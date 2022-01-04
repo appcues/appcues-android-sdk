@@ -7,5 +7,5 @@ dependencyResolutionManagement {
 }
 rootProject.name = "appcues-android-sdk"
 
-include ':samples:app'
+include ':samples:kotlin-android-app'
 include ':appcues'

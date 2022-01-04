@@ -7,13 +7,16 @@ android {
     compileSdk 31
 
     defaultConfig {
-        applicationId "com.appcues"
+        applicationId "com.appcues.samples.kotlin"
         minSdk 21
         targetSdk 31
         versionCode 1
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField "String", "APPCUES_ACCOUNT_ID", "\"PLACEHOLDER_ACCOUNT_ID\""
+        buildConfigField "String", "APPCUES_APPLICATION_ID", "\"PLACEHOLDER_APPLICATION_ID\""
     }
 
     buildTypes {
