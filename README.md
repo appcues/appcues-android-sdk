@@ -48,4 +48,4 @@ The `samples` directory in repository contains full example Android apps providi
 
 ## 📄 License
 
-This project is licensed under the MIT License. See [LICENSE](https://github.com/appcues/appcues-ios-sdk/blob/main/LICENSE) for more information.
+This project is licensed under the MIT License. See [LICENSE](https://github.com/appcues/appcues-android-sdk/blob/main/LICENSE) for more information.

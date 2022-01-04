@@ -6,13 +6,17 @@ import android.os.Bundle
 
 internal class ActivityMonitor(application: Application) : Application.ActivityLifecycleCallbacks {
 
-    private var _resumedActivity: Activity? = null
+    init {
+        application.registerActivityLifecycleCallbacks(this)
+    }
 
-    val resumedActivity: Activity?
-        get() = _resumedActivity
+    private var _activity: Activity? = null
+
+    val activity: Activity?
+        get() = _activity
 
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
-        // do nothing
+        this._activity = activity
     }
 
     override fun onActivityStarted(activity: Activity) {
@@ -20,11 +24,11 @@ internal class ActivityMonitor(application: Application) : Application.ActivityL
     }
 
     override fun onActivityResumed(activity: Activity) {
-        _resumedActivity = activity
+        // do nothing
     }
 
     override fun onActivityPaused(activity: Activity) {
-        _resumedActivity = null
+        // do nothing
     }
 
     override fun onActivityStopped(activity: Activity) {

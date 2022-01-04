@@ -1,4 +1,4 @@
-package com.appcues.samples.app
+package com.appcues.samples.kotlin
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -9,6 +9,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        AppcuesSingleton.INSTANCE.show("1234")
+        MyApplication.appcues.show("1234")
     }
 }

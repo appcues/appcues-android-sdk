@@ -1,21 +1,23 @@
 package com.appcues
 
-import android.app.Application
 import android.content.Context
-import com.appcues.action.Action
+import com.appcues.action.ExperienceAction
+import com.appcues.di.DependencyProvider
 import com.appcues.logging.Logcues
 import com.appcues.monitor.ActivityMonitor
-import com.appcues.trait.Trait
+import com.appcues.trait.ExperienceTrait
 
-class Appcues private constructor(private val context: Context, private val config: AppcuesConfig) {
+class Appcues internal constructor(dependencyProvider: DependencyProvider) {
 
-    private val activityMonitor = ActivityMonitor(context as Application)
+    private val logcues: Logcues = dependencyProvider.get()
+
+    private val activityMonitor: ActivityMonitor = dependencyProvider.get()
 
     /**
      * Returns the current version of Appcues SDK
      */
     val version: String
-        get() = "1.0.0"
+        get() = "0.1.0"
 
     /**
      * Identify the user and determine if they should see Appcues content.
@@ -24,7 +26,7 @@ class Appcues private constructor(private val context: Context, private val conf
      * [properties] Optional properties that provide additional context about the user.
      */
     fun identify(userId: String, properties: HashMap<String, Any>? = null) {
-        Logcues.i("identify(userId: $userId, properties: $properties)")
+        logcues.i("identify(userId: $userId, properties: $properties)")
     }
 
     /**
@@ -34,7 +36,7 @@ class Appcues private constructor(private val context: Context, private val conf
      * [properties] Optional properties that provide additional context about the group.
      */
     fun group(groupId: String, properties: HashMap<String, Any>? = null) {
-        Logcues.i("group(groupId: $groupId, properties: $properties)")
+        logcues.i("group(groupId: $groupId, properties: $properties)")
     }
 
     /**
@@ -43,7 +45,7 @@ class Appcues private constructor(private val context: Context, private val conf
      * to begin tracking activity and checking for qualified content.
      */
     fun anonymous(properties: HashMap<String, Any>? = null) {
-        Logcues.i("anonymous(properties: $properties)")
+        logcues.i("anonymous(properties: $properties)")
     }
 
     /**
@@ -51,7 +53,7 @@ class Appcues private constructor(private val context: Context, private val conf
      * Can be used when the user logs out of your application.
      */
     fun reset() {
-        Logcues.i("reset()")
+        logcues.i("reset()")
     }
 
     /**
@@ -61,7 +63,7 @@ class Appcues private constructor(private val context: Context, private val conf
      * [properties] Optional properties that provide additional context about the event.
      */
     fun track(name: String, properties: HashMap<String, Any>? = null) {
-        Logcues.i("track(name: $name, properties: $properties")
+        logcues.i("track(name: $name, properties: $properties")
     }
 
     /**
@@ -71,7 +73,7 @@ class Appcues private constructor(private val context: Context, private val conf
      * [properties] Optional properties that provide additional context about the event.
      */
     fun screen(title: String, properties: HashMap<String, Any>? = null) {
-        Logcues.i("screen(title: $title, properties: $properties)")
+        logcues.i("screen(title: $title, properties: $properties)")
     }
 
     /**
@@ -80,39 +82,39 @@ class Appcues private constructor(private val context: Context, private val conf
      * [contentId] ID of specific flow.
      */
     fun show(contentId: String) {
-        Logcues.i("show(contentId: $contentId): Activity: ${activityMonitor.resumedActivity}")
+        logcues.i("show(contentId: $contentId): Activity: ${activityMonitor.activity?.localClassName}")
     }
 
     /**
      * Register a trait that modifies an Experience.
      *
-     * [trait] Trait to register
+     * [experienceTrait] Trait to register
      */
-    fun register(trait: Trait) {
-        Logcues.i("register(trait: $trait)")
+    fun register(experienceTrait: ExperienceTrait) {
+        logcues.i("register(trait: $experienceTrait)")
     }
 
     /**
      * Register an action that can be activated in an Experience.
      *
-     * [action] Action to register.
+     * [experienceAction] Action to register.
      */
-    fun register(action: Action) {
-        Logcues.i("register(action: $action)")
+    fun register(experienceAction: ExperienceAction) {
+        logcues.i("register(action: $experienceAction)")
     }
 
     /**
      * Enables automatic screen tracking. (Works for Activities)
      */
     fun trackScreen() {
-        Logcues.i("trackScreen()")
+        logcues.i("trackScreen()")
     }
 
     /**
      * Set Appcues to start in Debug mode
      */
     fun debug() {
-        Logcues.i("debug()")
+        logcues.i("debug()")
     }
 
     class Builder(
@@ -128,14 +130,14 @@ class Appcues private constructor(private val context: Context, private val conf
         }
 
         fun build(): Appcues {
-
-            Logcues.setLoggingLevel(_loggingLevel)
-
             return Appcues(
-                context = context.applicationContext,
-                config = AppcuesConfig(
-                    accountId = accountId,
-                    applicationId = applicationId
+                dependencyProvider = DependencyProvider(
+                    context = context,
+                    config = AppcuesConfig(
+                        accountId = accountId,
+                        applicationId = applicationId,
+                        loggingLevel = _loggingLevel
+                    )
                 )
             )
         }

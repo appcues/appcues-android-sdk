@@ -3,19 +3,15 @@ package com.appcues.logging
 import android.util.Log
 import com.appcues.Appcues
 
-internal object Logcues {
+class Logcues(private val loggingLevel: Appcues.LoggingLevel) {
 
-    private const val TAG = "Appcues"
-
-    private lateinit var loggingLevel: Appcues.LoggingLevel
-
-    fun setLoggingLevel(loggingLevel: Appcues.LoggingLevel) {
-        this.loggingLevel = loggingLevel
+    companion object {
+        private const val TAG = "Appcues"
     }
 
     fun i(message: String) {
         if (loggingLevel > Appcues.LoggingLevel.NONE) {
-            Log.i(TAG, message)
+            Log.i(TAG, "$message")
         }
     }
 }

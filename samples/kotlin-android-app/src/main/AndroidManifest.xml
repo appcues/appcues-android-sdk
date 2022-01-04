@@ -4,7 +4,7 @@
     package="com.appcues">
 
     <application
-        android:name=".samples.app.MyApplication"
+        android:name=".samples.kotlin.MyApplication"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
@@ -12,7 +12,7 @@
         android:theme="@style/Theme.Appcues"
         tools:ignore="AllowBackup">
         <activity
-            android:name=".samples.app.MainActivity"
+            android:name=".samples.kotlin.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
