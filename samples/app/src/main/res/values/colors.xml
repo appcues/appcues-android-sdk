@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <!-- Primary -->
+    <color name="blurple_500">#5C5CFF</color>
+    <color name="blurple_600">#3923B7</color>
+    <!-- Secondary -->
+    <color name="bludacris_500">#2CB4FF</color>
+    <color name="bludacris_600">#0D7EF9</color>
+
+    <color name="cutecumber">#20E0D6</color>
+    <color name="pinkPowerRanger">#FF5290</color>
+    <!-- Tertiary -->
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="smurfBlood">#0B1A38</color>
+    <color name="norEaster">#F5F7FA</color>
+    
+    <!-- Gradients -->
+    <color name="blurpleHazeStart">#5C5CFF</color>
+    <color name="blurpleHazeEnd">#8960FF</color>
+
+</resources>

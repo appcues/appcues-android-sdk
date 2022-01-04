@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="Theme.Appcues" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/blurple_500</item>
+        <item name="colorPrimaryVariant">@color/blurple_600</item>
+        <item name="colorOnPrimary">@color/black</item>
+        <item name="colorSecondary">@color/bludacris_500</item>
+        <item name="colorSecondaryVariant">@color/bludacris_600</item>
+        <item name="colorOnSecondary">@color/black</item>
+        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
+    </style>
+</resources>
