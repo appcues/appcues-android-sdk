@@ -18,7 +18,12 @@ output.json
 
 # IntelliJ
 *.iml
-.idea/
+/.idea/compiler.xml
+/.idea/gradle.xml
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/vcs.xml
+/.idea/workspace.xml
 
 # Keystore files
 *.jks

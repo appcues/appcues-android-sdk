@@ -2,7 +2,6 @@ package com.appcues.samples.kotlin
 
 import android.app.Application
 import com.appcues.Appcues
-import com.appcues.BuildConfig
 
 class MyApplication : Application() {
 

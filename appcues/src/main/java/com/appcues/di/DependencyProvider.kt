@@ -17,5 +17,4 @@ internal class DependencyProvider(context: Context, config: AppcuesConfig) {
     inline fun <reified T : Any> get(): T {
         return koinApplication.koin.get()
     }
-
 }

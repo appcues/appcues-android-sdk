@@ -1,0 +1,16 @@
+apply plugin: 'io.gitlab.arturbosch.detekt'
+
+detekt {
+    config = files("$rootDir/gradle/tools/detekt/detekt-config.yml")
+
+    /**
+     * Enable autoCorrect to automatically correct formatting issues
+     *
+     * For now we will leave it disabled so we can catch any discrepancies between the linter and our project codeStyle
+     */
+    //autoCorrect = true
+}
+
+dependencies {
+    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.19.0")
+}

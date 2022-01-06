@@ -9,6 +9,14 @@ buildscript {
     }
 }
 
+plugins {
+    id "io.gitlab.arturbosch.detekt" version "1.19.0"
+}
+
+allprojects {
+    apply from: "$rootDir/gradle/tools/detekt/detekt-build.gradle"
+}
+
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
