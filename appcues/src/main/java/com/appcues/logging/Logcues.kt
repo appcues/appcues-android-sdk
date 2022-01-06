@@ -11,7 +11,7 @@ class Logcues(private val loggingLevel: Appcues.LoggingLevel) {
 
     fun i(message: String) {
         if (loggingLevel > Appcues.LoggingLevel.NONE) {
-            Log.i(TAG, "$message")
+            Log.i(TAG, message)
         }
     }
 }

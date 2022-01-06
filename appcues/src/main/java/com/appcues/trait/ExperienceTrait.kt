@@ -1,5 +1,3 @@
 package com.appcues.trait
 
-sealed class ExperienceTrait {
-
-}
+sealed class ExperienceTrait

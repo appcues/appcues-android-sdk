@@ -1,5 +1,3 @@
 package com.appcues.action
 
-sealed class ExperienceAction {
-
-}
+sealed class ExperienceAction
