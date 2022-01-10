@@ -1,4 +1,4 @@
-package com.appcues.ui
+package com.appcues.ui.internal
 
 import android.app.Dialog
 import android.content.Context
@@ -103,7 +103,7 @@ private class AppcuesViewDialogWrapper(
 
     init {
         requireWindow().setBackgroundDrawableResource(android.R.color.transparent)
-        //window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED or WindowManager.LayoutParams.SOFT_INPUT_ADJUST_UNSPECIFIED)
+
         dialogLayout = DialogLayout(context).apply {
             // Set unique id for AbstractComposeView. This allows state restoration for the state
             // defined inside the Dialog via rememberSaveable()
@@ -236,7 +236,6 @@ private class DialogLayout(
         this.content = content
         shouldCreateCompositionOnAttachedToWindow = true
         createComposition()
-
     }
 
     fun setDispatchTouchEvent(dispatchTouchEvent: (MotionEvent) -> Unit) {

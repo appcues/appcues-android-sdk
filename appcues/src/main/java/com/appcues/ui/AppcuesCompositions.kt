@@ -19,6 +19,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.appcues.ui.internal.AppcuesView
+
+private const val DIM_COLOR = 0xA0000000
+private const val CARD_BACKGROUND_COLOR = 0xFFFFFFFF
 
 /**
  * Sample of Composition building a static Dialog with a text and a button to close it
@@ -33,10 +37,9 @@ fun AppcuesDialog() {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(color = Color(0xA0000000)),
+                    .background(color = Color(DIM_COLOR)),
                 contentAlignment = Alignment.Center,
-
-                ) {
+            ) {
                 Card(
                     modifier = Modifier.defaultMinSize(minWidth = 200.dp, minHeight = 100.dp),
                     elevation = 10.dp,
@@ -46,16 +49,15 @@ fun AppcuesDialog() {
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier
                             .padding(16.dp)
-                            .background(color = Color(0xFFFFFFFF)),
+                            .background(color = Color(CARD_BACKGROUND_COLOR)),
                     ) {
                         Text(text = "First Dialog")
 
                         Spacer(modifier = Modifier.height(48.dp))
 
-                        Button(
-                            onClick = {
-                                openDialog.value = false
-                            }) {
+                        Button(onClick = {
+                            openDialog.value = false
+                        }) {
                             Text(text = "Close")
                         }
                     }
