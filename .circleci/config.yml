@@ -1,0 +1,68 @@
+# -------------------------
+#  Android SDK Pipeline
+# -------------------------
+version: 2.1
+
+# -------------------------
+#          ORBS
+# -------------------------
+orbs:
+  slack: circleci/slack@4.5.1
+  android: circleci/android@2.0.0
+
+# -------------------------
+#        REFERENCES
+# -------------------------
+
+# -------------------------
+#          JOBS
+# --------------------------
+jobs:
+  test:
+    working_directory: ~/code
+    executor:
+      name: android/android-machine
+      resource-class: large
+      tag: 2021.10.1
+    environment:
+      JVM_OPTS: -Xmx3200m
+    steps:
+      - checkout
+      - restore_cache:
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
+#      - run:
+#         name: Chmod permissions #if permission for Gradlew Dependencies fail, use this.
+#         command: sudo chmod +x ./gradlew
+      - run:
+          name: Download Dependencies
+          command: ./gradlew androidDependencies
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
+      - run:
+          name: Run Tests
+          command: ./gradlew lint test
+      - store_artifacts: # for display in Artifacts: https://circleci.com/docs/2.0/artifacts/
+          path: app/build/reports
+          destination: reports
+      - store_test_results: # for display in Test Summary: https://circleci.com/docs/2.0/collect-test-data/
+          path: app/build/test-results
+      # See https://circleci.com/docs/2.0/deployment-integrations/ for deploy examples
+      - slack/notify:
+          event: fail
+          template: basic_fail_1
+          channel: circle-slack-testing
+      - slack/notify:
+          event: pass
+          template: basic_success_1
+          channel: circle-slack-testing
+
+# --------------------------
+#        WORKFLOWS
+# --------------------------
+workflows:
+  build_deploy:
+    jobs:
+      - test:
+          context: Appcues
