@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <style name="Theme.Appcues" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+    <style name="Theme.Appcues" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
         <item name="colorPrimary">@color/blurple_500</item>
         <item name="colorPrimaryVariant">@color/blurple_600</item>
         <item name="colorOnPrimary">@color/black</item>
