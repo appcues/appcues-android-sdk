@@ -1,11 +1,16 @@
 package com.appcues
 
 import android.content.Context
+import android.view.ViewGroup.LayoutParams
+import androidx.compose.material.MaterialTheme
+import androidx.compose.ui.platform.ComposeView
 import com.appcues.action.ExperienceAction
 import com.appcues.di.DependencyProvider
 import com.appcues.logging.Logcues
 import com.appcues.monitor.ActivityMonitor
 import com.appcues.trait.ExperienceTrait
+import com.appcues.ui.AppcuesDialog
+import com.appcues.ui.theme.colors
 
 class Appcues internal constructor(dependencyProvider: DependencyProvider) {
 
@@ -83,6 +88,21 @@ class Appcues internal constructor(dependencyProvider: DependencyProvider) {
      */
     fun show(contentId: String) {
         logcues.i("show(contentId: $contentId): Activity: ${activityMonitor.activity?.localClassName}")
+        activityMonitor.activity?.let {
+            it.addContentView(
+                ComposeView(it).apply {
+                    setContent {
+                        MaterialTheme(
+                            // Just an example on how its possible to reuse preset themes from host application
+                            colors = colors(context, MaterialTheme.colors)
+                        ) {
+                            AppcuesDialog()
+                        }
+                    }
+                },
+                LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
+            )
+        }
     }
 
     /**
