@@ -19,7 +19,6 @@ orbs:
 # --------------------------
 jobs:
   test:
-    working_directory: ~/code
     executor:
       name: android/android-machine
       resource-class: large
@@ -52,11 +51,11 @@ jobs:
       - slack/notify:
           event: fail
           template: basic_fail_1
-          channel: circle-slack-testing
+          channel: circleci-slack-testing
       - slack/notify:
           event: pass
           template: basic_success_1
-          channel: circle-slack-testing
+          channel: circleci-slack-testing
 
 # --------------------------
 #        WORKFLOWS
