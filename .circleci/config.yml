@@ -20,16 +20,14 @@ orbs:
 jobs:
   test:
     working_directory: ~/code
-    executor:
-      name: android/android-machine
-      resource-class: large
-      tag: 2021.10.1
+    docker:
+      - image: circleci/android:api-30-alpha
     environment:
       JVM_OPTS: -Xmx3200m
     steps:
       - checkout
       - restore_cache:
-          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "~/code/app/build.gradle" }}
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
       - run:
          name: Chmod permissions #if permission for Gradlew Dependencies fail, use this.
          command: sudo chmod +x ./gradlew
@@ -39,7 +37,7 @@ jobs:
       - save_cache:
           paths:
             - ~/.gradle
-          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "~/code/app/build.gradle" }}
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
       - run:
           name: Run Tests
           command: ./gradlew lint test
