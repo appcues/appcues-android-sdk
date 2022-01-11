@@ -6,13 +6,13 @@ If you're reading this, you're awesome! Thank you for helping us make this proje
 
 Pull requests are always welcome, but before working on a large change or something that changes the API, it is best to open an issue first to discuss it with the maintainers.
 
-When in doubt, keep your merge requests small. To give a PR the best chance of getting accepted, don't bundle more than one feature or bug fix per pull request. It's always best to create two smaller MRs than one big one.
+When in doubt, keep your pull requests small. To give a PR the best chance of getting accepted, don't bundle more than one feature or bug fix per pull request. It's always best to create two smaller PRs than one big one.
 
 When adding new features or modifying existing, please attempt to include tests to confirm the new behaviour.
 
-### Increasing the chance of a MR being accepted
+### Increasing the chance of a PR being accepted
 
-We will only accept a merge request for which all tests pass. Make sure the following is true:
+We will only accept a pull request for which all tests pass. Make sure the following is true:
 
 - The branch is targeted at `main`.
 - The branch is not behind its target.
@@ -55,7 +55,7 @@ We will only accept a merge request for which all tests pass. Make sure the foll
     git push -u origin <branch-name>
     ```
 
-7. Open a merge request to get your `<branch-name>` merged into `main`
+7. Open a pull request to get your `<branch-name>` merged into `main`
 
 ### Branch structure
 
