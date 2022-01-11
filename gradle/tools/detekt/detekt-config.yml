@@ -144,9 +144,9 @@ complexity:
     active: true
     excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**', '**/Appcues.kt']
     thresholdInFiles: 11
-    thresholdInClasses: 11
+    thresholdInClasses: 15
     thresholdInInterfaces: 11
-    thresholdInObjects: 11
+    thresholdInObjects: 15
     thresholdInEnums: 11
     ignoreDeprecated: false
     ignorePrivate: false
@@ -289,7 +289,7 @@ formatting:
     active: false
     autoCorrect: true
     indentSize: 4
-    maxLineLength: 120
+    maxLineLength: 140
   ChainWrapping:
     active: true
     autoCorrect: true
@@ -316,7 +316,7 @@ formatting:
     continuationIndentSize: 4
   MaximumLineLength:
     active: true
-    maxLineLength: 120
+    maxLineLength: 140
     ignoreBackTickedIdentifier: false
   ModifierOrdering:
     active: true
@@ -448,6 +448,7 @@ naming:
     excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**']
     functionPattern: '([a-z][a-zA-Z0-9]*)|(`.*`)'
     excludeClassPattern: '$^'
+    ignoreAnnotated: ['Composable']
     ignoreOverridden: true
   FunctionParameterNaming:
     active: true
@@ -691,10 +692,10 @@ style:
     active: false
   MaxLineLength:
     active: true
-    maxLineLength: 120
+    maxLineLength: 140
     excludePackageStatements: true
     excludeImportStatements: true
-    excludeCommentStatements: false
+    excludeCommentStatements: true
   MayBeConst:
     active: true
   ModifierOrder:
