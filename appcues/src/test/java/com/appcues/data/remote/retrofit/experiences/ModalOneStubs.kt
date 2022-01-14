@@ -1,3 +1,5 @@
+@file:Suppress("MaxLineLength")
+
 package com.appcues.data.remote.retrofit.experiences
 
 import com.appcues.data.remote.response.ProfileResponse

@@ -2,7 +2,6 @@ package com.appcues.data.remote.retrofit
 
 import com.appcues.BuildConfig
 import com.google.gson.GsonBuilder
-import com.google.gson.LongSerializationPolicy.STRING
 import okhttp3.HttpUrl
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
