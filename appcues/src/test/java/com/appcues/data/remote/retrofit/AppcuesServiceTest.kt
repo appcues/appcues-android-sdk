@@ -24,7 +24,7 @@ class AppcuesServiceTest {
         // Given
         mockWebServer.enqueueResponse("experiences/modal_one.json", 200)
         // When
-        val result = api.getTaco("TEST", "TEST")
+        val result = api.getTaco(1234, "TestUser")
         // Then
         with(result) {
             assertThat(this).isEqualTo(modalOneStub)
@@ -40,7 +40,7 @@ class AppcuesServiceTest {
             )
         )
         // When
-        val result = api.getTaco("1234", "5678")
+        val result = api.getTaco(1234, "TestUser")
         // Then
         with(result) {
             assertThat(this).isEqualTo(modalOneStub)

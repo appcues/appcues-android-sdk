@@ -4,5 +4,5 @@ import com.appcues.data.remote.response.TacoResponse
 
 internal interface AppcuesRemoteSource {
 
-    suspend fun getTaco(account: String, user: String): TacoResponse
+    suspend fun getTaco(account: Int, user: String): TacoResponse
 }

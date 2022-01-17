@@ -8,7 +8,7 @@ internal interface AppcuesService {
 
     @GET("v1/accounts/{account}/users/{user}/activity")
     suspend fun getTaco(
-        @Path("account") account: String,
+        @Path("account") account: Int,
         @Path("user") user: String
     ): TacoResponse
 }

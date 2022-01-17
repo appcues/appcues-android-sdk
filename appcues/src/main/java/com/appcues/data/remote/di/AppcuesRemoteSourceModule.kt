@@ -12,11 +12,15 @@ internal object AppcuesRemoteSourceModule {
 
     private const val BASE_URL = "https://api.appcues.com/"
 
-    fun install(): Module = module {
+    fun install(apiHostUrl: String? = null): Module = module {
         single<AppcuesRemoteSource> {
             RetrofitAppcuesRemoteSource(
-                appcuesService = RetrofitWrapper(BASE_URL.toHttpUrl()).create(AppcuesService::class)
+                appcuesService = getAppcuesService(apiHostUrl ?: BASE_URL)
             )
         }
+    }
+
+    private fun getAppcuesService(apiHostUrl: String): AppcuesService {
+        return RetrofitWrapper(apiHostUrl.toHttpUrl()).create(AppcuesService::class)
     }
 }

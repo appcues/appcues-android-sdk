@@ -4,4 +4,5 @@ internal data class AppcuesConfig(
     val accountId: String,
     val applicationId: String,
     val loggingLevel: Appcues.LoggingLevel,
+    val apiHostUrl: String?,
 )
