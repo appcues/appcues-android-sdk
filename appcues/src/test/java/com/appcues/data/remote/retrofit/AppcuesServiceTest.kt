@@ -11,7 +11,7 @@ class AppcuesServiceTest {
 
     private val mockWebServer = MockWebServer()
 
-    private val api = RetrofitWrapper(mockWebServer.url("/"), false)
+    private val api = RetrofitWrapper(mockWebServer.url("/"), true)
         .create(AppcuesService::class)
 
     @After
@@ -36,7 +36,7 @@ class AppcuesServiceTest {
         // Given
         mockWebServer.dispatchResponses(
             responses = hashMapOf(
-                "/v1/accounts/1234/users/5678/activity" to "experiences/modal_one.json"
+                "/v1/accounts/1234/users/TestUser/activity" to "experiences/modal_one.json"
             )
         )
         // When
