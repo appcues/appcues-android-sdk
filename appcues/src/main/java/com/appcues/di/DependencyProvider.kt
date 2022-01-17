@@ -7,12 +7,15 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.core.KoinApplication
 import org.koin.dsl.koinApplication
 
-internal class DependencyProvider(context: Context, config: AppcuesConfig) {
+internal class DependencyProvider(
+    context: Context,
+    config: AppcuesConfig,
+) {
 
     private val koinApplication: KoinApplication = koinApplication {
         androidContext(context.applicationContext)
 
-        modules(AppcuesModule.install(config) + AppcuesRemoteSourceModule.install())
+        modules(AppcuesModule.install(config) + AppcuesRemoteSourceModule.install(config.apiHostUrl))
     }
 
     inline fun <reified T : Any> get(): T {

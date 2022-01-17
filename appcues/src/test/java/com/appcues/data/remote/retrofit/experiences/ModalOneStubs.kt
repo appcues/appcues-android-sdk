@@ -2,11 +2,10 @@
 
 package com.appcues.data.remote.retrofit.experiences
 
-import com.appcues.data.remote.response.ProfileResponse
 import com.appcues.data.remote.response.TacoResponse
+import com.appcues.data.remote.response.action.ActionResponse
 import com.appcues.data.remote.response.experience.ExperienceResponse
 import com.appcues.data.remote.response.experience.ExperienceThemeResponse
-import com.appcues.data.remote.response.step.StepActionResponse
 import com.appcues.data.remote.response.step.StepContentResponse
 import com.appcues.data.remote.response.step.StepItemContentResponse
 import com.appcues.data.remote.response.step.StepItemResponse
@@ -18,13 +17,12 @@ import com.appcues.data.remote.response.styling.StyleResponse
 import com.appcues.data.remote.response.styling.StyleShadowResponse
 import com.appcues.data.remote.response.trait.TraitConfigResponse
 import com.appcues.data.remote.response.trait.TraitResponse
+import java.util.UUID
 
 internal val modalOneStub = TacoResponse(
-    checklists = arrayListOf(),
-    contents = arrayListOf(),
     experiences = arrayListOf(
         ExperienceResponse(
-            id = "9f4baa80-8f6a-41b1-a7b9-979da5c175e2",
+            id = UUID.fromString("9f4baa80-8f6a-41b1-a7b9-979da5c175e2"),
             name = "POC Modal One",
             tags = arrayListOf(),
             theme = ExperienceThemeResponse(),
@@ -32,10 +30,10 @@ internal val modalOneStub = TacoResponse(
             traits = arrayListOf(),
             steps = arrayListOf(
                 StepResponse(
-                    id = "68c0d4b4-4909-4d4a-9ce4-7af8b04efab2",
+                    id = UUID.fromString("68c0d4b4-4909-4d4a-9ce4-7af8b04efab2"),
                     contentType = "application/json",
                     content = StepContentResponse(
-                        id = "2cf7dbf7-c6be-4130-b642-85861f9c6b6a",
+                        id = UUID.fromString("2cf7dbf7-c6be-4130-b642-85861f9c6b6a"),
                         type = "stack",
                         orientation = "vertical",
                         style = StyleResponse(
@@ -44,18 +42,18 @@ internal val modalOneStub = TacoResponse(
                         ),
                         items = arrayListOf(
                             StepItemResponse(
-                                id = "8e46637d-071a-4405-a9dd-dec4a64e98b8",
+                                id = UUID.fromString("8e46637d-071a-4405-a9dd-dec4a64e98b8"),
                                 type = "stack",
                                 orientation = "horizontal",
                                 distribution = "equal",
                                 items = arrayListOf(
                                     StepItemResponse(
-                                        id = "80bb63b2-2db2-44a4-b5fc-61c3d7f5c889",
+                                        id = UUID.fromString("80bb63b2-2db2-44a4-b5fc-61c3d7f5c889"),
                                         type = "block",
                                         blockType = "image",
                                         content = StepItemContentResponse(
+                                            id = UUID.fromString("f2affaaa-0883-42f8-a313-73a28cc2d0b4"),
                                             type = "image",
-                                            id = "f2affaaa-0883-42f8-a313-73a28cc2d0b4",
                                             imageUrl = "https://res.cloudinary.com/dnjrorsut/image/upload/v1635971825/98227/oh5drlvojb1spaetc1ol.jpg",
                                             contentMode = "fill",
                                             intrinsicSize = SizeResponse(
@@ -72,17 +70,17 @@ internal val modalOneStub = TacoResponse(
                                 )
                             ),
                             StepItemResponse(
-                                id = "678a3466-8f26-4530-9391-82c03bc2cebf",
+                                id = UUID.fromString("678a3466-8f26-4530-9391-82c03bc2cebf"),
                                 type = "stack",
                                 orientation = "horizontal",
                                 distribution = "equal",
                                 items = arrayListOf(
                                     StepItemResponse(
-                                        id = "e905d8bf-b1ad-4401-adfe-2f7e01878fa1",
+                                        id = UUID.fromString("e905d8bf-b1ad-4401-adfe-2f7e01878fa1"),
                                         type = "block",
                                         blockType = "text",
                                         content = StepItemContentResponse(
-                                            id = "d52cd085-3f57-4218-8eb2-973f654a5acf",
+                                            id = UUID.fromString("d52cd085-3f57-4218-8eb2-973f654a5acf"),
                                             type = "text",
                                             text = "Ready to make your\nworkflow simpler?",
                                             style = StyleResponse(
@@ -102,17 +100,17 @@ internal val modalOneStub = TacoResponse(
                                 )
                             ),
                             StepItemResponse(
-                                id = "dffddbe8-0ec8-4045-8681-25c60f7f9ccf",
+                                id = UUID.fromString("dffddbe8-0ec8-4045-8681-25c60f7f9ccf"),
                                 type = "stack",
                                 orientation = "horizontal",
                                 distribution = "equal",
                                 items = arrayListOf(
                                     StepItemResponse(
-                                        id = "a25bc0a0-f527-4ec6-bc8f-3f8d8ff4d0e9",
+                                        id = UUID.fromString("a25bc0a0-f527-4ec6-bc8f-3f8d8ff4d0e9"),
                                         type = "block",
                                         blockType = "text",
                                         content = StepItemContentResponse(
-                                            id = "d52cd085-3f57-4218-8eb2-973f654a5dcf",
+                                            id = UUID.fromString("d52cd085-3f57-4218-8eb2-973f654a5dcf"),
                                             type = "text",
                                             text = "Take a few moments to learn how to best use our features.",
                                             style = StyleResponse(
@@ -134,20 +132,20 @@ internal val modalOneStub = TacoResponse(
                                 )
                             ),
                             StepItemResponse(
-                                id = "a4ac4eb8-f833-4be1-8b14-d58562f11aa8",
+                                id = UUID.fromString("a4ac4eb8-f833-4be1-8b14-d58562f11aa8"),
                                 type = "stack",
                                 orientation = "horizontal",
                                 distribution = "equal",
                                 items = arrayListOf(
                                     StepItemResponse(
-                                        id = "f4c4f89e-4c8a-4c9d-9a8a-80c8bbfa8fa7",
+                                        id = UUID.fromString("f4c4f89e-4c8a-4c9d-9a8a-80c8bbfa8fa7"),
                                         type = "block",
                                         blockType = "button",
                                         content = StepItemContentResponse(
-                                            id = "c34f7d02-443d-497c-ac3a-1a9b42af9dd8",
+                                            id = UUID.fromString("c34f7d02-443d-497c-ac3a-1a9b42af9dd8"),
                                             type = "button",
                                             content = StepItemContentResponse(
-                                                id = "a839e508-3dd9-47ac-8d5a-4cd122c3177d",
+                                                id = UUID.fromString("a839e508-3dd9-47ac-8d5a-4cd122c3177d"),
                                                 type = "text",
                                                 text = "Button 1",
                                                 style = StyleResponse(
@@ -213,7 +211,7 @@ internal val modalOneStub = TacoResponse(
                     ),
                     actions = hashMapOf(
                         "c34f7d02-443d-497c-ac3a-1a9b42af9dd8" to arrayListOf(
-                            StepActionResponse(
+                            ActionResponse(
                                 on = "tap",
                                 type = "@appcues/close"
                             )
@@ -224,7 +222,6 @@ internal val modalOneStub = TacoResponse(
         )
     ),
     performedQualifications = true,
-    profile = ProfileResponse(abGroup = 1),
     qualificationReason = "forced",
-    requestId = "814EF333-6C88-4354-985B-9B5FE930F8DB"
+    requestId = UUID.fromString("814EF333-6C88-4354-985B-9B5FE930F8DB")
 )

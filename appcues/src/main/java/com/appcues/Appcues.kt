@@ -5,6 +5,7 @@ import android.view.ViewGroup.LayoutParams
 import androidx.compose.material.MaterialTheme
 import androidx.compose.ui.platform.ComposeView
 import com.appcues.action.ExperienceAction
+import com.appcues.builder.ApiHostBuilderValidator
 import com.appcues.di.DependencyProvider
 import com.appcues.logging.Logcues
 import com.appcues.monitor.ActivityMonitor
@@ -149,6 +150,20 @@ class Appcues internal constructor(dependencyProvider: DependencyProvider) {
             _loggingLevel = level
         }
 
+        private var _apiHostUrl: String? = null
+
+        /**
+         * Defines a custom api host for the SDK. If Not defined it will point to appcues
+         *
+         * [url] Custom Url as api host for the SDK. It will throw [IllegalArgumentException] if the given Url
+         *       does not start with 'http' and ends with '/'
+         */
+        fun apiHost(url: String) = apply {
+            ApiHostBuilderValidator().run {
+                _apiHostUrl = validate(url)
+            }
+        }
+
         fun build(): Appcues {
             return Appcues(
                 dependencyProvider = DependencyProvider(
@@ -156,7 +171,8 @@ class Appcues internal constructor(dependencyProvider: DependencyProvider) {
                     config = AppcuesConfig(
                         accountId = accountId,
                         applicationId = applicationId,
-                        loggingLevel = _loggingLevel
+                        loggingLevel = _loggingLevel,
+                        apiHostUrl = _apiHostUrl
                     )
                 )
             )
