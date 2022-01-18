@@ -2,6 +2,7 @@ package com.appcues.logging
 
 import android.util.Log
 import com.appcues.Appcues
+import java.lang.Exception
 
 class Logcues(private val loggingLevel: Appcues.LoggingLevel) {
 
@@ -12,6 +13,12 @@ class Logcues(private val loggingLevel: Appcues.LoggingLevel) {
     fun i(message: String) {
         if (loggingLevel > Appcues.LoggingLevel.NONE) {
             Log.i(TAG, message)
+        }
+    }
+
+    fun e(exception: Exception) {
+        if (loggingLevel > Appcues.LoggingLevel.NONE) {
+            Log.e(TAG, exception.message.toString())
         }
     }
 }
