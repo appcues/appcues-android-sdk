@@ -4,4 +4,11 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <application>
+        <activity
+            android:name=".ui.AppcuesActivity"
+            android:exported="false"
+            android:theme="@style/Appcues.AppcuesActivityTheme" />
+    </application>
+
 </manifest>

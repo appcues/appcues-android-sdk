@@ -11,7 +11,7 @@ class AppcuesServiceTest {
 
     private val mockWebServer = MockWebServer()
 
-    private val api = RetrofitWrapper(mockWebServer.url("/"), true)
+    private val api = RetrofitWrapper(mockWebServer.url("/"), false)
         .create(AppcuesService::class)
 
     @After

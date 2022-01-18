@@ -10,7 +10,7 @@ internal data class ExperienceResponse(
     val name: String,
     val tags: List<Any>,
     val theme: ExperienceThemeResponse,
-    val actions: HashMap<String, ActionResponse>,
+    val actions: HashMap<UUID, ActionResponse>,
     val traits: List<TraitResponse>,
     val steps: List<StepResponse>
 )
