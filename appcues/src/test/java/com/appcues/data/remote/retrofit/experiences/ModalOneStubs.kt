@@ -7,7 +7,6 @@ import com.appcues.data.remote.response.action.ActionResponse
 import com.appcues.data.remote.response.experience.ExperienceResponse
 import com.appcues.data.remote.response.experience.ExperienceThemeResponse
 import com.appcues.data.remote.response.step.StepContentResponse
-import com.appcues.data.remote.response.step.StepItemContentResponse
 import com.appcues.data.remote.response.step.StepItemResponse
 import com.appcues.data.remote.response.step.StepResponse
 import com.appcues.data.remote.response.styling.SizeResponse
@@ -51,7 +50,7 @@ internal val modalOneStub = TacoResponse(
                                         id = UUID.fromString("80bb63b2-2db2-44a4-b5fc-61c3d7f5c889"),
                                         type = "block",
                                         blockType = "image",
-                                        content = StepItemContentResponse(
+                                        content = StepContentResponse(
                                             id = UUID.fromString("f2affaaa-0883-42f8-a313-73a28cc2d0b4"),
                                             type = "image",
                                             imageUrl = "https://res.cloudinary.com/dnjrorsut/image/upload/v1635971825/98227/oh5drlvojb1spaetc1ol.jpg",
@@ -79,7 +78,7 @@ internal val modalOneStub = TacoResponse(
                                         id = UUID.fromString("e905d8bf-b1ad-4401-adfe-2f7e01878fa1"),
                                         type = "block",
                                         blockType = "text",
-                                        content = StepItemContentResponse(
+                                        content = StepContentResponse(
                                             id = UUID.fromString("d52cd085-3f57-4218-8eb2-973f654a5acf"),
                                             type = "text",
                                             text = "Ready to make your\nworkflow simpler?",
@@ -109,7 +108,7 @@ internal val modalOneStub = TacoResponse(
                                         id = UUID.fromString("a25bc0a0-f527-4ec6-bc8f-3f8d8ff4d0e9"),
                                         type = "block",
                                         blockType = "text",
-                                        content = StepItemContentResponse(
+                                        content = StepContentResponse(
                                             id = UUID.fromString("d52cd085-3f57-4218-8eb2-973f654a5dcf"),
                                             type = "text",
                                             text = "Take a few moments to learn how to best use our features.",
@@ -141,10 +140,10 @@ internal val modalOneStub = TacoResponse(
                                         id = UUID.fromString("f4c4f89e-4c8a-4c9d-9a8a-80c8bbfa8fa7"),
                                         type = "block",
                                         blockType = "button",
-                                        content = StepItemContentResponse(
+                                        content = StepContentResponse(
                                             id = UUID.fromString("c34f7d02-443d-497c-ac3a-1a9b42af9dd8"),
                                             type = "button",
-                                            content = StepItemContentResponse(
+                                            content = StepContentResponse(
                                                 id = UUID.fromString("a839e508-3dd9-47ac-8d5a-4cd122c3177d"),
                                                 type = "text",
                                                 text = "Button 1",
