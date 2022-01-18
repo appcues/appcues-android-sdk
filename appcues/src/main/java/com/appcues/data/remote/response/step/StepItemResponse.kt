@@ -9,5 +9,5 @@ internal data class StepItemResponse(
     val distribution: String? = null,
     val blockType: String? = null,
     val items: List<StepItemResponse>? = null,
-    val content: StepItemContentResponse? = null,
+    val content: StepContentResponse? = null,
 )
