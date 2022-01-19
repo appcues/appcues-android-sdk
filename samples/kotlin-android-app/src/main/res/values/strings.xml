@@ -1,6 +1,22 @@
 <resources>
-    <string name="app_name">AppcuesExample</string>
-
-    <string name="show_button">Show</string>
-    <string name="test_click_button">Test click</string>
+    <string name="app_name">Appcues Example</string>
+    <string name="default_user_id">default-0000</string>
+    <string name="sign_in">Sign In</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="user_id">User ID</string>
+    <string name="title_activity_signin">Sign In</string>
+    <string name="title_activity_main">Appcues</string>
+    <string name="title_events">Events</string>
+    <string name="title_profile">Profile</string>
+    <string name="title_group">Group</string>
+    <string name="name_events">Trigger Events</string>
+    <string name="name_profile">Update Profile</string>
+    <string name="name_group">Update Group</string>
+    <string name="trigger_event_1">Trigger Event 1</string>
+    <string name="trigger_event_2">Trigger Event 2</string>
+    <string name="launch_modal">Launch Modal</string>
+    <string name="given_name">Given Name</string>
+    <string name="family_name">Family Name</string>
+    <string name="save">save</string>
+    <string name="group">Group</string>
 </resources>

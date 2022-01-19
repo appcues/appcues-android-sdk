@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/navigation_events">
+
+    <fragment
+        android:id="@+id/navigation_events"
+        android:name="com.appcues.samples.kotlin.main.EventsFragment"
+        android:label="@string/name_events"
+        tools:layout="@layout/fragment_events" />
+
+    <fragment
+        android:id="@+id/navigation_profile"
+        android:name="com.appcues.samples.kotlin.main.ProfileFragment"
+        android:label="@string/name_profile"
+        tools:layout="@layout/fragment_profile" />
+
+    <fragment
+        android:id="@+id/navigation_group"
+        android:name="com.appcues.samples.kotlin.main.GroupFragment"
+        android:label="@string/name_group"
+        tools:layout="@layout/fragment_group" />
+</navigation>

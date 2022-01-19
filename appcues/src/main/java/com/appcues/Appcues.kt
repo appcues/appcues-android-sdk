@@ -36,7 +36,7 @@ class Appcues internal constructor(dependencyProvider: DependencyProvider) {
      * [groupId] Unique value identifying the group.
      * [properties] Optional properties that provide additional context about the group.
      */
-    fun group(groupId: String, properties: HashMap<String, Any>? = null) {
+    fun group(groupId: String?, properties: HashMap<String, Any>? = null) {
         logcues.i("group(groupId: $groupId, properties: $properties)")
     }
 
