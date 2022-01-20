@@ -27,7 +27,7 @@
         android:layout_marginStart="24dp"
         android:layout_marginTop="24dp"
         android:importantForAccessibility="no"
-        android:text="@string/given_name"
+        android:text="@string/given_name_label"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -38,7 +38,7 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="24dp"
         android:ems="10"
-        android:hint="@string/given_name"
+        android:hint="@string/given_name_label"
         android:inputType="textPersonName"
         android:minHeight="48dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -52,7 +52,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:importantForAccessibility="no"
-        android:text="@string/family_name"
+        android:text="@string/family_name_label"
         app:layout_constraintStart_toStartOf="@+id/editTextGivenName"
         app:layout_constraintTop_toBottomOf="@+id/editTextGivenName" />
 
@@ -64,7 +64,7 @@
         android:layout_marginEnd="24dp"
         android:autofillHints="personFamilyName"
         android:ems="10"
-        android:hint="@string/family_name"
+        android:hint="@string/family_name_label"
         android:inputType="textPersonName"
         android:minHeight="48dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -79,7 +79,7 @@
         android:layout_marginStart="24dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="24dp"
-        android:text="@string/save"
+        android:text="@string/save_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/editTextFamilyName" />

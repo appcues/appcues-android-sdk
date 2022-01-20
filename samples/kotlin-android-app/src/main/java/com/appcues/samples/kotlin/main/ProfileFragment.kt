@@ -72,6 +72,7 @@ class ProfileFragment : Fragment() {
         return when (item.itemId) {
             R.id.sign_out -> {
                 ExampleApplication.appcues.reset()
+                ExampleApplication.currentUserID = ""
                 val intent = Intent(activity, SignInActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_TASK_ON_HOME
                 startActivity(intent)
