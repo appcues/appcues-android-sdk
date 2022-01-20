@@ -3,6 +3,7 @@
     <string name="default_user_id">default-0000</string>
     <string name="sign_in_button">Sign In</string>
     <string name="sign_out_menu">Sign Out</string>
+    <string name="skip_menu">Skip</string>
     <string name="user_id_label">User ID</string>
     <string name="title_activity_signin">Sign In</string>
     <string name="title_activity_main">Appcues</string>
@@ -19,4 +20,5 @@
     <string name="family_name_label">Family Name</string>
     <string name="save_button">save</string>
     <string name="group_label">Group</string>
+    <string name="anonymous_user_button">Anonymous User</string>
 </resources>

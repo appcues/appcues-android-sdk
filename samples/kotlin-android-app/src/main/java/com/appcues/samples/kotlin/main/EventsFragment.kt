@@ -16,6 +16,8 @@ class EventsFragment : Fragment() {
     // onDestroyView.
     private val binding get() = _binding!!
 
+    private val appcues = ExampleApplication.appcues
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -24,15 +26,15 @@ class EventsFragment : Fragment() {
         _binding = FragmentEventsBinding.inflate(inflater, container, false)
 
         binding.buttonEvent1.setOnClickListener {
-            ExampleApplication.appcues.track("event1")
+            appcues.track("event1")
         }
 
         binding.buttonEvent2.setOnClickListener {
-            ExampleApplication.appcues.track("event2")
+            appcues.track("event2")
         }
 
         binding.buttonSampleModal.setOnClickListener {
-            ExampleApplication.appcues.show("1234")
+            appcues.show("1234")
         }
 
         return binding.root
@@ -41,7 +43,7 @@ class EventsFragment : Fragment() {
     override fun onResume() {
         super.onResume()
 
-        ExampleApplication.appcues.screen("Trigger Events")
+        appcues.screen("Trigger Events")
     }
 
     override fun onDestroyView() {
