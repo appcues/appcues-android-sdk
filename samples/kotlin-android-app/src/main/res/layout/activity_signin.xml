@@ -13,7 +13,7 @@
         android:layout_marginStart="24dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="24dp"
-        android:text="@string/sign_in"
+        android:text="@string/sign_in_button"
         app:cornerRadius="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -26,7 +26,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
         android:layout_marginTop="24dp"
-        android:text="@string/user_id"
+        android:text="@string/user_id_label"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -39,7 +39,7 @@
         android:layout_marginEnd="24dp"
         android:autofillHints="username"
         android:ems="10"
-        android:hint="@string/user_id"
+        android:hint="@string/user_id_label"
         android:inputType="textPersonName"
         android:minHeight="48dp"
         android:text="@string/default_user_id"
