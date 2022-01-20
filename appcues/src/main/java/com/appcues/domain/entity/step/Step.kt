@@ -1,3 +1,7 @@
 package com.appcues.domain.entity.step
 
-internal class Step
+import java.util.UUID
+
+internal data class Step(
+    val id: UUID,
+)
