@@ -22,6 +22,8 @@ class ProfileFragment : Fragment() {
     // onDestroyView.
     private val binding get() = _binding!!
 
+    private val appcues = ExampleApplication.appcues
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
@@ -49,7 +51,7 @@ class ProfileFragment : Fragment() {
                 properties["familyName"] = familyName
             }
 
-            ExampleApplication.appcues.identify(ExampleApplication.currentUserID, properties)
+            appcues.identify(ExampleApplication.currentUserID, properties)
 
             binding.editTextGivenName.text = null
             binding.editTextFamilyName.text = null
@@ -71,7 +73,7 @@ class ProfileFragment : Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.sign_out -> {
-                ExampleApplication.appcues.reset()
+                appcues.reset()
                 ExampleApplication.currentUserID = ""
                 val intent = Intent(activity, SignInActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_TASK_ON_HOME

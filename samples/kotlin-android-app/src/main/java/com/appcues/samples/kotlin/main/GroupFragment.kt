@@ -16,6 +16,8 @@ class GroupFragment : Fragment() {
     // onDestroyView.
     private val binding get() = _binding!!
 
+    private val appcues = ExampleApplication.appcues
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -27,7 +29,7 @@ class GroupFragment : Fragment() {
         binding.buttonSaveGroup.setOnClickListener {
             val groupInput = binding.editTextGroup.text.toString()
             val groupID = if (groupInput.isNotEmpty()) groupInput else null
-            ExampleApplication.appcues.group(groupID, hashMapOf("test_user" to true))
+            appcues.group(groupID, hashMapOf("test_user" to true))
         }
 
         return root
