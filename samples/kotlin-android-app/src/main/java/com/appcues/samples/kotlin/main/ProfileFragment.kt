@@ -60,6 +60,11 @@ class ProfileFragment : Fragment() {
         return root
     }
 
+    override fun onStart() {
+        super.onStart()
+        appcues.screen(getString(R.string.fragment_profile))
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

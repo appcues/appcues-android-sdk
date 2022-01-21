@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
-import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import com.appcues.samples.kotlin.ExampleApplication
 import com.appcues.samples.kotlin.R
@@ -15,7 +14,7 @@ import com.appcues.samples.kotlin.databinding.ActivitySigninBinding
 import com.appcues.samples.kotlin.main.MainActivity
 
 class SignInActivity : AppCompatActivity() {
-    private lateinit var binding: ActivitySigninBinding
+    private val binding by lazy { ActivitySigninBinding.inflate(layoutInflater) }
     private val appcues = ExampleApplication.appcues
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -23,15 +22,15 @@ class SignInActivity : AppCompatActivity() {
 
         supportActionBar?.setTitle(string.title_activity_signin)
 
-        binding = ActivitySigninBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         binding.editTextUserName.setText(ExampleApplication.currentUserID)
 
         binding.buttonSignIn.setOnClickListener {
-            val userID = findViewById<EditText>(id.editTextUserName).text.toString()
-            ExampleApplication.currentUserID = userID
+            val userInput = binding.editTextUserName.text.toString()
+            val userID = if (userInput.isNotEmpty()) userInput else ExampleApplication.currentUserID
             appcues.identify(userID)
+            ExampleApplication.currentUserID = userID
             completeSignIn()
         }
 
@@ -41,9 +40,9 @@ class SignInActivity : AppCompatActivity() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        appcues.screen("Sign In")
+    override fun onStart() {
+        super.onStart()
+        appcues.screen(getString(string.title_activity_signin))
     }
 
     private fun completeSignIn() {
