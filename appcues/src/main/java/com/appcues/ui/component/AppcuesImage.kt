@@ -15,6 +15,7 @@ import com.skydoves.landscapist.glide.GlideImage
 @Composable
 internal fun ImageComponent.Compose() {
     if (LocalInspectionMode.current) {
+        // if true, it means we are visualizing this composition from the Compose preview panel
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -29,7 +30,6 @@ internal fun ImageComponent.Compose() {
                 .aspectRatio(ratio = size.width.toFloat() / size.height.toFloat())
                 .background(color = Color(color = backgroundColor.light)),
             contentScale = ContentScale.FillWidth,
-            previewPlaceholder = android.R.drawable.ic_menu_save
         )
     }
 }

@@ -24,9 +24,8 @@ internal fun TextComponent.Compose() {
 
 private fun ComponentTextAlignment.toTextAlign(): TextAlign {
     return when (this) {
-        ComponentTextAlignment.START -> TextAlign.Start
+        ComponentTextAlignment.LEADING -> TextAlign.Start
         ComponentTextAlignment.CENTER -> TextAlign.Center
-        ComponentTextAlignment.END -> TextAlign.End
-        ComponentTextAlignment.JUSTIFY -> TextAlign.Justify
+        ComponentTextAlignment.TRAILING -> TextAlign.End
     }
 }
