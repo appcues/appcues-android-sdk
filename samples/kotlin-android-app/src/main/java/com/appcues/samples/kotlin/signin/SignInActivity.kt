@@ -40,9 +40,9 @@ class SignInActivity : AppCompatActivity() {
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-        appcues.screen(getString(string.title_activity_signin))
+    override fun onResume() {
+        super.onResume()
+        appcues.screen("Sign In")
     }
 
     private fun completeSignIn() {

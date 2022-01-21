@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.appcues.samples.kotlin.ExampleApplication
-import com.appcues.samples.kotlin.R
 import com.appcues.samples.kotlin.databinding.FragmentEventsBinding
 
 class EventsFragment : Fragment() {
@@ -41,9 +40,9 @@ class EventsFragment : Fragment() {
         return binding.root
     }
 
-    override fun onStart() {
-        super.onStart()
-        appcues.screen(getString(R.string.fragment_events))
+    override fun onResume() {
+        super.onResume()
+        appcues.screen("Trigger Events")
     }
 
     override fun onDestroyView() {
