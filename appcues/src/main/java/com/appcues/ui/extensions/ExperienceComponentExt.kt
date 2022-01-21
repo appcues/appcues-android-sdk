@@ -8,20 +8,15 @@ import com.appcues.domain.entity.ExperienceComponent.ImageComponent
 import com.appcues.domain.entity.ExperienceComponent.TextComponent
 import com.appcues.domain.entity.ExperienceComponent.VerticalStackComponent
 import com.appcues.ui.component.Compose
-import java.util.UUID
 
 @Composable
-internal fun List<ExperienceComponent>.ComposeAll(onClick: (id: UUID) -> Unit) {
-    forEach { it.ComposeExperience(onClick) }
-}
+internal fun List<ExperienceComponent>.ComposeEach() = forEach { it.Compose() }
 
 @Composable
-internal fun ExperienceComponent.ComposeExperience(onClick: (id: UUID) -> Unit) {
-    when (this) {
-        is ButtonComponent -> Compose(onClick = onClick)
-        is ImageComponent -> Compose()
-        is TextComponent -> Compose()
-        is HorizontalStackComponent -> Compose(onClick = onClick)
-        is VerticalStackComponent -> Compose(onClick = onClick)
-    }
+internal fun ExperienceComponent.Compose() = when (this) {
+    is ButtonComponent -> Compose()
+    is ImageComponent -> Compose()
+    is TextComponent -> Compose()
+    is HorizontalStackComponent -> Compose()
+    is VerticalStackComponent -> Compose()
 }

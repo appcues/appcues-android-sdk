@@ -8,15 +8,14 @@ import com.appcues.domain.entity.styling.ComponentHorizontalAlignment
 import com.appcues.domain.entity.styling.ComponentHorizontalAlignment.CENTER
 import com.appcues.domain.entity.styling.ComponentHorizontalAlignment.LEADING
 import com.appcues.domain.entity.styling.ComponentHorizontalAlignment.TRAILING
-import com.appcues.ui.extensions.ComposeAll
-import java.util.UUID
+import com.appcues.ui.extensions.ComposeEach
 
 @Composable
-internal fun VerticalStackComponent.Compose(onClick: (id: UUID) -> Unit) {
+internal fun VerticalStackComponent.Compose() {
     Column(
         horizontalAlignment = alignment.toHorizontalAlignment()
     ) {
-        items.ComposeAll(onClick = onClick)
+        items.ComposeEach()
     }
 }
 
