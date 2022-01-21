@@ -17,12 +17,12 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 import com.appcues.domain.entity.ExperienceComponent.ButtonComponent
 import com.appcues.domain.entity.styling.ComponentColor
-import com.appcues.ui.extensions.ComposeExperience
+import com.appcues.ui.LocalAppcuesActions
+import com.appcues.ui.extensions.Compose
 import com.appcues.ui.extensions.padding
-import java.util.UUID
 
 @Composable
-internal fun ButtonComponent.Compose(onClick: (id: UUID) -> Unit) {
+internal fun ButtonComponent.Compose() {
     var color: Color? = null
     var gradient: Brush? = null
 
@@ -36,14 +36,15 @@ internal fun ButtonComponent.Compose(onClick: (id: UUID) -> Unit) {
             }
         }
     }
+    val onClick = LocalAppcuesActions.current.onClick
 
     GradientTextButton(
         modifier = Modifier.padding(style.padding()),
         gradient = gradient,
         color = color,
         shape = RoundedCornerShape(style.cornerRadius.dp),
-        content = { content.ComposeExperience(onClick) },
-        onClick = { onClick(id) },
+        content = { content.Compose() },
+        onClick = { onClick?.invoke(id) },
     )
 }
 

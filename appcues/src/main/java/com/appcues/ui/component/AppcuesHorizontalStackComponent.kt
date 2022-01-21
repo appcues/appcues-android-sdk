@@ -10,16 +10,15 @@ import com.appcues.domain.entity.styling.ComponentVerticalAlignment
 import com.appcues.domain.entity.styling.ComponentVerticalAlignment.BOTTOM
 import com.appcues.domain.entity.styling.ComponentVerticalAlignment.CENTER
 import com.appcues.domain.entity.styling.ComponentVerticalAlignment.TOP
-import com.appcues.ui.extensions.ComposeAll
-import java.util.UUID
+import com.appcues.ui.extensions.ComposeEach
 
 @Composable
-internal fun HorizontalStackComponent.Compose(onClick: (id: UUID) -> Unit) {
+internal fun HorizontalStackComponent.Compose() {
     Row(
         horizontalArrangement = distribution.toHorizontalArrangement(),
         verticalAlignment = alignment.toVerticalAlignment()
     ) {
-        items.ComposeAll(onClick = onClick)
+        items.ComposeEach()
     }
 }
 

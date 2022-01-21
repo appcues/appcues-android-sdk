@@ -4,8 +4,9 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.tooling.preview.Preview
-import com.appcues.ui.extensions.ComposeExperience
+import com.appcues.ui.extensions.Compose
 import com.appcues.ui.theme.AppcuesTheme
 import com.appcues.ui.trait.DialogTrait
 
@@ -15,8 +16,10 @@ internal class AppcuesActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             AppcuesTheme {
-                DialogTrait {
-                    experienceModalOne.ComposeExperience(onClick = { finish() })
+                CompositionLocalProvider(LocalAppcuesActions provides AppcuesActions { finish() }) {
+                    DialogTrait {
+                        experienceModalOne.Compose()
+                    }
                 }
             }
         }
@@ -30,7 +33,7 @@ internal class AppcuesActivity : AppCompatActivity() {
     fun Preview() {
         AppcuesTheme {
             DialogTrait {
-                experienceModalOne.ComposeExperience(onClick = { finish() })
+                experienceModalOne.Compose()
             }
         }
     }
