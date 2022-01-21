@@ -18,7 +18,7 @@ orbs:
 #          JOBS
 # --------------------------
 jobs:
-  test:
+  validate_code:
     working_directory: ~/code
     executor:
       name: android/android-machine
@@ -42,7 +42,7 @@ jobs:
  #         key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
       - run:
           name: Run Tests
-          command: ./gradlew lint test
+          command: ./gradlew detekt test
       - store_artifacts: # for display in Artifacts: https://circleci.com/docs/2.0/artifacts/
           path: app/build/reports
           destination: reports
@@ -58,7 +58,12 @@ jobs:
 #        WORKFLOWS
 # --------------------------
 workflows:
-  build_deploy:
+  version: 2
+  pr_validation:
     jobs:
-      - test:
+      - validate_code:
+          filters:
+            branches:
+              ignore:
+                - main
           context: Appcues
