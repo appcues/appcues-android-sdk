@@ -3,16 +3,17 @@ package com.appcues
 import android.content.Context
 import com.appcues.action.ExperienceAction
 import com.appcues.builder.ApiHostBuilderValidator
-import com.appcues.di.DependencyProvider
+import com.appcues.di.AppcuesKoinContext
+import com.appcues.di.newAppcuesInstance
+import com.appcues.di.startKoinOnce
 import com.appcues.logging.Logcues
 import com.appcues.monitor.ActivityMonitor
 import com.appcues.trait.ExperienceTrait
 
-class Appcues internal constructor(dependencyProvider: DependencyProvider) {
-
-    private val logcues: Logcues = dependencyProvider.get()
-
-    private val activityMonitor: ActivityMonitor = dependencyProvider.get()
+class Appcues internal constructor(
+    private val logcues: Logcues,
+    private val activityMonitor: ActivityMonitor,
+) {
 
     /**
      * Returns the current version of Appcues SDK
@@ -64,7 +65,7 @@ class Appcues internal constructor(dependencyProvider: DependencyProvider) {
      * [properties] Optional properties that provide additional context about the event.
      */
     fun track(name: String, properties: HashMap<String, Any>? = null) {
-        logcues.i("track(name: $name, properties: $properties")
+        logcues.i("track(name: $name, properties: $properties)")
     }
 
     /**
@@ -145,17 +146,18 @@ class Appcues internal constructor(dependencyProvider: DependencyProvider) {
         }
 
         fun build(): Appcues {
-            return Appcues(
-                dependencyProvider = DependencyProvider(
-                    context = context,
-                    config = AppcuesConfig(
+            return with(AppcuesKoinContext) {
+                startKoinOnce(context)
+
+                newAppcuesInstance(
+                    appcuesConfig = AppcuesConfig(
                         accountId = accountId,
                         applicationId = applicationId,
                         loggingLevel = _loggingLevel,
                         apiHostUrl = _apiHostUrl
                     )
                 )
-            )
+            }
         }
     }
 
