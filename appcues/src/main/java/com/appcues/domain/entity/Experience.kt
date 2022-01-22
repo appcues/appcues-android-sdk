@@ -5,7 +5,7 @@ import com.appcues.domain.entity.step.Step
 import com.appcues.domain.entity.trait.Trait
 import java.util.UUID
 
-internal class Experience(
+internal data class Experience(
     val id: UUID,
     val name: String,
     val actions: HashMap<String, Action>,

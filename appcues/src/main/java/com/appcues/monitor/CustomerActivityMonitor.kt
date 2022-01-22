@@ -2,47 +2,49 @@ package com.appcues.monitor
 
 import android.app.Activity
 import android.app.Application
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.savedstate.SavedStateRegistryOwner
 import com.appcues.R
-import com.appcues.di.DependencyProvider
-import com.appcues.domain.entity.Experience
+import com.appcues.di.AppcuesKoinComponent
+import com.appcues.di.getApplicationContext
+import com.appcues.di.getOwnedViewModel
 import com.appcues.domain.gateway.CustomerViewGateway
 import com.appcues.ui.AppcuesActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.koin.androidx.viewmodel.ViewModelOwner
+import java.util.UUID
 
 internal class CustomerActivityMonitor(
-    private val dependencyProvider: DependencyProvider
-) : CustomerViewGateway, ActivityMonitor, Application.ActivityLifecycleCallbacks {
+    override val scopeId: String,
+) : CustomerViewGateway, ActivityMonitor, Application.ActivityLifecycleCallbacks, AppcuesKoinComponent {
 
     init {
-        (dependencyProvider.get<Context>() as Application).registerActivityLifecycleCallbacks(this)
+        getApplicationContext().registerActivityLifecycleCallbacks(this)
     }
 
     private var customerActivity: Activity? = null
 
-    override suspend fun showExperiences(experience: List<Experience>) {
+    override suspend fun showExperience(experienceId: UUID) {
         withContext(Dispatchers.Main) {
             customerActivity?.let {
-                it.startActivity(Intent(it, AppcuesActivity::class.java))
+                it.startActivity(AppcuesActivity.getIntent(it, scopeId, experienceId))
                 it.overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
             }
         }
     }
 
     override fun getCustomerViewModel(): CustomerViewModel? {
-        return customerActivity?.run {
-            dependencyProvider.getViewModel {
-                ViewModelOwner.from(
-                    this as ViewModelStoreOwner,
-                    this as? SavedStateRegistryOwner
-                )
-            }
+        return customerActivity?.let {
+            getOwnedViewModel(
+                owner = {
+                    ViewModelOwner.from(
+                        it as ViewModelStoreOwner,
+                        it as? SavedStateRegistryOwner
+                    )
+                }
+            )
         }
     }
 
