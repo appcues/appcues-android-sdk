@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.tooling.preview.Preview
+import com.appcues.R
 import com.appcues.ui.extensions.Compose
 import com.appcues.ui.theme.AppcuesTheme
 import com.appcues.ui.trait.DialogTrait
@@ -16,13 +17,18 @@ internal class AppcuesActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             AppcuesTheme {
-                CompositionLocalProvider(LocalAppcuesActions provides AppcuesActions { finish() }) {
+                CompositionLocalProvider(LocalAppcuesActions provides AppcuesActions { finishAnimated() }) {
                     DialogTrait {
                         experienceModalOne.Compose()
                     }
                 }
             }
         }
+    }
+
+    private fun finishAnimated() {
+        finish()
+        overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
     }
 
     @Preview(
