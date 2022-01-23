@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.savedstate.SavedStateRegistryOwner
+import com.appcues.R
 import com.appcues.di.DependencyProvider
 import com.appcues.domain.entity.Experience
 import com.appcues.domain.gateway.CustomerViewGateway
@@ -29,6 +30,7 @@ internal class CustomerActivityMonitor(
         withContext(Dispatchers.Main) {
             customerActivity?.let {
                 it.startActivity(Intent(it, AppcuesActivity::class.java))
+                it.overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
             }
         }
     }
