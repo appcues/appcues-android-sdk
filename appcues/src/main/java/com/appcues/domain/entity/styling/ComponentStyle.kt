@@ -1,5 +1,9 @@
 package com.appcues.domain.entity.styling
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
 internal data class ComponentStyle(
     // Margin is outside space
     val marginLeading: Int = 0,
@@ -13,4 +17,4 @@ internal data class ComponentStyle(
     val paddingBottom: Int = 0,
 
     val cornerRadius: Int = 0,
-)
+) : Parcelable

@@ -1,12 +1,10 @@
 package com.appcues.di
 
 import com.appcues.AppcuesConfig
-import com.appcues.data.local.DefaultExperienceLocalGateway
 import com.appcues.data.remote.MockExperienceRemoteGateway
-import com.appcues.domain.GetExperienceUseCase
+import com.appcues.domain.ShowExperienceUseCase
 import com.appcues.domain.ShowUseCase
 import com.appcues.domain.gateway.CustomerViewGateway
-import com.appcues.domain.gateway.ExperienceLocalGateway
 import com.appcues.domain.gateway.ExperienceRemoteGateway
 import com.appcues.logging.Logcues
 import com.appcues.monitor.ActivityMonitor
@@ -31,19 +29,17 @@ internal object AppcuesModule {
                 .bind(CustomerViewGateway::class)
 
             scoped<ExperienceRemoteGateway> { MockExperienceRemoteGateway() }
-            scoped<ExperienceLocalGateway> { DefaultExperienceLocalGateway() }
 
             factory {
                 ShowUseCase(
                     experienceRemote = get(),
-                    experienceLocal = get(),
-                    customerView = get(),
+                    showExperienceUseCase = get(),
                 )
             }
 
             factory {
-                GetExperienceUseCase(
-                    experienceLocal = get(),
+                ShowExperienceUseCase(
+                    customerView = get(),
                 )
             }
 
@@ -56,8 +52,7 @@ internal object AppcuesModule {
 
             viewModel { parametersHolder ->
                 AppcuesViewModel(
-                    experienceId = parametersHolder.get(),
-                    getExperienceUseCase = get()
+                    experience = parametersHolder.get(),
                 )
             }
         }

@@ -1,3 +1,7 @@
 package com.appcues.domain.entity.action
 
-internal sealed class Action
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
+internal class Action : Parcelable
