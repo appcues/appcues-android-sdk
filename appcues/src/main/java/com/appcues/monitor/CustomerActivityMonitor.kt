@@ -9,12 +9,12 @@ import com.appcues.R
 import com.appcues.di.AppcuesKoinComponent
 import com.appcues.di.getApplicationContext
 import com.appcues.di.getOwnedViewModel
+import com.appcues.domain.entity.Experience
 import com.appcues.domain.gateway.CustomerViewGateway
 import com.appcues.ui.AppcuesActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.koin.androidx.viewmodel.ViewModelOwner
-import java.util.UUID
 
 internal class CustomerActivityMonitor(
     override val scopeId: String,
@@ -26,10 +26,10 @@ internal class CustomerActivityMonitor(
 
     private var customerActivity: Activity? = null
 
-    override suspend fun showExperience(experienceId: UUID) {
+    override suspend fun showExperience(experience: Experience) {
         withContext(Dispatchers.Main) {
             customerActivity?.let {
-                it.startActivity(AppcuesActivity.getIntent(it, scopeId, experienceId))
+                it.startActivity(AppcuesActivity.getIntent(it, scopeId, experience))
                 it.overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
             }
         }

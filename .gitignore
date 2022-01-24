@@ -19,6 +19,7 @@ output.json
 # IntelliJ
 *.iml
 /.idea/libraries/
+/.idea/inspectionProfiles/
 /.idea/compiler.xml
 /.idea/gradle.xml
 /.idea/misc.xml

@@ -1,3 +1,7 @@
 package com.appcues.domain.entity.trait
 
-internal sealed class Trait
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
+internal class Trait : Parcelable

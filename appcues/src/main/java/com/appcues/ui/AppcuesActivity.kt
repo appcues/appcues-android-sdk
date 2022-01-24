@@ -12,12 +12,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.os.bundleOf
 import com.appcues.R
 import com.appcues.di.AppcuesKoinComponent
+import com.appcues.domain.entity.Experience
 import com.appcues.ui.extensions.Compose
 import com.appcues.ui.theme.AppcuesTheme
 import com.appcues.ui.trait.DialogTrait
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
-import java.util.UUID
 
 internal class AppcuesActivity : AppCompatActivity(), AppcuesKoinComponent {
 
@@ -26,31 +26,31 @@ internal class AppcuesActivity : AppCompatActivity(), AppcuesKoinComponent {
         private const val EXTRA_SCOPE_ID = "EXTRA_SCOPE_ID"
         private const val EXTRA_EXPERIENCE = "EXTRA_EXPERIENCE"
 
-        fun getIntent(context: Context, scopeId: String, experienceId: UUID): Intent =
+        fun getIntent(context: Context, scopeId: String, experience: Experience): Intent =
             Intent(context, AppcuesActivity::class.java).apply {
                 putExtras(
                     bundleOf(
                         EXTRA_SCOPE_ID to scopeId,
-                        EXTRA_EXPERIENCE to experienceId
+                        EXTRA_EXPERIENCE to experience
                     )
                 )
             }
     }
 
-    override val scopeId: String by lazy { intent.getSerializableExtra(EXTRA_SCOPE_ID) as String }
+    override val scopeId: String by lazy { intent.getStringExtra(EXTRA_SCOPE_ID)!! }
 
-    private val experienceId: UUID by lazy { intent.getSerializableExtra(EXTRA_EXPERIENCE) as UUID }
+    private val experience: Experience by lazy { intent.getParcelableExtra(EXTRA_EXPERIENCE)!! }
 
-    private val viewModel: AppcuesViewModel by viewModel { parametersOf(experienceId) }
+    private val viewModel: AppcuesViewModel by viewModel { parametersOf(experience) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             AppcuesTheme {
                 CompositionLocalProvider(LocalAppcuesActions provides AppcuesActions { finishAnimated() }) {
-                    val experience = remember { viewModel.experience }
+                    val experience = remember { viewModel.experienceState }
                     DialogTrait {
-                        experience.value?.steps?.first()?.content?.Compose()
+                        experience.value.steps.first().content.Compose()
                     }
                 }
             }

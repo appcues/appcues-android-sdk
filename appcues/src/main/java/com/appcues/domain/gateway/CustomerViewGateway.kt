@@ -1,8 +1,8 @@
 package com.appcues.domain.gateway
 
-import java.util.UUID
+import com.appcues.domain.entity.Experience
 
 internal interface CustomerViewGateway {
 
-    suspend fun showExperience(experienceId: UUID)
+    suspend fun showExperience(experience: Experience)
 }

@@ -1,23 +1,16 @@
 package com.appcues.ui
 
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.appcues.domain.GetExperienceUseCase
 import com.appcues.domain.entity.Experience
-import kotlinx.coroutines.launch
-import java.util.UUID
 
 internal class AppcuesViewModel(
-    private val experienceId: UUID,
-    private val getExperienceUseCase: GetExperienceUseCase
+    experience: Experience
 ) : ViewModel() {
 
-    val experience = mutableStateOf<Experience?>(null)
+    private val _experienceState = mutableStateOf(experience)
 
-    init {
-        viewModelScope.launch {
-            experience.value = getExperienceUseCase(experienceId)
-        }
-    }
+    val experienceState: State<Experience>
+        get() = _experienceState
 }
