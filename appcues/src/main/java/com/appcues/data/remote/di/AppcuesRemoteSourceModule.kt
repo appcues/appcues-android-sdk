@@ -18,7 +18,9 @@ internal object AppcuesRemoteSourceModule {
         scope(named(scopeId)) {
             scoped<AppcuesRemoteSource> {
                 RetrofitAppcuesRemoteSource(
-                    appcuesService = getAppcuesService(config.apiHostUrl ?: BASE_URL)
+                    appcuesService = getAppcuesService(config.apiHostUrl ?: BASE_URL),
+                    accountId = config.accountId,
+                    session = get(),
                 )
             }
         }

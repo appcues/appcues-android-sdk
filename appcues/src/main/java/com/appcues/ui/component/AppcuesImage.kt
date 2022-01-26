@@ -1,6 +1,7 @@
 package com.appcues.ui.component
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,7 +21,7 @@ internal fun ImageComponent.Compose() {
             modifier = Modifier
                 .fillMaxSize()
                 .aspectRatio(ratio = size.width.toFloat() / size.height.toFloat())
-                .background(color = Color(color = backgroundColor.light)),
+                .background(color = getBackgroundColor(isSystemInDarkTheme())),
         )
     } else {
         GlideImage(
@@ -28,8 +29,16 @@ internal fun ImageComponent.Compose() {
             modifier = Modifier
                 .fillMaxSize()
                 .aspectRatio(ratio = size.width.toFloat() / size.height.toFloat())
-                .background(color = Color(color = backgroundColor.light)),
+                .background(color = getBackgroundColor(isSystemInDarkTheme())),
             contentScale = ContentScale.FillWidth,
         )
+    }
+}
+
+private fun ImageComponent.getBackgroundColor(isDark: Boolean): Color {
+    return when {
+        backgroundColor == null -> Color.Transparent
+        isDark -> Color(backgroundColor.dark)
+        else -> Color(backgroundColor.light)
     }
 }

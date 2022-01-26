@@ -47,7 +47,7 @@ internal fun experienceModalOneContent() = VerticalStackComponent(
                     id = UUID.randomUUID(),
                     url = "https://res.cloudinary.com/dnjrorsut/image/upload/v1635971825/98227/oh5drlvojb1spaetc1ol.jpg",
                     size = ComponentSize(width = 1920, height = 1280),
-                    backgroundColor = ComponentColor(light = 0xFF8F8F8F)
+                    backgroundColor = ComponentColor(light = 0xFF8F8F8F, dark = 0xFF8F8F8F)
                 )
             )
         ),
@@ -63,7 +63,7 @@ internal fun experienceModalOneContent() = VerticalStackComponent(
                         marginTop = 20,
                         marginBottom = 5,
                     ),
-                    textColor = ComponentColor(light = 0xFF394455),
+                    textColor = ComponentColor(light = 0xFF394455, dark = 0xFF394455),
                     textSize = 20,
                     textAlignment = ComponentTextAlignment.CENTER,
                 )
@@ -84,7 +84,7 @@ internal fun experienceModalOneContent() = VerticalStackComponent(
                     ),
                     text = "Take a few moments to learn how to best use our features.",
                     textSize = 17,
-                    textColor = ComponentColor(light = 0xFF394455),
+                    textColor = ComponentColor(light = 0xFF394455, dark = 0xFF394455),
                     textAlignment = ComponentTextAlignment.CENTER,
                 )
             )
@@ -103,16 +103,16 @@ internal fun experienceModalOneContent() = VerticalStackComponent(
                         marginBottom = 8,
                         cornerRadius = 6,
                     ),
-                    colors = arrayListOf(
-                        ComponentColor(light = 0xFF5C5CFF),
-                        ComponentColor(light = 0xFF8960FF),
-                        ComponentColor(light = 0xFFAA90FF)
+                    backgroundColors = arrayListOf(
+                        ComponentColor(light = 0xFF5C5CFF, dark = 0xFF394455),
+                        ComponentColor(light = 0xFF8960FF, dark = 0xFF394455),
+                        ComponentColor(light = 0xFFAA90FF, dark = 0xFF394455)
                     ),
                     content = TextComponent(
                         id = UUID.randomUUID(),
                         text = "Button 1",
                         textSize = 17,
-                        textColor = ComponentColor(light = 0xFFFFFFFF)
+                        textColor = ComponentColor(light = 0xFFFFFFFF, dark = 0xFF394455)
                     )
                 )
             )

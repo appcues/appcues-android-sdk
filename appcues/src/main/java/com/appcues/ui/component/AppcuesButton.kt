@@ -19,6 +19,7 @@ import com.appcues.domain.entity.ExperienceComponent.ButtonComponent
 import com.appcues.domain.entity.styling.ComponentColor
 import com.appcues.ui.LocalAppcuesActions
 import com.appcues.ui.extensions.Compose
+import com.appcues.ui.extensions.contentPadding
 import com.appcues.ui.extensions.padding
 
 @Composable
@@ -26,14 +27,11 @@ internal fun ButtonComponent.Compose() {
     var color: Color? = null
     var gradient: Brush? = null
 
-    colors.toComposeColors().let {
-        when (it.size) {
-            1 -> {
-                color = it.first()
-            }
-            else -> {
-                gradient = Brush.horizontalGradient(it)
-            }
+    backgroundColors.toComposeColors().let {
+        if (it.size == 1) {
+            color = it.first()
+        } else {
+            gradient = Brush.horizontalGradient(it)
         }
     }
     val onClick = LocalAppcuesActions.current.onClick
@@ -42,6 +40,7 @@ internal fun ButtonComponent.Compose() {
         modifier = Modifier.padding(style.padding()),
         gradient = gradient,
         color = color,
+        contentPadding = style.contentPadding(),
         shape = RoundedCornerShape(style.cornerRadius.dp),
         content = { content.Compose() },
         onClick = { onClick?.invoke(id) },
@@ -49,8 +48,8 @@ internal fun ButtonComponent.Compose() {
 }
 
 @Composable
-private fun List<ComponentColor>?.toComposeColors(): List<Color> {
-    return if (this.isNullOrEmpty()) {
+private fun List<ComponentColor>.toComposeColors(): List<Color> {
+    return if (isEmpty()) {
         arrayListOf(MaterialTheme.colors.primary)
     } else {
         this.map { Color(it.light) }
@@ -62,6 +61,7 @@ private fun GradientTextButton(
     modifier: Modifier = Modifier,
     gradient: Brush? = null,
     color: Color? = null,
+    contentPadding: PaddingValues = PaddingValues(),
     onClick: () -> Unit = { },
     shape: Shape = MaterialTheme.shapes.small,
     content: @Composable () -> Unit
@@ -76,7 +76,7 @@ private fun GradientTextButton(
         Box(
             modifier = Modifier
                 .gradientBackground(color, gradient)
-                .then(modifier),
+                .padding(contentPadding),
             contentAlignment = Alignment.Center,
         ) {
             content()

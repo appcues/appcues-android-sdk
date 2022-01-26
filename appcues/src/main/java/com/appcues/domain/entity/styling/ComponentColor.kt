@@ -6,5 +6,5 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 internal data class ComponentColor(
     val light: Long,
-    val dark: Long? = null,
+    val dark: Long,
 ) : Parcelable

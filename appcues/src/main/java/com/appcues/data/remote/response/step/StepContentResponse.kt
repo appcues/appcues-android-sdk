@@ -9,10 +9,11 @@ internal data class StepContentResponse(
     val type: String,
     val orientation: String? = null,
     val style: StyleResponse? = null,
-    val items: List<StepItemResponse>? = null,
+    val items: List<StepContentResponse>? = null,
     val imageUrl: String? = null,
     val contentMode: String? = null,
     val intrinsicSize: SizeResponse? = null,
     val text: String? = null,
     val content: StepContentResponse? = null,
+    val distribution: String? = null,
 )

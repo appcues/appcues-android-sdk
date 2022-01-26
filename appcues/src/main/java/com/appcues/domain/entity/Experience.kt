@@ -11,7 +11,7 @@ import java.util.UUID
 internal data class Experience(
     val id: UUID,
     val name: String,
-    val actions: HashMap<String, Action>,
+    val actions: HashMap<UUID, List<Action>>,
     val traits: List<Trait>,
     val steps: List<Step>
 ) : Parcelable

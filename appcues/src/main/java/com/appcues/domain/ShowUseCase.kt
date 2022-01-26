@@ -1,15 +1,13 @@
 package com.appcues.domain
 
-import com.appcues.domain.gateway.ExperienceRemoteGateway
+import com.appcues.domain.gateway.DataGateway
 
 internal class ShowUseCase(
-    private val experienceRemote: ExperienceRemoteGateway,
+    private val data: DataGateway,
     private val showExperienceUseCase: ShowExperienceUseCase,
 ) {
 
     suspend operator fun invoke(contentId: String) {
-        experienceRemote.getExperience(contentId)?.let {
-            showExperienceUseCase(it)
-        }
+        showExperienceUseCase(data.getContent(contentId))
     }
 }
