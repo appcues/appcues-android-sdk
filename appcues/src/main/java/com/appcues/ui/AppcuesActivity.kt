@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -14,7 +15,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.os.bundleOf
 import com.appcues.R
-import com.appcues.di.AppcuesKoinComponent
 import com.appcues.domain.entity.Experience
 import com.appcues.monitor.intentActionFinish
 import com.appcues.monitor.registerLocalReceiver
@@ -22,10 +22,8 @@ import com.appcues.monitor.unregisterLocalReceiver
 import com.appcues.ui.extensions.Compose
 import com.appcues.ui.theme.AppcuesTheme
 import com.appcues.ui.trait.DialogTrait
-import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.koin.core.parameter.parametersOf
 
-internal class AppcuesActivity : AppCompatActivity(), AppcuesKoinComponent {
+internal class AppcuesActivity : AppCompatActivity() {
 
     companion object {
 
@@ -45,13 +43,13 @@ internal class AppcuesActivity : AppCompatActivity(), AppcuesKoinComponent {
             }
     }
 
-    override val scopeId: String by lazy { intent.getStringExtra(EXTRA_SCOPE_ID)!! }
+    private val scopeId: String by lazy { intent.getStringExtra(EXTRA_SCOPE_ID)!! }
 
     private val experience: Experience by lazy { intent.getParcelableExtra(EXTRA_EXPERIENCE)!! }
 
     private val parentIntentActionFinish: String by lazy { intent.getStringExtra(EXTRA_PARENT_INTENT_ACTION_FINISH)!! }
 
-    private val viewModel: AppcuesViewModel by viewModel { parametersOf(experience) }
+    private val viewModel: AppcuesViewModel by viewModels { AppcuesViewModelFactory(scopeId, experience) }
 
     private val broadcastReceiver = AppcuesBroadcastReceiver()
 
@@ -61,9 +59,10 @@ internal class AppcuesActivity : AppCompatActivity(), AppcuesKoinComponent {
         setContent {
             AppcuesTheme {
                 CompositionLocalProvider(LocalAppcuesActions provides AppcuesActions { finishAnimated() }) {
-                    val experience = remember { viewModel.experienceState }
-                    DialogTrait {
-                        experience.value.steps.first().content.Compose()
+                    remember { viewModel.experienceState }.run {
+                        DialogTrait {
+                            value.steps.first().content.Compose()
+                        }
                     }
                 }
             }

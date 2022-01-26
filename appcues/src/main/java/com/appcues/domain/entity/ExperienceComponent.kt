@@ -31,7 +31,7 @@ internal sealed class ExperienceComponent(open val id: UUID) : Parcelable {
         override val id: UUID,
         val content: ExperienceComponent,
         val style: ComponentStyle = ComponentStyle(),
-        val colors: List<ComponentColor>? = null,
+        val backgroundColors: List<ComponentColor>,
         val shadow: ComponentShadow? = null,
     ) : ExperienceComponent(id)
 
@@ -40,7 +40,7 @@ internal sealed class ExperienceComponent(open val id: UUID) : Parcelable {
         override val id: UUID,
         val url: String,
         val size: ComponentSize,
-        val backgroundColor: ComponentColor,
+        val backgroundColor: ComponentColor?,
         val style: ComponentStyle = ComponentStyle(),
     ) : ExperienceComponent(id)
 
@@ -58,6 +58,6 @@ internal sealed class ExperienceComponent(open val id: UUID) : Parcelable {
         val items: List<ExperienceComponent>,
         val style: ComponentStyle = ComponentStyle(),
         val alignment: ComponentVerticalAlignment = ComponentVerticalAlignment.TOP,
-        val distribution: ComponentDistribution = ComponentDistribution.CENTER
+        val distribution: ComponentDistribution
     ) : ExperienceComponent(id)
 }

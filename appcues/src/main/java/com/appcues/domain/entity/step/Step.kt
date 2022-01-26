@@ -12,5 +12,5 @@ internal data class Step(
     val id: UUID,
     val content: ExperienceComponent,
     val traits: List<Trait>,
-    val actions: HashMap<String, List<Action>>
+    val actions: HashMap<UUID, List<Action>>
 ) : Parcelable

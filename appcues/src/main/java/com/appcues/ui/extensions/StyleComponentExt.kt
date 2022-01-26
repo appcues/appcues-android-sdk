@@ -10,3 +10,10 @@ internal fun ComponentStyle.padding() = PaddingValues(
     bottom = marginBottom.dp,
     end = marginTrailing.dp,
 )
+
+internal fun ComponentStyle.contentPadding() = PaddingValues(
+    start = paddingLeading.dp,
+    top = paddingTop.dp,
+    bottom = paddingBottom.dp,
+    end = paddingTrailing.dp,
+)

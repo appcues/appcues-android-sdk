@@ -1,13 +1,12 @@
 @file:Suppress("MaxLineLength")
 
-package com.appcues.data.remote.retrofit.experiences
+package com.appcues.data.remote.retrofit.stubs
 
 import com.appcues.data.remote.response.TacoResponse
 import com.appcues.data.remote.response.action.ActionResponse
 import com.appcues.data.remote.response.experience.ExperienceResponse
 import com.appcues.data.remote.response.experience.ExperienceThemeResponse
 import com.appcues.data.remote.response.step.StepContentResponse
-import com.appcues.data.remote.response.step.StepItemResponse
 import com.appcues.data.remote.response.step.StepResponse
 import com.appcues.data.remote.response.styling.SizeResponse
 import com.appcues.data.remote.response.styling.StyleColorResponse
@@ -18,19 +17,17 @@ import com.appcues.data.remote.response.trait.TraitConfigResponse
 import com.appcues.data.remote.response.trait.TraitResponse
 import java.util.UUID
 
-internal val modalOneStub = TacoResponse(
+internal val activityModalOneStubs = TacoResponse(
     experiences = arrayListOf(
         ExperienceResponse(
             id = UUID.fromString("9f4baa80-8f6a-41b1-a7b9-979da5c175e2"),
             name = "POC Modal One",
-            tags = arrayListOf(),
             theme = ExperienceThemeResponse(),
             actions = hashMapOf(),
             traits = arrayListOf(),
             steps = arrayListOf(
                 StepResponse(
                     id = UUID.fromString("68c0d4b4-4909-4d4a-9ce4-7af8b04efab2"),
-                    contentType = "application/json",
                     content = StepContentResponse(
                         id = UUID.fromString("2cf7dbf7-c6be-4130-b642-85861f9c6b6a"),
                         type = "stack",
@@ -40,16 +37,15 @@ internal val modalOneStub = TacoResponse(
                             marginBottom = 25
                         ),
                         items = arrayListOf(
-                            StepItemResponse(
+                            StepContentResponse(
                                 id = UUID.fromString("8e46637d-071a-4405-a9dd-dec4a64e98b8"),
                                 type = "stack",
                                 orientation = "horizontal",
                                 distribution = "equal",
                                 items = arrayListOf(
-                                    StepItemResponse(
+                                    StepContentResponse(
                                         id = UUID.fromString("80bb63b2-2db2-44a4-b5fc-61c3d7f5c889"),
                                         type = "block",
-                                        blockType = "image",
                                         content = StepContentResponse(
                                             id = UUID.fromString("f2affaaa-0883-42f8-a313-73a28cc2d0b4"),
                                             type = "image",
@@ -68,16 +64,15 @@ internal val modalOneStub = TacoResponse(
                                     )
                                 )
                             ),
-                            StepItemResponse(
+                            StepContentResponse(
                                 id = UUID.fromString("678a3466-8f26-4530-9391-82c03bc2cebf"),
                                 type = "stack",
                                 orientation = "horizontal",
                                 distribution = "equal",
                                 items = arrayListOf(
-                                    StepItemResponse(
+                                    StepContentResponse(
                                         id = UUID.fromString("e905d8bf-b1ad-4401-adfe-2f7e01878fa1"),
                                         type = "block",
-                                        blockType = "text",
                                         content = StepContentResponse(
                                             id = UUID.fromString("d52cd085-3f57-4218-8eb2-973f654a5acf"),
                                             type = "text",
@@ -98,16 +93,15 @@ internal val modalOneStub = TacoResponse(
                                     )
                                 )
                             ),
-                            StepItemResponse(
+                            StepContentResponse(
                                 id = UUID.fromString("dffddbe8-0ec8-4045-8681-25c60f7f9ccf"),
                                 type = "stack",
                                 orientation = "horizontal",
                                 distribution = "equal",
                                 items = arrayListOf(
-                                    StepItemResponse(
+                                    StepContentResponse(
                                         id = UUID.fromString("a25bc0a0-f527-4ec6-bc8f-3f8d8ff4d0e9"),
                                         type = "block",
-                                        blockType = "text",
                                         content = StepContentResponse(
                                             id = UUID.fromString("d52cd085-3f57-4218-8eb2-973f654a5dcf"),
                                             type = "text",
@@ -130,16 +124,15 @@ internal val modalOneStub = TacoResponse(
                                     )
                                 )
                             ),
-                            StepItemResponse(
+                            StepContentResponse(
                                 id = UUID.fromString("a4ac4eb8-f833-4be1-8b14-d58562f11aa8"),
                                 type = "stack",
                                 orientation = "horizontal",
                                 distribution = "equal",
                                 items = arrayListOf(
-                                    StepItemResponse(
+                                    StepContentResponse(
                                         id = UUID.fromString("f4c4f89e-4c8a-4c9d-9a8a-80c8bbfa8fa7"),
                                         type = "block",
-                                        blockType = "button",
                                         content = StepContentResponse(
                                             id = UUID.fromString("c34f7d02-443d-497c-ac3a-1a9b42af9dd8"),
                                             type = "button",
@@ -209,7 +202,7 @@ internal val modalOneStub = TacoResponse(
                         )
                     ),
                     actions = hashMapOf(
-                        "c34f7d02-443d-497c-ac3a-1a9b42af9dd8" to arrayListOf(
+                        UUID.fromString("c34f7d02-443d-497c-ac3a-1a9b42af9dd8") to arrayListOf(
                             ActionResponse(
                                 on = "tap",
                                 type = "@appcues/close"

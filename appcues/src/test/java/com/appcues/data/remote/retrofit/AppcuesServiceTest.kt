@@ -1,6 +1,7 @@
 package com.appcues.data.remote.retrofit
 
-import com.appcues.data.remote.retrofit.experiences.modalOneStub
+import com.appcues.data.remote.retrofit.stubs.activityModalOneStubs
+import com.appcues.data.remote.retrofit.stubs.contentModalOneStubs
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockWebServer
@@ -20,30 +21,40 @@ class AppcuesServiceTest {
     }
 
     @Test
-    fun `getTaco SHOULD fetch taco correctly given 200 response`() = runBlocking {
-        // Given
-        mockWebServer.enqueueResponse("experiences/modal_one.json", 200)
-        // When
-        val result = api.getTaco(1234, "TestUser")
-        // Then
-        with(result) {
-            assertThat(this).isEqualTo(modalOneStub)
-        }
-    }
-
-    @Test
     fun `getTaco(1234, 5678) SHOULD fetch taco correctly from specific path `() = runBlocking {
         // Given
         mockWebServer.dispatchResponses(
             responses = hashMapOf(
-                "/v1/accounts/1234/users/TestUser/activity" to "experiences/modal_one.json"
+                "/v1/accounts/1234/users/TestUser/activity" to "activity/activity_modal_one.json"
             )
         )
         // When
         val result = api.getTaco(1234, "TestUser")
         // Then
         with(result) {
-            assertThat(this).isEqualTo(modalOneStub)
+            assertThat(this).isEqualTo(activityModalOneStubs)
+        }
+    }
+
+    @Test
+    fun `content SHOULD fetch Experience correctly from specific path`() {
+        // Given
+        mockWebServer.dispatchResponses(
+            responses = hashMapOf(
+                "/v1/accounts/1234/users/TestUser/experience_content/5678" to "content/content_modal_one.json"
+            )
+        )
+        // When
+        val result = runBlocking {
+            api.content(
+                account = "1234",
+                user = "TestUser",
+                contentId = "5678",
+            )
+        }
+        // Then
+        with(result) {
+            assertThat(this).isEqualTo(contentModalOneStubs)
         }
     }
 }

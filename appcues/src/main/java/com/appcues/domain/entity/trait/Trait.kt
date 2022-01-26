@@ -4,4 +4,6 @@ import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-internal class Trait : Parcelable
+internal data class Trait(
+    val type: String,
+) : Parcelable

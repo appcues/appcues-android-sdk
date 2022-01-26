@@ -4,4 +4,7 @@ import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-internal class Action : Parcelable
+internal data class Action(
+    val on: OnAction,
+    val type: String,
+) : Parcelable
