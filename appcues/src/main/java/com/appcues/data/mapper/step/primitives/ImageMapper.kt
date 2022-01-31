@@ -23,7 +23,7 @@ internal class ImageMapper(
             ImageComponent(
                 id = id,
                 url = imageUrl,
-                size = sizeMapper.map(intrinsicSize),
+                intrinsicSize = sizeMapper.map(intrinsicSize),
                 backgroundColor = style.getBackgroundColor(),
                 style = styleMapper.map(style)
             )

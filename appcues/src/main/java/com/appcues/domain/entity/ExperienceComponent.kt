@@ -39,9 +39,9 @@ internal sealed class ExperienceComponent(open val id: UUID) : Parcelable {
     data class ImageComponent(
         override val id: UUID,
         val url: String,
-        val size: ComponentSize,
+        val style: ComponentStyle,
+        val intrinsicSize: ComponentSize?,
         val backgroundColor: ComponentColor?,
-        val style: ComponentStyle = ComponentStyle(),
     ) : ExperienceComponent(id)
 
     @Parcelize

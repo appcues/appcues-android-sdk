@@ -220,8 +220,8 @@ class StepContentMapperTest {
         with(result as ImageComponent) {
             assertThat(id).isEqualTo(randomId)
             assertThat(url).isEqualTo(imageUrl)
-            assertThat(size.width).isEqualTo(1920)
-            assertThat(size.height).isEqualTo(1280)
+            assertThat(intrinsicSize?.width).isEqualTo(1920)
+            assertThat(intrinsicSize?.height).isEqualTo(1280)
             assertThat(backgroundColor).isNotNull()
             assertThat(backgroundColor?.light).isEqualTo(0xFF000000)
         }
