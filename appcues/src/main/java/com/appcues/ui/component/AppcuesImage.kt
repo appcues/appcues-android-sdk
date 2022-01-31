@@ -1,44 +1,63 @@
 package com.appcues.ui.component
 
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalInspectionMode
+import coil.annotation.ExperimentalCoilApi
+import coil.compose.ImagePainter
+import coil.compose.ImagePainter.State.Success
+import coil.compose.rememberImagePainter
 import com.appcues.domain.entity.ExperienceComponent.ImageComponent
-import com.skydoves.landscapist.glide.GlideImage
+import com.appcues.domain.entity.styling.ComponentColor
+import com.appcues.domain.entity.styling.ComponentSize
 
 @Composable
 internal fun ImageComponent.Compose() {
-    if (LocalInspectionMode.current) {
-        // if true, it means we are visualizing this composition from the Compose preview panel
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .aspectRatio(ratio = size.width.toFloat() / size.height.toFloat())
-                .background(color = getBackgroundColor(isSystemInDarkTheme())),
-        )
-    } else {
-        GlideImage(
-            imageModel = url,
-            modifier = Modifier
-                .fillMaxSize()
-                .aspectRatio(ratio = size.width.toFloat() / size.height.toFloat())
-                .background(color = getBackgroundColor(isSystemInDarkTheme())),
-            contentScale = ContentScale.FillWidth,
-        )
-    }
+    val imagePainter = rememberImagePainter(data = url, builder = { crossfade(true) })
+
+    Image(
+        painter = imagePainter,
+        contentDescription = null, // contentDescription for image is missing
+        modifier = Modifier
+            .fillMaxSize()
+            .animateContentSize()
+            .background(backgroundColor, isSystemInDarkTheme())
+            .aspectRatio(imagePainter, intrinsicSize),
+        contentScale = ContentScale.FillWidth,
+    )
 }
 
-private fun ImageComponent.getBackgroundColor(isDark: Boolean): Color {
-    return when {
-        backgroundColor == null -> Color.Transparent
-        isDark -> Color(backgroundColor.dark)
-        else -> Color(backgroundColor.light)
+private fun Modifier.background(colorComponent: ComponentColor?, isDark: Boolean) = background(
+    when {
+        colorComponent == null -> Color.Transparent
+        isDark -> Color(colorComponent.dark)
+        else -> Color(colorComponent.light)
     }
+)
+
+// This value is immense for aspect ratio on purpose, so that the Image compose
+// will probably have 1 pixel height while image is loading.
+// Still needed for ImagePainter to trigger the image loader
+private const val FALLBACK_ASPECT_RATIO = 1000f
+
+@OptIn(ExperimentalCoilApi::class)
+private fun Modifier.aspectRatio(imagePainter: ImagePainter, intrinsicSize: ComponentSize?) = aspectRatio(
+    when {
+        intrinsicSize != null -> calculateAspectRatio(intrinsicSize.width, intrinsicSize.height)
+        imagePainter.state is Success -> with((imagePainter.state as Success).result.drawable) {
+            calculateAspectRatio(intrinsicWidth, intrinsicHeight)
+        }
+        else -> FALLBACK_ASPECT_RATIO
+    }
+)
+
+private fun calculateAspectRatio(width: Int, height: Int): Float {
+    return width.toFloat() / height.toFloat()
 }

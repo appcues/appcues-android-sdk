@@ -46,8 +46,9 @@ internal fun experienceModalOneContent() = VerticalStackComponent(
                 ImageComponent(
                     id = UUID.randomUUID(),
                     url = "https://res.cloudinary.com/dnjrorsut/image/upload/v1635971825/98227/oh5drlvojb1spaetc1ol.jpg",
-                    size = ComponentSize(width = 1920, height = 1280),
-                    backgroundColor = ComponentColor(light = 0xFF8F8F8F, dark = 0xFF8F8F8F)
+                    intrinsicSize = ComponentSize(width = 1920, height = 1280),
+                    backgroundColor = ComponentColor(light = 0xFF8F8F8F, dark = 0xFF8F8F8F),
+                    style = ComponentStyle()
                 )
             )
         ),
