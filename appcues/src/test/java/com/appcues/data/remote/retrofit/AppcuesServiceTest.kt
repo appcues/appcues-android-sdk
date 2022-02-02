@@ -1,6 +1,5 @@
 package com.appcues.data.remote.retrofit
 
-import com.appcues.data.remote.retrofit.stubs.activityModalOneStubs
 import com.appcues.data.remote.retrofit.stubs.contentModalOneStubs
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.runBlocking
@@ -18,22 +17,6 @@ class AppcuesServiceTest {
     @After
     fun tearDown() {
         mockWebServer.shutdown()
-    }
-
-    @Test
-    fun `getTaco(1234, 5678) SHOULD fetch taco correctly from specific path `() = runBlocking {
-        // Given
-        mockWebServer.dispatchResponses(
-            responses = hashMapOf(
-                "/v1/accounts/1234/users/TestUser/activity" to "activity/activity_modal_one.json"
-            )
-        )
-        // When
-        val result = api.getTaco(1234, "TestUser")
-        // Then
-        with(result) {
-            assertThat(this).isEqualTo(activityModalOneStubs)
-        }
     }
 
     @Test

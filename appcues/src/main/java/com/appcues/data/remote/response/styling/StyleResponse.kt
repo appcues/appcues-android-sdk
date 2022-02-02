@@ -1,7 +1,8 @@
 package com.appcues.data.remote.response.styling
 
 internal data class StyleResponse(
-    val horizontalAlignment: String? = null,
+    val width: Int? = null,
+    val height: Int? = null,
     val marginLeading: Int = 0,
     val marginTop: Int = 0,
     val marginTrailing: Int = 0,
@@ -12,11 +13,17 @@ internal data class StyleResponse(
     val paddingTrailing: Int = 0,
     val cornerRadius: Int = 0,
     val shadow: StyleShadowResponse? = null,
-    val backgroundColor: StyleColorResponse? = null,
     val foregroundColor: StyleColorResponse? = null,
+    val backgroundColor: StyleColorResponse? = null,
     val backgroundGradient: StyleGradientColorResponse? = null,
+    val borderColor: StyleColorResponse? = null,
+    val borderWidth: Int? = null,
     val fontName: String? = null,
     val fontSize: Int? = null,
+    val fontWeight: String? = null,
+    val letterSpacing: Int? = null,
+    val lineHeight: Int? = null,
     val textAlignment: String? = null,
-    val lineSpacing: Int? = null
+    val verticalAlignment: String? = null,
+    val horizontalAlignment: String? = null,
 )

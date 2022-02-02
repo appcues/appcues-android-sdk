@@ -18,7 +18,8 @@ class StyleColorMapperTest {
         // When
         val result = mapper.map(from)
         // Then
-        with(result) {
+        assertThat(result).isNotNull()
+        with(result!!) {
             assertThat(light).isEqualTo(0xFF8960FF)
             assertThat(dark).isEqualTo(0xFF896000)
         }
@@ -34,7 +35,8 @@ class StyleColorMapperTest {
         // When
         val result = mapper.map(from)
         // Then
-        with(result) {
+        assertThat(result).isNotNull()
+        with(result!!) {
             assertThat(light).isEqualTo(0xFF8866FF)
             assertThat(dark).isEqualTo(0xFF886600)
         }
@@ -50,7 +52,8 @@ class StyleColorMapperTest {
         // When
         val result = mapper.map(from)
         // Then
-        with(result) {
+        assertThat(result).isNotNull()
+        with(result!!) {
             assertThat(light).isEqualTo(0xFFAA8866)
             assertThat(dark).isEqualTo(0x00BB8866)
         }
@@ -66,7 +69,8 @@ class StyleColorMapperTest {
         // When
         val result = mapper.map(from)
         // Then
-        with(result) {
+        assertThat(result).isNotNull()
+        with(result!!) {
             assertThat(light).isEqualTo(0x6FA0B1A8)
             assertThat(dark).isEqualTo(0xFFFFFFFF)
         }
@@ -82,9 +86,20 @@ class StyleColorMapperTest {
         // When
         val result = mapper.map(from)
         // Then
-        with(result) {
+        assertThat(result).isNotNull()
+        with(result!!) {
             assertThat(light).isEqualTo(0xFFAA8866)
             assertThat(dark).isEqualTo(0xFFAA8866)
         }
+    }
+
+    @Test
+    fun `map SHOULD map from null to null`() {
+        // Given
+        val from = null
+        // When
+        val result = mapper.map(from)
+        // Then
+        assertThat(result).isNull()
     }
 }

@@ -13,6 +13,7 @@ internal data class StepContentResponse(
     val imageUrl: String? = null,
     val contentMode: String? = null,
     val intrinsicSize: SizeResponse? = null,
+    val accessibilityLabel: String? = null,
     val text: String? = null,
     val content: StepContentResponse? = null,
     val distribution: String? = null,
