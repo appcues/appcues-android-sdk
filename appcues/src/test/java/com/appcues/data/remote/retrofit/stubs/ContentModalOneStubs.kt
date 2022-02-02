@@ -11,7 +11,6 @@ import com.appcues.data.remote.response.styling.StyleColorResponse
 import com.appcues.data.remote.response.styling.StyleGradientColorResponse
 import com.appcues.data.remote.response.styling.StyleResponse
 import com.appcues.data.remote.response.styling.StyleShadowResponse
-import com.appcues.data.remote.response.trait.TraitConfigResponse
 import com.appcues.data.remote.response.trait.TraitResponse
 import java.util.UUID
 
@@ -28,10 +27,7 @@ internal val contentModalOneStubs = ExperienceResponse(
                 id = UUID.fromString("2cf7dbf7-c6be-4130-b642-85861f9c6b6a"),
                 type = "stack",
                 orientation = "vertical",
-                style = StyleResponse(
-                    horizontalAlignment = "center",
-                    marginBottom = 25
-                ),
+                style = StyleResponse(),
                 items = arrayListOf(
                     StepContentResponse(
                         id = UUID.fromString("8e46637d-071a-4405-a9dd-dec4a64e98b8"),
@@ -46,6 +42,7 @@ internal val contentModalOneStubs = ExperienceResponse(
                                     id = UUID.fromString("f2affaaa-0883-42f8-a313-73a28cc2d0b4"),
                                     type = "image",
                                     imageUrl = "https://res.cloudinary.com/dnjrorsut/image/upload/v1635971825/98227/oh5drlvojb1spaetc1ol.jpg",
+                                    accessibilityLabel = "Mountains at night",
                                     contentMode = "fill",
                                     intrinsicSize = SizeResponse(
                                         width = 1920,
@@ -53,7 +50,7 @@ internal val contentModalOneStubs = ExperienceResponse(
                                     ),
                                     style = StyleResponse(
                                         backgroundColor = StyleColorResponse(
-                                            light = "#236"
+                                            light = "#223366"
                                         )
                                     )
                                 )
@@ -79,10 +76,10 @@ internal val contentModalOneStubs = ExperienceResponse(
                                         fontName = "Lato-Black",
                                         fontSize = 20,
                                         textAlignment = "center",
-                                        lineSpacing = 4,
+                                        lineHeight = 24,
                                         foregroundColor = StyleColorResponse(
                                             light = "#394455",
-                                            dark = "#fff"
+                                            dark = "#ffffff"
                                         )
                                     )
                                 )
@@ -110,10 +107,10 @@ internal val contentModalOneStubs = ExperienceResponse(
                                         fontName = "Lato-Regular",
                                         fontSize = 17,
                                         textAlignment = "center",
-                                        lineSpacing = 2,
+                                        lineHeight = 19,
                                         foregroundColor = StyleColorResponse(
                                             light = "#394455",
-                                            dark = "#fff"
+                                            dark = "#ffffff"
                                         )
                                     )
                                 )
@@ -125,6 +122,7 @@ internal val contentModalOneStubs = ExperienceResponse(
                         type = "stack",
                         orientation = "horizontal",
                         distribution = "equal",
+                        style = StyleResponse(),
                         items = arrayListOf(
                             StepContentResponse(
                                 id = UUID.fromString("f4c4f89e-4c8a-4c9d-9a8a-80c8bbfa8fa7"),
@@ -140,7 +138,7 @@ internal val contentModalOneStubs = ExperienceResponse(
                                             fontName = "Lato-Bold",
                                             fontSize = 17,
                                             foregroundColor = StyleColorResponse(
-                                                light = "#fff"
+                                                light = "#ffffff"
                                             )
                                         )
                                     ),
@@ -149,6 +147,7 @@ internal val contentModalOneStubs = ExperienceResponse(
                                         paddingLeading = 18,
                                         paddingBottom = 8,
                                         paddingTrailing = 18,
+                                        marginBottom = 25,
                                         backgroundGradient = StyleGradientColorResponse(
                                             colors = arrayListOf(
                                                 StyleColorResponse(light = "#5C5CFF"),
@@ -174,25 +173,35 @@ internal val contentModalOneStubs = ExperienceResponse(
             traits = arrayListOf(
                 TraitResponse(
                     type = "@appcues/modal",
-                    config = TraitConfigResponse(
-                        presentationStyle = "dialog",
-                        skippable = true,
-                        backdropColor = StyleColorResponse(
-                            light = "#0000004d",
-                            dark = "#ffffff4d",
-                        ),
-                        style = StyleResponse(
-                            cornerRadius = 8,
-                            backgroundColor = StyleColorResponse(
-                                light = "#fff",
-                                dark = "#000"
+                    config = hashMapOf(
+                        "presentationStyle" to "dialog",
+                        "style" to hashMapOf(
+                            "cornerRadius" to 8.toDouble(),
+                            "backgroundColor" to hashMapOf(
+                                "light" to "#ffffff",
+                                "dark" to "#000000"
                             ),
-                            shadow = StyleShadowResponse(
-                                color = StyleColorResponse(light = "#777777ee"),
-                                radius = 3,
-                                x = 0,
-                                y = 2
+
+                            "shadow" to hashMapOf(
+                                "color" to hashMapOf(
+                                    "light" to "#777777ee"
+                                ),
+                                "radius" to 3.0,
+                                "x" to 0.0,
+                                "y" to 2.0
                             )
+                        )
+                    )
+                ),
+                TraitResponse(
+                    type = "@appcues/skippable",
+                ),
+                TraitResponse(
+                    type = "@appcues/backdrop",
+                    config = hashMapOf(
+                        "backgroundColor" to hashMapOf(
+                            "light" to "#0000004d",
+                            "dark" to "#ffffff4d"
                         )
                     )
                 )

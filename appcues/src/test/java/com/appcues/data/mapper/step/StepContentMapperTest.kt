@@ -56,9 +56,9 @@ class StepContentMapperTest {
             with(items[0] as TextComponent) {
                 assertThat(id).isEqualTo(textRandomId)
                 assertThat(text).isEqualTo("Sample Text")
-                assertThat(textSize).isEqualTo(20)
-                assertThat(textColor.light).isEqualTo(0xFF000000)
-                assertThat(textColor.dark).isEqualTo(0xFF000000)
+                assertThat(style.fontSize).isEqualTo(20)
+                assertThat(style.foregroundColor?.light).isEqualTo(0xFF000000)
+                assertThat(style.foregroundColor?.dark).isEqualTo(0xFF000000)
             }
         }
     }
@@ -101,9 +101,9 @@ class StepContentMapperTest {
             with(items[0] as TextComponent) {
                 assertThat(id).isEqualTo(textRandomId)
                 assertThat(text).isEqualTo("Sample Text")
-                assertThat(textSize).isEqualTo(20)
-                assertThat(textColor.light).isEqualTo(0xFF000000)
-                assertThat(textColor.dark).isEqualTo(0xFF000000)
+                assertThat(style.fontSize).isEqualTo(20)
+                assertThat(style.foregroundColor?.light).isEqualTo(0xFF000000)
+                assertThat(style.foregroundColor?.dark).isEqualTo(0xFF000000)
             }
         }
     }
@@ -132,9 +132,9 @@ class StepContentMapperTest {
         with(result as TextComponent) {
             assertThat(id).isEqualTo(randomId)
             assertThat(text).isEqualTo("Sample Text")
-            assertThat(textSize).isEqualTo(20)
-            assertThat(textColor.light).isEqualTo(0xFF000000)
-            assertThat(textColor.dark).isEqualTo(0xFF000000)
+            assertThat(style.fontSize).isEqualTo(20)
+            assertThat(style.foregroundColor?.light).isEqualTo(0xFF000000)
+            assertThat(style.foregroundColor?.dark).isEqualTo(0xFF000000)
         }
     }
 
@@ -177,16 +177,16 @@ class StepContentMapperTest {
         assertThat(result).isInstanceOf(ButtonComponent::class.java)
         with(result as ButtonComponent) {
             assertThat(id).isEqualTo(randomId)
-            assertThat(backgroundColors).hasSize(2)
-            assertThat(backgroundColors[0]).isEqualTo(ComponentColor(light = 0xFF5C5CFF, dark = 0xFF5C5CFF))
-            assertThat(backgroundColors[1]).isEqualTo(ComponentColor(light = 0xFF8960FF, dark = 0xFF8960FF))
+            assertThat(style.backgroundGradient).hasSize(2)
+            assertThat(style.backgroundGradient!![0]).isEqualTo(ComponentColor(light = 0xFF5C5CFF, dark = 0xFF5C5CFF))
+            assertThat(style.backgroundGradient[1]).isEqualTo(ComponentColor(light = 0xFF8960FF, dark = 0xFF8960FF))
             assertThat(content).isInstanceOf(TextComponent::class.java)
             with(content as TextComponent) {
                 assertThat(id).isEqualTo(textRandomId)
                 assertThat(text).isEqualTo("Button 1")
-                assertThat(textSize).isEqualTo(17)
-                assertThat(textColor.light).isEqualTo(0xFFFFFFFF)
-                assertThat(textColor.dark).isEqualTo(0xFF000000)
+                assertThat(style.fontSize).isEqualTo(17)
+                assertThat(style.foregroundColor?.light).isEqualTo(0xFFFFFFFF)
+                assertThat(style.foregroundColor?.dark).isEqualTo(0xFF000000)
             }
         }
     }
@@ -204,6 +204,7 @@ class StepContentMapperTest {
                 type = "image",
                 imageUrl = imageUrl,
                 contentMode = "fill",
+                accessibilityLabel = "Image Label",
                 intrinsicSize = SizeResponse(
                     width = 1920,
                     height = 1280,
@@ -220,10 +221,11 @@ class StepContentMapperTest {
         with(result as ImageComponent) {
             assertThat(id).isEqualTo(randomId)
             assertThat(url).isEqualTo(imageUrl)
+            assertThat(accessibilityLabel).isEqualTo("Image Label")
             assertThat(intrinsicSize?.width).isEqualTo(1920)
             assertThat(intrinsicSize?.height).isEqualTo(1280)
-            assertThat(backgroundColor).isNotNull()
-            assertThat(backgroundColor?.light).isEqualTo(0xFF000000)
+            assertThat(style.backgroundColor).isNotNull()
+            assertThat(style.backgroundColor?.light).isEqualTo(0xFF000000)
         }
     }
 }

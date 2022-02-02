@@ -16,10 +16,7 @@
         "type": "stack",
         "orientation": "vertical",
         "id": "2cf7dbf7-c6be-4130-b642-85861f9c6b6a",
-        "style": {
-          "horizontalAlignment": "center",
-          "marginBottom": 25
-        },
+        "style": {},
         "items": [
           {
             "type": "stack",
@@ -31,7 +28,7 @@
                 "type": "block",
                 "blockType": "image",
                 "id": "80bb63b2-2db2-44a4-b5fc-61c3d7f5c889",
-                "content":  {
+                "content": {
                   "type": "image",
                   "id": "f2affaaa-0883-42f8-a313-73a28cc2d0b4",
                   "imageUrl": "https://res.cloudinary.com/dnjrorsut/image/upload/v1635971825/98227/oh5drlvojb1spaetc1ol.jpg",
@@ -40,8 +37,9 @@
                     "width": 1920,
                     "height": 1280
                   },
+                  "accessibilityLabel": "Mountains at night",
                   "style": {
-                    "backgroundColor": { "light": "#236" }
+                    "backgroundColor": { "light": "#223366" }
                   }
                 }
               }
@@ -67,8 +65,8 @@
                     "fontName": "Lato-Black",
                     "fontSize": 20,
                     "textAlignment": "center",
-                    "lineSpacing": 4,
-                    "foregroundColor": { "light": "#394455", "dark": "#fff" }
+                    "lineHeight": 24,
+                    "foregroundColor": { "light": "#394455", "dark": "#ffffff" }
                   }
                 }
               }
@@ -96,8 +94,8 @@
                     "fontName": "Lato-Regular",
                     "fontSize": 17,
                     "textAlignment": "center",
-                    "lineSpacing": 2,
-                    "foregroundColor": { "light": "#394455", "dark": "#fff" }
+                    "lineHeight": 19,
+                    "foregroundColor": { "light": "#394455", "dark": "#ffffff" }
                   }
                 }
               }
@@ -108,6 +106,7 @@
             "id": "a4ac4eb8-f833-4be1-8b14-d58562f11aa8",
             "orientation": "horizontal",
             "distribution": "equal",
+            "style": {},
             "items": [
               {
                 "type": "block",
@@ -123,10 +122,11 @@
                     "style": {
                       "fontName": "Lato-Bold",
                       "fontSize": 17,
-                      "foregroundColor": { "light": "#fff" }
+                      "foregroundColor": { "light": "#ffffff" }
                     }
                   },
                   "style": {
+                    "marginBottom": 25,
                     "paddingTop": 8,
                     "paddingLeading": 18,
                     "paddingBottom": 8,
@@ -155,11 +155,9 @@
           "type": "@appcues/modal",
           "config": {
             "presentationStyle": "dialog",
-            "skippable": true,
-            "backdropColor": { "light": "#0000004d", "dark": "#ffffff4d" },
             "style": {
               "cornerRadius": 8,
-              "backgroundColor": { "light": "#fff", "dark": "#000" },
+              "backgroundColor": { "light": "#ffffff", "dark": "#000000" },
               "shadow": {
                 "color": { "light": "#777777ee" },
                 "radius": 3,
@@ -167,6 +165,15 @@
                 "y": 2
               }
             }
+          }
+        },
+        {
+          "type": "@appcues/skippable"
+        },
+        {
+          "type": "@appcues/backdrop",
+          "config": {
+            "backgroundColor": { "light": "#0000004d", "dark": "#ffffff4d" }
           }
         }
       ],

@@ -12,9 +12,27 @@ class TextComponentTest : ScreenshotTest {
     val composeRule = createComposeRule()
 
     @Test
-    fun validateTextColor() {
+    fun testPreviewTextComponentColor() {
         composeRule.setContent {
             PreviewTextComponentColor()
+        }
+
+        compareScreenshot(composeRule.onRoot())
+    }
+
+    @Test
+    fun testPreviewTextComponentLineHeight() {
+        composeRule.setContent {
+            PreviewTextComponentLineHeight()
+        }
+
+        compareScreenshot(composeRule.onRoot())
+    }
+
+    @Test
+    fun testPreviewTextComponentLetterSpacing() {
+        composeRule.setContent {
+            PreviewTextComponentLetterSpacing()
         }
 
         compareScreenshot(composeRule.onRoot())

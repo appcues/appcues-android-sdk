@@ -1,14 +1,18 @@
 package com.appcues.ui.theme
 
 import android.content.res.Configuration
+import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material.Colors
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.unit.dp
 
 /**
  * Official AppcuesTheme for all compositions
@@ -40,7 +44,10 @@ internal fun AppcuesPreview(
     LocalConfiguration.current.uiMode = if (isDark) Configuration.UI_MODE_NIGHT_YES else Configuration.UI_MODE_NIGHT_NO
 
     AppcuesTheme {
-        Surface {
+        Column(
+            modifier = Modifier.background(MaterialTheme.colors.surface),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             content()
         }
     }

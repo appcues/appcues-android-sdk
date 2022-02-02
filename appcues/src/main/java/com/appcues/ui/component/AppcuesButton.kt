@@ -1,96 +1,53 @@
 package com.appcues.ui.component
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.text.resolveDefaults
 import androidx.compose.ui.unit.dp
 import com.appcues.domain.entity.ExperienceComponent.ButtonComponent
-import com.appcues.domain.entity.styling.ComponentColor
 import com.appcues.ui.LocalAppcuesActions
 import com.appcues.ui.extensions.Compose
-import com.appcues.ui.extensions.contentPadding
-import com.appcues.ui.extensions.padding
+import com.appcues.ui.extensions.applyStyle
+import com.appcues.ui.extensions.componentStyle
 
 @Composable
 internal fun ButtonComponent.Compose() {
-    var color: Color? = null
-    var gradient: Brush? = null
-
-    backgroundColors.toComposeColors().let {
-        if (it.size == 1) {
-            color = it.first()
-        } else {
-            gradient = Brush.horizontalGradient(it)
-        }
-    }
     val onClick = LocalAppcuesActions.current.onClick
+    val textStyle = LocalTextStyle.current
+    val layoutDirection = LocalLayoutDirection.current
 
-    GradientTextButton(
-        modifier = Modifier.padding(style.padding()),
-        gradient = gradient,
-        color = color,
-        contentPadding = style.contentPadding(),
-        shape = RoundedCornerShape(style.cornerRadius.dp),
-        content = { content.Compose() },
-        onClick = { onClick?.invoke(id) },
-    )
-}
-
-@Composable
-private fun List<ComponentColor>.toComposeColors(): List<Color> {
-    return if (isEmpty()) {
-        arrayListOf(MaterialTheme.colors.primary)
-    } else {
-        this.map { Color(it.light) }
-    }
-}
-
-@Composable
-private fun GradientTextButton(
-    modifier: Modifier = Modifier,
-    gradient: Brush? = null,
-    color: Color? = null,
-    contentPadding: PaddingValues = PaddingValues(),
-    onClick: () -> Unit = { },
-    shape: Shape = MaterialTheme.shapes.small,
-    content: @Composable () -> Unit
-) {
     Button(
-        modifier = modifier,
-        shape = shape,
+        shape = RoundedCornerShape(style.cornerRadius.dp),
         colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent),
         contentPadding = PaddingValues(),
-        onClick = onClick,
+        onClick = { onClick?.invoke(id) },
     ) {
         Box(
-            modifier = Modifier
-                .gradientBackground(color, gradient)
-                .padding(contentPadding),
+            modifier = Modifier.componentStyle(style, isSystemInDarkTheme(), MaterialTheme.colors.primary),
             contentAlignment = Alignment.Center,
         ) {
-            content()
+            CompositionLocalProvider(
+                LocalTextStyle provides resolveDefaults(textStyle, layoutDirection).applyStyle(
+                    style = style,
+                    context = LocalContext.current,
+                    isDark = isSystemInDarkTheme(),
+                )
+            ) {
+                content.Compose()
+            }
         }
     }
 }
-
-private fun Modifier.gradientBackground(
-    color: Color?,
-    gradient: Brush?
-) = this.then(
-    color?.let {
-        Modifier.background(it)
-    } ?: gradient?.let {
-        Modifier.background(it)
-    } ?: Modifier
-)

@@ -9,10 +9,8 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.os.bundleOf
 import com.appcues.R
 import com.appcues.domain.entity.Experience
@@ -84,18 +82,5 @@ internal class AppcuesActivity : AppCompatActivity() {
     private fun finishAnimated() {
         finish()
         overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
-    }
-
-    @Preview(
-        name = "First Preview",
-        showBackground = true
-    )
-    @Composable
-    fun Preview() {
-        AppcuesTheme {
-            DialogTrait {
-                experienceModalOne.Compose()
-            }
-        }
     }
 }
