@@ -1,5 +1,6 @@
 package com.appcues
 
+import android.app.Activity
 import android.content.Context
 import com.appcues.action.ExperienceAction
 import com.appcues.builder.ApiHostBuilderValidator
@@ -145,6 +146,12 @@ class Appcues internal constructor(
             }
         }
 
+        private var _activity: Activity? = null
+
+        fun activity(activity: Activity) = apply {
+            _activity = activity
+        }
+
         fun build(): Appcues {
             return with(AppcuesKoinContext) {
                 startKoinOnce(context)
@@ -154,7 +161,8 @@ class Appcues internal constructor(
                         accountId = accountId,
                         applicationId = applicationId,
                         loggingLevel = _loggingLevel,
-                        apiHostUrl = _apiHostUrl
+                        apiHostUrl = _apiHostUrl,
+                        activity = _activity
                     )
                 )
             }

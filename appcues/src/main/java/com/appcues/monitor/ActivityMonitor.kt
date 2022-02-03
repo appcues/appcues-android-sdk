@@ -1,6 +1,8 @@
 package com.appcues.monitor
 
-internal interface ActivityMonitor {
+import android.app.Activity
 
+internal interface ActivityMonitor {
+    var customerActivity: Activity?
     fun getCustomerViewModel(): CustomerViewModel?
 }

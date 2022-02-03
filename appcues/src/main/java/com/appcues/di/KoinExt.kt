@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import com.appcues.Appcues
 import com.appcues.AppcuesConfig
 import com.appcues.data.remote.di.AppcuesRemoteSourceModule
+import com.appcues.monitor.ActivityMonitor
 import org.koin.androidx.viewmodel.ViewModelOwnerDefinition
 import org.koin.androidx.viewmodel.scope.getViewModel
 import org.koin.core.component.get
@@ -36,8 +37,11 @@ internal fun AppcuesKoinContext.newAppcuesInstance(appcuesConfig: AppcuesConfig)
         )
     )
 
+    val activityMonitor: ActivityMonitor = getScope(scopeId).get()
+    activityMonitor.customerActivity = appcuesConfig.activity
+
     return Appcues(
         logcues = getScope(scopeId).get(),
-        activityMonitor = getScope(scopeId).get(),
+        activityMonitor = activityMonitor,
     )
 }

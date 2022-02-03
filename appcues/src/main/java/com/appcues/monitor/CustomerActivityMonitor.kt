@@ -25,7 +25,7 @@ internal class CustomerActivityMonitor(
         getApplicationContext().registerActivityLifecycleCallbacks(this)
     }
 
-    private var customerActivity: Activity? = null
+    override var customerActivity: Activity? = null
 
     override suspend fun showExperience(experience: Experience) {
         withContext(Dispatchers.Main) {
