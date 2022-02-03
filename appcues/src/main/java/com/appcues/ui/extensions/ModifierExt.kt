@@ -2,21 +2,28 @@ package com.appcues.ui.extensions
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.appcues.domain.entity.styling.ComponentStyle
 
-internal fun Modifier.componentStyle(style: ComponentStyle, isDark: Boolean, defaultBackgroundColor: Color? = null) = this.then(
+internal fun Modifier.componentStyle(
+    style: ComponentStyle,
+    isDark: Boolean,
+    defaultBackgroundColor: Color? = null,
+    noSizeFillMax: Boolean = false
+) = this.then(
     Modifier
         .padding(style.getMargins())
-        .componentSize(style)
+        .componentSize(style, noSizeFillMax)
         .componentCorner(style)
         .componentBorder(style, isDark)
         .componentBackground(style, isDark, defaultBackgroundColor)
@@ -50,11 +57,16 @@ internal fun Modifier.componentBorder(
     }
 )
 
-internal fun Modifier.componentSize(style: ComponentStyle) = this.then(
+internal fun Modifier.componentSize(style: ComponentStyle, noSizeFillMax: Boolean = false) = this.then(
     when {
-        style.width != null && style.height != null -> Modifier.size(style.width.dp, style.height.dp)
-        style.width != null -> Modifier.size(style.width.dp, Dp.Unspecified)
-        style.height != null -> Modifier.size(Dp.Unspecified, style.height.dp)
+        style.width != null && style.height != null ->
+            Modifier.size(style.width.dp, style.height.dp)
+        style.width != null ->
+            Modifier.width(style.width.dp)
+        style.height != null ->
+            Modifier.height(style.height.dp)
+        noSizeFillMax ->
+            Modifier.fillMaxSize()
         else -> Modifier
     }
 )

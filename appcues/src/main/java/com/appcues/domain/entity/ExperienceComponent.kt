@@ -1,6 +1,8 @@
 package com.appcues.domain.entity
 
 import android.os.Parcelable
+import com.appcues.domain.entity.styling.ComponentContentMode
+import com.appcues.domain.entity.styling.ComponentContentMode.FILL
 import com.appcues.domain.entity.styling.ComponentDistribution
 import com.appcues.domain.entity.styling.ComponentSize
 import com.appcues.domain.entity.styling.ComponentStyle
@@ -29,6 +31,7 @@ internal sealed class ExperienceComponent(open val id: UUID) : Parcelable {
         val url: String,
         val accessibilityLabel: String?,
         val intrinsicSize: ComponentSize?,
+        val contentMode: ComponentContentMode = FILL,
         val style: ComponentStyle = ComponentStyle(),
     ) : ExperienceComponent(id)
 
