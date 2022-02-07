@@ -28,6 +28,7 @@ internal class StackMapper(
         return VerticalStackComponent(
             id = id,
             items = items?.map { stackItemsMapper(it) } ?: arrayListOf(),
+            spacing = spacing,
             style = styleMapper.map(style)
         )
     }
@@ -39,6 +40,7 @@ internal class StackMapper(
             id = id,
             items = items?.map { stackItemsMapper(it) } ?: arrayListOf(),
             distribution = distribution.toComponentDistribution(),
+            spacing = spacing,
             style = styleMapper.map(style)
         )
     }

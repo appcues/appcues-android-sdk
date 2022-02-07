@@ -3,11 +3,15 @@ package com.appcues.ui.extensions
 import android.content.Context
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.appcues.domain.entity.styling.ComponentStyle
 import com.appcues.domain.entity.styling.ComponentStyle.ComponentFontWeight.BLACK
 import com.appcues.domain.entity.styling.ComponentStyle.ComponentFontWeight.BOLD
@@ -85,4 +89,16 @@ internal fun ComponentStyle.getHorizontalAlignment(): Alignment.Horizontal {
         ComponentHorizontalAlignment.TRAILING -> Alignment.End
         null -> Alignment.CenterHorizontally
     }
+}
+
+internal fun ComponentStyle.getTextStyle(context: Context, isDark: Boolean): TextStyle {
+    return TextStyle(
+        color = foregroundColor.getColor(isDark) ?: Color.Unspecified,
+        fontSize = fontSize?.sp ?: TextUnit.Unspecified,
+        lineHeight = lineHeight?.sp ?: TextUnit.Unspecified,
+        textAlign = getTextAlignment(),
+        fontFamily = getFontFamily(context),
+        letterSpacing = letterSpacing?.sp ?: TextUnit.Unspecified,
+        fontWeight = getFontWeight(),
+    )
 }

@@ -4,6 +4,7 @@ import android.os.Parcelable
 import com.appcues.domain.entity.styling.ComponentContentMode
 import com.appcues.domain.entity.styling.ComponentContentMode.FILL
 import com.appcues.domain.entity.styling.ComponentDistribution
+import com.appcues.domain.entity.styling.ComponentDistribution.EQUAL
 import com.appcues.domain.entity.styling.ComponentSize
 import com.appcues.domain.entity.styling.ComponentStyle
 import kotlinx.parcelize.Parcelize
@@ -39,6 +40,7 @@ internal sealed class ExperienceComponent(open val id: UUID) : Parcelable {
     data class VerticalStackComponent(
         override val id: UUID,
         val items: List<ExperienceComponent>,
+        val spacing: Int = 0,
         val style: ComponentStyle = ComponentStyle(),
     ) : ExperienceComponent(id)
 
@@ -46,7 +48,8 @@ internal sealed class ExperienceComponent(open val id: UUID) : Parcelable {
     data class HorizontalStackComponent(
         override val id: UUID,
         val items: List<ExperienceComponent>,
-        val distribution: ComponentDistribution,
+        val spacing: Int = 0,
+        val distribution: ComponentDistribution = EQUAL,
         val style: ComponentStyle = ComponentStyle(),
     ) : ExperienceComponent(id)
 }

@@ -3,41 +3,35 @@ package com.appcues.ui.component
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.material.LocalTextStyle
+import androidx.compose.material.ProvideTextStyle
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.text.resolveDefaults
+import androidx.compose.ui.unit.dp
 import com.appcues.domain.entity.ExperienceComponent.HorizontalStackComponent
 import com.appcues.domain.entity.styling.ComponentDistribution
 import com.appcues.ui.extensions.ComposeEach
-import com.appcues.ui.extensions.applyStyle
 import com.appcues.ui.extensions.componentStyle
+import com.appcues.ui.extensions.getTextStyle
 import com.appcues.ui.extensions.getVerticalAlignment
 
 @Composable
 internal fun HorizontalStackComponent.Compose() {
     Row(
         modifier = Modifier.componentStyle(style, isSystemInDarkTheme()),
-        horizontalArrangement = distribution.toHorizontalArrangement(),
+        horizontalArrangement = distribution.toHorizontalArrangement(spacing),
         verticalAlignment = style.getVerticalAlignment()
     ) {
 
-        CompositionLocalProvider(
-            LocalTextStyle provides resolveDefaults(LocalTextStyle.current, LocalLayoutDirection.current).applyStyle(
-                style = style,
-                context = LocalContext.current,
-                isDark = isSystemInDarkTheme(),
-            )
-        ) {
+        ProvideTextStyle(style.getTextStyle(LocalContext.current, isSystemInDarkTheme())) {
             items.ComposeEach()
         }
     }
 }
 
-private fun ComponentDistribution.toHorizontalArrangement(): Arrangement.Horizontal {
+private fun ComponentDistribution.toHorizontalArrangement(spacing: Int = 0): Arrangement.Horizontal {
+    if (spacing > 0) return Arrangement.spacedBy(spacing.dp)
+
     return when (this) {
         ComponentDistribution.CENTER -> Arrangement.Center
         ComponentDistribution.EQUAL -> Arrangement.SpaceAround

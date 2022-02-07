@@ -10,6 +10,7 @@ import com.appcues.domain.entity.styling.ComponentStyle.ComponentVerticalAlignme
 internal class StyleMapper(
     private val styleColorMapper: StyleColorMapper = StyleColorMapper(),
     private val styleFontWeightMapper: StyleFontWeightMapper = StyleFontWeightMapper(),
+    private val styleShadowMapper: StyleShadowMapper = StyleShadowMapper(),
 ) {
 
     fun map(from: StyleResponse?) = if (from != null) ComponentStyle(
@@ -26,6 +27,7 @@ internal class StyleMapper(
         cornerRadius = from.cornerRadius,
         foregroundColor = styleColorMapper.map(from.foregroundColor),
         backgroundColor = styleColorMapper.map(from.backgroundColor),
+        shadow = styleShadowMapper.map(from.shadow),
         // Not dealing with direction, every gradient is horizontal from start to end
         backgroundGradient = from.backgroundGradient.toComponentColorList(),
         borderColor = styleColorMapper.map(from.borderColor),

@@ -17,4 +17,5 @@ internal data class StepContentResponse(
     val text: String? = null,
     val content: StepContentResponse? = null,
     val distribution: String? = null,
+    val spacing: Int = 0,
 )
