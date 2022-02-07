@@ -9,9 +9,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.appcues.domain.entity.styling.ComponentStyle
 
@@ -19,11 +25,14 @@ internal fun Modifier.componentStyle(
     style: ComponentStyle,
     isDark: Boolean,
     defaultBackgroundColor: Color? = null,
-    noSizeFillMax: Boolean = false
+    noSizeFillMax: Boolean = false,
+    clickModifier: Modifier = Modifier,
 ) = this.then(
     Modifier
         .padding(style.getMargins())
+        .componentShadow(style, isDark)
         .componentSize(style, noSizeFillMax)
+        .then(clickModifier)
         .componentCorner(style)
         .componentBorder(style, isDark)
         .componentBackground(style, isDark, defaultBackgroundColor)
@@ -51,7 +60,7 @@ internal fun Modifier.componentBorder(
 ) = this.then(
     if (style.borderWidth != null && style.borderWidth != 0 && style.borderColor != null) {
         Modifier
-            .border(style.borderWidth.dp, style.borderColor.getColor(isDark), RoundedCornerShape(style.cornerRadius))
+            .border(style.borderWidth.dp, style.borderColor.getColor(isDark), RoundedCornerShape(style.cornerRadius.dp))
     } else {
         Modifier
     }
@@ -73,7 +82,58 @@ internal fun Modifier.componentSize(style: ComponentStyle, noSizeFillMax: Boolea
 
 internal fun Modifier.componentCorner(style: ComponentStyle) = this.then(
     when {
-        style.cornerRadius != 0 -> Modifier.clip(RoundedCornerShape(style.cornerRadius))
+        style.cornerRadius != 0 -> Modifier.clip(RoundedCornerShape(style.cornerRadius.dp))
         else -> Modifier
     }
 )
+
+private fun Modifier.componentShadow(style: ComponentStyle, isDark: Boolean): Modifier {
+    return this.then(
+        when {
+            style.shadow != null -> Modifier.coloredShadow(
+                color = style.shadow.color.getColor(isDark),
+                radius = style.shadow.radius.dp,
+                offsetX = style.shadow.x.dp,
+                offsetY = style.shadow.y.dp,
+            )
+            else -> Modifier
+        }
+    )
+}
+
+private fun Modifier.coloredShadow(
+    color: Color,
+    radius: Dp = 0.dp,
+    offsetX: Dp = 0.dp,
+    offsetY: Dp = 0.dp
+) = composed {
+
+    val shadowColor = color.toArgb()
+    val transparent = color.copy(alpha = 0.2f).toArgb()
+
+    drawBehind {
+
+        drawIntoCanvas {
+            val paint = Paint()
+            val frameworkPaint = paint.asFrameworkPaint()
+            frameworkPaint.color = transparent
+
+            frameworkPaint.setShadowLayer(
+                4.dp.toPx(),
+                offsetX.toPx(),
+                offsetY.toPx(),
+                shadowColor
+            )
+
+            it.drawRoundRect(
+                0f,
+                0f,
+                this.size.width,
+                this.size.height,
+                radius.toPx(),
+                radius.toPx(),
+                paint
+            )
+        }
+    }
+}
