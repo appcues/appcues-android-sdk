@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
@@ -106,34 +105,31 @@ private fun Modifier.coloredShadow(
     radius: Dp = 0.dp,
     offsetX: Dp = 0.dp,
     offsetY: Dp = 0.dp
-) = composed {
+) = drawBehind {
 
     val shadowColor = color.toArgb()
     val transparent = color.copy(alpha = 0.2f).toArgb()
 
-    drawBehind {
+    drawIntoCanvas {
+        val paint = Paint()
+        val frameworkPaint = paint.asFrameworkPaint()
+        frameworkPaint.color = transparent
 
-        drawIntoCanvas {
-            val paint = Paint()
-            val frameworkPaint = paint.asFrameworkPaint()
-            frameworkPaint.color = transparent
+        frameworkPaint.setShadowLayer(
+            4.dp.toPx(),
+            offsetX.toPx(),
+            offsetY.toPx(),
+            shadowColor
+        )
 
-            frameworkPaint.setShadowLayer(
-                4.dp.toPx(),
-                offsetX.toPx(),
-                offsetY.toPx(),
-                shadowColor
-            )
-
-            it.drawRoundRect(
-                0f,
-                0f,
-                this.size.width,
-                this.size.height,
-                radius.toPx(),
-                radius.toPx(),
-                paint
-            )
-        }
+        it.drawRoundRect(
+            0f,
+            0f,
+            this.size.width,
+            this.size.height,
+            radius.toPx(),
+            radius.toPx(),
+            paint
+        )
     }
 }

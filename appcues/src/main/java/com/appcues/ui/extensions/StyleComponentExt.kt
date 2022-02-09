@@ -78,7 +78,7 @@ internal fun ComponentStyle.getVerticalAlignment(): Alignment.Vertical {
         ComponentVerticalAlignment.TOP -> Alignment.Top
         ComponentVerticalAlignment.CENTER -> Alignment.CenterVertically
         ComponentVerticalAlignment.BOTTOM -> Alignment.Bottom
-        null -> Alignment.Top
+        null -> Alignment.CenterVertically
     }
 }
 

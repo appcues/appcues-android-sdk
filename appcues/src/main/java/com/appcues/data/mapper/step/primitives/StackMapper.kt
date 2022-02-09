@@ -49,7 +49,7 @@ internal class StackMapper(
         return when (this) {
             "center" -> ComponentDistribution.CENTER
             "equal" -> ComponentDistribution.EQUAL
-            else -> ComponentDistribution.EQUAL
+            else -> ComponentDistribution.CENTER
         }
     }
 }

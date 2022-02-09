@@ -10,9 +10,6 @@ import com.appcues.domain.entity.ExperienceComponent.VerticalStackComponent
 import com.appcues.ui.component.Compose
 
 @Composable
-internal fun List<ExperienceComponent>.ComposeEach() = forEach { it.Compose() }
-
-@Composable
 internal fun ExperienceComponent.Compose() = when (this) {
     is ButtonComponent -> Compose()
     is ImageComponent -> Compose()
