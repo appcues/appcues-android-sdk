@@ -1,6 +1,5 @@
 package com.appcues.di
 
-import android.app.Application
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import com.appcues.Appcues
@@ -8,15 +7,10 @@ import com.appcues.AppcuesConfig
 import com.appcues.data.remote.di.AppcuesRemoteSourceModule
 import org.koin.androidx.viewmodel.ViewModelOwnerDefinition
 import org.koin.androidx.viewmodel.scope.getViewModel
-import org.koin.core.component.get
 import java.util.UUID
 
 internal inline fun <reified T : ViewModel> AppcuesKoinComponent.getOwnedViewModel(noinline owner: ViewModelOwnerDefinition): T {
     return scope.getViewModel(owner = owner)
-}
-
-internal fun AppcuesKoinComponent.getApplicationContext(): Application {
-    return get<Context>() as Application
 }
 
 internal fun AppcuesKoinContext.startKoinOnce(context: Context) {
@@ -38,6 +32,6 @@ internal fun AppcuesKoinContext.newAppcuesInstance(appcuesConfig: AppcuesConfig)
 
     return Appcues(
         logcues = getScope(scopeId).get(),
-        activityMonitor = getScope(scopeId).get(),
+        customerViewModelHolder = getScope(scopeId).get(),
     )
 }

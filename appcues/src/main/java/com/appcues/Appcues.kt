@@ -7,12 +7,12 @@ import com.appcues.di.AppcuesKoinContext
 import com.appcues.di.newAppcuesInstance
 import com.appcues.di.startKoinOnce
 import com.appcues.logging.Logcues
-import com.appcues.monitor.ActivityMonitor
+import com.appcues.monitor.CustomerViewModelHolder
 import com.appcues.trait.ExperienceTrait
 
 class Appcues internal constructor(
     private val logcues: Logcues,
-    private val activityMonitor: ActivityMonitor,
+    private val customerViewModelHolder: CustomerViewModelHolder,
 ) {
 
     /**
@@ -84,7 +84,9 @@ class Appcues internal constructor(
      * [contentId] ID of specific flow.
      */
     fun show(contentId: String) {
-        activityMonitor.getCustomerViewModel()?.show(contentId)
+        customerViewModelHolder.withViewModel {
+            show(contentId)
+        }
     }
 
     /**

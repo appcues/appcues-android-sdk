@@ -6,15 +6,17 @@ import com.appcues.R
 import com.appcues.di.AppcuesKoinComponent
 import com.appcues.di.getOwnedViewModel
 import com.appcues.domain.entity.Experience
-import com.appcues.domain.gateway.CustomerViewGateway
+import com.appcues.domain.gateway.CustomerExperienceGateway
 import com.appcues.ui.AppcuesActivity
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.androidx.viewmodel.ViewModelOwner
 
-internal class CustomerActivityMonitor(
+internal class CustomerViewModelAdapter(
     override val scopeId: String,
-) : CustomerViewGateway, ActivityMonitor, AppcuesKoinComponent {
+) : CustomerExperienceGateway, CustomerViewModelHolder, AppcuesKoinComponent {
 
     override suspend fun showExperience(experience: Experience) {
         withContext(Dispatchers.Main) {
@@ -25,16 +27,18 @@ internal class CustomerActivityMonitor(
         }
     }
 
-    override fun getCustomerViewModel(): CustomerViewModel? {
-        return AppcuesActivityMonitor.activity?.let {
-            getOwnedViewModel(
-                owner = {
-                    ViewModelOwner.from(
-                        it as ViewModelStoreOwner,
-                        it as? SavedStateRegistryOwner
-                    )
-                }
-            )
+    override fun withViewModel(block: CustomerViewModel.() -> Unit) {
+        CoroutineScope(Dispatchers.Main).launch {
+            AppcuesActivityMonitor.activity?.let {
+                getOwnedViewModel<CustomerViewModel>(
+                    owner = {
+                        ViewModelOwner.from(
+                            it as ViewModelStoreOwner,
+                            it as? SavedStateRegistryOwner
+                        )
+                    }
+                ).run(block)
+            }
         }
     }
 }

@@ -5,12 +5,12 @@ import com.appcues.AppcuesSession
 import com.appcues.data.DefaultDataGateway
 import com.appcues.domain.ShowExperienceUseCase
 import com.appcues.domain.ShowUseCase
-import com.appcues.domain.gateway.CustomerViewGateway
+import com.appcues.domain.gateway.CustomerExperienceGateway
 import com.appcues.domain.gateway.DataGateway
 import com.appcues.logging.Logcues
-import com.appcues.monitor.ActivityMonitor
-import com.appcues.monitor.CustomerActivityMonitor
 import com.appcues.monitor.CustomerViewModel
+import com.appcues.monitor.CustomerViewModelAdapter
+import com.appcues.monitor.CustomerViewModelHolder
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.module.Module
 import org.koin.core.qualifier.named
@@ -24,9 +24,9 @@ internal object AppcuesModule {
             scoped { AppcuesSession() }
             scoped { Logcues(config.loggingLevel) }
 
-            scoped { CustomerActivityMonitor(scopeId = scopeId) }
-                .bind(ActivityMonitor::class)
-                .bind(CustomerViewGateway::class)
+            scoped { CustomerViewModelAdapter(scopeId = scopeId) }
+                .bind(CustomerViewModelHolder::class)
+                .bind(CustomerExperienceGateway::class)
 
             scoped<DataGateway> {
                 DefaultDataGateway(
@@ -43,7 +43,7 @@ internal object AppcuesModule {
 
             factory {
                 ShowExperienceUseCase(
-                    customerView = get(),
+                    customerExperience = get(),
                 )
             }
 
