@@ -19,7 +19,7 @@ class Appcues internal constructor(
      * Returns the current version of Appcues SDK
      */
     val version: String
-        get() = "0.1.0"
+        get() = "${BuildConfig.SDK_VERSION}-${BuildConfig.BUILD_TYPE}"
 
     /**
      * Identify the user and determine if they should see Appcues content.
