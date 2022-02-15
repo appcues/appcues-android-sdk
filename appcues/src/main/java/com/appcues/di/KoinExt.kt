@@ -30,8 +30,5 @@ internal fun AppcuesKoinContext.newAppcuesInstance(appcuesConfig: AppcuesConfig)
         )
     )
 
-    return Appcues(
-        logcues = getScope(scopeId).get(),
-        customerViewModelHolder = getScope(scopeId).get(),
-    )
+    return getScope(scopeId).get()
 }

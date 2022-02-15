@@ -2,15 +2,15 @@ package com.appcues.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.appcues.domain.entity.Experience
+import java.util.UUID
 
 internal class AppcuesViewModelFactory(
     private val scopeID: String,
-    private val experience: Experience,
+    private val experienceId: UUID,
 ) : ViewModelProvider.Factory {
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-        return AppcuesViewModel(scopeID, experience) as T
+        return AppcuesViewModel(scopeID, experienceId) as T
     }
 }

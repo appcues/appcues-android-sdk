@@ -1,14 +1,13 @@
 package com.appcues.domain
 
 import com.appcues.domain.entity.Experience
-import com.appcues.domain.gateway.CustomerExperienceGateway
+import com.appcues.domain.gateway.ExperienceGateway
 
 internal class ShowExperienceUseCase(
-    private val customerExperience: CustomerExperienceGateway
+    private val experienceGateway: ExperienceGateway
 ) {
 
     suspend operator fun invoke(experience: Experience) {
-        // In the future we could have the state machine for given experience here.
-        return customerExperience.showExperience(experience)
+        return experienceGateway.start(experience)
     }
 }

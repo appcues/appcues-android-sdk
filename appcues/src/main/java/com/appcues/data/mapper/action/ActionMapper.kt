@@ -14,5 +14,6 @@ internal class ActionMapper {
             else -> throw AppcuesMappingException("on property ${from.on} is unknown")
         },
         type = from.type,
+        config = from.config,
     )
 }

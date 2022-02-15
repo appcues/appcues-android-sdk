@@ -1,12 +1,15 @@
 package com.appcues.di
 
+import com.appcues.Appcues
 import com.appcues.AppcuesConfig
 import com.appcues.AppcuesSession
+import com.appcues.action.ActionRegistry
 import com.appcues.data.DefaultDataGateway
 import com.appcues.domain.ShowExperienceUseCase
 import com.appcues.domain.ShowUseCase
-import com.appcues.domain.gateway.CustomerExperienceGateway
 import com.appcues.domain.gateway.DataGateway
+import com.appcues.domain.gateway.ExperienceGateway
+import com.appcues.experience.ExperienceController
 import com.appcues.logging.Logcues
 import com.appcues.monitor.CustomerViewModel
 import com.appcues.monitor.CustomerViewModelAdapter
@@ -21,12 +24,23 @@ internal object AppcuesModule {
 
     fun install(scopeId: String, config: AppcuesConfig): Module = module {
         scope(named(scopeId)) {
+            scoped {
+                Appcues(
+                    logcues = getScope(scopeId).get(),
+                    customerViewModelHolder = getScope(scopeId).get(),
+                    actionRegistry = getScope(scopeId).get(),
+                )
+            }
+
             scoped { AppcuesSession() }
             scoped { Logcues(config.loggingLevel) }
 
-            scoped { CustomerViewModelAdapter(scopeId = scopeId) }
-                .bind(CustomerViewModelHolder::class)
-                .bind(CustomerExperienceGateway::class)
+            scoped<CustomerViewModelHolder> { CustomerViewModelAdapter(scopeId = scopeId) }
+
+            scoped { ExperienceController(scopeId = scopeId) }
+                .bind(ExperienceGateway::class)
+
+            scoped { ActionRegistry(scopeId = scopeId) }
 
             scoped<DataGateway> {
                 DefaultDataGateway(
@@ -43,7 +57,7 @@ internal object AppcuesModule {
 
             factory {
                 ShowExperienceUseCase(
-                    customerExperience = get(),
+                    experienceGateway = get(),
                 )
             }
 

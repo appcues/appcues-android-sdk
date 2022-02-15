@@ -14,7 +14,8 @@ class ActionMapperTest {
         // Given
         val from = ActionResponse(
             on = "tap",
-            type = "@appcues/close"
+            type = "@appcues/close",
+            config = null,
         )
         // When
         val result = mapper.map(from)
@@ -30,7 +31,8 @@ class ActionMapperTest {
         // Given
         val from = ActionResponse(
             on = "longPress",
-            type = "@appcues/open"
+            type = "@appcues/open",
+            config = null,
         )
         // When
         val result = mapper.map(from)

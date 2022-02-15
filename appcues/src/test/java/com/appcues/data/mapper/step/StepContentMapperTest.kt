@@ -1,5 +1,6 @@
 package com.appcues.data.mapper.step
 
+import com.appcues.data.remote.response.action.ActionResponse
 import com.appcues.data.remote.response.step.StepContentResponse
 import com.appcues.data.remote.response.styling.SizeResponse
 import com.appcues.data.remote.response.styling.StyleColorResponse
@@ -10,13 +11,14 @@ import com.appcues.domain.entity.ExperienceComponent.HorizontalStackComponent
 import com.appcues.domain.entity.ExperienceComponent.ImageComponent
 import com.appcues.domain.entity.ExperienceComponent.TextComponent
 import com.appcues.domain.entity.ExperienceComponent.VerticalStackComponent
+import com.appcues.domain.entity.action.OnAction
 import com.appcues.domain.entity.styling.ComponentColor
 import com.appcues.domain.entity.styling.ComponentDistribution
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import java.util.UUID
 
-class StepContentMapperTest {
+internal class StepContentMapperTest {
 
     private val mapper = StepContentMapper()
 
@@ -45,8 +47,11 @@ class StepContentMapperTest {
                 )
             )
         )
+        val mockActions = hashMapOf<UUID, List<ActionResponse>>(
+            textRandomId to arrayListOf(ActionResponse(on = "tap", type = "@appcues/test", config = null))
+        )
         // WHEN
-        val result = mapper.map(from)
+        val result = mapper.map(from, mockActions)
         // THEN
         assertThat(result).isInstanceOf(VerticalStackComponent::class.java)
         with(result as VerticalStackComponent) {
@@ -59,6 +64,11 @@ class StepContentMapperTest {
                 assertThat(style.fontSize).isEqualTo(20)
                 assertThat(style.foregroundColor?.light).isEqualTo(0xFF000000)
                 assertThat(style.foregroundColor?.dark).isEqualTo(0xFF000000)
+                assertThat(actions).hasSize(1)
+                with(actions[0]) {
+                    assertThat(type).isEqualTo("@appcues/test")
+                    assertThat(on).isEqualTo(OnAction.TAP)
+                }
             }
         }
     }
@@ -90,7 +100,7 @@ class StepContentMapperTest {
             )
         )
         // WHEN
-        val result = mapper.map(from)
+        val result = mapper.map(from, hashMapOf())
         // THEN
         assertThat(result).isInstanceOf(HorizontalStackComponent::class.java)
         with(result as HorizontalStackComponent) {
@@ -126,7 +136,7 @@ class StepContentMapperTest {
             )
         )
         // WHEN
-        val result = mapper.map(from)
+        val result = mapper.map(from, hashMapOf())
         // THEN
         assertThat(result).isInstanceOf(TextComponent::class.java)
         with(result as TextComponent) {
@@ -172,7 +182,7 @@ class StepContentMapperTest {
             )
         )
         // WHEN
-        val result = mapper.map(from)
+        val result = mapper.map(from, hashMapOf())
         // THEN
         assertThat(result).isInstanceOf(ButtonComponent::class.java)
         with(result as ButtonComponent) {
@@ -215,7 +225,7 @@ class StepContentMapperTest {
             )
         )
         // WHEN
-        val result = mapper.map(from)
+        val result = mapper.map(from, hashMapOf())
         // THEN
         assertThat(result).isInstanceOf(ImageComponent::class.java)
         with(result as ImageComponent) {

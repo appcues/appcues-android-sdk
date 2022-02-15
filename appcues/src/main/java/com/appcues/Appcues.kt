@@ -1,6 +1,7 @@
 package com.appcues
 
 import android.content.Context
+import com.appcues.action.ActionRegistry
 import com.appcues.action.ExperienceAction
 import com.appcues.builder.ApiHostBuilderValidator
 import com.appcues.di.AppcuesKoinContext
@@ -13,6 +14,7 @@ import com.appcues.trait.ExperienceTrait
 class Appcues internal constructor(
     private val logcues: Logcues,
     private val customerViewModelHolder: CustomerViewModelHolder,
+    private val actionRegistry: ActionRegistry,
 ) {
 
     /**
@@ -104,7 +106,7 @@ class Appcues internal constructor(
      * [experienceAction] Action to register.
      */
     fun register(experienceAction: ExperienceAction) {
-        logcues.i("register(action: $experienceAction)")
+        actionRegistry.register(experienceAction)
     }
 
     /**

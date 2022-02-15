@@ -210,7 +210,8 @@ internal val contentModalOneStubs = ExperienceResponse(
                 UUID.fromString("c34f7d02-443d-497c-ac3a-1a9b42af9dd8") to arrayListOf(
                     ActionResponse(
                         on = "tap",
-                        type = "@appcues/close"
+                        type = "@appcues/close",
+                        config = null,
                     )
                 )
             )
