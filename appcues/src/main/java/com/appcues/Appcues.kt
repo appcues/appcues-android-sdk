@@ -4,15 +4,12 @@ import android.content.Context
 import com.appcues.action.ExperienceAction
 import com.appcues.builder.ApiHostBuilderValidator
 import com.appcues.di.AppcuesKoinContext
-import com.appcues.di.newAppcuesInstance
-import com.appcues.di.startKoinOnce
 import com.appcues.logging.Logcues
-import com.appcues.monitor.CustomerViewModelHolder
 import com.appcues.trait.ExperienceTrait
 
 class Appcues internal constructor(
     private val logcues: Logcues,
-    private val customerViewModelHolder: CustomerViewModelHolder,
+    private val appcuesScope: AppcuesScope,
 ) {
 
     /**
@@ -84,9 +81,7 @@ class Appcues internal constructor(
      * [contentId] ID of specific flow.
      */
     fun show(contentId: String) {
-        customerViewModelHolder.withViewModel {
-            show(contentId)
-        }
+        appcuesScope.show(contentId)
     }
 
     /**
@@ -149,9 +144,8 @@ class Appcues internal constructor(
 
         fun build(): Appcues {
             return with(AppcuesKoinContext) {
-                startKoinOnce(context)
-
-                newAppcuesInstance(
+                createAppcues(
+                    context = context,
                     appcuesConfig = AppcuesConfig(
                         accountId = accountId,
                         applicationId = applicationId,

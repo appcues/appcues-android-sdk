@@ -10,5 +10,5 @@ interface AppcuesKoinComponent : KoinScopeComponent {
     override val scope: Scope
         get() = AppcuesKoinContext.getScope(scopeId)
 
-    override fun getKoin() = AppcuesKoinContext.getKoin()
+    override fun getKoin() = AppcuesKoinContext.koin
 }
