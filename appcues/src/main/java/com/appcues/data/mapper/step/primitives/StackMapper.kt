@@ -1,31 +1,31 @@
 package com.appcues.data.mapper.step.primitives
 
-import com.appcues.data.mapper.AppcuesMappingException
+import com.appcues.data.mapper.AppcuesMapperException
 import com.appcues.data.mapper.styling.StyleMapper
+import com.appcues.data.model.ExperiencePrimitive
+import com.appcues.data.model.ExperiencePrimitive.HorizontalStackPrimitive
+import com.appcues.data.model.ExperiencePrimitive.VerticalStackPrimitive
+import com.appcues.data.model.styling.ComponentDistribution
 import com.appcues.data.remote.response.step.StepContentResponse
-import com.appcues.domain.entity.ExperienceComponent
-import com.appcues.domain.entity.ExperienceComponent.HorizontalStackComponent
-import com.appcues.domain.entity.ExperienceComponent.VerticalStackComponent
-import com.appcues.domain.entity.styling.ComponentDistribution
 
 internal class StackMapper(
     private val styleMapper: StyleMapper = StyleMapper(),
 ) {
 
-    fun map(from: StepContentResponse, stackTransform: (StepContentResponse) -> ExperienceComponent): ExperienceComponent {
-        requireNotNull(from.orientation) { throw AppcuesMappingException("stack(${from.id}) orientation is null") }
+    fun map(from: StepContentResponse, stackTransform: (StepContentResponse) -> ExperiencePrimitive): ExperiencePrimitive {
+        requireNotNull(from.orientation) { throw AppcuesMapperException("stack(${from.id}) orientation is null") }
 
         return when (from.orientation) {
             "vertical" -> from.mapVerticalStack(stackTransform)
             "horizontal" -> from.mapHorizontalStack(stackTransform)
-            else -> throw AppcuesMappingException("stack(${from.id}) unknown orientation ${from.orientation}")
+            else -> throw AppcuesMapperException("stack(${from.id}) unknown orientation ${from.orientation}")
         }
     }
 
     private fun StepContentResponse.mapVerticalStack(
-        stackItemsMapper: (StepContentResponse) -> ExperienceComponent
-    ): VerticalStackComponent {
-        return VerticalStackComponent(
+        stackItemsMapper: (StepContentResponse) -> ExperiencePrimitive
+    ): VerticalStackPrimitive {
+        return VerticalStackPrimitive(
             id = id,
             items = items?.map { stackItemsMapper(it) } ?: arrayListOf(),
             spacing = spacing,
@@ -34,9 +34,9 @@ internal class StackMapper(
     }
 
     private fun StepContentResponse.mapHorizontalStack(
-        stackItemsMapper: (StepContentResponse) -> ExperienceComponent
-    ): HorizontalStackComponent {
-        return HorizontalStackComponent(
+        stackItemsMapper: (StepContentResponse) -> ExperiencePrimitive
+    ): HorizontalStackPrimitive {
+        return HorizontalStackPrimitive(
             id = id,
             items = items?.map { stackItemsMapper(it) } ?: arrayListOf(),
             distribution = distribution.toComponentDistribution(),

@@ -1,7 +1,7 @@
 package com.appcues.data.mapper.styling
 
+import com.appcues.data.model.styling.ComponentShadow
 import com.appcues.data.remote.response.styling.StyleShadowResponse
-import com.appcues.domain.entity.styling.ComponentShadow
 
 internal class StyleShadowMapper(
     private val styleColorMapper: StyleColorMapper = StyleColorMapper(),

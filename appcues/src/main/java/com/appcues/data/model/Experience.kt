@@ -1,9 +1,9 @@
-package com.appcues.domain.entity
+package com.appcues.data.model
 
 import android.os.Parcelable
-import com.appcues.domain.entity.action.Action
-import com.appcues.domain.entity.step.Step
-import com.appcues.domain.entity.trait.Trait
+import com.appcues.data.model.action.Action
+import com.appcues.data.model.step.Step
+import com.appcues.data.model.trait.Trait
 import kotlinx.parcelize.Parcelize
 import java.util.UUID
 

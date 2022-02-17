@@ -1,7 +1,8 @@
 package com.appcues
 
 import android.util.Log
-import com.appcues.domain.ShowUseCase
+import com.appcues.data.AppcuesRepository
+import com.appcues.experience.container.DialogModalPresenter
 import com.appcues.logging.Logcues
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
@@ -11,7 +12,8 @@ import kotlinx.coroutines.launch
 
 internal class AppcuesScope(
     private val logcues: Logcues,
-    private val showUseCase: ShowUseCase,
+    private val repository: AppcuesRepository,
+    private val presenter: DialogModalPresenter
 ) : CoroutineScope {
 
     private val parentJob = SupervisorJob()
@@ -23,7 +25,7 @@ internal class AppcuesScope(
     fun show(contentId: String) {
         launch {
             logcues.i("show(contentId: $contentId)")
-            showUseCase(contentId = contentId)
+            presenter.show(repository.getContent(contentId))
         }
     }
 }

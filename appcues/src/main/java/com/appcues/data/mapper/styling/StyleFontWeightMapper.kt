@@ -1,6 +1,6 @@
 package com.appcues.data.mapper.styling
 
-import com.appcues.domain.entity.styling.ComponentStyle.ComponentFontWeight
+import com.appcues.data.model.styling.ComponentStyle.ComponentFontWeight
 
 internal class StyleFontWeightMapper {
 

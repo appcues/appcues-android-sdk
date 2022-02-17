@@ -1,4 +1,4 @@
-package com.appcues.domain.entity.styling
+package com.appcues.data.model.styling
 
 enum class ComponentContentMode {
     FILL, FIT

@@ -1,17 +1,17 @@
 package com.appcues.data.mapper.step
 
+import com.appcues.data.model.ExperiencePrimitive.ButtonPrimitive
+import com.appcues.data.model.ExperiencePrimitive.HorizontalStackPrimitive
+import com.appcues.data.model.ExperiencePrimitive.ImagePrimitive
+import com.appcues.data.model.ExperiencePrimitive.TextPrimitive
+import com.appcues.data.model.ExperiencePrimitive.VerticalStackPrimitive
+import com.appcues.data.model.styling.ComponentColor
+import com.appcues.data.model.styling.ComponentDistribution
 import com.appcues.data.remote.response.step.StepContentResponse
 import com.appcues.data.remote.response.styling.SizeResponse
 import com.appcues.data.remote.response.styling.StyleColorResponse
 import com.appcues.data.remote.response.styling.StyleGradientColorResponse
 import com.appcues.data.remote.response.styling.StyleResponse
-import com.appcues.domain.entity.ExperienceComponent.ButtonComponent
-import com.appcues.domain.entity.ExperienceComponent.HorizontalStackComponent
-import com.appcues.domain.entity.ExperienceComponent.ImageComponent
-import com.appcues.domain.entity.ExperienceComponent.TextComponent
-import com.appcues.domain.entity.ExperienceComponent.VerticalStackComponent
-import com.appcues.domain.entity.styling.ComponentColor
-import com.appcues.domain.entity.styling.ComponentDistribution
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import java.util.UUID
@@ -48,12 +48,12 @@ class StepContentMapperTest {
         // WHEN
         val result = mapper.map(from)
         // THEN
-        assertThat(result).isInstanceOf(VerticalStackComponent::class.java)
-        with(result as VerticalStackComponent) {
+        assertThat(result).isInstanceOf(VerticalStackPrimitive::class.java)
+        with(result as VerticalStackPrimitive) {
             assertThat(id).isEqualTo(randomId)
             assertThat(items).hasSize(1)
-            assertThat(items[0]).isInstanceOf(TextComponent::class.java)
-            with(items[0] as TextComponent) {
+            assertThat(items[0]).isInstanceOf(TextPrimitive::class.java)
+            with(items[0] as TextPrimitive) {
                 assertThat(id).isEqualTo(textRandomId)
                 assertThat(text).isEqualTo("Sample Text")
                 assertThat(style.fontSize).isEqualTo(20)
@@ -92,13 +92,13 @@ class StepContentMapperTest {
         // WHEN
         val result = mapper.map(from)
         // THEN
-        assertThat(result).isInstanceOf(HorizontalStackComponent::class.java)
-        with(result as HorizontalStackComponent) {
+        assertThat(result).isInstanceOf(HorizontalStackPrimitive::class.java)
+        with(result as HorizontalStackPrimitive) {
             assertThat(id).isEqualTo(randomId)
             assertThat(items).hasSize(1)
             assertThat(distribution).isEqualTo(ComponentDistribution.EQUAL)
-            assertThat(items[0]).isInstanceOf(TextComponent::class.java)
-            with(items[0] as TextComponent) {
+            assertThat(items[0]).isInstanceOf(TextPrimitive::class.java)
+            with(items[0] as TextPrimitive) {
                 assertThat(id).isEqualTo(textRandomId)
                 assertThat(text).isEqualTo("Sample Text")
                 assertThat(style.fontSize).isEqualTo(20)
@@ -128,8 +128,8 @@ class StepContentMapperTest {
         // WHEN
         val result = mapper.map(from)
         // THEN
-        assertThat(result).isInstanceOf(TextComponent::class.java)
-        with(result as TextComponent) {
+        assertThat(result).isInstanceOf(TextPrimitive::class.java)
+        with(result as TextPrimitive) {
             assertThat(id).isEqualTo(randomId)
             assertThat(text).isEqualTo("Sample Text")
             assertThat(style.fontSize).isEqualTo(20)
@@ -174,14 +174,14 @@ class StepContentMapperTest {
         // WHEN
         val result = mapper.map(from)
         // THEN
-        assertThat(result).isInstanceOf(ButtonComponent::class.java)
-        with(result as ButtonComponent) {
+        assertThat(result).isInstanceOf(ButtonPrimitive::class.java)
+        with(result as ButtonPrimitive) {
             assertThat(id).isEqualTo(randomId)
             assertThat(style.backgroundGradient).hasSize(2)
             assertThat(style.backgroundGradient!![0]).isEqualTo(ComponentColor(light = 0xFF5C5CFF, dark = 0xFF5C5CFF))
             assertThat(style.backgroundGradient[1]).isEqualTo(ComponentColor(light = 0xFF8960FF, dark = 0xFF8960FF))
-            assertThat(content).isInstanceOf(TextComponent::class.java)
-            with(content as TextComponent) {
+            assertThat(content).isInstanceOf(TextPrimitive::class.java)
+            with(content as TextPrimitive) {
                 assertThat(id).isEqualTo(textRandomId)
                 assertThat(text).isEqualTo("Button 1")
                 assertThat(style.fontSize).isEqualTo(17)
@@ -217,8 +217,8 @@ class StepContentMapperTest {
         // WHEN
         val result = mapper.map(from)
         // THEN
-        assertThat(result).isInstanceOf(ImageComponent::class.java)
-        with(result as ImageComponent) {
+        assertThat(result).isInstanceOf(ImagePrimitive::class.java)
+        with(result as ImagePrimitive) {
             assertThat(id).isEqualTo(randomId)
             assertThat(url).isEqualTo(imageUrl)
             assertThat(accessibilityLabel).isEqualTo("Image Label")

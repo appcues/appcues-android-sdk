@@ -3,7 +3,7 @@ package com.appcues.ui.extensions
 import android.content.Context
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.sp
-import com.appcues.domain.entity.styling.ComponentStyle
+import com.appcues.data.model.styling.ComponentStyle
 
 internal fun TextStyle.applyStyle(style: ComponentStyle, context: Context, isDark: Boolean): TextStyle {
     return copy(

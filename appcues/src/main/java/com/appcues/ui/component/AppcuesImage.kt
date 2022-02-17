@@ -12,16 +12,16 @@ import androidx.compose.ui.layout.ContentScale
 import coil.compose.rememberImagePainter
 import coil.size.OriginalSize
 import coil.size.Scale
-import com.appcues.domain.entity.ExperienceComponent.ImageComponent
-import com.appcues.domain.entity.styling.ComponentContentMode
-import com.appcues.domain.entity.styling.ComponentContentMode.FILL
-import com.appcues.domain.entity.styling.ComponentContentMode.FIT
-import com.appcues.domain.entity.styling.ComponentSize
-import com.appcues.domain.entity.styling.ComponentStyle
+import com.appcues.data.model.ExperiencePrimitive.ImagePrimitive
+import com.appcues.data.model.styling.ComponentContentMode
+import com.appcues.data.model.styling.ComponentContentMode.FILL
+import com.appcues.data.model.styling.ComponentContentMode.FIT
+import com.appcues.data.model.styling.ComponentSize
+import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.ui.extensions.componentStyle
 
 @Composable
-internal fun ImageComponent.Compose() {
+internal fun ImagePrimitive.Compose() {
     Box(
         modifier = Modifier
             .componentStyle(style, isSystemInDarkTheme(), noSizeFillMax = true)

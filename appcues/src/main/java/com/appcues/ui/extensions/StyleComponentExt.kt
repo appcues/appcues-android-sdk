@@ -12,18 +12,18 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.appcues.domain.entity.styling.ComponentStyle
-import com.appcues.domain.entity.styling.ComponentStyle.ComponentFontWeight.BLACK
-import com.appcues.domain.entity.styling.ComponentStyle.ComponentFontWeight.BOLD
-import com.appcues.domain.entity.styling.ComponentStyle.ComponentFontWeight.HEAVY
-import com.appcues.domain.entity.styling.ComponentStyle.ComponentFontWeight.LIGHT
-import com.appcues.domain.entity.styling.ComponentStyle.ComponentFontWeight.MEDIUM
-import com.appcues.domain.entity.styling.ComponentStyle.ComponentFontWeight.REGULAR
-import com.appcues.domain.entity.styling.ComponentStyle.ComponentFontWeight.SEMI_BOLD
-import com.appcues.domain.entity.styling.ComponentStyle.ComponentFontWeight.THIN
-import com.appcues.domain.entity.styling.ComponentStyle.ComponentFontWeight.ULTRA_LIGHT
-import com.appcues.domain.entity.styling.ComponentStyle.ComponentHorizontalAlignment
-import com.appcues.domain.entity.styling.ComponentStyle.ComponentVerticalAlignment
+import com.appcues.data.model.styling.ComponentStyle
+import com.appcues.data.model.styling.ComponentStyle.ComponentFontWeight.BLACK
+import com.appcues.data.model.styling.ComponentStyle.ComponentFontWeight.BOLD
+import com.appcues.data.model.styling.ComponentStyle.ComponentFontWeight.HEAVY
+import com.appcues.data.model.styling.ComponentStyle.ComponentFontWeight.LIGHT
+import com.appcues.data.model.styling.ComponentStyle.ComponentFontWeight.MEDIUM
+import com.appcues.data.model.styling.ComponentStyle.ComponentFontWeight.REGULAR
+import com.appcues.data.model.styling.ComponentStyle.ComponentFontWeight.SEMI_BOLD
+import com.appcues.data.model.styling.ComponentStyle.ComponentFontWeight.THIN
+import com.appcues.data.model.styling.ComponentStyle.ComponentFontWeight.ULTRA_LIGHT
+import com.appcues.data.model.styling.ComponentStyle.ComponentHorizontalAlignment
+import com.appcues.data.model.styling.ComponentStyle.ComponentVerticalAlignment
 
 internal fun ComponentStyle.getMargins() = PaddingValues(
     start = marginLeading.dp,

@@ -1,7 +1,7 @@
 package com.appcues.data.mapper.action
 
+import com.appcues.data.model.action.Action
 import com.appcues.data.remote.response.action.ActionResponse
-import com.appcues.domain.entity.action.Action
 import java.util.UUID
 
 internal fun HashMap<UUID, List<ActionResponse>>?.mapValuesToAction(transform: (ActionResponse) -> Action) = let { actions ->

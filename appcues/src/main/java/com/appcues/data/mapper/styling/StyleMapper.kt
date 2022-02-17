@@ -1,11 +1,11 @@
 package com.appcues.data.mapper.styling
 
+import com.appcues.data.model.styling.ComponentColor
+import com.appcues.data.model.styling.ComponentStyle
+import com.appcues.data.model.styling.ComponentStyle.ComponentHorizontalAlignment
+import com.appcues.data.model.styling.ComponentStyle.ComponentVerticalAlignment
 import com.appcues.data.remote.response.styling.StyleGradientColorResponse
 import com.appcues.data.remote.response.styling.StyleResponse
-import com.appcues.domain.entity.styling.ComponentColor
-import com.appcues.domain.entity.styling.ComponentStyle
-import com.appcues.domain.entity.styling.ComponentStyle.ComponentHorizontalAlignment
-import com.appcues.domain.entity.styling.ComponentStyle.ComponentVerticalAlignment
 
 internal class StyleMapper(
     private val styleColorMapper: StyleColorMapper = StyleColorMapper(),
