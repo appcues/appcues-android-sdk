@@ -3,8 +3,8 @@ package com.appcues.ui
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import com.appcues.data.model.Experience
 import com.appcues.di.AppcuesKoinComponent
-import com.appcues.domain.entity.Experience
 import com.appcues.logging.Logcues
 import org.koin.core.component.inject
 

@@ -1,6 +1,6 @@
 package com.appcues.data.mapper.styling
 
-import com.appcues.data.mapper.AppcuesMappingException
+import com.appcues.data.mapper.AppcuesMapperException
 
 private val colorHexRegex = "#?([0-9a-f]{3,8})".toRegex(RegexOption.IGNORE_CASE)
 
@@ -18,7 +18,7 @@ internal fun normalizeToArgbLong(rgbaHex: String): Long {
 
 private fun normalizeAsRGBA(value: String): String {
     val matchResult = colorHexRegex.matchEntire(value)
-        ?: throw AppcuesMappingException("The provided colorHex '$value' is not a valid color hex")
+        ?: throw AppcuesMapperException("The provided colorHex '$value' is not a valid color hex")
 
     val hexValue = matchResult.groups[1]!!.value.lowercase()
     return when (hexValue.length) {
@@ -26,7 +26,7 @@ private fun normalizeAsRGBA(value: String): String {
         LENGTH_RGB_TWO_DIGITS -> "${hexValue}ff"
         LENGTH_RGBA_ONE_DIGIT -> expandToTwoDigitsPerComponent(hexValue)
         LENGTH_RGBA_TWO_DIGITS -> hexValue
-        else -> throw AppcuesMappingException("The provided colorHex '$value' is not in a supported format")
+        else -> throw AppcuesMapperException("The provided colorHex '$value' is not in a supported format")
     }
 }
 

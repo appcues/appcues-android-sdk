@@ -18,7 +18,7 @@ import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.appcues.domain.entity.styling.ComponentStyle
+import com.appcues.data.model.styling.ComponentStyle
 
 internal fun Modifier.componentStyle(
     style: ComponentStyle,

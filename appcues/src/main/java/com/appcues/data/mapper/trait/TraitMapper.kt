@@ -1,7 +1,7 @@
 package com.appcues.data.mapper.trait
 
+import com.appcues.data.model.trait.Trait
 import com.appcues.data.remote.response.trait.TraitResponse
-import com.appcues.domain.entity.trait.Trait
 
 internal class TraitMapper {
 

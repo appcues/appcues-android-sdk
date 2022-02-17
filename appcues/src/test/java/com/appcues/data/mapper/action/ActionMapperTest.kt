@@ -1,7 +1,6 @@
 package com.appcues.data.mapper.action
 
 import com.appcues.data.remote.response.action.ActionResponse
-import com.appcues.domain.entity.action.OnAction
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 
@@ -20,7 +19,7 @@ class ActionMapperTest {
         val result = mapper.map(from)
         // Then
         with(result) {
-            assertThat(on).isEqualTo(OnAction.TAP)
+            assertThat(on).isEqualTo(com.appcues.data.model.action.OnAction.TAP)
             assertThat(type).isEqualTo("@appcues/close")
         }
     }
@@ -36,7 +35,7 @@ class ActionMapperTest {
         val result = mapper.map(from)
         // Then
         with(result) {
-            assertThat(on).isEqualTo(OnAction.LONG_PRESS)
+            assertThat(on).isEqualTo(com.appcues.data.model.action.OnAction.LONG_PRESS)
             assertThat(type).isEqualTo("@appcues/open")
         }
     }

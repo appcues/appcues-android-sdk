@@ -1,4 +1,4 @@
-package com.appcues.domain.entity.action
+package com.appcues.data.model.action
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize

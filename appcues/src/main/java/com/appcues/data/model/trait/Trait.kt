@@ -1,4 +1,4 @@
-package com.appcues.domain.entity.trait
+package com.appcues.data.model.trait
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize

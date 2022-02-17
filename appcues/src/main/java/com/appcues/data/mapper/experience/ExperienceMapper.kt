@@ -6,8 +6,8 @@ import com.appcues.data.mapper.step.StepMapper
 import com.appcues.data.mapper.step.mapToStep
 import com.appcues.data.mapper.trait.TraitMapper
 import com.appcues.data.mapper.trait.mapToTrait
+import com.appcues.data.model.Experience
 import com.appcues.data.remote.response.experience.ExperienceResponse
-import com.appcues.domain.entity.Experience
 
 internal class ExperienceMapper(
     private val actionMapper: ActionMapper = ActionMapper(),

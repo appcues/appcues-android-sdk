@@ -1,7 +1,7 @@
 package com.appcues.data.mapper.styling
 
+import com.appcues.data.model.styling.ComponentColor
 import com.appcues.data.remote.response.styling.StyleColorResponse
-import com.appcues.domain.entity.styling.ComponentColor
 
 internal class StyleColorMapper {
 

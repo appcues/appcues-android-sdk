@@ -1,4 +1,4 @@
-package com.appcues.domain.entity.styling
+package com.appcues.data.model.styling
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize

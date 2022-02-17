@@ -17,12 +17,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
-import com.appcues.domain.entity.ExperienceComponent.ButtonComponent
-import com.appcues.domain.entity.ExperienceComponent.HorizontalStackComponent
-import com.appcues.domain.entity.ExperienceComponent.TextComponent
-import com.appcues.domain.entity.styling.ComponentColor
-import com.appcues.domain.entity.styling.ComponentShadow
-import com.appcues.domain.entity.styling.ComponentStyle
+import com.appcues.data.model.ExperiencePrimitive.ButtonPrimitive
+import com.appcues.data.model.ExperiencePrimitive.HorizontalStackPrimitive
+import com.appcues.data.model.ExperiencePrimitive.TextPrimitive
+import com.appcues.data.model.styling.ComponentColor
+import com.appcues.data.model.styling.ComponentShadow
+import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.ui.LocalAppcuesActions
 import com.appcues.ui.extensions.Compose
 import com.appcues.ui.extensions.componentStyle
@@ -31,7 +31,7 @@ import com.appcues.ui.theme.AppcuesPreview
 import java.util.UUID
 
 @Composable
-internal fun ButtonComponent.Compose() {
+internal fun ButtonPrimitive.Compose() {
     val onClick = LocalAppcuesActions.current.onClick
     val interactionSource = remember { MutableInteractionSource() }
     val isEnabled = remember { true }
@@ -80,9 +80,9 @@ private fun Modifier.clickableButton(
 @Composable
 @Preview(name = "button-border.json", group = "extra")
 internal fun PreviewButtonBorder() {
-    val component = ButtonComponent(
+    val component = ButtonPrimitive(
         id = UUID.randomUUID(),
-        content = TextComponent(
+        content = TextPrimitive(
             id = UUID.randomUUID(),
             text = "My Fancy Button",
             style = ComponentStyle(
@@ -112,17 +112,17 @@ internal fun PreviewButtonBorder() {
 @Composable
 @Preview(name = "button-complex-contents.json", group = "extra")
 internal fun PreviewButtonComplexContents() {
-    val component = ButtonComponent(
+    val component = ButtonPrimitive(
         id = UUID.randomUUID(),
-        content = HorizontalStackComponent(
+        content = HorizontalStackPrimitive(
             id = UUID.randomUUID(),
             spacing = 8,
             items = arrayListOf(
-                TextComponent(
+                TextPrimitive(
                     id = UUID.randomUUID(),
                     text = "\uD83E\uDDEA"
                 ),
-                TextComponent(
+                TextPrimitive(
                     id = UUID.randomUUID(),
                     text = "My Fancy Button"
                 )
@@ -148,9 +148,9 @@ internal fun PreviewButtonComplexContents() {
 @Composable
 @Preview(name = "button-default.json", group = "extra")
 internal fun PreviewButtonDefault() {
-    val component = ButtonComponent(
+    val component = ButtonPrimitive(
         id = UUID.randomUUID(),
-        content = TextComponent(
+        content = TextPrimitive(
             id = UUID.randomUUID(),
             text = "My Button",
         ),
@@ -164,9 +164,9 @@ internal fun PreviewButtonDefault() {
 @Composable
 @Preview(name = "button-general.json", group = "extra")
 internal fun PreviewButtonGeneral() {
-    val component = ButtonComponent(
+    val component = ButtonPrimitive(
         id = UUID.randomUUID(),
-        content = TextComponent(
+        content = TextPrimitive(
             id = UUID.randomUUID(),
             text = "Button 1",
             style = ComponentStyle(

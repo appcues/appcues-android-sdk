@@ -1,4 +1,4 @@
-package com.appcues.domain.entity.action
+package com.appcues.data.model.action
 
 internal enum class OnAction {
     TAP, LONG_PRESS

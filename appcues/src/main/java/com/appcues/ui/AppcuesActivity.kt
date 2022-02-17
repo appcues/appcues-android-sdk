@@ -10,7 +10,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.core.os.bundleOf
 import com.appcues.R
-import com.appcues.domain.entity.Experience
+import com.appcues.data.model.Experience
 import com.appcues.ui.extensions.Compose
 import com.appcues.ui.theme.AppcuesTheme
 import com.appcues.ui.trait.DialogTrait

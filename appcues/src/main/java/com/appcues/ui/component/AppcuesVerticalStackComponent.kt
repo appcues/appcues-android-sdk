@@ -10,13 +10,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.appcues.domain.entity.ExperienceComponent.ButtonComponent
-import com.appcues.domain.entity.ExperienceComponent.TextComponent
-import com.appcues.domain.entity.ExperienceComponent.VerticalStackComponent
-import com.appcues.domain.entity.styling.ComponentColor
-import com.appcues.domain.entity.styling.ComponentStyle
-import com.appcues.domain.entity.styling.ComponentStyle.ComponentHorizontalAlignment
-import com.appcues.domain.entity.styling.ComponentStyle.ComponentHorizontalAlignment.TRAILING
+import com.appcues.data.model.ExperiencePrimitive.ButtonPrimitive
+import com.appcues.data.model.ExperiencePrimitive.TextPrimitive
+import com.appcues.data.model.ExperiencePrimitive.VerticalStackPrimitive
+import com.appcues.data.model.styling.ComponentColor
+import com.appcues.data.model.styling.ComponentStyle
+import com.appcues.data.model.styling.ComponentStyle.ComponentHorizontalAlignment.LEADING
+import com.appcues.data.model.styling.ComponentStyle.ComponentHorizontalAlignment.TRAILING
 import com.appcues.ui.extensions.Compose
 import com.appcues.ui.extensions.componentStyle
 import com.appcues.ui.extensions.getHorizontalAlignment
@@ -25,7 +25,7 @@ import com.appcues.ui.theme.AppcuesPreview
 import java.util.UUID
 
 @Composable
-internal fun VerticalStackComponent.Compose() {
+internal fun VerticalStackPrimitive.Compose() {
     Column(
         modifier = Modifier.componentStyle(style, isSystemInDarkTheme()),
         horizontalAlignment = style.getHorizontalAlignment(),
@@ -39,13 +39,13 @@ internal fun VerticalStackComponent.Compose() {
 }
 
 private val items = arrayListOf(
-    TextComponent(
+    TextPrimitive(
         id = UUID.randomUUID(),
         text = "\uD83D\uDC4B Welcome!",
     ),
-    ButtonComponent(
+    ButtonPrimitive(
         id = UUID.randomUUID(),
-        content = TextComponent(
+        content = TextPrimitive(
             id = UUID.randomUUID(),
             text = "Button 1",
             style = ComponentStyle(
@@ -65,7 +65,7 @@ private val items = arrayListOf(
             cornerRadius = 6
         )
     ),
-    TextComponent(
+    TextPrimitive(
         id = UUID.randomUUID(),
         text = "BYE! \uD83E\uDD96",
     )
@@ -74,7 +74,7 @@ private val items = arrayListOf(
 @Composable
 @Preview(name = "stack-Vertical-alignment.json", group = "extra")
 internal fun PreviewTestVerticalAlignment() {
-    val component = VerticalStackComponent(
+    val component = VerticalStackPrimitive(
         id = UUID.randomUUID(),
         style = ComponentStyle(
             horizontalAlignment = TRAILING,
@@ -91,7 +91,7 @@ internal fun PreviewTestVerticalAlignment() {
 @Composable
 @Preview(name = "stack-Vertical-default.json", group = "extra")
 internal fun PreviewTestVerticalDefault() {
-    val component = VerticalStackComponent(
+    val component = VerticalStackPrimitive(
         id = UUID.randomUUID(),
         style = ComponentStyle(
             backgroundColor = ComponentColor(light = 0xFFCDCDFA, dark = 0xFFCDCDFA)
@@ -107,7 +107,7 @@ internal fun PreviewTestVerticalDefault() {
 @Composable
 @Preview(name = "stack-Vertical-layout.json", group = "extra")
 internal fun PreviewTestVerticalLayout() {
-    val component = VerticalStackComponent(
+    val component = VerticalStackPrimitive(
         id = UUID.randomUUID(),
         spacing = 20,
         style = ComponentStyle(
@@ -119,7 +119,7 @@ internal fun PreviewTestVerticalLayout() {
             paddingLeading = 7,
             paddingBottom = 9,
             paddingTrailing = 10,
-            horizontalAlignment = ComponentHorizontalAlignment.LEADING,
+            horizontalAlignment = LEADING,
             backgroundColor = ComponentColor(light = 0xFFCDCDFA, dark = 0xFFCDCDFA)
         ),
         items = items

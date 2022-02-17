@@ -1,6 +1,6 @@
 package com.appcues.data.mapper.styling
 
-import com.appcues.domain.entity.styling.ComponentContentMode
+import com.appcues.data.model.styling.ComponentContentMode
 
 internal class ContentModeMapper {
 

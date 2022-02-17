@@ -1,17 +1,18 @@
 package com.appcues.data.mapper.action
 
-import com.appcues.data.mapper.AppcuesMappingException
+import com.appcues.data.mapper.AppcuesMapperException
+import com.appcues.data.model.action.Action
+import com.appcues.data.model.action.OnAction.LONG_PRESS
+import com.appcues.data.model.action.OnAction.TAP
 import com.appcues.data.remote.response.action.ActionResponse
-import com.appcues.domain.entity.action.Action
-import com.appcues.domain.entity.action.OnAction
 
 internal class ActionMapper {
 
     fun map(from: ActionResponse) = Action(
         on = when (from.on) {
-            "tap" -> OnAction.TAP
-            "longPress" -> OnAction.LONG_PRESS
-            else -> throw AppcuesMappingException("on property ${from.on} is unknown")
+            "tap" -> TAP
+            "longPress" -> LONG_PRESS
+            else -> throw AppcuesMapperException("on property ${from.on} is unknown")
         },
         type = from.type,
     )

@@ -2,7 +2,7 @@ package com.appcues.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.appcues.domain.entity.Experience
+import com.appcues.data.model.Experience
 
 internal class AppcuesViewModelFactory(
     private val scopeID: String,

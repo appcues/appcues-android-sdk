@@ -1,21 +1,21 @@
 package com.appcues.data
 
 import com.appcues.data.mapper.experience.ExperienceMapper
+import com.appcues.data.model.Experience
 import com.appcues.data.remote.AppcuesRemoteSource
 import com.appcues.data.remote.response.experience.ExperienceResponse
-import com.appcues.domain.entity.Experience
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 
-class DefaultDataGatewayTest {
+class AppcuesRepositoryTest {
 
     private val appcuesRemoteSource: AppcuesRemoteSource = mockk()
     private val experienceMapper: ExperienceMapper = mockk()
 
-    private val defaultDataGateway = DefaultDataGateway(
+    private val defaultDataGateway = AppcuesRepository(
         appcuesRemoteSource = appcuesRemoteSource,
         experienceMapper = experienceMapper,
     )

@@ -2,13 +2,13 @@ package com.appcues.data.mapper.step
 
 import com.appcues.data.mapper.action.ActionMapper
 import com.appcues.data.mapper.trait.TraitMapper
+import com.appcues.data.model.ExperiencePrimitive
+import com.appcues.data.model.action.Action
+import com.appcues.data.model.trait.Trait
 import com.appcues.data.remote.response.action.ActionResponse
 import com.appcues.data.remote.response.step.StepContentResponse
 import com.appcues.data.remote.response.step.StepResponse
 import com.appcues.data.remote.response.trait.TraitResponse
-import com.appcues.domain.entity.ExperienceComponent
-import com.appcues.domain.entity.action.Action
-import com.appcues.domain.entity.trait.Trait
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
@@ -34,7 +34,7 @@ class StepMapperTest {
         // Given
         val randomId = UUID.randomUUID()
         val stepContentResponse = mockk<StepContentResponse>(relaxed = true)
-        val experienceComponent = mockk<ExperienceComponent>()
+        val experienceComponent = mockk<ExperiencePrimitive>()
         every { stepContentMapper.map(stepContentResponse) } returns experienceComponent
         val actionResponse = mockk<ActionResponse>()
         val action = mockk<Action>()

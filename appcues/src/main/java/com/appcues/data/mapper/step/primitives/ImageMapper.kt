@@ -1,11 +1,11 @@
 package com.appcues.data.mapper.step.primitives
 
-import com.appcues.data.mapper.AppcuesMappingException
+import com.appcues.data.mapper.AppcuesMapperException
 import com.appcues.data.mapper.styling.ContentModeMapper
 import com.appcues.data.mapper.styling.SizeMapper
 import com.appcues.data.mapper.styling.StyleMapper
+import com.appcues.data.model.ExperiencePrimitive.ImagePrimitive
 import com.appcues.data.remote.response.step.StepContentResponse
-import com.appcues.domain.entity.ExperienceComponent.ImageComponent
 
 internal class ImageMapper(
     private val sizeMapper: SizeMapper = SizeMapper(),
@@ -13,11 +13,11 @@ internal class ImageMapper(
     private val contentModeMapper: ContentModeMapper = ContentModeMapper(),
 ) {
 
-    fun map(from: StepContentResponse): ImageComponent {
+    fun map(from: StepContentResponse): ImagePrimitive {
         return with(from) {
-            requireNotNull(imageUrl) { throw AppcuesMappingException("image($id) imageUrl is null") }
+            requireNotNull(imageUrl) { throw AppcuesMapperException("image($id) imageUrl is null") }
 
-            ImageComponent(
+            ImagePrimitive(
                 id = id,
                 url = imageUrl,
                 accessibilityLabel = accessibilityLabel,

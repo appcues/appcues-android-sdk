@@ -1,12 +1,12 @@
 package com.appcues.data.mapper.step
 
-import com.appcues.data.mapper.AppcuesMappingException
+import com.appcues.data.mapper.AppcuesMapperException
 import com.appcues.data.mapper.step.primitives.ButtonMapper
 import com.appcues.data.mapper.step.primitives.ImageMapper
 import com.appcues.data.mapper.step.primitives.StackMapper
 import com.appcues.data.mapper.step.primitives.TextMapper
+import com.appcues.data.model.ExperiencePrimitive
 import com.appcues.data.remote.response.step.StepContentResponse
-import com.appcues.domain.entity.ExperienceComponent
 
 internal class StepContentMapper(
     private val stackMapper: StackMapper = StackMapper(),
@@ -15,7 +15,7 @@ internal class StepContentMapper(
     private val imageMapper: ImageMapper = ImageMapper(),
 ) {
 
-    fun map(from: StepContentResponse): ExperienceComponent = when (from.type) {
+    fun map(from: StepContentResponse): ExperiencePrimitive = when (from.type) {
         "stack" -> stackMapper.map(from) { map(it) }
         "text" -> textMapper.map(from)
         "button" -> buttonMapper.map(from) { map(it) }
@@ -23,8 +23,8 @@ internal class StepContentMapper(
         else -> from.mapContent()
     }
 
-    private fun StepContentResponse.mapContent(): ExperienceComponent {
-        requireNotNull(content) { throw AppcuesMappingException("$type($id) content is null") }
+    private fun StepContentResponse.mapContent(): ExperiencePrimitive {
+        requireNotNull(content) { throw AppcuesMapperException("$type($id) content is null") }
 
         return map(content)
     }

@@ -9,17 +9,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import com.appcues.domain.entity.ExperienceComponent.TextComponent
-import com.appcues.domain.entity.styling.ComponentColor
-import com.appcues.domain.entity.styling.ComponentStyle.ComponentFontWeight.BLACK
-import com.appcues.domain.entity.styling.ComponentStyle.ComponentHorizontalAlignment.TRAILING
+import com.appcues.data.model.ExperiencePrimitive.TextPrimitive
+import com.appcues.data.model.styling.ComponentColor
+import com.appcues.data.model.styling.ComponentStyle.ComponentFontWeight.BLACK
+import com.appcues.data.model.styling.ComponentStyle.ComponentHorizontalAlignment.TRAILING
 import com.appcues.ui.extensions.applyStyle
 import com.appcues.ui.extensions.componentStyle
 import com.appcues.ui.theme.AppcuesPreview
 import java.util.UUID
 
 @Composable
-internal fun TextComponent.Compose() {
+internal fun TextPrimitive.Compose() {
     Text(
         text = text,
         modifier = Modifier.componentStyle(style, isSystemInDarkTheme()),
@@ -32,7 +32,7 @@ internal fun TextComponent.Compose() {
     )
 }
 
-private val textComponent = TextComponent(
+private val textComponent = TextPrimitive(
     id = UUID.randomUUID(),
     text = "\uD83D\uDC4B Welcome! If you’re looking for Appcues’\nbrand guidelines, you’ve come to the right place.",
 )

@@ -3,14 +3,14 @@ package com.appcues.data.mapper.experience
 import com.appcues.data.mapper.action.ActionMapper
 import com.appcues.data.mapper.step.StepMapper
 import com.appcues.data.mapper.trait.TraitMapper
+import com.appcues.data.model.action.Action
+import com.appcues.data.model.step.Step
+import com.appcues.data.model.trait.Trait
 import com.appcues.data.remote.response.action.ActionResponse
 import com.appcues.data.remote.response.experience.ExperienceResponse
 import com.appcues.data.remote.response.experience.ExperienceThemeResponse
 import com.appcues.data.remote.response.step.StepResponse
 import com.appcues.data.remote.response.trait.TraitResponse
-import com.appcues.domain.entity.action.Action
-import com.appcues.domain.entity.step.Step
-import com.appcues.domain.entity.trait.Trait
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
