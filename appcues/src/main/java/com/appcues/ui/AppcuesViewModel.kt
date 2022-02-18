@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import com.appcues.data.model.Experience
 import com.appcues.di.AppcuesKoinComponent
 import com.appcues.logging.Logcues
+import com.appcues.statemachine.StateMachine
 import org.koin.core.component.inject
 
 internal class AppcuesViewModel(
@@ -15,6 +16,8 @@ internal class AppcuesViewModel(
 
     private val logcues by inject<Logcues>()
 
+    private val stateMachine by inject<StateMachine>()
+
     private val _experienceState = mutableStateOf(experience)
 
     val experienceState: State<Experience>
@@ -22,5 +25,9 @@ internal class AppcuesViewModel(
 
     init {
         logcues.info("$this init with experience $experience")
+    }
+
+    fun finish() {
+        stateMachine.endExperience()
     }
 }
