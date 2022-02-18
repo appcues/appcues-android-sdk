@@ -6,8 +6,8 @@ import com.appcues.AppcuesScope
 import com.appcues.AppcuesSession
 import com.appcues.action.ActionRegistry
 import com.appcues.data.AppcuesRepository
-import com.appcues.experience.container.DialogModalPresenter
 import com.appcues.logging.Logcues
+import com.appcues.statemachine.StateMachine
 import org.koin.core.module.Module
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -28,7 +28,7 @@ internal object AppcuesModule {
             scoped { Logcues(config.loggingLevel) }
 
             scoped {
-                DialogModalPresenter(
+                StateMachine(
                     scopeId = scopeId,
                     context = get()
                 )
@@ -38,7 +38,7 @@ internal object AppcuesModule {
                 AppcuesScope(
                     logcues = get(),
                     repository = get(),
-                    presenter = get(),
+                    stateMachine = get(),
                 )
             }
 
