@@ -6,6 +6,7 @@ import com.appcues.Appcues
 class ExampleApplication : Application() {
 
     companion object {
+
         lateinit var appcues: Appcues
         var currentUserID = "default-0000"
     }
@@ -13,8 +14,10 @@ class ExampleApplication : Application() {
     override fun onCreate() {
         super.onCreate()
 
+        val loggingLevel = if (BuildConfig.DEBUG) Appcues.LoggingLevel.DEBUG else Appcues.LoggingLevel.INFO
+
         appcues = Appcues.Builder(this, BuildConfig.APPCUES_ACCOUNT_ID, BuildConfig.APPCUES_APPLICATION_ID)
-            .logging(Appcues.LoggingLevel.BASIC)
+            .logging(loggingLevel)
             .build()
     }
 }

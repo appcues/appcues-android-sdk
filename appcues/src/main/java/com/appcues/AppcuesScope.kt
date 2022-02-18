@@ -24,7 +24,7 @@ internal class AppcuesScope(
 
     fun show(contentId: String) {
         launch {
-            logcues.i("show(contentId: $contentId)")
+            logcues.info("show(contentId: $contentId)")
             presenter.show(repository.getContent(contentId))
         }
     }
