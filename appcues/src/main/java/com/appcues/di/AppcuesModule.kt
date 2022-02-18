@@ -4,6 +4,7 @@ import com.appcues.Appcues
 import com.appcues.AppcuesConfig
 import com.appcues.AppcuesScope
 import com.appcues.AppcuesSession
+import com.appcues.action.ActionRegistry
 import com.appcues.data.AppcuesRepository
 import com.appcues.experience.container.DialogModalPresenter
 import com.appcues.logging.Logcues
@@ -17,8 +18,9 @@ internal object AppcuesModule {
         scope(named(scopeId)) {
             scoped {
                 Appcues(
-                    logcues = getScope(scopeId).get(),
-                    appcuesScope = getScope(scopeId).get(),
+                    logcues = get(),
+                    appcuesScope = get(),
+                    actionRegistry = get(),
                 )
             }
 
@@ -43,6 +45,12 @@ internal object AppcuesModule {
             scoped {
                 AppcuesRepository(
                     appcuesRemoteSource = get(),
+                )
+            }
+
+            scoped {
+                ActionRegistry(
+                    logcues = get(),
                 )
             }
         }

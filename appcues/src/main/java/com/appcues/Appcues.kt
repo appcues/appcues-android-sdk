@@ -1,6 +1,7 @@
 package com.appcues
 
 import android.content.Context
+import com.appcues.action.ActionRegistry
 import com.appcues.action.ExperienceAction
 import com.appcues.builder.ApiHostBuilderValidator
 import com.appcues.di.AppcuesKoinContext
@@ -10,6 +11,7 @@ import com.appcues.trait.ExperienceTrait
 class Appcues internal constructor(
     private val logcues: Logcues,
     private val appcuesScope: AppcuesScope,
+    private val actionRegistry: ActionRegistry,
 ) {
 
     /**
@@ -25,7 +27,7 @@ class Appcues internal constructor(
      * [properties] Optional properties that provide additional context about the user.
      */
     fun identify(userId: String, properties: HashMap<String, Any>? = null) {
-        logcues.i("identify(userId: $userId, properties: $properties)")
+        logcues.info("identify(userId: $userId, properties: $properties)")
     }
 
     /**
@@ -35,7 +37,7 @@ class Appcues internal constructor(
      * [properties] Optional properties that provide additional context about the group.
      */
     fun group(groupId: String?, properties: HashMap<String, Any>? = null) {
-        logcues.i("group(groupId: $groupId, properties: $properties)")
+        logcues.info("group(groupId: $groupId, properties: $properties)")
     }
 
     /**
@@ -44,7 +46,7 @@ class Appcues internal constructor(
      * to begin tracking activity and checking for qualified content.
      */
     fun anonymous(properties: HashMap<String, Any>? = null) {
-        logcues.i("anonymous(properties: $properties)")
+        logcues.info("anonymous(properties: $properties)")
     }
 
     /**
@@ -52,7 +54,7 @@ class Appcues internal constructor(
      * Can be used when the user logs out of your application.
      */
     fun reset() {
-        logcues.i("reset()")
+        logcues.info("reset()")
     }
 
     /**
@@ -62,7 +64,7 @@ class Appcues internal constructor(
      * [properties] Optional properties that provide additional context about the event.
      */
     fun track(name: String, properties: HashMap<String, Any>? = null) {
-        logcues.i("track(name: $name, properties: $properties)")
+        logcues.info("track(name: $name, properties: $properties)")
     }
 
     /**
@@ -72,7 +74,7 @@ class Appcues internal constructor(
      * [properties] Optional properties that provide additional context about the event.
      */
     fun screen(title: String, properties: HashMap<String, Any>? = null) {
-        logcues.i("screen(title: $title, properties: $properties)")
+        logcues.info("screen(title: $title, properties: $properties)")
     }
 
     /**
@@ -90,30 +92,34 @@ class Appcues internal constructor(
      * [experienceTrait] Trait to register
      */
     fun register(experienceTrait: ExperienceTrait) {
-        logcues.i("register(trait: $experienceTrait)")
+        logcues.info("register(trait: $experienceTrait)")
     }
 
     /**
      * Register an action that can be activated in an Experience.
      *
-     * [experienceAction] Action to register.
+     * [type] type of the action that is sent by the experience. ex: "my-action"
+     * [actionFactory] factory (lambda) responsible for creating the ExperienceAction registered for given [type]
+     *
+     * usage:
+     * registerAction("my-action") { MyCustomExperienceAction() }
      */
-    fun register(experienceAction: ExperienceAction) {
-        logcues.i("register(action: $experienceAction)")
+    fun registerAction(type: String, actionFactory: (config: HashMap<String, Any>?) -> ExperienceAction) {
+        actionRegistry.register(type, actionFactory)
     }
 
     /**
      * Enables automatic screen tracking. (Works for Activities)
      */
     fun trackScreen() {
-        logcues.i("trackScreen()")
+        logcues.info("trackScreen()")
     }
 
     /**
      * Set Appcues to start in Debug mode
      */
     fun debug() {
-        logcues.i("debug()")
+        logcues.info("debug()")
     }
 
     class Builder(
@@ -158,6 +164,6 @@ class Appcues internal constructor(
     }
 
     enum class LoggingLevel {
-        NONE, BASIC
+        NONE, INFO, DEBUG
     }
 }

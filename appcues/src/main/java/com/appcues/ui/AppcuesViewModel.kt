@@ -21,6 +21,6 @@ internal class AppcuesViewModel(
         get() = _experienceState
 
     init {
-        logcues.i("$this init with experience $experience")
+        logcues.info("$this init with experience $experience")
     }
 }

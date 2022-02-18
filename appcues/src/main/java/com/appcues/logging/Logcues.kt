@@ -2,22 +2,26 @@ package com.appcues.logging
 
 import android.util.Log
 import com.appcues.Appcues
-import java.lang.Exception
+import com.appcues.Appcues.LoggingLevel.DEBUG
+import com.appcues.Appcues.LoggingLevel.NONE
 
 class Logcues(private val loggingLevel: Appcues.LoggingLevel) {
 
     companion object {
+
         private const val TAG = "Appcues"
     }
 
-    fun i(message: String) {
-        if (loggingLevel > Appcues.LoggingLevel.NONE) {
+    fun info(message: String) {
+        if (loggingLevel > NONE) {
             Log.i(TAG, message)
         }
     }
 
-    fun e(exception: Exception) {
-        if (loggingLevel > Appcues.LoggingLevel.NONE) {
+    fun error(exception: Exception) {
+        if (loggingLevel == DEBUG) {
+            throw exception
+        } else if (loggingLevel > NONE) {
             Log.e(TAG, exception.message.toString())
         }
     }
