@@ -3,11 +3,13 @@ package com.appcues
 import android.util.Log
 import com.appcues.data.AppcuesRepository
 import com.appcues.logging.Logcues
+import com.appcues.statemachine.Action.StartExperience
 import com.appcues.statemachine.StateMachine
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 internal class AppcuesScope(
@@ -22,10 +24,20 @@ internal class AppcuesScope(
         Log.i("Appcues", "AppcuesScope error handler -> exception: $error")
     }
 
+    init {
+        launch {
+            stateMachine.state.collect {
+                logcues.info("moved to state $it")
+            }
+        }
+    }
+
     fun show(contentId: String) {
         launch {
             logcues.info("show(contentId: $contentId)")
-            stateMachine.showExperience(repository.getContent(contentId))
+            repository.getContent(contentId).also {
+                stateMachine.handleAction(StartExperience(it))
+            }
         }
     }
 }

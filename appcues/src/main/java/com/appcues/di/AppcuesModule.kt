@@ -5,6 +5,7 @@ import com.appcues.AppcuesConfig
 import com.appcues.AppcuesScope
 import com.appcues.AppcuesSession
 import com.appcues.action.ActionRegistry
+import com.appcues.action.appcues.AppcuesCloseAction
 import com.appcues.data.AppcuesRepository
 import com.appcues.logging.Logcues
 import com.appcues.statemachine.StateMachine
@@ -29,8 +30,7 @@ internal object AppcuesModule {
 
             scoped {
                 StateMachine(
-                    scopeId = scopeId,
-                    context = get()
+                    scopeId = scopeId
                 )
             }
 
@@ -50,8 +50,13 @@ internal object AppcuesModule {
 
             scoped {
                 ActionRegistry(
+                    scopeId = scopeId,
                     logcues = get(),
                 )
+            }
+
+            factory { params ->
+                AppcuesCloseAction(params.get(), get())
             }
         }
     }

@@ -11,7 +11,7 @@ import com.appcues.trait.ExperienceTrait
 class Appcues internal constructor(
     private val logcues: Logcues,
     private val appcuesScope: AppcuesScope,
-    private val actionRegistry: ActionRegistry,
+    private val actionRegistry: ActionRegistry
 ) {
 
     /**
