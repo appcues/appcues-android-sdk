@@ -40,14 +40,16 @@ internal class AppcuesActivity : AppCompatActivity() {
         overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
         super.onCreate(savedInstanceState)
 
-        viewModel.uiState.observe(this) {
-            when (it) {
+        viewModel.uiState.observe(this) { state ->
+            when (state) {
                 is Render -> {
+                    // noticed that for some reason something is triggering a recomposition.
+                    // its not impacting anything but it would be good to find out why.
                     setContent {
                         AppcuesTheme {
-                            CompositionLocalProvider(LocalAppcuesActions provides AppcuesActions { viewModel.testAction() }) {
+                            CompositionLocalProvider(LocalAppcuesActions provides AppcuesActions { viewModel.onAction(it) }) {
                                 DialogTrait {
-                                    it.experience.steps.first().content.Compose()
+                                    state.experience.steps.first().content.Compose()
                                 }
                             }
                         }

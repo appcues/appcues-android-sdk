@@ -1,21 +1,18 @@
-package com.appcues.di
+package com.appcues
 
-import com.appcues.Appcues
-import com.appcues.AppcuesConfig
-import com.appcues.AppcuesScope
-import com.appcues.AppcuesSession
 import com.appcues.action.ActionRegistry
 import com.appcues.action.appcues.AppcuesCloseAction
 import com.appcues.data.AppcuesRepository
+import com.appcues.di.KoinModule
 import com.appcues.logging.Logcues
 import com.appcues.statemachine.StateMachine
 import org.koin.core.module.Module
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
-internal object AppcuesModule {
+internal object AppcuesModule : KoinModule {
 
-    fun install(scopeId: String, config: AppcuesConfig): Module = module {
+    override fun install(scopeId: String, config: AppcuesConfig): Module = module {
         scope(named(scopeId)) {
             scoped {
                 Appcues(
@@ -40,6 +37,7 @@ internal object AppcuesModule {
             scoped {
                 AppcuesRepository(
                     appcuesRemoteSource = get(),
+                    experienceMapper = get(),
                 )
             }
 
@@ -50,9 +48,7 @@ internal object AppcuesModule {
                 )
             }
 
-            factory { params ->
-                AppcuesCloseAction(params.get(), get())
-            }
+            factory { params -> AppcuesCloseAction(params.getOrNull(), get()) }
         }
     }
 }

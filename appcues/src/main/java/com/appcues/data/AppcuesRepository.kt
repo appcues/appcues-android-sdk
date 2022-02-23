@@ -8,7 +8,7 @@ import kotlinx.coroutines.withContext
 
 internal class AppcuesRepository(
     private val appcuesRemoteSource: AppcuesRemoteSource,
-    private val experienceMapper: ExperienceMapper = ExperienceMapper(),
+    private val experienceMapper: ExperienceMapper,
 ) {
 
     suspend fun getContent(contentId: String): Experience = withContext(Dispatchers.IO) {

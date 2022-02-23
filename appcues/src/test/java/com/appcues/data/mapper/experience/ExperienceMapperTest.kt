@@ -1,11 +1,9 @@
 package com.appcues.data.mapper.experience
 
-import com.appcues.data.mapper.action.ActionMapper
 import com.appcues.data.mapper.step.StepMapper
 import com.appcues.data.mapper.trait.TraitMapper
-import com.appcues.data.model.action.Action
-import com.appcues.data.model.step.Step
-import com.appcues.data.model.trait.Trait
+import com.appcues.data.model.Step
+import com.appcues.data.model.Trait
 import com.appcues.data.remote.response.action.ActionResponse
 import com.appcues.data.remote.response.experience.ExperienceResponse
 import com.appcues.data.remote.response.experience.ExperienceThemeResponse
@@ -21,12 +19,9 @@ class ExperienceMapperTest {
 
     private val stepMapper = mockk<StepMapper>()
 
-    private val actionMapper = mockk<ActionMapper>()
-
     private val traitMapper = mockk<TraitMapper>()
 
     private val mapper = ExperienceMapper(
-        actionMapper = actionMapper,
         traitMapper = traitMapper,
         stepMapper = stepMapper
     )
@@ -38,11 +33,8 @@ class ExperienceMapperTest {
 
         val stepResponse = mockk<StepResponse>()
         val step = mockk<Step>()
-        every { stepMapper.map(stepResponse) } returns step
-        val actionResponse = mockk<ActionResponse>()
-        val action = mockk<Action>()
-        val actionRandomId = UUID.randomUUID()
-        every { actionMapper.map(actionResponse) } returns action
+        val actions = hashMapOf<UUID, List<ActionResponse>>()
+        every { stepMapper.map(stepResponse, actions) } returns step
         val traitResponse = mockk<TraitResponse>()
         val trait = mockk<Trait>()
         every { traitMapper.map(traitResponse) } returns trait
@@ -50,7 +42,7 @@ class ExperienceMapperTest {
             id = randomId,
             name = "Test Experience",
             theme = ExperienceThemeResponse(),
-            actions = hashMapOf(actionRandomId to arrayListOf(actionResponse)),
+            actions = actions,
             traits = arrayListOf(traitResponse),
             steps = arrayListOf(stepResponse),
         )
@@ -62,9 +54,6 @@ class ExperienceMapperTest {
             assertThat(name).isEqualTo("Test Experience")
             assertThat(steps).hasSize(1)
             assertThat(steps[0]).isEqualTo(step)
-            assertThat(actions).hasSize(1)
-            assertThat(actions[actionRandomId]).hasSize(1)
-            assertThat(actions[actionRandomId]?.get(0)).isEqualTo(action)
             assertThat(traits).hasSize(1)
             assertThat(traits[0]).isEqualTo(trait)
         }

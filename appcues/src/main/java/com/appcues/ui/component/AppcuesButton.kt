@@ -32,7 +32,7 @@ import java.util.UUID
 
 @Composable
 internal fun ButtonPrimitive.Compose() {
-    val onClick = LocalAppcuesActions.current.onClick
+    val onAction = LocalAppcuesActions.current.onAction
     val interactionSource = remember { MutableInteractionSource() }
     val isEnabled = remember { true }
 
@@ -45,7 +45,7 @@ internal fun ButtonPrimitive.Compose() {
                     interactionSource = interactionSource,
                     indication = rememberRipple(),
                     enabled = isEnabled,
-                    onClick = { onClick?.invoke(id) }
+                    onClick = { actions.forEach { onAction(it.experienceAction) } }
                 )
             ),
         color = Color.Transparent,
