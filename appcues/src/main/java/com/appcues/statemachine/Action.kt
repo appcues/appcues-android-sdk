@@ -8,5 +8,5 @@ internal sealed class Action {
     class RenderStep : Action()
     class EndStep : Action()
     class EndExperience : Action()
-    class Reset : Action() // not sure yet if we really need Reset in addition to EndExperience, TBD
+    class Reset : Action()
 }
