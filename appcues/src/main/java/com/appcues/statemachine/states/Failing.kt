@@ -4,18 +4,19 @@ import com.appcues.data.model.Experience
 import com.appcues.statemachine.Action
 import com.appcues.statemachine.Action.Reset
 import com.appcues.statemachine.State
+import com.appcues.statemachine.State.Transition
 
 // not sure if we really need this state - more of a pass through for analytics on the way back to Idling?
 internal class Failing(
     override val scopeId: String,
     override val experience: Experience?
 ) : State {
-    override fun handleAction(action: Action): State {
+    override fun handleAction(action: Action): Transition? {
         return when (action) {
             is Reset -> {
-                Idling(scopeId)
+                Transition(Idling(scopeId))
             }
-            else -> this
+            else -> null
         }
     }
 }

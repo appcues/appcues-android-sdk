@@ -15,7 +15,7 @@ import com.appcues.statemachine.states.BeginningStep
 import com.appcues.statemachine.states.EndingStep
 import com.appcues.ui.AppcuesViewModel.UIState.Completed
 import com.appcues.ui.AppcuesViewModel.UIState.Render
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.core.component.get
 import org.koin.core.component.inject
@@ -38,7 +38,7 @@ internal class AppcuesViewModel(
 
     init {
         viewModelScope.launch {
-            stateMachine.state.collect {
+            stateMachine.flow.collectLatest {
                 when (it) {
                     is BeginningStep -> {
                         // this can happen multiple times in multi-step container

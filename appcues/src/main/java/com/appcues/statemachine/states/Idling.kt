@@ -5,20 +5,19 @@ import com.appcues.statemachine.Action
 import com.appcues.statemachine.Action.StartExperience
 import com.appcues.statemachine.Action.StartStep
 import com.appcues.statemachine.State
+import com.appcues.statemachine.State.Transition
 
 internal class Idling(
     override val scopeId: String,
     override val experience: Experience? = null
 ) : State {
-    override fun handleAction(action: Action): State {
+    override fun handleAction(action: Action): Transition? {
         return when (action) {
             is StartExperience -> {
                 // no work here, transition state
-                BeginningExperience(scopeId, action.experience)
-                    // and auto-invoke starting step 0
-                    .handleAction(StartStep(0))
+                Transition(BeginningExperience(scopeId, action.experience), StartStep(0))
             }
-            else -> this
+            else -> null
         }
     }
 }

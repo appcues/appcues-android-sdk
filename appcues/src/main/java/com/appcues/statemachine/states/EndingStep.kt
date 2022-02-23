@@ -7,6 +7,7 @@ import com.appcues.statemachine.Action.RenderStep
 import com.appcues.statemachine.Action.Reset
 import com.appcues.statemachine.Action.StartStep
 import com.appcues.statemachine.State
+import com.appcues.statemachine.State.Transition
 
 internal class EndingStep(
     override val scopeId: String,
@@ -14,19 +15,16 @@ internal class EndingStep(
     val step: Int,
     val dismissContainer: Boolean
 ) : State {
-    override fun handleAction(action: Action): State {
+    override fun handleAction(action: Action): Transition? {
         return when (action) {
             is StartStep -> {
                 // trait packaging?...
-                BeginningStep(scopeId, experience, action.step)
-                    // auto-invoke rendering
-                    .handleAction(RenderStep())
+                Transition(BeginningStep(scopeId, experience, action.step), RenderStep())
             }
             is EndExperience -> {
-                EndingExperience(scopeId, experience)
-                    .handleAction(Reset())
+                Transition(EndingExperience(scopeId, experience), Reset())
             }
-            else -> this
+            else -> null
         }
     }
 }
