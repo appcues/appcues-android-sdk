@@ -22,9 +22,6 @@ internal class BeginningExperience(
 
                 // render it...
                 // eventually: will be rendering a step or set of steps ("step container") - not entire experience
-                // idea: don't need to pass the experience through directly here, could let activity reference back
-                //    to state machine / state somehow to get the experience and/or steps to render
-                //    experience then does not need to be Parcelable
                 context.startActivity(AppcuesActivity.getIntent(context, scopeId))
 
                 // transition to begin step

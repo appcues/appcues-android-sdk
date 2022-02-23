@@ -1,9 +1,5 @@
 package com.appcues.data.model.styling
 
-import android.os.Parcelable
-import kotlinx.parcelize.Parcelize
-
-@Parcelize
 internal data class ComponentStyle(
     // General properties
     val width: Int? = null,
@@ -37,7 +33,7 @@ internal data class ComponentStyle(
     val horizontalAlignment: ComponentHorizontalAlignment? = null,
 
     // missing properties: backgroundGradient, shadow
-) : Parcelable {
+) {
 
     enum class ComponentFontWeight {
         ULTRA_LIGHT, THIN, LIGHT, REGULAR, MEDIUM, SEMI_BOLD, BOLD, HEAVY, BLACK

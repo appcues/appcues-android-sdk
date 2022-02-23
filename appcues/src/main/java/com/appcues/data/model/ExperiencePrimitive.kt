@@ -1,35 +1,29 @@
 package com.appcues.data.model
 
-import android.os.Parcelable
 import com.appcues.data.model.styling.ComponentContentMode
 import com.appcues.data.model.styling.ComponentContentMode.FILL
 import com.appcues.data.model.styling.ComponentDistribution
 import com.appcues.data.model.styling.ComponentDistribution.CENTER
 import com.appcues.data.model.styling.ComponentSize
 import com.appcues.data.model.styling.ComponentStyle
-import kotlinx.parcelize.Parcelize
 import java.util.UUID
 
 internal sealed class ExperiencePrimitive(
     open val id: UUID,
     open val style: ComponentStyle,
-) : Parcelable {
-
-    @Parcelize
+) {
     data class TextPrimitive(
         override val id: UUID,
         val text: String,
         override val style: ComponentStyle = ComponentStyle(),
     ) : ExperiencePrimitive(id, style)
 
-    @Parcelize
     data class ButtonPrimitive(
         override val id: UUID,
         val content: ExperiencePrimitive,
         override val style: ComponentStyle = ComponentStyle(),
     ) : ExperiencePrimitive(id, style)
 
-    @Parcelize
     data class ImagePrimitive(
         override val id: UUID,
         val url: String,
@@ -39,7 +33,6 @@ internal sealed class ExperiencePrimitive(
         override val style: ComponentStyle = ComponentStyle(),
     ) : ExperiencePrimitive(id, style)
 
-    @Parcelize
     data class VerticalStackPrimitive(
         override val id: UUID,
         val items: List<ExperiencePrimitive>,
@@ -47,7 +40,6 @@ internal sealed class ExperiencePrimitive(
         override val style: ComponentStyle = ComponentStyle(),
     ) : ExperiencePrimitive(id, style)
 
-    @Parcelize
     data class HorizontalStackPrimitive(
         override val id: UUID,
         val items: List<ExperiencePrimitive>,
