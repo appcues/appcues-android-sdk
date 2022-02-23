@@ -14,7 +14,7 @@ internal class Idling(
     override fun handleAction(action: Action): Transition? {
         return when (action) {
             is StartExperience -> {
-                // no work here, transition state
+                // StartStep continuation will trigger immediate transition to BeginningStep
                 Transition(BeginningExperience(scopeId, action.experience), StartStep(0))
             }
             else -> null

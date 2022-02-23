@@ -27,13 +27,7 @@ internal object AppcuesModule {
 
             scoped { AppcuesSession() }
             scoped { Logcues(config.loggingLevel) }
-
-            scoped {
-                StateMachine(
-                    logger = get(),
-                    scopeId = scopeId
-                )
-            }
+            scoped { StateMachine(scopeId = scopeId) }
 
             scoped {
                 AppcuesScope(

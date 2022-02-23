@@ -60,11 +60,15 @@ internal class AppcuesViewModel(
     }
 
     fun onRender() {
-        stateMachine.handleAction(RenderStep())
+        viewModelScope.launch {
+            stateMachine.handleAction(RenderStep())
+        }
     }
 
-    fun onFinish() {
-        stateMachine.handleAction(EndExperience())
+    fun onEndExperience() {
+        viewModelScope.launch {
+            stateMachine.handleAction(EndExperience())
+        }
     }
 
     fun testAction() {

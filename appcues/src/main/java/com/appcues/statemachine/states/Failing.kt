@@ -6,7 +6,6 @@ import com.appcues.statemachine.Action.Reset
 import com.appcues.statemachine.State
 import com.appcues.statemachine.State.Transition
 
-// not sure if we really need this state - more of a pass through for analytics on the way back to Idling?
 internal class Failing(
     override val scopeId: String,
     override val experience: Experience?

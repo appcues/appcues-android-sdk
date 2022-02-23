@@ -9,6 +9,7 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 internal class AppcuesScope(
@@ -23,7 +24,17 @@ internal class AppcuesScope(
         Log.i("Appcues", "AppcuesScope error handler -> exception: $error")
     }
 
+    init {
+        launch {
+            stateMachine.flow.collect {
+                logcues.info("moved to state $it")
+            }
+        }
+    }
+
     fun show(contentId: String) {
+        // should this check if the state is Idling before even trying to fetch
+        // the experience? since it cannot show anyway, if already in another state?
         launch {
             logcues.info("show(contentId: $contentId)")
             repository.getContent(contentId).also {

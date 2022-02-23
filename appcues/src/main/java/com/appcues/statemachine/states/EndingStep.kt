@@ -3,7 +3,6 @@ package com.appcues.statemachine.states
 import com.appcues.data.model.Experience
 import com.appcues.statemachine.Action
 import com.appcues.statemachine.Action.EndExperience
-import com.appcues.statemachine.Action.RenderStep
 import com.appcues.statemachine.Action.Reset
 import com.appcues.statemachine.Action.StartStep
 import com.appcues.statemachine.State
@@ -18,8 +17,8 @@ internal class EndingStep(
     override fun handleAction(action: Action): Transition? {
         return when (action) {
             is StartStep -> {
-                // trait packaging?...
-                Transition(BeginningStep(scopeId, experience, action.step), RenderStep())
+                // would either move page forward in existing container or start a new activity - TBD
+                Transition(BeginningStep(scopeId, experience, action.step))
             }
             is EndExperience -> {
                 Transition(EndingExperience(scopeId, experience), Reset())
