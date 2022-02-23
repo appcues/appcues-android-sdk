@@ -1,8 +1,8 @@
 package com.appcues.ui
 
 import androidx.compose.runtime.staticCompositionLocalOf
-import java.util.UUID
+import com.appcues.action.ExperienceAction
 
-internal val LocalAppcuesActions = staticCompositionLocalOf { AppcuesActions() }
+internal val LocalAppcuesActions = staticCompositionLocalOf { AppcuesActions {} }
 
-internal data class AppcuesActions(val onClick: ((id: UUID) -> Unit)? = null)
+internal data class AppcuesActions(val onAction: ((ExperienceAction) -> Unit))

@@ -11,40 +11,47 @@ import java.util.UUID
 internal sealed class ExperiencePrimitive(
     open val id: UUID,
     open val style: ComponentStyle,
+    open val actions: List<Action>,
 ) {
+
     data class TextPrimitive(
         override val id: UUID,
-        val text: String,
         override val style: ComponentStyle = ComponentStyle(),
-    ) : ExperiencePrimitive(id, style)
+        override val actions: List<Action> = arrayListOf(),
+        val text: String,
+    ) : ExperiencePrimitive(id, style, actions)
 
     data class ButtonPrimitive(
         override val id: UUID,
-        val content: ExperiencePrimitive,
         override val style: ComponentStyle = ComponentStyle(),
-    ) : ExperiencePrimitive(id, style)
+        override val actions: List<Action> = arrayListOf(),
+        val content: ExperiencePrimitive,
+    ) : ExperiencePrimitive(id, style, actions)
 
     data class ImagePrimitive(
         override val id: UUID,
+        override val style: ComponentStyle = ComponentStyle(),
+        override val actions: List<Action> = arrayListOf(),
         val url: String,
         val accessibilityLabel: String?,
         val intrinsicSize: ComponentSize?,
         val contentMode: ComponentContentMode = FILL,
-        override val style: ComponentStyle = ComponentStyle(),
-    ) : ExperiencePrimitive(id, style)
+    ) : ExperiencePrimitive(id, style, actions)
 
     data class VerticalStackPrimitive(
         override val id: UUID,
+        override val style: ComponentStyle = ComponentStyle(),
+        override val actions: List<Action> = arrayListOf(),
         val items: List<ExperiencePrimitive>,
         val spacing: Int = 0,
-        override val style: ComponentStyle = ComponentStyle(),
-    ) : ExperiencePrimitive(id, style)
+    ) : ExperiencePrimitive(id, style, actions)
 
     data class HorizontalStackPrimitive(
         override val id: UUID,
+        override val style: ComponentStyle = ComponentStyle(),
+        override val actions: List<Action> = arrayListOf(),
         val items: List<ExperiencePrimitive>,
         val spacing: Int = 0,
         val distribution: ComponentDistribution = CENTER,
-        override val style: ComponentStyle = ComponentStyle(),
-    ) : ExperiencePrimitive(id, style)
+    ) : ExperiencePrimitive(id, style, actions)
 }

@@ -2,9 +2,8 @@ package com.appcues.data.model
 
 import java.util.UUID
 
-internal data class Experience(
+internal data class Step(
     val id: UUID,
-    val name: String,
+    val content: ExperiencePrimitive,
     val traits: List<Trait>,
-    val steps: List<Step>
 )

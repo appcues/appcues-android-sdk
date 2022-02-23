@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.appcues.Appcues
-import com.appcues.action.ActionRegistry
+import com.appcues.action.ExperienceAction
 import com.appcues.data.model.Experience
 import com.appcues.di.AppcuesKoinComponent
 import com.appcues.statemachine.Action.EndExperience
@@ -17,7 +17,6 @@ import com.appcues.ui.AppcuesViewModel.UIState.Completed
 import com.appcues.ui.AppcuesViewModel.UIState.Render
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import org.koin.core.component.get
 import org.koin.core.component.inject
 
 internal class AppcuesViewModel(
@@ -30,6 +29,8 @@ internal class AppcuesViewModel(
     }
 
     private val stateMachine by inject<StateMachine>()
+
+    private val appcues by inject<Appcues>()
 
     private val _uiState = MutableLiveData<UIState>()
 
@@ -71,15 +72,9 @@ internal class AppcuesViewModel(
         }
     }
 
-    fun testAction() {
-        // this simulates how the CloseAction would be invoked
-        val actionRegistry = get<ActionRegistry>()
-        val closeActionFactory = actionRegistry["@appcues/close"]
-        val appcues = get<Appcues>()
-        val closeAction = closeActionFactory?.invoke(hashMapOf())
-
+    fun onAction(experienceAction: ExperienceAction) {
         viewModelScope.launch {
-            closeAction?.execute(appcues)
+            experienceAction.execute(appcues)
         }
     }
 }

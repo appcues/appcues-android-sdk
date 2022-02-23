@@ -1,6 +1,5 @@
 package com.appcues
 
-import android.util.Log
 import com.appcues.data.AppcuesRepository
 import com.appcues.logging.Logcues
 import com.appcues.statemachine.Action.StartExperience
@@ -20,14 +19,18 @@ internal class AppcuesScope(
 
     private val parentJob = SupervisorJob()
 
-    override val coroutineContext = parentJob + Dispatchers.Main + CoroutineExceptionHandler { _, error ->
-        Log.i("Appcues", "AppcuesScope error handler -> exception: $error")
+    private val dispatcher = Dispatchers.Main
+
+    private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
+        logcues.error(Exception(throwable))
     }
+
+    override val coroutineContext = parentJob + dispatcher + exceptionHandler
 
     init {
         launch {
             stateMachine.flow.collect {
-                logcues.info("moved to state $it")
+                logcues.info("StateMachine moved to state -> ${it::class.simpleName}")
             }
         }
     }

@@ -1,10 +1,8 @@
 package com.appcues.data.mapper.step
 
-import com.appcues.data.mapper.action.ActionMapper
 import com.appcues.data.mapper.trait.TraitMapper
 import com.appcues.data.model.ExperiencePrimitive
-import com.appcues.data.model.action.Action
-import com.appcues.data.model.trait.Trait
+import com.appcues.data.model.Trait
 import com.appcues.data.remote.response.action.ActionResponse
 import com.appcues.data.remote.response.step.StepContentResponse
 import com.appcues.data.remote.response.step.StepResponse
@@ -19,12 +17,9 @@ class StepMapperTest {
 
     private val stepContentMapper = mockk<StepContentMapper>()
 
-    private val actionMapper = mockk<ActionMapper>()
-
     private val traitMapper = mockk<TraitMapper>()
 
     private val mapper = StepMapper(
-        actionMapper = actionMapper,
         traitMapper = traitMapper,
         stepContentMapper = stepContentMapper
     )
@@ -35,29 +30,23 @@ class StepMapperTest {
         val randomId = UUID.randomUUID()
         val stepContentResponse = mockk<StepContentResponse>(relaxed = true)
         val experienceComponent = mockk<ExperiencePrimitive>()
-        every { stepContentMapper.map(stepContentResponse) } returns experienceComponent
-        val actionResponse = mockk<ActionResponse>()
-        val action = mockk<Action>()
-        val actionRandomId = UUID.randomUUID()
-        every { actionMapper.map(actionResponse) } returns action
+        val actions = hashMapOf<UUID, List<ActionResponse>>()
+        every { stepContentMapper.map(stepContentResponse, actions) } returns experienceComponent
         val traitResponse = mockk<TraitResponse>()
         val trait = mockk<Trait>()
         every { traitMapper.map(traitResponse) } returns trait
         val from = StepResponse(
             id = randomId,
             content = stepContentResponse,
-            actions = hashMapOf(actionRandomId to arrayListOf(actionResponse)),
+            actions = actions,
             traits = arrayListOf(traitResponse),
         )
         // When
-        val result = mapper.map(from)
+        val result = mapper.map(from, actions)
         // Then
         with(result) {
             assertThat(id).isEqualTo(randomId)
             assertThat(content).isEqualTo(experienceComponent)
-            assertThat(actions).hasSize(1)
-            assertThat(actions[actionRandomId]).hasSize(1)
-            assertThat(actions[actionRandomId]?.get(0)).isEqualTo(action)
             assertThat(traits).hasSize(1)
             assertThat(traits[0]).isEqualTo(trait)
         }
