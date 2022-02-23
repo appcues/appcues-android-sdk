@@ -30,6 +30,7 @@ internal object AppcuesModule {
 
             scoped {
                 StateMachine(
+                    logger = get(),
                     scopeId = scopeId
                 )
             }

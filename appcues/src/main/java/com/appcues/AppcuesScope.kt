@@ -9,7 +9,6 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 internal class AppcuesScope(
@@ -22,14 +21,6 @@ internal class AppcuesScope(
 
     override val coroutineContext = parentJob + Dispatchers.Main + CoroutineExceptionHandler { _, error ->
         Log.i("Appcues", "AppcuesScope error handler -> exception: $error")
-    }
-
-    init {
-        launch {
-            stateMachine.state.collect {
-                logcues.info("moved to state $it")
-            }
-        }
     }
 
     fun show(contentId: String) {
