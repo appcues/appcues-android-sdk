@@ -1,7 +1,11 @@
 package com.appcues.ui.extensions
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Indication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -16,26 +20,32 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.appcues.action.ExperienceAction
+import com.appcues.data.model.Action
+import com.appcues.data.model.ExperiencePrimitive
 import com.appcues.data.model.styling.ComponentStyle
 
 internal fun Modifier.componentStyle(
-    style: ComponentStyle,
+    component: ExperiencePrimitive,
+    gestureProperties: PrimitiveGestureProperties,
     isDark: Boolean,
     defaultBackgroundColor: Color? = null,
     noSizeFillMax: Boolean = false,
-    clickModifier: Modifier = Modifier,
 ) = this.then(
-    Modifier
-        .padding(style.getMargins())
-        .componentShadow(style, isDark)
-        .componentSize(style, noSizeFillMax)
-        .then(clickModifier)
-        .componentCorner(style)
-        .componentBorder(style, isDark)
-        .componentBackground(style, isDark, defaultBackgroundColor)
-        .padding(style.getPaddings())
+    with(component) {
+        Modifier
+            .padding(style.getMargins())
+            .componentShadow(style, isDark)
+            .componentSize(style, noSizeFillMax)
+            .componentActions(actions, gestureProperties)
+            .componentCorner(style)
+            .componentBorder(style, isDark)
+            .componentBackground(style, isDark, defaultBackgroundColor)
+            .padding(style.getPaddings())
+    }
 )
 
 internal fun Modifier.componentBackground(
@@ -132,4 +142,54 @@ private fun Modifier.coloredShadow(
             paint
         )
     }
+}
+
+internal data class PrimitiveGestureProperties(
+    val onAction: (ExperienceAction) -> Unit,
+    val interactionSource: MutableInteractionSource,
+    val indication: Indication?,
+    val enabled: Boolean = true,
+    val role: Role = Role.Button,
+)
+
+@OptIn(ExperimentalFoundationApi::class)
+private fun Modifier.componentActions(
+    actions: List<Action>,
+    gestureProperties: PrimitiveGestureProperties
+) = this.then(
+    // check to see if the list is not null first, to ensure that we have at least one action before setting
+    // the combinedClickable Modifier
+    if (actions.isNotEmpty()) Modifier.combinedClickable(
+        interactionSource = gestureProperties.interactionSource,
+        indication = gestureProperties.indication,
+        enabled = gestureProperties.enabled,
+        role = gestureProperties.role,
+        onLongClick = actions.toLongPressMotionOrNull(gestureProperties.onAction),
+        onClick = actions.toTapMotionOrEmpty(gestureProperties.onAction),
+    )
+    else Modifier
+)
+
+private fun List<Action>.toTapMotionOrEmpty(onAction: (ExperienceAction) -> Unit): (() -> Unit) {
+    // filter only TAP motions
+    return filter { it.on == Action.Motion.TAP }
+        // take if there is any
+        .takeIf { it.isNotEmpty() }
+        // map to ExperienceAction
+        ?.map { it.experienceAction }
+        // return click block that executes onAction for every ExperienceAction
+        // else returns empty click block (notnull property for combinedClickable)
+        ?.run { { forEach { onAction(it) } } } ?: { }
+}
+
+private fun List<Action>.toLongPressMotionOrNull(block: (ExperienceAction) -> Unit): (() -> Unit)? {
+    // filter only LONG_PRESS motions
+    return filter { it.on == Action.Motion.LONG_PRESS }
+        // take if there is any
+        .takeIf { it.isNotEmpty() }
+        // map to ExperienceAction
+        ?.map { it.experienceAction }
+        // return click block that executes onAction for every ExperienceAction
+        // else returns null
+        ?.run { { forEach { block(it) } } }
 }

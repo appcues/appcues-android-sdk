@@ -1,10 +1,13 @@
 package com.appcues.ui.component
 
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.ProvideTextStyle
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -17,7 +20,9 @@ import com.appcues.data.model.styling.ComponentColor
 import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.data.model.styling.ComponentStyle.ComponentHorizontalAlignment.LEADING
 import com.appcues.data.model.styling.ComponentStyle.ComponentHorizontalAlignment.TRAILING
+import com.appcues.ui.LocalAppcuesActions
 import com.appcues.ui.extensions.Compose
+import com.appcues.ui.extensions.PrimitiveGestureProperties
 import com.appcues.ui.extensions.componentStyle
 import com.appcues.ui.extensions.getHorizontalAlignment
 import com.appcues.ui.extensions.getTextStyle
@@ -27,7 +32,16 @@ import java.util.UUID
 @Composable
 internal fun VerticalStackPrimitive.Compose() {
     Column(
-        modifier = Modifier.componentStyle(style, isSystemInDarkTheme()),
+        modifier = Modifier.componentStyle(
+            component = this,
+            gestureProperties = PrimitiveGestureProperties(
+                onAction = LocalAppcuesActions.current.onAction,
+                interactionSource = remember { MutableInteractionSource() },
+                indication = rememberRipple(),
+                enabled = remember { true },
+            ),
+            isDark = isSystemInDarkTheme()
+        ),
         horizontalAlignment = style.getHorizontalAlignment(),
         verticalArrangement = Arrangement.spacedBy(spacing.dp, Alignment.CenterVertically)
     ) {

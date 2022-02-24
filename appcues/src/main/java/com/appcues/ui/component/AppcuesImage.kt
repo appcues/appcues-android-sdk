@@ -2,13 +2,17 @@ package com.appcues.ui.component
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.semantics.Role
 import coil.compose.rememberImagePainter
 import coil.size.OriginalSize
 import coil.size.Scale
@@ -18,13 +22,26 @@ import com.appcues.data.model.styling.ComponentContentMode.FILL
 import com.appcues.data.model.styling.ComponentContentMode.FIT
 import com.appcues.data.model.styling.ComponentSize
 import com.appcues.data.model.styling.ComponentStyle
+import com.appcues.ui.LocalAppcuesActions
+import com.appcues.ui.extensions.PrimitiveGestureProperties
 import com.appcues.ui.extensions.componentStyle
 
 @Composable
 internal fun ImagePrimitive.Compose() {
     Box(
         modifier = Modifier
-            .componentStyle(style, isSystemInDarkTheme(), noSizeFillMax = true)
+            .componentStyle(
+                component = this,
+                gestureProperties = PrimitiveGestureProperties(
+                    onAction = LocalAppcuesActions.current.onAction,
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = rememberRipple(),
+                    enabled = remember { true },
+                    role = Role.Image,
+                ),
+                isDark = isSystemInDarkTheme(),
+                noSizeFillMax = true
+            )
             .imageAspectRatio(intrinsicSize, style)
             .animateContentSize(),
         contentAlignment = Alignment.Center

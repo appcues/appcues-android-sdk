@@ -12,6 +12,7 @@ internal class ActionsMapper(
 
     fun map(actions: HashMap<UUID, List<ActionResponse>>?, primitiveId: UUID): List<Action> {
         return arrayListOf<Action>().apply {
+            // get possible action list based on id, then map to Action model
             actions?.get(primitiveId)?.forEach { actionResponse -> actionResponse.toAction()?.let { add(it) } }
         }
     }
@@ -21,7 +22,7 @@ internal class ActionsMapper(
             Action(
                 on = when (on) {
                     "tap" -> Action.Motion.TAP
-                    "longPress" -> Action.Motion.TAP
+                    "longPress" -> Action.Motion.LONG_PRESS
                     else -> throw AppcuesMappingException("on property $on is unknown")
                 },
                 experienceAction = it.invoke(config)
