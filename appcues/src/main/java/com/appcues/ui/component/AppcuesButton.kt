@@ -1,7 +1,5 @@
 package com.appcues.ui.component
 
-import androidx.compose.foundation.Indication
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -15,7 +13,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import com.appcues.data.model.ExperiencePrimitive.ButtonPrimitive
 import com.appcues.data.model.ExperiencePrimitive.HorizontalStackPrimitive
@@ -25,6 +22,7 @@ import com.appcues.data.model.styling.ComponentShadow
 import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.ui.LocalAppcuesActions
 import com.appcues.ui.extensions.Compose
+import com.appcues.ui.extensions.PrimitiveGestureProperties
 import com.appcues.ui.extensions.componentStyle
 import com.appcues.ui.extensions.getTextStyle
 import com.appcues.ui.theme.AppcuesPreview
@@ -32,21 +30,17 @@ import java.util.UUID
 
 @Composable
 internal fun ButtonPrimitive.Compose() {
-    val onAction = LocalAppcuesActions.current.onAction
-    val interactionSource = remember { MutableInteractionSource() }
-    val isEnabled = remember { true }
-
     Surface(
         modifier = Modifier
             .componentStyle(
-                style = style,
-                isDark = isSystemInDarkTheme(),
-                clickModifier = Modifier.clickableButton(
-                    interactionSource = interactionSource,
+                component = this,
+                gestureProperties = PrimitiveGestureProperties(
+                    onAction = LocalAppcuesActions.current.onAction,
+                    interactionSource = remember { MutableInteractionSource() },
                     indication = rememberRipple(),
-                    enabled = isEnabled,
-                    onClick = { actions.forEach { onAction(it.experienceAction) } }
-                )
+                    enabled = remember { true },
+                ),
+                isDark = isSystemInDarkTheme(),
             ),
         color = Color.Transparent,
     ) {
@@ -60,22 +54,6 @@ internal fun ButtonPrimitive.Compose() {
         }
     }
 }
-
-private fun Modifier.clickableButton(
-    interactionSource: MutableInteractionSource,
-    indication: Indication?,
-    enabled: Boolean = true,
-    onClick: () -> Unit
-) = this.then(
-    Modifier.clickable(
-        interactionSource = interactionSource,
-        indication = indication,
-        enabled = enabled,
-        onClickLabel = null,
-        role = Role.Button,
-        onClick = onClick,
-    )
-)
 
 @Composable
 @Preview(name = "button-border.json", group = "extra")

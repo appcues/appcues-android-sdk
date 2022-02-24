@@ -25,17 +25,19 @@ internal class StepMapper(
         actions: HashMap<UUID, List<ActionResponse>>?
     ): HashMap<UUID, List<ActionResponse>>? {
         return when {
+            // if step actions is not null and experience action is null, return step actions
             this != null && actions == null -> this
+            // if step actions is null and experience actions is not null, return experience actions
             this == null && actions != null -> actions
-            this != null && actions != null -> {
-                hashMapOf<UUID, List<ActionResponse>>().also { hashMap ->
-                    forEach {
-                        hashMap[it.key] = it.value.toMutableList().apply {
-                            actions[it.key]?.let { keyActions -> addAll(keyActions) }
-                        }
+            // if both are not null, then merge both lists into a new hashMap
+            this != null && actions != null -> hashMapOf<UUID, List<ActionResponse>>().also { hashMap ->
+                forEach {
+                    hashMap[it.key] = it.value.toMutableList().apply {
+                        actions[it.key]?.let { keyActions -> addAll(keyActions) }
                     }
                 }
             }
+            // do nothing
             else -> null
         }
     }

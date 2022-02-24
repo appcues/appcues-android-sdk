@@ -1,10 +1,13 @@
 package com.appcues.ui.component
 
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.Text
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
@@ -13,6 +16,8 @@ import com.appcues.data.model.ExperiencePrimitive.TextPrimitive
 import com.appcues.data.model.styling.ComponentColor
 import com.appcues.data.model.styling.ComponentStyle.ComponentFontWeight.BLACK
 import com.appcues.data.model.styling.ComponentStyle.ComponentHorizontalAlignment.TRAILING
+import com.appcues.ui.LocalAppcuesActions
+import com.appcues.ui.extensions.PrimitiveGestureProperties
 import com.appcues.ui.extensions.applyStyle
 import com.appcues.ui.extensions.componentStyle
 import com.appcues.ui.theme.AppcuesPreview
@@ -22,7 +27,16 @@ import java.util.UUID
 internal fun TextPrimitive.Compose() {
     Text(
         text = text,
-        modifier = Modifier.componentStyle(style, isSystemInDarkTheme()),
+        modifier = Modifier.componentStyle(
+            component = this,
+            gestureProperties = PrimitiveGestureProperties(
+                onAction = LocalAppcuesActions.current.onAction,
+                interactionSource = remember { MutableInteractionSource() },
+                indication = rememberRipple(),
+                enabled = remember { true },
+            ),
+            isDark = isSystemInDarkTheme()
+        ),
         style = LocalTextStyle.current.applyStyle(
             style = style,
             context = LocalContext.current,

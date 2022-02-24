@@ -26,9 +26,7 @@ internal class ButtonPrimitiveMapper(
                 id = id,
                 content = blockTransform(content),
                 style = styleMapper.map(style),
-                actions = actionsMapper.map(actions, id).toMutableList().apply {
-                    addAll(actionsMapper.map(actions, content.id))
-                },
+                actions = actionsMapper.map(actions, id),
             )
         }
     }
