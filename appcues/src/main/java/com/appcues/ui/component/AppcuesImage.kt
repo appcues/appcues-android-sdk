@@ -21,7 +21,6 @@ import com.appcues.data.model.styling.ComponentContentMode
 import com.appcues.data.model.styling.ComponentContentMode.FILL
 import com.appcues.data.model.styling.ComponentContentMode.FIT
 import com.appcues.data.model.styling.ComponentSize
-import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.ui.LocalAppcuesActions
 import com.appcues.ui.extensions.PrimitiveGestureProperties
 import com.appcues.ui.extensions.componentStyle
@@ -42,7 +41,7 @@ internal fun ImagePrimitive.Compose() {
                 isDark = isSystemInDarkTheme(),
                 noSizeFillMax = true
             )
-            .imageAspectRatio(intrinsicSize, style)
+            .imageAspectRatio(intrinsicSize)
             .animateContentSize(),
         contentAlignment = Alignment.Center
     ) {
@@ -71,8 +70,9 @@ private fun ComponentContentMode.toContentScale() = when (this) {
     FIT -> ContentScale.Fit
 }
 
-private fun Modifier.imageAspectRatio(intrinsicSize: ComponentSize?, style: ComponentStyle) = this.then(
-    if (intrinsicSize != null && style.width == null && style.height == null) {
+private fun Modifier.imageAspectRatio(intrinsicSize: ComponentSize?) = this.then(
+    // apply aspectRatio only when intrinsicSize is not null or any values is 0
+    if (intrinsicSize != null && (intrinsicSize.width > 0 && intrinsicSize.height > 0)) {
         Modifier.aspectRatio(ratio = intrinsicSize.width.toFloat() / intrinsicSize.height.toFloat())
     } else Modifier
 )
