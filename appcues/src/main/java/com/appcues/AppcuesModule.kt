@@ -2,6 +2,7 @@ package com.appcues
 
 import com.appcues.action.ActionRegistry
 import com.appcues.action.appcues.AppcuesCloseAction
+import com.appcues.action.appcues.AppcuesLinkAction
 import com.appcues.data.AppcuesRepository
 import com.appcues.di.KoinModule
 import com.appcues.logging.Logcues
@@ -48,7 +49,19 @@ internal object AppcuesModule : KoinModule {
                 )
             }
 
-            factory { params -> AppcuesCloseAction(params.getOrNull(), get()) }
+            factory { params ->
+                AppcuesCloseAction(
+                    config = params.getOrNull(),
+                    stateMachine = get()
+                )
+            }
+
+            factory { params ->
+                AppcuesLinkAction(
+                    config = params.getOrNull(),
+                    context = get()
+                )
+            }
         }
     }
 }
