@@ -5,12 +5,12 @@ import android.content.Intent
 import android.net.Uri
 import androidx.browser.customtabs.CustomTabsIntent
 import com.appcues.Appcues
-import com.appcues.action.ActionConfigMap
 import com.appcues.action.ExperienceAction
-import com.appcues.action.getConfigOrDefault
+import com.appcues.data.model.AppcuesConfigMap
+import com.appcues.data.model.getConfigOrDefault
 
 internal class AppcuesLinkAction(
-    override val config: ActionConfigMap,
+    override val config: AppcuesConfigMap,
     private val context: Context,
 ) : ExperienceAction {
 

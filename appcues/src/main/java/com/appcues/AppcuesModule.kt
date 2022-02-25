@@ -7,6 +7,7 @@ import com.appcues.data.AppcuesRepository
 import com.appcues.di.KoinModule
 import com.appcues.logging.Logcues
 import com.appcues.statemachine.StateMachine
+import com.appcues.trait.TraitRegistry
 import org.koin.core.module.Module
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -20,6 +21,7 @@ internal object AppcuesModule : KoinModule {
                     logcues = get(),
                     appcuesScope = get(),
                     actionRegistry = get(),
+                    traitRegistry = get(),
                 )
             }
 
@@ -60,6 +62,12 @@ internal object AppcuesModule : KoinModule {
                 AppcuesLinkAction(
                     config = params.getOrNull(),
                     context = get()
+                )
+            }
+
+            scoped {
+                TraitRegistry(
+                    logcues = get()
                 )
             }
         }
