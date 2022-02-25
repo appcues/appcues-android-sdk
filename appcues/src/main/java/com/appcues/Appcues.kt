@@ -7,11 +7,13 @@ import com.appcues.builder.ApiHostBuilderValidator
 import com.appcues.di.AppcuesKoinContext
 import com.appcues.logging.Logcues
 import com.appcues.trait.ExperienceTrait
+import com.appcues.trait.TraitRegistry
 
 class Appcues internal constructor(
     private val logcues: Logcues,
     private val appcuesScope: AppcuesScope,
-    private val actionRegistry: ActionRegistry
+    private val actionRegistry: ActionRegistry,
+    private val traitRegistry: TraitRegistry,
 ) {
 
     /**
@@ -87,12 +89,16 @@ class Appcues internal constructor(
     }
 
     /**
-     * Register a trait that modifies an Experience.
+     * Register a trait that can customize an Experience.
      *
-     * [experienceTrait] Trait to register
+     * [type] type of the action that is sent by the experience. ex: "my-trait"
+     * [traitFactory] factory (lambda) responsible for creating the ExperienceTrait registered for given [type]
+     *
+     * usage:
+     * registerTrait("my-trait") { MyCustomExperienceTrait() }
      */
-    fun register(experienceTrait: ExperienceTrait) {
-        logcues.info("register(trait: $experienceTrait)")
+    fun registerTrait(type: String, traitFactory: (config: HashMap<String, Any>?) -> ExperienceTrait) {
+        traitRegistry.register(type, traitFactory)
     }
 
     /**

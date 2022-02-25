@@ -28,7 +28,7 @@ internal class AppcuesViewModel(
         object Completed : UIState()
     }
 
-    private val stateMachine by inject<StateMachine>()
+    val stateMachine by inject<StateMachine>()
 
     private val appcues by inject<Appcues>()
 

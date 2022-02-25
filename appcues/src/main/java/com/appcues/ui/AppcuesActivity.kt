@@ -9,11 +9,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.core.os.bundleOf
 import com.appcues.R
+import com.appcues.trait.appcues.AppcuesModalTrait
 import com.appcues.ui.AppcuesViewModel.UIState.Completed
 import com.appcues.ui.AppcuesViewModel.UIState.Render
 import com.appcues.ui.extensions.Compose
 import com.appcues.ui.theme.AppcuesTheme
-import com.appcues.ui.trait.DialogTrait
 
 internal class AppcuesActivity : AppCompatActivity() {
 
@@ -48,7 +48,8 @@ internal class AppcuesActivity : AppCompatActivity() {
                     setContent {
                         AppcuesTheme {
                             CompositionLocalProvider(LocalAppcuesActions provides AppcuesActions { viewModel.onAction(it) }) {
-                                DialogTrait {
+                                // later this will be done from the view model state object
+                                AppcuesModalTrait(null, viewModel.stateMachine, applicationContext, scopeId).WrapContent {
                                     state.experience.steps.first().content.Compose()
                                 }
                             }

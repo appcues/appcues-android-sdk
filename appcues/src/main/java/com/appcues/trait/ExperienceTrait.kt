@@ -1,3 +1,6 @@
 package com.appcues.trait
 
-sealed class ExperienceTrait
+interface ExperienceTrait {
+
+    val config: HashMap<String, Any>?
+}
