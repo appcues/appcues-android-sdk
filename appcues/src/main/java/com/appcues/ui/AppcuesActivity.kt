@@ -56,19 +56,14 @@ internal class AppcuesActivity : AppCompatActivity() {
                     }
                     viewModel.onRender()
                 }
-                Completed -> finishAnimated()
+                Completed -> finish()
             }
         }
     }
 
-    override fun onBackPressed() {
-        super.onBackPressed()
+    override fun finish() {
+        super.finish()
         viewModel.onEndExperience()
-    }
-
-    private fun finishAnimated() {
-        viewModel.onEndExperience()
-        finish()
         overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
     }
 }
