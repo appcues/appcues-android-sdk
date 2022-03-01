@@ -4,18 +4,16 @@ import com.appcues.AppcuesConfig
 import com.appcues.data.remote.retrofit.AppcuesService
 import com.appcues.data.remote.retrofit.RetrofitAppcuesRemoteSource
 import com.appcues.data.remote.retrofit.RetrofitWrapper
-import com.appcues.di.KoinModule
+import com.appcues.di.KoinScopePlugin
 import okhttp3.HttpUrl.Companion.toHttpUrl
-import org.koin.core.module.Module
-import org.koin.core.qualifier.named
-import org.koin.dsl.module
+import org.koin.dsl.ScopeDSL
 
-internal object DataRemoteModule : KoinModule {
+internal object DataRemoteModule : KoinScopePlugin {
 
     private const val BASE_URL = "https://api.appcues.com/"
 
-    override fun install(scopeId: String, config: AppcuesConfig): Module = module {
-        scope(named(scopeId)) {
+    override fun installIn(koinScope: ScopeDSL, scopeId: String, config: AppcuesConfig) {
+        with(koinScope) {
             scoped<AppcuesRemoteSource> {
                 RetrofitAppcuesRemoteSource(
                     appcuesService = getAppcuesService(config.apiHostUrl ?: BASE_URL),

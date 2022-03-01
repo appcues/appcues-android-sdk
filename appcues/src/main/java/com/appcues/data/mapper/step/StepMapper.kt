@@ -1,25 +1,22 @@
 package com.appcues.data.mapper.step
 
-import com.appcues.data.mapper.trait.TraitMapper
+import com.appcues.data.mapper.trait.TraitsMapper
 import com.appcues.data.model.Step
-import com.appcues.data.model.Trait
 import com.appcues.data.remote.response.action.ActionResponse
 import com.appcues.data.remote.response.step.StepResponse
-import com.appcues.data.remote.response.trait.TraitResponse
+import com.appcues.trait.StepDecoratingTrait
 import java.util.UUID
 
 internal class StepMapper(
     private val stepContentMapper: StepContentMapper,
-    private val traitMapper: TraitMapper = TraitMapper()
+    private val traitsMapper: TraitsMapper,
 ) {
 
     fun map(from: StepResponse, actions: HashMap<UUID, List<ActionResponse>>?) = Step(
         id = from.id,
         content = stepContentMapper.map(from.content, from.actions.mergeActions(actions)),
-        traits = from.traits.mapToTrait { traitMapper.map(it) },
+        stepTraits = traitsMapper.map(from.traits).filterIsInstance(StepDecoratingTrait::class.java),
     )
-
-    private fun List<TraitResponse>.mapToTrait(transform: (TraitResponse) -> Trait) = map { transform(it) }
 
     private fun HashMap<UUID, List<ActionResponse>>?.mergeActions(
         actions: HashMap<UUID, List<ActionResponse>>?
