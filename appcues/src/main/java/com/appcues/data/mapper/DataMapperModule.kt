@@ -9,24 +9,25 @@ import com.appcues.data.mapper.step.primitives.ButtonPrimitiveMapper
 import com.appcues.data.mapper.step.primitives.ImagePrimitiveMapper
 import com.appcues.data.mapper.step.primitives.StackPrimitiveMapper
 import com.appcues.data.mapper.step.primitives.TextPrimitiveMapper
-import com.appcues.di.KoinModule
-import org.koin.core.module.Module
-import org.koin.core.qualifier.named
-import org.koin.dsl.module
+import com.appcues.data.mapper.trait.TraitsMapper
+import com.appcues.di.KoinScopePlugin
+import org.koin.dsl.ScopeDSL
 
-internal object DataMapperModule : KoinModule {
+internal object DataMapperModule : KoinScopePlugin {
 
-    override fun install(scopeId: String, config: AppcuesConfig): Module = module {
-        scope(named(scopeId)) {
+    override fun installIn(koinScope: ScopeDSL, scopeId: String, config: AppcuesConfig) {
+        with(koinScope) {
             scoped {
                 ExperienceMapper(
                     stepMapper = get(),
+                    traitsMapper = get(),
                 )
             }
 
             scoped {
                 StepMapper(
                     stepContentMapper = get(),
+                    traitsMapper = get(),
                 )
             }
 
@@ -45,6 +46,7 @@ internal object DataMapperModule : KoinModule {
             scoped { TextPrimitiveMapper(actionsMapper = get()) }
 
             scoped { ActionsMapper(actionRegistry = get()) }
+            scoped { TraitsMapper(traitRegistry = get()) }
         }
     }
 }

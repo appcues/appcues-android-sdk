@@ -3,15 +3,19 @@ package com.appcues.di
 import android.content.Context
 import com.appcues.Appcues
 import com.appcues.AppcuesConfig
-import com.appcues.AppcuesModule
+import com.appcues.AppcuesKoin
+import com.appcues.action.ActionKoin
 import com.appcues.data.mapper.DataMapperModule
 import com.appcues.data.remote.DataRemoteModule
+import com.appcues.trait.TraitKoin
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.Koin
 import org.koin.core.KoinApplication
+import org.koin.core.module.Module
 import org.koin.core.qualifier.named
 import org.koin.core.scope.Scope
 import org.koin.dsl.koinApplication
+import org.koin.dsl.module
 import java.util.UUID
 
 internal object AppcuesKoinContext {
@@ -22,8 +26,10 @@ internal object AppcuesKoinContext {
 
     val koin: Koin get() = koinApp.koin
 
-    private val koinModules = arrayListOf(
-        AppcuesModule,
+    private val koinPlugins = arrayListOf(
+        AppcuesKoin,
+        ActionKoin,
+        TraitKoin,
         DataRemoteModule,
         DataMapperModule
     )
@@ -47,7 +53,7 @@ internal object AppcuesKoinContext {
 
     private fun createScope(appcuesConfig: AppcuesConfig): Scope {
         return generateNewScopeId().let { scopeId ->
-            koinModules.loadIntoScope(scopeId, appcuesConfig)
+            koinApp.modules(koinPlugins.scopedModule(scopeId, appcuesConfig))
 
             getScope(scopeId)
         }
@@ -55,7 +61,11 @@ internal object AppcuesKoinContext {
 
     private fun generateNewScopeId() = UUID.randomUUID().toString()
 
-    private fun List<KoinModule>.loadIntoScope(scopeId: String, appcuesConfig: AppcuesConfig) {
-        koin.loadModules(map { it.install(scopeId, appcuesConfig) })
+    private fun List<KoinScopePlugin>.scopedModule(scopeId: String, appcuesConfig: AppcuesConfig): Module {
+        return module {
+            scope(named(scopeId)) {
+                forEach { it.installIn(this, scopeId, appcuesConfig) }
+            }
+        }
     }
 }

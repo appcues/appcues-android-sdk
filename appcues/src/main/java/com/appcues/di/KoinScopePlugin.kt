@@ -1,19 +1,19 @@
 package com.appcues.di
 
 import com.appcues.AppcuesConfig
-import org.koin.core.module.Module
+import org.koin.dsl.ScopeDSL
 
 /**
  * Implement this interface to define a module that will be loaded for each new Appcues scope
  *
  * Used at AppcuesKoinContext
  */
-internal interface KoinModule {
+internal interface KoinScopePlugin {
 
     /**
      * Return custom module.
      *
      * Remember to make everything inside this module built inside of scope block
      */
-    fun install(scopeId: String, config: AppcuesConfig): Module
+    fun installIn(koinScope: ScopeDSL, scopeId: String, config: AppcuesConfig)
 }

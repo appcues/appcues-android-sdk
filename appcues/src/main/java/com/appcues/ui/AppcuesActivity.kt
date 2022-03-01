@@ -6,14 +6,28 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.core.os.bundleOf
+import androidx.lifecycle.lifecycleScope
 import com.appcues.R
-import com.appcues.trait.appcues.AppcuesModalTrait
-import com.appcues.ui.AppcuesViewModel.UIState.Completed
+import com.appcues.ui.AppcuesViewModel.UIAction
+import com.appcues.ui.AppcuesViewModel.UIAction.Finish
 import com.appcues.ui.AppcuesViewModel.UIState.Render
 import com.appcues.ui.extensions.Compose
 import com.appcues.ui.theme.AppcuesTheme
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 internal class AppcuesActivity : AppCompatActivity() {
 
@@ -40,26 +54,73 @@ internal class AppcuesActivity : AppCompatActivity() {
         overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
         super.onCreate(savedInstanceState)
 
-        viewModel.uiState.observe(this) { state ->
-            when (state) {
-                is Render -> {
-                    // noticed that for some reason something is triggering a recomposition.
-                    // its not impacting anything but it would be good to find out why.
-                    setContent {
-                        AppcuesTheme {
-                            CompositionLocalProvider(LocalAppcuesActions provides AppcuesActions { viewModel.onAction(it) }) {
-                                // later this will be done from the view model state object
-                                AppcuesModalTrait(null, viewModel.stateMachine, applicationContext, scopeId).WrapContent {
-                                    state.experience.steps.first().content.Compose()
-                                }
-                            }
-                        }
+        setContent {
+            AppcuesActivityContent()
+        }
+
+        // handle in a separate stream ui actions
+        viewModel.uiAction.handleActions()
+    }
+
+    @Composable
+    private fun AppcuesActivityContent() {
+        AppcuesTheme {
+            CompositionLocalProvider(LocalAppcuesActions provides AppcuesActions { viewModel.onAction(it) }) {
+                // observe ui state
+                val state = viewModel.uiState.collectAsState().value
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    // if state is Render, then we compose it
+                    if (state is Render) {
+                        state.Compose(boxScope = this)
                     }
-                    viewModel.onRender()
                 }
-                Completed -> finish()
             }
         }
+    }
+
+    @Composable
+    private fun Render.Compose(boxScope: BoxScope) {
+        // show if render state is not null
+        val step = stepContainer.steps.getOrNull(position)
+
+        with(stepContainer) {
+            // apply backdrop traits
+            backdropTraits.forEach { it.Backdrop(scope = boxScope) }
+            // create wrapper
+            contentWrappingTrait.WrapContent {
+                Box(
+                    contentAlignment = Alignment.TopCenter
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.verticalScroll(rememberScrollState())
+                    ) {
+                        // Compose content (primitives)
+                        step?.content?.Compose()
+                    }
+
+                    // Compose all container traits on top of the content Column
+                    containerTraits.forEach { it.Overlay(scope = this) }
+                }
+            }
+        }
+    }
+
+    private fun SharedFlow<UIAction>.handleActions() {
+        lifecycleScope.launch {
+            collect { action ->
+                when (action) {
+                    Finish -> handleFinishAction()
+                }
+            }
+        }
+    }
+
+    private fun handleFinishAction() {
+        finish()
     }
 
     override fun finish() {
