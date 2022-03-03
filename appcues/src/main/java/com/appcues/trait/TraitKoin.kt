@@ -8,11 +8,11 @@ import org.koin.dsl.ScopeDSL
 
 internal object TraitKoin : KoinScopePlugin {
 
-    override fun installIn(koinScope: ScopeDSL, scopeId: String, config: AppcuesConfig) {
+    override fun installIn(koinScope: ScopeDSL, config: AppcuesConfig) {
         with(koinScope) {
             scoped {
                 TraitRegistry(
-                    scopeId = scopeId,
+                    scopeId = id,
                     logcues = get()
                 )
             }
@@ -27,7 +27,7 @@ internal object TraitKoin : KoinScopePlugin {
             factory { params ->
                 AppcuesModalTrait(
                     config = params.getOrNull(),
-                    scopeId = scopeId,
+                    scopeId = id,
                     context = get(),
                 )
             }
