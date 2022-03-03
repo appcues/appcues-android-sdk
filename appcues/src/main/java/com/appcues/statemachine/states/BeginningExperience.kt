@@ -7,7 +7,6 @@ import com.appcues.statemachine.State
 import com.appcues.statemachine.State.Transition
 
 internal class BeginningExperience(
-    override val scopeId: String,
     override val experience: Experience
 ) : State {
 
@@ -27,7 +26,7 @@ internal class BeginningExperience(
                 // maybe we need a StartStepContainer, EndStepContainer to wrap all step lifecycle
 
                 // transition to begin step
-                Transition(BeginningStep(scopeId, experience, action.step))
+                Transition(BeginningStep(experience, action.step))
             }
             else -> null
         }

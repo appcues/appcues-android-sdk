@@ -14,10 +14,11 @@ import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.trait.ContentWrappingTrait
 import com.appcues.trait.ExperiencePresentingTrait
 import com.appcues.ui.AppcuesActivity
+import org.koin.core.scope.Scope
 
 internal class AppcuesModalTrait(
     override val config: AppcuesConfigMap,
-    private val scopeId: String,
+    private val scope: Scope,
     private val context: Context,
 ) : ExperiencePresentingTrait, ContentWrappingTrait {
 
@@ -27,7 +28,7 @@ internal class AppcuesModalTrait(
     }
 
     override fun presentExperience() {
-        context.startActivity(AppcuesActivity.getIntent(context, scopeId))
+        context.startActivity(AppcuesActivity.getIntent(context, scope.id))
     }
 
     @Composable
