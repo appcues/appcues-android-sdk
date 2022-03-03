@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.appcues.Appcues
 import com.appcues.action.ExperienceAction
 import com.appcues.data.model.StepContainer
-import com.appcues.di.AppcuesKoinComponent
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.RenderStep
 import com.appcues.statemachine.StateMachine
@@ -20,11 +19,13 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
+import org.koin.core.scope.Scope
 
 internal class AppcuesViewModel(
-    override val scopeId: String,
-) : ViewModel(), AppcuesKoinComponent {
+    override val scope: Scope,
+) : ViewModel(), KoinScopeComponent {
 
     sealed class UIState {
         object Idle : UIState()

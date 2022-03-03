@@ -8,7 +8,6 @@ import com.appcues.statemachine.State
 import com.appcues.statemachine.State.Transition
 
 internal class RenderingStep(
-    override val scopeId: String,
     override val experience: Experience,
     val step: Int
 ) : State {
@@ -20,11 +19,11 @@ internal class RenderingStep(
                 // might progress to EndingStep then move to next
 
                 // for now, we'll just treat it as ending and move to new step
-                Transition(EndingStep(scopeId, experience, step, true), StartStep(action.step))
+                Transition(EndingStep(experience, step, true), StartStep(action.step))
             }
             is EndExperience -> {
                 // this means the experience was closed / dismissed
-                Transition(EndingStep(scopeId, experience, step, true))
+                Transition(EndingStep(experience, step, true))
             }
             else -> null
         }

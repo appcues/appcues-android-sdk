@@ -13,7 +13,7 @@ internal object ActionKoin : KoinScopePlugin {
         with(koinScope) {
             scoped {
                 ActionRegistry(
-                    scopeId = id,
+                    scope = this,
                     logcues = get(),
                 )
             }

@@ -9,7 +9,6 @@ import com.appcues.statemachine.State
 import com.appcues.statemachine.State.Transition
 
 internal class EndingStep(
-    override val scopeId: String,
     override val experience: Experience,
     val step: Int,
     val dismissContainer: Boolean
@@ -18,10 +17,10 @@ internal class EndingStep(
         return when (action) {
             is StartStep -> {
                 // would either move page forward in existing container or start a new activity - TBD
-                Transition(BeginningStep(scopeId, experience, action.step))
+                Transition(BeginningStep(experience, action.step))
             }
             is EndExperience -> {
-                Transition(EndingExperience(scopeId, experience), Reset())
+                Transition(EndingExperience(experience), Reset())
             }
             else -> null
         }
