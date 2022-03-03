@@ -7,13 +7,12 @@ import com.appcues.statemachine.State
 import com.appcues.statemachine.State.Transition
 
 internal class Failing(
-    override val scopeId: String,
     override val experience: Experience?
 ) : State {
     override fun handleAction(action: Action): Transition? {
         return when (action) {
             is Reset -> {
-                Transition(Idling(scopeId))
+                Transition(Idling())
             }
             else -> null
         }

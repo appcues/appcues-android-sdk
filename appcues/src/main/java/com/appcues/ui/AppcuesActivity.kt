@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.core.os.bundleOf
 import androidx.lifecycle.lifecycleScope
 import com.appcues.R
+import com.appcues.di.AppcuesKoinContext
 import com.appcues.ui.AppcuesViewModel.UIAction
 import com.appcues.ui.AppcuesViewModel.UIAction.Finish
 import com.appcues.ui.AppcuesViewModel.UIState.Render
@@ -28,6 +29,7 @@ import com.appcues.ui.theme.AppcuesTheme
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import org.koin.core.scope.Scope
 
 internal class AppcuesActivity : AppCompatActivity() {
 
@@ -46,9 +48,9 @@ internal class AppcuesActivity : AppCompatActivity() {
             }
     }
 
-    private val scopeId: String by lazy { intent.getStringExtra(EXTRA_SCOPE_ID)!! }
+    private val scope: Scope by lazy { AppcuesKoinContext.koin.getScope(intent.getStringExtra(EXTRA_SCOPE_ID)!!) }
 
-    private val viewModel: AppcuesViewModel by viewModels { AppcuesViewModelFactory(scopeId) }
+    private val viewModel: AppcuesViewModel by viewModels { AppcuesViewModelFactory(scope) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         overridePendingTransition(R.anim.fade_in, R.anim.fade_out)

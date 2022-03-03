@@ -7,7 +7,6 @@ import com.appcues.statemachine.State
 import com.appcues.statemachine.State.Transition
 
 internal class BeginningStep(
-    override val scopeId: String,
     override val experience: Experience,
     val step: Int
 ) : State {
@@ -18,7 +17,7 @@ internal class BeginningStep(
                 // to tell us that the view has rendered
 
                 // no additional work to do, just update state
-                Transition(RenderingStep(scopeId, experience, step))
+                Transition(RenderingStep(experience, step))
             }
             else -> null
         }

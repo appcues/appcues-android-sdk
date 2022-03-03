@@ -3,17 +3,19 @@ package com.appcues.action
 import com.appcues.action.appcues.AppcuesCloseAction
 import com.appcues.action.appcues.AppcuesLinkAction
 import com.appcues.data.model.AppcuesConfigMap
-import com.appcues.di.AppcuesKoinComponent
 import com.appcues.logging.Logcues
+import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.get
 import org.koin.core.parameter.parametersOf
+import org.koin.core.scope.Scope
+import kotlin.collections.set
 
 typealias ActionFactoryBlock = (config: AppcuesConfigMap) -> ExperienceAction
 
 internal class ActionRegistry(
-    override val scopeId: String,
+    override val scope: Scope,
     private val logcues: Logcues
-) : AppcuesKoinComponent {
+) : KoinScopeComponent {
 
     private val actions: HashMap<String, ActionFactoryBlock> = hashMapOf()
 

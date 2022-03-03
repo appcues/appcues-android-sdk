@@ -2,13 +2,14 @@ package com.appcues.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import org.koin.core.scope.Scope
 
 internal class AppcuesViewModelFactory(
-    private val scopeID: String,
+    private val scope: Scope
 ) : ViewModelProvider.Factory {
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-        return AppcuesViewModel(scopeID) as T
+        return AppcuesViewModel(scope) as T
     }
 }

@@ -4,11 +4,11 @@ import com.appcues.statemachine.states.Idling
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 
-internal class StateMachine(scopeId: String) {
+internal class StateMachine {
     private var _flow = MutableSharedFlow<State>(1)
     val flow = _flow.asSharedFlow()
 
-    private var _currentState: State = Idling(scopeId)
+    private var _currentState: State = Idling()
 
     suspend fun handleAction(action: Action) {
         _currentState.handleAction(action)?.also { change ->

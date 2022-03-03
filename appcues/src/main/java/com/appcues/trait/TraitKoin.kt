@@ -12,7 +12,7 @@ internal object TraitKoin : KoinScopePlugin {
         with(koinScope) {
             scoped {
                 TraitRegistry(
-                    scopeId = id,
+                    scope = this,
                     logcues = get()
                 )
             }
@@ -27,7 +27,7 @@ internal object TraitKoin : KoinScopePlugin {
             factory { params ->
                 AppcuesModalTrait(
                     config = params.getOrNull(),
-                    scopeId = id,
+                    scope = this,
                     context = get(),
                 )
             }
