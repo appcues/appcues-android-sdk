@@ -8,7 +8,7 @@ import org.koin.dsl.ScopeDSL
 
 internal object AppcuesKoin : KoinScopePlugin {
 
-    override fun installIn(koinScope: ScopeDSL, scopeId: String, config: AppcuesConfig) {
+    override fun installIn(koinScope: ScopeDSL, config: AppcuesConfig) {
         with(koinScope) {
             scoped {
                 Appcues(
@@ -21,7 +21,7 @@ internal object AppcuesKoin : KoinScopePlugin {
 
             scoped { AppcuesSession() }
             scoped { Logcues(config.loggingLevel) }
-            scoped { StateMachine(scopeId = scopeId) }
+            scoped { StateMachine(scopeId = id) }
 
             scoped {
                 AppcuesScope(

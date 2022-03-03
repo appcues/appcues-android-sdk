@@ -13,9 +13,9 @@ import com.appcues.data.mapper.trait.TraitsMapper
 import com.appcues.di.KoinScopePlugin
 import org.koin.dsl.ScopeDSL
 
-internal object DataMapperModule : KoinScopePlugin {
+internal object DataMapperKoin : KoinScopePlugin {
 
-    override fun installIn(koinScope: ScopeDSL, scopeId: String, config: AppcuesConfig) {
+    override fun installIn(koinScope: ScopeDSL, config: AppcuesConfig) {
         with(koinScope) {
             scoped {
                 ExperienceMapper(

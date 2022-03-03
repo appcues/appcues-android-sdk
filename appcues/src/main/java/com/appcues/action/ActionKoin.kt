@@ -9,11 +9,11 @@ import org.koin.dsl.ScopeDSL
 
 internal object ActionKoin : KoinScopePlugin {
 
-    override fun installIn(koinScope: ScopeDSL, scopeId: String, config: AppcuesConfig) {
+    override fun installIn(koinScope: ScopeDSL, config: AppcuesConfig) {
         with(koinScope) {
             scoped {
                 ActionRegistry(
-                    scopeId = scopeId,
+                    scopeId = id,
                     logcues = get(),
                 )
             }

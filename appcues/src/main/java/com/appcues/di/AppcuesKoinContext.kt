@@ -5,8 +5,8 @@ import com.appcues.Appcues
 import com.appcues.AppcuesConfig
 import com.appcues.AppcuesKoin
 import com.appcues.action.ActionKoin
-import com.appcues.data.mapper.DataMapperModule
-import com.appcues.data.remote.DataRemoteModule
+import com.appcues.data.mapper.DataMapperKoin
+import com.appcues.data.remote.DataRemoteKoin
 import com.appcues.trait.TraitKoin
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.Koin
@@ -30,8 +30,8 @@ internal object AppcuesKoinContext {
         AppcuesKoin,
         ActionKoin,
         TraitKoin,
-        DataRemoteModule,
-        DataMapperModule
+        DataRemoteKoin,
+        DataMapperKoin,
     )
 
     fun getScope(scopeId: String): Scope = koin.getOrCreateScope(scopeId = scopeId, qualifier = named(scopeId))
@@ -64,7 +64,7 @@ internal object AppcuesKoinContext {
     private fun List<KoinScopePlugin>.scopedModule(scopeId: String, appcuesConfig: AppcuesConfig): Module {
         return module {
             scope(named(scopeId)) {
-                forEach { it.installIn(this, scopeId, appcuesConfig) }
+                forEach { it.installIn(this, appcuesConfig) }
             }
         }
     }
