@@ -9,35 +9,33 @@ import org.koin.dsl.ScopeDSL
 
 internal object ActionKoin : KoinScopePlugin {
 
-    override fun installIn(koinScope: ScopeDSL, config: AppcuesConfig) {
-        with(koinScope) {
-            scoped {
-                ActionRegistry(
-                    scope = this,
-                    logcues = get(),
-                )
-            }
+    override fun ScopeDSL.install(config: AppcuesConfig) {
+        scoped {
+            ActionRegistry(
+                scope = get(),
+                logcues = get(),
+            )
+        }
 
-            factory { params ->
-                AppcuesCloseAction(
-                    config = params.getOrNull(),
-                    stateMachine = get(),
-                )
-            }
+        factory { params ->
+            AppcuesCloseAction(
+                config = params.getOrNull(),
+                stateMachine = get(),
+            )
+        }
 
-            factory { params ->
-                AppcuesLinkAction(
-                    config = params.getOrNull(),
-                    context = get(),
-                )
-            }
+        factory { params ->
+            AppcuesLinkAction(
+                config = params.getOrNull(),
+                context = get(),
+            )
+        }
 
-            factory { params ->
-                AppcuesSkippableTrait(
-                    config = params.getOrNull(),
-                    stateMachine = get(),
-                )
-            }
+        factory { params ->
+            AppcuesSkippableTrait(
+                config = params.getOrNull(),
+                stateMachine = get(),
+            )
         }
     }
 }
