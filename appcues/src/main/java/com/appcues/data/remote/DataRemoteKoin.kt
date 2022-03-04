@@ -12,15 +12,13 @@ internal object DataRemoteKoin : KoinScopePlugin {
 
     private const val BASE_URL = "https://api.appcues.com/"
 
-    override fun installIn(koinScope: ScopeDSL, config: AppcuesConfig) {
-        with(koinScope) {
-            scoped<AppcuesRemoteSource> {
-                RetrofitAppcuesRemoteSource(
-                    appcuesService = getAppcuesService(config.apiHostUrl ?: BASE_URL),
-                    accountId = config.accountId,
-                    session = get(),
-                )
-            }
+    override fun ScopeDSL.install(config: AppcuesConfig) {
+        scoped<AppcuesRemoteSource> {
+            RetrofitAppcuesRemoteSource(
+                appcuesService = getAppcuesService(config.apiHostUrl ?: BASE_URL),
+                accountId = config.accountId,
+                session = get(),
+            )
         }
     }
 
