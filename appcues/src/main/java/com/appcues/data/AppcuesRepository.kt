@@ -3,6 +3,7 @@ package com.appcues.data
 import com.appcues.data.mapper.experience.ExperienceMapper
 import com.appcues.data.model.Experience
 import com.appcues.data.remote.AppcuesRemoteSource
+import com.appcues.data.remote.request.ActivityRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -15,5 +16,9 @@ internal class AppcuesRepository(
         appcuesRemoteSource.getContent(contentId).let {
             experienceMapper.map(it)
         }
+    }
+
+    suspend fun trackActivity(activity: ActivityRequest, sync: Boolean) = withContext(Dispatchers.IO) {
+        appcuesRemoteSource.postActivity(activity, sync)
     }
 }
