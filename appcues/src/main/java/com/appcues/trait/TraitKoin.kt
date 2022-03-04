@@ -8,29 +8,27 @@ import org.koin.dsl.ScopeDSL
 
 internal object TraitKoin : KoinScopePlugin {
 
-    override fun installIn(koinScope: ScopeDSL, config: AppcuesConfig) {
-        with(koinScope) {
-            scoped {
-                TraitRegistry(
-                    scope = this,
-                    logcues = get()
-                )
-            }
+    override fun ScopeDSL.install(config: AppcuesConfig) {
+        scoped {
+            TraitRegistry(
+                scope = get(),
+                logcues = get()
+            )
+        }
 
-            factory { params ->
-                AppcuesBackdropTrait(
-                    config = params.getOrNull(),
-                    stateMachine = get(),
-                )
-            }
+        factory { params ->
+            AppcuesBackdropTrait(
+                config = params.getOrNull(),
+                stateMachine = get(),
+            )
+        }
 
-            factory { params ->
-                AppcuesModalTrait(
-                    config = params.getOrNull(),
-                    scope = this,
-                    context = get(),
-                )
-            }
+        factory { params ->
+            AppcuesModalTrait(
+                config = params.getOrNull(),
+                scope = get(),
+                context = get(),
+            )
         }
     }
 }

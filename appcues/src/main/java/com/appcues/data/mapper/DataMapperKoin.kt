@@ -15,38 +15,36 @@ import org.koin.dsl.ScopeDSL
 
 internal object DataMapperKoin : KoinScopePlugin {
 
-    override fun installIn(koinScope: ScopeDSL, config: AppcuesConfig) {
-        with(koinScope) {
-            scoped {
-                ExperienceMapper(
-                    stepMapper = get(),
-                    traitsMapper = get(),
-                )
-            }
-
-            scoped {
-                StepMapper(
-                    stepContentMapper = get(),
-                    traitsMapper = get(),
-                )
-            }
-
-            scoped {
-                StepContentMapper(
-                    stackMapper = get(),
-                    textMapper = get(),
-                    buttonMapper = get(),
-                    imageMapper = get(),
-                )
-            }
-
-            scoped { ButtonPrimitiveMapper(actionsMapper = get()) }
-            scoped { ImagePrimitiveMapper(actionsMapper = get()) }
-            scoped { StackPrimitiveMapper(actionsMapper = get()) }
-            scoped { TextPrimitiveMapper(actionsMapper = get()) }
-
-            scoped { ActionsMapper(actionRegistry = get()) }
-            scoped { TraitsMapper(traitRegistry = get()) }
+    override fun ScopeDSL.install(config: AppcuesConfig) {
+        scoped {
+            ExperienceMapper(
+                stepMapper = get(),
+                traitsMapper = get(),
+            )
         }
+
+        scoped {
+            StepMapper(
+                stepContentMapper = get(),
+                traitsMapper = get(),
+            )
+        }
+
+        scoped {
+            StepContentMapper(
+                stackMapper = get(),
+                textMapper = get(),
+                buttonMapper = get(),
+                imageMapper = get(),
+            )
+        }
+
+        scoped { ButtonPrimitiveMapper(actionsMapper = get()) }
+        scoped { ImagePrimitiveMapper(actionsMapper = get()) }
+        scoped { StackPrimitiveMapper(actionsMapper = get()) }
+        scoped { TextPrimitiveMapper(actionsMapper = get()) }
+
+        scoped { ActionsMapper(actionRegistry = get()) }
+        scoped { TraitsMapper(traitRegistry = get()) }
     }
 }
