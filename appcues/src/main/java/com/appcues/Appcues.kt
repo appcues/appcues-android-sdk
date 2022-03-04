@@ -15,6 +15,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 class Appcues internal constructor(
     private val logcues: Logcues,
@@ -22,6 +23,7 @@ class Appcues internal constructor(
     private val traitRegistry: TraitRegistry,
     private val experienceRenderer: ExperienceRenderer,
     private val analyticsTracker: AnalyticsTracker,
+    private val session: AppcuesSession
 ) : CoroutineScope {
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable -> logcues.error(Exception(throwable)) }
@@ -40,7 +42,7 @@ class Appcues internal constructor(
      * [properties] Optional properties that provide additional context about the user.
      */
     fun identify(userId: String, properties: HashMap<String, Any>? = null) {
-        logcues.info("identify(userId: $userId, properties: $properties)")
+        identify(false, userId, properties)
     }
 
     /**
@@ -50,7 +52,15 @@ class Appcues internal constructor(
      * [properties] Optional properties that provide additional context about the group.
      */
     fun group(groupId: String?, properties: HashMap<String, Any>? = null) {
-        logcues.info("group(groupId: $groupId, properties: $properties)")
+        launch {
+            session.groupId = groupId
+            if (groupId == null || groupId.isEmpty()) {
+                // null or empty is removing the group (and no properties allowed)
+                analyticsTracker.group(null)
+            } else {
+                analyticsTracker.group(properties)
+            }
+        }
     }
 
     /**
@@ -59,7 +69,8 @@ class Appcues internal constructor(
      * to begin tracking activity and checking for qualified content.
      */
     fun anonymous(properties: HashMap<String, Any>? = null) {
-        logcues.info("anonymous(properties: $properties)")
+        // todo - allow config to supply the anon ID factory
+        identify(true, UUID.randomUUID().toString(), properties)
     }
 
     /**
@@ -89,7 +100,9 @@ class Appcues internal constructor(
      * [properties] Optional properties that provide additional context about the event.
      */
     fun screen(title: String, properties: HashMap<String, Any>? = null) {
-        logcues.info("screen(title: $title, properties: $properties)")
+        launch {
+            analyticsTracker.screen(title, properties)
+        }
     }
 
     /**
@@ -141,6 +154,25 @@ class Appcues internal constructor(
      */
     fun debug() {
         logcues.info("debug()")
+    }
+
+    private fun identify(isAnonymous: Boolean, userId: String, properties: HashMap<String, Any>?) {
+        if (userId.isEmpty()) {
+            logcues.info("Invalid userId - empty string") // possibly should be an error
+            return
+        }
+
+        val userChanged = session.userId != userId
+        session.userId = userId
+        session.isAnonymous = isAnonymous
+        if (userChanged) {
+            // group info is reset on new user
+            session.groupId = null
+        }
+
+        launch {
+            analyticsTracker.identify(properties)
+        }
     }
 
     class Builder(

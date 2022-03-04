@@ -17,7 +17,8 @@ internal object AppcuesKoin : KoinScopePlugin {
                 actionRegistry = get(),
                 traitRegistry = get(),
                 experienceRenderer = get(),
-                analyticsTracker = get()
+                analyticsTracker = get(),
+                session = get()
             )
         }
 

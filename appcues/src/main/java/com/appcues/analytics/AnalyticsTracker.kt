@@ -13,14 +13,46 @@ internal class AnalyticsTracker(
     private val session: AppcuesSession,
     private val experienceRenderer: ExperienceRenderer
 ) {
+    suspend fun identify(properties: HashMap<String, Any>? = null) {
+        val activity = ActivityRequest(
+            userId = session.userId,
+            groupId = session.groupId,
+            accountId = config.accountId,
+            profileUpdate = properties
+        )
+        trackActivity(activity, true)
+    }
 
     suspend fun track(name: String, properties: HashMap<String, Any>? = null, sync: Boolean = true) {
         val activity = ActivityRequest(
             events = listOf(EventRequest(name = name, attributes = properties)),
-            userId = session.user,
+            userId = session.userId,
+            groupId = session.groupId,
             accountId = config.accountId
         )
+        trackActivity(activity, sync)
+    }
 
+    suspend fun screen(title: String, properties: HashMap<String, Any>? = null) {
+        // screen calls are really just a special type of event: "appcues:screen_view"
+        val updatedProperties = properties ?: hashMapOf()
+        // include the "screenTitle" property automatically
+        updatedProperties["screenTitle"] = title
+        // handle the same as other events
+        track("appcues:screen_view", updatedProperties, true)
+    }
+
+    suspend fun group(properties: HashMap<String, Any>? = null) {
+        val activity = ActivityRequest(
+            userId = session.userId,
+            groupId = session.groupId,
+            accountId = config.accountId,
+            groupUpdate = properties
+        )
+        trackActivity(activity, true)
+    }
+
+    private suspend fun trackActivity(activity: ActivityRequest, sync: Boolean) {
         // this will respond with qualified experiences, if applicable
         val experiences = repository.trackActivity(activity, sync)
 

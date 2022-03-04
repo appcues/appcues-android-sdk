@@ -13,10 +13,10 @@ internal class RetrofitAppcuesRemoteSource(
 ) : AppcuesRemoteSource {
 
     override suspend fun getContent(contentId: String): ExperienceResponse {
-        return appcuesService.content(accountId, session.user, contentId)
+        return appcuesService.content(accountId, session.userId, contentId)
     }
 
     override suspend fun postActivity(activity: ActivityRequest, sync: Boolean): ActivityResponse {
-        return appcuesService.activity(accountId, session.user, if (sync) 1 else null, activity)
+        return appcuesService.activity(accountId, session.userId, if (sync) 1 else null, activity)
     }
 }
