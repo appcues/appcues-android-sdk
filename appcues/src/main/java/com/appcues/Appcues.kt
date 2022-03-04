@@ -207,7 +207,7 @@ class Appcues internal constructor(
         // wants to override the way anonymous IDs are generated
         private var _anonymousIdFactory: () -> String = { UUID.randomUUID().toString() }
 
-        fun anonymousIdFactory(factory: () -> String) {
+        fun anonymousIdFactory(factory: () -> String) = apply {
             _anonymousIdFactory = factory
         }
 
