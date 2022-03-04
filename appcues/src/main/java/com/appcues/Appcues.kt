@@ -17,6 +17,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import java.util.UUID
 
+@Suppress("LongParameterList")
 class Appcues internal constructor(
     private val config: AppcuesConfig,
     private val logcues: Logcues,
