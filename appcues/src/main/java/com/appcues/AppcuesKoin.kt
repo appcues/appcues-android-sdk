@@ -1,9 +1,11 @@
 package com.appcues
 
+import com.appcues.analytics.AnalyticsTracker
 import com.appcues.data.AppcuesRepository
 import com.appcues.di.KoinScopePlugin
 import com.appcues.logging.Logcues
 import com.appcues.statemachine.StateMachine
+import com.appcues.ui.ExperienceRenderer
 import org.koin.dsl.ScopeDSL
 
 internal object AppcuesKoin : KoinScopePlugin {
@@ -12,9 +14,10 @@ internal object AppcuesKoin : KoinScopePlugin {
         scoped {
             Appcues(
                 logcues = get(),
-                appcuesScope = get(),
                 actionRegistry = get(),
                 traitRegistry = get(),
+                experienceRenderer = get(),
+                analyticsTracker = get()
             )
         }
 
@@ -23,10 +26,19 @@ internal object AppcuesKoin : KoinScopePlugin {
         scoped { StateMachine() }
 
         scoped {
-            AppcuesScope(
-                logcues = get(),
+            AnalyticsTracker(
+                config = config,
                 repository = get(),
-                stateMachine = get(),
+                session = get(),
+                experienceRenderer = get(),
+                experienceMapper = get()
+            )
+        }
+
+        scoped {
+            ExperienceRenderer(
+                repository = get(),
+                stateMachine = get()
             )
         }
 

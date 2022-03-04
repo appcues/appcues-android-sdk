@@ -3,18 +3,29 @@ package com.appcues
 import android.content.Context
 import com.appcues.action.ActionRegistry
 import com.appcues.action.ExperienceAction
+import com.appcues.analytics.AnalyticsTracker
 import com.appcues.builder.ApiHostBuilderValidator
 import com.appcues.di.AppcuesKoinContext
 import com.appcues.logging.Logcues
 import com.appcues.trait.ExperienceTrait
 import com.appcues.trait.TraitRegistry
+import com.appcues.ui.ExperienceRenderer
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 
 class Appcues internal constructor(
     private val logcues: Logcues,
-    private val appcuesScope: AppcuesScope,
     private val actionRegistry: ActionRegistry,
     private val traitRegistry: TraitRegistry,
-) {
+    private val experienceRenderer: ExperienceRenderer,
+    private val analyticsTracker: AnalyticsTracker,
+) : CoroutineScope {
+
+    private val exceptionHandler = CoroutineExceptionHandler { _, throwable -> logcues.error(Exception(throwable)) }
+    override val coroutineContext = SupervisorJob() + Dispatchers.Main + exceptionHandler
 
     /**
      * Returns the current version of Appcues SDK
@@ -66,7 +77,9 @@ class Appcues internal constructor(
      * [properties] Optional properties that provide additional context about the event.
      */
     fun track(name: String, properties: HashMap<String, Any>? = null) {
-        logcues.info("track(name: $name, properties: $properties)")
+        launch {
+            analyticsTracker.track(name, properties)
+        }
     }
 
     /**
@@ -85,7 +98,9 @@ class Appcues internal constructor(
      * [contentId] ID of specific flow.
      */
     fun show(contentId: String) {
-        appcuesScope.show(contentId)
+        launch {
+            experienceRenderer.show(contentId)
+        }
     }
 
     /**

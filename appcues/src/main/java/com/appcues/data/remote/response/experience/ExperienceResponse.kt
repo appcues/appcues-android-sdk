@@ -8,7 +8,7 @@ import java.util.UUID
 internal data class ExperienceResponse(
     val id: UUID,
     val name: String,
-    val theme: ExperienceThemeResponse?,
+    val theme: String?,
     val actions: HashMap<UUID, List<ActionResponse>>?,
     val traits: List<TraitResponse>,
     val steps: List<StepResponse>
