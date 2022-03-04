@@ -18,6 +18,7 @@ import kotlinx.coroutines.launch
 import java.util.UUID
 
 class Appcues internal constructor(
+    private val config: AppcuesConfig,
     private val logcues: Logcues,
     private val actionRegistry: ActionRegistry,
     private val traitRegistry: TraitRegistry,
@@ -69,8 +70,7 @@ class Appcues internal constructor(
      * to begin tracking activity and checking for qualified content.
      */
     fun anonymous(properties: HashMap<String, Any>? = null) {
-        // todo - allow config to supply the anon ID factory
-        identify(true, UUID.randomUUID().toString(), properties)
+        identify(true, config.anonymousIdFactory(), properties)
     }
 
     /**
@@ -201,6 +201,15 @@ class Appcues internal constructor(
             }
         }
 
+        // todo - this should really use a one time generated device ID (UUID) by default
+        // the anonymous user can then be tied back to the device consistently, unless the customer
+        // wants to override the way anonymous IDs are generated
+        private var _anonymousIdFactory: () -> String = { UUID.randomUUID().toString() }
+
+        fun anonymousIdFactory(factory: () -> String) {
+            _anonymousIdFactory = factory
+        }
+
         fun build(): Appcues {
             return with(AppcuesKoinContext) {
                 createAppcues(
@@ -209,7 +218,8 @@ class Appcues internal constructor(
                         accountId = accountId,
                         applicationId = applicationId,
                         loggingLevel = _loggingLevel,
-                        apiHostUrl = _apiHostUrl
+                        apiHostUrl = _apiHostUrl,
+                        anonymousIdFactory = _anonymousIdFactory
                     )
                 )
             }

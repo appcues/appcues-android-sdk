@@ -5,4 +5,5 @@ internal data class AppcuesConfig(
     val applicationId: String,
     val loggingLevel: Appcues.LoggingLevel,
     val apiHostUrl: String?,
+    val anonymousIdFactory: () -> String
 )
