@@ -23,16 +23,16 @@ import com.appcues.data.model.styling.ComponentStyle.ComponentHorizontalAlignmen
 import com.appcues.ui.LocalAppcuesActions
 import com.appcues.ui.extensions.Compose
 import com.appcues.ui.extensions.PrimitiveGestureProperties
-import com.appcues.ui.extensions.componentStyle
 import com.appcues.ui.extensions.getHorizontalAlignment
 import com.appcues.ui.extensions.getTextStyle
+import com.appcues.ui.extensions.primitiveStyle
 import com.appcues.ui.theme.AppcuesPreview
 import java.util.UUID
 
 @Composable
 internal fun VerticalStackPrimitive.Compose() {
     Column(
-        modifier = Modifier.componentStyle(
+        modifier = Modifier.primitiveStyle(
             component = this,
             gestureProperties = PrimitiveGestureProperties(
                 onAction = LocalAppcuesActions.current.onAction,

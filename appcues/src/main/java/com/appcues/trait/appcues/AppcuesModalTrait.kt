@@ -1,19 +1,21 @@
 package com.appcues.trait.appcues
 
+import ExpandedBottomSheetModal
 import android.content.Context
-import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.unit.dp
 import com.appcues.data.model.AppcuesConfigMap
+import com.appcues.data.model.getConfigOrDefault
+import com.appcues.data.model.getConfigStyle
 import com.appcues.trait.ContentWrappingTrait
 import com.appcues.trait.ExperiencePresentingTrait
+import com.appcues.trait.appcues.AppcuesModalTrait.PresentationStyle.BOTTOM_SHEET
+import com.appcues.trait.appcues.AppcuesModalTrait.PresentationStyle.DIALOG
+import com.appcues.trait.appcues.AppcuesModalTrait.PresentationStyle.EXPANDED_BOTTOM_SHEET
+import com.appcues.trait.appcues.AppcuesModalTrait.PresentationStyle.FULL_SCREEN
 import com.appcues.ui.AppcuesActivity
+import com.appcues.ui.modal.BottomSheetModal
+import com.appcues.ui.modal.DialogModal
+import com.appcues.ui.modal.FullScreenModal
 import org.koin.core.scope.Scope
 
 internal class AppcuesModalTrait(
@@ -22,32 +24,37 @@ internal class AppcuesModalTrait(
     private val context: Context,
 ) : ExperiencePresentingTrait, ContentWrappingTrait {
 
-    companion object {
-
-        private const val SCREEN_PADDING = 0.05
+    internal enum class PresentationStyle {
+        DIALOG, FULL_SCREEN, BOTTOM_SHEET, EXPANDED_BOTTOM_SHEET
     }
+
+    private val presentationStyle = config
+        .getConfigOrDefault("presentationStyle", "dialog")
+        .toModalPresentationStyle()
+
+    private val style = config.getConfigStyle()
 
     override fun presentExperience() {
         context.startActivity(AppcuesActivity.getIntent(context, scope.id))
     }
 
     @Composable
-    override fun WrapContent(
-        content: @Composable () -> Unit
-    ) {
-        val configuration = LocalConfiguration.current
-        val dialogHorizontalMargin = (configuration.screenWidthDp * SCREEN_PADDING).dp
-        val dialogVerticalMargin = (configuration.screenHeightDp * SCREEN_PADDING).dp
+    override fun WrapContent(content: @Composable () -> Unit) {
+        when (presentationStyle) {
+            DIALOG -> DialogModal(style, content)
+            FULL_SCREEN -> FullScreenModal(style, content)
+            BOTTOM_SHEET -> BottomSheetModal(style, content)
+            EXPANDED_BOTTOM_SHEET -> ExpandedBottomSheetModal(style, content)
+        }
+    }
 
-        Card(
-            modifier = Modifier
-                .defaultMinSize(minWidth = 200.dp, minHeight = 100.dp)
-                .padding(horizontal = dialogHorizontalMargin, vertical = dialogVerticalMargin),
-            contentColor = Color(color = 0xFFFFFFFF),
-            elevation = 10.dp,
-            shape = RoundedCornerShape(12.dp),
-        ) {
-            content()
+    private fun String.toModalPresentationStyle(): PresentationStyle {
+        return when (this) {
+            "dialog" -> DIALOG
+            "full" -> FULL_SCREEN
+            "sheet" -> EXPANDED_BOTTOM_SHEET
+            "halfSheet" -> BOTTOM_SHEET
+            else -> DIALOG
         }
     }
 }
