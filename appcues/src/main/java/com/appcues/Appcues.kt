@@ -28,7 +28,7 @@ class Appcues internal constructor(koinScope: Scope) {
     private val analyticsTracker by koinScope.inject <AnalyticsTracker>()
     private val session by koinScope.inject<AppcuesSession>()
 
-    private val appcuesScope = CoroutineScope(
+    private val coroutineScope = CoroutineScope(
         SupervisorJob() +
             Dispatchers.Main +
             CoroutineExceptionHandler { _, throwable -> logcues.error(Exception(throwable)) }
@@ -60,7 +60,7 @@ class Appcues internal constructor(koinScope: Scope) {
         session.groupId = groupId
 
         (if (groupId.isNullOrEmpty()) null else properties).also {
-            appcuesScope.launch {
+            coroutineScope.launch {
                 analyticsTracker.group(it)
             }
         }
@@ -90,7 +90,7 @@ class Appcues internal constructor(koinScope: Scope) {
      * [properties] Optional properties that provide additional context about the event.
      */
     fun track(name: String, properties: HashMap<String, Any>? = null) {
-        appcuesScope.launch {
+        coroutineScope.launch {
             analyticsTracker.track(name, properties)
         }
     }
@@ -102,7 +102,7 @@ class Appcues internal constructor(koinScope: Scope) {
      * [properties] Optional properties that provide additional context about the event.
      */
     fun screen(title: String, properties: HashMap<String, Any>? = null) {
-        appcuesScope.launch {
+        coroutineScope.launch {
             analyticsTracker.screen(title, properties)
         }
     }
@@ -113,7 +113,7 @@ class Appcues internal constructor(koinScope: Scope) {
      * [contentId] ID of specific flow.
      */
     fun show(contentId: String) {
-        appcuesScope.launch {
+        coroutineScope.launch {
             experienceRenderer.show(contentId)
         }
     }
@@ -172,7 +172,7 @@ class Appcues internal constructor(koinScope: Scope) {
             session.groupId = null
         }
 
-        appcuesScope.launch {
+        coroutineScope.launch {
             analyticsTracker.identify(properties)
         }
     }
