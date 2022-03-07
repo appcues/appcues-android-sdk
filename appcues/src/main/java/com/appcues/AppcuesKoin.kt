@@ -19,15 +19,21 @@ internal object AppcuesKoin : KoinScopePlugin {
             )
         }
 
-        scoped { AppcuesSession() }
         scoped { Logcues(config.loggingLevel) }
         scoped { StateMachine() }
+
+        scoped {
+            Storage(
+                context = get(),
+                config = get()
+            )
+        }
 
         scoped {
             AnalyticsTracker(
                 config = config,
                 repository = get(),
-                session = get(),
+                storage = get(),
                 experienceRenderer = get()
             )
         }

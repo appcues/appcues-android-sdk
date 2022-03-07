@@ -16,7 +16,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import org.koin.core.scope.Scope
-import java.util.UUID
 
 class Appcues internal constructor(koinScope: Scope) {
 
@@ -26,7 +25,7 @@ class Appcues internal constructor(koinScope: Scope) {
     private val actionRegistry by koinScope.inject<ActionRegistry>()
     private val traitRegistry by koinScope.inject <TraitRegistry>()
     private val analyticsTracker by koinScope.inject <AnalyticsTracker>()
-    private val session by koinScope.inject<AppcuesSession>()
+    private val storage by koinScope.inject<Storage>()
 
     private val coroutineScope = CoroutineScope(
         SupervisorJob() +
@@ -57,7 +56,7 @@ class Appcues internal constructor(koinScope: Scope) {
      * [properties] Optional properties that provide additional context about the group.
      */
     fun group(groupId: String?, properties: HashMap<String, Any>? = null) {
-        session.groupId = groupId
+        storage.groupId = groupId
 
         (if (groupId.isNullOrEmpty()) null else properties).also {
             coroutineScope.launch {
@@ -72,7 +71,10 @@ class Appcues internal constructor(koinScope: Scope) {
      * to begin tracking activity and checking for qualified content.
      */
     fun anonymous(properties: HashMap<String, Any>? = null) {
-        identify(true, appcuesConfig.anonymousIdFactory(), properties)
+        // use the device ID as the default anonymous user ID, unless an override for generating
+        // anonymous user IDs is supplied in the config builder
+        val anonymousId = appcuesConfig.anonymousIdFactory?.invoke() ?: storage.deviceId
+        identify(true, anonymousId, properties)
     }
 
     /**
@@ -80,7 +82,9 @@ class Appcues internal constructor(koinScope: Scope) {
      * Can be used when the user logs out of your application.
      */
     fun reset() {
-        logcues.info("reset()")
+        storage.userId = ""
+        storage.isAnonymous = true
+        storage.groupId = null
     }
 
     /**
@@ -164,12 +168,12 @@ class Appcues internal constructor(koinScope: Scope) {
             return
         }
 
-        val userChanged = session.userId != userId
-        session.userId = userId
-        session.isAnonymous = isAnonymous
+        val userChanged = storage.userId != userId
+        storage.userId = userId
+        storage.isAnonymous = isAnonymous
         if (userChanged) {
             // group info is reset on new user
-            session.groupId = null
+            storage.groupId = null
         }
 
         coroutineScope.launch {
@@ -203,11 +207,13 @@ class Appcues internal constructor(koinScope: Scope) {
             }
         }
 
-        // todo - this should really use a one time generated device ID (UUID) by default
-        // the anonymous user can then be tied back to the device consistently, unless the customer
-        // wants to override the way anonymous IDs are generated
-        private var _anonymousIdFactory: () -> String = { UUID.randomUUID().toString() }
+        private var _anonymousIdFactory: (() -> String)? = null
 
+        /**
+         * Set the factory responsible for generating anonymous user IDs.
+         *
+         * [factory] factory (lambda) that returns an ID as a String.
+         */
         fun anonymousIdFactory(factory: () -> String) = apply {
             _anonymousIdFactory = factory
         }
