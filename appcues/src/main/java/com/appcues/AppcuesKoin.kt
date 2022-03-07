@@ -30,8 +30,7 @@ internal object AppcuesKoin : KoinScopePlugin {
                 config = config,
                 repository = get(),
                 session = get(),
-                experienceRenderer = get(),
-                experienceMapper = get()
+                experienceRenderer = get()
             )
         }
 

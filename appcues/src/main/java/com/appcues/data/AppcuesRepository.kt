@@ -18,7 +18,7 @@ internal class AppcuesRepository(
         }
     }
 
-    suspend fun trackActivity(activity: ActivityRequest, sync: Boolean) = withContext(Dispatchers.IO) {
-        appcuesRemoteSource.postActivity(activity, sync)
+    suspend fun trackActivity(activity: ActivityRequest, sync: Boolean): List<Experience> = withContext(Dispatchers.IO) {
+        appcuesRemoteSource.postActivity(activity, sync).experiences.map { experienceMapper.map(it) }
     }
 }
