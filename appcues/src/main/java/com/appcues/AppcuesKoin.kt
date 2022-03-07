@@ -11,6 +11,8 @@ import org.koin.dsl.ScopeDSL
 internal object AppcuesKoin : KoinScopePlugin {
 
     override fun ScopeDSL.install(config: AppcuesConfig) {
+        scoped { config }
+
         scoped {
             Appcues(
                 koinScope = this
