@@ -13,13 +13,7 @@ internal object AppcuesKoin : KoinScopePlugin {
     override fun ScopeDSL.install(config: AppcuesConfig) {
         scoped {
             Appcues(
-                config = config,
-                logcues = get(),
-                actionRegistry = get(),
-                traitRegistry = get(),
-                experienceRenderer = get(),
-                analyticsTracker = get(),
-                session = get()
+                koinScope = this
             )
         }
 

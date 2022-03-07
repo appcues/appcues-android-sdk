@@ -66,6 +66,8 @@ internal object AppcuesKoinContext {
                 scope(named(scope.id)) {
                     // add scope to its own dependency tree
                     scoped { scope }
+                    // make config available for injection
+                    scoped { appcuesConfig }
                     // run install for each KoinScopePlugin
                     forEach {
                         with(it) { install(appcuesConfig) }
