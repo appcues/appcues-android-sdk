@@ -17,7 +17,7 @@ internal object DataRemoteKoin : KoinScopePlugin {
             RetrofitAppcuesRemoteSource(
                 appcuesService = getAppcuesService(config.apiHostUrl ?: BASE_URL),
                 accountId = config.accountId,
-                session = get(),
+                storage = get(),
             )
         }
     }

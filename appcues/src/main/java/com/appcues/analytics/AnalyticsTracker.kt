@@ -1,7 +1,7 @@
 package com.appcues.analytics
 
 import com.appcues.AppcuesConfig
-import com.appcues.AppcuesSession
+import com.appcues.Storage
 import com.appcues.data.AppcuesRepository
 import com.appcues.data.remote.request.ActivityRequest
 import com.appcues.data.remote.request.EventRequest
@@ -10,13 +10,13 @@ import com.appcues.ui.ExperienceRenderer
 internal class AnalyticsTracker(
     private val config: AppcuesConfig,
     private val repository: AppcuesRepository,
-    private val session: AppcuesSession,
+    private val storage: Storage,
     private val experienceRenderer: ExperienceRenderer
 ) {
     suspend fun identify(properties: HashMap<String, Any>? = null) {
         val activity = ActivityRequest(
-            userId = session.userId,
-            groupId = session.groupId,
+            userId = storage.userId,
+            groupId = storage.groupId,
             accountId = config.accountId,
             profileUpdate = properties
         )
@@ -26,8 +26,8 @@ internal class AnalyticsTracker(
     suspend fun track(name: String, properties: HashMap<String, Any>? = null, sync: Boolean = true) {
         val activity = ActivityRequest(
             events = listOf(EventRequest(name = name, attributes = properties)),
-            userId = session.userId,
-            groupId = session.groupId,
+            userId = storage.userId,
+            groupId = storage.groupId,
             accountId = config.accountId
         )
         trackActivity(activity, sync)
@@ -44,8 +44,8 @@ internal class AnalyticsTracker(
 
     suspend fun group(properties: HashMap<String, Any>? = null) {
         val activity = ActivityRequest(
-            userId = session.userId,
-            groupId = session.groupId,
+            userId = storage.userId,
+            groupId = storage.groupId,
             accountId = config.accountId,
             groupUpdate = properties
         )
@@ -53,6 +53,10 @@ internal class AnalyticsTracker(
     }
 
     private suspend fun trackActivity(activity: ActivityRequest, sync: Boolean) {
+
+        // todo - will need to revisit with proper session handling, but this means no user identified
+        if (storage.userId.isEmpty()) return
+
         // this will respond with qualified experiences, if applicable
         val experiences = repository.trackActivity(activity, sync)
 
