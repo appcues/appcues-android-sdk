@@ -28,7 +28,7 @@ import com.appcues.data.model.Action
 import com.appcues.data.model.ExperiencePrimitive
 import com.appcues.data.model.styling.ComponentStyle
 
-internal fun Modifier.componentStyle(
+internal fun Modifier.primitiveStyle(
     component: ExperiencePrimitive,
     gestureProperties: PrimitiveGestureProperties,
     isDark: Boolean,
@@ -38,17 +38,31 @@ internal fun Modifier.componentStyle(
     with(component) {
         Modifier
             .padding(style.getMargins())
-            .componentShadow(style, isDark)
-            .componentSize(style, noSizeFillMax)
-            .componentActions(actions, gestureProperties)
-            .componentCorner(style)
-            .componentBorder(style, isDark)
-            .componentBackground(style, isDark, defaultBackgroundColor)
+            .styleShadow(style, isDark)
+            .styleSize(style, noSizeFillMax)
+            .actions(actions, gestureProperties)
+            .styleCorner(style)
+            .styleBorder(style, isDark)
+            .styleBackground(style, isDark, defaultBackgroundColor)
             .padding(style.getPaddings())
     }
 )
 
-internal fun Modifier.componentBackground(
+internal fun Modifier.modalStyle(
+    style: ComponentStyle?,
+    isDark: Boolean,
+    modifier: Modifier = Modifier,
+) = this.then(
+    if (style != null) Modifier
+        .padding(style.getMargins())
+        .then(modifier)
+        .styleBorder(style, isDark)
+        .styleBackground(style, isDark)
+        .padding(style.getPaddings())
+    else Modifier
+)
+
+private fun Modifier.styleBackground(
     style: ComponentStyle,
     isDark: Boolean,
     defaultColor: Color? = null
@@ -63,7 +77,7 @@ internal fun Modifier.componentBackground(
     }
 )
 
-internal fun Modifier.componentBorder(
+private fun Modifier.styleBorder(
     style: ComponentStyle,
     isDark: Boolean
 ) = this.then(
@@ -75,7 +89,7 @@ internal fun Modifier.componentBorder(
     }
 )
 
-internal fun Modifier.componentSize(style: ComponentStyle, noSizeFillMax: Boolean = false) = this.then(
+private fun Modifier.styleSize(style: ComponentStyle, noSizeFillMax: Boolean = false) = this.then(
     when {
         style.width != null && style.height != null ->
             Modifier.size(style.width.dp, style.height.dp)
@@ -89,24 +103,22 @@ internal fun Modifier.componentSize(style: ComponentStyle, noSizeFillMax: Boolea
     }
 )
 
-internal fun Modifier.componentCorner(style: ComponentStyle) = this.then(
+private fun Modifier.styleCorner(style: ComponentStyle) = this.then(
     when {
         style.cornerRadius != 0 -> Modifier.clip(RoundedCornerShape(style.cornerRadius.dp))
         else -> Modifier
     }
 )
 
-private fun Modifier.componentShadow(style: ComponentStyle, isDark: Boolean): Modifier {
+internal fun Modifier.styleShadow(style: ComponentStyle?, isDark: Boolean): Modifier {
     return this.then(
-        when {
-            style.shadow != null -> Modifier.coloredShadow(
-                color = style.shadow.color.getColor(isDark),
-                radius = style.shadow.radius.dp,
-                offsetX = style.shadow.x.dp,
-                offsetY = style.shadow.y.dp,
-            )
-            else -> Modifier
-        }
+        if (style?.shadow != null) Modifier.coloredShadow(
+            color = style.shadow.color.getColor(isDark),
+            radius = style.shadow.radius.dp,
+            offsetX = style.shadow.x.dp,
+            offsetY = style.shadow.y.dp,
+        )
+        else Modifier
     )
 }
 
@@ -153,7 +165,7 @@ internal data class PrimitiveGestureProperties(
 )
 
 @OptIn(ExperimentalFoundationApi::class)
-private fun Modifier.componentActions(
+private fun Modifier.actions(
     actions: List<Action>,
     gestureProperties: PrimitiveGestureProperties
 ) = this.then(

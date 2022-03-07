@@ -23,13 +23,13 @@ import com.appcues.data.model.styling.ComponentContentMode.FIT
 import com.appcues.data.model.styling.ComponentSize
 import com.appcues.ui.LocalAppcuesActions
 import com.appcues.ui.extensions.PrimitiveGestureProperties
-import com.appcues.ui.extensions.componentStyle
+import com.appcues.ui.extensions.primitiveStyle
 
 @Composable
 internal fun ImagePrimitive.Compose() {
     Box(
         modifier = Modifier
-            .componentStyle(
+            .primitiveStyle(
                 component = this,
                 gestureProperties = PrimitiveGestureProperties(
                     onAction = LocalAppcuesActions.current.onAction,

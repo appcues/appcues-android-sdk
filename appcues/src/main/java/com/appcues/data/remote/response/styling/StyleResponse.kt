@@ -1,5 +1,7 @@
 package com.appcues.data.remote.response.styling
 
+import com.google.gson.Gson
+
 internal data class StyleResponse(
     val width: Int? = null,
     val height: Int? = null,
@@ -26,4 +28,17 @@ internal data class StyleResponse(
     val textAlignment: String? = null,
     val verticalAlignment: String? = null,
     val horizontalAlignment: String? = null,
-)
+) {
+
+    companion object {
+
+        /**
+         * Try to create a [StyleResponse] from [Any]
+         */
+        fun fromAny(any: Any?): StyleResponse? {
+            return Gson().run {
+                fromJson(toJsonTree(any).asJsonObject, StyleResponse::class.java)
+            }
+        }
+    }
+}

@@ -19,7 +19,7 @@ import com.appcues.data.model.styling.ComponentStyle.ComponentHorizontalAlignmen
 import com.appcues.ui.LocalAppcuesActions
 import com.appcues.ui.extensions.PrimitiveGestureProperties
 import com.appcues.ui.extensions.applyStyle
-import com.appcues.ui.extensions.componentStyle
+import com.appcues.ui.extensions.primitiveStyle
 import com.appcues.ui.theme.AppcuesPreview
 import java.util.UUID
 
@@ -27,7 +27,7 @@ import java.util.UUID
 internal fun TextPrimitive.Compose() {
     Text(
         text = text,
-        modifier = Modifier.componentStyle(
+        modifier = Modifier.primitiveStyle(
             component = this,
             gestureProperties = PrimitiveGestureProperties(
                 onAction = LocalAppcuesActions.current.onAction,
