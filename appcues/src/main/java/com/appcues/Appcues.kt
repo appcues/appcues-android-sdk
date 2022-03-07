@@ -15,21 +15,24 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import org.koin.core.scope.Scope
 import java.util.UUID
 
-@Suppress("LongParameterList")
-class Appcues internal constructor(
-    private val config: AppcuesConfig,
-    private val logcues: Logcues,
-    private val actionRegistry: ActionRegistry,
-    private val traitRegistry: TraitRegistry,
-    private val experienceRenderer: ExperienceRenderer,
-    private val analyticsTracker: AnalyticsTracker,
-    private val session: AppcuesSession
-) : CoroutineScope {
+class Appcues internal constructor(koinScope: Scope) {
 
-    private val exceptionHandler = CoroutineExceptionHandler { _, throwable -> logcues.error(Exception(throwable)) }
-    override val coroutineContext = SupervisorJob() + Dispatchers.Main + exceptionHandler
+    private val appcuesConfig by koinScope.inject<AppcuesConfig>()
+    private val experienceRenderer by koinScope.inject<ExperienceRenderer>()
+    private val logcues by koinScope.inject<Logcues>()
+    private val actionRegistry by koinScope.inject<ActionRegistry>()
+    private val traitRegistry by koinScope.inject <TraitRegistry>()
+    private val analyticsTracker by koinScope.inject <AnalyticsTracker>()
+    private val session by koinScope.inject<AppcuesSession>()
+
+    private val appcuesScope = CoroutineScope(
+        SupervisorJob() +
+            Dispatchers.Main +
+            CoroutineExceptionHandler { _, throwable -> logcues.error(Exception(throwable)) }
+    )
 
     /**
      * Returns the current version of Appcues SDK
@@ -54,13 +57,11 @@ class Appcues internal constructor(
      * [properties] Optional properties that provide additional context about the group.
      */
     fun group(groupId: String?, properties: HashMap<String, Any>? = null) {
-        launch {
-            session.groupId = groupId
-            if (groupId == null || groupId.isEmpty()) {
-                // null or empty is removing the group (and no properties allowed)
-                analyticsTracker.group(null)
-            } else {
-                analyticsTracker.group(properties)
+        session.groupId = groupId
+
+        (if (groupId.isNullOrEmpty()) null else properties).also {
+            appcuesScope.launch {
+                analyticsTracker.group(it)
             }
         }
     }
@@ -71,7 +72,7 @@ class Appcues internal constructor(
      * to begin tracking activity and checking for qualified content.
      */
     fun anonymous(properties: HashMap<String, Any>? = null) {
-        identify(true, config.anonymousIdFactory(), properties)
+        identify(true, appcuesConfig.anonymousIdFactory(), properties)
     }
 
     /**
@@ -89,7 +90,7 @@ class Appcues internal constructor(
      * [properties] Optional properties that provide additional context about the event.
      */
     fun track(name: String, properties: HashMap<String, Any>? = null) {
-        launch {
+        appcuesScope.launch {
             analyticsTracker.track(name, properties)
         }
     }
@@ -101,7 +102,7 @@ class Appcues internal constructor(
      * [properties] Optional properties that provide additional context about the event.
      */
     fun screen(title: String, properties: HashMap<String, Any>? = null) {
-        launch {
+        appcuesScope.launch {
             analyticsTracker.screen(title, properties)
         }
     }
@@ -112,7 +113,7 @@ class Appcues internal constructor(
      * [contentId] ID of specific flow.
      */
     fun show(contentId: String) {
-        launch {
+        appcuesScope.launch {
             experienceRenderer.show(contentId)
         }
     }
@@ -171,7 +172,7 @@ class Appcues internal constructor(
             session.groupId = null
         }
 
-        launch {
+        appcuesScope.launch {
             analyticsTracker.identify(properties)
         }
     }
