@@ -1,7 +1,8 @@
 package com.appcues.action
 
-import com.appcues.action.appcues.AppcuesCloseAction
-import com.appcues.action.appcues.AppcuesLinkAction
+import com.appcues.action.appcues.CloseAction
+import com.appcues.action.appcues.LinkAction
+import com.appcues.action.appcues.TrackEventAction
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.logging.Logcues
 import org.koin.core.component.KoinScopeComponent
@@ -20,8 +21,9 @@ internal class ActionRegistry(
     private val actions: HashMap<String, ActionFactoryBlock> = hashMapOf()
 
     init {
-        register("@appcues/close") { get<AppcuesCloseAction> { parametersOf(it) } }
-        register("@appcues/link") { get<AppcuesLinkAction> { parametersOf(it) } }
+        register("@appcues/close") { get<CloseAction> { parametersOf(it) } }
+        register("@appcues/link") { get<LinkAction> { parametersOf(it) } }
+        register("@appcues/track") { get<TrackEventAction> { parametersOf(it) } }
     }
 
     operator fun get(key: String): ActionFactoryBlock? {

@@ -6,7 +6,7 @@ import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.StateMachine
 
-internal class AppcuesCloseAction(
+internal class CloseAction(
     override val config: AppcuesConfigMap,
     private val stateMachine: StateMachine
 ) : ExperienceAction {

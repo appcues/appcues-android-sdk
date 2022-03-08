@@ -2,8 +2,9 @@ package com.appcues.trait
 
 import com.appcues.AppcuesConfig
 import com.appcues.di.KoinScopePlugin
-import com.appcues.trait.appcues.AppcuesBackdropTrait
-import com.appcues.trait.appcues.AppcuesModalTrait
+import com.appcues.trait.appcues.BackdropTrait
+import com.appcues.trait.appcues.ModalTrait
+import com.appcues.trait.appcues.SkippableTrait
 import org.koin.dsl.ScopeDSL
 
 internal object TraitKoin : KoinScopePlugin {
@@ -17,17 +18,24 @@ internal object TraitKoin : KoinScopePlugin {
         }
 
         factory { params ->
-            AppcuesBackdropTrait(
+            BackdropTrait(
                 config = params.getOrNull(),
                 stateMachine = get(),
             )
         }
 
         factory { params ->
-            AppcuesModalTrait(
+            ModalTrait(
                 config = params.getOrNull(),
                 scope = get(),
                 context = get(),
+            )
+        }
+
+        factory { params ->
+            SkippableTrait(
+                config = params.getOrNull(),
+                stateMachine = get(),
             )
         }
     }

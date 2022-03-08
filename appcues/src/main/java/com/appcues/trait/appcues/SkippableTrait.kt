@@ -21,7 +21,7 @@ import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.StateMachine
 import com.appcues.trait.ContainerDecoratingTrait
 
-internal class AppcuesSkippableTrait(
+internal class SkippableTrait(
     override val config: AppcuesConfigMap,
     private val stateMachine: StateMachine
 ) : ContainerDecoratingTrait {

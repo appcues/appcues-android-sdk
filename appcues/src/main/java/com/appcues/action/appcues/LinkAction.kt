@@ -9,7 +9,7 @@ import com.appcues.action.ExperienceAction
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.getConfigOrDefault
 
-internal class AppcuesLinkAction(
+internal class LinkAction(
     override val config: AppcuesConfigMap,
     private val context: Context,
 ) : ExperienceAction {
