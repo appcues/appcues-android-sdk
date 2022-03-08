@@ -19,22 +19,26 @@ import com.appcues.ui.extensions.modalStyle
 internal fun BottomSheetModal(style: ComponentStyle?, content: @Composable () -> Unit) {
     Box(
         modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.BottomCenter
+        contentAlignment = Alignment.BottomCenter,
     ) {
-        Surface(
-            modifier = Modifier
-                // will fill max width
-                .fillMaxWidth()
-                // will fill height in 60%
-                .fillMaxHeight(fraction = 0.6f)
-                // default modal style modifiers
-                .modalStyle(
-                    style = style,
-                    isDark = isSystemInDarkTheme(),
-                    modifier = Modifier.bottomSheetCorner(style),
-                ),
-            content = content,
-        )
+        // container box to limit the size of the bottom sheet to at most 60% of screen
+        Box(
+            modifier = Modifier.fillMaxHeight(fraction = 0.6f),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            Surface(
+                modifier = Modifier
+                    // will fill max width
+                    .fillMaxWidth()
+                    // default modal style modifiers
+                    .modalStyle(
+                        style = style,
+                        isDark = isSystemInDarkTheme(),
+                        modifier = Modifier.bottomSheetCorner(style),
+                    ),
+                content = content,
+            )
+        }
     }
 }
 
