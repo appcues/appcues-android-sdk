@@ -15,7 +15,7 @@ import com.appcues.ui.modal.DialogModal
 import com.appcues.ui.modal.FullScreenModal
 import org.koin.core.scope.Scope
 
-internal class AppcuesModalTrait(
+internal class ModalTrait(
     override val config: AppcuesConfigMap,
     private val scope: Scope,
     private val context: Context,

@@ -1,10 +1,10 @@
 package com.appcues.action
 
 import com.appcues.AppcuesConfig
-import com.appcues.action.appcues.AppcuesCloseAction
-import com.appcues.action.appcues.AppcuesLinkAction
+import com.appcues.action.appcues.CloseAction
+import com.appcues.action.appcues.LinkAction
+import com.appcues.action.appcues.TrackEventAction
 import com.appcues.di.KoinScopePlugin
-import com.appcues.trait.appcues.AppcuesSkippableTrait
 import org.koin.dsl.ScopeDSL
 
 internal object ActionKoin : KoinScopePlugin {
@@ -18,23 +18,22 @@ internal object ActionKoin : KoinScopePlugin {
         }
 
         factory { params ->
-            AppcuesCloseAction(
+            CloseAction(
                 config = params.getOrNull(),
                 stateMachine = get(),
             )
         }
 
         factory { params ->
-            AppcuesLinkAction(
+            LinkAction(
                 config = params.getOrNull(),
                 context = get(),
             )
         }
 
         factory { params ->
-            AppcuesSkippableTrait(
-                config = params.getOrNull(),
-                stateMachine = get(),
+            TrackEventAction(
+                config = params.getOrNull()
             )
         }
     }

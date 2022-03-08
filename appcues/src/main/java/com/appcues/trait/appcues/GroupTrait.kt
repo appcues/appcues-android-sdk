@@ -6,7 +6,7 @@ import com.appcues.data.model.Step
 import com.appcues.data.model.getConfig
 import com.appcues.trait.StepGroupingTrait
 
-internal class AppcuesGroupTrait(override val config: AppcuesConfigMap) : StepGroupingTrait {
+internal class GroupTrait(override val config: AppcuesConfigMap) : StepGroupingTrait {
 
     override val groupId: String? = config.getConfig("groupId")
 

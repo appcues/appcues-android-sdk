@@ -17,7 +17,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-internal class AppcuesBackdropTrait(
+internal class BackdropTrait(
     override val config: AppcuesConfigMap,
     private val stateMachine: StateMachine
 ) : BackdropDecoratingTrait {
