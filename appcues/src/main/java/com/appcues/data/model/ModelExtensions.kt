@@ -1,7 +1,10 @@
 package com.appcues.data.model
 
+import com.appcues.data.mapper.styling.StyleColorMapper
 import com.appcues.data.mapper.styling.StyleMapper
+import com.appcues.data.model.styling.ComponentColor
 import com.appcues.data.model.styling.ComponentStyle
+import com.appcues.data.remote.response.styling.StyleColorResponse
 import com.appcues.data.remote.response.styling.StyleResponse
 
 typealias AppcuesConfigMap = HashMap<String, Any>?
@@ -24,11 +27,13 @@ internal inline fun <reified T : Any?> AppcuesConfigMap.getConfig(key: String): 
 }
 
 internal fun AppcuesConfigMap.getConfigStyle(key: String): ComponentStyle? {
-    // check if config is not null
-    if (this == null) return null
-    // get style property if there is any
-    return get(key)?.let {
-        // create StyleResponse from style and map to ComponentStyle
+    return getConfig<Any>(key)?.let {
         StyleMapper().map(StyleResponse.fromAny(it))
+    }
+}
+
+internal fun AppcuesConfigMap.getConfigColor(key: String): ComponentColor? {
+    return getConfig<Any>(key)?.let {
+        StyleColorMapper().map(StyleColorResponse.fromAny(it))
     }
 }
