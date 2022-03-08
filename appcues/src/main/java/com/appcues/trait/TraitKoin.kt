@@ -20,7 +20,6 @@ internal object TraitKoin : KoinScopePlugin {
         factory { params ->
             BackdropTrait(
                 config = params.getOrNull(),
-                stateMachine = get(),
             )
         }
 
