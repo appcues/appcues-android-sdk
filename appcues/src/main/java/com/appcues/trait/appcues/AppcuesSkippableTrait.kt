@@ -1,19 +1,26 @@
 package com.appcues.trait.appcues
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import com.appcues.R
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.StateMachine
 import com.appcues.trait.ContainerDecoratingTrait
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 internal class AppcuesSkippableTrait(
@@ -23,18 +30,24 @@ internal class AppcuesSkippableTrait(
 
     @Composable
     override fun Overlay(scope: BoxScope) {
+        val coroutineScope = rememberCoroutineScope()
         with(scope) {
             IconButton(
-                modifier = Modifier.align(Alignment.TopEnd),
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(8.dp)
+                    .clip(CircleShape)
+                    .size(30.dp, 30.dp)
+                    .background(Color(color = 0x80000000)),
                 onClick = {
-                    CoroutineScope(Dispatchers.Main).launch {
+                    coroutineScope.launch {
                         stateMachine.handleAction(EndExperience())
                     }
                 }
             ) {
                 Icon(
                     painter = painterResource(id = android.R.drawable.ic_menu_close_clear_cancel),
-                    contentDescription = "Dismiss",
+                    contentDescription = stringResource(id = R.string.skippable_trait_dismiss),
                     tint = Color(color = 0xFFE3E9F1)
                 )
             }
