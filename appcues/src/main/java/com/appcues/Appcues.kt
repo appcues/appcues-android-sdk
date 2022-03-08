@@ -207,7 +207,7 @@ class Appcues internal constructor(koinScope: Scope) {
         }
 
         @Suppress("MagicNumber")
-        private var _sessionTimeout: Int = 1800 // 30 minutes by default
+        private var _sessionTimeout: Int = AppcuesConfig.SESSION_TIMEOUT_DEFAULT
 
         /**
          *  Set the session timeout for the configuration. This timeout value is used to determine if a new session is started
