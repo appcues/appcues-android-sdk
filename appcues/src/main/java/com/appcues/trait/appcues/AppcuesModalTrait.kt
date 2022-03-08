@@ -2,16 +2,13 @@ package com.appcues.trait.appcues
 
 import ExpandedBottomSheetModal
 import android.content.Context
+import android.util.Log
 import androidx.compose.runtime.Composable
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.getConfigOrDefault
 import com.appcues.data.model.getConfigStyle
 import com.appcues.trait.ContentWrappingTrait
 import com.appcues.trait.ExperiencePresentingTrait
-import com.appcues.trait.appcues.AppcuesModalTrait.PresentationStyle.BOTTOM_SHEET
-import com.appcues.trait.appcues.AppcuesModalTrait.PresentationStyle.DIALOG
-import com.appcues.trait.appcues.AppcuesModalTrait.PresentationStyle.EXPANDED_BOTTOM_SHEET
-import com.appcues.trait.appcues.AppcuesModalTrait.PresentationStyle.FULL_SCREEN
 import com.appcues.ui.AppcuesActivity
 import com.appcues.ui.modal.BottomSheetModal
 import com.appcues.ui.modal.DialogModal
@@ -24,15 +21,10 @@ internal class AppcuesModalTrait(
     private val context: Context,
 ) : ExperiencePresentingTrait, ContentWrappingTrait {
 
-    internal enum class PresentationStyle {
-        DIALOG, FULL_SCREEN, BOTTOM_SHEET, EXPANDED_BOTTOM_SHEET
-    }
+    // should we have a default presentation style?
+    private val presentationStyle = config.getConfigOrDefault("presentationStyle", "full")
 
-    private val presentationStyle = config
-        .getConfigOrDefault("presentationStyle", "dialog")
-        .toModalPresentationStyle()
-
-    private val style = config.getConfigStyle()
+    private val style = config.getConfigStyle("style")
 
     override fun presentExperience() {
         context.startActivity(AppcuesActivity.getIntent(context, scope.id))
@@ -40,21 +32,15 @@ internal class AppcuesModalTrait(
 
     @Composable
     override fun WrapContent(content: @Composable () -> Unit) {
+        Log.i("Appcues", " WrapContent style: $presentationStyle")
         when (presentationStyle) {
-            DIALOG -> DialogModal(style, content)
-            FULL_SCREEN -> FullScreenModal(style, content)
-            BOTTOM_SHEET -> BottomSheetModal(style, content)
-            EXPANDED_BOTTOM_SHEET -> ExpandedBottomSheetModal(style, content)
-        }
-    }
-
-    private fun String.toModalPresentationStyle(): PresentationStyle {
-        return when (this) {
-            "dialog" -> DIALOG
-            "full" -> FULL_SCREEN
-            "sheet" -> EXPANDED_BOTTOM_SHEET
-            "halfSheet" -> BOTTOM_SHEET
-            else -> DIALOG
+            "dialog" -> DialogModal(style, content)
+            "full" -> FullScreenModal(style, content)
+            "sheet" -> ExpandedBottomSheetModal(style, content)
+            "halfSheet" -> BottomSheetModal(style, content)
+            else -> {
+                // what to do if presentationStyle is not valid?
+            }
         }
     }
 }

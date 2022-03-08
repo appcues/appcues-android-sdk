@@ -23,11 +23,11 @@ internal inline fun <reified T : Any?> AppcuesConfigMap.getConfig(key: String): 
     }
 }
 
-internal fun AppcuesConfigMap.getConfigStyle(): ComponentStyle? {
+internal fun AppcuesConfigMap.getConfigStyle(key: String): ComponentStyle? {
     // check if config is not null
     if (this == null) return null
     // get style property if there is any
-    return get("style")?.let {
+    return get(key)?.let {
         // create StyleResponse from style and map to ComponentStyle
         StyleMapper().map(StyleResponse.fromAny(it))
     }
