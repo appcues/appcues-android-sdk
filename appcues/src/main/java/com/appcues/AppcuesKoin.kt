@@ -19,8 +19,18 @@ internal object AppcuesKoin : KoinScopePlugin {
             )
         }
 
+        scoped {
+            AppcuesCoroutineScope(
+                logcues = get()
+            )
+        }
+
         scoped { Logcues(config.loggingLevel) }
-        scoped { StateMachine() }
+        scoped {
+            StateMachine(
+                appcuesCoroutineScope = get()
+            )
+        }
 
         scoped {
             Storage(
@@ -30,16 +40,27 @@ internal object AppcuesKoin : KoinScopePlugin {
         }
 
         scoped {
+            SessionMonitor(
+                config = get(),
+                storage = get(),
+                scope = this
+            )
+        }
+
+        scoped {
             AnalyticsTracker(
+                appcuesCoroutineScope = get(),
                 config = config,
                 repository = get(),
                 storage = get(),
-                experienceRenderer = get()
+                experienceRenderer = get(),
+                sessionMonitor = get()
             )
         }
 
         scoped {
             ExperienceRenderer(
+                appcuesCoroutineScope = get(),
                 repository = get(),
                 stateMachine = get()
             )

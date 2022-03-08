@@ -10,11 +10,6 @@ import com.appcues.logging.Logcues
 import com.appcues.trait.ExperienceTrait
 import com.appcues.trait.TraitRegistry
 import com.appcues.ui.ExperienceRenderer
-import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
 import org.koin.core.scope.Scope
 
 class Appcues internal constructor(koinScope: Scope) {
@@ -23,15 +18,14 @@ class Appcues internal constructor(koinScope: Scope) {
     private val experienceRenderer by koinScope.inject<ExperienceRenderer>()
     private val logcues by koinScope.inject<Logcues>()
     private val actionRegistry by koinScope.inject<ActionRegistry>()
-    private val traitRegistry by koinScope.inject <TraitRegistry>()
-    private val analyticsTracker by koinScope.inject <AnalyticsTracker>()
+    private val traitRegistry by koinScope.inject<TraitRegistry>()
+    private val analyticsTracker by koinScope.inject<AnalyticsTracker>()
     private val storage by koinScope.inject<Storage>()
+    private val sessionMonitor by koinScope.inject<SessionMonitor>()
 
-    private val coroutineScope = CoroutineScope(
-        SupervisorJob() +
-            Dispatchers.Main +
-            CoroutineExceptionHandler { _, throwable -> logcues.error(Exception(throwable)) }
-    )
+    init {
+        sessionMonitor.start()
+    }
 
     /**
      * Returns the current version of Appcues SDK
@@ -59,9 +53,7 @@ class Appcues internal constructor(koinScope: Scope) {
         storage.groupId = groupId
 
         (if (groupId.isNullOrEmpty()) null else properties).also {
-            coroutineScope.launch {
-                analyticsTracker.group(it)
-            }
+            analyticsTracker.group(it)
         }
     }
 
@@ -82,6 +74,7 @@ class Appcues internal constructor(koinScope: Scope) {
      * Can be used when the user logs out of your application.
      */
     fun reset() {
+        sessionMonitor.reset()
         storage.userId = ""
         storage.isAnonymous = true
         storage.groupId = null
@@ -94,9 +87,7 @@ class Appcues internal constructor(koinScope: Scope) {
      * [properties] Optional properties that provide additional context about the event.
      */
     fun track(name: String, properties: HashMap<String, Any>? = null) {
-        coroutineScope.launch {
-            analyticsTracker.track(name, properties)
-        }
+        analyticsTracker.track(name, properties)
     }
 
     /**
@@ -106,9 +97,7 @@ class Appcues internal constructor(koinScope: Scope) {
      * [properties] Optional properties that provide additional context about the event.
      */
     fun screen(title: String, properties: HashMap<String, Any>? = null) {
-        coroutineScope.launch {
-            analyticsTracker.screen(title, properties)
-        }
+        analyticsTracker.screen(title, properties)
     }
 
     /**
@@ -117,9 +106,7 @@ class Appcues internal constructor(koinScope: Scope) {
      * [contentId] ID of specific flow.
      */
     fun show(contentId: String) {
-        coroutineScope.launch {
-            experienceRenderer.show(contentId)
-        }
+        experienceRenderer.show(contentId)
     }
 
     /**
@@ -172,13 +159,14 @@ class Appcues internal constructor(koinScope: Scope) {
         storage.userId = userId
         storage.isAnonymous = isAnonymous
         if (userChanged) {
+            // when the identified user changes from last known value, we must start a new session
+            sessionMonitor.start()
+
             // group info is reset on new user
             storage.groupId = null
         }
 
-        coroutineScope.launch {
-            analyticsTracker.identify(properties)
-        }
+        analyticsTracker.identify(properties)
     }
 
     class Builder(
@@ -218,6 +206,18 @@ class Appcues internal constructor(koinScope: Scope) {
             _anonymousIdFactory = factory
         }
 
+        @Suppress("MagicNumber")
+        private var _sessionTimeout: Int = 1800 // 30 minutes by default
+
+        /**
+         *  Set the session timeout for the configuration. This timeout value is used to determine if a new session is started
+         *  upon the application returning to the foreground. The default value is 1800 seconds (30 minutes).
+         *  [sessionTimeout] The timeout length, in seconds.
+         */
+        fun sessionTimeout(timeout: Int) = apply {
+            _sessionTimeout = timeout.coerceAtLeast(0)
+        }
+
         fun build(): Appcues {
             return with(AppcuesKoinContext) {
                 createAppcues(
@@ -227,7 +227,8 @@ class Appcues internal constructor(koinScope: Scope) {
                         applicationId = applicationId,
                         loggingLevel = _loggingLevel,
                         apiHostUrl = _apiHostUrl,
-                        anonymousIdFactory = _anonymousIdFactory
+                        anonymousIdFactory = _anonymousIdFactory,
+                        sessionTimeout = _sessionTimeout
                     )
                 )
             }
