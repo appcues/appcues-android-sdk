@@ -8,7 +8,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,7 +20,6 @@ import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.StateMachine
 import com.appcues.trait.ContainerDecoratingTrait
-import kotlinx.coroutines.launch
 
 internal class AppcuesSkippableTrait(
     override val config: AppcuesConfigMap,
@@ -30,7 +28,6 @@ internal class AppcuesSkippableTrait(
 
     @Composable
     override fun Overlay(scope: BoxScope) {
-        val coroutineScope = rememberCoroutineScope()
         with(scope) {
             IconButton(
                 modifier = Modifier
@@ -40,9 +37,7 @@ internal class AppcuesSkippableTrait(
                     .size(30.dp, 30.dp)
                     .background(Color(color = 0x80000000)),
                 onClick = {
-                    coroutineScope.launch {
-                        stateMachine.handleAction(EndExperience())
-                    }
+                    stateMachine.handleAction(EndExperience())
                 }
             ) {
                 Icon(

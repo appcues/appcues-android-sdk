@@ -1,6 +1,8 @@
 package com.appcues.data.remote.retrofit
 
 import com.appcues.BuildConfig
+import com.appcues.data.remote.response.ActivityDeserializer
+import com.appcues.data.remote.response.ActivityResponse
 import com.google.gson.GsonBuilder
 import okhttp3.HttpUrl
 import okhttp3.Interceptor
@@ -17,7 +19,9 @@ internal class RetrofitWrapper(private val url: HttpUrl, private val isDebug: Bo
     }
 
     private fun getRetrofit(): Retrofit {
-        val gson = GsonBuilder().create()
+        val gson = GsonBuilder()
+            .registerTypeAdapter(ActivityResponse::class.java, ActivityDeserializer())
+            .create()
 
         val okHttp = OkHttpClient.Builder().also {
             if (isDebug) {
