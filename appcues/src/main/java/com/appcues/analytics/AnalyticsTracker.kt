@@ -1,61 +1,34 @@
 package com.appcues.analytics
 
-import com.appcues.AppcuesConfig
 import com.appcues.AppcuesCoroutineScope
 import com.appcues.SessionMonitor
-import com.appcues.Storage
 import com.appcues.data.AppcuesRepository
 import com.appcues.data.remote.request.ActivityRequest
-import com.appcues.data.remote.request.EventRequest
 import com.appcues.ui.ExperienceRenderer
 import kotlinx.coroutines.launch
 
 internal class AnalyticsTracker(
     private val appcuesCoroutineScope: AppcuesCoroutineScope,
-    private val config: AppcuesConfig,
     private val repository: AppcuesRepository,
-    private val storage: Storage,
     private val experienceRenderer: ExperienceRenderer,
-    private val sessionMonitor: SessionMonitor
+    private val sessionMonitor: SessionMonitor,
+    private val activityBuilder: ActivityRequestBuilder,
 ) {
 
     fun identify(properties: HashMap<String, Any>? = null) {
-        val activity = ActivityRequest(
-            userId = storage.userId,
-            groupId = storage.groupId,
-            accountId = config.accountId,
-            profileUpdate = properties
-        )
-        trackActivity(activity, true)
+        trackActivity(activityBuilder.identify(properties), true)
     }
 
     fun track(name: String, properties: HashMap<String, Any>? = null, sync: Boolean = true) {
-        val activity = ActivityRequest(
-            events = listOf(EventRequest(name = name, attributes = properties)),
-            userId = storage.userId,
-            groupId = storage.groupId,
-            accountId = config.accountId
-        )
-        trackActivity(activity, sync)
+        trackActivity(activityBuilder.track(name, properties), sync)
     }
 
     fun screen(title: String, properties: HashMap<String, Any>? = null) {
-        // screen calls are really just a special type of event: "appcues:screen_view"
-        val updatedProperties = properties ?: hashMapOf()
-        // include the "screenTitle" property automatically
-        updatedProperties["screenTitle"] = title
-        // handle the same as other events
-        track("appcues:screen_view", updatedProperties, true)
+        trackActivity(activityBuilder.screen(title, properties), true)
     }
 
     fun group(properties: HashMap<String, Any>? = null) {
-        val activity = ActivityRequest(
-            userId = storage.userId,
-            groupId = storage.groupId,
-            accountId = config.accountId,
-            groupUpdate = properties
-        )
-        trackActivity(activity, true)
+        trackActivity(activityBuilder.group(properties), true)
     }
 
     private fun trackActivity(activity: ActivityRequest, sync: Boolean) {

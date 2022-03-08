@@ -8,6 +8,6 @@ internal data class EventRequest(
     val name: String,
     @JsonAdapter(UnixTimestampAdapter::class)
     val timestamp: Date = Date(),
-    val attributes: HashMap<String, Any>? = null,
-    val context: HashMap<String, Any>? = null
+    val attributes: HashMap<String, Any> = hashMapOf(),
+    val context: HashMap<String, Any> = hashMapOf()
 )
