@@ -31,7 +31,8 @@ internal class AutoPropertyDecorator(
         const val SESSION_RANDOMIZER_UPPER_BOUND = 100
     }
 
-    private var lastScreen: String? = null
+    private var currentScreen: String? = null
+    private var previousScreen: String? = null
     private var sessionPageviews = 0
     private var sessionRandomizer: Int? = 0
 
@@ -63,7 +64,8 @@ internal class AutoPropertyDecorator(
             "_sessionId" to sessionMonitor.sessionId?.toString(),
             "_lastContentShownAt" to storage.lastContentShownAt?.time,
             "_lastBrowserLanguage" to getCurrentLocale(context).language,
-            "_lastScreen" to lastScreen,
+            "_currentScreenTitle" to currentScreen,
+            "_lastScreenTitle" to previousScreen,
             "_sessionPageviews" to sessionPageviews,
             "_sessionRandomizer" to sessionRandomizer,
         ).filterValues { it != null }.mapValues { it.value as Any }
@@ -77,7 +79,8 @@ internal class AutoPropertyDecorator(
     fun decorateTrack(event: EventRequest) = event.apply {
         if (event.name == AnalyticEvents.ScreenView.eventName) {
             // special handling for screen_view events
-            lastScreen = attributes[ActivityRequestBuilder.SCREEN_TITLE_ATTRIBUTE]?.toString()
+            previousScreen = currentScreen
+            currentScreen = attributes[ActivityRequestBuilder.SCREEN_TITLE_ATTRIBUTE]?.toString()
             sessionPageviews += 1
         } else if (event.name == AnalyticEvents.SessionStarted.eventName) {
             // special handling for session start events
