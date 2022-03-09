@@ -19,6 +19,11 @@ internal class AnalyticsTracker(
         trackActivity(activityBuilder.identify(properties), true)
     }
 
+    // convenience helper for internal events
+    fun track(event: AnalyticEvents, properties: HashMap<String, Any>? = null, sync: Boolean = true) {
+        track(event.eventName, properties, sync)
+    }
+
     fun track(name: String, properties: HashMap<String, Any>? = null, sync: Boolean = true) {
         trackActivity(activityBuilder.track(name, properties), sync)
     }
