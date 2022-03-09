@@ -17,6 +17,6 @@ internal class RetrofitAppcuesRemoteSource(
     }
 
     override suspend fun postActivity(activity: ActivityRequest, sync: Boolean): ActivityResponse {
-        return appcuesService.activity(accountId, storage.userId, if (sync) 1 else null, activity)
+        return appcuesService.activity(accountId, activity.userId, if (sync) 1 else null, activity)
     }
 }

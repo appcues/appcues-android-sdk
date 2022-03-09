@@ -20,7 +20,7 @@ internal object AppcuesKoin : KoinScopePlugin {
         scoped { StateMachine(appcuesCoroutineScope = get()) }
         scoped { Storage(context = get(), config = get()) }
         scoped { SessionMonitor(config = get(), storage = get(), scope = this) }
-        scoped { AutoPropertyDecorator(context = get(), config = get()) }
+        scoped { AutoPropertyDecorator(context = get(), config = get(), storage = get(), sessionMonitor = get()) }
         scoped { ActivityRequestBuilder(config = get(), storage = get(), decorator = get()) }
         scoped { ExperienceRenderer(appcuesCoroutineScope = get(), repository = get(), stateMachine = get()) }
         scoped { AppcuesRepository(appcuesRemoteSource = get(), experienceMapper = get()) }
