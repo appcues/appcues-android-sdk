@@ -11,25 +11,27 @@ internal class ActivityRequestBuilder(
     private val decorator: AutoPropertyDecorator,
 ) {
 
-    fun identify(properties: HashMap<String, Any>? = null) = ActivityRequest(
-        userId = storage.userId,
-        accountId = config.accountId,
-        groupId = storage.groupId,
-        profileUpdate = properties
+    fun identify(properties: HashMap<String, Any>? = null) = decorator.decorateIdentify(
+        ActivityRequest(
+            userId = storage.userId,
+            accountId = config.accountId,
+            groupId = storage.groupId,
+            profileUpdate = properties
+        )
     )
 
     fun group(properties: HashMap<String, Any>? = null) = ActivityRequest(
         userId = storage.userId,
         accountId = config.accountId,
         groupId = storage.groupId,
-        groupUpdate = properties
+        groupUpdate = properties // no auto-properties on group calls
     )
 
     fun track(name: String, properties: HashMap<String, Any>? = null) = ActivityRequest(
         userId = storage.userId,
         accountId = config.accountId,
         groupId = storage.groupId,
-        events = listOf(decorator.decorate(EventRequest(name = name, attributes = properties ?: hashMapOf())))
+        events = listOf(decorator.decorateTrack(EventRequest(name = name, attributes = properties ?: hashMapOf())))
     )
 
     fun screen(title: String, properties: HashMap<String, Any>? = null) =

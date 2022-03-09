@@ -42,8 +42,8 @@ internal class SessionMonitor(
     }
 
     fun reset() {
-        _sessionId = null
         analyticsTracker.track("appcues:session_reset", null, false)
+        _sessionId = null
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
