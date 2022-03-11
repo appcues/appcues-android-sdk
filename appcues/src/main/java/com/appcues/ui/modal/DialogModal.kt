@@ -1,7 +1,12 @@
 package com.appcues.ui.modal
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.padding
@@ -27,8 +32,8 @@ internal fun DialogModal(style: ComponentStyle?, content: @Composable () -> Unit
     val isDark = isSystemInDarkTheme()
 
     AppcuesTraitAnimatedVisibility(
-        enter = fadeIn(),
-        exit = fadeOut(),
+        enter = enterTransition(),
+        exit = exitTransition(),
     ) {
         Surface(
             modifier = Modifier
@@ -47,6 +52,17 @@ internal fun DialogModal(style: ComponentStyle?, content: @Composable () -> Unit
             content = content,
         )
     }
+}
+
+@OptIn(ExperimentalAnimationApi::class)
+private fun enterTransition(): EnterTransition {
+    return tween<Float>(durationMillis = 250).let {
+        fadeIn(it) + scaleIn(it, initialScale = 0.8f)
+    }
+}
+
+private fun exitTransition(): ExitTransition {
+    return fadeOut(tween(durationMillis = 100))
 }
 
 private fun Modifier.dialogCorner(style: ComponentStyle?) = this.then(

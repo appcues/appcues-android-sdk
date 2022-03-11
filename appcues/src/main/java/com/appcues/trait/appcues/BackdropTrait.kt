@@ -1,5 +1,8 @@
 package com.appcues.trait.appcues
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
@@ -25,8 +28,8 @@ internal class BackdropTrait(
     @Composable
     override fun Backdrop(scope: BoxScope) {
         AppcuesTraitAnimatedVisibility(
-            enter = fadeIn(),
-            exit = fadeOut()
+            enter = enterTransition(),
+            exit = exitTransition(),
         ) {
             Spacer(
                 modifier = Modifier
@@ -42,4 +45,12 @@ internal class BackdropTrait(
             .background(color.getColor(isDark))
         else Modifier
     )
+
+    private fun enterTransition(): EnterTransition {
+        return fadeIn(tween(durationMillis = 300))
+    }
+
+    private fun exitTransition(): ExitTransition {
+        return fadeOut(tween(durationMillis = 300))
+    }
 }
