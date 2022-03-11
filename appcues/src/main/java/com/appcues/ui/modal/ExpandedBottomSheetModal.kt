@@ -1,3 +1,5 @@
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -11,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.appcues.data.model.styling.ComponentStyle
+import com.appcues.ui.AppcuesTraitAnimatedVisibility
 import com.appcues.ui.extensions.modalStyle
 
 @Composable
@@ -19,20 +22,25 @@ internal fun ExpandedBottomSheetModal(style: ComponentStyle?, content: @Composab
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.BottomCenter
     ) {
-        Surface(
-            modifier = Modifier
-                // will fill max width
-                .fillMaxWidth()
-                // will fill height in 95%
-                .fillMaxHeight(fraction = 0.95f)
-                // default modal style modifiers
-                .modalStyle(
-                    style = style,
-                    isDark = isSystemInDarkTheme(),
-                    modifier = Modifier.bottomSheetCorner(style),
-                ),
-            content = content,
-        )
+        AppcuesTraitAnimatedVisibility(
+            enter = slideInVertically(initialOffsetY = { it }),
+            exit = slideOutVertically(targetOffsetY = { it }),
+        ) {
+            Surface(
+                modifier = Modifier
+                    // will fill max width
+                    .fillMaxWidth()
+                    // will fill height in 95%
+                    .fillMaxHeight(fraction = 0.95f)
+                    // default modal style modifiers
+                    .modalStyle(
+                        style = style,
+                        isDark = isSystemInDarkTheme(),
+                        modifier = Modifier.bottomSheetCorner(style),
+                    ),
+                content = content,
+            )
+        }
     }
 }
 

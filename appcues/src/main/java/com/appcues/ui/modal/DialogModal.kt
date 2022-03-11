@@ -1,5 +1,7 @@
 package com.appcues.ui.modal
 
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.padding
@@ -11,6 +13,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import com.appcues.data.model.styling.ComponentStyle
+import com.appcues.ui.AppcuesTraitAnimatedVisibility
 import com.appcues.ui.extensions.modalStyle
 import com.appcues.ui.extensions.styleShadow
 
@@ -23,22 +26,27 @@ internal fun DialogModal(style: ComponentStyle?, content: @Composable () -> Unit
     val dialogVerticalMargin = (configuration.screenHeightDp * SCREEN_PADDING).dp
     val isDark = isSystemInDarkTheme()
 
-    Surface(
-        modifier = Modifier
-            // min width and height so it doesn't look weird
-            .defaultMinSize(minWidth = 200.dp, minHeight = 100.dp)
-            // container padding based on screen size
-            .padding(horizontal = dialogHorizontalMargin, vertical = dialogVerticalMargin)
-            // default modal style modifiers
-            .modalStyle(
-                style = style,
-                isDark = isDark,
-                modifier = Modifier
-                    .styleShadow(style, isDark)
-                    .dialogCorner(style),
-            ),
-        content = content,
-    )
+    AppcuesTraitAnimatedVisibility(
+        enter = fadeIn(),
+        exit = fadeOut(),
+    ) {
+        Surface(
+            modifier = Modifier
+                // min width and height so it doesn't look weird
+                .defaultMinSize(minWidth = 200.dp, minHeight = 100.dp)
+                // container padding based on screen size
+                .padding(horizontal = dialogHorizontalMargin, vertical = dialogVerticalMargin)
+                // default modal style modifiers
+                .modalStyle(
+                    style = style,
+                    isDark = isDark,
+                    modifier = Modifier
+                        .styleShadow(style, isDark)
+                        .dialogCorner(style),
+                ),
+            content = content,
+        )
+    }
 }
 
 private fun Modifier.dialogCorner(style: ComponentStyle?) = this.then(

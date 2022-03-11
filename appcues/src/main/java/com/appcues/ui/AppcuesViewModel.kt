@@ -10,12 +10,10 @@ import com.appcues.statemachine.Action.RenderStep
 import com.appcues.statemachine.StateMachine
 import com.appcues.statemachine.states.BeginningStep
 import com.appcues.statemachine.states.EndingStep
-import com.appcues.ui.AppcuesViewModel.UIAction.Finish
+import com.appcues.ui.AppcuesViewModel.UIState.Dismissing
 import com.appcues.ui.AppcuesViewModel.UIState.Idle
-import com.appcues.ui.AppcuesViewModel.UIState.Render
-import kotlinx.coroutines.flow.MutableSharedFlow
+import com.appcues.ui.AppcuesViewModel.UIState.Rendering
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -29,11 +27,8 @@ internal class AppcuesViewModel(
 
     sealed class UIState {
         object Idle : UIState()
-        data class Render(val stepContainer: StepContainer, val position: Int) : UIState()
-    }
-
-    sealed class UIAction {
-        object Finish : UIAction()
+        data class Rendering(val stepContainer: StepContainer, val position: Int) : UIState()
+        object Dismissing : UIState()
     }
 
     val stateMachine by inject<StateMachine>()
@@ -45,11 +40,6 @@ internal class AppcuesViewModel(
     val uiState: StateFlow<UIState>
         get() = _uiState
 
-    private val _uiAction = MutableSharedFlow<UIAction>(replay = 0)
-
-    val uiAction: SharedFlow<UIAction>
-        get() = _uiAction
-
     init {
         viewModelScope.launch {
             stateMachine.flow.collectLatest {
@@ -59,7 +49,7 @@ internal class AppcuesViewModel(
                         // and will trigger moving to another page forward/backward
                         it.experience.stepContainer.firstOrNull()?.let { container ->
                             // Render if there is a stepContainer
-                            _uiState.value = Render(container, it.step)
+                            _uiState.value = Rendering(container, it.step)
                             // Notify state machine that we will render step
                             viewModelScope.launch {
                                 stateMachine.handleAction(RenderStep())
@@ -72,7 +62,8 @@ internal class AppcuesViewModel(
                         // action was executed.
 
                         if (it.dismissContainer) {
-                            _uiAction.emit(Finish)
+                            // dismiss will trigger exit animations and finish activity
+                            _uiState.value = Dismissing
                         }
                     }
                 }
