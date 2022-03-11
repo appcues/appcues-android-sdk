@@ -15,20 +15,17 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.core.os.bundleOf
-import androidx.lifecycle.lifecycleScope
-import com.appcues.R
 import com.appcues.di.AppcuesKoinContext
-import com.appcues.ui.AppcuesViewModel.UIAction
-import com.appcues.ui.AppcuesViewModel.UIAction.Finish
-import com.appcues.ui.AppcuesViewModel.UIState.Render
+import com.appcues.ui.AppcuesViewModel.UIState
+import com.appcues.ui.AppcuesViewModel.UIState.Dismissing
+import com.appcues.ui.AppcuesViewModel.UIState.Rendering
 import com.appcues.ui.extensions.Compose
 import com.appcues.ui.theme.AppcuesTheme
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 import org.koin.core.scope.Scope
 
 internal class AppcuesActivity : AppCompatActivity() {
@@ -53,30 +50,33 @@ internal class AppcuesActivity : AppCompatActivity() {
     private val viewModel: AppcuesViewModel by viewModels { AppcuesViewModelFactory(scope) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
+        // remove enter animation from this activity
+        overridePendingTransition(0, 0)
         super.onCreate(savedInstanceState)
 
         setContent {
-            AppcuesActivityContent()
+            AppcuesTheme {
+                Composition()
+            }
         }
-
-        // handle in a separate stream ui actions
-        viewModel.uiAction.handleActions()
     }
 
     @Composable
-    private fun AppcuesActivityContent() {
-        AppcuesTheme {
-            CompositionLocalProvider(LocalAppcuesActions provides AppcuesActions { viewModel.onAction(it) }) {
-                // observe ui state
-                val state = viewModel.uiState.collectAsState().value
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    // if state is Render, then we compose it
-                    if (state is Render) {
-                        state.Compose(boxScope = this)
+    private fun Composition() {
+        CompositionLocalProvider(LocalAppcuesActions provides AppcuesActions { viewModel.onAction(it) }) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center,
+            ) {
+                // collect all UIState
+                viewModel.uiState.collectAsState().let {
+                    // update and compose last rendering state remember based on latest UIState
+                    ComposeLastRenderingState(it.value, this)
+
+                    // will run when transition from visible to gone is completed
+                    LaunchOnHideAnimationCompleted {
+                        // if state is dismissing then finish activity
+                        if (it.value is Dismissing) finish()
                     }
                 }
             }
@@ -84,7 +84,28 @@ internal class AppcuesActivity : AppCompatActivity() {
     }
 
     @Composable
-    private fun Render.Compose(boxScope: BoxScope) {
+    private fun ComposeLastRenderingState(
+        state: UIState,
+        boxScope: BoxScope,
+    ) {
+        remember { mutableStateOf<Rendering?>(null) }
+            .let {
+                it.value = if (state is Rendering) {
+                    // if UIState is rendering then we set new value and show content
+                    isContentVisible.targetState = true
+                    state
+                } else {
+                    // else we keep the same value and hide content
+                    isContentVisible.targetState = false
+                    it.value
+                }
+                // return Rendering?
+                it.value
+            }?.Compose(boxScope = boxScope)
+    }
+
+    @Composable
+    private fun Rendering.Compose(boxScope: BoxScope) {
         // show if render state is not null
         val step = stepContainer.steps.getOrNull(position)
 
@@ -111,23 +132,10 @@ internal class AppcuesActivity : AppCompatActivity() {
         }
     }
 
-    private fun SharedFlow<UIAction>.handleActions() {
-        lifecycleScope.launch {
-            collect { action ->
-                when (action) {
-                    Finish -> handleFinishAction()
-                }
-            }
-        }
-    }
-
-    private fun handleFinishAction() {
-        finish()
-    }
-
     override fun finish() {
         super.finish()
         viewModel.onEndExperience()
-        overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
+        // remove exit animation from this activity
+        overridePendingTransition(0, 0)
     }
 }

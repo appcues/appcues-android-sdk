@@ -1,5 +1,7 @@
 package com.appcues.trait.appcues
 
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.BoxScope
@@ -11,6 +13,7 @@ import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.getConfigColor
 import com.appcues.data.model.styling.ComponentColor
 import com.appcues.trait.BackdropDecoratingTrait
+import com.appcues.ui.AppcuesTraitAnimatedVisibility
 import com.appcues.ui.extensions.getColor
 
 internal class BackdropTrait(
@@ -21,12 +24,17 @@ internal class BackdropTrait(
 
     @Composable
     override fun Backdrop(scope: BoxScope) {
-        Spacer(
-            modifier = Modifier
-                .fillMaxSize()
-                // set background color
-                .background(backgroundColor, isSystemInDarkTheme())
-        )
+        AppcuesTraitAnimatedVisibility(
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            Spacer(
+                modifier = Modifier
+                    .fillMaxSize()
+                    // set background color
+                    .background(backgroundColor, isSystemInDarkTheme())
+            )
+        }
     }
 
     private fun Modifier.background(color: ComponentColor?, isDark: Boolean) = this.then(
