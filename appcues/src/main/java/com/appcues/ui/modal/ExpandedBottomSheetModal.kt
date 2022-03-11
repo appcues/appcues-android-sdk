@@ -1,3 +1,7 @@
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -23,8 +27,8 @@ internal fun ExpandedBottomSheetModal(style: ComponentStyle?, content: @Composab
         contentAlignment = Alignment.BottomCenter
     ) {
         AppcuesTraitAnimatedVisibility(
-            enter = slideInVertically(initialOffsetY = { it }),
-            exit = slideOutVertically(targetOffsetY = { it }),
+            enter = enterTransition(),
+            exit = exitTransition(),
         ) {
             Surface(
                 modifier = Modifier
@@ -42,6 +46,15 @@ internal fun ExpandedBottomSheetModal(style: ComponentStyle?, content: @Composab
             )
         }
     }
+}
+
+private fun enterTransition(): EnterTransition {
+    return slideInVertically(tween(durationMillis = 300)) { it }
+}
+
+private fun exitTransition(): ExitTransition {
+    return slideOutVertically(tween(durationMillis = 250)) { it } +
+        fadeOut(tween(durationMillis = 200))
 }
 
 private fun Modifier.bottomSheetCorner(style: ComponentStyle?) = this.then(
