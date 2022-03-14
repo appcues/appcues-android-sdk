@@ -12,29 +12,40 @@ internal class StepMapper(
     private val traitsMapper: TraitsMapper,
 ) {
 
-    fun map(from: StepResponse, actions: HashMap<UUID, List<ActionResponse>>?) = Step(
-        id = from.id,
-        content = stepContentMapper.map(from.content, from.actions.mergeActions(actions)),
-        stepTraits = traitsMapper.map(from.traits).filterIsInstance(StepDecoratingTrait::class.java),
-    )
+    fun map(
+        from: StepResponse,
+        stepContainerActions: HashMap<UUID, List<ActionResponse>>?,
+        experienceActions: HashMap<UUID, List<ActionResponse>>?
+    ): Step {
+        return Step(
+            id = from.id,
+            content = stepContentMapper.map(
+                from.content,
+                from.actions
+                    .mergeActions(stepContainerActions)
+                    .mergeActions(experienceActions),
+            ),
+            stepTraits = traitsMapper.map(from.traits).filterIsInstance(StepDecoratingTrait::class.java),
+        )
+    }
 
     private fun HashMap<UUID, List<ActionResponse>>?.mergeActions(
-        actions: HashMap<UUID, List<ActionResponse>>?
+        other: HashMap<UUID, List<ActionResponse>>?
     ): HashMap<UUID, List<ActionResponse>>? {
         return when {
-            // if step actions is not null and experience action is null, return step actions
-            this != null && actions == null -> this
-            // if step actions is null and experience actions is not null, return experience actions
-            this == null && actions != null -> actions
-            // if both are not null, then merge both lists into a new hashMap
-            this != null && actions != null -> hashMapOf<UUID, List<ActionResponse>>().also { hashMap ->
+            // this is not null and not empty and other is null, return this
+            this != null && isNotEmpty() && other == null -> this
+            // this is null or empty and other is not null, return other
+            this.isNullOrEmpty() && other != null -> other
+            // this is not null and not empty and other is not null, return merge of both
+            this != null && isNotEmpty() && other != null -> hashMapOf<UUID, List<ActionResponse>>().also { hashMap ->
                 forEach {
                     hashMap[it.key] = it.value.toMutableList().apply {
-                        actions[it.key]?.let { keyActions -> addAll(keyActions) }
+                        other[it.key]?.let { keyActions -> addAll(keyActions) }
                     }
                 }
             }
-            // do nothing
+            // both are null, both are empty, etc..
             else -> null
         }
     }
