@@ -1,5 +1,6 @@
-package com.appcues.data.remote.response
+package com.appcues.data.remote.retrofit.deserializer
 
+import com.appcues.data.remote.response.ActivityResponse
 import com.appcues.data.remote.response.experience.ExperienceResponse
 import com.google.gson.Gson
 import com.google.gson.JsonDeserializationContext
@@ -7,7 +8,7 @@ import com.google.gson.JsonDeserializer
 import com.google.gson.JsonElement
 import java.lang.reflect.Type
 
-internal class ActivityDeserializer : JsonDeserializer<ActivityResponse> {
+internal class ActivityResponseDeserializer : JsonDeserializer<ActivityResponse> {
     override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext?): ActivityResponse {
         val jsonObject = json.asJsonObject
 
