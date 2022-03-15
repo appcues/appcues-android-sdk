@@ -5,7 +5,7 @@ import com.appcues.statemachine.Action
 import com.appcues.statemachine.Action.StartExperience
 import com.appcues.statemachine.Action.StartStep
 import com.appcues.statemachine.State
-import com.appcues.statemachine.State.Transition
+import com.appcues.statemachine.Transition
 
 internal class Idling(
     override val experience: Experience? = null

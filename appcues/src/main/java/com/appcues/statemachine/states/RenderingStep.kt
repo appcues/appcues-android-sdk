@@ -3,9 +3,10 @@ package com.appcues.statemachine.states
 import com.appcues.data.model.Experience
 import com.appcues.statemachine.Action
 import com.appcues.statemachine.Action.EndExperience
+import com.appcues.statemachine.Action.StartExperience
 import com.appcues.statemachine.Action.StartStep
 import com.appcues.statemachine.State
-import com.appcues.statemachine.State.Transition
+import com.appcues.statemachine.Transition
 
 internal class RenderingStep(
     override val experience: Experience,
@@ -13,6 +14,7 @@ internal class RenderingStep(
 ) : State {
     override fun handleAction(action: Action): Transition? {
         return when (action) {
+            is StartExperience -> Transition.ExperienceActiveError(experience)
             is StartStep -> {
                 // this is when the user advances forward/backward
                 // might move to a page within current container

@@ -42,7 +42,7 @@ internal class AppcuesViewModel(
 
     init {
         viewModelScope.launch {
-            stateMachine.flow.collectLatest {
+            stateMachine.stateFlow.collectLatest {
                 when (it) {
                     is BeginningStep -> {
                         // this can happen multiple times in multi-step container

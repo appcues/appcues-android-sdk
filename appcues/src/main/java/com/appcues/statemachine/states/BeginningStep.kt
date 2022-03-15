@@ -3,8 +3,9 @@ package com.appcues.statemachine.states
 import com.appcues.data.model.Experience
 import com.appcues.statemachine.Action
 import com.appcues.statemachine.Action.RenderStep
+import com.appcues.statemachine.Action.StartExperience
 import com.appcues.statemachine.State
-import com.appcues.statemachine.State.Transition
+import com.appcues.statemachine.Transition
 
 internal class BeginningStep(
     override val experience: Experience,
@@ -12,6 +13,7 @@ internal class BeginningStep(
 ) : State {
     override fun handleAction(action: Action): Transition? {
         return when (action) {
+            is StartExperience -> Transition.ExperienceActiveError(experience)
             is RenderStep -> {
                 // this transition is triggered by "callback" from AppcuesActivity (via VM)
                 // to tell us that the view has rendered
