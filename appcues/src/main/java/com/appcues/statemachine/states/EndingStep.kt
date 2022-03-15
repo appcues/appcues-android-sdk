@@ -4,9 +4,10 @@ import com.appcues.data.model.Experience
 import com.appcues.statemachine.Action
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.Reset
+import com.appcues.statemachine.Action.StartExperience
 import com.appcues.statemachine.Action.StartStep
 import com.appcues.statemachine.State
-import com.appcues.statemachine.State.Transition
+import com.appcues.statemachine.Transition
 
 internal class EndingStep(
     override val experience: Experience,
@@ -15,6 +16,7 @@ internal class EndingStep(
 ) : State {
     override fun handleAction(action: Action): Transition? {
         return when (action) {
+            is StartExperience -> Transition.ExperienceActiveError(experience)
             is StartStep -> {
                 // would either move page forward in existing container or start a new activity - TBD
                 Transition(BeginningStep(experience, action.step))

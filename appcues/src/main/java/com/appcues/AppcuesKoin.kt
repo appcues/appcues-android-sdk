@@ -3,6 +3,7 @@ package com.appcues
 import com.appcues.analytics.ActivityRequestBuilder
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.analytics.AutoPropertyDecorator
+import com.appcues.analytics.ExperienceLifecycleTracker
 import com.appcues.data.AppcuesRepository
 import com.appcues.di.KoinScopePlugin
 import com.appcues.logging.Logcues
@@ -24,13 +25,15 @@ internal object AppcuesKoin : KoinScopePlugin {
         scoped { ActivityRequestBuilder(config = get(), storage = get(), decorator = get()) }
         scoped { ExperienceRenderer(appcuesCoroutineScope = get(), repository = get(), stateMachine = get()) }
         scoped { AppcuesRepository(appcuesRemoteSource = get(), experienceMapper = get()) }
+        factory { ExperienceLifecycleTracker(scope = this) }
         scoped {
             AnalyticsTracker(
                 appcuesCoroutineScope = get(),
                 repository = get(),
                 experienceRenderer = get(),
                 sessionMonitor = get(),
-                activityBuilder = get()
+                activityBuilder = get(),
+                experienceLifecycleTracker = get(),
             )
         }
     }

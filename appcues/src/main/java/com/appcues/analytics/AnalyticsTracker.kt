@@ -13,7 +13,14 @@ internal class AnalyticsTracker(
     private val experienceRenderer: ExperienceRenderer,
     private val sessionMonitor: SessionMonitor,
     private val activityBuilder: ActivityRequestBuilder,
+    experienceLifecycleTracker: ExperienceLifecycleTracker,
 ) {
+
+    init {
+        appcuesCoroutineScope.launch {
+            experienceLifecycleTracker.start()
+        }
+    }
 
     fun identify(properties: HashMap<String, Any>? = null) {
         trackActivity(activityBuilder.identify(properties), true)
