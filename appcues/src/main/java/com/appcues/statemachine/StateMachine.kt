@@ -1,7 +1,7 @@
 package com.appcues.statemachine
 
 import com.appcues.AppcuesCoroutineScope
-import com.appcues.statemachine.states.Idling
+import com.appcues.statemachine.State.Idling
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
@@ -19,9 +19,9 @@ internal class StateMachine(
 
     fun handleAction(action: Action) {
         appcuesCoroutineScope.launch {
-            _currentState.handleAction(action)?.also { change ->
+            _currentState.transition(action)?.also { transition ->
 
-                change.state?.let {
+                transition.state?.let {
                     // update current state
                     _currentState = it
 
@@ -29,16 +29,12 @@ internal class StateMachine(
                     _stateFlow.emit(it)
                 }
 
-                change.continuation?.let {
-                    // if there is a continuation action (i.e. auto-transition), recurse
-                    handleAction(it)
-                }
-
-                change.error?.let {
-                    // if some error occurred, propagate it to observers
-                    _errorFlow.emit(it)
+                transition.sideEffect?.let {
+                    it.execute(this@StateMachine)
                 }
             }
         }
     }
+
+    suspend fun handleError(error: Error) = _errorFlow.emit(error)
 }

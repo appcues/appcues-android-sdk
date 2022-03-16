@@ -7,9 +7,9 @@ import com.appcues.action.ExperienceAction
 import com.appcues.data.model.StepContainer
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.RenderStep
+import com.appcues.statemachine.State.BeginningStep
+import com.appcues.statemachine.State.EndingStep
 import com.appcues.statemachine.StateMachine
-import com.appcues.statemachine.states.BeginningStep
-import com.appcues.statemachine.states.EndingStep
 import com.appcues.ui.AppcuesViewModel.UIState.Dismissing
 import com.appcues.ui.AppcuesViewModel.UIState.Idle
 import com.appcues.ui.AppcuesViewModel.UIState.Rendering
@@ -61,7 +61,7 @@ internal class AppcuesViewModel(
                         // either (A) completed last step of container or (B) close experience
                         // action was executed.
 
-                        if (it.dismissContainer) {
+                        if (it.dismiss) {
                             // dismiss will trigger exit animations and finish activity
                             _uiState.value = Dismissing
                         }

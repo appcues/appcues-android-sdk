@@ -6,13 +6,12 @@ import com.appcues.analytics.AnalyticEvents.ExperienceError
 import com.appcues.analytics.AnalyticEvents.ExperienceStarted
 import com.appcues.analytics.AnalyticEvents.StepCompleted
 import com.appcues.analytics.AnalyticEvents.StepSeen
-import com.appcues.statemachine.Error
 import com.appcues.statemachine.State
+import com.appcues.statemachine.State.EndingExperience
+import com.appcues.statemachine.State.EndingStep
+import com.appcues.statemachine.State.Idling
+import com.appcues.statemachine.State.RenderingStep
 import com.appcues.statemachine.StateMachine
-import com.appcues.statemachine.states.EndingExperience
-import com.appcues.statemachine.states.EndingStep
-import com.appcues.statemachine.states.Idling
-import com.appcues.statemachine.states.RenderingStep
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.collect
@@ -72,7 +71,7 @@ internal class ExperienceLifecycleTracker(
             }
         }
 
-    private suspend fun monitorErrors(flow: SharedFlow<Error>) =
+    private suspend fun monitorErrors(flow: SharedFlow<com.appcues.statemachine.Error>) =
         flow.collect {
             analyticsTracker.track(ExperienceError)
         }
