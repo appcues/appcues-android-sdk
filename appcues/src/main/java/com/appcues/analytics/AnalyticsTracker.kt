@@ -27,7 +27,7 @@ internal class AnalyticsTracker(
     }
 
     // convenience helper for internal events
-    fun track(event: AnalyticEvents, properties: HashMap<String, Any>? = null, sync: Boolean = true) {
+    fun track(event: AnalyticsEvent, properties: HashMap<String, Any>? = null, sync: Boolean = true) {
         track(event.eventName, properties, sync)
     }
 

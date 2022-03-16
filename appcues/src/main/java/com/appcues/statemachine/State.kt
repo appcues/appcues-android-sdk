@@ -6,6 +6,7 @@ import com.appcues.statemachine.Action.RenderStep
 import com.appcues.statemachine.Action.Reset
 import com.appcues.statemachine.Action.StartExperience
 import com.appcues.statemachine.Action.StartStep
+import com.appcues.statemachine.Error.ExperienceError
 import com.appcues.statemachine.SideEffect.Continuation
 import com.appcues.statemachine.SideEffect.PresentContainer
 import com.appcues.statemachine.SideEffect.ReportError
@@ -18,7 +19,7 @@ internal abstract class State {
 
     class BeginningExperience(override val experience: Experience) : State()
     class BeginningStep(override val experience: Experience, val step: Int) : State()
-    class EndingExperience(override val experience: Experience) : State()
+    class EndingExperience(override val experience: Experience, val step: Int) : State()
     class EndingStep(override val experience: Experience, val step: Int, val dismiss: Boolean) : State()
     class Idling(override val experience: Experience? = null) : State()
     class RenderingStep(override val experience: Experience, val step: Int) : State()
@@ -36,7 +37,7 @@ internal abstract class State {
             this is RenderingStep && action is EndExperience ->
                 Transition(EndingStep(experience, step, true), Continuation(EndExperience()))
             this is EndingStep && action is EndExperience ->
-                Transition(EndingExperience(experience), Continuation(Reset()))
+                Transition(EndingExperience(experience, step), Continuation(Reset()))
             this is EndingStep && action is StartStep ->
                 Transition.fromEndingStepToBeginningStep(experience, step)
             this is EndingExperience && action is Reset ->
@@ -44,7 +45,7 @@ internal abstract class State {
 
             // error cases
             action is StartExperience ->
-                Transition(null, ReportError(Error(action.experience, null, "Experience already active")))
+                Transition(null, ReportError(ExperienceError(action.experience, "Experience already active")))
             action is Action.ReportError ->
                 Transition(null, ReportError(action.error))
 
@@ -55,7 +56,7 @@ internal abstract class State {
 
 internal fun Transition.Companion.fromIdlingToBeginningExperience(experience: Experience): Transition {
     if (experience.stepContainer.isEmpty()) {
-        return Transition(null, ReportError(Error(experience, null, "Experience has 0 steps")))
+        return Transition(null, ReportError(ExperienceError(experience, "Experience has 0 steps")))
     }
     return Transition(BeginningExperience(experience), Continuation(StartStep(0)))
 }

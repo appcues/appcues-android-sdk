@@ -47,7 +47,7 @@ internal class ActivityRequestBuilder(
             decorator.decorateTrack(
                 EventRequest(
                     // screen calls are really just a special type of event: "appcues:screen_view"
-                    name = AnalyticEvents.ScreenView.eventName,
+                    name = AnalyticsEvent.ScreenView.eventName,
                     attributes = (properties ?: hashMapOf()).apply { put(SCREEN_TITLE_ATTRIBUTE, title) },
                     context = hashMapOf(SCREEN_TITLE_CONTEXT to title)
                 )

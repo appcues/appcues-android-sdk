@@ -1,11 +1,13 @@
 package com.appcues.analytics
 
-import com.appcues.analytics.AnalyticEvents.ExperienceCompleted
-import com.appcues.analytics.AnalyticEvents.ExperienceDismissed
-import com.appcues.analytics.AnalyticEvents.ExperienceError
-import com.appcues.analytics.AnalyticEvents.ExperienceStarted
-import com.appcues.analytics.AnalyticEvents.StepCompleted
-import com.appcues.analytics.AnalyticEvents.StepSeen
+import com.appcues.analytics.ExperienceLifecycleEvent.ExperienceCompleted
+import com.appcues.analytics.ExperienceLifecycleEvent.ExperienceDismissed
+import com.appcues.analytics.ExperienceLifecycleEvent.ExperienceError
+import com.appcues.analytics.ExperienceLifecycleEvent.ExperienceStarted
+import com.appcues.analytics.ExperienceLifecycleEvent.StepCompleted
+import com.appcues.analytics.ExperienceLifecycleEvent.StepError
+import com.appcues.analytics.ExperienceLifecycleEvent.StepSeen
+import com.appcues.statemachine.Error
 import com.appcues.statemachine.State
 import com.appcues.statemachine.State.EndingExperience
 import com.appcues.statemachine.State.EndingStep
@@ -46,22 +48,22 @@ internal class ExperienceLifecycleTracker(
             when (it) {
                 is RenderingStep -> {
                     if (!startedExperience) {
-                        analyticsTracker.track(ExperienceStarted)
+                        trackLifecycleEvent(ExperienceStarted(it.experience))
                         startedExperience = true
                     }
-                    analyticsTracker.track(StepSeen)
+                    trackLifecycleEvent(StepSeen(it.experience, it.step))
                 }
                 is EndingStep -> {
-                    analyticsTracker.track(StepCompleted)
+                    trackLifecycleEvent(StepCompleted(it.experience, it.step))
                     // todo - need a way to check if the step ended was the last step of the last step container
                     // and mark the `completedExperience = true` if so -- so that we can correctly fire
                     // the experience completed vs. dismissed events
                 }
                 is EndingExperience -> {
                     if (completedExperience) {
-                        analyticsTracker.track(ExperienceCompleted)
+                        trackLifecycleEvent(ExperienceCompleted(it.experience))
                     } else {
-                        analyticsTracker.track(ExperienceDismissed)
+                        trackLifecycleEvent(ExperienceDismissed(it.experience, it.step))
                     }
                 }
                 is Idling -> {
@@ -71,8 +73,15 @@ internal class ExperienceLifecycleTracker(
             }
         }
 
-    private suspend fun monitorErrors(flow: SharedFlow<com.appcues.statemachine.Error>) =
+    private suspend fun monitorErrors(flow: SharedFlow<Error>) =
         flow.collect {
-            analyticsTracker.track(ExperienceError)
+            when (it) {
+                is Error.ExperienceError -> trackLifecycleEvent(ExperienceError(it))
+                is Error.StepError -> trackLifecycleEvent(StepError(it))
+            }
         }
+
+    private fun trackLifecycleEvent(event: ExperienceLifecycleEvent) {
+        analyticsTracker.track(event.name, event.properties, false)
+    }
 }
