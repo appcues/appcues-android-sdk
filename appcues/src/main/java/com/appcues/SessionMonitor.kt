@@ -4,7 +4,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ProcessLifecycleOwner
-import com.appcues.analytics.AnalyticEvents
+import com.appcues.analytics.AnalyticsEvent
 import com.appcues.analytics.AnalyticsTracker
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
@@ -39,11 +39,11 @@ internal class SessionMonitor(
     fun start() {
         if (storage.userId.isEmpty()) return
         _sessionId = UUID.randomUUID()
-        analyticsTracker.track(AnalyticEvents.SessionStarted, null, true)
+        analyticsTracker.track(AnalyticsEvent.SessionStarted, null, true)
     }
 
     fun reset() {
-        analyticsTracker.track(AnalyticEvents.SessionReset, null, false)
+        analyticsTracker.track(AnalyticsEvent.SessionReset, null, false)
         _sessionId = null
     }
 
@@ -56,9 +56,9 @@ internal class SessionMonitor(
         applicationBackgrounded = null
 
         if (elapsed >= sessionTimeout) {
-            analyticsTracker.track(AnalyticEvents.SessionStarted, null, true)
+            analyticsTracker.track(AnalyticsEvent.SessionStarted, null, true)
         } else {
-            analyticsTracker.track(AnalyticEvents.SessionResumed, null, false)
+            analyticsTracker.track(AnalyticsEvent.SessionResumed, null, false)
         }
     }
 
@@ -66,6 +66,6 @@ internal class SessionMonitor(
     fun onAppBackgrounded() {
         if (_sessionId == null) return
         applicationBackgrounded = Date()
-        analyticsTracker.track(AnalyticEvents.SessionSuspended, null, false)
+        analyticsTracker.track(AnalyticsEvent.SessionSuspended, null, false)
     }
 }

@@ -77,12 +77,12 @@ internal class AutoPropertyDecorator(
         }
 
     fun decorateTrack(event: EventRequest) = event.apply {
-        if (event.name == AnalyticEvents.ScreenView.eventName) {
+        if (event.name == AnalyticsEvent.ScreenView.eventName) {
             // special handling for screen_view events
             previousScreen = currentScreen
             currentScreen = attributes[ActivityRequestBuilder.SCREEN_TITLE_ATTRIBUTE]?.toString()
             sessionPageviews += 1
-        } else if (event.name == AnalyticEvents.SessionStarted.eventName) {
+        } else if (event.name == AnalyticsEvent.SessionStarted.eventName) {
             // special handling for session start events
             sessionPageviews = 0
             sessionRandomizer = Random.nextInt(SESSION_RANDOMIZER_LOWER_BOUND, SESSION_RANDOMIZER_UPPER_BOUND)
