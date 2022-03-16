@@ -9,4 +9,5 @@ internal sealed class Action {
     class EndStep : Action()
     class EndExperience : Action()
     class Reset : Action()
+    class ReportError(val error: Error) : Action()
 }
