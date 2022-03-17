@@ -10,6 +10,8 @@ import com.appcues.statemachine.Action.RenderStep
 import com.appcues.statemachine.State.BeginningStep
 import com.appcues.statemachine.State.EndingStep
 import com.appcues.statemachine.StateMachine
+import com.appcues.statemachine.StateResult.Failure
+import com.appcues.statemachine.StateResult.Success
 import com.appcues.ui.AppcuesViewModel.UIState.Dismissing
 import com.appcues.ui.AppcuesViewModel.UIState.Idle
 import com.appcues.ui.AppcuesViewModel.UIState.Rendering
@@ -42,30 +44,34 @@ internal class AppcuesViewModel(
 
     init {
         viewModelScope.launch {
-            stateMachine.stateFlow.collectLatest {
-                when (it) {
-                    is BeginningStep -> {
-                        // this can happen multiple times in multi-step container
-                        // and will trigger moving to another page forward/backward
-                        it.experience.stepContainer.firstOrNull()?.let { container ->
-                            // Render if there is a stepContainer
-                            _uiState.value = Rendering(container, it.step)
-                            // Notify state machine that we will render step
-                            viewModelScope.launch {
-                                stateMachine.handleAction(RenderStep())
+            stateMachine.stateResultFlow.collectLatest { result ->
+                when (result) {
+                    is Success -> with(result.state) {
+                        when (this) {
+                            is BeginningStep -> {
+                                // this can happen multiple times in multi-step container
+                                // and will trigger moving to another page forward/backward
+                                experience.stepContainer.firstOrNull()?.let { container ->
+                                    // Render if there is a stepContainer
+                                    _uiState.value = Rendering(container, step)
+                                    // Notify state machine that we will render step
+                                    viewModelScope.launch {
+                                        stateMachine.handleAction(RenderStep())
+                                    }
+                                }
                             }
-                        }
-                    }
-                    is EndingStep -> {
-                        // the state tells us if we should dismiss the view (finish activity)
-                        // either (A) completed last step of container or (B) close experience
-                        // action was executed.
+                            is EndingStep -> {
+                                // the state tells us if we should dismiss the view (finish activity)
+                                // either (A) completed last step of container or (B) close experience
+                                // action was executed.
 
-                        if (it.dismiss) {
-                            // dismiss will trigger exit animations and finish activity
-                            _uiState.value = Dismissing
+                                // dismiss will trigger exit animations and finish activity
+                                _uiState.value = if (dismiss) Dismissing else _uiState.value
+                            }
+                            else -> { /* no action on other state changes */ }
                         }
                     }
+                    is Failure -> { /* no action on failure cases */ }
                 }
             }
         }

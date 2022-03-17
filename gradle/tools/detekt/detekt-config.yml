@@ -92,7 +92,7 @@ complexity:
     includePrivateDeclarations: false
   ComplexMethod:
     active: true
-    threshold: 25
+    threshold: 15
     ignoreSingleWhenExpression: false
     ignoreSimpleWhenEntries: false
     ignoreNestingFunctions: false
@@ -106,6 +106,7 @@ complexity:
       - 'run'
       - 'use'
       - 'with'
+    excludes: ['**/statemachine/State.kt']
   LabeledExpression:
     active: false
     ignoredLabels: [ ]

@@ -8,16 +8,15 @@ import com.appcues.analytics.ExperienceLifecycleEvent.StepCompleted
 import com.appcues.analytics.ExperienceLifecycleEvent.StepError
 import com.appcues.analytics.ExperienceLifecycleEvent.StepSeen
 import com.appcues.statemachine.Error
-import com.appcues.statemachine.State
 import com.appcues.statemachine.State.EndingExperience
 import com.appcues.statemachine.State.EndingStep
 import com.appcues.statemachine.State.Idling
 import com.appcues.statemachine.State.RenderingStep
 import com.appcues.statemachine.StateMachine
+import com.appcues.statemachine.StateResult.Failure
+import com.appcues.statemachine.StateResult.Success
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
@@ -39,47 +38,45 @@ internal class ExperienceLifecycleTracker(
     private var completedExperience = false
 
     suspend fun start() = withContext(Dispatchers.IO) {
-        launch { monitorState(stateMachine.stateFlow) }
-        launch { monitorErrors(stateMachine.errorFlow) }
+        stateMachine.stateResultFlow.collect { result ->
+            when (result) {
+                is Success -> with(result.state) {
+                    when (this) {
+                        is RenderingStep -> {
+                            if (!startedExperience) {
+                                trackLifecycleEvent(ExperienceStarted(experience))
+                                startedExperience = true
+                            }
+                            trackLifecycleEvent(StepSeen(experience, step))
+                        }
+                        is EndingStep -> {
+                            trackLifecycleEvent(StepCompleted(experience, step))
+                            // todo - need a way to check if the step ended was the last step of the last step container
+                            // and mark the `completedExperience = true` if so -- so that we can correctly fire
+                            // the experience completed vs. dismissed events
+                        }
+                        is EndingExperience -> {
+                            if (completedExperience) {
+                                trackLifecycleEvent(ExperienceCompleted(experience))
+                            } else {
+                                trackLifecycleEvent(ExperienceDismissed(experience, step))
+                            }
+                        }
+                        is Idling -> {
+                            startedExperience = false
+                            completedExperience = false
+                        }
+                    }
+                }
+                is Failure -> with(result.error) {
+                    when (this) {
+                        is Error.ExperienceError -> trackLifecycleEvent(ExperienceError(this))
+                        is Error.StepError -> trackLifecycleEvent(StepError(this))
+                    }
+                }
+            }
+        }
     }
-
-    private suspend fun monitorState(flow: SharedFlow<State>) =
-        flow.collect {
-            when (it) {
-                is RenderingStep -> {
-                    if (!startedExperience) {
-                        trackLifecycleEvent(ExperienceStarted(it.experience))
-                        startedExperience = true
-                    }
-                    trackLifecycleEvent(StepSeen(it.experience, it.step))
-                }
-                is EndingStep -> {
-                    trackLifecycleEvent(StepCompleted(it.experience, it.step))
-                    // todo - need a way to check if the step ended was the last step of the last step container
-                    // and mark the `completedExperience = true` if so -- so that we can correctly fire
-                    // the experience completed vs. dismissed events
-                }
-                is EndingExperience -> {
-                    if (completedExperience) {
-                        trackLifecycleEvent(ExperienceCompleted(it.experience))
-                    } else {
-                        trackLifecycleEvent(ExperienceDismissed(it.experience, it.step))
-                    }
-                }
-                is Idling -> {
-                    startedExperience = false
-                    completedExperience = false
-                }
-            }
-        }
-
-    private suspend fun monitorErrors(flow: SharedFlow<Error>) =
-        flow.collect {
-            when (it) {
-                is Error.ExperienceError -> trackLifecycleEvent(ExperienceError(it))
-                is Error.StepError -> trackLifecycleEvent(StepError(it))
-            }
-        }
 
     private fun trackLifecycleEvent(event: ExperienceLifecycleEvent) {
         analyticsTracker.track(event.name, event.properties, false)
