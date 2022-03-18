@@ -14,15 +14,15 @@ import com.appcues.statemachine.State.BeginningExperience
 import com.appcues.statemachine.State.BeginningStep
 import com.appcues.statemachine.State.EndingStep
 
-internal abstract class State {
+internal sealed class State {
     abstract val experience: Experience?
 
+    class Idling(override val experience: Experience? = null) : State()
     class BeginningExperience(override val experience: Experience) : State()
     class BeginningStep(override val experience: Experience, val step: Int) : State()
-    class EndingExperience(override val experience: Experience, val step: Int) : State()
-    class EndingStep(override val experience: Experience, val step: Int, val dismiss: Boolean) : State()
-    class Idling(override val experience: Experience? = null) : State()
     class RenderingStep(override val experience: Experience, val step: Int) : State()
+    class EndingStep(override val experience: Experience, val step: Int, val dismiss: Boolean) : State()
+    class EndingExperience(override val experience: Experience, val step: Int) : State()
 
     fun transition(action: Action): Transition? =
         when {
