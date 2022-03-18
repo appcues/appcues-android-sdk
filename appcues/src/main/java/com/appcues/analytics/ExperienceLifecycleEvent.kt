@@ -2,11 +2,13 @@ package com.appcues.analytics
 
 import com.appcues.data.model.Experience
 import com.appcues.data.model.Step
+import com.appcues.data.model.getFlatStep
 import com.appcues.statemachine.Error
 
 internal sealed class ExperienceLifecycleEvent(
     val name: String
 ) {
+
     abstract val experience: Experience
 
     data class StepSeen(
@@ -72,13 +74,12 @@ internal sealed class ExperienceLifecycleEvent(
 
     private val step: Step?
         get() = when (this) {
-            // todo - this needs refactored to handle group/step indexing
-            is StepSeen -> experience.stepContainer[this.stepIndex].steps.first()
-            is StepInteraction -> experience.stepContainer[this.stepIndex].steps.first()
-            is StepCompleted -> experience.stepContainer[this.stepIndex].steps.first()
-            is StepError -> experience.stepContainer[this.stepError.stepIndex].steps.first()
-            is StepRecovered -> experience.stepContainer[this.stepIndex].steps.first()
-            is ExperienceDismissed -> experience.stepContainer[this.stepIndex].steps.first()
+            is StepSeen -> experience.getFlatStep(stepIndex)
+            is StepInteraction -> experience.getFlatStep(stepIndex)
+            is StepCompleted -> experience.getFlatStep(stepIndex)
+            is StepError -> experience.getFlatStep(stepError.stepIndex)
+            is StepRecovered -> experience.getFlatStep(stepIndex)
+            is ExperienceDismissed -> experience.getFlatStep(stepIndex)
             else -> null
         }
 

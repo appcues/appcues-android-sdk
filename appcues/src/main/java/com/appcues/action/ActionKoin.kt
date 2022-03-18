@@ -2,6 +2,7 @@ package com.appcues.action
 
 import com.appcues.AppcuesConfig
 import com.appcues.action.appcues.CloseAction
+import com.appcues.action.appcues.ContinueAction
 import com.appcues.action.appcues.LinkAction
 import com.appcues.action.appcues.TrackEventAction
 import com.appcues.di.KoinScopePlugin
@@ -34,6 +35,13 @@ internal object ActionKoin : KoinScopePlugin {
         factory { params ->
             TrackEventAction(
                 config = params.getOrNull()
+            )
+        }
+
+        factory { params ->
+            ContinueAction(
+                config = params.getOrNull(),
+                stateMachine = get(),
             )
         }
     }
