@@ -25,7 +25,7 @@ internal object AppcuesKoin : KoinScopePlugin {
         scoped { ActivityRequestBuilder(config = get(), storage = get(), decorator = get()) }
         scoped { ExperienceRenderer(appcuesCoroutineScope = get(), repository = get(), stateMachine = get()) }
         scoped { AppcuesRepository(appcuesRemoteSource = get(), experienceMapper = get()) }
-        factory { ExperienceLifecycleTracker(scope = this) }
+        scoped { ExperienceLifecycleTracker(scope = this) }
         scoped {
             AnalyticsTracker(
                 appcuesCoroutineScope = get(),

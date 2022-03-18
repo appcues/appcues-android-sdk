@@ -4,7 +4,7 @@ import com.appcues.data.model.Experience
 import com.appcues.data.model.Step
 import com.appcues.statemachine.Error
 
-internal abstract class ExperienceLifecycleEvent(
+internal sealed class ExperienceLifecycleEvent(
     val name: String
 ) {
     abstract val experience: Experience
