@@ -26,6 +26,15 @@ internal inline fun <reified T : Any?> AppcuesConfigMap.getConfig(key: String): 
     }
 }
 
+internal fun AppcuesConfigMap.getConfigInt(key: String): Int? {
+    // if hash config is null, return default
+    if (this == null) return null
+    // get value by key as Int?
+    return get(key)?.let {
+        if (it is Double) it.toInt() else null
+    }
+}
+
 internal fun AppcuesConfigMap.getConfigStyle(key: String): ComponentStyle? {
     return getConfig<Any>(key)?.let {
         StyleMapper().map(StyleResponse.fromAny(it))
@@ -36,4 +45,25 @@ internal fun AppcuesConfigMap.getConfigColor(key: String): ComponentColor? {
     return getConfig<Any>(key)?.let {
         StyleColorMapper().map(StyleColorResponse.fromAny(it))
     }
+}
+
+internal fun Experience.areStepsFromDifferentContainers(stepIndexOne: Int, stepIndexTwo: Int): Boolean {
+    return stepContainer.none { it.steps.containsAll(arrayListOf(getFlatStep(stepIndexOne), getFlatStep(stepIndexTwo))) }
+}
+
+internal fun Experience.getStepContainerIndex(stepIndex: Int): Int? {
+    stepContainer.forEachIndexed { index, stepContainer -> if (stepContainer.steps.contains(getFlatStep(stepIndex))) return index }
+
+    // should never reach because whoever is calling this should know
+    // if stepIndex is a valid step. that being said,
+    // stepContainer.steps.contains will always check true once
+    return null
+}
+
+internal fun Experience.flatSteps(): List<Step> {
+    return stepContainer.flatMap { it.steps }
+}
+
+internal fun Experience.getFlatStep(index: Int): Step {
+    return flatSteps()[index]
 }

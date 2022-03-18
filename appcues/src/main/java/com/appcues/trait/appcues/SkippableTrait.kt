@@ -39,7 +39,7 @@ internal class SkippableTrait(
                     .clip(CircleShape)
                     .size(30.dp, 30.dp),
                 onClick = {
-                    stateMachine.handleAction(EndExperience())
+                    stateMachine.handleAction(EndExperience)
                 }
             ) {
                 Image(
@@ -58,7 +58,7 @@ internal class SkippableTrait(
                 // add click listener but without any ripple effect, should this happen?
                 .pointerInput(Unit) {
                     detectTapGestures {
-                        stateMachine.handleAction(EndExperience())
+                        stateMachine.handleAction(EndExperience)
                     }
                 },
         )

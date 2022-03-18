@@ -1,6 +1,7 @@
 package com.appcues.action
 
 import com.appcues.action.appcues.CloseAction
+import com.appcues.action.appcues.ContinueAction
 import com.appcues.action.appcues.LinkAction
 import com.appcues.action.appcues.TrackEventAction
 import com.appcues.data.model.AppcuesConfigMap
@@ -24,6 +25,7 @@ internal class ActionRegistry(
         register("@appcues/close") { get<CloseAction> { parametersOf(it) } }
         register("@appcues/link") { get<LinkAction> { parametersOf(it) } }
         register("@appcues/track") { get<TrackEventAction> { parametersOf(it) } }
+        register("@appcues/continue") { get<ContinueAction> { parametersOf(it) } }
     }
 
     operator fun get(key: String): ActionFactoryBlock? {

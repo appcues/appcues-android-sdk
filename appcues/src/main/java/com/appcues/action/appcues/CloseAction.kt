@@ -12,6 +12,6 @@ internal class CloseAction(
 ) : ExperienceAction {
 
     override suspend fun execute(appcues: Appcues) {
-        stateMachine.handleAction(EndExperience())
+        stateMachine.handleAction(EndExperience)
     }
 }

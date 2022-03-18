@@ -9,6 +9,7 @@ import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.RenderStep
 import com.appcues.statemachine.State.BeginningStep
 import com.appcues.statemachine.State.EndingStep
+import com.appcues.statemachine.State.RenderingStep
 import com.appcues.statemachine.StateMachine
 import com.appcues.ui.AppcuesViewModel.UIState.Dismissing
 import com.appcues.ui.AppcuesViewModel.UIState.Idle
@@ -45,15 +46,15 @@ internal class AppcuesViewModel(
             stateMachine.stateFlow.collectLatest { result ->
                 when (result) {
                     is BeginningStep -> {
-                        // this can happen multiple times in multi-step container
-                        // and will trigger moving to another page forward/backward
+                        // Notify state machine that we are good to render steps
+                        viewModelScope.launch {
+                            stateMachine.handleAction(RenderStep)
+                        }
+                    }
+                    is RenderingStep -> {
                         result.experience.stepContainer.firstOrNull()?.let { container ->
                             // Render if there is a stepContainer
                             _uiState.value = Rendering(container, result.step)
-                            // Notify state machine that we will render step
-                            viewModelScope.launch {
-                                stateMachine.handleAction(RenderStep())
-                            }
                         }
                     }
                     is EndingStep -> {
@@ -62,12 +63,12 @@ internal class AppcuesViewModel(
                         // action was executed.
 
                         // dismiss will trigger exit animations and finish activity
-                        // _uiState.value = if (dismiss) Dismissing else _uiState.value
                         if (result.dismiss) {
                             _uiState.value = Dismissing
                         }
                     }
-                    else -> { /* no action on other state changes */ }
+                    // ignore other state changes
+                    else -> Unit
                 }
             }
         }
@@ -75,7 +76,7 @@ internal class AppcuesViewModel(
 
     fun onEndExperience() {
         viewModelScope.launch {
-            stateMachine.handleAction(EndExperience())
+            stateMachine.handleAction(EndExperience)
         }
     }
 

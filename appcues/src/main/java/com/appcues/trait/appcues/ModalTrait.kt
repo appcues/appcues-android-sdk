@@ -2,7 +2,6 @@ package com.appcues.trait.appcues
 
 import ExpandedBottomSheetModal
 import android.content.Context
-import android.util.Log
 import androidx.compose.runtime.Composable
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.getConfigOrDefault
@@ -32,15 +31,13 @@ internal class ModalTrait(
 
     @Composable
     override fun WrapContent(content: @Composable () -> Unit) {
-        Log.i("Appcues", " WrapContent style: $presentationStyle")
         when (presentationStyle) {
             "dialog" -> DialogModal(style, content)
             "full" -> FullScreenModal(style, content)
             "sheet" -> ExpandedBottomSheetModal(style, content)
             "halfSheet" -> BottomSheetModal(style, content)
-            else -> {
-                // what to do if presentationStyle is not valid?
-            }
+            // what to do if presentationStyle is not valid?
+            else -> Unit
         }
     }
 }
