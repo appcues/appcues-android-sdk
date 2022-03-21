@@ -6,5 +6,5 @@ import androidx.compose.runtime.Composable
 interface ContainerDecoratingTrait : ExperienceTrait {
 
     @Composable
-    fun Overlay(scope: BoxScope)
+    fun BoxScope.Overlay()
 }
