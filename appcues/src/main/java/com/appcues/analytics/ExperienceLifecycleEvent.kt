@@ -6,53 +6,52 @@ import com.appcues.data.model.getFlatStep
 import com.appcues.statemachine.Error
 
 internal sealed class ExperienceLifecycleEvent(
+    open val experience: Experience,
     val name: String
 ) {
-
-    abstract val experience: Experience
 
     data class StepSeen(
         override val experience: Experience,
         val stepIndex: Int,
-    ) : ExperienceLifecycleEvent("appcues:v2:step_seen")
+    ) : ExperienceLifecycleEvent(experience, "appcues:v2:step_seen")
 
     data class StepInteraction(
         override val experience: Experience,
         val stepIndex: Int,
-    ) : ExperienceLifecycleEvent("appcues:v2:step_interaction")
+    ) : ExperienceLifecycleEvent(experience, "appcues:v2:step_interaction")
 
     data class StepCompleted(
         override val experience: Experience,
         val stepIndex: Int,
-    ) : ExperienceLifecycleEvent("appcues:v2:step_completed")
+    ) : ExperienceLifecycleEvent(experience, "appcues:v2:step_completed")
 
     data class StepError(
         val stepError: Error.StepError,
         override val experience: Experience = stepError.experience,
-    ) : ExperienceLifecycleEvent("appcues:v2:step_error")
+    ) : ExperienceLifecycleEvent(experience, "appcues:v2:step_error")
 
     data class StepRecovered(
         override val experience: Experience,
         val stepIndex: Int,
-    ) : ExperienceLifecycleEvent("appcues:v2:step_recovered")
+    ) : ExperienceLifecycleEvent(experience, "appcues:v2:step_recovered")
 
     data class ExperienceStarted(
         override val experience: Experience,
-    ) : ExperienceLifecycleEvent("appcues:v2:experience_started")
+    ) : ExperienceLifecycleEvent(experience, "appcues:v2:experience_started")
 
     data class ExperienceCompleted(
         override val experience: Experience,
-    ) : ExperienceLifecycleEvent("appcues:v2:experience_completed")
+    ) : ExperienceLifecycleEvent(experience, "appcues:v2:experience_completed")
 
     data class ExperienceDismissed(
         override val experience: Experience,
         val stepIndex: Int,
-    ) : ExperienceLifecycleEvent("appcues:v2:experience_dismissed")
+    ) : ExperienceLifecycleEvent(experience, "appcues:v2:experience_dismissed")
 
     data class ExperienceError(
         val experienceError: Error.ExperienceError,
         override val experience: Experience = experienceError.experience
-    ) : ExperienceLifecycleEvent("appcues:v2:experience_error")
+    ) : ExperienceLifecycleEvent(experience, "appcues:v2:experience_error")
 
     val properties: HashMap<String, Any>
         get() = hashMapOf<String, Any>(
