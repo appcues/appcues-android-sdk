@@ -4,8 +4,12 @@ import com.appcues.AppcuesCoroutineScope
 import com.appcues.SessionMonitor
 import com.appcues.data.AppcuesRepository
 import com.appcues.data.remote.request.ActivityRequest
+import com.appcues.data.remote.request.EventRequest
 import com.appcues.ui.ExperienceRenderer
 import kotlinx.coroutines.launch
+import java.util.Timer
+import java.util.TimerTask
+import kotlin.concurrent.schedule
 
 internal class AnalyticsTracker(
     private val appcuesCoroutineScope: AppcuesCoroutineScope,
@@ -15,6 +19,12 @@ internal class AnalyticsTracker(
     private val activityBuilder: ActivityRequestBuilder,
     experienceLifecycleTracker: ExperienceLifecycleTracker,
 ) {
+    companion object {
+        const val FLUSH_AFTER_MILLISECONDS: Long = 10000
+    }
+
+    private var pendingActivity = mutableListOf<ActivityRequest>()
+    private var flushTask: TimerTask? = null
 
     init {
         appcuesCoroutineScope.launch {
@@ -23,7 +33,7 @@ internal class AnalyticsTracker(
     }
 
     fun identify(properties: HashMap<String, Any>? = null) {
-        trackActivity(activityBuilder.identify(properties), true)
+        flushThenSend(activityBuilder.identify(properties))
     }
 
     // convenience helper for internal events
@@ -32,19 +42,61 @@ internal class AnalyticsTracker(
     }
 
     fun track(name: String, properties: HashMap<String, Any>? = null, sync: Boolean = true) {
-        trackActivity(activityBuilder.track(name, properties), sync)
+        val activity = activityBuilder.track(name, properties)
+        if (sync) {
+            queueThenFlush(activity)
+        } else {
+            queue(activity)
+        }
     }
 
     fun screen(title: String, properties: HashMap<String, Any>? = null) {
-        trackActivity(activityBuilder.screen(title, properties), true)
+        queueThenFlush(activityBuilder.screen(title, properties))
     }
 
     fun group(properties: HashMap<String, Any>? = null) {
-        trackActivity(activityBuilder.group(properties), true)
+        flushThenSend(activityBuilder.group(properties))
     }
 
-    private fun trackActivity(activity: ActivityRequest, sync: Boolean) {
+    private fun queueThenFlush(activity: ActivityRequest) {
+        synchronized(this) {
+            flushTask?.cancel()
+            pendingActivity.add(activity)
+            flushPendingActivity(true)
+        }
+    }
 
+    private fun flushThenSend(activity: ActivityRequest) {
+        synchronized(this) {
+            flushTask?.cancel()
+            flushPendingActivity(false)
+            flush(activity, true)
+        }
+    }
+
+    private fun queue(activity: ActivityRequest) {
+        synchronized(this) {
+            pendingActivity.add(activity)
+            if (flushTask == null) {
+                flushTask = Timer().schedule(FLUSH_AFTER_MILLISECONDS) {
+                    synchronized(this@AnalyticsTracker) {
+                        flushPendingActivity(false)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun flushPendingActivity(sync: Boolean) {
+        flushTask = null
+        val activity = pendingActivity.merge()
+        pendingActivity = mutableListOf()
+        if (activity != null) {
+            flush(activity, sync)
+        }
+    }
+
+    private fun flush(activity: ActivityRequest, sync: Boolean) {
         if (!sessionMonitor.isActive) return
 
         appcuesCoroutineScope.launch {
@@ -58,4 +110,16 @@ internal class AnalyticsTracker(
             }
         }
     }
+}
+
+internal fun List<ActivityRequest>.merge(): ActivityRequest? {
+    if (isEmpty()) return null
+    val activity = first()
+    val events = mutableListOf<EventRequest>()
+    forEach { item ->
+        item.events?.let {
+            events.addAll(it)
+        }
+    }
+    return activity.copy(events = events)
 }
