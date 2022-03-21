@@ -58,6 +58,12 @@ internal class AnalyticsTracker(
         flushThenSend(activityBuilder.group(properties))
     }
 
+    // to be called when any pending activity should immediately be flushed to cache, and network if possible
+    // i.e. app going to background / being killed
+    fun flushAsync() {
+        flushPendingActivity(false)
+    }
+
     private fun queueThenFlush(activity: ActivityRequest) {
         synchronized(this) {
             flushTask?.cancel()
