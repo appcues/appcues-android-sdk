@@ -30,28 +30,26 @@ internal class SkippableTrait(
 ) : ContainerDecoratingTrait, BackdropDecoratingTrait {
 
     @Composable
-    override fun Overlay(scope: BoxScope) {
-        with(scope) {
-            IconButton(
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(8.dp)
-                    .clip(CircleShape)
-                    .size(30.dp, 30.dp),
-                onClick = {
-                    stateMachine.handleAction(EndExperience)
-                }
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.ic_dismiss),
-                    contentDescription = stringResource(id = R.string.skippable_trait_dismiss),
-                )
+    override fun BoxScope.Overlay() {
+        IconButton(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(8.dp)
+                .clip(CircleShape)
+                .size(30.dp, 30.dp),
+            onClick = {
+                stateMachine.handleAction(EndExperience)
             }
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.ic_dismiss),
+                contentDescription = stringResource(id = R.string.skippable_trait_dismiss),
+            )
         }
     }
 
     @Composable
-    override fun Backdrop(scope: BoxScope) {
+    override fun BoxScope.Backdrop() {
         Spacer(
             modifier = Modifier
                 .fillMaxSize()

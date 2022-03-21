@@ -8,10 +8,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
@@ -106,27 +103,24 @@ internal class AppcuesActivity : AppCompatActivity() {
 
     @Composable
     private fun Rendering.Compose(boxScope: BoxScope) {
-        // show if render state is not null
-        val step = stepContainer.steps.getOrNull(position)
-
         with(stepContainer) {
             // apply backdrop traits
-            backdropTraits.forEach { it.Backdrop(scope = boxScope) }
+            backdropTraits.forEach { it.run { boxScope.Backdrop() } }
             // create wrapper
             contentWrappingTrait.WrapContent {
                 Box(
                     contentAlignment = Alignment.TopCenter
                 ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.verticalScroll(rememberScrollState())
-                    ) {
-                        // Compose content (primitives)
-                        step?.content?.Compose()
+                    // Apply content holder trait
+                    contentHolderTrait.run {
+                        CreateContentHolder(
+                            pages = stepContainer.steps.map { { it.content.Compose() } },
+                            pageIndex = position
+                        )
                     }
 
                     // Compose all container traits on top of the content Column
-                    containerTraits.forEach { it.Overlay(scope = this) }
+                    containerTraits.forEach { it.run { Overlay() } }
                 }
             }
         }

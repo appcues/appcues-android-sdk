@@ -9,8 +9,11 @@ import com.appcues.data.remote.response.experience.ExperienceResponse
 import com.appcues.data.remote.response.step.StepContainerResponse
 import com.appcues.trait.BackdropDecoratingTrait
 import com.appcues.trait.ContainerDecoratingTrait
+import com.appcues.trait.ContentHolderTrait
 import com.appcues.trait.ContentWrappingTrait
 import com.appcues.trait.ExperiencePresentingTrait
+import com.appcues.trait.ExperienceTrait
+import com.appcues.trait.appcues.DefaultContentHolderTrait
 import java.util.UUID
 
 internal class ExperienceMapper(
@@ -39,10 +42,17 @@ internal class ExperienceMapper(
                         experienceActions,
                     )
                 },
-                presentingTrait = traits.filterIsInstance(ExperiencePresentingTrait::class.java).first(),
-                contentWrappingTrait = traits.filterIsInstance(ContentWrappingTrait::class.java).first(),
-                backdropTraits = traits.filterIsInstance(BackdropDecoratingTrait::class.java),
-                containerTraits = traits.filterIsInstance(ContainerDecoratingTrait::class.java),
+                // what should we do if no presenting trait is found?
+                presentingTrait = traits.filterIsInstance<ExperiencePresentingTrait>().first(),
+                contentHolderTrait = traits.getContainerCreatingTraitOrDefault(),
+                // what should we do if no content wrapping trait is found?
+                contentWrappingTrait = traits.filterIsInstance<ContentWrappingTrait>().first(),
+                backdropTraits = traits.filterIsInstance<BackdropDecoratingTrait>(),
+                containerTraits = traits.filterIsInstance<ContainerDecoratingTrait>(),
             )
         }
+
+    private fun List<ExperienceTrait>.getContainerCreatingTraitOrDefault(): ContentHolderTrait {
+        return filterIsInstance<ContentHolderTrait>().firstOrNull() ?: DefaultContentHolderTrait(null)
+    }
 }

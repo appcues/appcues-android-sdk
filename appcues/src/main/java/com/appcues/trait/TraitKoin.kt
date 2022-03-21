@@ -3,6 +3,7 @@ package com.appcues.trait
 import com.appcues.AppcuesConfig
 import com.appcues.di.KoinScopePlugin
 import com.appcues.trait.appcues.BackdropTrait
+import com.appcues.trait.appcues.CarouselTrait
 import com.appcues.trait.appcues.ModalTrait
 import com.appcues.trait.appcues.SkippableTrait
 import org.koin.dsl.ScopeDSL
@@ -35,6 +36,12 @@ internal object TraitKoin : KoinScopePlugin {
             SkippableTrait(
                 config = params.getOrNull(),
                 stateMachine = get(),
+            )
+        }
+
+        factory { params ->
+            CarouselTrait(
+                config = params.getOrNull()
             )
         }
     }

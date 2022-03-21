@@ -26,7 +26,7 @@ internal class BackdropTrait(
     private val backgroundColor = config.getConfigColor("backgroundColor")
 
     @Composable
-    override fun Backdrop(scope: BoxScope) {
+    override fun BoxScope.Backdrop() {
         AppcuesTraitAnimatedVisibility(
             enter = enterTransition(),
             exit = exitTransition(),
