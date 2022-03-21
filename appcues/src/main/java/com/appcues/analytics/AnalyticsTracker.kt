@@ -23,7 +23,7 @@ internal class AnalyticsTracker(
         const val FLUSH_AFTER_MILLISECONDS: Long = 10000
     }
 
-    private var pendingActivity = mutableListOf<ActivityRequest>()
+    private val pendingActivity = mutableListOf<ActivityRequest>()
     private var flushTask: TimerTask? = null
 
     init {
@@ -96,7 +96,7 @@ internal class AnalyticsTracker(
     private fun flushPendingActivity(sync: Boolean) {
         flushTask = null
         val activity = pendingActivity.merge()
-        pendingActivity = mutableListOf()
+        pendingActivity.clear()
         if (activity != null) {
             flush(activity, sync)
         }
