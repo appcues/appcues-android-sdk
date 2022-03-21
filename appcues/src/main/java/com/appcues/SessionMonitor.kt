@@ -67,5 +67,8 @@ internal class SessionMonitor(
         if (_sessionId == null) return
         applicationBackgrounded = Date()
         analyticsTracker.track(AnalyticsEvent.SessionSuspended, null, false)
+
+        // ensure any pending in-memory analytics get processed asap
+        analyticsTracker.flushAsync()
     }
 }
