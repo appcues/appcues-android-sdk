@@ -48,11 +48,11 @@ internal fun AppcuesConfigMap.getConfigColor(key: String): ComponentColor? {
 }
 
 internal fun Experience.areStepsFromDifferentContainers(stepIndexOne: Int, stepIndexTwo: Int): Boolean {
-    return stepContainer.none { it.steps.containsAll(arrayListOf(getFlatStep(stepIndexOne), getFlatStep(stepIndexTwo))) }
+    return stepContainers.none { it.steps.containsAll(arrayListOf(getFlatStep(stepIndexOne), getFlatStep(stepIndexTwo))) }
 }
 
 internal fun Experience.getStepContainerIndex(stepIndex: Int): Int? {
-    stepContainer.forEachIndexed { index, stepContainer -> if (stepContainer.steps.contains(getFlatStep(stepIndex))) return index }
+    stepContainers.forEachIndexed { index, stepContainer -> if (stepContainer.steps.contains(getFlatStep(stepIndex))) return index }
 
     // should never reach because whoever is calling this should know
     // if stepIndex is a valid step. that being said,
@@ -60,10 +60,6 @@ internal fun Experience.getStepContainerIndex(stepIndex: Int): Int? {
     return null
 }
 
-internal fun Experience.flatSteps(): List<Step> {
-    return stepContainer.flatMap { it.steps }
-}
-
 internal fun Experience.getFlatStep(index: Int): Step {
-    return flatSteps()[index]
+    return flatSteps[index]
 }

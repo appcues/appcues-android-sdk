@@ -66,6 +66,7 @@ internal class ExperienceLifecycleTracker(
                             startedExperience = false
                             completedExperience = false
                         }
+                        else -> Unit
                     }
                 }
                 is Failure -> with(result.error) {
