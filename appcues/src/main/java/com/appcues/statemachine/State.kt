@@ -1,8 +1,6 @@
 package com.appcues.statemachine
 
 import com.appcues.data.model.Experience
-import com.appcues.data.model.areStepsFromDifferentContainers
-import com.appcues.data.model.getStepContainerIndex
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.RenderStep
 import com.appcues.statemachine.Action.Reset
@@ -94,9 +92,9 @@ private fun Transition.Companion.transitionOfEndingToBeginning(
     currentStepIndex: Int,
     nextStepIndex: Int,
     nextStepReference: StepReference
-) = if (experience.areStepsFromDifferentContainers(currentStepIndex, nextStepIndex)) {
+) = if (experience.areStepsFromDifferentGroup(currentStepIndex, nextStepIndex)) {
     // given that steps are from different container, we now get step container index to present
-    experience.getStepContainerIndex(nextStepIndex)?.let { stepContainerIndex ->
+    experience.groupLookup[nextStepIndex]?.let { stepContainerIndex ->
         Transition(BeginningStep(experience, nextStepIndex), PresentContainer(experience, stepContainerIndex))
     } ?: run {
         // this should never happen at this point. but better to safe guard anyways
@@ -118,7 +116,7 @@ private fun Transition.Companion.fromRenderingStepToEndingStep(
                 state = EndingStep(
                     experience,
                     currentStepIndex,
-                    experience.areStepsFromDifferentContainers(currentStepIndex, nextStepIndex)
+                    experience.areStepsFromDifferentGroup(currentStepIndex, nextStepIndex)
                 ),
                 sideEffect = Continuation(StartStep(nextStepReference)),
             )
@@ -143,4 +141,8 @@ private fun Transition.Companion.transitionOfError(experience: Experience, curre
         state = null,
         sideEffect = ReportError(StepError(experience, currentStepIndex, message))
     )
+}
+
+private fun Experience.areStepsFromDifferentGroup(stepIndexOne: Int, stepIndexTwo: Int): Boolean {
+    return groupLookup[stepIndexOne] != groupLookup[stepIndexTwo]
 }

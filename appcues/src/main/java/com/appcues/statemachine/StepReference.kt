@@ -10,12 +10,10 @@ internal sealed class StepReference {
     data class StepId(val id: UUID) : StepReference() {
 
         override fun getIndex(experience: Experience, currentStepIndex: Int): Int? {
-            experience.flatSteps.forEachIndexed { index, step ->
-                // return index if matches any step in experience
-                if (step.id == id) return index
+            return experience.flatSteps.indexOfFirst { step -> step.id == id }.let {
+                // if is less then 0 it means that there was no match
+                if (it < 0) null else it
             }
-
-            return null
         }
     }
 
