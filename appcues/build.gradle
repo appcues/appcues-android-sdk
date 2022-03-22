@@ -2,6 +2,7 @@ plugins {
     id 'com.android.library'
     id 'kotlin-android'
     id 'shot'
+    id 'kotlin-kapt'
 }
 
 apply from: 'publish-maven.gradle'
@@ -65,6 +66,8 @@ dependencies {
     implementation "androidx.compose.material:material:1.1.1"
     implementation "com.google.android.material:material:1.5.0"
     implementation 'android.arch.lifecycle:extensions:1.1.1'
+    implementation "androidx.room:room-runtime:2.4.2"
+    kapt "androidx.room:room-compiler:2.4.2"
     // Image Loader
     implementation "io.coil-kt:coil-compose:1.4.0"
     // RESTApi
