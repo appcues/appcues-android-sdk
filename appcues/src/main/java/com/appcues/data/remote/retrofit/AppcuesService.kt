@@ -1,8 +1,8 @@
 package com.appcues.data.remote.retrofit
 
-import com.appcues.data.remote.request.ActivityRequest
 import com.appcues.data.remote.response.ActivityResponse
 import com.appcues.data.remote.response.experience.ExperienceResponse
+import okhttp3.RequestBody
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -16,13 +16,13 @@ internal interface AppcuesService {
         @Path("account") account: String,
         @Path("user") user: String,
         @Query("sync") sync: Int?,
-        @Body activity: ActivityRequest
+        @Body activity: RequestBody
     ): ActivityResponse
 
-    @GET("v1/accounts/{account}/users/{user}/experience_content/{content}")
-    suspend fun content(
+    @GET("v1/accounts/{account}/users/{user}/experience_content/{experienceId}")
+    suspend fun experienceContent(
         @Path("account") account: String,
         @Path("user") user: String,
-        @Path("content") contentId: String,
+        @Path("experienceId") experienceId: String,
     ): ExperienceResponse
 }
