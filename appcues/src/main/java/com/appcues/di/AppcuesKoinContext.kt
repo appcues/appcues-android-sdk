@@ -6,6 +6,7 @@ import com.appcues.AppcuesConfig
 import com.appcues.AppcuesKoin
 import com.appcues.action.ActionKoin
 import com.appcues.analytics.AnalyticsKoin
+import com.appcues.data.local.DataLocalKoin
 import com.appcues.data.mapper.DataMapperKoin
 import com.appcues.data.remote.DataRemoteKoin
 import com.appcues.trait.TraitKoin
@@ -33,6 +34,7 @@ internal object AppcuesKoinContext {
         TraitKoin,
         DataRemoteKoin,
         DataMapperKoin,
+        DataLocalKoin,
     )
 
     private fun getScope(scopeId: String): Scope = koin.getOrCreateScope(scopeId = scopeId, qualifier = named(scopeId))

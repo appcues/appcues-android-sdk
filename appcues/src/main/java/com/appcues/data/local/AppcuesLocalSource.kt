@@ -1,6 +1,8 @@
-package com.appcues.analytics.storage
+package com.appcues.data.local
 
-internal interface ActivityStoring {
+import com.appcues.data.local.model.ActivityStorage
+
+internal interface AppcuesLocalSource {
     suspend fun save(activityStorage: ActivityStorage)
     suspend fun remove(activityStorage: ActivityStorage)
     suspend fun read(): List<ActivityStorage>
