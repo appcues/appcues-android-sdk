@@ -21,7 +21,7 @@ internal class ExperienceRenderer(
         appcuesCoroutineScope.launch {
             // should this check if the state is Idling before even trying to fetch
             // the experience? since it cannot show anyway, if already in another state?
-            repository.getContent(contentId).also {
+            repository.getExperienceContent(contentId).also {
                 show(it)
             }
         }

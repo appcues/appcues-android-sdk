@@ -17,14 +17,15 @@ internal class AppcuesRepository(
     private val gson: Gson,
 ) {
 
-    suspend fun getContent(contentId: String): Experience = withContext(Dispatchers.IO) {
-        appcuesRemoteSource.getContent(contentId).let {
+    suspend fun getExperienceContent(experienceId: String): Experience = withContext(Dispatchers.IO) {
+        appcuesRemoteSource.getExperienceContent(experienceId).let {
             experienceMapper.map(it)
         }
     }
 
     suspend fun trackActivity(activity: ActivityRequest, sync: Boolean): List<Experience> = withContext(Dispatchers.IO) {
-        val activityStorage = ActivityStorage(activity.requestId, activity.accountId, activity.userId, gson.toJson(activity))
+        val activityJson = gson.toJson(activity)
+        val activityStorage = ActivityStorage(activity.requestId, activity.accountId, activity.userId, activityJson)
         appcuesLocalSource.save(activityStorage)
         appcuesLocalSource.remove(activityStorage)
 //
@@ -39,6 +40,6 @@ internal class AppcuesRepository(
 //        }
 //        // later, this will be managed internally and cleaned up during processing to network
 
-        appcuesRemoteSource.postActivity(activity, sync).experiences.map { experienceMapper.map(it) }
+        appcuesRemoteSource.postActivity(activity.userId, activityJson, sync).experiences.map { experienceMapper.map(it) }
     }
 }

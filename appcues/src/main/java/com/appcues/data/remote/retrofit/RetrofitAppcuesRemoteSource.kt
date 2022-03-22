@@ -2,9 +2,10 @@ package com.appcues.data.remote.retrofit
 
 import com.appcues.Storage
 import com.appcues.data.remote.AppcuesRemoteSource
-import com.appcues.data.remote.request.ActivityRequest
 import com.appcues.data.remote.response.ActivityResponse
 import com.appcues.data.remote.response.experience.ExperienceResponse
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.toRequestBody
 
 internal class RetrofitAppcuesRemoteSource(
     private val appcuesService: AppcuesService,
@@ -12,11 +13,12 @@ internal class RetrofitAppcuesRemoteSource(
     private val storage: Storage
 ) : AppcuesRemoteSource {
 
-    override suspend fun getContent(contentId: String): ExperienceResponse {
-        return appcuesService.content(accountId, storage.userId, contentId)
+    override suspend fun getExperienceContent(experienceId: String): ExperienceResponse {
+        return appcuesService.experienceContent(accountId, storage.userId, experienceId)
     }
 
-    override suspend fun postActivity(activity: ActivityRequest, sync: Boolean): ActivityResponse {
-        return appcuesService.activity(accountId, activity.userId, if (sync) 1 else null, activity)
+    override suspend fun postActivity(userId: String, activityJson: String, sync: Boolean): ActivityResponse {
+        val body = activityJson.toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
+        return appcuesService.activity(accountId, userId, if (sync) 1 else null, body)
     }
 }
