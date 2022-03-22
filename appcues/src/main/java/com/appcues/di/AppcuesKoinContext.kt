@@ -5,6 +5,7 @@ import com.appcues.Appcues
 import com.appcues.AppcuesConfig
 import com.appcues.AppcuesKoin
 import com.appcues.action.ActionKoin
+import com.appcues.analytics.AnalyticsKoin
 import com.appcues.data.mapper.DataMapperKoin
 import com.appcues.data.remote.DataRemoteKoin
 import com.appcues.trait.TraitKoin
@@ -27,6 +28,7 @@ internal object AppcuesKoinContext {
 
     private val koinPlugins = arrayListOf(
         AppcuesKoin,
+        AnalyticsKoin,
         ActionKoin,
         TraitKoin,
         DataRemoteKoin,
