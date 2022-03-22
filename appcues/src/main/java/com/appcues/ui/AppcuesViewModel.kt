@@ -52,7 +52,7 @@ internal class AppcuesViewModel(
                         }
                     }
                     is RenderingStep -> {
-                        result.experience.stepContainer.firstOrNull()?.let { container ->
+                        result.experience.stepContainers.firstOrNull()?.let { container ->
                             // Render if there is a stepContainer
                             _uiState.value = Rendering(container, result.step)
                         }

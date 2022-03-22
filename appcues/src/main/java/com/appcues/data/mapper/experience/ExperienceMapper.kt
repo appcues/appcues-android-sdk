@@ -22,7 +22,7 @@ internal class ExperienceMapper(
         return Experience(
             id = from.id,
             name = from.name,
-            stepContainer = from.steps.mapToStepContainer(from.actions)
+            stepContainers = from.steps.mapToStepContainer(from.actions)
         )
     }
 

@@ -1,7 +1,6 @@
 package com.appcues.statemachine
 
 import com.appcues.data.model.Experience
-import com.appcues.data.model.flatSteps
 import java.util.UUID
 
 internal sealed class StepReference {
@@ -11,7 +10,7 @@ internal sealed class StepReference {
     data class StepId(val id: UUID) : StepReference() {
 
         override fun getIndex(experience: Experience, currentStepIndex: Int): Int? {
-            experience.flatSteps().forEachIndexed { index, step ->
+            experience.flatSteps.forEachIndexed { index, step ->
                 // return index if matches any step in experience
                 if (step.id == id) return index
             }
@@ -22,17 +21,22 @@ internal sealed class StepReference {
 
     data class StepIndex(val index: Int) : StepReference() {
 
-        override fun getIndex(experience: Experience, currentStepIndex: Int): Int {
+        override fun getIndex(experience: Experience, currentStepIndex: Int): Int? {
             // just return index
-            return index
+            return validateStepIndexOrNull(experience, index)
         }
     }
 
     data class StepOffset(val offset: Int) : StepReference() {
 
-        override fun getIndex(experience: Experience, currentStepIndex: Int): Int {
+        override fun getIndex(experience: Experience, currentStepIndex: Int): Int? {
             // apply offset to current step index
-            return currentStepIndex + offset
+            return validateStepIndexOrNull(experience, currentStepIndex + offset)
         }
+    }
+
+    protected fun validateStepIndexOrNull(experience: Experience, index: Int): Int? {
+        // if index is valid return index else returns null
+        return if (index >= 0 && index < experience.flatSteps.size) index else null
     }
 }

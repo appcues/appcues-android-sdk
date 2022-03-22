@@ -2,7 +2,6 @@ package com.appcues.statemachine
 
 import com.appcues.data.model.Experience
 import com.appcues.data.model.areStepsFromDifferentContainers
-import com.appcues.data.model.flatSteps
 import com.appcues.data.model.getStepContainerIndex
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.RenderStep
@@ -59,7 +58,7 @@ internal sealed class State(open val experience: Experience?) {
 }
 
 private fun Transition.Companion.fromIdlingToBeginningExperience(experience: Experience): Transition {
-    return if (experience.stepContainer.isNotEmpty()) {
+    return if (experience.stepContainers.isNotEmpty()) {
         Transition(BeginningExperience(experience), Continuation(StartStep(StepReference.StepIndex(0))))
     } else {
         // empty experience error
@@ -136,7 +135,7 @@ private fun Transition.Companion.isValidStepIndex(stepIndex: Int?, experience: E
         returns() implies (stepIndex != null)
     }
 
-    return stepIndex != null && stepIndex >= 0 && stepIndex < experience.flatSteps().size
+    return stepIndex != null && stepIndex >= 0 && stepIndex < experience.flatSteps.size
 }
 
 private fun Transition.Companion.transitionOfError(experience: Experience, currentStepIndex: Int, message: String): Transition {

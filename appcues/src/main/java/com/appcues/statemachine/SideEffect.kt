@@ -12,7 +12,7 @@ internal sealed class SideEffect {
             is Continuation -> machine.handleAction(action)
             is ReportError -> machine.reportError(error)
             is PresentContainer -> {
-                experience.stepContainer[step].presentingTrait.presentExperience()
+                experience.stepContainers[step].presentingTrait.presentExperience()
             }
         }
 }
