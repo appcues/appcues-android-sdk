@@ -1,30 +1,18 @@
 package com.appcues.data.remote.retrofit
 
-import com.appcues.data.remote.response.ActivityResponse
-import com.appcues.data.remote.response.step.StepContainerResponse
-import com.appcues.data.remote.retrofit.deserializer.ActivityResponseDeserializer
-import com.appcues.data.remote.retrofit.deserializer.StepContainerResponseDeserializer
-import com.appcues.data.remote.retrofit.serializer.DateSerializer
+import com.appcues.data.remote.GsonConfiguration
 import com.appcues.data.remote.retrofit.stubs.contentModalOneStubs
 import com.google.common.truth.Truth.assertThat
-import com.google.gson.GsonBuilder
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
 import org.junit.Test
-import java.util.Date
 
 class AppcuesServiceTest {
 
     private val mockWebServer = MockWebServer()
 
-    private val gson = GsonBuilder()
-        .registerTypeAdapter(Date::class.java, DateSerializer())
-        .registerTypeAdapter(ActivityResponse::class.java, ActivityResponseDeserializer())
-        .registerTypeAdapter(StepContainerResponse::class.java, StepContainerResponseDeserializer())
-        .create()
-
-    private val api = RetrofitWrapper(gson, mockWebServer.url("/"), false)
+    private val api = RetrofitWrapper(GsonConfiguration.getGson(), mockWebServer.url("/"), false)
         .create(AppcuesService::class)
 
     @After

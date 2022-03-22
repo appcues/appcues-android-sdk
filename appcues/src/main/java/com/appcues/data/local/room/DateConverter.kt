@@ -1,4 +1,4 @@
-package com.appcues.analytics.storage.room
+package com.appcues.data.local.room
 
 import androidx.room.TypeConverter
 import java.util.Date

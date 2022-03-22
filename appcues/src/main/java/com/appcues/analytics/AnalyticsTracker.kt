@@ -2,6 +2,7 @@ package com.appcues.analytics
 
 import com.appcues.AppcuesCoroutineScope
 import com.appcues.SessionMonitor
+import com.appcues.data.AppcuesRepository
 import com.appcues.data.remote.request.ActivityRequest
 import com.appcues.data.remote.request.EventRequest
 import com.appcues.ui.ExperienceRenderer
@@ -12,10 +13,10 @@ import kotlin.concurrent.schedule
 
 internal class AnalyticsTracker(
     private val appcuesCoroutineScope: AppcuesCoroutineScope,
+    private val repository: AppcuesRepository,
     private val experienceRenderer: ExperienceRenderer,
     private val sessionMonitor: SessionMonitor,
     private val activityBuilder: ActivityRequestBuilder,
-    private val activityProcessor: ActivityProcessor,
     experienceLifecycleTracker: ExperienceLifecycleTracker,
 ) {
     companion object {
@@ -106,7 +107,7 @@ internal class AnalyticsTracker(
 
         appcuesCoroutineScope.launch {
             // this will respond with qualified experiences, if applicable
-            val experiences = activityProcessor.process(activity, sync)
+            val experiences = repository.trackActivity(activity, sync)
 
             if (sync && experiences.isNotEmpty()) {
                 // note: by default we just show the first experience, but will need to revisit and allow
