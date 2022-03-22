@@ -30,10 +30,10 @@ class AppcuesServiceTest {
         )
         // When
         val result = runBlocking {
-            api.content(
+            api.experienceContent(
                 account = "1234",
                 user = "TestUser",
-                contentId = "5678",
+                experienceId = "5678",
             )
         }
         // Then

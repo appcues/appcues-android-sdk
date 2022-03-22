@@ -30,12 +30,12 @@ class AppcuesRepositoryTest {
     fun `getContent SHOULD get from appcuesRemoteSource AND map from experienceMapper`() {
         // Given
         val experienceResponse = mockk<ExperienceResponse>()
-        coEvery { appcuesRemoteSource.getContent("1234") } returns experienceResponse
+        coEvery { appcuesRemoteSource.getExperienceContent("1234") } returns experienceResponse
         val mappedExperience = mockk<Experience>()
         coEvery { experienceMapper.map(experienceResponse) } returns mappedExperience
         // When
         val result = runBlocking {
-            defaultDataGateway.getContent("1234")
+            defaultDataGateway.getExperienceContent("1234")
         }
         // Then
         assertThat(result).isEqualTo(mappedExperience)
