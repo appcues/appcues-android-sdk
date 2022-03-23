@@ -10,7 +10,6 @@ import com.appcues.statemachine.Action.RenderStep
 import com.appcues.statemachine.Action.StartStep
 import com.appcues.statemachine.State.BeginningStep
 import com.appcues.statemachine.State.EndingStep
-import com.appcues.statemachine.State.RenderingStep
 import com.appcues.statemachine.StateMachine
 import com.appcues.statemachine.StepReference.StepIndex
 import com.appcues.ui.AppcuesViewModel.UIState.Dismissing
@@ -48,15 +47,13 @@ internal class AppcuesViewModel(
             stateMachine.stateFlow.collectLatest { result ->
                 when (result) {
                     is BeginningStep -> {
-                        // Notify state machine that we are good to render steps
-                        viewModelScope.launch {
-                            stateMachine.handleAction(RenderStep)
-                        }
-                    }
-                    is RenderingStep -> {
-                        result.experience.stepContainers.firstOrNull()?.let { container ->
-                            // Render if there is a stepContainer
-                            _uiState.value = Rendering(container, result.step)
+                        result.toRenderingState()?.run {
+                            _uiState.value = this
+
+                            // Notify state machine that we are rendering current step
+                            viewModelScope.launch {
+                                stateMachine.handleAction(RenderStep)
+                            }
                         }
                     }
                     is EndingStep -> {
@@ -73,6 +70,19 @@ internal class AppcuesViewModel(
                     else -> Unit
                 }
             }
+        }
+    }
+
+    private fun BeginningStep.toRenderingState(): Rendering? {
+        return with(experience) {
+            // find the container index
+            val containerId = groupLookup[flatStepIndex]
+            // find the step index in relation to the container
+            val stepIndexInContainer = stepIndexLookup[flatStepIndex]
+            // if both are valid ids we return Rendering else null
+            if (containerId != null && stepIndexInContainer != null) {
+                Rendering(stepContainers[containerId], stepIndexInContainer)
+            } else null
         }
     }
 

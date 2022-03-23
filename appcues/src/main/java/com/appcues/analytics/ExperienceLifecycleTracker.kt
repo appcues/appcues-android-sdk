@@ -47,10 +47,10 @@ internal class ExperienceLifecycleTracker(
                                 trackLifecycleEvent(ExperienceStarted(experience))
                                 startedExperience = true
                             }
-                            trackLifecycleEvent(StepSeen(experience, step))
+                            trackLifecycleEvent(StepSeen(experience, flatStepIndex))
                         }
                         is EndingStep -> {
-                            trackLifecycleEvent(StepCompleted(experience, step))
+                            trackLifecycleEvent(StepCompleted(experience, flatStepIndex))
                             // todo - need a way to check if the step ended was the last step of the last step container
                             // and mark the `completedExperience = true` if so -- so that we can correctly fire
                             // the experience completed vs. dismissed events
@@ -59,7 +59,7 @@ internal class ExperienceLifecycleTracker(
                             if (completedExperience) {
                                 trackLifecycleEvent(ExperienceCompleted(experience))
                             } else {
-                                trackLifecycleEvent(ExperienceDismissed(experience, step))
+                                trackLifecycleEvent(ExperienceDismissed(experience, flatStepIndex))
                             }
                         }
                         is Idling -> {
