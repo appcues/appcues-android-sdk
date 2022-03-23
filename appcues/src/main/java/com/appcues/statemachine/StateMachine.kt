@@ -2,8 +2,9 @@ package com.appcues.statemachine
 
 import com.appcues.AppcuesCoroutineScope
 import com.appcues.statemachine.State.Idling
-import com.appcues.statemachine.StateResult.Failure
-import com.appcues.statemachine.StateResult.Success
+import com.appcues.util.Result
+import com.appcues.util.Result.Failure
+import com.appcues.util.Result.Success
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -12,9 +13,12 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 
+internal typealias StateResult = Result<State, Error>
+
 internal class StateMachine(
     private val appcuesCoroutineScope: AppcuesCoroutineScope,
 ) {
+
     private var _stateResultFlow = MutableSharedFlow<StateResult>(1)
     val stateResultFlow: SharedFlow<StateResult>
         get() = _stateResultFlow
@@ -23,8 +27,8 @@ internal class StateMachine(
     // state updates (no error cases)
     val stateFlow: SharedFlow<State>
         get() = stateResultFlow
-            .filterIsInstance<Success>()
-            .map { it.state }
+            .filterIsInstance<Success<State>>()
+            .map { it.value }
             .shareIn(appcuesCoroutineScope, SharingStarted.Lazily, 1)
 
     private var _currentState: State = Idling()
