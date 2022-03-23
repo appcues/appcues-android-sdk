@@ -18,9 +18,9 @@ internal class RetrofitAppcuesRemoteSource(
 
     override suspend fun postActivity(userId: String, activityJson: String, sync: Boolean): ActivityResponse =
         appcuesService.activity(
-            accountId,
-            userId,
-            if (sync) 1 else null,
-            activityJson.toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
+            account = accountId,
+            user = userId,
+            sync = if (sync) 1 else null,
+            activity = activityJson.toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
         )
 }
