@@ -19,4 +19,15 @@ internal data class Experience(
             }
         }
     }
+
+    val stepIndexLookup: HashMap<Int, Int> = hashMapOf<Int, Int>().apply {
+        flatSteps.forEachIndexed { stepIndex, step ->
+            stepContainers.forEach {
+                val index = it.steps.indexOf(step)
+                if (index >= 0) {
+                    put(stepIndex, index)
+                }
+            }
+        }
+    }
 }

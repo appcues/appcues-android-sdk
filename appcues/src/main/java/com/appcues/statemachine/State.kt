@@ -21,10 +21,10 @@ internal sealed class State(open val experience: Experience?) {
 
     data class Idling(override val experience: Experience? = null) : State(experience)
     data class BeginningExperience(override val experience: Experience) : State(experience)
-    data class BeginningStep(override val experience: Experience, val step: Int) : State(experience)
-    data class RenderingStep(override val experience: Experience, val step: Int) : State(experience)
-    data class EndingStep(override val experience: Experience, val step: Int, val dismiss: Boolean) : State(experience)
-    data class EndingExperience(override val experience: Experience, val step: Int) : State(experience)
+    data class BeginningStep(override val experience: Experience, val flatStepIndex: Int) : State(experience)
+    data class RenderingStep(override val experience: Experience, val flatStepIndex: Int) : State(experience)
+    data class EndingStep(override val experience: Experience, val flatStepIndex: Int, val dismiss: Boolean) : State(experience)
+    data class EndingExperience(override val experience: Experience, val flatStepIndex: Int) : State(experience)
 
     fun transition(action: Action): Transition? = when {
         this is Idling && action is StartExperience ->
@@ -32,15 +32,15 @@ internal sealed class State(open val experience: Experience?) {
         this is BeginningExperience && action is StartStep ->
             Transition.fromBeginningExperienceToBeginningStep(experience)
         this is BeginningStep && action is RenderStep ->
-            Transition(RenderingStep(experience, step))
+            Transition(RenderingStep(experience, flatStepIndex))
         this is RenderingStep && action is StartStep ->
-            Transition.fromRenderingStepToEndingStep(experience, step, action.stepReference)
+            Transition.fromRenderingStepToEndingStep(experience, flatStepIndex, action.stepReference)
         this is RenderingStep && action is EndExperience ->
-            Transition(EndingStep(experience, step, true), Continuation(EndExperience))
+            Transition(EndingStep(experience, flatStepIndex, true), Continuation(EndExperience))
         this is EndingStep && action is EndExperience ->
-            Transition(EndingExperience(experience, step), Continuation(Reset))
+            Transition(EndingExperience(experience, flatStepIndex), Continuation(Reset))
         this is EndingStep && action is StartStep ->
-            Transition.fromEndingStepToBeginningStep(experience, step, action.stepReference)
+            Transition.fromEndingStepToBeginningStep(experience, flatStepIndex, action.stepReference)
         this is EndingExperience && action is Reset ->
             Transition(Idling())
 
