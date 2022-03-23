@@ -41,7 +41,7 @@ internal object TraitKoin : KoinScopePlugin {
 
         factory { params ->
             CarouselTrait(
-                config = params.getOrNull()
+                config = params.getOrNull(),
             )
         }
     }

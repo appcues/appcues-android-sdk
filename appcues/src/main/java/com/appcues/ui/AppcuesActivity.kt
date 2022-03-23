@@ -60,7 +60,10 @@ internal class AppcuesActivity : AppCompatActivity() {
 
     @Composable
     private fun Composition() {
-        CompositionLocalProvider(LocalAppcuesActions provides AppcuesActions { viewModel.onAction(it) }) {
+        CompositionLocalProvider(
+            LocalAppcuesActions provides AppcuesActions { viewModel.onAction(it) },
+            LocalAppcuesPagination provides AppcuesPagination { viewModel.onPageChanged(it) }
+        ) {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center,

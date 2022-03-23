@@ -10,6 +10,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkOut
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -19,7 +20,16 @@ import com.appcues.action.ExperienceAction
 // used to register callback for all Actions triggered from primitives
 internal val LocalAppcuesActions = staticCompositionLocalOf { AppcuesActions {} }
 
-internal data class AppcuesActions(val onAction: ((ExperienceAction) -> Unit))
+internal data class AppcuesActions(val onAction: (ExperienceAction) -> Unit)
+
+/**
+ * LocalAppcuesPagination is used to report back any page change that
+ * happened that is coming from outside of our internal SDK logic.
+ * Usually used by traits that when dealing with multi-page containers
+ */
+val LocalAppcuesPagination = compositionLocalOf { AppcuesPagination {} }
+
+data class AppcuesPagination(val onPageChanged: (Int) -> Unit)
 
 internal val isContentVisible = MutableTransitionState(false)
 
