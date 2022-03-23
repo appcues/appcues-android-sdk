@@ -3,7 +3,6 @@
 package com.appcues.statemachine
 
 import com.appcues.data.model.Experience
-import com.appcues.data.model.areStepsFromDifferentGroup
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.RenderStep
 import com.appcues.statemachine.Action.Reset
@@ -116,6 +115,10 @@ private fun transitionsToBeginningStep(
 } else {
     // else we just move to rendering step
     Transition(BeginningStep(experience, nextStepIndex), ContinuationEffect(StartStep(nextStepReference)))
+}
+
+private fun Experience.areStepsFromDifferentGroup(stepIndexOne: Int, stepIndexTwo: Int): Boolean {
+    return groupLookup[stepIndexOne] != groupLookup[stepIndexTwo]
 }
 
 private fun errorTransition(experience: Experience, currentStepIndex: Int, message: String): Transition {

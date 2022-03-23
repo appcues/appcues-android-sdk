@@ -50,6 +50,7 @@ internal class StateMachine(
     fun handleAction(action: Action) {
         appcuesCoroutineScope.launch {
 
+            // current state will take action and apply transition
             _currentState.take(action).applyTransition(this@StateMachine) {
                 // update current state
                 _currentState = it
