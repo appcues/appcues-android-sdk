@@ -6,7 +6,7 @@ import com.appcues.data.remote.RemoteError
 import com.appcues.data.remote.response.ActivityResponse
 import com.appcues.data.remote.response.ErrorResponse
 import com.appcues.data.remote.response.experience.ExperienceResponse
-import com.appcues.util.Result
+import com.appcues.util.ResultOf
 import com.google.gson.Gson
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -19,12 +19,12 @@ internal class RetrofitAppcuesRemoteSource(
     private val gson: Gson,
 ) : AppcuesRemoteSource {
 
-    override suspend fun getExperienceContent(experienceId: String): Result<ExperienceResponse, RemoteError> =
+    override suspend fun getExperienceContent(experienceId: String): ResultOf<ExperienceResponse, RemoteError> =
         request {
             appcuesService.experienceContent(accountId, storage.userId, experienceId)
         }
 
-    override suspend fun postActivity(userId: String, activityJson: String, sync: Boolean): Result<ActivityResponse, RemoteError> =
+    override suspend fun postActivity(userId: String, activityJson: String, sync: Boolean): ResultOf<ActivityResponse, RemoteError> =
         request {
             appcuesService.activity(
                 account = accountId,
@@ -34,18 +34,18 @@ internal class RetrofitAppcuesRemoteSource(
             )
         }
 
-    suspend fun <Success> request(apiCall: suspend () -> Success): Result<Success, RemoteError> {
+    suspend fun <Success> request(apiCall: suspend () -> Success): ResultOf<Success, RemoteError> {
         return try {
-            Result.Success(apiCall.invoke())
+            ResultOf.Success(apiCall.invoke())
         } catch (throwable: Throwable) {
             when (throwable) {
                 is HttpException -> {
                     val code = throwable.code()
                     val errorResponse = convertErrorBody(throwable)
-                    Result.Failure(RemoteError.HttpError(code, errorResponse))
+                    ResultOf.Failure(RemoteError.HttpError(code, errorResponse))
                 }
                 else -> {
-                    Result.Failure(RemoteError.NetworkError(throwable))
+                    ResultOf.Failure(RemoteError.NetworkError(throwable))
                 }
             }
         }

@@ -13,8 +13,8 @@ import com.appcues.statemachine.State.EndingStep
 import com.appcues.statemachine.State.Idling
 import com.appcues.statemachine.State.RenderingStep
 import com.appcues.statemachine.StateMachine
-import com.appcues.util.Result.Failure
-import com.appcues.util.Result.Success
+import com.appcues.util.ResultOf.Failure
+import com.appcues.util.ResultOf.Success
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.withContext

@@ -6,8 +6,8 @@ import com.appcues.data.mapper.experience.ExperienceMapper
 import com.appcues.data.model.Experience
 import com.appcues.data.remote.AppcuesRemoteSource
 import com.appcues.data.remote.request.ActivityRequest
-import com.appcues.util.Result.Failure
-import com.appcues.util.Result.Success
+import com.appcues.util.ResultOf.Failure
+import com.appcues.util.ResultOf.Success
 import com.appcues.util.doIfSuccess
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
@@ -95,14 +95,13 @@ internal class AppcuesRepository(
         // todo - error handling on this network request
         val experiences = mutableListOf<Experience>()
         activityResult.doIfSuccess { response ->
-            experiences +=
-                response.experiences.mapNotNull {
-                    // this is likely redundant, since a non-sync request wont
-                    // return any experiences qualified - but we want to make sure
-                    // we don't do any needless mapping work on something that will
-                    // be ignored anyway (cache items)
-                    if (syncRequest) experienceMapper.map(it) else null
-                }
+            experiences += response.experiences.mapNotNull {
+                // this is likely redundant, since a non-sync request wont
+                // return any experiences qualified - but we want to make sure
+                // we don't do any needless mapping work on something that will
+                // be ignored anyway (cache items)
+                if (syncRequest) experienceMapper.map(it) else null
+            }
         }
 
         // it should only be removed from local storage on success
