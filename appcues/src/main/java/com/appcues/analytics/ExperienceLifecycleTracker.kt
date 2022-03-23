@@ -13,8 +13,8 @@ import com.appcues.statemachine.State.EndingStep
 import com.appcues.statemachine.State.Idling
 import com.appcues.statemachine.State.RenderingStep
 import com.appcues.statemachine.StateMachine
-import com.appcues.statemachine.StateResult.Failure
-import com.appcues.statemachine.StateResult.Success
+import com.appcues.util.Result.Failure
+import com.appcues.util.Result.Success
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.withContext
@@ -40,7 +40,7 @@ internal class ExperienceLifecycleTracker(
     suspend fun start() = withContext(Dispatchers.IO) {
         stateMachine.stateResultFlow.collect { result ->
             when (result) {
-                is Success -> with(result.state) {
+                is Success -> with(result.value) {
                     when (this) {
                         is RenderingStep -> {
                             if (!startedExperience) {
@@ -69,7 +69,7 @@ internal class ExperienceLifecycleTracker(
                         else -> Unit
                     }
                 }
-                is Failure -> with(result.error) {
+                is Failure -> with(result.reason) {
                     when (this) {
                         is Error.ExperienceError -> trackLifecycleEvent(ExperienceError(this))
                         is Error.StepError -> trackLifecycleEvent(StepError(this))

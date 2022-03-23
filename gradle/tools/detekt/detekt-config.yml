@@ -231,6 +231,7 @@ exceptions:
     ignoreLabeled: false
   SwallowedException:
     active: true
+    excludes: ['**/RetrofitAppcuesRemoteSource.kt']
     ignoredExceptionTypes:
       - 'InterruptedException'
       - 'MalformedURLException'
@@ -258,7 +259,7 @@ exceptions:
     active: true
   TooGenericExceptionCaught:
     active: true
-    excludes: [ '**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**' ]
+    excludes: [ '**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**', '**/RetrofitAppcuesRemoteSource.kt' ]
     exceptionNames:
       - 'ArrayIndexOutOfBoundsException'
       - 'Error'

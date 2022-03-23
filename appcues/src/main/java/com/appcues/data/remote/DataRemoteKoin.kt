@@ -21,6 +21,7 @@ internal object DataRemoteKoin : KoinScopePlugin {
                 appcuesService = getAppcuesService(gson = get(), config.apiHostUrl ?: BASE_URL),
                 accountId = config.accountId,
                 storage = get(),
+                gson = get()
             )
         }
     }
