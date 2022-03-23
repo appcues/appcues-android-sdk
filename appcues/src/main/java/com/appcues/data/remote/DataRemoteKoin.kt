@@ -1,6 +1,7 @@
 package com.appcues.data.remote
 
 import com.appcues.AppcuesConfig
+import com.appcues.data.GsonConfiguration
 import com.appcues.data.remote.retrofit.AppcuesService
 import com.appcues.data.remote.retrofit.RetrofitAppcuesRemoteSource
 import com.appcues.data.remote.retrofit.RetrofitWrapper
