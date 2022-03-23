@@ -1,6 +1,6 @@
 package com.appcues.data.remote.retrofit
 
-import com.appcues.data.remote.GsonConfiguration
+import com.appcues.data.GsonConfiguration
 import com.appcues.data.remote.retrofit.stubs.contentModalOneStubs
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.runBlocking

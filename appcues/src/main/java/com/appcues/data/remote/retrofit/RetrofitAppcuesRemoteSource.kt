@@ -13,12 +13,14 @@ internal class RetrofitAppcuesRemoteSource(
     private val storage: Storage
 ) : AppcuesRemoteSource {
 
-    override suspend fun getExperienceContent(experienceId: String): ExperienceResponse {
-        return appcuesService.experienceContent(accountId, storage.userId, experienceId)
-    }
+    override suspend fun getExperienceContent(experienceId: String): ExperienceResponse =
+        appcuesService.experienceContent(accountId, storage.userId, experienceId)
 
-    override suspend fun postActivity(userId: String, activityJson: String, sync: Boolean): ActivityResponse {
-        val body = activityJson.toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
-        return appcuesService.activity(accountId, userId, if (sync) 1 else null, body)
-    }
+    override suspend fun postActivity(userId: String, activityJson: String, sync: Boolean): ActivityResponse =
+        appcuesService.activity(
+            accountId,
+            userId,
+            if (sync) 1 else null,
+            activityJson.toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
+        )
 }

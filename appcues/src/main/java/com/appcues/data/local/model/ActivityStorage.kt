@@ -9,7 +9,7 @@ import java.util.UUID
 internal data class ActivityStorage(
     @PrimaryKey val requestId: UUID,
     val accountId: String,
-    val userID: String,
+    val userId: String,
     val data: String,
     val created: Date = Date(),
 )

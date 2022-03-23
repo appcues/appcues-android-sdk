@@ -1,4 +1,4 @@
-package com.appcues.data.remote
+package com.appcues.data
 
 import com.appcues.data.remote.response.ActivityResponse
 import com.appcues.data.remote.response.step.StepContainerResponse

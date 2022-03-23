@@ -9,11 +9,11 @@ import com.appcues.data.local.model.ActivityStorage
 @Dao
 internal interface ActivityStorageDao {
     @Query("SELECT * FROM ActivityStorage ORDER BY created")
-    fun getAll(): List<ActivityStorage>
+    suspend fun getAll(): List<ActivityStorage>
 
     @Insert
-    fun insertAll(vararg activityStorage: ActivityStorage)
+    suspend fun insertAll(vararg activityStorage: ActivityStorage)
 
     @Delete
-    fun delete(activityStorage: ActivityStorage)
+    suspend fun delete(activityStorage: ActivityStorage)
 }
