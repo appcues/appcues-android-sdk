@@ -7,10 +7,12 @@ import com.appcues.action.ExperienceAction
 import com.appcues.data.model.StepContainer
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.RenderStep
+import com.appcues.statemachine.Action.StartStep
 import com.appcues.statemachine.State.BeginningStep
 import com.appcues.statemachine.State.EndingStep
 import com.appcues.statemachine.State.RenderingStep
 import com.appcues.statemachine.StateMachine
+import com.appcues.statemachine.StepReference.StepIndex
 import com.appcues.ui.AppcuesViewModel.UIState.Dismissing
 import com.appcues.ui.AppcuesViewModel.UIState.Idle
 import com.appcues.ui.AppcuesViewModel.UIState.Rendering
@@ -83,6 +85,12 @@ internal class AppcuesViewModel(
     fun onAction(experienceAction: ExperienceAction) {
         viewModelScope.launch {
             experienceAction.execute(appcues)
+        }
+    }
+
+    fun onPageChanged(index: Int) {
+        viewModelScope.launch {
+            stateMachine.handleAction(StartStep(StepIndex(index)))
         }
     }
 }
