@@ -46,3 +46,7 @@ internal fun AppcuesConfigMap.getConfigColor(key: String): ComponentColor? {
         StyleColorMapper().map(StyleColorResponse.fromAny(it))
     }
 }
+
+internal fun Experience.areStepsFromDifferentGroup(stepIndexOne: Int, stepIndexTwo: Int): Boolean {
+    return groupLookup[stepIndexOne] != groupLookup[stepIndexTwo]
+}

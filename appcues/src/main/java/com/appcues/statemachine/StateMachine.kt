@@ -1,7 +1,21 @@
 package com.appcues.statemachine
 
 import com.appcues.AppcuesCoroutineScope
+import com.appcues.statemachine.Action.EndExperience
+import com.appcues.statemachine.Action.RenderStep
+import com.appcues.statemachine.Action.ReportError
+import com.appcues.statemachine.Action.Reset
+import com.appcues.statemachine.Action.StartExperience
+import com.appcues.statemachine.Action.StartStep
+import com.appcues.statemachine.Error.ExperienceError
+import com.appcues.statemachine.State.BeginningExperience
+import com.appcues.statemachine.State.BeginningStep
+import com.appcues.statemachine.State.EndingExperience
+import com.appcues.statemachine.State.EndingStep
 import com.appcues.statemachine.State.Idling
+import com.appcues.statemachine.State.RenderingStep
+import com.appcues.statemachine.Transition.EmptyTransition
+import com.appcues.statemachine.Transition.ErrorLoggingTransition
 import com.appcues.util.ResultOf
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
@@ -35,20 +49,55 @@ internal class StateMachine(
 
     fun handleAction(action: Action) {
         appcuesCoroutineScope.launch {
-            _currentState.transition(action)?.also { transition ->
 
-                transition.state?.let {
-                    // update current state
-                    _currentState = it
+            _currentState.take(action).applyTransition(this@StateMachine) {
+                // update current state
+                _currentState = it
 
-                    // emit state change to all listeners via flow
-                    _stateResultFlow.emit(Success(it))
-                }
-
-                transition.sideEffect?.execute(this@StateMachine)
+                // emit state change to all listeners via flow
+                _stateResultFlow.emit(Success(it))
             }
         }
     }
 
-    suspend fun reportError(error: Error) = _stateResultFlow.emit(Failure(error))
+    fun reportError(error: Error) {
+        appcuesCoroutineScope.launch {
+            _stateResultFlow.emit(Failure(error))
+        }
+    }
+
+    private fun State.take(action: Action): Transition {
+        return takeValidStateTransitions(this, action) ?: when (action) {
+            // start experience action when experience is already active
+            is StartExperience -> ErrorLoggingTransition(ExperienceError(action.experience, "Experience already active"))
+            // report error action
+            is ReportError -> ErrorLoggingTransition(action.error)
+            // undefined transition - no-op
+            else -> EmptyTransition()
+        }
+    }
+
+    /**
+     * returns Transition for a valid combination of state plus action or null
+     */
+    private fun takeValidStateTransitions(state: State, action: Action) = with(Transitions) {
+        when {
+            // Idling
+            state is Idling && action is StartExperience -> state.fromIdlingToBeginningExperience(action)
+            // BeginningExperience
+            state is BeginningExperience && action is StartStep -> state.fromBeginningExperienceToBeginningStep(action)
+            // BeginningStep
+            state is BeginningStep && action is RenderStep -> state.fromBeginningStepToRenderingStep(action)
+            // RenderingStep
+            state is RenderingStep && action is StartStep -> state.fromRenderingStepToEndingStep(action)
+            state is RenderingStep && action is EndExperience -> state.fromRenderingStepToEndingStep(action)
+            // EndingStep
+            state is EndingStep && action is EndExperience -> state.fromEndingStepToEndingExperience(action)
+            state is EndingStep && action is StartStep -> state.fromEndingStepToBeginningStep(action)
+            // EndingExperience
+            state is EndingExperience && action is Reset -> state.fromEndingExperienceToIdling(action)
+            // No valid combination of state plus action
+            else -> null
+        }
+    }
 }
