@@ -8,6 +8,7 @@ import com.appcues.data.remote.response.ErrorResponse
 import com.appcues.data.remote.response.experience.ExperienceResponse
 import com.appcues.util.ResultOf
 import com.google.gson.Gson
+import com.google.gson.JsonParseException
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.HttpException
@@ -34,30 +35,19 @@ internal class RetrofitAppcuesRemoteSource(
             )
         }
 
-    suspend fun <Success> request(apiCall: suspend () -> Success): ResultOf<Success, RemoteError> {
-        return try {
+    suspend fun <Success> request(apiCall: suspend () -> Success): ResultOf<Success, RemoteError> =
+        try {
             ResultOf.Success(apiCall.invoke())
-        } catch (throwable: Throwable) {
-            when (throwable) {
-                is HttpException -> {
-                    val code = throwable.code()
-                    val errorResponse = convertErrorBody(throwable)
-                    ResultOf.Failure(RemoteError.HttpError(code, errorResponse))
-                }
-                else -> {
-                    ResultOf.Failure(RemoteError.NetworkError(throwable))
-                }
-            }
-        }
-    }
-
-    private fun convertErrorBody(throwable: HttpException): ErrorResponse? {
-        return try {
-            throwable.response()?.errorBody()?.charStream()?.let {
-                gson.fromJson(it, ErrorResponse::class.java)
-            }
+        } catch (exception: HttpException) {
+            ResultOf.Failure(RemoteError.HttpError(exception.code(), convertErrorBody(exception)))
         } catch (exception: Exception) {
+            ResultOf.Failure(RemoteError.NetworkError(exception))
+        }
+
+    private fun convertErrorBody(exception: HttpException): ErrorResponse? =
+        try {
+            exception.response()?.errorBody()?.charStream()?.let { gson.fromJson(it, ErrorResponse::class.java) }
+        } catch (exception: JsonParseException) {
             null
         }
-    }
 }
