@@ -2,9 +2,9 @@ package com.appcues.statemachine
 
 import com.appcues.AppcuesCoroutineScope
 import com.appcues.statemachine.State.Idling
-import com.appcues.util.Result
-import com.appcues.util.Result.Failure
-import com.appcues.util.Result.Success
+import com.appcues.util.ResultOf
+import com.appcues.util.ResultOf.Failure
+import com.appcues.util.ResultOf.Success
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 
-internal typealias StateResult = Result<State, Error>
+internal typealias StateResult = ResultOf<State, Error>
 
 internal class StateMachine(
     private val appcuesCoroutineScope: AppcuesCoroutineScope,
