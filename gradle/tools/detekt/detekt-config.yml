@@ -231,7 +231,6 @@ exceptions:
     ignoreLabeled: false
   SwallowedException:
     active: true
-    excludes: ['**/RetrofitAppcuesRemoteSource.kt']
     ignoredExceptionTypes:
       - 'InterruptedException'
       - 'MalformedURLException'
