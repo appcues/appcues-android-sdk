@@ -7,12 +7,12 @@ internal class RoomAppcuesLocalSource(
     private val db: AppcuesDatabase
 ) : AppcuesLocalSource {
 
-    override suspend fun save(activityStorage: ActivityStorage) =
+    override suspend fun saveActivity(activityStorage: ActivityStorage) =
         db.activityStorageDao().insertAll(activityStorage)
 
-    override suspend fun remove(activityStorage: ActivityStorage) =
+    override suspend fun removeActivity(activityStorage: ActivityStorage) =
         db.activityStorageDao().delete(activityStorage)
 
-    override suspend fun read(): List<ActivityStorage> =
+    override suspend fun getAllActivity(): List<ActivityStorage> =
         db.activityStorageDao().getAll()
 }

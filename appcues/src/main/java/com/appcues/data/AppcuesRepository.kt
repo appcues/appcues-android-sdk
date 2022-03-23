@@ -34,12 +34,12 @@ internal class AppcuesRepository(
             processingActivity.add(activity.requestId)
         }
 
-        appcuesLocalSource.save(activityStorage)
+        appcuesLocalSource.saveActivity(activityStorage)
         flush(activityStorage, sync)
     }
 
     private suspend fun flush(activity: ActivityStorage?, sync: Boolean): List<Experience> {
-        val activities = appcuesLocalSource.read()
+        val activities = appcuesLocalSource.getAllActivity()
         val itemsToFlush = mutableListOf<ActivityStorage>()
 
         // the block that checks which items are eligible (not already processing)
@@ -95,7 +95,7 @@ internal class AppcuesRepository(
             }
 
         // it should only be removed from local storage on success
-        appcuesLocalSource.remove(activity)
+        appcuesLocalSource.removeActivity(activity)
 
         synchronized(this) {
             // always mark done processing after an attempt
