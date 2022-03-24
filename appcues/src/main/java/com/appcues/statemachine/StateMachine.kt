@@ -1,6 +1,7 @@
 package com.appcues.statemachine
 
 import com.appcues.AppcuesCoroutineScope
+import com.appcues.Storage
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.RenderStep
 import com.appcues.statemachine.Action.ReportError
@@ -31,6 +32,7 @@ internal typealias StateResult = ResultOf<State, Error>
 
 internal class StateMachine(
     private val appcuesCoroutineScope: AppcuesCoroutineScope,
+    val storage: Storage,
 ) {
 
     private var _stateResultFlow = MutableSharedFlow<StateResult>(1)

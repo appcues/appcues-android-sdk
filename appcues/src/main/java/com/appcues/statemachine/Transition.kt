@@ -3,6 +3,7 @@ package com.appcues.statemachine
 import com.appcues.statemachine.SideEffect.ContinuationEffect
 import com.appcues.statemachine.SideEffect.PresentContainerEffect
 import com.appcues.statemachine.SideEffect.ReportErrorEffect
+import java.util.Date
 
 internal open class Transition(
     private val state: State?,
@@ -18,7 +19,7 @@ internal open class Transition(
             when (sideEffect) {
                 is ContinuationEffect -> sideEffect.applyEffect(stateMachine)
                 is ReportErrorEffect -> sideEffect.applyEffect(stateMachine)
-                is PresentContainerEffect -> sideEffect.applyEffect()
+                is PresentContainerEffect -> sideEffect.applyEffect(stateMachine)
             }
         }
     }
@@ -31,8 +32,9 @@ internal open class Transition(
         stateMachine.reportError(error)
     }
 
-    private fun PresentContainerEffect.applyEffect() {
+    private fun PresentContainerEffect.applyEffect(stateMachine: StateMachine) {
         experience.stepContainers[step].presentingTrait.presentExperience()
+        stateMachine.storage.lastContentShownAt = Date()
     }
 
     class ErrorLoggingTransition(error: Error) : Transition(null, ReportErrorEffect(error))
