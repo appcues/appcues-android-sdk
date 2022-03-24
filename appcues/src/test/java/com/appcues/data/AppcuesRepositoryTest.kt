@@ -1,10 +1,12 @@
 package com.appcues.data
 
+import com.appcues.AppcuesConfig
 import com.appcues.data.local.AppcuesLocalSource
 import com.appcues.data.mapper.experience.ExperienceMapper
 import com.appcues.data.model.Experience
 import com.appcues.data.remote.AppcuesRemoteSource
 import com.appcues.data.remote.response.experience.ExperienceResponse
+import com.appcues.logging.Logcues
 import com.appcues.util.ResultOf.Success
 import com.google.common.truth.Truth.assertThat
 import com.google.gson.Gson
@@ -19,12 +21,16 @@ class AppcuesRepositoryTest {
     private val appcuesLocalSource: AppcuesLocalSource = mockk()
     private val experienceMapper: ExperienceMapper = mockk()
     private val gson: Gson = mockk()
+    private val config: AppcuesConfig = mockk()
+    private val logcues: Logcues = mockk()
 
     private val defaultDataGateway = AppcuesRepository(
         appcuesRemoteSource = appcuesRemoteSource,
         appcuesLocalSource = appcuesLocalSource,
         experienceMapper = experienceMapper,
         gson = gson,
+        config = config,
+        logcues = logcues,
     )
 
     @Test
