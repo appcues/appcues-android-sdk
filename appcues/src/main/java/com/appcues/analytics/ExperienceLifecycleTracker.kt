@@ -1,5 +1,6 @@
 package com.appcues.analytics
 
+import com.appcues.Storage
 import com.appcues.analytics.ExperienceLifecycleEvent.ExperienceCompleted
 import com.appcues.analytics.ExperienceLifecycleEvent.ExperienceDismissed
 import com.appcues.analytics.ExperienceLifecycleEvent.ExperienceError
@@ -21,6 +22,7 @@ import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
+import java.util.Date
 
 internal class ExperienceLifecycleTracker(
     override val scope: Scope
@@ -30,6 +32,7 @@ internal class ExperienceLifecycleTracker(
     // AnalyticsTracker -> this <- Analytics Tracker
     private val analyticsTracker: AnalyticsTracker by inject()
     private val stateMachine: StateMachine by inject()
+    private val storage: Storage by inject()
 
     // note: this is operating under the assumption that we have a single state machine and
     // a single experience rendering at a time.  if/when that evolves, this will need
@@ -44,6 +47,8 @@ internal class ExperienceLifecycleTracker(
                     when (this) {
                         is RenderingStep -> {
                             if (!startedExperience) {
+                                // update this value for auto-properties
+                                storage.lastContentShownAt = Date()
                                 trackLifecycleEvent(ExperienceStarted(experience))
                                 startedExperience = true
                             }
