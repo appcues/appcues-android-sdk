@@ -1,80 +1,112 @@
 package com.appcues.data
 
+import com.appcues.AppcuesConfig
 import com.appcues.data.local.AppcuesLocalSource
 import com.appcues.data.local.model.ActivityStorage
 import com.appcues.data.mapper.experience.ExperienceMapper
 import com.appcues.data.model.Experience
 import com.appcues.data.remote.AppcuesRemoteSource
+import com.appcues.data.remote.RemoteError.NetworkError
 import com.appcues.data.remote.request.ActivityRequest
+import com.appcues.logging.Logcues
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
-import com.appcues.util.doIfSuccess
+import com.appcues.util.doIfFailure
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import java.util.Date
 import java.util.UUID
+import java.util.concurrent.TimeUnit
 
 internal class AppcuesRepository(
     private val appcuesRemoteSource: AppcuesRemoteSource,
     private val appcuesLocalSource: AppcuesLocalSource,
     private val experienceMapper: ExperienceMapper,
     private val gson: Gson,
+    private val config: AppcuesConfig,
+    private val logcues: Logcues,
 ) {
     private val processingActivity: HashSet<UUID> = hashSetOf()
+    private val mutex = Mutex()
 
     suspend fun getExperienceContent(experienceId: String): Experience? = withContext(Dispatchers.IO) {
         appcuesRemoteSource.getExperienceContent(experienceId).let {
             when (it) {
                 is Success -> experienceMapper.map(it.value)
-                is Failure -> null // Log?
+                is Failure -> {
+                    logcues.info("Experience content request failed, reason: ${it.reason}")
+                    null
+                }
             }
         }
     }
 
     suspend fun trackActivity(activity: ActivityRequest, sync: Boolean): List<Experience> = withContext(Dispatchers.IO) {
+
         val activityStorage = ActivityStorage(activity.requestId, activity.accountId, activity.userId, gson.toJson(activity))
-
-        // mark this current item as processing before inserting into storage
-        // so that any concurrent flush going on will not use it
-        synchronized(this) {
-            processingActivity.add(activity.requestId)
-        }
-
-        appcuesLocalSource.saveActivity(activityStorage)
-        flush(activityStorage, sync)
-    }
-
-    private suspend fun flush(activity: ActivityStorage?, sync: Boolean): List<Experience> {
-        val activities = appcuesLocalSource.getAllActivity()
         val itemsToFlush = mutableListOf<ActivityStorage>()
 
-        // the block that checks which items are eligible (not already processing)
-        // and sets up the next queue to process needs to be threadsafe
-        synchronized(this) {
-            // exclude any items that are already processing
-            val available = activities.filter { !processingActivity.contains(it.requestId) }
-            itemsToFlush += prepareForRetry(available)
+        // need to protect thread-safety in this section where it is determining which activities in the queue each new
+        // track attempt should process
+        mutex.withLock {
+            // mark this current item as processing before inserting into storage
+            // so that any concurrent flush going on will not use it
+            processingActivity.add(activity.requestId)
 
-            // append the current item, if provided - it will have been filtered out as processing
-            // but if passed in as `activity` this flush is responsible for handling it
-            if (activity != null) {
-                itemsToFlush.add(activity)
-            }
+            // save this item to local storage so we can retry later if needed
+            appcuesLocalSource.saveActivity(activityStorage)
+
+            // exclude any items that are already processing
+            val stored = appcuesLocalSource.getAllActivity().filter { !processingActivity.contains(it.requestId) }
+
+            itemsToFlush.addAll(prepareForRetry(stored))
+
+            // add the current item (since it was marked as processing already)
+            itemsToFlush.add(activityStorage)
 
             // mark them all as requests in process
             processingActivity.addAll(itemsToFlush.map { it.requestId })
         }
-        
-        return post(itemsToFlush, activity, sync)
+
+        post(itemsToFlush, activityStorage, sync)
     }
 
-    private fun prepareForRetry(available: List<ActivityStorage>): MutableList<ActivityStorage> {
-        val eligible = mutableListOf<ActivityStorage>()
-        // todo - logic here needs to be built out in next pass
-        // 1. most recent X items only based on config
-        // 2. mark others as outdated and delete from storage
-        // 3. optionally handle a max age from config
-        eligible += available.sortedBy { it.created }
+    private suspend fun prepareForRetry(available: List<ActivityStorage>): MutableList<ActivityStorage> {
+        val activities = available.sortedBy { it.created }
+        val count = activities.count()
+
+        // only flush max X, based on config
+        // since items are sorted chronologically, take the most recent from the end
+        val eligible = activities
+            .takeLast(config.activityStorageMaxSize)
+            .toMutableList()
+
+        val ineligible = mutableListOf<ActivityStorage>()
+
+        // if there are more items in storage than allowed, trim off the front, up to our allowed storage size
+        // and mark as ineligible, for deletion.
+        if (count > config.activityStorageMaxSize) {
+            ineligible.addAll(activities.take((count - config.activityStorageMaxSize)))
+        }
+
+        // optionally, if a max age is specified, filter out items that are older
+        val maxAgeSeconds = config.activityStorageMaxAge
+        if (maxAgeSeconds != null) {
+            val now = Date()
+            val tooOld = eligible.filter {
+                TimeUnit.MILLISECONDS.toSeconds(now.time - it.created.time) > maxAgeSeconds
+            }
+            eligible.removeAll(tooOld)
+            ineligible.addAll(tooOld)
+        }
+
+        ineligible.forEach {
+            appcuesLocalSource.removeActivity(it)
+        }
+
         return eligible
     }
 
@@ -89,23 +121,38 @@ internal class AppcuesRepository(
         // requested to be synchronous
         val syncRequest = if (isCurrent) sync else false
 
-        val activityResult = appcuesRemoteSource
-            .postActivity(activity.userId, activity.data, syncRequest)
-
-        // todo - error handling on this network request
+        var successful = true
         val experiences = mutableListOf<Experience>()
-        activityResult.doIfSuccess { response ->
-            experiences += response.experiences.mapNotNull {
+
+        val activityResult = appcuesRemoteSource.postActivity(activity.userId, activity.data, syncRequest)
+
+        when (activityResult) {
+            is Success -> {
                 // this is likely redundant, since a non-sync request wont
                 // return any experiences qualified - but we want to make sure
                 // we don't do any needless mapping work on something that will
                 // be ignored anyway (cache items)
-                if (syncRequest) experienceMapper.map(it) else null
+                if (syncRequest) {
+                    experiences += activityResult.value.experiences.map { experienceMapper.map(it) }
+                }
+            }
+            is Failure -> {
+                logcues.info("Activity request failed, reason: ${activityResult.reason}")
+                when (activityResult.reason) {
+                    is NetworkError -> successful = false
+                    else -> Unit
+                }
             }
         }
 
+        activityResult.doIfFailure {
+            logcues.info(it.toString())
+        }
+
         // it should only be removed from local storage on success
-        appcuesLocalSource.removeActivity(activity)
+        if (successful) {
+            appcuesLocalSource.removeActivity(activity)
+        }
 
         synchronized(this) {
             // always mark done processing after an attempt

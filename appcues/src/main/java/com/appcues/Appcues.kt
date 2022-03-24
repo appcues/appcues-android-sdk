@@ -206,7 +206,6 @@ class Appcues internal constructor(koinScope: Scope) {
             _anonymousIdFactory = factory
         }
 
-        @Suppress("MagicNumber")
         private var _sessionTimeout: Int = AppcuesConfig.SESSION_TIMEOUT_DEFAULT
 
         /**
@@ -216,6 +215,30 @@ class Appcues internal constructor(koinScope: Scope) {
          */
         fun sessionTimeout(timeout: Int) = apply {
             _sessionTimeout = timeout.coerceAtLeast(0)
+        }
+
+        private var _activityStorageMaxSize: Int = AppcuesConfig.ACTIVITY_STORAGE_MAX_SIZE
+
+        /**
+         * Set the activity storage max size for the configuration.  This value determines how many analytics requests can be
+         * stored on the local device and retried later, in the case of the device network connection being unavailable.
+         * Only the most recent requests, up to this count, are retained.
+         * [size] The number of items to store, maximum 25, minimum 0.
+         */
+        fun activityStorageMaxSize(size: Int) = apply {
+            _activityStorageMaxSize = size.coerceAtLeast(0).coerceAtMost(AppcuesConfig.ACTIVITY_STORAGE_MAX_SIZE)
+        }
+
+        private var _activityStorageMaxAge: Int? = null
+
+        /**
+         *  Sets the activity storage max age for the configuration.  This value determines how long an item can be stored
+         *  on the local device and retried later, in the case of hte device network connection being unavailable.  Only
+         *  requests that are more recent than the max age will be retried - or all, if not set.
+         *  [seconds] The max age, in seconds, since now.  The default is `nil`, meaning no max age.
+         */
+        fun activityStorageMaxAge(age: Int) = apply {
+            _activityStorageMaxAge = age.coerceAtLeast(0)
         }
 
         fun build(): Appcues {
@@ -228,7 +251,9 @@ class Appcues internal constructor(koinScope: Scope) {
                         loggingLevel = _loggingLevel,
                         apiHostUrl = _apiHostUrl,
                         anonymousIdFactory = _anonymousIdFactory,
-                        sessionTimeout = _sessionTimeout
+                        sessionTimeout = _sessionTimeout,
+                        activityStorageMaxSize = _activityStorageMaxSize,
+                        activityStorageMaxAge = _activityStorageMaxAge,
                     )
                 )
             }
