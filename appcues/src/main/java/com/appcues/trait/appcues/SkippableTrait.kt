@@ -29,6 +29,10 @@ internal class SkippableTrait(
     private val stateMachine: StateMachine
 ) : ContainerDecoratingTrait, BackdropDecoratingTrait {
 
+    companion object {
+        const val TYPE = "@appcues/skippable"
+    }
+
     @Composable
     override fun BoxScope.Overlay() {
         IconButton(

@@ -23,11 +23,11 @@ internal class TraitRegistry(
     private val actions: HashMap<String, TraitFactoryBlock> = hashMapOf()
 
     init {
-        register("@appcues/backdrop") { get<BackdropTrait> { parametersOf(it) } }
-        register("@appcues/modal") { get<ModalTrait> { parametersOf(it) } }
-        register("@appcues/skippable") { get<SkippableTrait> { parametersOf(it) } }
-        register("@appcues/carousel") { get<CarouselTrait> { parametersOf(it) } }
-        register("@appcues/paging-dots") { get<PagingDotsTrait> { parametersOf(it) } }
+        register(BackdropTrait.TYPE) { get<BackdropTrait> { parametersOf(it) } }
+        register(ModalTrait.TYPE) { get<ModalTrait> { parametersOf(it) } }
+        register(SkippableTrait.TYPE) { get<SkippableTrait> { parametersOf(it) } }
+        register(CarouselTrait.TYPE) { get<CarouselTrait> { parametersOf(it) } }
+        register(PagingDotsTrait.TYPE) { get<PagingDotsTrait> { parametersOf(it) } }
     }
 
     operator fun get(key: String): TraitFactoryBlock? {

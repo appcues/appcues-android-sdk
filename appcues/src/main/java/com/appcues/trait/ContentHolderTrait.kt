@@ -8,7 +8,7 @@ import com.appcues.ui.appcuesPaginationData
 interface ContentHolderTrait : ExperienceTrait {
 
     @Composable
-    fun BoxScope.CreateContentHolder(contentHolderPage: ContentHolderPage)
+    fun BoxScope.CreateContentHolder(containerPages: ContainerPages)
 
     /**
      * Class used as a parameter for [CreateContentHolder]
@@ -16,7 +16,7 @@ interface ContentHolderTrait : ExperienceTrait {
      * [pages] the page compositions
      * [pageIndex] current page index
      */
-    data class ContentHolderPage(
+    data class ContainerPages(
         val pages: List<@Composable () -> Unit>,
         val pageIndex: Int,
     ) {

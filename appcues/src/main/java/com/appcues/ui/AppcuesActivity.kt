@@ -19,7 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.core.os.bundleOf
 import com.appcues.di.AppcuesKoinContext
-import com.appcues.trait.ContentHolderTrait.ContentHolderPage
+import com.appcues.trait.ContentHolderTrait.ContainerPages
 import com.appcues.ui.AppcuesViewModel.UIState
 import com.appcues.ui.AppcuesViewModel.UIState.Dismissing
 import com.appcues.ui.AppcuesViewModel.UIState.Rendering
@@ -121,7 +121,7 @@ internal class AppcuesActivity : AppCompatActivity() {
                     // Apply content holder trait
                     with(contentHolderTrait) {
                         // create object that will passed down to CreateContentHolder
-                        ContentHolderPage(
+                        ContainerPages(
                             pages = steps.map { { it.content.Compose() } },
                             pageIndex = state.position,
                         ).also {
