@@ -23,6 +23,16 @@ class Appcues internal constructor(koinScope: Scope) {
     private val storage by koinScope.inject<Storage>()
     private val sessionMonitor by koinScope.inject<SessionMonitor>()
 
+    /**
+     * Set the listener to be notified about the display of Experience content.
+     */
+    var experienceListener: ExperienceListener? by appcuesConfig::experienceListener
+
+    /**
+     * Set the interceptor for additional control over SDK runtime behaviors.
+     */
+    var interceptor: AppcuesInterceptor? by appcuesConfig::interceptor
+
     init {
         sessionMonitor.start()
     }
@@ -257,6 +267,17 @@ class Appcues internal constructor(koinScope: Scope) {
             _interceptor = interceptor
         }
 
+        private var _experienceListener: ExperienceListener? = null
+
+        /**
+         * Set the listener to be notified about the display of Experience content.
+         *
+         * [listener] The listener to use.
+         */
+        fun experienceListener(listener: ExperienceListener) = apply {
+            _experienceListener = listener
+        }
+
         fun build(): Appcues {
             return with(AppcuesKoinContext) {
                 createAppcues(
@@ -271,6 +292,7 @@ class Appcues internal constructor(koinScope: Scope) {
                         activityStorageMaxSize = _activityStorageMaxSize,
                         activityStorageMaxAge = _activityStorageMaxAge,
                         interceptor = _interceptor,
+                        experienceListener = _experienceListener,
                     )
                 )
             }
