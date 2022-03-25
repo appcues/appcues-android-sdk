@@ -30,7 +30,7 @@ internal class AppcuesViewModel(
     sealed class UIState {
         object Idle : UIState()
         data class Rendering(val stepContainer: StepContainer, val position: Int) : UIState()
-        object Dismissing : UIState()
+        data class Dismissing(val nextStepIndex: Int?) : UIState()
     }
 
     val stateMachine by inject<StateMachine>()
@@ -45,6 +45,9 @@ internal class AppcuesViewModel(
     init {
         viewModelScope.launch {
             stateMachine.stateFlow.collectLatest { result ->
+                // don't collect if we are Dismissing
+                if (uiState.value is Dismissing) return@collectLatest
+
                 when (result) {
                     is BeginningStep -> {
                         result.toRenderingState()?.run {
@@ -63,7 +66,7 @@ internal class AppcuesViewModel(
 
                         // dismiss will trigger exit animations and finish activity
                         if (result.dismiss) {
-                            _uiState.value = Dismissing
+                            _uiState.value = Dismissing(result.flatNextStepIndex)
                         }
                     }
                     // ignore other state changes
@@ -86,9 +89,21 @@ internal class AppcuesViewModel(
         }
     }
 
-    fun onEndExperience() {
+    fun onFinish() {
         viewModelScope.launch {
             stateMachine.handleAction(EndExperience)
+        }
+    }
+
+    fun onDismissCompleted() {
+        uiState.value.let { state ->
+            // if current state is dismissing and nextStepIndex is not null
+            if (state is Dismissing && state.nextStepIndex != null) {
+                // we send a StartStep action to notify state machine we can move to the next step group
+                viewModelScope.launch {
+                    stateMachine.handleAction(StartStep(StepIndex(state.nextStepIndex)))
+                }
+            }
         }
     }
 
@@ -99,8 +114,14 @@ internal class AppcuesViewModel(
     }
 
     fun onPageChanged(index: Int) {
-        viewModelScope.launch {
-            stateMachine.handleAction(StartStep(StepIndex(index)))
+        uiState.value.let { state ->
+            // prevent unnecessary calls to the state machine when
+            // there is not a valid page change
+            if (state is Rendering && state.position != index) {
+                viewModelScope.launch {
+                    stateMachine.handleAction(StartStep(StepIndex(index)))
+                }
+            }
         }
     }
 }

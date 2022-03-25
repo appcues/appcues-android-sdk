@@ -30,7 +30,7 @@ internal class CarouselTrait(
     @OptIn(ExperimentalPagerApi::class)
     @Composable
     override fun BoxScope.CreateContentHolder(containerPages: ContainerPages) {
-        val pagerState = rememberPagerState().also {
+        val pagerState = rememberPagerState(containerPages.pageIndex).also {
             containerPages.setPaginationData(
                 AppcuesPaginationData(
                     pageCount = it.pageCount,
