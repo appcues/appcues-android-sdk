@@ -33,6 +33,7 @@ internal class AnalyticsTracker(
     }
 
     fun identify(properties: HashMap<String, Any>? = null) {
+        if (!sessionMonitor.checkSession("unable to track user")) return
         flushThenSend(activityBuilder.identify(properties))
     }
 
@@ -42,6 +43,7 @@ internal class AnalyticsTracker(
     }
 
     fun track(name: String, properties: HashMap<String, Any>? = null, sync: Boolean = true) {
+        if (!sessionMonitor.checkSession("unable to track event")) return
         val activity = activityBuilder.track(name, properties)
         if (sync) {
             queueThenFlush(activity)
@@ -51,10 +53,12 @@ internal class AnalyticsTracker(
     }
 
     fun screen(title: String, properties: HashMap<String, Any>? = null) {
+        if (!sessionMonitor.checkSession("unable to track screen")) return
         queueThenFlush(activityBuilder.screen(title, properties))
     }
 
     fun group(properties: HashMap<String, Any>? = null) {
+        if (!sessionMonitor.checkSession("unable to track group")) return
         flushThenSend(activityBuilder.group(properties))
     }
 
@@ -103,8 +107,6 @@ internal class AnalyticsTracker(
     }
 
     private fun flush(activity: ActivityRequest, sync: Boolean) {
-        if (!sessionMonitor.isActive) return
-
         appcuesCoroutineScope.launch {
             // this will respond with qualified experiences, if applicable
             val experiences = repository.trackActivity(activity, sync)

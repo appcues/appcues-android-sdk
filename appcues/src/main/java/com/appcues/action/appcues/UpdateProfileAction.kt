@@ -1,22 +1,22 @@
 package com.appcues.action.appcues
 
 import com.appcues.Appcues
+import com.appcues.Storage
 import com.appcues.action.ExperienceAction
 import com.appcues.data.model.AppcuesConfigMap
-import com.appcues.data.model.getConfigOrDefault
 
-internal class TrackEventAction(
+internal class UpdateProfileAction(
     override val config: AppcuesConfigMap,
+    private val storage: Storage,
 ) : ExperienceAction {
+
     companion object {
-        const val NAME = "@appcues/track"
+        const val NAME = "@appcues/update-profile"
     }
 
-    private val eventName = config.getConfigOrDefault<String?>("eventName", null)
-
     override suspend fun execute(appcues: Appcues) {
-        if (!eventName.isNullOrEmpty()) {
-            appcues.track(eventName)
+        if (config != null) {
+            appcues.identify(storage.userId, properties = config)
         }
     }
 }

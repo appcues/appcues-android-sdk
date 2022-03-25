@@ -6,6 +6,7 @@ import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.appcues.analytics.AnalyticsEvent
 import com.appcues.analytics.AnalyticsTracker
+import com.appcues.logging.Logcues
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
@@ -14,23 +15,24 @@ import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 internal class SessionMonitor(
-    private val storage: Storage,
-    config: AppcuesConfig,
     override val scope: Scope,
 ) : LifecycleObserver, KoinScopeComponent {
+
+    // lazy prop inject here to avoid circular dependency
+    private val analyticsTracker by inject<AnalyticsTracker>()
+    private val storage by inject<Storage>()
+    private val config by inject<AppcuesConfig>()
+    private val logcues by inject<Logcues>()
 
     private var _sessionId: UUID? = null
     val sessionId: UUID?
         get() = _sessionId
 
-    val isActive: Boolean
+    private val isActive: Boolean
         get() = _sessionId != null
 
     private var applicationBackgrounded: Date? = null
     private val sessionTimeout: Int = config.sessionTimeout
-
-    // lazy prop inject here to avoid circular dependency
-    private val analyticsTracker by inject<AnalyticsTracker>()
 
     init {
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
@@ -45,6 +47,13 @@ internal class SessionMonitor(
     fun reset() {
         analyticsTracker.track(AnalyticsEvent.SessionReset, null, false)
         _sessionId = null
+    }
+
+    fun checkSession(errorMessage: String): Boolean {
+        if (isActive) return true
+
+        logcues.info("No active session - $errorMessage")
+        return false
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_START)

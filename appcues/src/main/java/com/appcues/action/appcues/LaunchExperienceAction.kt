@@ -5,18 +5,19 @@ import com.appcues.action.ExperienceAction
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.getConfigOrDefault
 
-internal class TrackEventAction(
+internal class LaunchExperienceAction(
     override val config: AppcuesConfigMap,
 ) : ExperienceAction {
+
     companion object {
-        const val NAME = "@appcues/track"
+        const val NAME = "@appcues/launch-experience"
     }
 
-    private val eventName = config.getConfigOrDefault<String?>("eventName", null)
+    private val experienceId = config.getConfigOrDefault<String?>("experienceID", null)
 
     override suspend fun execute(appcues: Appcues) {
-        if (!eventName.isNullOrEmpty()) {
-            appcues.track(eventName)
+        if (experienceId != null) {
+            appcues.show(experienceId)
         }
     }
 }

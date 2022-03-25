@@ -101,12 +101,12 @@ class Appcues internal constructor(koinScope: Scope) {
     }
 
     /**
-     * Forces specific Appcues content to appear for the current user by passing in the [contentId].
+     * Forces specific Appcues experience to appear for the current user by passing in the [experienceId].
      *
-     * [contentId] ID of specific flow.
+     * [experienceId] ID of the experience.
      */
-    fun show(contentId: String) {
-        experienceRenderer.show(contentId)
+    fun show(experienceId: String) {
+        experienceRenderer.show(experienceId)
     }
 
     /**

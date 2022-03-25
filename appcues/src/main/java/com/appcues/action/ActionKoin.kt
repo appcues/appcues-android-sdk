@@ -3,8 +3,10 @@ package com.appcues.action
 import com.appcues.AppcuesConfig
 import com.appcues.action.appcues.CloseAction
 import com.appcues.action.appcues.ContinueAction
+import com.appcues.action.appcues.LaunchExperienceAction
 import com.appcues.action.appcues.LinkAction
 import com.appcues.action.appcues.TrackEventAction
+import com.appcues.action.appcues.UpdateProfileAction
 import com.appcues.di.KoinScopePlugin
 import org.koin.dsl.ScopeDSL
 
@@ -42,6 +44,19 @@ internal object ActionKoin : KoinScopePlugin {
             ContinueAction(
                 config = params.getOrNull(),
                 stateMachine = get(),
+            )
+        }
+
+        factory { params ->
+            LaunchExperienceAction(
+                config = params.getOrNull(),
+            )
+        }
+
+        factory { params ->
+            UpdateProfileAction(
+                config = params.getOrNull(),
+                storage = get(),
             )
         }
     }
