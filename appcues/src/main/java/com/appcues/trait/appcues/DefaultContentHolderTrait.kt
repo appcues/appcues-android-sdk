@@ -8,17 +8,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.appcues.trait.ContentHolderTrait
-import com.appcues.trait.ContentHolderTrait.ContentHolderPage
+import com.appcues.trait.ContentHolderTrait.ContainerPages
 
 internal class DefaultContentHolderTrait(override val config: HashMap<String, Any>?) : ContentHolderTrait {
 
     @Composable
-    override fun BoxScope.CreateContentHolder(contentHolderPage: ContentHolderPage) {
+    override fun BoxScope.CreateContentHolder(containerPages: ContainerPages) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.verticalScroll(rememberScrollState())
         ) {
-            contentHolderPage.pages[contentHolderPage.pageIndex]()
+            containerPages.pages[containerPages.pageIndex]()
         }
     }
 }

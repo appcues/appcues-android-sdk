@@ -11,7 +11,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.appcues.trait.ContentHolderTrait
-import com.appcues.trait.ContentHolderTrait.ContentHolderPage
+import com.appcues.trait.ContentHolderTrait.ContainerPages
 import com.appcues.ui.AppcuesPaginationData
 import com.appcues.ui.LocalAppcuesPagination
 import com.google.accompanist.pager.ExperimentalPagerApi
@@ -23,11 +23,15 @@ internal class CarouselTrait(
     override val config: HashMap<String, Any>?,
 ) : ContentHolderTrait {
 
+    companion object {
+        const val TYPE = "@appcues/carousel"
+    }
+
     @OptIn(ExperimentalPagerApi::class)
     @Composable
-    override fun BoxScope.CreateContentHolder(contentHolderPage: ContentHolderPage) {
+    override fun BoxScope.CreateContentHolder(containerPages: ContainerPages) {
         val pagerState = rememberPagerState().also {
-            contentHolderPage.setPaginationData(
+            containerPages.setPaginationData(
                 AppcuesPaginationData(
                     pageCount = it.pageCount,
                     currentPage = it.currentPage,
@@ -39,8 +43,8 @@ internal class CarouselTrait(
         val localPagination = LocalAppcuesPagination.current
 
         // state machine changed the page, so we animate to that page
-        LaunchedEffect(contentHolderPage.pageIndex) {
-            pagerState.animateScrollToPage(contentHolderPage.pageIndex)
+        LaunchedEffect(containerPages.pageIndex) {
+            pagerState.animateScrollToPage(containerPages.pageIndex)
         }
 
         // we scrolled over to next page, so we notify the local pagination listener
@@ -52,7 +56,7 @@ internal class CarouselTrait(
         HorizontalPager(
             // change
             modifier = Modifier.animateContentSize(),
-            count = contentHolderPage.pages.size,
+            count = containerPages.pages.size,
             state = pagerState,
             verticalAlignment = Alignment.Top
         ) { index ->
@@ -61,7 +65,7 @@ internal class CarouselTrait(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.verticalScroll(rememberScrollState())
             ) {
-                contentHolderPage.pages[index]()
+                containerPages.pages[index]()
             }
         }
     }

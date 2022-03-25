@@ -23,6 +23,10 @@ internal class BackdropTrait(
     override val config: AppcuesConfigMap,
 ) : BackdropDecoratingTrait {
 
+    companion object {
+        const val TYPE = "@appcues/backdrop"
+    }
+
     private val backgroundColor = config.getConfigColor("backgroundColor")
 
     @Composable

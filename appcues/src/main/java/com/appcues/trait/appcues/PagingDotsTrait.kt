@@ -33,6 +33,10 @@ internal class PagingDotsTrait(
     override val config: AppcuesConfigMap
 ) : ContainerDecoratingTrait {
 
+    companion object {
+        const val TYPE = "@appcues/paging-dots"
+    }
+
     private val style = config.getConfigStyle("style")
 
     @Composable

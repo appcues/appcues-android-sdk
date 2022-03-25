@@ -20,6 +20,10 @@ internal class ModalTrait(
     private val context: Context,
 ) : ExperiencePresentingTrait, ContentWrappingTrait {
 
+    companion object {
+        const val TYPE = "@appcues/modal"
+    }
+
     // should we have a default presentation style?
     private val presentationStyle = config.getConfigOrDefault("presentationStyle", "full")
 
