@@ -21,7 +21,8 @@ internal object AppcuesKoin : KoinScopePlugin {
                 appcuesCoroutineScope = get(),
                 repository = get(),
                 stateMachine = get(),
-                sessionMonitor = get()
+                sessionMonitor = get(),
+                config = get(),
             )
         }
         scoped {

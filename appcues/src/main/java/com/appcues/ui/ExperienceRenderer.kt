@@ -1,5 +1,6 @@
 package com.appcues.ui
 
+import com.appcues.AppcuesConfig
 import com.appcues.AppcuesCoroutineScope
 import com.appcues.SessionMonitor
 import com.appcues.data.AppcuesRepository
@@ -13,10 +14,14 @@ internal class ExperienceRenderer(
     private val repository: AppcuesRepository,
     private val stateMachine: StateMachine,
     private val sessionMonitor: SessionMonitor,
+    private val config: AppcuesConfig,
 ) {
 
-    fun show(experience: Experience) {
-        stateMachine.handleAction(StartExperience(experience))
+    suspend fun show(experience: Experience) {
+        val canShow = config.interceptor?.canDisplayExperience(experience.id) ?: true
+        if (canShow) {
+            stateMachine.handleAction(StartExperience(experience))
+        }
     }
 
     fun show(experienceId: String) {

@@ -28,7 +28,9 @@ class Appcues internal constructor(koinScope: Scope) {
     }
 
     /**
-     * Returns the current version of Appcues SDK
+     * Returns the current version of Appcues SDK.
+     *
+     * @return Current version.
      */
     val version: String
         get() = "${BuildConfig.SDK_VERSION}-${BuildConfig.BUILD_TYPE}"
@@ -211,6 +213,7 @@ class Appcues internal constructor(koinScope: Scope) {
         /**
          *  Set the session timeout for the configuration. This timeout value is used to determine if a new session is started
          *  upon the application returning to the foreground. The default value is 1800 seconds (30 minutes).
+         *
          *  [sessionTimeout] The timeout length, in seconds.
          */
         fun sessionTimeout(timeout: Int) = apply {
@@ -223,6 +226,7 @@ class Appcues internal constructor(koinScope: Scope) {
          * Set the activity storage max size for the configuration.  This value determines how many analytics requests can be
          * stored on the local device and retried later, in the case of the device network connection being unavailable.
          * Only the most recent requests, up to this count, are retained.
+         *
          * [size] The number of items to store, maximum 25, minimum 0.
          */
         fun activityStorageMaxSize(size: Int) = apply {
@@ -235,10 +239,22 @@ class Appcues internal constructor(koinScope: Scope) {
          *  Sets the activity storage max age for the configuration.  This value determines how long an item can be stored
          *  on the local device and retried later, in the case of hte device network connection being unavailable.  Only
          *  requests that are more recent than the max age will be retried - or all, if not set.
-         *  [seconds] The max age, in seconds, since now.  The default is `nil`, meaning no max age.
+         *
+         *  [age] The max age, in seconds, since now.  The default is `nil`, meaning no max age.
          */
         fun activityStorageMaxAge(age: Int) = apply {
             _activityStorageMaxAge = age.coerceAtLeast(0)
+        }
+
+        private var _interceptor: AppcuesInterceptor? = null
+
+        /**
+         * Set the interceptor for additional control over SDK runtime behaviors.
+         *
+         * [interceptor] The interceptor to use.
+         */
+        fun interceptor(interceptor: AppcuesInterceptor) = apply {
+            _interceptor = interceptor
         }
 
         fun build(): Appcues {
@@ -254,6 +270,7 @@ class Appcues internal constructor(koinScope: Scope) {
                         sessionTimeout = _sessionTimeout,
                         activityStorageMaxSize = _activityStorageMaxSize,
                         activityStorageMaxAge = _activityStorageMaxAge,
+                        interceptor = _interceptor,
                     )
                 )
             }
