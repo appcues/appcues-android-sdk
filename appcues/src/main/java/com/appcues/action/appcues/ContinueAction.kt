@@ -21,17 +21,16 @@ internal class ContinueAction(
 
     private val index = config.getConfigInt("index")
 
-    private val offset = config.getConfigInt("offset")
+    private val offset = config.getConfigInt("offset") ?: 1
 
     private val id = config.getConfig<String>("stepID")
 
     override suspend fun execute(appcues: Appcues) {
         when {
             index != null -> StepReference.StepIndex(index)
-            offset != null -> StepReference.StepOffset(offset)
             id != null -> StepReference.StepId(UUID.fromString(id))
-            else -> null
-        }?.let {
+            else -> StepReference.StepOffset(offset)
+        }.let {
             stateMachine.handleAction(StartStep(it))
         }
     }

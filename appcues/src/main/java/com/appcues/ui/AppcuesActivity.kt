@@ -81,7 +81,10 @@ internal class AppcuesActivity : AppCompatActivity() {
                     // will run when transition from visible to gone is completed
                     LaunchOnHideAnimationCompleted {
                         // if state is dismissing then finish activity
-                        if (state.value is Dismissing) finish()
+                        if (state.value is Dismissing) {
+                            viewModel.onDismissCompleted()
+                            finish()
+                        }
                     }
                 }
             }
@@ -144,7 +147,7 @@ internal class AppcuesActivity : AppCompatActivity() {
 
     override fun finish() {
         super.finish()
-        viewModel.onEndExperience()
+        viewModel.onFinish()
         // remove exit animation from this activity
         overridePendingTransition(0, 0)
     }

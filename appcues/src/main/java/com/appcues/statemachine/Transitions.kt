@@ -46,14 +46,19 @@ internal interface Transitions {
     fun RenderingStep.fromRenderingStepToEndingStep(action: StartStep): Transition {
         return action.stepReference.getIndex(experience, flatStepIndex).let { nextStepIndex ->
             if (isValidStepIndex(nextStepIndex, experience)) {
-                Transition(
-                    state = EndingStep(
-                        experience,
-                        flatStepIndex,
-                        experience.areStepsFromDifferentGroup(flatStepIndex, nextStepIndex)
-                    ),
-                    sideEffect = ContinuationEffect(StartStep(action.stepReference)),
-                )
+                if (experience.areStepsFromDifferentGroup(flatStepIndex, nextStepIndex)) {
+                    // in different groups we want to wait for StartStep action from AppcuesViewModel
+                    Transition(
+                        state = EndingStep(experience, flatStepIndex, nextStepIndex, true),
+                        sideEffect = null,
+                    )
+                } else {
+                    // in same group we can continue to StartStep internally
+                    Transition(
+                        state = EndingStep(experience, flatStepIndex, nextStepIndex, false),
+                        sideEffect = ContinuationEffect(StartStep(action.stepReference)),
+                    )
+                }
             } else {
                 // next step index is out of bounds error
                 errorTransition(experience, flatStepIndex, "Step at ${action.stepReference} does not exist")
@@ -62,7 +67,7 @@ internal interface Transitions {
     }
 
     fun RenderingStep.fromRenderingStepToEndingStep(action: EndExperience): Transition {
-        return Transition(EndingStep(experience, flatStepIndex, true), ContinuationEffect(EndExperience))
+        return Transition(EndingStep(experience, flatStepIndex, null, true), ContinuationEffect(EndExperience))
     }
 
     fun EndingStep.fromEndingStepToEndingExperience(action: EndExperience): Transition {
