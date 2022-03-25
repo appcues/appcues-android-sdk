@@ -16,7 +16,7 @@ internal class ContinueAction(
 ) : ExperienceAction {
 
     companion object {
-        const val NAME = "@appcues/continue"
+        const val TYPE = "@appcues/continue"
     }
 
     private val index = config.getConfigInt("index")

@@ -12,7 +12,7 @@ internal class CloseAction(
 ) : ExperienceAction {
 
     companion object {
-        const val NAME = "@appcues/close"
+        const val TYPE = "@appcues/close"
     }
 
     override suspend fun execute(appcues: Appcues) {

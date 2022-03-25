@@ -11,7 +11,7 @@ internal class UpdateProfileAction(
 ) : ExperienceAction {
 
     companion object {
-        const val NAME = "@appcues/update-profile"
+        const val TYPE = "@appcues/update-profile"
     }
 
     override suspend fun execute(appcues: Appcues) {
