@@ -14,8 +14,11 @@ internal class LinkAction(
     private val context: Context,
 ) : ExperienceAction {
 
-    private val url = config.getConfigOrDefault<String?>("url", null)
+    companion object {
+        const val NAME = "@appcues/link"
+    }
 
+    private val url = config.getConfigOrDefault<String?>("url", null)
     private val openExternally = config.getConfigOrDefault("openExternally", false)
 
     override suspend fun execute(appcues: Appcues) {

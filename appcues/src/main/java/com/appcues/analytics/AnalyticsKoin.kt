@@ -8,7 +8,7 @@ import org.koin.dsl.ScopeDSL
 internal object AnalyticsKoin : KoinScopePlugin {
 
     override fun ScopeDSL.install(config: AppcuesConfig) {
-        scoped { SessionMonitor(config = get(), storage = get(), scope = this) }
+        scoped { SessionMonitor(scope = this) }
         scoped { AutoPropertyDecorator(context = get(), config = get(), storage = get(), sessionMonitor = get()) }
         scoped { ActivityRequestBuilder(config = get(), storage = get(), decorator = get()) }
         scoped { ExperienceLifecycleTracker(scope = this) }

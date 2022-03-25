@@ -2,8 +2,10 @@ package com.appcues.action
 
 import com.appcues.action.appcues.CloseAction
 import com.appcues.action.appcues.ContinueAction
+import com.appcues.action.appcues.LaunchExperienceAction
 import com.appcues.action.appcues.LinkAction
 import com.appcues.action.appcues.TrackEventAction
+import com.appcues.action.appcues.UpdateProfileAction
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.logging.Logcues
 import org.koin.core.component.KoinScopeComponent
@@ -22,10 +24,12 @@ internal class ActionRegistry(
     private val actions: HashMap<String, ActionFactoryBlock> = hashMapOf()
 
     init {
-        register("@appcues/close") { get<CloseAction> { parametersOf(it) } }
-        register("@appcues/link") { get<LinkAction> { parametersOf(it) } }
-        register("@appcues/track") { get<TrackEventAction> { parametersOf(it) } }
-        register("@appcues/continue") { get<ContinueAction> { parametersOf(it) } }
+        register(CloseAction.NAME) { get<CloseAction> { parametersOf(it) } }
+        register(LinkAction.NAME) { get<LinkAction> { parametersOf(it) } }
+        register(TrackEventAction.NAME) { get<TrackEventAction> { parametersOf(it) } }
+        register(ContinueAction.NAME) { get<ContinueAction> { parametersOf(it) } }
+        register(UpdateProfileAction.NAME) { get<UpdateProfileAction> { parametersOf(it) } }
+        register(LaunchExperienceAction.NAME) { get<LaunchExperienceAction> { parametersOf(it) } }
     }
 
     operator fun get(key: String): ActionFactoryBlock? {

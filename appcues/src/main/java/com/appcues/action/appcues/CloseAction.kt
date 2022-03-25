@@ -11,6 +11,10 @@ internal class CloseAction(
     private val stateMachine: StateMachine
 ) : ExperienceAction {
 
+    companion object {
+        const val NAME = "@appcues/close"
+    }
+
     override suspend fun execute(appcues: Appcues) {
         stateMachine.handleAction(EndExperience)
     }

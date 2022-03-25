@@ -15,6 +15,10 @@ internal class ContinueAction(
     private val stateMachine: StateMachine
 ) : ExperienceAction {
 
+    companion object {
+        const val NAME = "@appcues/continue"
+    }
+
     private val index = config.getConfigInt("index")
 
     private val offset = config.getConfigInt("offset")
