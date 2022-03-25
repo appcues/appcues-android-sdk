@@ -5,6 +5,7 @@ import com.appcues.logging.Logcues
 import com.appcues.trait.appcues.BackdropTrait
 import com.appcues.trait.appcues.CarouselTrait
 import com.appcues.trait.appcues.ModalTrait
+import com.appcues.trait.appcues.PagingDotsTrait
 import com.appcues.trait.appcues.SkippableTrait
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.get
@@ -26,6 +27,7 @@ internal class TraitRegistry(
         register("@appcues/modal") { get<ModalTrait> { parametersOf(it) } }
         register("@appcues/skippable") { get<SkippableTrait> { parametersOf(it) } }
         register("@appcues/carousel") { get<CarouselTrait> { parametersOf(it) } }
+        register("@appcues/paging-dots") { get<PagingDotsTrait> { parametersOf(it) } }
     }
 
     operator fun get(key: String): TraitFactoryBlock? {

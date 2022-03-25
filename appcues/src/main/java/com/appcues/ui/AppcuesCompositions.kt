@@ -10,6 +10,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkOut
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,6 +31,30 @@ internal data class AppcuesActions(val onAction: (ExperienceAction) -> Unit)
 val LocalAppcuesPagination = compositionLocalOf { AppcuesPagination {} }
 
 data class AppcuesPagination(val onPageChanged: (Int) -> Unit)
+
+/**
+ * AppcuesPaginationData is used to communicate between different traits
+ * information regarding pagination.
+ *
+ * Every [ContentHolderTrait] should update this information if other
+ * traits are supposed to react to stuff like page changes, horizontal scrolling
+ * between pages, etc..
+ */
+data class AppcuesPaginationData(
+    val pageCount: Int,
+    val currentPage: Int,
+    val scrollOffset: Float
+)
+
+internal val appcuesPaginationData = mutableStateOf(AppcuesPaginationData(1, 0, 0.0f))
+
+/**
+ * rememberAppcuesPaginationState is used by traits that wants to know updates about pagination data
+ * returns a State of AppcuesPaginationData containing pageCount, currentPage index and scrollingOffset
+ * that can be used to sync animations
+ */
+@Composable
+fun rememberAppcuesPaginationState() = remember<State<AppcuesPaginationData>> { appcuesPaginationData }
 
 internal val isContentVisible = MutableTransitionState(false)
 
