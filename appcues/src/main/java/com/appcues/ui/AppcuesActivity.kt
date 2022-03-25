@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -18,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.core.os.bundleOf
 import com.appcues.di.AppcuesKoinContext
+import com.appcues.trait.ContentHolderTrait.ContentHolderPage
 import com.appcues.ui.AppcuesViewModel.UIState
 import com.appcues.ui.AppcuesViewModel.UIState.Dismissing
 import com.appcues.ui.AppcuesViewModel.UIState.Rendering
@@ -69,14 +71,17 @@ internal class AppcuesActivity : AppCompatActivity() {
                 contentAlignment = Alignment.Center,
             ) {
                 // collect all UIState
-                viewModel.uiState.collectAsState().let {
-                    // update and compose last rendering state remember based on latest UIState
-                    ComposeLastRenderingState(it.value, this)
+                viewModel.uiState.collectAsState().let { state ->
+                    // update last rendering state based on new state
+                    rememberLastRenderingState(state).run {
+                        // render last known rendering state
+                        value?.let { ComposeLastRenderingState(it) }
+                    }
 
                     // will run when transition from visible to gone is completed
                     LaunchOnHideAnimationCompleted {
                         // if state is dismissing then finish activity
-                        if (it.value is Dismissing) finish()
+                        if (state.value is Dismissing) finish()
                     }
                 }
             }
@@ -84,46 +89,54 @@ internal class AppcuesActivity : AppCompatActivity() {
     }
 
     @Composable
-    private fun ComposeLastRenderingState(
-        state: UIState,
-        boxScope: BoxScope,
-    ) {
-        remember { mutableStateOf<Rendering?>(null) }
-            .let {
-                it.value = if (state is Rendering) {
+    private fun rememberLastRenderingState(state: State<UIState>) = remember { mutableStateOf<Rendering?>(null) }
+        .apply {
+            value = state.value.let { uiState ->
+                if (uiState is Rendering) {
                     // if UIState is rendering then we set new value and show content
                     isContentVisible.targetState = true
-                    state
+                    uiState
                 } else {
-                    // else we keep the same value and hide content
+                    // else we keep the same value and hide content to trigger dismissing animation
                     isContentVisible.targetState = false
-                    it.value
+                    value
                 }
-                // return Rendering?
-                it.value
-            }?.Compose(boxScope = boxScope)
-    }
+            }
+        }
 
     @Composable
-    private fun Rendering.Compose(boxScope: BoxScope) {
-        with(stepContainer) {
+    private fun BoxScope.ComposeLastRenderingState(state: Rendering) {
+        with(state.stepContainer) {
             // apply backdrop traits
-            backdropTraits.forEach { it.run { boxScope.Backdrop() } }
+            backdropTraits.forEach {
+                with(it) {
+                    Backdrop()
+                }
+            }
             // create wrapper
             contentWrappingTrait.WrapContent {
                 Box(
                     contentAlignment = Alignment.TopCenter
                 ) {
                     // Apply content holder trait
-                    contentHolderTrait.run {
-                        CreateContentHolder(
-                            pages = stepContainer.steps.map { { it.content.Compose() } },
-                            pageIndex = position
-                        )
+                    with(contentHolderTrait) {
+                        // create object that will passed down to CreateContentHolder
+                        ContentHolderPage(
+                            pages = steps.map { { it.content.Compose() } },
+                            pageIndex = state.position,
+                        ).also {
+                            // create content holder
+                            CreateContentHolder(it)
+                            // sync pagination data in case content holder didn't update it
+                            it.syncPaginationData()
+                        }
                     }
-
                     // Compose all container traits on top of the content Column
-                    containerTraits.forEach { it.run { Overlay() } }
+                    containerTraits.forEach {
+                        with(it) {
+                            Overlay()
+                        }
+                    }
                 }
             }
         }

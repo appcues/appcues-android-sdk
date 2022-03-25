@@ -3,6 +3,7 @@ package com.appcues.ui.extensions
 import android.content.Context
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -89,6 +90,25 @@ internal fun ComponentStyle.getHorizontalAlignment(): Alignment.Horizontal {
         ComponentHorizontalAlignment.TRAILING -> Alignment.End
         null -> Alignment.CenterHorizontally
     }
+}
+
+internal fun ComponentStyle?.getBoxAlignment(): Alignment {
+    if (this == null) return Alignment.Center
+
+    val horizontalBias = when (horizontalAlignment) {
+        ComponentHorizontalAlignment.LEADING -> -1f
+        ComponentHorizontalAlignment.CENTER -> 0f
+        ComponentHorizontalAlignment.TRAILING -> 1f
+        null -> 0f
+    }
+    val verticalBias = when (verticalAlignment) {
+        ComponentVerticalAlignment.TOP -> -1f
+        ComponentVerticalAlignment.CENTER -> 0f
+        ComponentVerticalAlignment.BOTTOM -> 1f
+        null -> 0f
+    }
+
+    return BiasAlignment(horizontalBias, verticalBias)
 }
 
 internal fun ComponentStyle.getTextStyle(context: Context, isDark: Boolean): TextStyle {

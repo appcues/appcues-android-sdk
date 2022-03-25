@@ -11,6 +11,8 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.appcues.trait.ContentHolderTrait
+import com.appcues.trait.ContentHolderTrait.ContentHolderPage
+import com.appcues.ui.AppcuesPaginationData
 import com.appcues.ui.LocalAppcuesPagination
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
@@ -23,34 +25,43 @@ internal class CarouselTrait(
 
     @OptIn(ExperimentalPagerApi::class)
     @Composable
-    override fun BoxScope.CreateContentHolder(pages: List<@Composable () -> Unit>, pageIndex: Int) {
-        val pagerState = rememberPagerState()
+    override fun BoxScope.CreateContentHolder(contentHolderPage: ContentHolderPage) {
+        val pagerState = rememberPagerState().also {
+            contentHolderPage.setPaginationData(
+                AppcuesPaginationData(
+                    pageCount = it.pageCount,
+                    currentPage = it.currentPage,
+                    scrollOffset = it.currentPageOffset
+                )
+            )
+        }
+
         val localPagination = LocalAppcuesPagination.current
+
         // state machine changed the page, so we animate to that page
-        LaunchedEffect(pageIndex) {
-            pagerState.animateScrollToPage(pageIndex)
+        LaunchedEffect(contentHolderPage.pageIndex) {
+            pagerState.animateScrollToPage(contentHolderPage.pageIndex)
         }
 
         // we scrolled over to next page, so we notify the local pagination listener
         LaunchedEffect(pagerState) {
             snapshotFlow { pagerState.currentPage }
-                .collect { localPagination.onPageChanged(pagerState.currentPage) }
+                .collect { localPagination.onPageChanged(it) }
         }
 
         HorizontalPager(
             // change
             modifier = Modifier.animateContentSize(),
-            count = pages.size,
+            count = contentHolderPage.pages.size,
             state = pagerState,
             verticalAlignment = Alignment.Top
         ) { index ->
             // Our page content
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .verticalScroll(rememberScrollState())
+                modifier = Modifier.verticalScroll(rememberScrollState())
             ) {
-                pages[index]()
+                contentHolderPage.pages[index]()
             }
         }
     }

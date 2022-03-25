@@ -5,6 +5,7 @@ import com.appcues.di.KoinScopePlugin
 import com.appcues.trait.appcues.BackdropTrait
 import com.appcues.trait.appcues.CarouselTrait
 import com.appcues.trait.appcues.ModalTrait
+import com.appcues.trait.appcues.PagingDotsTrait
 import com.appcues.trait.appcues.SkippableTrait
 import org.koin.dsl.ScopeDSL
 
@@ -41,6 +42,12 @@ internal object TraitKoin : KoinScopePlugin {
 
         factory { params ->
             CarouselTrait(
+                config = params.getOrNull(),
+            )
+        }
+
+        factory { params ->
+            PagingDotsTrait(
                 config = params.getOrNull(),
             )
         }
