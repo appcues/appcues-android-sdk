@@ -24,12 +24,12 @@ internal class ActionRegistry(
     private val actions: HashMap<String, ActionFactoryBlock> = hashMapOf()
 
     init {
-        register(CloseAction.NAME) { get<CloseAction> { parametersOf(it) } }
-        register(LinkAction.NAME) { get<LinkAction> { parametersOf(it) } }
-        register(TrackEventAction.NAME) { get<TrackEventAction> { parametersOf(it) } }
-        register(ContinueAction.NAME) { get<ContinueAction> { parametersOf(it) } }
-        register(UpdateProfileAction.NAME) { get<UpdateProfileAction> { parametersOf(it) } }
-        register(LaunchExperienceAction.NAME) { get<LaunchExperienceAction> { parametersOf(it) } }
+        register(CloseAction.TYPE) { get<CloseAction> { parametersOf(it) } }
+        register(LinkAction.TYPE) { get<LinkAction> { parametersOf(it) } }
+        register(TrackEventAction.TYPE) { get<TrackEventAction> { parametersOf(it) } }
+        register(ContinueAction.TYPE) { get<ContinueAction> { parametersOf(it) } }
+        register(UpdateProfileAction.TYPE) { get<UpdateProfileAction> { parametersOf(it) } }
+        register(LaunchExperienceAction.TYPE) { get<LaunchExperienceAction> { parametersOf(it) } }
     }
 
     operator fun get(key: String): ActionFactoryBlock? {

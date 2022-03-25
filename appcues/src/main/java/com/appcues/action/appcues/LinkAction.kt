@@ -7,6 +7,7 @@ import androidx.browser.customtabs.CustomTabsIntent
 import com.appcues.Appcues
 import com.appcues.action.ExperienceAction
 import com.appcues.data.model.AppcuesConfigMap
+import com.appcues.data.model.getConfig
 import com.appcues.data.model.getConfigOrDefault
 
 internal class LinkAction(
@@ -15,10 +16,10 @@ internal class LinkAction(
 ) : ExperienceAction {
 
     companion object {
-        const val NAME = "@appcues/link"
+        const val TYPE = "@appcues/link"
     }
 
-    private val url = config.getConfigOrDefault<String?>("url", null)
+    private val url: String? = config.getConfig("url")
     private val openExternally = config.getConfigOrDefault("openExternally", false)
 
     override suspend fun execute(appcues: Appcues) {

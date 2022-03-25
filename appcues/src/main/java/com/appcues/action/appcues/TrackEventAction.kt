@@ -9,7 +9,7 @@ internal class TrackEventAction(
     override val config: AppcuesConfigMap,
 ) : ExperienceAction {
     companion object {
-        const val NAME = "@appcues/track"
+        const val TYPE = "@appcues/track"
     }
 
     private val eventName = config.getConfigOrDefault<String?>("eventName", null)
