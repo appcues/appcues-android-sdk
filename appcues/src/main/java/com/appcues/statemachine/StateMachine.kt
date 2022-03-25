@@ -1,5 +1,6 @@
 package com.appcues.statemachine
 
+import com.appcues.AppcuesConfig
 import com.appcues.AppcuesCoroutineScope
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.RenderStep
@@ -22,6 +23,7 @@ import com.appcues.util.ResultOf.Success
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
@@ -31,6 +33,7 @@ internal typealias StateResult = ResultOf<State, Error>
 
 internal class StateMachine(
     private val appcuesCoroutineScope: AppcuesCoroutineScope,
+    private val config: AppcuesConfig,
 ) {
 
     private var _stateResultFlow = MutableSharedFlow<StateResult>(1)
@@ -46,6 +49,18 @@ internal class StateMachine(
             .shareIn(appcuesCoroutineScope, SharingStarted.Lazily, 1)
 
     private var _currentState: State = Idling()
+
+    init {
+        appcuesCoroutineScope.launch {
+            stateFlow.collect {
+                when (it) {
+                    is BeginningExperience -> config.experienceListener?.experienceStarted(it.experience.id)
+                    is EndingExperience -> config.experienceListener?.experienceFinished(it.experience.id)
+                    else -> Unit
+                }
+            }
+        }
+    }
 
     fun handleAction(action: Action) {
         appcuesCoroutineScope.launch {

@@ -9,7 +9,8 @@ internal data class AppcuesConfig(
     val sessionTimeout: Int,
     val activityStorageMaxSize: Int,
     val activityStorageMaxAge: Int?,
-    val interceptor: AppcuesInterceptor?,
+    var interceptor: AppcuesInterceptor?,
+    var experienceListener: ExperienceListener?,
 ) {
     companion object {
         const val SESSION_TIMEOUT_DEFAULT = 1800 // 30 minutes by default
