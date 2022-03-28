@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.appcues.Appcues
 import com.appcues.action.ExperienceAction
 import com.appcues.data.model.StepContainer
+import com.appcues.statemachine.Action
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.RenderStep
 import com.appcues.statemachine.Action.StartStep
@@ -30,7 +31,7 @@ internal class AppcuesViewModel(
     sealed class UIState {
         object Idle : UIState()
         data class Rendering(val stepContainer: StepContainer, val position: Int) : UIState()
-        data class Dismissing(val nextStepIndex: Int?) : UIState()
+        data class Dismissing(val continueAction: Action) : UIState()
     }
 
     val stateMachine by inject<StateMachine>()
@@ -60,13 +61,9 @@ internal class AppcuesViewModel(
                         }
                     }
                     is EndingStep -> {
-                        // the state tells us if we should dismiss the view (finish activity)
-                        // either (A) completed last step of container or (B) close experience
-                        // action was executed.
-
                         // dismiss will trigger exit animations and finish activity
-                        if (result.dismiss) {
-                            _uiState.value = Dismissing(result.flatNextStepIndex)
+                        if (result.dismissAndContinue != null) {
+                            _uiState.value = Dismissing(result.dismissAndContinue)
                         }
                     }
                     // ignore other state changes
@@ -89,37 +86,46 @@ internal class AppcuesViewModel(
         }
     }
 
-    fun onFinish() {
-        viewModelScope.launch {
-            stateMachine.handleAction(EndExperience)
-        }
-    }
-
-    fun onDismissCompleted() {
+    fun onAction(experienceAction: ExperienceAction) {
         uiState.value.let { state ->
-            // if current state is dismissing and nextStepIndex is not null
-            if (state is Dismissing && state.nextStepIndex != null) {
-                // we send a StartStep action to notify state machine we can move to the next step group
+            // if current state IS Rendering then we process the action
+            if (state is Rendering) {
                 viewModelScope.launch {
-                    stateMachine.handleAction(StartStep(StepIndex(state.nextStepIndex)))
+                    experienceAction.execute(appcues)
                 }
             }
         }
     }
 
-    fun onAction(experienceAction: ExperienceAction) {
-        viewModelScope.launch {
-            experienceAction.execute(appcues)
-        }
-    }
-
     fun onPageChanged(index: Int) {
         uiState.value.let { state ->
-            // prevent unnecessary calls to the state machine when
-            // there is not a valid page change
+            // if current state is Rendering but position is different than current
+            // then we report new position to state machine
             if (state is Rendering && state.position != index) {
                 viewModelScope.launch {
                     stateMachine.handleAction(StartStep(StepIndex(index)))
+                }
+            }
+        }
+    }
+
+    fun onBackPressed() {
+        uiState.value.let { state ->
+            // if current state IS Rendering then we process the action
+            if (state is Rendering) {
+                viewModelScope.launch {
+                    stateMachine.handleAction(EndExperience)
+                }
+            }
+        }
+    }
+
+    fun onFinish() {
+        uiState.value.let { state ->
+            // if current state IS dismissing we send the continueAction from EndingStep
+            if (state is Dismissing) {
+                viewModelScope.launch {
+                    stateMachine.handleAction(state.continueAction)
                 }
             }
         }

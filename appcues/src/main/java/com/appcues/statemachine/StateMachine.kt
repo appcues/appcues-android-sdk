@@ -91,7 +91,7 @@ internal class StateMachine(
             state is BeginningStep && action is RenderStep -> state.fromBeginningStepToRenderingStep(action)
             // RenderingStep
             state is RenderingStep && action is StartStep -> state.fromRenderingStepToEndingStep(action)
-            state is RenderingStep && action is EndExperience -> state.fromRenderingStepToEndingStep(action)
+            state is RenderingStep && action is EndExperience -> state.fromRenderingStepToEndingExperience(action)
             // EndingStep
             state is EndingStep && action is EndExperience -> state.fromEndingStepToEndingExperience(action)
             state is EndingStep && action is StartStep -> state.fromEndingStepToBeginningStep(action)

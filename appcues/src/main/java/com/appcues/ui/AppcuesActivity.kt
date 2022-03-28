@@ -82,7 +82,6 @@ internal class AppcuesActivity : AppCompatActivity() {
                     LaunchOnHideAnimationCompleted {
                         // if state is dismissing then finish activity
                         if (state.value is Dismissing) {
-                            viewModel.onDismissCompleted()
                             finish()
                         }
                     }
@@ -145,10 +144,15 @@ internal class AppcuesActivity : AppCompatActivity() {
         }
     }
 
+    override fun onBackPressed() {
+        viewModel.onBackPressed()
+    }
+
     override fun finish() {
         super.finish()
-        viewModel.onFinish()
         // remove exit animation from this activity
         overridePendingTransition(0, 0)
+
+        viewModel.onFinish()
     }
 }
