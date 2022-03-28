@@ -28,8 +28,6 @@ internal object TraitKoin : KoinScopePlugin {
         factory { params ->
             ModalTrait(
                 config = params.getOrNull(),
-                scope = get(),
-                context = get(),
             )
         }
 
