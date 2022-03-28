@@ -49,13 +49,13 @@ internal interface Transitions {
                 if (experience.areStepsFromDifferentGroup(flatStepIndex, nextStepIndex)) {
                     // in different groups we want to wait for StartStep action from AppcuesViewModel
                     Transition(
-                        state = EndingStep(experience, flatStepIndex, nextStepIndex, true),
+                        state = EndingStep(experience, flatStepIndex, StartStep(action.stepReference)),
                         sideEffect = null,
                     )
                 } else {
                     // in same group we can continue to StartStep internally
                     Transition(
-                        state = EndingStep(experience, flatStepIndex, nextStepIndex, false),
+                        state = EndingStep(experience, flatStepIndex, null),
                         sideEffect = ContinuationEffect(StartStep(action.stepReference)),
                     )
                 }
@@ -66,8 +66,10 @@ internal interface Transitions {
         }
     }
 
-    fun RenderingStep.fromRenderingStepToEndingStep(action: EndExperience): Transition {
-        return Transition(EndingStep(experience, flatStepIndex, null, true), ContinuationEffect(EndExperience))
+    fun RenderingStep.fromRenderingStepToEndingExperience(action: EndExperience): Transition {
+        // instead of using sideEffect we pass EndExperience on EndingStep
+        // then AppcuesViewModel will continue to EndExperience when appropriate
+        return Transition(EndingStep(experience, flatStepIndex, EndExperience), null)
     }
 
     fun EndingStep.fromEndingStepToEndingExperience(action: EndExperience): Transition {
