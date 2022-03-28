@@ -36,11 +36,11 @@ internal interface Transitions {
 
     fun BeginningExperience.fromBeginningExperienceToBeginningStep(action: StartStep): Transition {
         // not sure yet if we'll eventually do any trait composition here
-        return Transition(BeginningStep(experience, 0), PresentContainerEffect(experience, 0))
+        return Transition(BeginningStep(experience, 0, true), PresentContainerEffect(experience, 0))
     }
 
     fun BeginningStep.fromBeginningStepToRenderingStep(action: RenderStep): Transition {
-        return Transition(RenderingStep(experience, flatStepIndex))
+        return Transition(RenderingStep(experience, flatStepIndex, isFirst))
     }
 
     fun RenderingStep.fromRenderingStepToEndingStep(action: StartStep): Transition {
@@ -114,14 +114,14 @@ private fun transitionsToBeginningStep(
 ) = if (experience.areStepsFromDifferentGroup(currentStepIndex, nextStepIndex)) {
     // given that steps are from different container, we now get step container index to present
     experience.groupLookup[nextStepIndex]?.let { stepContainerIndex ->
-        Transition(BeginningStep(experience, nextStepIndex), PresentContainerEffect(experience, stepContainerIndex))
+        Transition(BeginningStep(experience, nextStepIndex, false), PresentContainerEffect(experience, stepContainerIndex))
     } ?: run {
         // this should never happen at this point. but better to safe guard anyways
         errorTransition(experience, currentStepIndex, "StepContainer for nextStepIndex $nextStepIndex not found")
     }
 } else {
     // else we just move to rendering step
-    Transition(BeginningStep(experience, nextStepIndex), ContinuationEffect(StartStep(nextStepReference)))
+    Transition(BeginningStep(experience, nextStepIndex, false), ContinuationEffect(StartStep(nextStepReference)))
 }
 
 private fun Experience.areStepsFromDifferentGroup(stepIndexOne: Int, stepIndexTwo: Int): Boolean {
