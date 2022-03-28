@@ -1,5 +1,6 @@
 package com.appcues.data.mapper.experience
 
+import android.content.Context
 import com.appcues.data.mapper.step.StepMapper
 import com.appcues.data.mapper.trait.TraitsMapper
 import com.appcues.data.model.Experience
@@ -12,14 +13,18 @@ import com.appcues.trait.BackdropDecoratingTrait
 import com.appcues.trait.ContainerDecoratingTrait
 import com.appcues.trait.ContentHolderTrait
 import com.appcues.trait.ContentWrappingTrait
-import com.appcues.trait.ExperiencePresentingTrait
 import com.appcues.trait.ExperienceTrait
+import com.appcues.trait.PresentingTrait
 import com.appcues.trait.appcues.DefaultContentHolderTrait
+import com.appcues.trait.appcues.DefaultPresentingTrait
+import org.koin.core.scope.Scope
 import java.util.UUID
 
 internal class ExperienceMapper(
     private val stepMapper: StepMapper,
     private val traitsMapper: TraitsMapper,
+    private val scope: Scope,
+    private val context: Context,
 ) {
 
     fun map(from: ExperienceResponse): Experience {
@@ -45,8 +50,7 @@ internal class ExperienceMapper(
                     experienceActions,
                 )
             },
-            // what should we do if no presenting trait is found?
-            presentingTrait = traits.filterIsInstance<ExperiencePresentingTrait>().first(),
+            presentingTrait = traits.getExperiencePresentingTraitOrDefault(),
             contentHolderTrait = traits.getContainerCreatingTraitOrDefault(),
             // what should we do if no content wrapping trait is found?
             contentWrappingTrait = traits.filterIsInstance<ContentWrappingTrait>().first(),
@@ -57,6 +61,10 @@ internal class ExperienceMapper(
 
     private fun List<ExperienceTrait>.getContainerCreatingTraitOrDefault(): ContentHolderTrait {
         return filterIsInstance<ContentHolderTrait>().firstOrNull() ?: DefaultContentHolderTrait(null)
+    }
+
+    private fun List<ExperienceTrait>.getExperiencePresentingTraitOrDefault(): PresentingTrait {
+        return filterIsInstance<PresentingTrait>().firstOrNull() ?: DefaultPresentingTrait(null, scope, context)
     }
 
     private fun List<TraitResponse>.mergeWith(other: List<TraitResponse>): List<TraitResponse> {

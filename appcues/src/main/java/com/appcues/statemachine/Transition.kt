@@ -32,7 +32,7 @@ internal open class Transition(
     }
 
     private fun PresentContainerEffect.applyEffect() {
-        experience.stepContainers[containerIndex].presentingTrait.presentExperience()
+        experience.stepContainers[containerIndex].presentingTrait.present()
     }
 
     class ErrorLoggingTransition(error: Error) : Transition(null, ReportErrorEffect(error))
