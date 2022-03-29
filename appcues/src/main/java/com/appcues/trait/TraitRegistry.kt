@@ -7,6 +7,7 @@ import com.appcues.trait.appcues.CarouselTrait
 import com.appcues.trait.appcues.ModalTrait
 import com.appcues.trait.appcues.PagingDotsTrait
 import com.appcues.trait.appcues.SkippableTrait
+import com.appcues.trait.appcues.StickyContentTrait
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.get
 import org.koin.core.parameter.parametersOf
@@ -28,6 +29,7 @@ internal class TraitRegistry(
         register(SkippableTrait.TYPE) { get<SkippableTrait> { parametersOf(it) } }
         register(CarouselTrait.TYPE) { get<CarouselTrait> { parametersOf(it) } }
         register(PagingDotsTrait.TYPE) { get<PagingDotsTrait> { parametersOf(it) } }
+        register(StickyContentTrait.TYPE) { get<StickyContentTrait> { parametersOf(it) } }
     }
 
     operator fun get(key: String): TraitFactoryBlock? {

@@ -6,9 +6,7 @@ import com.appcues.data.mapper.step.primitives.ImagePrimitiveMapper
 import com.appcues.data.mapper.step.primitives.StackPrimitiveMapper
 import com.appcues.data.mapper.step.primitives.TextPrimitiveMapper
 import com.appcues.data.model.ExperiencePrimitive
-import com.appcues.data.remote.response.action.ActionResponse
 import com.appcues.data.remote.response.step.StepContentResponse
-import java.util.UUID
 
 internal class StepContentMapper(
     private val stackMapper: StackPrimitiveMapper,
@@ -17,17 +15,17 @@ internal class StepContentMapper(
     private val imageMapper: ImagePrimitiveMapper
 ) {
 
-    fun map(from: StepContentResponse, actions: HashMap<UUID, List<ActionResponse>>?): ExperiencePrimitive = when (from.type) {
-        "stack" -> stackMapper.map(from, actions) { map(it, actions) }
-        "text" -> textMapper.map(from, actions)
-        "button" -> buttonMapper.map(from, actions) { map(it, actions) }
-        "image" -> imageMapper.map(from, actions)
-        else -> from.mapContent(actions)
+    fun map(from: StepContentResponse): ExperiencePrimitive = when (from.type) {
+        "stack" -> stackMapper.map(from) { map(it) }
+        "text" -> textMapper.map(from)
+        "button" -> buttonMapper.map(from) { map(it) }
+        "image" -> imageMapper.map(from)
+        else -> from.mapContent()
     }
 
-    private fun StepContentResponse.mapContent(actions: HashMap<UUID, List<ActionResponse>>?): ExperiencePrimitive {
+    private fun StepContentResponse.mapContent(): ExperiencePrimitive {
         requireNotNull(content) { throw AppcuesMappingException("$type($id) content is null") }
 
-        return map(content, actions)
+        return map(content)
     }
 }

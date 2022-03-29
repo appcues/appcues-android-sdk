@@ -8,7 +8,11 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.State
@@ -17,6 +21,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.core.os.bundleOf
 import com.appcues.di.AppcuesKoinContext
 import com.appcues.trait.ContentHolderTrait.ContainerPages
@@ -63,8 +68,8 @@ internal class AppcuesActivity : AppCompatActivity() {
     @Composable
     private fun Composition() {
         CompositionLocalProvider(
-            LocalAppcuesActions provides AppcuesActions { viewModel.onAction(it) },
-            LocalAppcuesPagination provides AppcuesPagination { viewModel.onPageChanged(it) }
+            LocalAppcuesActionDelegate provides AppcuesActions { viewModel.onAction(it) },
+            LocalAppcuesPaginationDelegate provides AppcuesPagination { viewModel.onPageChanged(it) }
         ) {
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -124,8 +129,28 @@ internal class AppcuesActivity : AppCompatActivity() {
                     with(contentHolderTrait) {
                         // create object that will passed down to CreateContentHolder
                         ContainerPages(
-                            pages = steps.map { { it.content.Compose() } },
-                            pageIndex = state.position,
+                            pageCount = steps.size,
+                            currentPage = state.position,
+                            composePage = { index ->
+                                with(steps[index]) {
+                                    CompositionLocalProvider(LocalAppcuesActions provides actions) {
+                                        // used to get the padding values from step decorating trait and apply to the Column
+                                        val rememberPadding = rememberStepDecoratingPadding(LocalDensity.current)
+                                        // Our page content
+                                        Column(
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                            modifier = Modifier
+                                                .verticalScroll(rememberScrollState())
+                                                .padding(paddingValues = rememberPadding.value.toPaddingValues())
+                                        ) {
+                                            content.Compose()
+                                        }
+
+                                        // apply step decorating traits
+                                        traits.forEach { with(it) { Overlay(rememberPadding.value) } }
+                                    }
+                                }
+                            }
                         ).also {
                             // create content holder
                             CreateContentHolder(it)

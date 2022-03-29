@@ -17,6 +17,16 @@ internal class ActionsMapper(
         }
     }
 
+    fun map(from: HashMap<UUID, List<ActionResponse>>?): HashMap<UUID, List<Action>> {
+        if (from == null) return hashMapOf()
+
+        return hashMapOf<UUID, List<Action>>().apply {
+            from.forEach { entry ->
+                entry.value.mapNotNull { actionResponse -> actionResponse.toAction() }.also { set(entry.key, it) }
+            }
+        }
+    }
+
     private fun ActionResponse.toAction(): Action? {
         return actionRegistry[type]?.let {
             Action(

@@ -6,12 +6,15 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
@@ -20,6 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -27,6 +31,8 @@ import com.appcues.action.ExperienceAction
 import com.appcues.data.model.Action
 import com.appcues.data.model.ExperiencePrimitive
 import com.appcues.data.model.styling.ComponentStyle
+import com.appcues.ui.StepDecoratingPadding
+import java.util.UUID
 
 internal fun Modifier.primitiveStyle(
     component: ExperiencePrimitive,
@@ -40,7 +46,7 @@ internal fun Modifier.primitiveStyle(
             .padding(style.getMargins())
             .styleShadow(style, isDark)
             .styleSize(style, noSizeFillMax)
-            .actions(actions, gestureProperties)
+            .actions(id, gestureProperties)
             .styleCorner(style)
             .styleBorder(style, isDark)
             .styleBackground(style, isDark, defaultBackgroundColor)
@@ -158,6 +164,7 @@ private fun Modifier.coloredShadow(
 
 internal data class PrimitiveGestureProperties(
     val onAction: (ExperienceAction) -> Unit,
+    val actions: HashMap<UUID, List<Action>>,
     val interactionSource: MutableInteractionSource,
     val indication: Indication?,
     val enabled: Boolean = true,
@@ -166,20 +173,22 @@ internal data class PrimitiveGestureProperties(
 
 @OptIn(ExperimentalFoundationApi::class)
 private fun Modifier.actions(
-    actions: List<Action>,
+    id: UUID,
     gestureProperties: PrimitiveGestureProperties
 ) = this.then(
     // check to see if the list is not null first, to ensure that we have at least one action before setting
     // the combinedClickable Modifier
-    if (actions.isNotEmpty()) Modifier.combinedClickable(
-        interactionSource = gestureProperties.interactionSource,
-        indication = gestureProperties.indication,
-        enabled = gestureProperties.enabled,
-        role = gestureProperties.role,
-        onLongClick = actions.toLongPressMotionOrNull(gestureProperties.onAction),
-        onClick = actions.toTapMotionOrEmpty(gestureProperties.onAction),
-    )
-    else Modifier
+    with(gestureProperties.actions[id]) {
+        if (isNullOrEmpty()) Modifier else
+            Modifier.combinedClickable(
+                interactionSource = gestureProperties.interactionSource,
+                indication = gestureProperties.indication,
+                enabled = gestureProperties.enabled,
+                role = gestureProperties.role,
+                onLongClick = toLongPressMotionOrNull(gestureProperties.onAction),
+                onClick = toTapMotionOrEmpty(gestureProperties.onAction),
+            )
+    }
 )
 
 private fun List<Action>.toTapMotionOrEmpty(onAction: (ExperienceAction) -> Unit): (() -> Unit) {
@@ -204,4 +213,36 @@ private fun List<Action>.toLongPressMotionOrNull(block: (ExperienceAction) -> Un
         // return click block that executes onAction for every ExperienceAction
         // else returns null
         ?.run { { forEach { block(it) } } }
+}
+
+/**
+ * used to properly align step decorating trait content
+ *
+ * the main reason why we have this function is so that we do some internal calculations
+ * to decide the amount of padding the main content will apply based on all step decorating traits
+ * applied for that step
+ */
+fun Modifier.alignStepOverlay(
+    boxScope: BoxScope,
+    alignment: Alignment,
+    stepDecoratingPadding: StepDecoratingPadding
+): Modifier {
+    return with(boxScope) {
+        then(
+            Modifier
+                .align(alignment)
+                .onGloballyPositioned {
+                    if (alignment is BiasAlignment) {
+                        with(alignment) {
+                            when {
+                                horizontalBias == -1f && verticalBias == 0f -> stepDecoratingPadding.setStartPadding(it.size.width)
+                                horizontalBias == 1f && verticalBias == 0f -> stepDecoratingPadding.setEndPadding(it.size.width)
+                                verticalBias == -1f -> stepDecoratingPadding.setTopPadding(it.size.height)
+                                verticalBias == 1f -> stepDecoratingPadding.setBottomPadding(it.size.height)
+                            }
+                        }
+                    }
+                }
+        )
+    }
 }

@@ -7,6 +7,7 @@ import com.appcues.trait.appcues.CarouselTrait
 import com.appcues.trait.appcues.ModalTrait
 import com.appcues.trait.appcues.PagingDotsTrait
 import com.appcues.trait.appcues.SkippableTrait
+import com.appcues.trait.appcues.StickyContentTrait
 import org.koin.dsl.ScopeDSL
 
 internal object TraitKoin : KoinScopePlugin {
@@ -47,6 +48,13 @@ internal object TraitKoin : KoinScopePlugin {
         factory { params ->
             PagingDotsTrait(
                 config = params.getOrNull(),
+            )
+        }
+
+        factory { params ->
+            StickyContentTrait(
+                config = params.getOrNull(),
+                stepContentMapper = get(),
             )
         }
     }
