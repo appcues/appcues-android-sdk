@@ -21,6 +21,7 @@ import com.appcues.data.model.styling.ComponentContentMode
 import com.appcues.data.model.styling.ComponentContentMode.FILL
 import com.appcues.data.model.styling.ComponentContentMode.FIT
 import com.appcues.data.model.styling.ComponentSize
+import com.appcues.ui.LocalAppcuesActionDelegate
 import com.appcues.ui.LocalAppcuesActions
 import com.appcues.ui.extensions.PrimitiveGestureProperties
 import com.appcues.ui.extensions.primitiveStyle
@@ -32,7 +33,8 @@ internal fun ImagePrimitive.Compose() {
             .primitiveStyle(
                 component = this,
                 gestureProperties = PrimitiveGestureProperties(
-                    onAction = LocalAppcuesActions.current.onAction,
+                    onAction = LocalAppcuesActionDelegate.current.onAction,
+                    actions = LocalAppcuesActions.current,
                     interactionSource = remember { MutableInteractionSource() },
                     indication = rememberRipple(),
                     enabled = remember { true },

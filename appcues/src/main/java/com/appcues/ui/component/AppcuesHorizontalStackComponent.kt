@@ -22,10 +22,8 @@ import com.appcues.data.model.styling.ComponentColor
 import com.appcues.data.model.styling.ComponentDistribution
 import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.data.model.styling.ComponentStyle.ComponentHorizontalAlignment
-import com.appcues.data.model.styling.ComponentStyle.ComponentHorizontalAlignment.LEADING
-import com.appcues.data.model.styling.ComponentStyle.ComponentHorizontalAlignment.TRAILING
-import com.appcues.data.model.styling.ComponentStyle.ComponentVerticalAlignment.BOTTOM
-import com.appcues.data.model.styling.ComponentStyle.ComponentVerticalAlignment.TOP
+import com.appcues.data.model.styling.ComponentStyle.ComponentVerticalAlignment
+import com.appcues.ui.LocalAppcuesActionDelegate
 import com.appcues.ui.LocalAppcuesActions
 import com.appcues.ui.arrangement.AppcuesArrangement
 import com.appcues.ui.extensions.Compose
@@ -42,7 +40,8 @@ internal fun HorizontalStackPrimitive.Compose() {
         modifier = Modifier.primitiveStyle(
             component = this,
             gestureProperties = PrimitiveGestureProperties(
-                onAction = LocalAppcuesActions.current.onAction,
+                onAction = LocalAppcuesActionDelegate.current.onAction,
+                actions = LocalAppcuesActions.current,
                 interactionSource = remember { MutableInteractionSource() },
                 indication = rememberRipple(),
                 enabled = remember { true },
@@ -99,8 +98,8 @@ private val items = arrayListOf(
         id = UUID.randomUUID(),
         text = "\uD83D\uDC4B Welcome!",
         style = ComponentStyle(
-            verticalAlignment = BOTTOM,
-            horizontalAlignment = LEADING,
+            verticalAlignment = ComponentVerticalAlignment.BOTTOM,
+            horizontalAlignment = ComponentHorizontalAlignment.LEADING,
         )
     ),
     ButtonPrimitive(
@@ -129,8 +128,8 @@ private val items = arrayListOf(
         id = UUID.randomUUID(),
         text = "BYE! \uD83E\uDD96",
         style = ComponentStyle(
-            verticalAlignment = TOP,
-            horizontalAlignment = TRAILING,
+            verticalAlignment = ComponentVerticalAlignment.TOP,
+            horizontalAlignment = ComponentHorizontalAlignment.TRAILING,
         )
     )
 )
@@ -141,7 +140,7 @@ internal fun PreviewTestHorizontalAlignment() {
     val component = HorizontalStackPrimitive(
         id = UUID.randomUUID(),
         style = ComponentStyle(
-            verticalAlignment = TOP,
+            verticalAlignment = ComponentVerticalAlignment.TOP,
             backgroundColor = ComponentColor(light = 0xFFCDCDFA, dark = 0xFFCDCDFA)
         ),
         items = items

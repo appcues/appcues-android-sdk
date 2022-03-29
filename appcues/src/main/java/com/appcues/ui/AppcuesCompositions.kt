@@ -9,6 +9,7 @@ import androidx.compose.animation.expandIn
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkOut
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.compositionLocalOf
@@ -16,19 +17,24 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Density
 import com.appcues.action.ExperienceAction
+import com.appcues.data.model.Action
+import java.util.UUID
 
 // used to register callback for all Actions triggered from primitives
-internal val LocalAppcuesActions = staticCompositionLocalOf { AppcuesActions {} }
+internal val LocalAppcuesActionDelegate = staticCompositionLocalOf { AppcuesActions {} }
 
 internal data class AppcuesActions(val onAction: (ExperienceAction) -> Unit)
+
+internal val LocalAppcuesActions = staticCompositionLocalOf { hashMapOf<UUID, List<Action>>() }
 
 /**
  * LocalAppcuesPagination is used to report back any page change that
  * happened that is coming from outside of our internal SDK logic.
  * Usually used by traits that when dealing with multi-page containers
  */
-val LocalAppcuesPagination = compositionLocalOf { AppcuesPagination {} }
+val LocalAppcuesPaginationDelegate = compositionLocalOf { AppcuesPagination {} }
 
 data class AppcuesPagination(val onPageChanged: (Int) -> Unit)
 
@@ -92,4 +98,50 @@ fun AppcuesTraitAnimatedVisibility(
         exit = exit,
         content = content
     )
+}
+
+@Composable
+internal fun rememberStepDecoratingPadding(density: Density) = remember { mutableStateOf(StepDecoratingPadding(density)) }
+
+class StepDecoratingPadding(private val density: Density) {
+
+    private val topPaddingPx = mutableStateOf(0)
+    private val bottomPaddingPx = mutableStateOf(0)
+    private val startPaddingPx = mutableStateOf(0)
+    private val endPaddingPx = mutableStateOf(0)
+
+    fun setTopPadding(px: Int) {
+        if (topPaddingPx.value < px) {
+            topPaddingPx.value = px
+        }
+    }
+
+    fun setBottomPadding(px: Int) {
+        if (bottomPaddingPx.value < px) {
+            bottomPaddingPx.value = px
+        }
+    }
+
+    fun setStartPadding(px: Int) {
+        if (startPaddingPx.value < px) {
+            startPaddingPx.value = px
+        }
+    }
+
+    fun setEndPadding(px: Int) {
+        if (endPaddingPx.value < px) {
+            endPaddingPx.value = px
+        }
+    }
+
+    internal fun toPaddingValues(): PaddingValues {
+        return with(density) {
+            PaddingValues(
+                start = startPaddingPx.value.toDp(),
+                top = topPaddingPx.value.toDp(),
+                end = endPaddingPx.value.toDp(),
+                bottom = bottomPaddingPx.value.toDp()
+            )
+        }
+    }
 }

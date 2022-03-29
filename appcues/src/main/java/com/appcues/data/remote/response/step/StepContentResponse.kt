@@ -2,6 +2,7 @@ package com.appcues.data.remote.response.step
 
 import com.appcues.data.remote.response.styling.SizeResponse
 import com.appcues.data.remote.response.styling.StyleResponse
+import com.google.gson.Gson
 import java.util.UUID
 
 internal data class StepContentResponse(
@@ -18,4 +19,17 @@ internal data class StepContentResponse(
     val content: StepContentResponse? = null,
     val distribution: String? = null,
     val spacing: Int = 0,
-)
+) {
+
+    companion object {
+
+        /**
+         * Try to create a [StyleResponse] from [Any]
+         */
+        fun fromAny(any: Any?): StepContentResponse? {
+            return Gson().run {
+                fromJson(toJsonTree(any).asJsonObject, StepContentResponse::class.java)
+            }
+        }
+    }
+}

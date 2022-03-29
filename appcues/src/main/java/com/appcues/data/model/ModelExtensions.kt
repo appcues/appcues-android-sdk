@@ -1,9 +1,11 @@
 package com.appcues.data.model
 
+import com.appcues.data.mapper.step.StepContentMapper
 import com.appcues.data.mapper.styling.StyleColorMapper
 import com.appcues.data.mapper.styling.StyleMapper
 import com.appcues.data.model.styling.ComponentColor
 import com.appcues.data.model.styling.ComponentStyle
+import com.appcues.data.remote.response.step.StepContentResponse
 import com.appcues.data.remote.response.styling.StyleColorResponse
 import com.appcues.data.remote.response.styling.StyleResponse
 
@@ -38,6 +40,15 @@ internal fun AppcuesConfigMap.getConfigInt(key: String): Int? {
 internal fun AppcuesConfigMap.getConfigStyle(key: String): ComponentStyle? {
     return getConfig<Any>(key)?.let {
         StyleMapper().map(StyleResponse.fromAny(it))
+    }
+}
+
+internal fun AppcuesConfigMap.getConfigPrimitive(key: String, stepContentMapper: StepContentMapper): ExperiencePrimitive? {
+    return getConfig<Any>(key)?.let {
+        val stepContentResponse = StepContentResponse.fromAny(it)
+        return if (stepContentResponse != null) {
+            stepContentMapper.map(stepContentResponse)
+        } else null
     }
 }
 

@@ -14,16 +14,17 @@ interface ContentHolderTrait : ExperienceTrait {
      * Class used as a parameter for [CreateContentHolder]
      *
      * [pages] the page compositions
-     * [pageIndex] current page index
+     * [currentPage] current page index
      */
     data class ContainerPages(
-        val pages: List<@Composable () -> Unit>,
-        val pageIndex: Int,
+        val pageCount: Int,
+        val currentPage: Int,
+        val composePage: @Composable (index: Int) -> Unit,
     ) {
 
         private var defaultPaginationData: AppcuesPaginationData = AppcuesPaginationData(
-            pageCount = pages.size,
-            currentPage = pageIndex,
+            pageCount = pageCount,
+            currentPage = currentPage,
             scrollOffset = 0.0f,
         )
 

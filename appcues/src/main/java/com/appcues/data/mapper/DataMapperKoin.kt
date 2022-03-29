@@ -29,6 +29,7 @@ internal object DataMapperKoin : KoinScopePlugin {
             StepMapper(
                 stepContentMapper = get(),
                 traitsMapper = get(),
+                actionsMapper = get(),
             )
         }
 
@@ -41,10 +42,10 @@ internal object DataMapperKoin : KoinScopePlugin {
             )
         }
 
-        scoped { ButtonPrimitiveMapper(actionsMapper = get()) }
-        scoped { ImagePrimitiveMapper(actionsMapper = get()) }
-        scoped { StackPrimitiveMapper(actionsMapper = get()) }
-        scoped { TextPrimitiveMapper(actionsMapper = get()) }
+        scoped { ButtonPrimitiveMapper() }
+        scoped { ImagePrimitiveMapper() }
+        scoped { StackPrimitiveMapper() }
+        scoped { TextPrimitiveMapper() }
 
         scoped { ActionsMapper(actionRegistry = get()) }
         scoped { TraitsMapper(traitRegistry = get()) }
