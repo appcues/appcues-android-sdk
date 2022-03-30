@@ -11,22 +11,22 @@ class ApiHostBuilderValidatorTest {
     @Test
     fun `validate SHOULD not throw an Exception`() {
         // When
-        val result = validator.validate("https://api.appcues.com/")
+        val result = validator.validate("https://api.appcues.net/")
         // Then
         with(result) {
-            assertThat(this).isEqualTo("https://api.appcues.com/")
+            assertThat(this).isEqualTo("https://api.appcues.net/")
         }
     }
 
     @Test(expected = IllegalArgumentException::class)
     fun `validate SHOULD throw an AppcuesBuilderException WHEN apiHost does not start with http`() {
         // WHEN
-        validator.validate("api.appcues.com/")
+        validator.validate("api.appcues.net/")
     }
 
     @Test(expected = IllegalArgumentException::class)
     fun `validate SHOULD throw an AppcuesBuilderException WHEN apiHost does not end with slash`() {
         // WHEN
-        validator.validate("https://api.appcues.com")
+        validator.validate("https://api.appcues.net")
     }
 }

@@ -70,7 +70,7 @@ internal class AutoPropertyDecorator(
             "_sessionRandomizer" to sessionRandomizer,
         ).filterValues { it != null }.mapValues { it.value as Any }
 
-    private val autoProperties: HashMap<String, Any>
+    val autoProperties: HashMap<String, Any>
         get() = hashMapOf<String, Any>().apply {
             putAll(applicationProperties)
             putAll(sessionProperties)
@@ -86,6 +86,8 @@ internal class AutoPropertyDecorator(
             // special handling for session start events
             sessionPageviews = 0
             sessionRandomizer = Random.nextInt(SESSION_RANDOMIZER_LOWER_BOUND, SESSION_RANDOMIZER_UPPER_BOUND)
+            currentScreen = null
+            previousScreen = null
         }
 
         attributes["_identity"] = autoProperties

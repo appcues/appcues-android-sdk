@@ -12,6 +12,7 @@ import com.appcues.logging.Logcues
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
 import com.appcues.util.doIfFailure
+import com.appcues.util.doIfSuccess
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
@@ -44,7 +45,7 @@ internal class AppcuesRepository(
         }
     }
 
-    suspend fun trackActivity(activity: ActivityRequest, sync: Boolean): List<Experience> = withContext(Dispatchers.IO) {
+    suspend fun trackActivity(activity: ActivityRequest): List<Experience> = withContext(Dispatchers.IO) {
 
         val activityStorage = ActivityStorage(activity.requestId, activity.accountId, activity.userId, gson.toJson(activity))
         val itemsToFlush = mutableListOf<ActivityStorage>()
@@ -71,7 +72,7 @@ internal class AppcuesRepository(
             processingActivity.addAll(itemsToFlush.map { it.requestId })
         }
 
-        post(itemsToFlush, activityStorage, sync)
+        post(itemsToFlush, activityStorage)
     }
 
     private suspend fun prepareForRetry(available: List<ActivityStorage>): MutableList<ActivityStorage> {
@@ -110,43 +111,41 @@ internal class AppcuesRepository(
         return eligible
     }
 
-    private suspend fun post(queue: MutableList<ActivityStorage>, current: ActivityStorage?, sync: Boolean): List<Experience> {
+    private suspend fun post(queue: MutableList<ActivityStorage>, current: ActivityStorage): List<Experience> {
         // pop the next activity off the current queue to process
         // the list is processed in chronological order
         val activity = queue.removeFirstOrNull() ?: return listOf()
 
         // `current` is the activity that triggered this processing, and may be qualifying
         val isCurrent = activity == current
-        // only apply the `sync=1` param if we are processing the current activity (not a cache item) and it was
-        // requested to be synchronous
-        val syncRequest = if (isCurrent) sync else false
 
         var successful = true
         val experiences = mutableListOf<Experience>()
 
-        val activityResult = appcuesRemoteSource.postActivity(activity.userId, activity.data, syncRequest)
+        if (isCurrent) {
+            val qualifyResult = appcuesRemoteSource.qualify(activity.userId, activity.data)
 
-        when (activityResult) {
-            is Success -> {
-                // this is likely redundant, since a non-sync request wont
-                // return any experiences qualified - but we want to make sure
-                // we don't do any needless mapping work on something that will
-                // be ignored anyway (cache items)
-                if (syncRequest) {
-                    experiences += activityResult.value.experiences.map { experienceMapper.map(it) }
-                }
+            qualifyResult.doIfSuccess { response ->
+                experiences += response.experiences.map { experienceMapper.map(it) }
             }
-            is Failure -> {
-                logcues.info("Activity request failed, reason: ${activityResult.reason}")
-                when (activityResult.reason) {
+
+            qualifyResult.doIfFailure {
+                logcues.info("qualify request failed, reason: $it")
+                when (it) {
                     is NetworkError -> successful = false
                     else -> Unit
                 }
             }
-        }
+        } else {
+            val activityResult = appcuesRemoteSource.postActivity(activity.userId, activity.data)
 
-        activityResult.doIfFailure {
-            logcues.info(it.toString())
+            activityResult.doIfFailure {
+                logcues.info("activity request failed, reason: $it")
+                when (it) {
+                    is NetworkError -> successful = false
+                    else -> Unit
+                }
+            }
         }
 
         // it should only be removed from local storage on success
@@ -159,7 +158,12 @@ internal class AppcuesRepository(
             processingActivity.remove(activity.requestId)
         }
 
-        // recurse
-        return experiences + post(queue, current, sync)
+        return if (isCurrent) {
+            // processed the qualify and should return the experiences
+            experiences
+        } else {
+            // continue to process the queue until we get to current item
+            post(queue, current)
+        }
     }
 }
