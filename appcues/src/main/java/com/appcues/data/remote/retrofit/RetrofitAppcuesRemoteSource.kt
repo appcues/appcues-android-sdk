@@ -5,6 +5,7 @@ import com.appcues.data.remote.AppcuesRemoteSource
 import com.appcues.data.remote.RemoteError
 import com.appcues.data.remote.response.ActivityResponse
 import com.appcues.data.remote.response.ErrorResponse
+import com.appcues.data.remote.response.QualifyResponse
 import com.appcues.data.remote.response.experience.ExperienceResponse
 import com.appcues.util.ResultOf
 import com.google.gson.Gson
@@ -25,12 +26,20 @@ internal class RetrofitAppcuesRemoteSource(
             appcuesService.experienceContent(accountId, storage.userId, experienceId)
         }
 
-    override suspend fun postActivity(userId: String, activityJson: String, sync: Boolean): ResultOf<ActivityResponse, RemoteError> =
+    override suspend fun postActivity(userId: String, activityJson: String): ResultOf<ActivityResponse, RemoteError> =
         request {
             appcuesService.activity(
                 account = accountId,
                 user = userId,
-                sync = if (sync) 1 else null,
+                activity = activityJson.toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
+            )
+        }
+
+    override suspend fun qualify(userId: String, activityJson: String): ResultOf<QualifyResponse, RemoteError> =
+        request {
+            appcuesService.qualify(
+                account = accountId,
+                user = userId,
                 activity = activityJson.toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
             )
         }

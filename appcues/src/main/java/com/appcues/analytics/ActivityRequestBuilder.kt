@@ -34,6 +34,7 @@ internal class ActivityRequestBuilder(
 
     fun track(name: String, properties: HashMap<String, Any>? = null) = ActivityRequest(
         userId = storage.userId,
+        profileUpdate = decorator.autoProperties,
         accountId = config.accountId,
         groupId = storage.groupId,
         events = listOf(decorator.decorateTrack(EventRequest(name = name, attributes = properties ?: hashMapOf())))
@@ -41,6 +42,7 @@ internal class ActivityRequestBuilder(
 
     fun screen(title: String, properties: HashMap<String, Any>? = null) = ActivityRequest(
         userId = storage.userId,
+        profileUpdate = decorator.autoProperties,
         accountId = config.accountId,
         groupId = storage.groupId,
         events = listOf(

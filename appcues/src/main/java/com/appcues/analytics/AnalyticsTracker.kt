@@ -38,14 +38,14 @@ internal class AnalyticsTracker(
     }
 
     // convenience helper for internal events
-    fun track(event: AnalyticsEvent, properties: HashMap<String, Any>? = null, sync: Boolean = true) {
-        track(event.eventName, properties, sync)
+    fun track(event: AnalyticsEvent, properties: HashMap<String, Any>? = null, interactive: Boolean = true) {
+        track(event.eventName, properties, interactive)
     }
 
-    fun track(name: String, properties: HashMap<String, Any>? = null, sync: Boolean = true) {
+    fun track(name: String, properties: HashMap<String, Any>? = null, interactive: Boolean = true) {
         if (!sessionMonitor.checkSession("unable to track event")) return
         val activity = activityBuilder.track(name, properties)
-        if (sync) {
+        if (interactive) {
             queueThenFlush(activity)
         } else {
             queue(activity)
@@ -65,22 +65,24 @@ internal class AnalyticsTracker(
     // to be called when any pending activity should immediately be flushed to cache, and network if possible
     // i.e. app going to background / being killed
     fun flushAsync() {
-        flushPendingActivity(false)
+        synchronized(this) {
+            flushPendingActivity()
+        }
     }
 
     private fun queueThenFlush(activity: ActivityRequest) {
         synchronized(this) {
             flushTask?.cancel()
             pendingActivity.add(activity)
-            flushPendingActivity(true)
+            flushPendingActivity()
         }
     }
 
     private fun flushThenSend(activity: ActivityRequest) {
         synchronized(this) {
             flushTask?.cancel()
-            flushPendingActivity(false)
-            flush(activity, true)
+            flushPendingActivity()
+            flush(activity)
         }
     }
 
@@ -90,28 +92,28 @@ internal class AnalyticsTracker(
             if (flushTask == null) {
                 flushTask = Timer().schedule(FLUSH_AFTER_MILLISECONDS) {
                     synchronized(this@AnalyticsTracker) {
-                        flushPendingActivity(false)
+                        flushPendingActivity()
                     }
                 }
             }
         }
     }
 
-    private fun flushPendingActivity(sync: Boolean) {
+    private fun flushPendingActivity() {
         flushTask = null
         val activity = pendingActivity.merge()
         pendingActivity.clear()
         if (activity != null) {
-            flush(activity, sync)
+            flush(activity)
         }
     }
 
-    private fun flush(activity: ActivityRequest, sync: Boolean) {
+    private fun flush(activity: ActivityRequest) {
         appcuesCoroutineScope.launch {
             // this will respond with qualified experiences, if applicable
-            val experiences = repository.trackActivity(activity, sync)
+            val experiences = repository.trackActivity(activity)
 
-            if (sync && experiences.isNotEmpty()) {
+            if (experiences.isNotEmpty()) {
                 // note: by default we just show the first experience, but will need to revisit and allow
                 // for showing secondary qualified experience if the first fails to load for some reason
                 experienceRenderer.show(experiences.first())
@@ -124,10 +126,16 @@ internal fun List<ActivityRequest>.merge(): ActivityRequest? {
     if (isEmpty()) return null
     val activity = first()
     val events = mutableListOf<EventRequest>()
+    val profileUpdate = hashMapOf<String, Any>()
     forEach { item ->
+        // merge events
         item.events?.let {
             events.addAll(it)
         }
+        // merge auto properties in profile update
+        if (item.profileUpdate != null) {
+            profileUpdate.putAll(item.profileUpdate)
+        }
     }
-    return activity.copy(events = events)
+    return activity.copy(events = events, profileUpdate = profileUpdate)
 }

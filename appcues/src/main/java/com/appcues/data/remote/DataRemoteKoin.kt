@@ -12,7 +12,7 @@ import org.koin.dsl.ScopeDSL
 
 internal object DataRemoteKoin : KoinScopePlugin {
 
-    private const val BASE_URL = "https://api.appcues.com/"
+    private const val BASE_URL = "https://api.appcues.net/"
 
     override fun ScopeDSL.install(config: AppcuesConfig) {
         scoped { GsonConfiguration.getGson() }
