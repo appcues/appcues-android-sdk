@@ -117,12 +117,15 @@ internal class AppcuesRepository(
         val activity = queue.removeFirstOrNull() ?: return listOf()
 
         // `current` is the activity that triggered this processing, and may be qualifying
+        // it will be the last activity in the queue
         val isCurrent = activity == current
 
         var successful = true
         val experiences = mutableListOf<Experience>()
 
         if (isCurrent) {
+            // if we are processing the current item (last item in queue) - then use the /qualify
+            // endpoint and optionally get back qualified experiences to render
             val qualifyResult = appcuesRemoteSource.qualify(activity.userId, activity.data)
 
             qualifyResult.doIfSuccess { response ->
@@ -137,6 +140,8 @@ internal class AppcuesRepository(
                 }
             }
         } else {
+            // if we are processing non current items (retries) - then use the /activity
+            // endpoint, which will never returned qualified content, only ingest analytics
             val activityResult = appcuesRemoteSource.postActivity(activity.userId, activity.data)
 
             activityResult.doIfFailure {
