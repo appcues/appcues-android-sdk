@@ -19,7 +19,7 @@ internal class StepContainerResponseDeserializer : JsonDeserializer<StepContaine
         return when {
             // if it does NOT have null content, its just a step
             // check for actual null (no key in data) and JsonNull (has key but null value)
-            !(jsonObject.get("content")?.isJsonNull ?: true) -> deserializeFakeStepContainer(jsonObject, gson)
+            (jsonObject.get("content")?.isJsonNull ?: true).not() -> deserializeFakeStepContainer(jsonObject, gson)
             // else, its a real step container
             else -> deserializeRealStepContainer(jsonObject, gson)
         }
