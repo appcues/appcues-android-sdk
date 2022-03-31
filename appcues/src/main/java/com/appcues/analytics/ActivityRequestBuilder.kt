@@ -32,28 +32,36 @@ internal class ActivityRequestBuilder(
         groupUpdate = properties // no auto-properties on group calls
     )
 
-    fun track(name: String, properties: HashMap<String, Any>? = null) = ActivityRequest(
-        userId = storage.userId,
-        profileUpdate = decorator.autoProperties,
-        accountId = config.accountId,
-        groupId = storage.groupId,
-        events = listOf(decorator.decorateTrack(EventRequest(name = name, attributes = properties ?: hashMapOf())))
-    )
+    fun track(name: String, properties: HashMap<String, Any>? = null): ActivityRequest {
+        // must do this decoration first, so that any auto-prop updates resulting from it get applied before
+        // using in the profileUpdate below
+        val events = listOf(decorator.decorateTrack(EventRequest(name = name, attributes = properties ?: hashMapOf())))
+        return ActivityRequest(
+            userId = storage.userId,
+            profileUpdate = decorator.autoProperties,
+            accountId = config.accountId,
+            groupId = storage.groupId,
+            events = events
+        )
+    }
 
-    fun screen(title: String, properties: HashMap<String, Any>? = null) = ActivityRequest(
-        userId = storage.userId,
-        profileUpdate = decorator.autoProperties,
-        accountId = config.accountId,
-        groupId = storage.groupId,
-        events = listOf(
-            decorator.decorateTrack(
-                EventRequest(
-                    // screen calls are really just a special type of event: "appcues:screen_view"
-                    name = AnalyticsEvent.ScreenView.eventName,
-                    attributes = (properties ?: hashMapOf()).apply { put(SCREEN_TITLE_ATTRIBUTE, title) },
-                    context = hashMapOf(SCREEN_TITLE_CONTEXT to title)
-                )
+    fun screen(title: String, properties: HashMap<String, Any>? = null): ActivityRequest {
+        // must do this decoration first, so that any auto-prop updates resulting from it get applied before
+        // using in the profileUpdate below
+        val screenEvent = decorator.decorateTrack(
+            EventRequest(
+                // screen calls are really just a special type of event: "appcues:screen_view"
+                name = AnalyticsEvent.ScreenView.eventName,
+                attributes = (properties ?: hashMapOf()).apply { put(SCREEN_TITLE_ATTRIBUTE, title) },
+                context = hashMapOf(SCREEN_TITLE_CONTEXT to title)
             )
         )
-    )
+        return ActivityRequest(
+            userId = storage.userId,
+            profileUpdate = decorator.autoProperties,
+            accountId = config.accountId,
+            groupId = storage.groupId,
+            events = listOf(screenEvent)
+        )
+    }
 }

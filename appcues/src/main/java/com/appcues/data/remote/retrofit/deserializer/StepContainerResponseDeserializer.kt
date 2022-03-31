@@ -17,9 +17,10 @@ internal class StepContainerResponseDeserializer : JsonDeserializer<StepContaine
         val gson = Gson()
 
         return when {
-            // its just a step or a malformed step group
-            jsonObject.has("content") -> deserializeFakeStepContainer(jsonObject, gson)
-            // its a real step container
+            // if it does NOT have null content, its just a step
+            // check for actual null (no key in data) and JsonNull (has key but null value)
+            !(jsonObject.get("content")?.isJsonNull ?: true) -> deserializeFakeStepContainer(jsonObject, gson)
+            // else, its a real step container
             else -> deserializeRealStepContainer(jsonObject, gson)
         }
     }
