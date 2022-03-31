@@ -1,7 +1,6 @@
 package com.appcues.analytics
 
 import com.appcues.AppcuesCoroutineScope
-import com.appcues.SessionMonitor
 import com.appcues.data.AppcuesRepository
 import com.appcues.data.remote.request.ActivityRequest
 import com.appcues.data.remote.request.EventRequest
@@ -15,9 +14,9 @@ internal class AnalyticsTracker(
     private val appcuesCoroutineScope: AppcuesCoroutineScope,
     private val repository: AppcuesRepository,
     private val experienceRenderer: ExperienceRenderer,
-    private val sessionMonitor: SessionMonitor,
     private val activityBuilder: ActivityRequestBuilder,
-    experienceLifecycleTracker: ExperienceLifecycleTracker,
+    private val experienceLifecycleTracker: ExperienceLifecycleTracker,
+    private val analyticsPolicy: AnalyticsPolicy,
 ) {
     companion object {
         const val FLUSH_AFTER_MILLISECONDS: Long = 10000
@@ -33,7 +32,7 @@ internal class AnalyticsTracker(
     }
 
     fun identify(properties: HashMap<String, Any>? = null) {
-        if (!sessionMonitor.checkSession("unable to track user")) return
+        if (!analyticsPolicy.canIdentify()) return
         flushThenSend(activityBuilder.identify(properties))
     }
 
@@ -43,7 +42,7 @@ internal class AnalyticsTracker(
     }
 
     fun track(name: String, properties: HashMap<String, Any>? = null, interactive: Boolean = true) {
-        if (!sessionMonitor.checkSession("unable to track event")) return
+        if (!analyticsPolicy.canTrackEvent()) return
         val activity = activityBuilder.track(name, properties)
         if (interactive) {
             queueThenFlush(activity)
@@ -53,12 +52,12 @@ internal class AnalyticsTracker(
     }
 
     fun screen(title: String, properties: HashMap<String, Any>? = null) {
-        if (!sessionMonitor.checkSession("unable to track screen")) return
+        if (!analyticsPolicy.canTrackScreen(title)) return
         queueThenFlush(activityBuilder.screen(title, properties))
     }
 
     fun group(properties: HashMap<String, Any>? = null) {
-        if (!sessionMonitor.checkSession("unable to track group")) return
+        if (!analyticsPolicy.canTrackGroup()) return
         flushThenSend(activityBuilder.group(properties))
     }
 
