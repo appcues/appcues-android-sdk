@@ -8,7 +8,9 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -99,14 +101,29 @@ private fun Modifier.styleBorder(
 
 private fun Modifier.styleSize(style: ComponentStyle, noSizeFillMax: Boolean = false) = this.then(
     when {
-        style.width != null && style.height != null ->
-            Modifier.size(style.width.dp, style.height.dp)
-        style.width != null ->
-            Modifier.width(style.width.dp)
-        style.height != null ->
-            Modifier.height(style.height.dp)
-        noSizeFillMax ->
-            Modifier.fillMaxSize()
+        // when style contains both width and height
+        style.width != null && style.height != null -> when {
+            // we fill max if both properties are -1
+            style.width == -1 && style.height == -1 -> Modifier.fillMaxSize()
+            // or we set height and fill width in case only width is -1
+            style.width == -1 ->
+                Modifier
+                    .height(style.height.dp)
+                    .fillMaxWidth()
+            // or we set width and fill height in case only height is -1
+            style.height == -1 ->
+                Modifier
+                    .width(style.width.dp)
+                    .fillMaxHeight()
+            // else we set size with width and height
+            else -> Modifier.size(style.width.dp, style.height.dp)
+        }
+        // if only width is not null, we fill max in case its -1 else we set the width
+        style.width != null -> if (style.width == -1) Modifier.fillMaxWidth() else Modifier.width(style.width.dp)
+        // if only height is not null, we fill max in case its -1 else we set the height
+        style.height != null -> if (style.height == -1) Modifier.fillMaxHeight() else Modifier.height(style.height.dp)
+        // at the end we fill max size in case there is no width/height but the primitive (like image) is fillmax by default
+        noSizeFillMax -> Modifier.fillMaxSize()
         else -> Modifier
     }
 )
