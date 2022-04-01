@@ -3,6 +3,7 @@ package com.appcues
 import android.content.Context
 import com.appcues.action.ActionRegistry
 import com.appcues.action.ExperienceAction
+import com.appcues.analytics.ActivityScreenTracking
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.builder.ApiHostBuilderValidator
 import com.appcues.di.AppcuesKoinContext
@@ -22,6 +23,7 @@ class Appcues internal constructor(koinScope: Scope) {
     private val analyticsTracker by koinScope.inject<AnalyticsTracker>()
     private val storage by koinScope.inject<Storage>()
     private val sessionMonitor by koinScope.inject<SessionMonitor>()
+    private val activityScreenTracking by koinScope.inject<ActivityScreenTracking>()
 
     /**
      * Set the listener to be notified about the display of Experience content.
@@ -148,10 +150,10 @@ class Appcues internal constructor(koinScope: Scope) {
     }
 
     /**
-     * Enables automatic screen tracking. (Works for Activities)
+     * Enables automatic screen tracking for Activities.
      */
-    fun trackScreen() {
-        logcues.info("trackScreen()")
+    fun trackScreens() {
+        activityScreenTracking.trackScreens()
     }
 
     /**

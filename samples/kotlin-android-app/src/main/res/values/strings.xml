@@ -6,7 +6,7 @@
     <string name="skip_menu">Skip</string>
     <string name="user_id_label">User ID</string>
     <string name="title_activity_signin">Sign In</string>
-    <string name="title_activity_main">Appcues</string>
+    <string name="title_activity_main">Home</string>
     <string name="tab_events">Events</string>
     <string name="tab_profile">Profile</string>
     <string name="tab_group">Group</string>
