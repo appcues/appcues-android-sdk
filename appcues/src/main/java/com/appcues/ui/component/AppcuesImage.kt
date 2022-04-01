@@ -5,7 +5,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -20,10 +19,10 @@ import com.appcues.data.model.ExperiencePrimitive.ImagePrimitive
 import com.appcues.data.model.styling.ComponentContentMode
 import com.appcues.data.model.styling.ComponentContentMode.FILL
 import com.appcues.data.model.styling.ComponentContentMode.FIT
-import com.appcues.data.model.styling.ComponentSize
 import com.appcues.ui.LocalAppcuesActionDelegate
 import com.appcues.ui.LocalAppcuesActions
 import com.appcues.ui.extensions.PrimitiveGestureProperties
+import com.appcues.ui.extensions.imageAspectRatio
 import com.appcues.ui.extensions.primitiveStyle
 
 @Composable
@@ -71,10 +70,3 @@ private fun ComponentContentMode.toContentScale() = when (this) {
     FILL -> ContentScale.Crop
     FIT -> ContentScale.Fit
 }
-
-private fun Modifier.imageAspectRatio(intrinsicSize: ComponentSize?) = this.then(
-    // apply aspectRatio only when intrinsicSize is not null or any values is 0
-    if (intrinsicSize != null && (intrinsicSize.width > 0 && intrinsicSize.height > 0)) {
-        Modifier.aspectRatio(ratio = intrinsicSize.width.toFloat() / intrinsicSize.height.toFloat())
-    } else Modifier
-)

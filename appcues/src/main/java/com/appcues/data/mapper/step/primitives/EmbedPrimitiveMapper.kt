@@ -13,7 +13,7 @@ internal class EmbedPrimitiveMapper(
 
     fun map(from: StepContentResponse): EmbedHtmlPrimitive {
         return with(from) {
-            requireNotNull(embed) { throw AppcuesMappingException("image($id) imageUrl is null") }
+            requireNotNull(embed) { throw AppcuesMappingException("embed($id) embed is null") }
 
             EmbedHtmlPrimitive(
                 id = id,
