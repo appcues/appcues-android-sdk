@@ -7,6 +7,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -30,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import com.appcues.action.ExperienceAction
 import com.appcues.data.model.Action
 import com.appcues.data.model.ExperiencePrimitive
+import com.appcues.data.model.styling.ComponentSize
 import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.ui.StepDecoratingPadding
 import java.util.UUID
@@ -214,6 +216,13 @@ private fun List<Action>.toLongPressMotionOrNull(block: (ExperienceAction) -> Un
         // else returns null
         ?.run { { forEach { block(it) } } }
 }
+
+internal fun Modifier.imageAspectRatio(intrinsicSize: ComponentSize?) = this.then(
+    // apply aspectRatio only when intrinsicSize is not null or any values is 0
+    if (intrinsicSize != null && (intrinsicSize.width > 0 && intrinsicSize.height > 0)) {
+        Modifier.aspectRatio(ratio = intrinsicSize.width.toFloat() / intrinsicSize.height.toFloat())
+    } else Modifier
+)
 
 /**
  * used to properly align step decorating trait content
