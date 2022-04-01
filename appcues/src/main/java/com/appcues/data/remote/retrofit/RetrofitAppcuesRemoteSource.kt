@@ -1,5 +1,6 @@
 package com.appcues.data.remote.retrofit
 
+import com.appcues.SessionMonitor
 import com.appcues.Storage
 import com.appcues.data.remote.AppcuesRemoteSource
 import com.appcues.data.remote.RemoteError
@@ -19,11 +20,24 @@ internal class RetrofitAppcuesRemoteSource(
     private val accountId: String,
     private val storage: Storage,
     private val gson: Gson,
+    private val sessionMonitor: SessionMonitor,
 ) : AppcuesRemoteSource {
 
     override suspend fun getExperienceContent(experienceId: String): ResultOf<ExperienceResponse, RemoteError> =
         request {
             appcuesService.experienceContent(accountId, storage.userId, experienceId)
+        }
+
+    override suspend fun getExperiencePreview(experienceId: String): ResultOf<ExperienceResponse, RemoteError> =
+        // preview _can_ be personalized, so attempt to use the user info, if a valid session exists
+        if (sessionMonitor.isActive) {
+            request {
+                appcuesService.experiencePreview(accountId, storage.userId, experienceId)
+            }
+        } else {
+            request {
+                appcuesService.experiencePreview(accountId, experienceId)
+            }
         }
 
     override suspend fun postActivity(userId: String, activityJson: String): ResultOf<ActivityResponse, RemoteError> =

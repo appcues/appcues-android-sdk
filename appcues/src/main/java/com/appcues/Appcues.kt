@@ -1,6 +1,7 @@
 package com.appcues
 
 import android.content.Context
+import android.content.Intent
 import com.appcues.action.ActionRegistry
 import com.appcues.action.ExperienceAction
 import com.appcues.analytics.ActivityScreenTracking
@@ -24,6 +25,7 @@ class Appcues internal constructor(koinScope: Scope) {
     private val storage by koinScope.inject<Storage>()
     private val sessionMonitor by koinScope.inject<SessionMonitor>()
     private val activityScreenTracking by koinScope.inject<ActivityScreenTracking>()
+    private val deeplinkHandler by koinScope.inject<DeeplinkHandler>()
 
     /**
      * Set the listener to be notified about the display of Experience content.
@@ -161,6 +163,16 @@ class Appcues internal constructor(koinScope: Scope) {
      */
     fun debug() {
         logcues.info("debug()")
+    }
+
+    /**
+     * Notify Appcues of a new Intent to check for deep link content.  This should be used to pass along Intents
+     * that may be using the custom Appcues scheme, for things like previewing experiences.
+     *
+     * [intent] the Intent that the Appcues SDK should check for deep link content.
+     */
+    fun onNewIntent(intent: Intent?) {
+        deeplinkHandler.handle(intent)
     }
 
     private fun identify(isAnonymous: Boolean, userId: String, properties: HashMap<String, Any>?) {
