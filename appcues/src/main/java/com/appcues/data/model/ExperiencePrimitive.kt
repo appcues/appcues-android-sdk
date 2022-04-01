@@ -48,4 +48,11 @@ internal sealed class ExperiencePrimitive(
         val spacing: Int = 0,
         val distribution: ComponentDistribution = CENTER,
     ) : ExperiencePrimitive(id, style)
+
+    data class EmbedHtmlPrimitive(
+        override val id: UUID,
+        override val style: ComponentStyle = ComponentStyle(),
+        val embed: String,
+        val intrinsicSize: ComponentSize?,
+    ) : ExperiencePrimitive(id, style)
 }

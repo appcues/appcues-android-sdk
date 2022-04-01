@@ -33,7 +33,7 @@ internal class ExperienceLifecycleTracker(
     private val stateMachine: StateMachine by inject()
     private val storage: Storage by inject()
 
-    suspend fun start() = withContext(Dispatchers.IO) {
+    suspend fun start(): Unit = withContext(Dispatchers.IO) {
         stateMachine.stateResultFlow.collect { result ->
             when (result) {
                 is Success -> with(result.value) {

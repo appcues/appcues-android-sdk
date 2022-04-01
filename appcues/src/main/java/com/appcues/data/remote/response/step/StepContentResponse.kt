@@ -12,6 +12,7 @@ internal data class StepContentResponse(
     val style: StyleResponse? = null,
     val items: List<StepContentResponse>? = null,
     val imageUrl: String? = null,
+    val embed: String? = null,
     val contentMode: String? = null,
     val intrinsicSize: SizeResponse? = null,
     val accessibilityLabel: String? = null,

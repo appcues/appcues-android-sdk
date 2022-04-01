@@ -6,6 +6,7 @@ import com.appcues.data.mapper.experience.ExperienceMapper
 import com.appcues.data.mapper.step.StepContentMapper
 import com.appcues.data.mapper.step.StepMapper
 import com.appcues.data.mapper.step.primitives.ButtonPrimitiveMapper
+import com.appcues.data.mapper.step.primitives.EmbedPrimitiveMapper
 import com.appcues.data.mapper.step.primitives.ImagePrimitiveMapper
 import com.appcues.data.mapper.step.primitives.StackPrimitiveMapper
 import com.appcues.data.mapper.step.primitives.TextPrimitiveMapper
@@ -39,6 +40,7 @@ internal object DataMapperKoin : KoinScopePlugin {
                 textMapper = get(),
                 buttonMapper = get(),
                 imageMapper = get(),
+                embedMapper = get(),
             )
         }
 
@@ -46,6 +48,7 @@ internal object DataMapperKoin : KoinScopePlugin {
         scoped { ImagePrimitiveMapper() }
         scoped { StackPrimitiveMapper() }
         scoped { TextPrimitiveMapper() }
+        scoped { EmbedPrimitiveMapper() }
 
         scoped { ActionsMapper(actionRegistry = get()) }
         scoped { TraitsMapper(traitRegistry = get()) }
