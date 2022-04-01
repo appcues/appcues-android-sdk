@@ -5,7 +5,8 @@ import java.util.UUID
 internal data class Experience(
     val id: UUID,
     val name: String,
-    val stepContainers: List<StepContainer>
+    val stepContainers: List<StepContainer>,
+    val published: Boolean,
 ) {
 
     // will run once when creating the experience

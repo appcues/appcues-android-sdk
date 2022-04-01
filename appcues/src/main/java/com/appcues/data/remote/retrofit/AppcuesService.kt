@@ -31,4 +31,17 @@ internal interface AppcuesService {
         @Path("user") user: String,
         @Path("experienceId") experienceId: String,
     ): ExperienceResponse
+
+    @GET("v1/accounts/{account}/users/{user}/experience_preview/{experienceId}")
+    suspend fun experiencePreview(
+        @Path("account") account: String,
+        @Path("user") user: String,
+        @Path("experienceId") experienceId: String,
+    ): ExperienceResponse
+
+    @GET("v1/accounts/{account}/experience_preview/{experienceId}")
+    suspend fun experiencePreview(
+        @Path("account") account: String,
+        @Path("experienceId") experienceId: String,
+    ): ExperienceResponse
 }

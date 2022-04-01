@@ -33,7 +33,8 @@ internal class ExperienceMapper(
         return Experience(
             id = from.id,
             name = from.name,
-            stepContainers = from.steps.mapToStepContainer(from.traits, from.actions)
+            stepContainers = from.steps.mapToStepContainer(from.traits, from.actions),
+            published = from.state != "DRAFT" // "DRAFT" is used for experience preview in builder
         )
     }
 

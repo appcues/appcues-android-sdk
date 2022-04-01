@@ -17,6 +17,7 @@ import java.util.UUID
 
 internal val contentModalOneStubs = ExperienceResponse(
     id = UUID.fromString("9f4baa80-8f6a-41b1-a7b9-979da5c175e2"),
+    state = "PUBLISHED",
     name = "POC Modal One",
     theme = null,
     actions = null,

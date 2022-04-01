@@ -16,6 +16,7 @@ internal object AppcuesKoin : KoinScopePlugin {
         scoped { Logcues(config.loggingLevel) }
         scoped { StateMachine(appcuesCoroutineScope = get(), config = get()) }
         scoped { Storage(context = get(), config = get()) }
+        scoped { DeeplinkHandler(config = get(), appcues = get(), experienceRenderer = get()) }
         scoped {
             ExperienceRenderer(
                 appcuesCoroutineScope = get(),

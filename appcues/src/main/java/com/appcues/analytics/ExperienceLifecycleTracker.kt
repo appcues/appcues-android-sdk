@@ -9,10 +9,15 @@ import com.appcues.analytics.ExperienceLifecycleEvent.StepCompleted
 import com.appcues.analytics.ExperienceLifecycleEvent.StepError
 import com.appcues.analytics.ExperienceLifecycleEvent.StepSeen
 import com.appcues.statemachine.Error
+import com.appcues.statemachine.State
+import com.appcues.statemachine.State.BeginningExperience
+import com.appcues.statemachine.State.BeginningStep
 import com.appcues.statemachine.State.EndingExperience
 import com.appcues.statemachine.State.EndingStep
+import com.appcues.statemachine.State.Idling
 import com.appcues.statemachine.State.RenderingStep
 import com.appcues.statemachine.StateMachine
+import com.appcues.util.ResultOf
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
 import kotlinx.coroutines.Dispatchers
@@ -35,36 +40,38 @@ internal class ExperienceLifecycleTracker(
 
     suspend fun start(): Unit = withContext(Dispatchers.IO) {
         stateMachine.stateResultFlow.collect { result ->
-            when (result) {
-                is Success -> with(result.value) {
-                    when (this) {
-                        is RenderingStep -> {
-                            if (isFirst) {
-                                // update this value for auto-properties
-                                storage.lastContentShownAt = Date()
-                                trackLifecycleEvent(ExperienceStarted(experience))
+            if (result.shouldTrack()) { // will not track for unpublished (preview) experiences
+                when (result) {
+                    is Success -> with(result.value) {
+                        when (this) {
+                            is RenderingStep -> {
+                                if (isFirst) {
+                                    // update this value for auto-properties
+                                    storage.lastContentShownAt = Date()
+                                    trackLifecycleEvent(ExperienceStarted(experience))
+                                }
+                                trackLifecycleEvent(StepSeen(experience, flatStepIndex))
                             }
-                            trackLifecycleEvent(StepSeen(experience, flatStepIndex))
-                        }
-                        is EndingStep -> {
-                            trackLifecycleEvent(StepCompleted(experience, flatStepIndex))
-                        }
-                        is EndingExperience -> {
-                            if (flatStepIndex == experience.flatSteps.count() - 1) {
-                                // if ending on the last step - it was completed
-                                trackLifecycleEvent(ExperienceCompleted(experience))
-                            } else {
-                                // otherwise its considered dismissed (not completed)
-                                trackLifecycleEvent(ExperienceDismissed(experience, flatStepIndex))
+                            is EndingStep -> {
+                                trackLifecycleEvent(StepCompleted(experience, flatStepIndex))
                             }
+                            is EndingExperience -> {
+                                if (flatStepIndex == experience.flatSteps.count() - 1) {
+                                    // if ending on the last step - it was completed
+                                    trackLifecycleEvent(ExperienceCompleted(experience))
+                                } else {
+                                    // otherwise its considered dismissed (not completed)
+                                    trackLifecycleEvent(ExperienceDismissed(experience, flatStepIndex))
+                                }
+                            }
+                            else -> Unit
                         }
-                        else -> Unit
                     }
-                }
-                is Failure -> with(result.reason) {
-                    when (this) {
-                        is Error.ExperienceError -> trackLifecycleEvent(ExperienceError(this))
-                        is Error.StepError -> trackLifecycleEvent(StepError(this))
+                    is Failure -> with(result.reason) {
+                        when (this) {
+                            is Error.ExperienceError -> trackLifecycleEvent(ExperienceError(this))
+                            is Error.StepError -> trackLifecycleEvent(StepError(this))
+                        }
                     }
                 }
             }
@@ -74,4 +81,24 @@ internal class ExperienceLifecycleTracker(
     private fun trackLifecycleEvent(event: ExperienceLifecycleEvent) {
         analyticsTracker.track(event.name, event.properties, false)
     }
+
+    private fun ResultOf<State, Error>.shouldTrack(): Boolean =
+        when (this) {
+            is Success -> {
+                when (this.value) {
+                    is BeginningExperience -> value.experience.published
+                    is BeginningStep -> value.experience.published
+                    is EndingExperience -> value.experience.published
+                    is EndingStep -> value.experience.published
+                    is Idling -> false
+                    is RenderingStep -> value.experience.published
+                }
+            }
+            is Failure -> {
+                when (reason) {
+                    is Error.ExperienceError -> reason.experience.published
+                    is Error.StepError -> reason.experience.published
+                }
+            }
+        }
 }

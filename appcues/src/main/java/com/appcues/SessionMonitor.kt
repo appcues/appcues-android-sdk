@@ -28,7 +28,7 @@ internal class SessionMonitor(
     val sessionId: UUID?
         get() = _sessionId
 
-    private val isActive: Boolean
+    val isActive: Boolean
         get() = _sessionId != null
 
     private var applicationBackgrounded: Date? = null

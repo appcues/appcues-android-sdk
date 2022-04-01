@@ -11,5 +11,6 @@ internal data class ExperienceResponse(
     val theme: String?,
     val actions: HashMap<UUID, List<ActionResponse>>?,
     val traits: List<TraitResponse>,
-    val steps: List<StepContainerResponse>
+    val steps: List<StepContainerResponse>,
+    val state: String?,
 )

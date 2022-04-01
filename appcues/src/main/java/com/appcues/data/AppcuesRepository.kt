@@ -45,6 +45,18 @@ internal class AppcuesRepository(
         }
     }
 
+    suspend fun getExperiencePreview(experienceId: String): Experience? = withContext(Dispatchers.IO) {
+        appcuesRemoteSource.getExperiencePreview(experienceId).let {
+            when (it) {
+                is Success -> experienceMapper.map(it.value)
+                is Failure -> {
+                    logcues.info("Experience preview request failed, reason: ${it.reason}")
+                    null
+                }
+            }
+        }
+    }
+
     suspend fun trackActivity(activity: ActivityRequest): List<Experience> = withContext(Dispatchers.IO) {
 
         val activityStorage = ActivityStorage(activity.requestId, activity.accountId, activity.userId, gson.toJson(activity))
