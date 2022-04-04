@@ -8,6 +8,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.TimeUnit.SECONDS
 import kotlin.reflect.KClass
 
 internal class RetrofitWrapper(
@@ -15,6 +16,11 @@ internal class RetrofitWrapper(
     private val url: HttpUrl,
     private val isDebug: Boolean = BuildConfig.DEBUG
 ) {
+    companion object {
+        // we should not show an experience response if it takes > 5 seconds to return
+        // as it could be out of date with the content the user is now viewing
+        const val READ_TIMEOUT_SECONDS: Long = 5
+    }
 
     fun <T : Any> create(service: KClass<T>): T {
         return getRetrofit().create(service.java)
@@ -26,7 +32,9 @@ internal class RetrofitWrapper(
             if (isDebug) {
                 it.addInterceptor(getHttpLoggingInterceptor())
             }
-        }.build()
+        }
+            .readTimeout(READ_TIMEOUT_SECONDS, SECONDS)
+            .build()
 
         return Retrofit.Builder()
             .baseUrl(url)
