@@ -49,6 +49,7 @@ internal val contentModalOneStubs = ExperienceResponse(
                                             imageUrl = "https://res.cloudinary.com/dnjrorsut/image/upload/v1635971825/98227/oh5drlvojb1spaetc1ol.jpg",
                                             accessibilityLabel = "Mountains at night",
                                             contentMode = "fill",
+                                            blurHash = "LDAmob}[k6tSxyoMNFR*005RaiV?",
                                             intrinsicSize = SizeResponse(
                                                 width = 1920,
                                                 height = 1280,
