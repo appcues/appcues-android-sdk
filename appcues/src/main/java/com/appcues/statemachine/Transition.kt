@@ -27,7 +27,7 @@ internal open class Transition(
         stateMachine.handleAction(action)
     }
 
-    private fun ReportErrorEffect.applyEffect(stateMachine: StateMachine) {
+    private suspend fun ReportErrorEffect.applyEffect(stateMachine: StateMachine) {
         stateMachine.reportError(error)
     }
 
