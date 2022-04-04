@@ -14,6 +14,7 @@ internal data class StepContentResponse(
     val imageUrl: String? = null,
     val embed: String? = null,
     val contentMode: String? = null,
+    val blurHash: String? = null,
     val intrinsicSize: SizeResponse? = null,
     val accessibilityLabel: String? = null,
     val text: String? = null,

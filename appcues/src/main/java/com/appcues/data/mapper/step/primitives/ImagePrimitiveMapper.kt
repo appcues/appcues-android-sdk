@@ -24,6 +24,7 @@ internal class ImagePrimitiveMapper(
                 style = styleMapper.map(style),
                 intrinsicSize = intrinsicSize?.let { sizeMapper.map(it) },
                 contentMode = contentModeMapper.map(contentMode),
+                blurHash = blurHash,
             )
         }
     }
