@@ -1,5 +1,6 @@
 package com.appcues.ui.component
 
+import android.graphics.drawable.BitmapDrawable
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -11,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import coil.compose.rememberImagePainter
 import coil.size.OriginalSize
@@ -21,12 +23,17 @@ import com.appcues.data.model.styling.ComponentContentMode.FILL
 import com.appcues.data.model.styling.ComponentContentMode.FIT
 import com.appcues.ui.LocalAppcuesActionDelegate
 import com.appcues.ui.LocalAppcuesActions
+import com.appcues.ui.blurhash.BlurHashDecoder
 import com.appcues.ui.extensions.PrimitiveGestureProperties
 import com.appcues.ui.extensions.imageAspectRatio
 import com.appcues.ui.extensions.primitiveStyle
 
+private const val PLACEHOLDER_SIZE_PX = 32
+
 @Composable
 internal fun ImagePrimitive.Compose() {
+    val blurPlaceholder = BlurHashDecoder.decode(blurHash, PLACEHOLDER_SIZE_PX, PLACEHOLDER_SIZE_PX)
+
     Box(
         modifier = Modifier
             .primitiveStyle(
@@ -47,9 +54,14 @@ internal fun ImagePrimitive.Compose() {
         contentAlignment = Alignment.Center
     ) {
         Image(
+            modifier = Modifier.matchParentSize(),
             painter = rememberImagePainter(
                 data = url,
                 builder = {
+                    if (blurPlaceholder != null) {
+                        placeholder(BitmapDrawable(LocalContext.current.resources, blurPlaceholder))
+                    }
+
                     crossfade(true)
                     size(OriginalSize)
                     scale(contentMode.toCoilScale())

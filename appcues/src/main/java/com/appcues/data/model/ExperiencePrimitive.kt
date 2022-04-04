@@ -32,6 +32,7 @@ internal sealed class ExperiencePrimitive(
         val accessibilityLabel: String?,
         val intrinsicSize: ComponentSize?,
         val contentMode: ComponentContentMode = FILL,
+        val blurHash: String? = null,
     ) : ExperiencePrimitive(id, style)
 
     data class VerticalStackPrimitive(
