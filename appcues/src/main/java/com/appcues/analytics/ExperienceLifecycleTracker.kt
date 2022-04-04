@@ -71,6 +71,7 @@ internal class ExperienceLifecycleTracker(
                         when (this) {
                             is Error.ExperienceError -> trackLifecycleEvent(ExperienceError(this))
                             is Error.StepError -> trackLifecycleEvent(StepError(this))
+                            is Error.ExperienceAlreadyActive -> Unit
                         }
                     }
                 }
@@ -98,6 +99,7 @@ internal class ExperienceLifecycleTracker(
                 when (reason) {
                     is Error.ExperienceError -> reason.experience.published
                     is Error.StepError -> reason.experience.published
+                    is Error.ExperienceAlreadyActive -> false
                 }
             }
         }

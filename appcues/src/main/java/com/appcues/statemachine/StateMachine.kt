@@ -8,7 +8,7 @@ import com.appcues.statemachine.Action.ReportError
 import com.appcues.statemachine.Action.Reset
 import com.appcues.statemachine.Action.StartExperience
 import com.appcues.statemachine.Action.StartStep
-import com.appcues.statemachine.Error.ExperienceError
+import com.appcues.statemachine.Error.ExperienceAlreadyActive
 import com.appcues.statemachine.State.BeginningExperience
 import com.appcues.statemachine.State.BeginningStep
 import com.appcues.statemachine.State.EndingExperience
@@ -76,16 +76,14 @@ internal class StateMachine(
         }
     }
 
-    fun reportError(error: Error) {
-        appcuesCoroutineScope.launch {
-            _stateResultFlow.emit(Failure(error))
-        }
+    suspend fun reportError(error: Error) {
+        _stateResultFlow.emit(Failure(error))
     }
 
     private fun State.take(action: Action): Transition {
         return takeValidStateTransitions(this, action) ?: when (action) {
             // start experience action when experience is already active
-            is StartExperience -> ErrorLoggingTransition(ExperienceError(action.experience, "Experience already active"))
+            is StartExperience -> ErrorLoggingTransition(ExperienceAlreadyActive(action.experience, "Experience already active"))
             // report error action
             is ReportError -> ErrorLoggingTransition(action.error)
             // undefined transition - no-op
