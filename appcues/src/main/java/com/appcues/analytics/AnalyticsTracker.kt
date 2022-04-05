@@ -111,12 +111,7 @@ internal class AnalyticsTracker(
         appcuesCoroutineScope.launch {
             // this will respond with qualified experiences, if applicable
             val experiences = repository.trackActivity(activity)
-
-            if (experiences.isNotEmpty()) {
-                // note: by default we just show the first experience, but will need to revisit and allow
-                // for showing secondary qualified experience if the first fails to load for some reason
-                experienceRenderer.show(experiences.first())
-            }
+            experienceRenderer.show(experiences)
         }
     }
 }
