@@ -29,6 +29,24 @@ internal class ExperienceRenderer(
         }
     }
 
+    suspend fun show(qualifiedExperiences: List<Experience>): Boolean {
+        if (qualifiedExperiences.isEmpty()) {
+            // If given an empty list of qualified experiences, complete with a success because this function has completed without error.
+            // This function only recurses on a non-empty case, so this block only applies to the initial external call.
+            return true
+        }
+
+        val success = show(qualifiedExperiences.first())
+        if (!success) {
+            val remainingExperiences = qualifiedExperiences.drop(1)
+            if (remainingExperiences.isNotEmpty()) {
+                // fallback logic - try the next remaining experience, if available
+                return show(remainingExperiences)
+            }
+        }
+        return success
+    }
+
     suspend fun show(experienceId: String): Boolean {
         if (!sessionMonitor.checkSession("cannot show Experience $experienceId")) return false
 
