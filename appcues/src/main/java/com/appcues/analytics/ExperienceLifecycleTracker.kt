@@ -17,11 +17,9 @@ import com.appcues.statemachine.State.EndingStep
 import com.appcues.statemachine.State.Idling
 import com.appcues.statemachine.State.RenderingStep
 import com.appcues.statemachine.StateMachine
-import com.appcues.util.ResultOf
-import com.appcues.util.ResultOf.Failure
-import com.appcues.util.ResultOf.Success
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
@@ -39,41 +37,47 @@ internal class ExperienceLifecycleTracker(
     private val storage: Storage by inject()
 
     suspend fun start(): Unit = withContext(Dispatchers.IO) {
-        stateMachine.stateResultFlow.collect { result ->
-            if (result.shouldTrack()) { // will not track for unpublished (preview) experiences
-                when (result) {
-                    is Success -> with(result.value) {
-                        when (this) {
-                            is RenderingStep -> {
-                                if (isFirst) {
-                                    // update this value for auto-properties
-                                    storage.lastContentShownAt = Date()
-                                    trackLifecycleEvent(ExperienceStarted(experience))
-                                }
-                                trackLifecycleEvent(StepSeen(experience, flatStepIndex))
-                            }
-                            is EndingStep -> {
-                                trackLifecycleEvent(StepCompleted(experience, flatStepIndex))
-                            }
-                            is EndingExperience -> {
-                                if (flatStepIndex == experience.flatSteps.count() - 1) {
-                                    // if ending on the last step - it was completed
-                                    trackLifecycleEvent(ExperienceCompleted(experience))
-                                } else {
-                                    // otherwise its considered dismissed (not completed)
-                                    trackLifecycleEvent(ExperienceDismissed(experience, flatStepIndex))
-                                }
-                            }
-                            else -> Unit
+        launch { observeState() }
+        launch { observeErrors() }
+    }
+
+    private suspend fun observeState() {
+        stateMachine.stateFlow.collect {
+            if (it.shouldTrack()) { // will not track for unpublished (preview) experiences
+                when (it) {
+                    is RenderingStep -> {
+                        if (it.isFirst) {
+                            // update this value for auto-properties
+                            storage.lastContentShownAt = Date()
+                            trackLifecycleEvent(ExperienceStarted(it.experience))
+                        }
+                        trackLifecycleEvent(StepSeen(it.experience, it.flatStepIndex))
+                    }
+                    is EndingStep -> {
+                        trackLifecycleEvent(StepCompleted(it.experience, it.flatStepIndex))
+                    }
+                    is EndingExperience -> {
+                        if (it.flatStepIndex == it.experience.flatSteps.count() - 1) {
+                            // if ending on the last step - it was completed
+                            trackLifecycleEvent(ExperienceCompleted(it.experience))
+                        } else {
+                            // otherwise its considered dismissed (not completed)
+                            trackLifecycleEvent(ExperienceDismissed(it.experience, it.flatStepIndex))
                         }
                     }
-                    is Failure -> with(result.reason) {
-                        when (this) {
-                            is Error.ExperienceError -> trackLifecycleEvent(ExperienceError(this))
-                            is Error.StepError -> trackLifecycleEvent(StepError(this))
-                            is Error.ExperienceAlreadyActive -> Unit
-                        }
-                    }
+                    else -> Unit
+                }
+            }
+        }
+    }
+
+    private suspend fun observeErrors() {
+        stateMachine.errorFLow.collect {
+            if (it.shouldTrack()) { // will not track for unpublished (preview) experiences
+                when (it) {
+                    is Error.ExperienceError -> trackLifecycleEvent(ExperienceError(it))
+                    is Error.StepError -> trackLifecycleEvent(StepError(it))
+                    is Error.ExperienceAlreadyActive -> Unit
                 }
             }
         }
@@ -83,24 +87,20 @@ internal class ExperienceLifecycleTracker(
         analyticsTracker.track(event.name, event.properties, false)
     }
 
-    private fun ResultOf<State, Error>.shouldTrack(): Boolean =
+    private fun State.shouldTrack(): Boolean =
         when (this) {
-            is Success -> {
-                when (this.value) {
-                    is BeginningExperience -> value.experience.published
-                    is BeginningStep -> value.experience.published
-                    is EndingExperience -> value.experience.published
-                    is EndingStep -> value.experience.published
-                    is Idling -> false
-                    is RenderingStep -> value.experience.published
-                }
-            }
-            is Failure -> {
-                when (reason) {
-                    is Error.ExperienceError -> reason.experience.published
-                    is Error.StepError -> reason.experience.published
-                    is Error.ExperienceAlreadyActive -> false
-                }
-            }
+            is BeginningExperience -> experience.published
+            is BeginningStep -> experience.published
+            is EndingExperience -> experience.published
+            is EndingStep -> experience.published
+            is Idling -> false
+            is RenderingStep -> experience.published
+        }
+
+    private fun Error.shouldTrack(): Boolean =
+        when (this) {
+            is Error.ExperienceError -> experience.published
+            is Error.StepError -> experience.published
+            is Error.ExperienceAlreadyActive -> false
         }
 }

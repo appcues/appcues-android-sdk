@@ -9,6 +9,9 @@ import com.appcues.statemachine.Action.Reset
 import com.appcues.statemachine.Action.StartExperience
 import com.appcues.statemachine.Action.StartStep
 import com.appcues.statemachine.Error.ExperienceAlreadyActive
+import com.appcues.statemachine.SideEffect.ContinuationEffect
+import com.appcues.statemachine.SideEffect.PresentContainerEffect
+import com.appcues.statemachine.SideEffect.ReportErrorEffect
 import com.appcues.statemachine.State.BeginningExperience
 import com.appcues.statemachine.State.BeginningStep
 import com.appcues.statemachine.State.EndingExperience
@@ -17,36 +20,23 @@ import com.appcues.statemachine.State.Idling
 import com.appcues.statemachine.State.RenderingStep
 import com.appcues.statemachine.Transition.EmptyTransition
 import com.appcues.statemachine.Transition.ErrorLoggingTransition
-import com.appcues.util.ResultOf
-import com.appcues.util.ResultOf.Failure
-import com.appcues.util.ResultOf.Success
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.filterIsInstance
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
-
-internal typealias StateResult = ResultOf<State, Error>
 
 internal class StateMachine(
     private val appcuesCoroutineScope: AppcuesCoroutineScope,
     private val config: AppcuesConfig,
 ) {
 
-    private var _stateResultFlow = MutableSharedFlow<StateResult>(1)
-    val stateResultFlow: SharedFlow<StateResult>
-        get() = _stateResultFlow
-
-    // this provides a way to observer a flow that is only passing along
-    // state updates (no error cases)
+    private var _stateFlow = MutableSharedFlow<State>(1)
     val stateFlow: SharedFlow<State>
-        get() = stateResultFlow
-            .filterIsInstance<Success<State>>()
-            .map { it.value }
-            .shareIn(appcuesCoroutineScope, SharingStarted.Lazily, 1)
+        get() = _stateFlow
+
+    private var _errorFLow = MutableSharedFlow<Error>()
+    val errorFLow: SharedFlow<Error>
+        get() = _errorFLow
 
     private var _currentState: State = Idling()
 
@@ -64,20 +54,28 @@ internal class StateMachine(
 
     fun handleAction(action: Action) {
         appcuesCoroutineScope.launch {
-
-            // current state will take action and apply transition
-            _currentState.take(action).applyTransition(this@StateMachine) {
-                // update current state
-                _currentState = it
-
-                // emit state change to all listeners via flow
-                _stateResultFlow.emit(Success(it))
-            }
+            apply(action)
         }
     }
 
-    suspend fun reportError(error: Error) {
-        _stateResultFlow.emit(Failure(error))
+    private suspend fun apply(action: Action) {
+        val transition = _currentState.take(action)
+
+        transition.state?.let {
+            // update current state
+            _currentState = it
+
+            // emit state change to all listeners via flow
+            _stateFlow.emit(it)
+        }
+
+        transition.sideEffect?.let {
+            when (it) {
+                is ContinuationEffect -> apply(it.action)
+                is ReportErrorEffect -> _errorFLow.emit(it.error)
+                is PresentContainerEffect -> it.experience.stepContainers[it.containerIndex].presentingTrait.present()
+            }
+        }
     }
 
     private fun State.take(action: Action): Transition {
