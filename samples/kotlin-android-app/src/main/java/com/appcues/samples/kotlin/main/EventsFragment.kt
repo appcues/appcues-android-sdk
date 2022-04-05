@@ -5,8 +5,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.appcues.samples.kotlin.ExampleApplication
 import com.appcues.samples.kotlin.databinding.FragmentEventsBinding
+import kotlinx.coroutines.launch
 
 class EventsFragment : Fragment() {
 
@@ -34,7 +36,9 @@ class EventsFragment : Fragment() {
         }
 
         binding.buttonSampleModal.setOnClickListener {
-            appcues.show("1234")
+            viewLifecycleOwner.lifecycleScope.launch {
+                appcues.show("1234")
+            }
         }
 
         return binding.root
