@@ -17,16 +17,19 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.appcues.AppcuesCoroutineScope
 import com.appcues.R
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.StateMachine
 import com.appcues.trait.BackdropDecoratingTrait
 import com.appcues.trait.ContainerDecoratingTrait
+import kotlinx.coroutines.launch
 
 internal class SkippableTrait(
     override val config: AppcuesConfigMap,
-    private val stateMachine: StateMachine
+    private val stateMachine: StateMachine,
+    private val appcuesCoroutineScope: AppcuesCoroutineScope,
 ) : ContainerDecoratingTrait, BackdropDecoratingTrait {
 
     companion object {
@@ -42,7 +45,9 @@ internal class SkippableTrait(
                 .clip(CircleShape)
                 .size(30.dp, 30.dp),
             onClick = {
-                stateMachine.handleAction(EndExperience)
+                appcuesCoroutineScope.launch {
+                    stateMachine.handleAction(EndExperience)
+                }
             }
         ) {
             Image(
@@ -60,7 +65,9 @@ internal class SkippableTrait(
                 // add click listener but without any ripple effect, should this happen?
                 .pointerInput(Unit) {
                     detectTapGestures {
-                        stateMachine.handleAction(EndExperience)
+                        appcuesCoroutineScope.launch {
+                            stateMachine.handleAction(EndExperience)
+                        }
                     }
                 },
         )

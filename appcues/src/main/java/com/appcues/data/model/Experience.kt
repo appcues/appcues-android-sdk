@@ -9,6 +9,8 @@ internal data class Experience(
     val published: Boolean,
 ) {
 
+    val instanceId: UUID = UUID.randomUUID()
+
     // will run once when creating the experience
     val flatSteps: List<Step> = stepContainers.flatMap { it.steps }
 

@@ -121,8 +121,8 @@ class Appcues internal constructor(koinScope: Scope) {
      *
      * [experienceId] ID of the experience.
      */
-    fun show(experienceId: String) {
-        experienceRenderer.show(experienceId)
+    suspend fun show(experienceId: String): Boolean {
+        return experienceRenderer.show(experienceId)
     }
 
     /**
