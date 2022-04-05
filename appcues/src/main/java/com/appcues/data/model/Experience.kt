@@ -9,6 +9,8 @@ internal data class Experience(
     val published: Boolean,
 ) {
 
+    // a unique identifier for this instance of the Experience, for comparison purposes, in the
+    // situation where multiple experiences with the same `id` may be initiated simultaneously
     val instanceId: UUID = UUID.randomUUID()
 
     // will run once when creating the experience
