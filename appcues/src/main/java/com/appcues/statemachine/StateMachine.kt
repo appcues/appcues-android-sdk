@@ -20,13 +20,17 @@ import com.appcues.statemachine.State.Idling
 import com.appcues.statemachine.State.RenderingStep
 import com.appcues.statemachine.Transition.EmptyTransition
 import com.appcues.statemachine.Transition.ErrorLoggingTransition
+import com.appcues.util.ResultOf
+import com.appcues.util.ResultOf.Failure
+import com.appcues.util.ResultOf.Success
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.launch
 
 internal class StateMachine(
-    private val appcuesCoroutineScope: AppcuesCoroutineScope,
+    appcuesCoroutineScope: AppcuesCoroutineScope,
     private val config: AppcuesConfig,
 ) {
 
@@ -52,29 +56,45 @@ internal class StateMachine(
         }
     }
 
-    fun handleAction(action: Action) {
-        appcuesCoroutineScope.launch {
-            apply(action)
-        }
-    }
-
-    private suspend fun apply(action: Action) {
+    suspend fun handleAction(action: Action): ResultOf<State, Error> {
         val transition = _currentState.take(action)
+        val state = transition.state
+        val sideEffect = transition.sideEffect
 
-        transition.state?.let {
+        if (state != null) {
             // update current state
-            _currentState = it
+            _currentState = state
 
             // emit state change to all listeners via flow
-            _stateFlow.emit(it)
+            _stateFlow.emit(state)
         }
 
-        transition.sideEffect?.let {
-            when (it) {
-                is ContinuationEffect -> apply(it.action)
-                is ReportErrorEffect -> _errorFLow.emit(it.error)
-                is PresentContainerEffect -> it.experience.stepContainers[it.containerIndex].presentingTrait.present()
+        if (sideEffect != null) {
+            return when (sideEffect) {
+                is ContinuationEffect -> {
+                    // recursive call on continuations to get the final return value
+                    handleAction(sideEffect.action)
+                }
+                is ReportErrorEffect -> {
+                    _errorFLow.emit(sideEffect.error)
+                    // return a failure if this call to `handleAction` ended with a reported error
+                    Failure(sideEffect.error)
+                }
+                is PresentContainerEffect -> {
+                    // kick off UI
+                    sideEffect.experience.stepContainers[sideEffect.containerIndex].presentingTrait.present()
+                    // wait on the RenderingStep state to flow in from the UI
+                    stateFlow.takeWhile {
+                        val found = it is RenderingStep && it.experience.instanceId == sideEffect.experience.instanceId
+                        !found
+                    }.collect { }
+                    // return the success for RenderingState - the resting state of machine
+                    return Success(_currentState)
+                }
             }
+        } else {
+            // if no side effect, return success with current state
+            return Success(_currentState)
         }
     }
 
