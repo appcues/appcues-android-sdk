@@ -23,10 +23,11 @@ import com.appcues.statemachine.Transition.ErrorLoggingTransition
 import com.appcues.util.ResultOf
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
+import kotlinx.coroutines.channels.BufferOverflow.DROP_OLDEST
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.launch
 
 internal class StateMachine(
@@ -34,13 +35,17 @@ internal class StateMachine(
     private val config: AppcuesConfig,
 ) {
 
-    private var _stateFlow = MutableSharedFlow<State>(1)
+    private val _stateFlow = MutableSharedFlow<State>(1)
     val stateFlow: SharedFlow<State>
         get() = _stateFlow
 
-    private var _errorFLow = MutableSharedFlow<Error>()
+    private val _errorFLow = MutableSharedFlow<Error>()
     val errorFLow: SharedFlow<Error>
         get() = _errorFLow
+
+    // for internal convenience when one state transition depends on waiting for another transition
+    // to complete "outside the system" - i.e. a UI driven update
+    private val stateUpdateChannel = Channel<State>(capacity = 1, onBufferOverflow = DROP_OLDEST)
 
     private var _currentState: State = Idling()
 
@@ -52,6 +57,12 @@ internal class StateMachine(
                     is EndingExperience -> config.experienceListener?.experienceFinished(it.experience.id)
                     else -> Unit
                 }
+            }
+        }
+
+        appcuesCoroutineScope.launch {
+            stateFlow.collect {
+                stateUpdateChannel.send(it)
             }
         }
     }
@@ -84,12 +95,13 @@ internal class StateMachine(
                     // kick off UI
                     sideEffect.experience.stepContainers[sideEffect.containerIndex].presentingTrait.present()
                     // wait on the RenderingStep state to flow in from the UI
-                    stateFlow.takeWhile {
-                        val found = it is RenderingStep && it.experience.instanceId == sideEffect.experience.instanceId
-                        !found
-                    }.collect { }
+
+                    var updatedState = stateUpdateChannel.receive()
+                    while ((updatedState is RenderingStep && updatedState.experience.instanceId == sideEffect.experience.instanceId).not()) {
+                        updatedState = stateUpdateChannel.receive()
+                    }
                     // return the success for RenderingState - the resting state of machine
-                    return Success(_currentState)
+                    Success(updatedState)
                 }
             }
         } else {
