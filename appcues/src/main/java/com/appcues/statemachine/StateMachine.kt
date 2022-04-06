@@ -2,6 +2,7 @@ package com.appcues.statemachine
 
 import com.appcues.AppcuesConfig
 import com.appcues.AppcuesCoroutineScope
+import com.appcues.data.model.Experience
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.RenderStep
 import com.appcues.statemachine.Action.ReportError
@@ -29,6 +30,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlin.reflect.KClass
 
 internal class StateMachine(
     appcuesCoroutineScope: AppcuesCoroutineScope,
@@ -97,7 +99,7 @@ internal class StateMachine(
                     // wait on the RenderingStep state to flow in from the UI
 
                     var updatedState = stateUpdateChannel.receive()
-                    while ((updatedState is RenderingStep && updatedState.experience.instanceId == sideEffect.experience.instanceId).not()) {
+                    while (updatedState.matching(RenderingStep::class, sideEffect.experience).not()) {
                         updatedState = stateUpdateChannel.receive()
                     }
                     // return the success for RenderingState - the resting state of machine
@@ -108,6 +110,10 @@ internal class StateMachine(
             // if no side effect, return success with current state
             return Success(_currentState)
         }
+    }
+
+    private fun <T : State> State.matching(clazz: KClass<T>, experience: Experience): Boolean {
+        return clazz.isInstance(this) && this.experience?.instanceId == experience.instanceId
     }
 
     private fun State.take(action: Action): Transition {
