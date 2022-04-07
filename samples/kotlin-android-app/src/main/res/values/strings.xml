@@ -3,6 +3,7 @@
     <string name="default_user_id">default-0000</string>
     <string name="sign_in_button">Sign In</string>
     <string name="sign_out_menu">Sign Out</string>
+    <string name="events_menu_debug">Debug</string>
     <string name="skip_menu">Skip</string>
     <string name="user_id_label">User ID</string>
     <string name="title_activity_signin">Sign In</string>
