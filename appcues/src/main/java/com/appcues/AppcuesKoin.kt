@@ -5,6 +5,7 @@ import com.appcues.di.KoinScopePlugin
 import com.appcues.logging.Logcues
 import com.appcues.statemachine.StateMachine
 import com.appcues.ui.ExperienceRenderer
+import com.appcues.ui.debugger.AppcuesDebuggerManager
 import org.koin.dsl.ScopeDSL
 
 internal object AppcuesKoin : KoinScopePlugin {
@@ -17,6 +18,7 @@ internal object AppcuesKoin : KoinScopePlugin {
         scoped { StateMachine(appcuesCoroutineScope = get(), config = get()) }
         scoped { Storage(context = get(), config = get()) }
         scoped { DeeplinkHandler(config = get(), appcues = get(), experienceRenderer = get(), appcuesCoroutineScope = get()) }
+        scoped { AppcuesDebuggerManager(context = get()) }
         scoped {
             ExperienceRenderer(
                 repository = get(),

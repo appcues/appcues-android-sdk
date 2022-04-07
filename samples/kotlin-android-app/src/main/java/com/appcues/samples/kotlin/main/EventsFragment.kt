@@ -2,11 +2,15 @@ package com.appcues.samples.kotlin.main
 
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.appcues.samples.kotlin.ExampleApplication
+import com.appcues.samples.kotlin.R
 import com.appcues.samples.kotlin.databinding.FragmentEventsBinding
 import kotlinx.coroutines.launch
 
@@ -19,6 +23,11 @@ class EventsFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val appcues = ExampleApplication.appcues
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -52,5 +61,20 @@ class EventsFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.events_menu, menu)
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.events_menu_debug -> {
+                appcues.debug(requireActivity())
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 }

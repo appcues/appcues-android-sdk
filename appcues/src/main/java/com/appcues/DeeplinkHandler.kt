@@ -1,5 +1,6 @@
 package com.appcues
 
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import com.appcues.ui.ExperienceRenderer
@@ -12,7 +13,7 @@ internal class DeeplinkHandler(
     private val appcuesCoroutineScope: AppcuesCoroutineScope,
 ) {
 
-    fun handle(intent: Intent?) {
+    fun handle(activity: Activity, intent: Intent?) {
         val linkAction: String? = intent?.action
         val linkData: Uri? = intent?.data
 
@@ -32,7 +33,7 @@ internal class DeeplinkHandler(
                         experienceRenderer.show(segments[1])
                     }
                 }
-                segments.count() == 1 && segments[0] == "debugger" -> appcues.debug()
+                segments.count() == 1 && segments[0] == "debugger" -> appcues.debug(activity)
             }
         }
     }
