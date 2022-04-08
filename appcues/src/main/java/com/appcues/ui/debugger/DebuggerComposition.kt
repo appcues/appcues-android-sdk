@@ -1,166 +1,145 @@
 package com.appcues.ui.debugger
 
-import android.widget.Toast
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.dp
+import com.appcues.ui.debugger.DebuggerViewModel.UIState.Creating
+import com.appcues.ui.debugger.DebuggerViewModel.UIState.Dismissed
+import com.appcues.ui.debugger.DebuggerViewModel.UIState.Dismissing
+import com.appcues.ui.debugger.DebuggerViewModel.UIState.Dragging
+import com.appcues.ui.debugger.DebuggerViewModel.UIState.Expanded
+import com.appcues.ui.debugger.DebuggerViewModel.UIState.Idle
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 
 @Composable
-internal fun DebuggerComposition(onDismiss: () -> Unit) {
+internal fun DebuggerComposition(viewModel: DebuggerViewModel, onDismiss: () -> Unit) {
     val density = LocalDensity.current
-    val isVisible = rememberVisibilityState(onDismiss)
+    val debuggerState by remember { mutableStateOf(MutableDebuggerState(density)) }
 
-    AnimatedVisibility(
-        visibleState = isVisible,
-        enter = fadeIn(),
-        exit = fadeOut()
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .onSizeChanged { debuggerState.initFabOffsets(it) }
     ) {
-        val boxSize = remember { mutableStateOf(IntSize(0, 0)) }
-        val fabSize = 56.dp
-        val offsetX = remember { mutableStateOf(value = 0f) }
-        val offsetY = remember { mutableStateOf(value = 0f) }
 
-        LaunchInitialOffsetPositions(boxSize, fabSize, offsetX, offsetY)
+        DebuggerOnDragOverlay(
+            debuggerState = debuggerState,
+            onDismiss = { viewModel.onDismiss() }
+        )
 
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .onGloballyPositioned { boxSize.value = it.size }
-        ) {
-            val isDragging = remember { MutableTransitionState(false) }
-            val dismissRect = remember { mutableStateOf(Rect(Offset(0f, 0f), Size(0f, 0f))) }
-            val debuggerFabRect = Rect(
-                offset = Offset(offsetX.value, offsetY.value),
-                size = with(density) { Size(fabSize.toPx(), fabSize.toPx()) }
-            )
+        // Fab is last because it will show on top of everything else in this composition
+        DebuggerFloatingActionButton(
+            debuggerState = debuggerState,
+            onDragStart = { viewModel.onDragStart() },
+            onDragEnd = { viewModel.onDragEnd() },
+            onDrag = { debuggerState.updateFabOffsets(it) },
+            onClick = { viewModel.onExpand() }
+        )
+    }
 
-            DismissDebugger(
-                isDragging = isDragging,
-                dismissRect = dismissRect,
-            )
+    with(debuggerState.isVisible) {
+        LaunchedEffect(currentState) {
+            if (isIdle && currentState.not() && targetState.not()) {
+                // when current state and target state are set to hide and animation is idle
+                // we will call back to onDismiss
+                viewModel.onDismissAnimationCompleted()
+            }
+        }
+    }
 
-            val context = LocalContext.current
-            DebuggerFloatingActionButton(
-                isVisible = isVisible,
-                isDragging = isDragging,
-                parentSize = boxSize,
-                offsetX = offsetX,
-                offsetY = offsetY,
-                size = fabSize,
+    LaunchedUIStateEffect(
+        viewModel = viewModel,
+        debuggerState = debuggerState,
+        onDismiss = onDismiss,
+    )
+
+    // run once to transition state in viewModel
+    LaunchedEffect(Unit) {
+        viewModel.onInit()
+    }
+}
+
+@Composable
+private fun LaunchedUIStateEffect(
+    viewModel: DebuggerViewModel,
+    debuggerState: MutableDebuggerState,
+    onDismiss: () -> Unit
+) {
+    with(viewModel.uiState.collectAsState()) {
+        LaunchedEffect(value) {
+            when (value) {
+                Creating -> Unit
+                Idle -> {
+                    debuggerState.isVisible.targetState = true
+                    debuggerState.isDragging.targetState = false
+                }
+                Dragging -> {
+                    debuggerState.isDragging.targetState = true
+                }
+                // next work will be focused on the expanded state
+                Expanded -> Unit
+                Dismissing -> {
+                    animateFabToDismiss(
+                        debuggerState = debuggerState,
+                        onComplete = { viewModel.onDismissAnimationCompleted() },
+                    )
+
+                    debuggerState.isVisible.targetState = false
+                }
+                Dismissed -> onDismiss()
+            }
+        }
+    }
+}
+
+private fun CoroutineScope.animateFabToDismiss(
+    debuggerState: MutableDebuggerState,
+    onComplete: () -> Unit,
+) {
+    with(debuggerState) {
+        val channel = Channel<Boolean>()
+        launch {
+            Animatable(fabXOffset.value).animateTo(
+                targetValue = getDismissAreaTargetXOffset(),
+                animationSpec = tween(durationMillis = 300)
             ) {
-                Toast.makeText(context, "teste click", Toast.LENGTH_SHORT).show()
+                fabXOffset.value = value
             }
 
-            LaunchPostDraggingEffects(isDragging, dismissRect, debuggerFabRect, offsetX, offsetY, isVisible)
+            channel.send(true)
         }
-    }
-}
 
-private const val GRID_SCREEN_COUNT = 5
-private const val GRID_FAB_POSITION = 4
-
-@Composable
-private fun LaunchInitialOffsetPositions(
-    boxSize: MutableState<IntSize>,
-    fabSize: Dp,
-    offsetX: MutableState<Float>,
-    offsetY: MutableState<Float>
-) {
-    val density = LocalDensity.current
-    LaunchedEffect(boxSize) {
-        with(density) {
-            offsetX.value = boxSize.value.width.toFloat() - fabSize.toPx()
-            offsetY.value = ((boxSize.value.height.toFloat() / GRID_SCREEN_COUNT) * GRID_FAB_POSITION) - fabSize.toPx()
-        }
-    }
-}
-
-@Composable
-private fun LaunchPostDraggingEffects(
-    isDragging: MutableTransitionState<Boolean>,
-    dismissRect: MutableState<Rect>,
-    debuggerFabRect: Rect,
-    offsetX: MutableState<Float>,
-    offsetY: MutableState<Float>,
-    isVisible: MutableTransitionState<Boolean>
-) {
-    LaunchedEffect(isDragging.targetState) {
-        if (isDragging.targetState.not()) {
-
-            if (dismissRect.value.overlaps(debuggerFabRect)) {
-                val channel = Channel<Boolean>()
-                launch {
-                    Animatable(debuggerFabRect.topLeft.x).animateTo(
-                        targetValue = dismissRect.value.center.x - debuggerFabRect.size.width / 2,
-                        animationSpec = tween(durationMillis = 300)
-                    ) {
-                        offsetX.value = value
-                    }
-
-                    channel.send(true)
-                }
-
-                launch {
-                    Animatable(debuggerFabRect.topLeft.y).animateTo(
-                        targetValue = dismissRect.value.center.y - debuggerFabRect.size.height / 2,
-                        animationSpec = tween(durationMillis = 300)
-                    ) {
-                        offsetY.value = value
-                    }
-
-                    channel.send(true)
-                }
-
-                launch {
-                    var waitComplete = 2
-                    while (waitComplete > 0) {
-                        channel.receive()
-                        waitComplete -= 1
-                    }
-
-                    isVisible.targetState = false
-                }
+        launch {
+            Animatable(fabYOffset.value).animateTo(
+                targetValue = getDismissAreaTargetYOffset(),
+                animationSpec = tween(durationMillis = 300)
+            ) {
+                fabYOffset.value = value
             }
-        }
-    }
-}
 
-@Composable
-private fun rememberVisibilityState(onDismiss: () -> Unit): MutableTransitionState<Boolean> {
-    return remember { MutableTransitionState(false) }.also {
-        // On first composition, set target to visible
-        LaunchedEffect(Unit) {
-            it.targetState = true
+            channel.send(true)
         }
 
-        LaunchedEffect(it.currentState) {
-            // when current state and target state are set to hide and animation is idle
-            // we will call back to onDismiss
-            if (it.isIdle && it.currentState.not() && it.targetState.not()) {
-                onDismiss()
+        launch {
+            var waitComplete = 2
+            while (waitComplete > 0) {
+                channel.receive()
+                waitComplete -= 1
             }
+
+            onComplete()
         }
     }
 }
