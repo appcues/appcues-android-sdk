@@ -8,8 +8,9 @@ import android.os.Bundle
 import android.view.ViewGroup
 import androidx.compose.ui.platform.ComposeView
 import com.appcues.R
+import org.koin.core.scope.Scope
 
-internal class AppcuesDebuggerManager(context: Context) : Application.ActivityLifecycleCallbacks {
+internal class AppcuesDebuggerManager(context: Context, private val koinScope: Scope) : Application.ActivityLifecycleCallbacks {
 
     private val application = context.applicationContext as Application
 
@@ -51,7 +52,7 @@ internal class AppcuesDebuggerManager(context: Context) : Application.ActivityLi
                         layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
 
                         setContent {
-                            DebuggerComposition {
+                            DebuggerComposition(DebuggerViewModel(scope = koinScope)) {
                                 stop()
                                 it.removeView(this)
                             }
