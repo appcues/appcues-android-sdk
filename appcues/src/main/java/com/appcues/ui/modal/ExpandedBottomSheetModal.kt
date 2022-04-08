@@ -1,3 +1,5 @@
+package com.appcues.ui.modal
+
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween

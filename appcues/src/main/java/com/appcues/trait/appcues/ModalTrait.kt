@@ -1,6 +1,5 @@
 package com.appcues.trait.appcues
 
-import ExpandedBottomSheetModal
 import androidx.compose.runtime.Composable
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.getConfigOrDefault
@@ -8,6 +7,7 @@ import com.appcues.data.model.getConfigStyle
 import com.appcues.trait.ContentWrappingTrait
 import com.appcues.ui.modal.BottomSheetModal
 import com.appcues.ui.modal.DialogModal
+import com.appcues.ui.modal.ExpandedBottomSheetModal
 import com.appcues.ui.modal.FullScreenModal
 
 internal class ModalTrait(
