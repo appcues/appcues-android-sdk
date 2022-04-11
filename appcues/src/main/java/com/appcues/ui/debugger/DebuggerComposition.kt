@@ -34,9 +34,13 @@ internal fun DebuggerComposition(viewModel: DebuggerViewModel, onDismiss: () -> 
             .onSizeChanged { debuggerState.initFabOffsets(it) }
     ) {
 
-        DebuggerOnDragOverlay(
+        DebuggerOnDrag(
             debuggerState = debuggerState,
             onDismiss = { viewModel.onDismiss() }
+        )
+
+        DebuggerPanel(
+            debuggerState = debuggerState
         )
 
         // Fab is last because it will show on top of everything else in this composition
@@ -45,7 +49,7 @@ internal fun DebuggerComposition(viewModel: DebuggerViewModel, onDismiss: () -> 
             onDragStart = { viewModel.onDragStart() },
             onDragEnd = { viewModel.onDragEnd() },
             onDrag = { debuggerState.updateFabOffsets(it) },
-            onClick = { viewModel.onExpand() }
+            onClick = { viewModel.onFabClick() }
         )
     }
 
@@ -82,14 +86,21 @@ private fun LaunchedUIStateEffect(
             when (value) {
                 Creating -> Unit
                 Idle -> {
+                    animateFabToIdle(debuggerState = debuggerState)
+
                     debuggerState.isVisible.targetState = true
                     debuggerState.isDragging.targetState = false
+                    debuggerState.isExpanded.targetState = false
                 }
                 Dragging -> {
                     debuggerState.isDragging.targetState = true
                 }
                 // next work will be focused on the expanded state
-                Expanded -> Unit
+                Expanded -> {
+                    animateFabToExpanded(debuggerState = debuggerState)
+
+                    debuggerState.isExpanded.targetState = true
+                }
                 Dismissing -> {
                     animateFabToDismiss(
                         debuggerState = debuggerState,
@@ -99,6 +110,52 @@ private fun LaunchedUIStateEffect(
                     debuggerState.isVisible.targetState = false
                 }
                 Dismissed -> onDismiss()
+            }
+        }
+    }
+}
+
+private fun CoroutineScope.animateFabToExpanded(debuggerState: MutableDebuggerState) {
+    with(debuggerState) {
+        launch {
+            Animatable(fabXOffset.value).animateTo(
+                targetValue = getExpandedFabAnchor().x,
+                animationSpec = tween(durationMillis = 250)
+            ) {
+                fabXOffset.value = value
+            }
+        }
+
+        launch {
+            Animatable(fabYOffset.value).animateTo(
+                targetValue = getExpandedFabAnchor().y,
+                animationSpec = tween(durationMillis = 350)
+            ) {
+                fabYOffset.value = value
+            }
+        }
+    }
+}
+
+private fun CoroutineScope.animateFabToIdle(debuggerState: MutableDebuggerState) {
+    with(debuggerState) {
+        if (shouldAnimateToIdle().not()) return
+
+        launch {
+            Animatable(fabXOffset.value).animateTo(
+                targetValue = getLastIdleFabAnchor().x,
+                animationSpec = tween(durationMillis = 350)
+            ) {
+                fabXOffset.value = value
+            }
+        }
+
+        launch {
+            Animatable(fabYOffset.value).animateTo(
+                targetValue = getLastIdleFabAnchor().y,
+                animationSpec = tween(durationMillis = 250)
+            ) {
+                fabYOffset.value = value
             }
         }
     }

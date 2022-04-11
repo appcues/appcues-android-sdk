@@ -20,10 +20,13 @@ internal class MutableDebuggerState(private val density: Density, val fabSize: D
 
         private const val GRID_SCREEN_COUNT = 5
         private const val GRID_FAB_POSITION = 4
+        private val EXPANDED_CONTAINER_TOP_PADDING = 8.dp
     }
 
     val isVisible = MutableTransitionState(false)
     val isDragging = MutableTransitionState(false)
+    val isExpanded = MutableTransitionState(false)
+
     val fabXOffset = mutableStateOf(value = 0f)
     val fabYOffset = mutableStateOf(value = 0f)
 
@@ -88,5 +91,27 @@ internal class MutableDebuggerState(private val density: Density, val fabSize: D
 
     fun getDismissAreaTargetYOffset(): Float {
         return dismissRect.center.y - fabRect.size.height / 2
+    }
+
+    fun getExpandedContainerHeight(): Dp {
+        return with(density) {
+            boxSize.height.toDp() - (fabSize / 2) - EXPANDED_CONTAINER_TOP_PADDING
+        }
+    }
+
+    fun getExpandedFabAnchor(): Offset {
+        return with(density) {
+            Offset((boxSize.width - fabSize.toPx()) / 2, EXPANDED_CONTAINER_TOP_PADDING.toPx())
+        }
+    }
+
+    fun getLastIdleFabAnchor(): Offset {
+        return fabRect.topLeft
+    }
+
+    fun shouldAnimateToIdle(): Boolean {
+        return fabRect.topLeft.let {
+            it.x != fabXOffset.value && it.y != fabYOffset.value
+        }
     }
 }

@@ -56,7 +56,11 @@ internal class DebuggerViewModel(
         _uiState.value = Dismissing
     }
 
-    fun onExpand() {
-        _uiState.value = Expanded
+    fun onFabClick() {
+        if (_uiState.value == Idle) {
+            _uiState.value = Expanded
+        } else if (_uiState.value == Expanded) {
+            _uiState.value = Idle
+        }
     }
 }

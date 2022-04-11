@@ -2,6 +2,7 @@ package com.appcues.ui.debugger
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -34,6 +35,8 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.appcues.R.drawable
 
+private const val FAB_DRAGGING_SIZE_MULTIPLIER = 1.1f
+
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 internal fun BoxScope.DebuggerFloatingActionButton(
@@ -51,10 +54,17 @@ internal fun BoxScope.DebuggerFloatingActionButton(
             .align(Alignment.TopStart)
             .offset { debuggerState.getFabPositionAsIntOffset() }
     ) {
+        val elevation = animateDpAsState(targetValue = if (debuggerState.isDragging.targetState) 8.dp else 4.dp)
+        val size = animateDpAsState(
+            targetValue = if (debuggerState.isDragging.targetState)
+                debuggerState.fabSize.times(FAB_DRAGGING_SIZE_MULTIPLIER)
+            else
+                debuggerState.fabSize
+        )
         Box(
             modifier = Modifier
                 .shadow(
-                    elevation = 8.dp,
+                    elevation = elevation.value,
                     shape = RoundedCornerShape(percent = 100),
                     ambientColor = Color(color = 0xFF5C5CFF),
                     spotColor = Color(color = 0xFF000000)
@@ -77,7 +87,7 @@ internal fun BoxScope.DebuggerFloatingActionButton(
                         }
                     )
                 }
-                .size(size = debuggerState.fabSize)
+                .size(size = size.value)
                 .clip(RoundedCornerShape(percent = 100))
                 .background(
                     brush = Brush.horizontalGradient(
