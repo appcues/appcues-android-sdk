@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 import com.appcues.R.drawable
 
 @Composable
-internal fun BoxScope.DebuggerOnDragOverlay(
+internal fun BoxScope.DebuggerOnDrag(
     debuggerState: MutableDebuggerState,
     onDismiss: () -> Unit,
 ) {
