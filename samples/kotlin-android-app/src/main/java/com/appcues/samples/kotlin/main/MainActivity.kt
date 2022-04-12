@@ -1,5 +1,7 @@
 package com.appcues.samples.kotlin.main
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
@@ -31,5 +33,25 @@ class MainActivity : AppCompatActivity() {
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+
+        handleLinkIntent(intent)
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        handleLinkIntent(intent)
+    }
+
+    private fun handleLinkIntent(intent: Intent?) {
+        val action: String? = intent?.action
+        val data: Uri? = intent?.data
+
+        if (action == Intent.ACTION_VIEW) {
+            when (data?.host) {
+                "events" -> binding.navView.selectedItemId = id.navigation_events
+                "profile" -> binding.navView.selectedItemId = id.navigation_profile
+                "group" -> binding.navView.selectedItemId = id.navigation_group
+            }
+        }
     }
 }

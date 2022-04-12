@@ -6,7 +6,7 @@ internal sealed class Action {
     data class StartExperience(val experience: Experience) : Action()
     data class StartStep(val stepReference: StepReference) : Action()
     object RenderStep : Action()
-    object EndExperience : Action()
+    data class EndExperience(val destroyed: Boolean) : Action()
     object Reset : Action()
     data class ReportError(val error: Error) : Action()
 }

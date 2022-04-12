@@ -15,14 +15,41 @@
         tools:targetApi="n">
         <activity
             android:name=".main.MainActivity"
-            android:exported="false"
-            android:label="@string/title_activity_main" />
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:label="@string/title_activity_main">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="appcues-example" android:host="events" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="appcues-example" android:host="profile" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="appcues-example" android:host="group" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".signin.SignInActivity"
+            android:launchMode="singleTask"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="appcues-example" android:host="signin" />
             </intent-filter>
         </activity>
     </application>
