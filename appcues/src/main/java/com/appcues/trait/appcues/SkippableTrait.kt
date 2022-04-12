@@ -46,7 +46,7 @@ internal class SkippableTrait(
                 .size(30.dp, 30.dp),
             onClick = {
                 appcuesCoroutineScope.launch {
-                    stateMachine.handleAction(EndExperience)
+                    stateMachine.handleAction(EndExperience(false))
                 }
             }
         ) {
@@ -66,7 +66,7 @@ internal class SkippableTrait(
                 .pointerInput(Unit) {
                     detectTapGestures {
                         appcuesCoroutineScope.launch {
-                            stateMachine.handleAction(EndExperience)
+                            stateMachine.handleAction(EndExperience(false))
                         }
                     }
                 },

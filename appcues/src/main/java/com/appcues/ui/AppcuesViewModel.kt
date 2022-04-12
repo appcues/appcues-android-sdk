@@ -3,6 +3,7 @@ package com.appcues.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.appcues.Appcues
+import com.appcues.AppcuesCoroutineScope
 import com.appcues.action.ExperienceAction
 import com.appcues.data.model.StepContainer
 import com.appcues.statemachine.Action
@@ -37,6 +38,7 @@ internal class AppcuesViewModel(
     val stateMachine by inject<StateMachine>()
 
     private val appcues by inject<Appcues>()
+    private val appcuesCoroutineScope by inject<AppcuesCoroutineScope>()
 
     private val _uiState = MutableStateFlow<UIState>(Idle)
 
@@ -114,7 +116,18 @@ internal class AppcuesViewModel(
             // if current state IS Rendering then we process the action
             if (state is Rendering) {
                 viewModelScope.launch {
-                    stateMachine.handleAction(EndExperience)
+                    stateMachine.handleAction(EndExperience(false))
+                }
+            }
+        }
+    }
+
+    fun onDestroy() {
+        uiState.value.let { state ->
+            // if current state IS Rendering then we process the action
+            if (state is Rendering) {
+                appcuesCoroutineScope.launch {
+                    stateMachine.handleAction(EndExperience(true))
                 }
             }
         }

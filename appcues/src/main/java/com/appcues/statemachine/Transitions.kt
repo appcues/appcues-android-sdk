@@ -67,9 +67,18 @@ internal interface Transitions {
     }
 
     fun RenderingStep.fromRenderingStepToEndingExperience(action: EndExperience): Transition {
-        // instead of using sideEffect we pass EndExperience on EndingStep
-        // then AppcuesViewModel will continue to EndExperience when appropriate
-        return Transition(EndingStep(experience, flatStepIndex, EndExperience), null)
+        return if (action.destroyed) {
+            // this means the AppcuesActivity was destroyed externally (i.e. deeplink) and we should
+            // immediately transition to EndingExperience - not rely on the UI to do it for us (it's gone)
+            Transition(EndingStep(experience, flatStepIndex, null), ContinuationEffect(action))
+        } else {
+            // otherwise, its a natural end of experience from an in-experience action / dismiss
+            // and should be communicated to the UI layer to dismiss itself.
+            //
+            // instead of using sideEffect we pass EndExperience on EndingStep
+            // then AppcuesViewModel will continue to EndExperience when appropriate
+            Transition(EndingStep(experience, flatStepIndex, action), null)
+        }
     }
 
     fun EndingStep.fromEndingStepToEndingExperience(action: EndExperience): Transition {
