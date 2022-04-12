@@ -82,7 +82,7 @@ internal interface Transitions {
     }
 
     fun EndingStep.fromEndingStepToEndingExperience(action: EndExperience): Transition {
-        return Transition(EndingExperience(experience, flatStepIndex), ContinuationEffect(Reset))
+        return Transition(EndingExperience(experience, flatStepIndex, action.markComplete), ContinuationEffect(Reset))
     }
 
     fun EndingStep.fromEndingStepToBeginningStep(action: StartStep): Transition {
