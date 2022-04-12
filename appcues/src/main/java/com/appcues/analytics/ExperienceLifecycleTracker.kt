@@ -18,7 +18,6 @@ import com.appcues.statemachine.State.Idling
 import com.appcues.statemachine.State.RenderingStep
 import com.appcues.statemachine.StateMachine
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinScopeComponent
@@ -57,11 +56,12 @@ internal class ExperienceLifecycleTracker(
                         trackLifecycleEvent(StepCompleted(it.experience, it.flatStepIndex))
                     }
                     is EndingExperience -> {
-                        if (it.flatStepIndex == it.experience.flatSteps.count() - 1) {
-                            // if ending on the last step - it was completed
+                        if (it.markComplete || it.flatStepIndex == it.experience.flatSteps.count() - 1) {
+                            // if ending on the last step OR an action requested it be considered complete explicitly,
+                            // track the experience_completed event
                             trackLifecycleEvent(ExperienceCompleted(it.experience))
                         } else {
-                            // otherwise its considered dismissed (not completed)
+                            // otherwise its considered experience_dismissed (not completed)
                             trackLifecycleEvent(ExperienceDismissed(it.experience, it.flatStepIndex))
                         }
                     }

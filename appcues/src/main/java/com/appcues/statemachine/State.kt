@@ -16,5 +16,5 @@ internal sealed class State(open val experience: Experience?) {
         val dismissAndContinue: Action?
     ) : State(experience)
 
-    data class EndingExperience(override val experience: Experience, val flatStepIndex: Int) : State(experience)
+    data class EndingExperience(override val experience: Experience, val flatStepIndex: Int, val markComplete: Boolean) : State(experience)
 }
