@@ -1,6 +1,8 @@
 package com.appcues.ui.component
 
 import android.graphics.drawable.BitmapDrawable
+import android.os.Build.VERSION.SDK_INT
+import android.os.Build.VERSION_CODES
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -14,7 +16,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
+import coil.ImageLoader
 import coil.compose.rememberImagePainter
+import coil.decode.GifDecoder
+import coil.decode.ImageDecoderDecoder
+import coil.decode.SvgDecoder
 import coil.size.OriginalSize
 import coil.size.Scale
 import com.appcues.data.model.ExperiencePrimitive.ImagePrimitive
@@ -33,6 +39,17 @@ private const val PLACEHOLDER_SIZE_PX = 32
 @Composable
 internal fun ImagePrimitive.Compose() {
     val blurPlaceholder = BlurHashDecoder.decode(blurHash, PLACEHOLDER_SIZE_PX, PLACEHOLDER_SIZE_PX)
+    val context = LocalContext.current
+    val imageLoader = ImageLoader.Builder(context)
+        .componentRegistry {
+            if (SDK_INT >= VERSION_CODES.P) {
+                add(ImageDecoderDecoder(context))
+            } else {
+                add(GifDecoder())
+            }
+            add(SvgDecoder(context))
+        }
+        .build()
 
     Box(
         modifier = Modifier
@@ -56,6 +73,7 @@ internal fun ImagePrimitive.Compose() {
         Image(
             modifier = Modifier.matchParentSize(),
             painter = rememberImagePainter(
+                imageLoader = imageLoader,
                 data = url,
                 builder = {
                     if (blurPlaceholder != null) {
