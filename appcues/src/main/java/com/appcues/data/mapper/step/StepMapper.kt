@@ -22,8 +22,8 @@ internal class StepMapper(
         superTraits: List<TraitResponse>,
         superActions: HashMap<UUID, List<ActionResponse>>?,
     ): Step {
-        val mergedTraits = from.traits.mergeTraits(superTraits)
-        val mergedActions = from.actions.mergeActions(superActions)
+        val mergedTraits = from.traits?.mergeTraits(superTraits) ?: superTraits
+        val mergedActions = from.actions?.mergeActions(superActions) ?: superActions
 
         return Step(
             id = from.id,

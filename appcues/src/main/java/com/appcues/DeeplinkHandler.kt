@@ -13,7 +13,7 @@ internal class DeeplinkHandler(
     private val appcuesCoroutineScope: AppcuesCoroutineScope,
 ) {
 
-    fun handle(activity: Activity, intent: Intent?) {
+    fun handle(activity: Activity, intent: Intent?): Boolean {
         val linkAction: String? = intent?.action
         val linkData: Uri? = intent?.data
 
@@ -27,14 +27,22 @@ internal class DeeplinkHandler(
                     appcuesCoroutineScope.launch {
                         experienceRenderer.preview(segments[1])
                     }
+                    return true
                 }
                 segments.count() == 2 && segments[0] == "experience_content" -> {
                     appcuesCoroutineScope.launch {
                         experienceRenderer.show(segments[1])
                     }
+                    return true
                 }
-                segments.count() == 1 && segments[0] == "debugger" -> appcues.debug(activity)
+                segments.count() == 1 && segments[0] == "debugger" -> {
+                    appcues.debug(activity)
+                    return true
+                }
+                else -> return false
             }
+        } else {
+            return false
         }
     }
 }

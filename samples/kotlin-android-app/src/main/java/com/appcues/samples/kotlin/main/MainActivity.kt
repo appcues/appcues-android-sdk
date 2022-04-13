@@ -8,6 +8,7 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.appcues.samples.kotlin.ExampleApplication
 import com.appcues.samples.kotlin.R.id
 import com.appcues.samples.kotlin.databinding.ActivityMainBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -43,14 +44,18 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun handleLinkIntent(intent: Intent?) {
-        val action: String? = intent?.action
-        val data: Uri? = intent?.data
+        val appcuesHandled = ExampleApplication.appcues.onNewIntent(this, intent)
 
-        if (action == Intent.ACTION_VIEW) {
-            when (data?.host) {
-                "events" -> binding.navView.selectedItemId = id.navigation_events
-                "profile" -> binding.navView.selectedItemId = id.navigation_profile
-                "group" -> binding.navView.selectedItemId = id.navigation_group
+        if (!appcuesHandled) {
+            val action: String? = intent?.action
+            val data: Uri? = intent?.data
+
+            if (action == Intent.ACTION_VIEW) {
+                when (data?.host) {
+                    "events" -> binding.navView.selectedItemId = id.navigation_events
+                    "profile" -> binding.navView.selectedItemId = id.navigation_profile
+                    "group" -> binding.navView.selectedItemId = id.navigation_group
+                }
             }
         }
     }

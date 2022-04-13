@@ -43,12 +43,12 @@ class ProfileFragment : Fragment() {
 
             val givenName = binding.editTextGivenName.text.toString()
             if (givenName.isNotEmpty()) {
-                properties["givenName"] = givenName
+                properties["given_name"] = givenName
             }
 
             val familyName = binding.editTextFamilyName.text.toString()
             if (familyName.isNotEmpty()) {
-                properties["familyName"] = familyName
+                properties["family_name"] = familyName
             }
 
             appcues.identify(ExampleApplication.currentUserID, properties)
