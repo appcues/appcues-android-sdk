@@ -16,6 +16,7 @@ internal class DeeplinkHandler(
     fun handle(activity: Activity, intent: Intent?): Boolean {
         val linkAction: String? = intent?.action
         val linkData: Uri? = intent?.data
+        var handled = false
 
         if (linkAction == Intent.ACTION_VIEW &&
             linkData?.scheme == "appcues-${config.applicationId}" &&
@@ -27,22 +28,21 @@ internal class DeeplinkHandler(
                     appcuesCoroutineScope.launch {
                         experienceRenderer.preview(segments[1])
                     }
-                    return true
+                    handled = true
                 }
                 segments.count() == 2 && segments[0] == "experience_content" -> {
                     appcuesCoroutineScope.launch {
                         experienceRenderer.show(segments[1])
                     }
-                    return true
+                    handled = true
                 }
                 segments.count() == 1 && segments[0] == "debugger" -> {
                     appcues.debug(activity)
-                    return true
+                    handled = true
                 }
-                else -> return false
             }
-        } else {
-            return false
         }
+
+        return handled
     }
 }
