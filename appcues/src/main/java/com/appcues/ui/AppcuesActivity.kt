@@ -173,11 +173,6 @@ internal class AppcuesActivity : AppCompatActivity() {
         viewModel.onBackPressed()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        viewModel.onDestroy()
-    }
-
     override fun finish() {
         super.finish()
         // remove exit animation from this activity

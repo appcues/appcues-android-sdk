@@ -123,6 +123,8 @@ class Appcues internal constructor(koinScope: Scope) {
      * Forces specific Appcues experience to appear for the current user by passing in the [experienceId].
      *
      * [experienceId] ID of the experience.
+     *
+     * * @return true if experience content was able to be shown, false if not.
      */
     suspend fun show(experienceId: String): Boolean {
         return experienceRenderer.show(experienceId)
@@ -174,10 +176,11 @@ class Appcues internal constructor(koinScope: Scope) {
      *
      * [activity] the current activity handling the intent
      * [intent] the Intent that the Appcues SDK should check for deep link content.
+     *
+     * @return true if a deep link was handled by the Appcues SDK, false if not - meaning the host application should process.
      */
-    fun onNewIntent(activity: Activity, intent: Intent?) {
+    fun onNewIntent(activity: Activity, intent: Intent?): Boolean =
         deeplinkHandler.handle(activity, intent)
-    }
 
     private fun identify(isAnonymous: Boolean, userId: String, properties: HashMap<String, Any>?) {
         if (userId.isEmpty()) {

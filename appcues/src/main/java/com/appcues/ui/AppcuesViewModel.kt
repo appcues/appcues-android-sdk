@@ -75,6 +75,22 @@ internal class AppcuesViewModel(
         }
     }
 
+    // handling the special case where the AppcuesActivity is removed by the OS from outside
+    // normal experience interactions (i.e. a deeplink)
+    override fun onCleared() {
+        super.onCleared()
+
+        uiState.value.let { state ->
+            // if current state IS Rendering this means that the Activity was removed
+            // from an external source (ex deeplink) and we should end the experience
+            if (state is Rendering) {
+                appcuesCoroutineScope.launch {
+                    stateMachine.handleAction(EndExperience(true))
+                }
+            }
+        }
+    }
+
     private fun BeginningStep.toRenderingState(): Rendering? {
         return with(experience) {
             // find the container index
@@ -117,17 +133,6 @@ internal class AppcuesViewModel(
             if (state is Rendering) {
                 viewModelScope.launch {
                     stateMachine.handleAction(EndExperience(false))
-                }
-            }
-        }
-    }
-
-    fun onDestroy() {
-        uiState.value.let { state ->
-            // if current state IS Rendering then we process the action
-            if (state is Rendering) {
-                appcuesCoroutineScope.launch {
-                    stateMachine.handleAction(EndExperience(true))
                 }
             }
         }

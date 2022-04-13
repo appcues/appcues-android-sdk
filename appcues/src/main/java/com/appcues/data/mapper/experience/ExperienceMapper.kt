@@ -42,9 +42,9 @@ internal class ExperienceMapper(
         superTraits: List<TraitResponse>,
         superActions: HashMap<UUID, List<ActionResponse>>?
     ) = map { stepContainerResponse ->
-        val mergedTraits = stepContainerResponse.traits.mergeTraits(superTraits)
+        val mergedTraits = stepContainerResponse.traits?.mergeTraits(superTraits) ?: superTraits
         val mappedTraits = traitsMapper.map(mergedTraits)
-        val mergedActions = stepContainerResponse.actions.mergeActions(superActions)
+        val mergedActions = stepContainerResponse.actions?.mergeActions(superActions) ?: superActions
 
         // this is where we will use groups to organize steps into stepContainers
         // also merge all necessary traits for each step
