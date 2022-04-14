@@ -28,6 +28,9 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 internal fun BoxScope.DebuggerPanel(debuggerState: MutableDebuggerState, onBackdropClick: () -> Unit) {
+    // don't show if current debugger is paused
+    if (debuggerState.isPaused.value) return
+
     AnimatedVisibility(
         visibleState = debuggerState.isExpanded,
         enter = fadeIn(),

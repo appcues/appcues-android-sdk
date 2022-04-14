@@ -27,6 +27,9 @@ internal fun BoxScope.DebuggerOnDrag(
     debuggerState: MutableDebuggerState,
     onDismiss: () -> Unit,
 ) {
+    // don't show if current debugger is paused
+    if (debuggerState.isPaused.value) return
+
     // show content when we are dragging
     AnimatedVisibility(
         modifier = Modifier.align(Alignment.BottomCenter),
