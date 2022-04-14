@@ -11,6 +11,7 @@ import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 
@@ -30,7 +31,19 @@ internal fun AppcuesTheme(
 }
 
 private fun getColors(isDark: Boolean): Colors {
-    return if (isDark) darkColors() else lightColors()
+
+    return if (isDark)
+        darkColors().copy(
+            background = Color.Transparent,
+            onBackground = Color.Transparent,
+            surface = Color.Transparent
+        )
+    else
+        lightColors().copy(
+            background = Color.Transparent,
+            onBackground = Color.Transparent,
+            surface = Color.Transparent
+        )
 }
 
 /**
