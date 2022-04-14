@@ -35,7 +35,7 @@ internal class PagingDotsTrait(
 
     companion object {
         const val TYPE = "@appcues/paging-dots"
-        private const val DEFAULT_PADDING = 8
+        private const val DEFAULT_PADDING = 16
     }
 
     private val style = config.getConfigStyle("style")
@@ -67,8 +67,7 @@ internal class PagingDotsTrait(
                     (DEFAULT_PADDING + (style?.marginTop ?: 0)).dp,
                     (DEFAULT_PADDING + (style?.marginTrailing ?: 0)).dp,
                     (DEFAULT_PADDING + (style?.marginBottom ?: 0)).dp
-                )
-                .padding(8.dp),
+                ),
             contentAlignment = Alignment.CenterStart
         ) {
             Row(
