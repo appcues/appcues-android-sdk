@@ -1,22 +1,23 @@
 package com.appcues.analytics
 
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.OnLifecycleEvent
+import androidx.lifecycle.ProcessLifecycleOwner
 import com.appcues.AppcuesCoroutineScope
 import com.appcues.SessionMonitor
 import com.appcues.logging.Logcues
 import com.appcues.statemachine.State.BeginningExperience
 import com.appcues.statemachine.State.EndingExperience
 import com.appcues.statemachine.StateMachine
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import java.util.Timer
-import kotlin.concurrent.schedule
 
 internal class AnalyticsPolicy(
     private val sessionMonitor: SessionMonitor,
     private val appcuesCoroutineScope: AppcuesCoroutineScope,
     private val stateMachine: StateMachine,
     private val logcues: Logcues,
-) {
+) : LifecycleObserver {
 
     private var lastScreen: String? = null
     private var activeExperienceScreen: String? = null
@@ -26,6 +27,7 @@ internal class AnalyticsPolicy(
         get() = experienceActiveCount > 0
 
     init {
+        ProcessLifecycleOwner.get().lifecycle.addObserver(this)
         appcuesCoroutineScope.launch {
             stateMachine.stateFlow.collect {
                 when (it) {
@@ -35,26 +37,27 @@ internal class AnalyticsPolicy(
                     }
                     is EndingExperience -> {
                         experienceActiveCount--
-
-                        // this is to handle the edge case of
-                        // (1) screen view qualifies an experience
-                        // (2) experience completes and returns to customer activity
-                        // (3) app is backgrounded
-                        // (4) app is foregrounded
-                        // after (4) the next onResume should be allowed to track the screen
-                        // so if sufficient time has passed (1 sec) to avoid the initial onResume re-trigger of screen
-                        // this will clear out the activeExperienceScreen and allow screen events to flow again with
-                        // the same name.
-                        //
-                        // this is needed, since after (2) the onResume() happens _before_ the state machine
-                        // fully transitions to EndingExperience here.
-                        Timer().schedule(1) {
-                            activeExperienceScreen = null
-                        }
                     }
                     else -> Unit
                 }
             }
+        }
+    }
+
+    @Suppress("unused")
+    @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+    fun onLifecycleProcessPause() {
+        // this is to handle the edge case of
+        // (1) screen view qualifies an experience
+        // (2) experience completes and returns to customer activity
+        // (3) app is backgrounded
+        // (4) app is foregrounded
+        // after (4) the next onResume should be allowed to track the screen with same name.
+        //
+        // this is needed, since after (2) the onResume() happens _before_ the state machine
+        // fully transitions to EndingExperience here.
+        if (experienceActiveCount == 0) {
+            activeExperienceScreen = null
         }
     }
 
