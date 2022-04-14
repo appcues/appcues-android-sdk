@@ -1,7 +1,7 @@
 package com.appcues.ui.debugger
 
+import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.ViewModel
-import com.appcues.statemachine.StateMachine
 import com.appcues.ui.debugger.DebuggerViewModel.UIState.Creating
 import com.appcues.ui.debugger.DebuggerViewModel.UIState.Dismissed
 import com.appcues.ui.debugger.DebuggerViewModel.UIState.Dismissing
@@ -11,7 +11,6 @@ import com.appcues.ui.debugger.DebuggerViewModel.UIState.Idle
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.koin.core.component.KoinScopeComponent
-import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 
 internal class DebuggerViewModel(
@@ -21,13 +20,11 @@ internal class DebuggerViewModel(
     sealed class UIState {
         object Creating : UIState()
         object Idle : UIState()
-        object Dragging : UIState()
+        data class Dragging(val dragAmount: Offset) : UIState()
         object Expanded : UIState()
         object Dismissing : UIState()
         object Dismissed : UIState()
     }
-
-    val stateMachine by inject<StateMachine>()
 
     private val _uiState = MutableStateFlow<UIState>(Creating)
 
@@ -44,8 +41,8 @@ internal class DebuggerViewModel(
         }
     }
 
-    fun onDragStart() {
-        _uiState.value = Dragging
+    fun onDragging(dragAmount: Offset) {
+        _uiState.value = Dragging(dragAmount)
     }
 
     fun onDragEnd() {
@@ -60,6 +57,18 @@ internal class DebuggerViewModel(
         if (_uiState.value == Idle) {
             _uiState.value = Expanded
         } else if (_uiState.value == Expanded) {
+            _uiState.value = Idle
+        }
+    }
+
+    fun onBackPress() {
+        if (_uiState.value == Expanded) {
+            _uiState.value = Idle
+        }
+    }
+
+    fun onBackdropClick() {
+        if (_uiState.value == Expanded) {
             _uiState.value = Idle
         }
     }

@@ -6,53 +6,102 @@ import android.app.Application
 import android.content.Context
 import android.os.Bundle
 import android.view.ViewGroup
+import androidx.activity.ComponentActivity
+import androidx.activity.OnBackPressedCallback
 import androidx.compose.ui.platform.ComposeView
+import androidx.fragment.app.FragmentActivity
 import com.appcues.R
+import com.appcues.ui.debugger.DebuggerViewModel.UIState.Expanded
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.launch
 import org.koin.core.scope.Scope
+import kotlin.coroutines.CoroutineContext
 
 internal class AppcuesDebuggerManager(context: Context, private val koinScope: Scope) : Application.ActivityLifecycleCallbacks {
 
+    private val coroutineScope: CoroutineScope = object : CoroutineScope {
+        override val coroutineContext: CoroutineContext = SupervisorJob() + Dispatchers.Main
+    }
+
     private val application = context.applicationContext as Application
 
-    lateinit var currentActivity: Activity
+    private var debuggerViewModel: DebuggerViewModel? = null
 
-    fun start(currentActivity: Activity) {
-        this.currentActivity = currentActivity
+    private lateinit var currentActivity: Activity
 
-        addDebuggerView()
+    private val onBackPressCallback = object : OnBackPressedCallback(false) {
+
+        override fun handleOnBackPressed() {
+            debuggerViewModel?.onBackPress()
+        }
+    }
+
+    fun start(activity: Activity) {
+        this.currentActivity = activity
+        coroutineScope.coroutineContext.cancelChildren()
+        debuggerViewModel = DebuggerViewModel(scope = koinScope).also {
+            coroutineScope.launch {
+                it.uiState.collect { state -> onBackPressCallback.isEnabled = state is Expanded }
+            }
+
+            addDebuggerView(activity, it)
+        }
 
         application.registerActivityLifecycleCallbacks(this)
+
+        setDebuggerBackPressCallback(activity)
     }
 
     private fun stop() {
+        coroutineScope.coroutineContext.cancelChildren()
+
+        removeDebuggerView(this.currentActivity)
+
         application.unregisterActivityLifecycleCallbacks(this)
+        onBackPressCallback.remove()
     }
 
-    override fun onActivityStarted(activity: Activity) {
+    override fun onActivityResumed(activity: Activity) {
         this.currentActivity = activity
+
+        debuggerViewModel?.let { addDebuggerView(activity, it) }
     }
 
-    override fun onActivityCreated(activity: Activity, bundle: Bundle?) = Unit
-    override fun onActivityResumed(activity: Activity) = Unit
+    override fun onActivityPostResumed(activity: Activity) {
+        // not sure if this is necessary but I wanted to make sure we register our back press after everyone else
+        // in case customer is using fragments with the same approach then our callback must be the last one so we can better
+        // control native back press by enabling and disabling on our side
+        setDebuggerBackPressCallback(activity)
+        // also to make sure that if they change fragment, we will register again after the new fragment is attached
+        (activity as FragmentActivity).supportFragmentManager.addFragmentOnAttachListener { _, _ ->
+            setDebuggerBackPressCallback(activity)
+        }
+    }
+
     override fun onActivityPaused(activity: Activity) = Unit
+    override fun onActivityStarted(activity: Activity) = Unit
     override fun onActivityStopped(activity: Activity) = Unit
+    override fun onActivityCreated(activity: Activity, bundle: Bundle?) = Unit
     override fun onActivitySaveInstanceState(activity: Activity, bundle: Bundle) = Unit
     override fun onActivityDestroyed(activity: Activity) = Unit
 
-    private fun addDebuggerView() {
-        currentActivity.window.decorView.findViewById<ViewGroup>(android.R.id.content).also {
+    private fun addDebuggerView(activity: Activity, debuggerViewModel: DebuggerViewModel) {
+        getParentView(activity).also {
             // if view is not there
             if (it.findViewById<ComposeView>(R.id.appcues_debugger_view) == null) {
                 // then we add
                 it.addView(
-                    ComposeView(currentActivity).apply {
+                    ComposeView(activity).apply {
 
                         id = R.id.appcues_debugger_view
 
                         layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
 
                         setContent {
-                            DebuggerComposition(DebuggerViewModel(scope = koinScope)) {
+                            DebuggerComposition(debuggerViewModel) {
                                 stop()
                                 it.removeView(this)
                             }
@@ -60,6 +109,31 @@ internal class AppcuesDebuggerManager(context: Context, private val koinScope: S
                     }
                 )
             }
+        }
+    }
+
+    private fun removeDebuggerView(activity: Activity) {
+        getParentView(activity).also {
+            it.findViewById<ComposeView?>(R.id.appcues_debugger_view)?.run {
+                it.removeView(this)
+            }
+        }
+    }
+
+    private fun getParentView(activity: Activity): ViewGroup {
+        // if there is any difference in API levels we can handle it here
+        return activity.window.decorView.findViewById<ViewGroup>(android.R.id.content)
+            .let { it.parent as ViewGroup }
+            .let { it.parent as ViewGroup }
+    }
+
+    private fun setDebuggerBackPressCallback(activity: Activity) {
+        // add onBackPressedDispatcher to handle internally native android back press when debugger is expanded
+        if (activity is ComponentActivity) {
+            onBackPressCallback.remove()
+
+            // attach to the new activity
+            activity.onBackPressedDispatcher.addCallback(onBackPressCallback)
         }
     }
 }

@@ -170,7 +170,14 @@ internal class AppcuesActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        viewModel.onBackPressed()
+        // if we have a back pressed dispatcher enabled then we call it. its not a good practice
+        // not call super onBackPressed but sometimes people do it, in that case the debugger wont
+        // consume the back press properly and there is nothing we can do about it.
+        if (onBackPressedDispatcher.hasEnabledCallbacks()) {
+            super.onBackPressed()
+        } else {
+            viewModel.onBackPressed()
+        }
     }
 
     override fun finish() {
