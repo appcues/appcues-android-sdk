@@ -14,18 +14,21 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
 
-internal class MutableDebuggerState(private val density: Density, val fabSize: Dp = 56.dp) {
+internal class MutableDebuggerState(private val density: Density, private val isCreating: Boolean, val fabSize: Dp = 56.dp) {
 
     companion object {
 
         private const val GRID_SCREEN_COUNT = 5
         private const val GRID_FAB_POSITION = 4
-        private val EXPANDED_CONTAINER_TOP_PADDING = 8.dp
+        private val EXPANDED_CONTAINER_TOP_PADDING = 24.dp
+
+        private var lastKnownPosition = Offset(0f, 0f)
     }
 
-    val isVisible = MutableTransitionState(false)
+    val isVisible = MutableTransitionState(isCreating.not())
     val isDragging = MutableTransitionState(false)
     val isExpanded = MutableTransitionState(false)
+    val isPaused = mutableStateOf(value = false)
 
     val fabXOffset = mutableStateOf(value = 0f)
     val fabYOffset = mutableStateOf(value = 0f)
@@ -38,10 +41,19 @@ internal class MutableDebuggerState(private val density: Density, val fabSize: D
         boxSize = size
 
         with(density) {
-            fabXOffset.value = size.width.toFloat() - fabSize.toPx()
-            fabYOffset.value = ((size.height.toFloat() / GRID_SCREEN_COUNT) * GRID_FAB_POSITION) - fabSize.toPx()
-
-            updateFabRect()
+            // if we are creating (meaning the debugger was started) we calculate the initial position,
+            // else we just use the last known position we have
+            if (isCreating) {
+                updatePosition(
+                    x = size.width.toFloat() - fabSize.toPx(),
+                    y = ((size.height.toFloat() / GRID_SCREEN_COUNT) * GRID_FAB_POSITION) - fabSize.toPx()
+                )
+            } else {
+                updatePosition(
+                    x = lastKnownPosition.x,
+                    y = lastKnownPosition.y
+                )
+            }
         }
     }
 
@@ -51,21 +63,29 @@ internal class MutableDebuggerState(private val density: Density, val fabSize: D
 
     fun updateFabOffsets(dragAmount: Offset) {
         with(density) {
-            fabXOffset.value = (fabXOffset.value + dragAmount.x)
-                .coerceIn(0f, boxSize.width.toFloat() - fabSize.toPx())
-
-            fabYOffset.value = (fabYOffset.value + dragAmount.y)
-                .coerceIn(0f, boxSize.height.toFloat() - fabSize.toPx())
-
-            updateFabRect()
+            updatePosition(
+                x = (fabXOffset.value + dragAmount.x).coerceIn(0f, boxSize.width.toFloat() - fabSize.toPx()),
+                y = (fabYOffset.value + dragAmount.y).coerceIn(0f, boxSize.height.toFloat() - fabSize.toPx())
+            )
         }
     }
 
-    private fun Density.updateFabRect() {
-        fabRect = Rect(
-            offset = Offset(fabXOffset.value, fabYOffset.value),
-            size = Size(fabSize.toPx(), fabSize.toPx())
-        )
+    private fun updatePosition(x: Float, y: Float) {
+        fabXOffset.value = x
+        fabYOffset.value = y
+        updateFabRect(x, y)
+
+        // update global offset value with latest update
+        lastKnownPosition = Offset(x, y)
+    }
+
+    private fun updateFabRect(x: Float, y: Float) {
+        with(density) {
+            fabRect = Rect(
+                offset = Offset(x, y),
+                size = Size(fabSize.toPx(), fabSize.toPx())
+            )
+        }
     }
 
     fun initDismissAreaRect(layoutCoordinates: LayoutCoordinates) {

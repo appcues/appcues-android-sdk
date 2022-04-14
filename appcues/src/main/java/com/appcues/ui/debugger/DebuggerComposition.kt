@@ -5,7 +5,9 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -13,6 +15,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.Lifecycle.Event
+import androidx.lifecycle.Lifecycle.Event.ON_ANY
+import androidx.lifecycle.LifecycleEventObserver
 import com.appcues.ui.debugger.DebuggerViewModel.UIState.Creating
 import com.appcues.ui.debugger.DebuggerViewModel.UIState.Dismissed
 import com.appcues.ui.debugger.DebuggerViewModel.UIState.Dismissing
@@ -26,7 +33,12 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun DebuggerComposition(viewModel: DebuggerViewModel, onDismiss: () -> Unit) {
     val density = LocalDensity.current
-    val debuggerState by remember { mutableStateOf(MutableDebuggerState(density)) }
+    val debuggerState by remember { mutableStateOf(MutableDebuggerState(density, viewModel.uiState.value == Creating)) }
+
+    // listening for lifecycle changes to update isPaused properly
+    LocalLifecycleOwner.current.lifecycle.observeAsSate().let {
+        debuggerState.isPaused.value = it.value == Event.ON_PAUSE
+    }
 
     Box(
         modifier = Modifier
@@ -40,15 +52,15 @@ internal fun DebuggerComposition(viewModel: DebuggerViewModel, onDismiss: () -> 
         )
 
         DebuggerPanel(
-            debuggerState = debuggerState
+            debuggerState = debuggerState,
+            onBackdropClick = { viewModel.onBackdropClick() }
         )
 
         // Fab is last because it will show on top of everything else in this composition
         DebuggerFloatingActionButton(
             debuggerState = debuggerState,
-            onDragStart = { viewModel.onDragStart() },
             onDragEnd = { viewModel.onDragEnd() },
-            onDrag = { debuggerState.updateFabOffsets(it) },
+            onDrag = { viewModel.onDragging(it) },
             onClick = { viewModel.onFabClick() }
         )
     }
@@ -81,9 +93,9 @@ private fun LaunchedUIStateEffect(
     debuggerState: MutableDebuggerState,
     onDismiss: () -> Unit
 ) {
-    with(viewModel.uiState.collectAsState()) {
-        LaunchedEffect(value) {
-            when (value) {
+    viewModel.uiState.collectAsState().value.let { state ->
+        LaunchedEffect(state) {
+            when (state) {
                 Creating -> Unit
                 Idle -> {
                     animateFabToIdle(debuggerState = debuggerState)
@@ -92,10 +104,10 @@ private fun LaunchedUIStateEffect(
                     debuggerState.isDragging.targetState = false
                     debuggerState.isExpanded.targetState = false
                 }
-                Dragging -> {
+                is Dragging -> {
                     debuggerState.isDragging.targetState = true
+                    debuggerState.updateFabOffsets(state.dragAmount)
                 }
-                // next work will be focused on the expanded state
                 Expanded -> {
                     animateFabToExpanded(debuggerState = debuggerState)
 
@@ -199,4 +211,19 @@ private fun CoroutineScope.animateFabToDismiss(
             onComplete()
         }
     }
+}
+
+@Composable
+private fun Lifecycle.observeAsSate(): MutableState<Event> {
+    val state = remember { mutableStateOf(ON_ANY) }
+    DisposableEffect(this) {
+        val observer = LifecycleEventObserver { _, event ->
+            state.value = event
+        }
+        this@observeAsSate.addObserver(observer)
+        onDispose {
+            this@observeAsSate.removeObserver(observer)
+        }
+    }
+    return state
 }

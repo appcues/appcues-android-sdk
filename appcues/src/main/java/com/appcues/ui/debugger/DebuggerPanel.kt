@@ -9,23 +9,25 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 @Composable
-internal fun BoxScope.DebuggerPanel(debuggerState: MutableDebuggerState) {
+internal fun BoxScope.DebuggerPanel(debuggerState: MutableDebuggerState, onBackdropClick: () -> Unit) {
     AnimatedVisibility(
         visibleState = debuggerState.isExpanded,
         enter = fadeIn(),
@@ -35,6 +37,7 @@ internal fun BoxScope.DebuggerPanel(debuggerState: MutableDebuggerState) {
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color(color = 0x30000000))
+                .clickable { onBackdropClick() }
         )
     }
 
@@ -46,19 +49,15 @@ internal fun BoxScope.DebuggerPanel(debuggerState: MutableDebuggerState) {
     ) {
         Box(
             modifier = Modifier
-                .shadow(
-                    elevation = 8.dp,
-                    shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
-                    ambientColor = Color(color = 0xFF5C5CFF),
-                    spotColor = Color(color = 0xFF000000)
-                )
-                .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+                .shadow(elevation = 4.dp)
                 .height(debuggerState.getExpandedContainerHeight())
                 .fillMaxWidth()
-                .background(Color(color = 0xFFFFFFFF)),
+                .background(Color(color = 0xFFFFFFFF))
+                .verticalScroll(rememberScrollState()),
             contentAlignment = Alignment.TopCenter
         ) {
             // content of the debugger view will be placed here
+            Text(text = "Hello Debugger", modifier = Modifier.align(Alignment.Center))
         }
     }
 }
