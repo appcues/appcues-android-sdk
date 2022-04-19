@@ -7,6 +7,7 @@ import androidx.lifecycle.ProcessLifecycleOwner
 import com.appcues.analytics.AnalyticsEvent
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.logging.Logcues
+import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
@@ -23,6 +24,7 @@ internal class SessionMonitor(
     private val storage by inject<Storage>()
     private val config by inject<AppcuesConfig>()
     private val logcues by inject<Logcues>()
+    private val appcuesCoroutineScope by inject<AppcuesCoroutineScope>()
 
     private var _sessionId: UUID? = null
     val sessionId: UUID?
@@ -35,7 +37,9 @@ internal class SessionMonitor(
     private val sessionTimeout: Int = config.sessionTimeout
 
     init {
-        ProcessLifecycleOwner.get().lifecycle.addObserver(this)
+        appcuesCoroutineScope.launch {
+            ProcessLifecycleOwner.get().lifecycle.addObserver(this@SessionMonitor)
+        }
     }
 
     fun start() {
