@@ -1,6 +1,6 @@
 package com.appcues.builder
 
-class ApiHostBuilderValidator : BuilderValidator<String> {
+internal class ApiHostBuilderValidator : BuilderValidator<String> {
 
     override fun validate(value: String): String {
         value.startsWithHttpOrThrow()

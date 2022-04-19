@@ -27,8 +27,8 @@ internal class AnalyticsPolicy(
         get() = experienceActiveCount > 0
 
     init {
-        ProcessLifecycleOwner.get().lifecycle.addObserver(this)
         appcuesCoroutineScope.launch {
+            ProcessLifecycleOwner.get().lifecycle.addObserver(this@AnalyticsPolicy)
             stateMachine.stateFlow.collect {
                 when (it) {
                     is BeginningExperience -> {
