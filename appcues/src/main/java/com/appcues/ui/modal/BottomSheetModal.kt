@@ -30,7 +30,7 @@ internal fun BottomSheetModal(style: ComponentStyle?, content: @Composable () ->
     ) {
         // container box to limit the size of the bottom sheet to at most 60% of screen
         Box(
-            modifier = Modifier.fillMaxHeight(fraction = 0.6f),
+            modifier = Modifier.fillMaxHeight(fraction = 0.55f),
             contentAlignment = Alignment.BottomCenter
         ) {
             AppcuesTraitAnimatedVisibility(
@@ -41,6 +41,7 @@ internal fun BottomSheetModal(style: ComponentStyle?, content: @Composable () ->
                     modifier = Modifier
                         // will fill max width
                         .fillMaxWidth()
+                        .fillMaxHeight()
                         // default modal style modifiers
                         .modalStyle(
                             style = style,
