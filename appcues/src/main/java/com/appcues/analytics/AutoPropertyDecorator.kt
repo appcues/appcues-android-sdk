@@ -7,12 +7,14 @@ import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import android.webkit.WebView
 import com.appcues.AppcuesConfig
+import com.appcues.AppcuesCoroutineScope
 import com.appcues.BuildConfig
 import com.appcues.R
 import com.appcues.SessionMonitor
 import com.appcues.Storage
 import com.appcues.data.remote.request.ActivityRequest
 import com.appcues.data.remote.request.EventRequest
+import kotlinx.coroutines.launch
 import java.util.Date
 import java.util.Locale
 import kotlin.random.Random
@@ -22,6 +24,7 @@ internal class AutoPropertyDecorator(
     config: AppcuesConfig,
     private val storage: Storage,
     private val sessionMonitor: SessionMonitor,
+    private val appcuesCoroutineScope: AppcuesCoroutineScope,
 ) {
     private companion object {
         // _sessionRandomizer is defined in the web SDK as: A random number between 1 and 100,
@@ -41,7 +44,7 @@ internal class AutoPropertyDecorator(
         "app_version" to context.getAppVersion(),
     )
 
-    private val applicationProperties = hashMapOf<String, Any>(
+    private var applicationProperties = hashMapOf<String, Any>(
         "_appId" to config.applicationId,
         "_operatingSystem" to "android",
         "_bundlePackageId" to context.packageName,
@@ -52,7 +55,6 @@ internal class AutoPropertyDecorator(
         "_sdkName" to "appcues-android",
         "_deviceType" to context.resources.getString(R.string.device_type),
         "_deviceModel" to getDeviceName(),
-        "_userAgent2" to WebView(context).settings.userAgentString
     )
 
     private val sessionProperties: Map<String, Any>
@@ -75,6 +77,13 @@ internal class AutoPropertyDecorator(
             putAll(applicationProperties)
             putAll(sessionProperties)
         }
+
+    init {
+        appcuesCoroutineScope.launch {
+            // this must be on main thread
+            applicationProperties["_userAgent"] = WebView(context).settings.userAgentString
+        }
+    }
 
     fun decorateTrack(event: EventRequest) = event.apply {
         if (event.name == AnalyticsEvent.ScreenView.eventName) {
