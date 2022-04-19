@@ -9,7 +9,15 @@ internal object AnalyticsKoin : KoinScopePlugin {
 
     override fun ScopeDSL.install(config: AppcuesConfig) {
         scoped { SessionMonitor(scope = this) }
-        scoped { AutoPropertyDecorator(context = get(), config = get(), storage = get(), sessionMonitor = get()) }
+        scoped {
+            AutoPropertyDecorator(
+                context = get(),
+                config = get(),
+                storage = get(),
+                sessionMonitor = get(),
+                appcuesCoroutineScope = get(),
+            )
+        }
         scoped { ActivityRequestBuilder(config = get(), storage = get(), decorator = get()) }
         scoped { ExperienceLifecycleTracker(scope = this) }
         scoped { AnalyticsPolicy(sessionMonitor = get(), appcuesCoroutineScope = get(), stateMachine = get(), logcues = get()) }
