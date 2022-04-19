@@ -42,6 +42,11 @@ internal class PagingDotsTrait(
 
     @Composable
     override fun BoxScope.Overlay() {
+        val paginationData = rememberAppcuesPaginationState()
+        val pageCount = paginationData.value.pageCount
+
+        if (pageCount < 2) return
+
         val activeColor: Color =
             style?.foregroundColor.getColor(isSystemInDarkTheme()) ?: LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
         val inactiveColor: Color =
@@ -54,8 +59,7 @@ internal class PagingDotsTrait(
         val indicatorShape: Shape = CircleShape
         val indicatorWidthPx = LocalDensity.current.run { indicatorWidth.roundToPx() }
         val spacingPx = LocalDensity.current.run { spacing.roundToPx() }
-        val paginationData = rememberAppcuesPaginationState()
-        val pageCount = paginationData.value.pageCount
+
         val currentPage = paginationData.value.currentPage
         val paginationOffset = paginationData.value.scrollOffset
 
