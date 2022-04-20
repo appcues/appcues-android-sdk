@@ -29,7 +29,7 @@ internal class AnalyticsTracker(
     private val pendingActivity = mutableListOf<ActivityRequest>()
     private var flushTask: TimerTask? = null
 
-    private val _analyticsFlow = MutableSharedFlow<ActivityRequest>(0)
+    private val _analyticsFlow = MutableSharedFlow<ActivityRequest>(1)
     val analyticsFlow: SharedFlow<ActivityRequest>
         get() = _analyticsFlow
 

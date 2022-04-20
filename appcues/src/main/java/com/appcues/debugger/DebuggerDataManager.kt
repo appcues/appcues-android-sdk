@@ -4,7 +4,6 @@ import android.os.Build
 import android.os.Build.VERSION
 import com.appcues.AppcuesConfig
 import com.appcues.R
-import com.appcues.R.string
 import com.appcues.Storage
 import com.appcues.analytics.AnalyticsEvent
 import com.appcues.data.remote.AppcuesRemoteSource
@@ -54,18 +53,21 @@ internal class DebuggerDataManager(
     suspend fun onActivityRequest(activityRequest: ActivityRequest) = withContext(Dispatchers.IO) {
         userIdentified = activityRequest.userId
 
-        activityRequest.events?.forEach {
-            when (it.name) {
+        activityRequest.events?.forEach { event ->
+            when (event.name) {
                 AnalyticsEvent.ScreenView.eventName -> {
                     trackingScreens = true
                 }
                 AnalyticsEvent.ExperienceStarted.eventName -> {
-                    experienceName = it.attributes["experienceName"] as String
+                    experienceName = event.attributes["experienceName"] as String
                 }
                 AnalyticsEvent.ExperienceStepSeen.eventName -> {
-                    val group = (it.attributes["groupIndex"] as Int) + 1
-                    val step = (it.attributes["stepIndexInGroup"] as Int) + 1
-                    experienceShowingStep = contextResources.getString(R.string.debugger_status_experience_line1, group, step)
+                    (event.attributes["stepIndex"] as String).split(",").also {
+                        val group = it.first().toInt() + 1
+                        val step = it.last().toInt() + 1
+
+                        experienceShowingStep = contextResources.getString(R.string.debugger_status_experience_line1, group, step)
+                    }
                 }
                 AnalyticsEvent.ExperienceCompleted.eventName -> {
                     experienceName = null
@@ -96,29 +98,29 @@ internal class DebuggerDataManager(
     }
 
     private fun deviceInfoItem() = DebuggerStatusItem(
-        title = contextResources.getString(string.debugger_status_device_title, Build.MANUFACTURER, VERSION.RELEASE),
+        title = contextResources.getString(R.string.debugger_status_device_title, Build.MANUFACTURER, VERSION.RELEASE),
         statusType = PHONE,
     )
 
     private fun sdkInfoItem() = DebuggerStatusItem(
-        title = contextResources.getString(string.debugger_status_sdk_title),
+        title = contextResources.getString(R.string.debugger_status_sdk_title),
         statusType = SUCCESS,
-        line1 = contextResources.getString(string.debugger_status_sdk_line1, appcuesConfig.accountId),
-        line2 = contextResources.getString(string.debugger_status_sdk_line2, appcuesConfig.applicationId)
+        line1 = contextResources.getString(R.string.debugger_status_sdk_line1, appcuesConfig.accountId),
+        line2 = contextResources.getString(R.string.debugger_status_sdk_line2, appcuesConfig.applicationId)
     )
 
     private fun connectionCheckItem() = (connectedToAppcues?.let { if (it) SUCCESS else ERROR } ?: LOADING).let { statusType ->
         DebuggerStatusItem(
             title = statusType.let {
                 when (it) {
-                    SUCCESS -> string.debugger_status_check_connection_connected_title
-                    LOADING -> string.debugger_status_check_connection_connecting_title
-                    else -> string.debugger_status_check_connection_error_title
+                    SUCCESS -> R.string.debugger_status_check_connection_connected_title
+                    LOADING -> R.string.debugger_status_check_connection_connecting_title
+                    else -> R.string.debugger_status_check_connection_error_title
                 }
             }.let { contextResources.getString(it) },
             line1 = statusType.let {
                 when (it) {
-                    ERROR -> string.debugger_status_check_connection_error_line1
+                    ERROR -> R.string.debugger_status_check_connection_error_line1
                     else -> null
                 }
             }?.let { contextResources.getString(it) },
@@ -130,10 +132,10 @@ internal class DebuggerDataManager(
 
     private fun trackingScreenCheckItem() = (trackingScreens?.let { if (it) SUCCESS else ERROR } ?: LOADING).let { statusType ->
         DebuggerStatusItem(
-            title = contextResources.getString(string.debugger_status_check_screen_tracking_title),
+            title = contextResources.getString(R.string.debugger_status_check_screen_tracking_title),
             line1 = statusType.let {
                 when (it) {
-                    LOADING -> string.debugger_status_check_screen_tracking_loading_line1
+                    LOADING -> R.string.debugger_status_check_screen_tracking_loading_line1
                     else -> null
                 }
             }?.let { contextResources.getString(it) },
@@ -143,14 +145,14 @@ internal class DebuggerDataManager(
 
     private fun identityItem() = userIdentified?.let {
         DebuggerStatusItem(
-            title = contextResources.getString(string.debugger_status_identity_success_title),
+            title = contextResources.getString(R.string.debugger_status_identity_success_title),
             line1 = userIdentified,
             statusType = SUCCESS,
         )
     } ?: run {
         DebuggerStatusItem(
-            title = contextResources.getString(string.debugger_status_identity_loading_title),
-            line1 = contextResources.getString(string.debugger_status_identity_loading_line1),
+            title = contextResources.getString(R.string.debugger_status_identity_loading_title),
+            line1 = contextResources.getString(R.string.debugger_status_identity_loading_line1),
             statusType = LOADING,
         )
     }
