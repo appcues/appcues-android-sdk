@@ -8,12 +8,12 @@ import com.appcues.action.ExperienceAction
 import com.appcues.analytics.ActivityScreenTracking
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.builder.ApiHostBuilderValidator
+import com.appcues.debugger.AppcuesDebuggerManager
 import com.appcues.di.AppcuesKoinContext
 import com.appcues.logging.Logcues
 import com.appcues.trait.ExperienceTrait
 import com.appcues.trait.TraitRegistry
 import com.appcues.ui.ExperienceRenderer
-import com.appcues.ui.debugger.AppcuesDebuggerManager
 import org.koin.core.scope.Scope
 
 class Appcues internal constructor(koinScope: Scope) {

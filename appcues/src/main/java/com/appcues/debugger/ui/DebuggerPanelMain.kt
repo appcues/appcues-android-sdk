@@ -1,4 +1,4 @@
-package com.appcues.ui.debugger
+package com.appcues.debugger.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -18,18 +18,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.appcues.R
-import com.appcues.ui.debugger.StatusType.ERROR
-import com.appcues.ui.debugger.StatusType.EXPERIENCE
-import com.appcues.ui.debugger.StatusType.LOADING
-import com.appcues.ui.debugger.StatusType.PHONE
-import com.appcues.ui.debugger.StatusType.SUCCESS
+import com.appcues.debugger.DebuggerViewModel
+import com.appcues.debugger.model.DebuggerStatusItem
+import com.appcues.debugger.model.StatusType
+import com.appcues.debugger.model.StatusType.ERROR
+import com.appcues.debugger.model.StatusType.EXPERIENCE
+import com.appcues.debugger.model.StatusType.LOADING
+import com.appcues.debugger.model.StatusType.PHONE
+import com.appcues.debugger.model.StatusType.SUCCESS
+import com.appcues.debugger.model.TapActionType
+import com.appcues.ui.theme.AppcuesColors
 
 @Composable
 internal fun DebuggerMain(debuggerViewModel: DebuggerViewModel) {
@@ -42,11 +47,11 @@ internal fun DebuggerMain(debuggerViewModel: DebuggerViewModel) {
                 contentAlignment = Alignment.CenterStart
             ) {
                 Text(
-                    text = "Status",
+                    text = LocalContext.current.getString(R.string.debugger_status_title),
                     modifier = Modifier.padding(start = 40.dp),
                     fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = Color(color = 0xFF0D7EF9)
+                    color = AppcuesColors.HadfieldBlue,
                 )
             }
         }
@@ -80,7 +85,7 @@ private fun LazyItemScope.StatusItemCompose(item: DebuggerStatusItem, onTap: (Ta
 
     Divider(
         modifier = Modifier.padding(horizontal = 20.dp),
-        color = Color(color = 0xFFE7ECF3),
+        color = AppcuesColors.WhisperBlue,
         thickness = 1.dp,
     )
 }
@@ -92,11 +97,11 @@ private fun DebuggerStatusItem.Icon() {
         .size(24.dp)
 
     if (statusType == LOADING) {
-        CircularProgressIndicator(modifier = iconModifier, color = Color(color = 0xFF0D7EF9))
+        CircularProgressIndicator(modifier = iconModifier, color = AppcuesColors.HadfieldBlue)
     } else {
         Image(
             painter = painterResource(id = statusType.toResourceId()),
-            contentDescription = "$title icon",
+            contentDescription = LocalContext.current.getString(R.string.debugger_status_item_icon_content_description, title),
             modifier = iconModifier,
             contentScale = ContentScale.None
         )
@@ -116,14 +121,14 @@ private fun DebuggerStatusItem.Content(rowScope: RowScope) {
                 text = title,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Normal,
-                color = Color(color = 0xFF242A35)
+                color = AppcuesColors.Infinity
             )
             line1?.let {
                 Text(
                     text = it,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Normal,
-                    color = Color(color = 0xFF627293)
+                    color = AppcuesColors.OceanNight
                 )
             }
             line2?.let {
@@ -131,7 +136,7 @@ private fun DebuggerStatusItem.Content(rowScope: RowScope) {
                     text = it,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Normal,
-                    color = Color(color = 0xFF627293)
+                    color = AppcuesColors.OceanNight
                 )
             }
         }
@@ -146,7 +151,7 @@ private fun DebuggerStatusItem.RefreshIcon() {
                 .padding(horizontal = 24.dp, vertical = 20.dp)
                 .size(24.dp),
             painter = painterResource(id = R.drawable.ic_reload),
-            contentDescription = "reload",
+            contentDescription = LocalContext.current.getString(R.string.debugger_status_reload_icon_content_description),
             contentScale = ContentScale.None
         )
     }

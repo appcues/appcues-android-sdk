@@ -1,12 +1,12 @@
 package com.appcues
 
 import com.appcues.data.AppcuesRepository
+import com.appcues.debugger.AppcuesDebuggerManager
 import com.appcues.di.KoinScopePlugin
 import com.appcues.logging.Logcues
 import com.appcues.statemachine.StateMachine
 import com.appcues.ui.ExperienceRenderer
-import com.appcues.ui.debugger.AppcuesDebuggerManager
-import com.appcues.ui.debugger.DebuggerDataManager
+import com.appcues.util.ContextResources
 import org.koin.dsl.ScopeDSL
 
 internal object AppcuesKoin : KoinScopePlugin {
@@ -20,6 +20,7 @@ internal object AppcuesKoin : KoinScopePlugin {
         scoped { Storage(context = get(), config = get()) }
         scoped { DeeplinkHandler(config = get(), appcues = get(), experienceRenderer = get(), appcuesCoroutineScope = get()) }
         scoped { AppcuesDebuggerManager(context = get(), koinScope = this) }
+        scoped { ContextResources(context = get()) }
         scoped {
             ExperienceRenderer(
                 repository = get(),
@@ -36,14 +37,6 @@ internal object AppcuesKoin : KoinScopePlugin {
                 gson = get(),
                 config = get(),
                 logcues = get()
-            )
-        }
-
-        scoped {
-            DebuggerDataManager(
-                appcuesConfig = get(),
-                storage = get(),
-                appcuesRemoteSource = get(),
             )
         }
     }

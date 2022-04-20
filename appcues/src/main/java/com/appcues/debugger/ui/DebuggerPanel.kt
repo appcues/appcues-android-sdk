@@ -1,4 +1,4 @@
-package com.appcues.ui.debugger
+package com.appcues.debugger.ui
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
@@ -27,6 +27,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.appcues.debugger.DebuggerViewModel
+import com.appcues.ui.theme.AppcuesColors
 
 @Composable
 internal fun BoxScope.DebuggerPanel(debuggerState: MutableDebuggerState, debuggerViewModel: DebuggerViewModel) {
@@ -41,7 +43,7 @@ internal fun BoxScope.DebuggerPanel(debuggerState: MutableDebuggerState, debugge
         Spacer(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(color = 0x30000000))
+                .background(AppcuesColors.BlackAlmostTransparent)
                 .clickable { debuggerViewModel.onBackdropClick() }
         )
     }
@@ -57,7 +59,7 @@ internal fun BoxScope.DebuggerPanel(debuggerState: MutableDebuggerState, debugge
                 .shadow(elevation = 4.dp)
                 .height(debuggerState.getExpandedContainerHeight())
                 .fillMaxWidth()
-                .background(Color(color = 0xFFFFFFFF))
+                .background(Color.White)
                 .clickable(enabled = false, onClickLabel = null) {}
                 // adding padding top to make sure nothing is drawn below the FAB
                 .padding(top = 40.dp),

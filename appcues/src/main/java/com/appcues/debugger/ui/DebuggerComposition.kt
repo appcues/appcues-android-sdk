@@ -1,4 +1,4 @@
-package com.appcues.ui.debugger
+package com.appcues.debugger.ui
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
@@ -20,12 +20,13 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Lifecycle.Event
 import androidx.lifecycle.Lifecycle.Event.ON_ANY
 import androidx.lifecycle.LifecycleEventObserver
-import com.appcues.ui.debugger.DebuggerViewModel.UIState.Creating
-import com.appcues.ui.debugger.DebuggerViewModel.UIState.Dismissed
-import com.appcues.ui.debugger.DebuggerViewModel.UIState.Dismissing
-import com.appcues.ui.debugger.DebuggerViewModel.UIState.Dragging
-import com.appcues.ui.debugger.DebuggerViewModel.UIState.Expanded
-import com.appcues.ui.debugger.DebuggerViewModel.UIState.Idle
+import com.appcues.debugger.DebuggerViewModel
+import com.appcues.debugger.DebuggerViewModel.UIState.Creating
+import com.appcues.debugger.DebuggerViewModel.UIState.Dismissed
+import com.appcues.debugger.DebuggerViewModel.UIState.Dismissing
+import com.appcues.debugger.DebuggerViewModel.UIState.Dragging
+import com.appcues.debugger.DebuggerViewModel.UIState.Expanded
+import com.appcues.debugger.DebuggerViewModel.UIState.Idle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch

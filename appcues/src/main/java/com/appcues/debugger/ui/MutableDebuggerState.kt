@@ -1,4 +1,4 @@
-package com.appcues.ui.debugger
+package com.appcues.debugger.ui
 
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.runtime.mutableStateOf

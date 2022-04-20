@@ -1,33 +1,34 @@
-package com.appcues.ui.debugger
+package com.appcues.debugger
 
 import android.os.Build
+import android.os.Build.VERSION
 import com.appcues.AppcuesConfig
+import com.appcues.R
+import com.appcues.R.string
 import com.appcues.Storage
 import com.appcues.analytics.AnalyticsEvent
 import com.appcues.data.remote.AppcuesRemoteSource
 import com.appcues.data.remote.request.ActivityRequest
-import com.appcues.ui.debugger.StatusType.ERROR
-import com.appcues.ui.debugger.StatusType.EXPERIENCE
-import com.appcues.ui.debugger.StatusType.LOADING
-import com.appcues.ui.debugger.StatusType.PHONE
-import com.appcues.ui.debugger.StatusType.SUCCESS
-import com.appcues.ui.debugger.TapActionType.HEALTH_CHECK
+import com.appcues.debugger.model.DebuggerStatusItem
+import com.appcues.debugger.model.StatusType.ERROR
+import com.appcues.debugger.model.StatusType.EXPERIENCE
+import com.appcues.debugger.model.StatusType.LOADING
+import com.appcues.debugger.model.StatusType.PHONE
+import com.appcues.debugger.model.StatusType.SUCCESS
+import com.appcues.debugger.model.TapActionType
+import com.appcues.debugger.model.TapActionType.HEALTH_CHECK
+import com.appcues.util.ContextResources
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.withContext
 
 internal class DebuggerDataManager(
-    appcuesConfig: AppcuesConfig,
     storage: Storage,
+    private val appcuesConfig: AppcuesConfig,
     private val appcuesRemoteSource: AppcuesRemoteSource,
+    private val contextResources: ContextResources,
 ) {
-
-    private val deviceName: String = "(${Build.MANUFACTURER}) Android ${Build.VERSION.RELEASE}"
-
-    private val accountId: String = appcuesConfig.accountId
-
-    private val applicationId: String = appcuesConfig.applicationId
 
     private var connectedToAppcues: Boolean? = false
 
@@ -36,6 +37,7 @@ internal class DebuggerDataManager(
     private var userIdentified: String? = storage.userId.let { it.ifEmpty { null } }
 
     private var experienceName: String? = null
+
     private var experienceShowingStep: String? = null
 
     private val _data = MutableStateFlow<List<DebuggerStatusItem>>(arrayListOf())
@@ -63,7 +65,7 @@ internal class DebuggerDataManager(
                 AnalyticsEvent.ExperienceStepSeen.eventName -> {
                     val group = (it.attributes["groupIndex"] as Int) + 1
                     val step = (it.attributes["stepIndexInGroup"] as Int) + 1
-                    experienceShowingStep = "Showing group $group step $step"
+                    experienceShowingStep = contextResources.getString(R.string.debugger_status_experience_line1, group, step)
                 }
                 AnalyticsEvent.ExperienceCompleted.eventName -> {
                     experienceName = null
@@ -94,35 +96,64 @@ internal class DebuggerDataManager(
     }
 
     private fun deviceInfoItem() = DebuggerStatusItem(
-        title = deviceName,
+        title = contextResources.getString(string.debugger_status_device_title, Build.MANUFACTURER, VERSION.RELEASE),
         statusType = PHONE,
     )
 
     private fun sdkInfoItem() = DebuggerStatusItem(
-        title = "Installed SDK",
+        title = contextResources.getString(string.debugger_status_sdk_title),
         statusType = SUCCESS,
-        line1 = "Account ID: $accountId",
-        line2 = "Application ID: $applicationId"
+        line1 = contextResources.getString(string.debugger_status_sdk_line1, appcuesConfig.accountId),
+        line2 = contextResources.getString(string.debugger_status_sdk_line2, appcuesConfig.applicationId)
     )
 
-    private fun connectionCheckItem() = DebuggerStatusItem(
-        title = "Connected to Appcues",
-        statusType = connectedToAppcues?.let { if (it) SUCCESS else ERROR } ?: LOADING,
-        showRefreshIcon = connectedToAppcues?.let { true } ?: false,
-        tapActionType = HEALTH_CHECK
-    )
+    private fun connectionCheckItem() = (connectedToAppcues?.let { if (it) SUCCESS else ERROR } ?: LOADING).let { statusType ->
+        DebuggerStatusItem(
+            title = statusType.let {
+                when (it) {
+                    SUCCESS -> string.debugger_status_check_connection_connected_title
+                    LOADING -> string.debugger_status_check_connection_connecting_title
+                    else -> string.debugger_status_check_connection_error_title
+                }
+            }.let { contextResources.getString(it) },
+            line1 = statusType.let {
+                when (it) {
+                    ERROR -> string.debugger_status_check_connection_error_line1
+                    else -> null
+                }
+            }?.let { contextResources.getString(it) },
+            statusType = statusType,
+            showRefreshIcon = statusType != LOADING,
+            tapActionType = HEALTH_CHECK
+        )
+    }
 
-    private fun trackingScreenCheckItem() = DebuggerStatusItem(
-        title = "Tracking Screens",
-        line1 = if (trackingScreens?.let { true } == true) null else "waiting for screen event...",
-        statusType = trackingScreens?.let { if (it) SUCCESS else ERROR } ?: LOADING,
-    )
+    private fun trackingScreenCheckItem() = (trackingScreens?.let { if (it) SUCCESS else ERROR } ?: LOADING).let { statusType ->
+        DebuggerStatusItem(
+            title = contextResources.getString(string.debugger_status_check_screen_tracking_title),
+            line1 = statusType.let {
+                when (it) {
+                    LOADING -> string.debugger_status_check_screen_tracking_loading_line1
+                    else -> null
+                }
+            }?.let { contextResources.getString(it) },
+            statusType = statusType,
+        )
+    }
 
-    private fun identityItem() = DebuggerStatusItem(
-        title = userIdentified?.let { "User Identified" } ?: "Identifying User",
-        line1 = userIdentified?.let { userIdentified } ?: "waiting for any event...",
-        statusType = userIdentified?.let { SUCCESS } ?: LOADING,
-    )
+    private fun identityItem() = userIdentified?.let {
+        DebuggerStatusItem(
+            title = contextResources.getString(string.debugger_status_identity_success_title),
+            line1 = userIdentified,
+            statusType = SUCCESS,
+        )
+    } ?: run {
+        DebuggerStatusItem(
+            title = contextResources.getString(string.debugger_status_identity_loading_title),
+            line1 = contextResources.getString(string.debugger_status_identity_loading_line1),
+            statusType = LOADING,
+        )
+    }
 
     private fun ArrayList<DebuggerStatusItem>.appendExperienceIfAny() = apply {
         experienceName?.also {
