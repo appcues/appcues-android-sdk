@@ -51,6 +51,9 @@ internal sealed class ExperienceLifecycleEvent(
         override val experience: Experience = experienceError.experience
     ) : ExperienceLifecycleEvent(experience, AnalyticsEvent.ExperienceError)
 
+    val name: String
+        get() = event.eventName
+
     val properties: HashMap<String, Any>
         get() = hashMapOf<String, Any>(
             "experienceId" to experience.id.toString().lowercase(),
@@ -63,12 +66,7 @@ internal sealed class ExperienceLifecycleEvent(
             flatStepIndex?.let {
                 this["stepId"] = experience.flatSteps[it].id.toString()
                 // this is required by SDK debugger to know which step and group is currently showing
-                experience.groupLookup[it]?.let { groupIndex ->
-                    this["groupIndex"] = groupIndex
-                }
-                experience.stepIndexLookup[it]?.let { stepIndex ->
-                    this["stepIndexInGroup"] = stepIndex
-                }
+                this["stepIndex"] = "${experience.groupLookup[it] ?: 0},${experience.stepIndexLookup[it] ?: 0}"
             }
             error?.let {
                 this["message"] = it.message

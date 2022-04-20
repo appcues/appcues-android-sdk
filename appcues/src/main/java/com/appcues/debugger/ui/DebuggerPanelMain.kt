@@ -163,7 +163,7 @@ private fun StatusType.toResourceId(): Int {
         SUCCESS -> R.drawable.ic_success
         ERROR -> R.drawable.ic_error
         EXPERIENCE -> R.drawable.ic_experience
-        // we never don't need loading icon
+        // we never need loading icon
         LOADING -> 0
     }
 }
