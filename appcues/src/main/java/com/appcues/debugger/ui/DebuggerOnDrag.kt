@@ -1,4 +1,4 @@
-package com.appcues.ui.debugger
+package com.appcues.debugger.ui
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -18,9 +18,12 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.appcues.R
 import com.appcues.R.drawable
+import com.appcues.ui.theme.AppcuesColors
 
 @Composable
 internal fun BoxScope.DebuggerOnDrag(
@@ -55,7 +58,11 @@ internal fun BoxScope.DebuggerOnDrag(
 private fun DismissDebuggerArea(onGloballyPositioned: (LayoutCoordinates) -> Unit) {
     Box(
         modifier = Modifier
-            .background(brush = Brush.radialGradient(listOf(Color(color = 0x40000000), Color(color = 0x00000000))))
+            .background(
+                brush = Brush.radialGradient(
+                    listOf(AppcuesColors.BlackAlmostTransparent, Color.Transparent)
+                )
+            )
             .size(168.dp)
             .onGloballyPositioned { onGloballyPositioned(it) },
         contentAlignment = Alignment.Center
@@ -63,7 +70,7 @@ private fun DismissDebuggerArea(onGloballyPositioned: (LayoutCoordinates) -> Uni
         Image(
             painter = painterResource(id = drawable.ic_dismiss),
             modifier = Modifier.clip(RoundedCornerShape(percent = 100)),
-            contentDescription = "Dismiss debugger"
+            contentDescription = LocalContext.current.getString(R.string.debugger_fab_dismiss_image_content_description)
         )
     }
 }

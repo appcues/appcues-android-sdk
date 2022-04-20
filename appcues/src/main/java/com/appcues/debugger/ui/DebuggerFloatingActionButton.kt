@@ -1,4 +1,4 @@
-package com.appcues.ui.debugger
+package com.appcues.debugger.ui
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -29,15 +29,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.consumeAllChanges
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import com.appcues.R
 import com.appcues.R.drawable
+import com.appcues.ui.theme.AppcuesColors
 
 private const val FAB_DRAGGING_SIZE_MULTIPLIER = 1.1f
 private const val FAB_DEFAULT_SIZE_MULTIPLIER = 1.0f
@@ -91,6 +93,7 @@ internal fun BoxScope.DebuggerFloatingActionButton(
                     shape = RoundedCornerShape(percent = 100)
                 )
                 .clickableAndDraggable(
+                    onClickLabel = LocalContext.current.getString(R.string.debugger_fab_on_click_label),
                     onDragEnd = onDragEnd,
                     onDrag = onDrag,
                     onClick = onClick,
@@ -99,12 +102,15 @@ internal fun BoxScope.DebuggerFloatingActionButton(
                 .clip(RoundedCornerShape(percent = 100))
                 .background(
                     brush = Brush.horizontalGradient(
-                        listOf(Color(color = 0xFF5C5CFF), Color(color = 0xFF8960FF))
+                        listOf(AppcuesColors.ShadyNeonBlue, AppcuesColors.PurpleAnemone)
                     )
                 )
                 .padding(12.dp)
         ) {
-            Image(painter = painterResource(id = drawable.ic_debugger_appcues_logo), contentDescription = "Logo debugger")
+            Image(
+                painter = painterResource(id = drawable.ic_debugger_appcues_logo),
+                contentDescription = LocalContext.current.getString(R.string.debugger_fab_image_content_description)
+            )
         }
     }
 }
@@ -128,6 +134,7 @@ private fun Modifier.offsetResize(offset: IntOffset, originalSize: Dp, resizeBy:
 )
 
 private fun Modifier.clickableAndDraggable(
+    onClickLabel: String,
     onDragEnd: () -> Unit,
     onDrag: (Offset) -> Unit,
     onClick: () -> Unit,
@@ -137,7 +144,7 @@ private fun Modifier.clickableAndDraggable(
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = rememberRipple(),
-                onClickLabel = "Appcues debugger details",
+                onClickLabel = onClickLabel,
                 role = Role.Button,
                 onClick = onClick
             )

@@ -9,6 +9,7 @@ import com.appcues.analytics.AnalyticsKoin
 import com.appcues.data.local.DataLocalKoin
 import com.appcues.data.mapper.DataMapperKoin
 import com.appcues.data.remote.DataRemoteKoin
+import com.appcues.debugger.DebuggerKoin
 import com.appcues.trait.TraitKoin
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.Koin
@@ -35,6 +36,7 @@ internal object AppcuesKoinContext {
         DataRemoteKoin,
         DataMapperKoin,
         DataLocalKoin,
+        DebuggerKoin
     )
 
     private fun getScope(scopeId: String): Scope = koin.getOrCreateScope(scopeId = scopeId, qualifier = named(scopeId))

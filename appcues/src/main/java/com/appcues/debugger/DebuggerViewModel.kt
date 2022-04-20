@@ -1,16 +1,19 @@
-package com.appcues.ui.debugger
+package com.appcues.debugger
 
 import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.appcues.analytics.AnalyticsTracker
-import com.appcues.ui.debugger.DebuggerViewModel.UIState.Creating
-import com.appcues.ui.debugger.DebuggerViewModel.UIState.Dismissed
-import com.appcues.ui.debugger.DebuggerViewModel.UIState.Dismissing
-import com.appcues.ui.debugger.DebuggerViewModel.UIState.Dragging
-import com.appcues.ui.debugger.DebuggerViewModel.UIState.Expanded
-import com.appcues.ui.debugger.DebuggerViewModel.UIState.Idle
-import com.appcues.ui.debugger.EventType.SCREEN
+import com.appcues.debugger.DebuggerViewModel.UIState.Creating
+import com.appcues.debugger.DebuggerViewModel.UIState.Dismissed
+import com.appcues.debugger.DebuggerViewModel.UIState.Dismissing
+import com.appcues.debugger.DebuggerViewModel.UIState.Dragging
+import com.appcues.debugger.DebuggerViewModel.UIState.Expanded
+import com.appcues.debugger.DebuggerViewModel.UIState.Idle
+import com.appcues.debugger.model.DebuggerEventItem
+import com.appcues.debugger.model.DebuggerStatusItem
+import com.appcues.debugger.model.EventType.SCREEN
+import com.appcues.debugger.model.TapActionType
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

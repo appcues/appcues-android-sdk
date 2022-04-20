@@ -1,4 +1,4 @@
-package com.appcues.ui.debugger
+package com.appcues.debugger
 
 import android.app.ActionBar.LayoutParams
 import android.app.Activity
@@ -12,7 +12,8 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.FragmentActivity
 import com.appcues.R
-import com.appcues.ui.debugger.DebuggerViewModel.UIState.Expanded
+import com.appcues.debugger.DebuggerViewModel.UIState.Expanded
+import com.appcues.debugger.ui.DebuggerComposition
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob

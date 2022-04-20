@@ -1,4 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- SDK -->
     <string name="skippable_trait_dismiss">dismiss</string>
+
+    <!-- Debugger Fab -->
+    <string name="debugger_fab_on_click_label">Appcues debugger details</string>
+    <string name="debugger_fab_image_content_description">Appcues floating action button</string>
+    <string name="debugger_fab_dismiss_image_content_description">Appcues floating action button dismissing area</string>
+
+    <!-- Debugger Panel -->
+    <string name="debugger_status_title">Status</string>
+    <string name="debugger_status_item_icon_content_description">%1$s icon</string>
+    <string name="debugger_status_reload_icon_content_description">reload icon</string>
+    <string name="debugger_status_device_title">"%1$s Android %2$s</string>
+    <string name="debugger_status_experience_line1">"Showing group %1$s step %2$s"</string>
+    <string name="debugger_status_sdk_title">Installed SDK</string>
+    <string name="debugger_status_sdk_line1">Account ID: %1$s</string>
+    <string name="debugger_status_sdk_line2">Application ID: %1$s</string>
+    <string name="debugger_status_check_connection_connecting_title">Connecting to Appcues</string>
+    <string name="debugger_status_check_connection_connected_title">Connected to Appcues</string>
+    <string name="debugger_status_check_connection_error_title">Appcues is unreachable</string>
+    <string name="debugger_status_check_connection_error_line1">Please check your connection or firewalls.</string>
+    <string name="debugger_status_check_screen_tracking_title">Tracking Screens</string>
+    <string name="debugger_status_check_screen_tracking_loading_line1">waiting for screen event…</string>
+    <string name="debugger_status_identity_success_title">User Identified</string>
+    <string name="debugger_status_identity_loading_title">Identifying User</string>
+    <string name="debugger_status_identity_loading_line1">waiting for any event…</string>
+
 </resources>

@@ -1,4 +1,4 @@
-package com.appcues.ui.debugger
+package com.appcues.debugger.model
 
 internal data class DebuggerEventItem(
     val name: String,
