@@ -16,8 +16,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -25,9 +24,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 
 @Composable
-internal fun BoxScope.DebuggerPanel(debuggerState: MutableDebuggerState, onBackdropClick: () -> Unit) {
+internal fun BoxScope.DebuggerPanel(debuggerState: MutableDebuggerState, debuggerViewModel: DebuggerViewModel) {
     // don't show if current debugger is paused
     if (debuggerState.isPaused.value) return
 
@@ -40,7 +42,7 @@ internal fun BoxScope.DebuggerPanel(debuggerState: MutableDebuggerState, onBackd
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color(color = 0x30000000))
-                .clickable { onBackdropClick() }
+                .clickable { debuggerViewModel.onBackdropClick() }
         )
     }
 
@@ -56,11 +58,15 @@ internal fun BoxScope.DebuggerPanel(debuggerState: MutableDebuggerState, onBackd
                 .height(debuggerState.getExpandedContainerHeight())
                 .fillMaxWidth()
                 .background(Color(color = 0xFFFFFFFF))
-                .verticalScroll(rememberScrollState()),
+                .clickable(enabled = false, onClickLabel = null) {}
+                // adding padding top to make sure nothing is drawn below the FAB
+                .padding(top = 40.dp),
             contentAlignment = Alignment.TopCenter
         ) {
-            // content of the debugger view will be placed here
-            Text(text = "Hello Debugger", modifier = Modifier.align(Alignment.Center))
+            NavHost(navController = rememberNavController(), startDestination = "main") {
+                composable("main") { DebuggerMain(debuggerViewModel) }
+                composable("event_details") { DebuggerEventDetails() }
+            }
         }
     }
 }
@@ -72,4 +78,9 @@ private fun enterTransition(): EnterTransition {
 private fun exitTransition(): ExitTransition {
     return slideOutVertically(tween(durationMillis = 200)) { it } +
         fadeOut(tween(durationMillis = 150))
+}
+
+@Composable
+internal fun DebuggerEventDetails() {
+    Text(text = "Event Details")
 }

@@ -53,7 +53,7 @@ internal fun DebuggerComposition(viewModel: DebuggerViewModel, onDismiss: () -> 
 
         DebuggerPanel(
             debuggerState = debuggerState,
-            onBackdropClick = { viewModel.onBackdropClick() }
+            debuggerViewModel = viewModel,
         )
 
         // Fab is last because it will show on top of everything else in this composition

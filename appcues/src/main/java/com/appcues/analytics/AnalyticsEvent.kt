@@ -6,4 +6,13 @@ enum class AnalyticsEvent(val eventName: String) {
     SessionSuspended("appcues:session_suspended"),
     SessionResumed("appcues:session_resumed"),
     SessionReset("appcues:session_reset"),
+    ExperienceStepSeen("appcues:v2:step_seen"),
+    ExperienceStepInteraction("appcues:v2:step_interaction"),
+    ExperienceStepCompleted("appcues:v2:step_completed"),
+    ExperienceStepError("appcues:v2:step_error"),
+    ExperienceStepRecovered("appcues:v2:step_recovered"),
+    ExperienceStarted("appcues:v2:experience_started"),
+    ExperienceCompleted("appcues:v2:experience_completed"),
+    ExperienceDismissed("appcues:v2:experience_dismissed"),
+    ExperienceError("appcues:v2:experience_error"),
 }

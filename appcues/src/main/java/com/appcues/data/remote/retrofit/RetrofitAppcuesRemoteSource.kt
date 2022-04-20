@@ -9,6 +9,8 @@ import com.appcues.data.remote.response.ErrorResponse
 import com.appcues.data.remote.response.QualifyResponse
 import com.appcues.data.remote.response.experience.ExperienceResponse
 import com.appcues.util.ResultOf
+import com.appcues.util.ResultOf.Failure
+import com.appcues.util.ResultOf.Success
 import com.google.gson.Gson
 import com.google.gson.JsonParseException
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -73,4 +75,15 @@ internal class RetrofitAppcuesRemoteSource(
         } catch (exception: JsonParseException) {
             null
         }
+
+    override suspend fun checkAppcuesConnection(): Boolean {
+        return request {
+            appcuesService.healthCheck()
+        }.let {
+            when (it) {
+                is Failure -> false
+                is Success -> true
+            }
+        }
+    }
 }
