@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.view.ViewGroup
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
+import androidx.compose.material.MaterialTheme
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.FragmentActivity
 import com.appcues.R
@@ -101,9 +102,11 @@ internal class AppcuesDebuggerManager(context: Context, private val koinScope: S
                         layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
 
                         setContent {
-                            DebuggerComposition(debuggerViewModel) {
-                                stop()
-                                it.removeView(this)
+                            MaterialTheme {
+                                DebuggerComposition(debuggerViewModel) {
+                                    stop()
+                                    it.removeView(this)
+                                }
                             }
                         }
                     }

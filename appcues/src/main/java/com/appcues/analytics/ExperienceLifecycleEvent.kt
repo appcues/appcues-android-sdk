@@ -1,56 +1,55 @@
 package com.appcues.analytics
 
 import com.appcues.data.model.Experience
-import com.appcues.data.model.Step
 import com.appcues.statemachine.Error
 
 internal sealed class ExperienceLifecycleEvent(
     open val experience: Experience,
-    val name: String
+    val event: AnalyticsEvent
 ) {
 
     data class StepSeen(
         override val experience: Experience,
         val stepIndex: Int,
-    ) : ExperienceLifecycleEvent(experience, "appcues:v2:step_seen")
+    ) : ExperienceLifecycleEvent(experience, AnalyticsEvent.ExperienceStepSeen)
 
     data class StepInteraction(
         override val experience: Experience,
         val stepIndex: Int,
-    ) : ExperienceLifecycleEvent(experience, "appcues:v2:step_interaction")
+    ) : ExperienceLifecycleEvent(experience, AnalyticsEvent.ExperienceStepInteraction)
 
     data class StepCompleted(
         override val experience: Experience,
         val stepIndex: Int,
-    ) : ExperienceLifecycleEvent(experience, "appcues:v2:step_completed")
+    ) : ExperienceLifecycleEvent(experience, AnalyticsEvent.ExperienceStepCompleted)
 
     data class StepError(
         val stepError: Error.StepError,
         override val experience: Experience = stepError.experience,
-    ) : ExperienceLifecycleEvent(experience, "appcues:v2:step_error")
+    ) : ExperienceLifecycleEvent(experience, AnalyticsEvent.ExperienceStepError)
 
     data class StepRecovered(
         override val experience: Experience,
         val stepIndex: Int,
-    ) : ExperienceLifecycleEvent(experience, "appcues:v2:step_recovered")
+    ) : ExperienceLifecycleEvent(experience, AnalyticsEvent.ExperienceStepRecovered)
 
     data class ExperienceStarted(
         override val experience: Experience,
-    ) : ExperienceLifecycleEvent(experience, "appcues:v2:experience_started")
+    ) : ExperienceLifecycleEvent(experience, AnalyticsEvent.ExperienceStarted)
 
     data class ExperienceCompleted(
         override val experience: Experience,
-    ) : ExperienceLifecycleEvent(experience, "appcues:v2:experience_completed")
+    ) : ExperienceLifecycleEvent(experience, AnalyticsEvent.ExperienceCompleted)
 
     data class ExperienceDismissed(
         override val experience: Experience,
         val stepIndex: Int,
-    ) : ExperienceLifecycleEvent(experience, "appcues:v2:experience_dismissed")
+    ) : ExperienceLifecycleEvent(experience, AnalyticsEvent.ExperienceDismissed)
 
     data class ExperienceError(
         val experienceError: Error.ExperienceError,
         override val experience: Experience = experienceError.experience
-    ) : ExperienceLifecycleEvent(experience, "appcues:v2:experience_error")
+    ) : ExperienceLifecycleEvent(experience, AnalyticsEvent.ExperienceError)
 
     val properties: HashMap<String, Any>
         get() = hashMapOf<String, Any>(
@@ -61,8 +60,15 @@ internal sealed class ExperienceLifecycleEvent(
             // "localeName" to "", -- add locale values to analytics for localized experiences
             // "localeId" to "", -- add locale values to analytics for localized experiences
         ).apply {
-            step?.let {
-                this["stepId"] = it.id.toString()
+            flatStepIndex?.let {
+                this["stepId"] = experience.flatSteps[it].id.toString()
+                // this is required by SDK debugger to know which step and group is currently showing
+                experience.groupLookup[it]?.let { groupIndex ->
+                    this["groupIndex"] = groupIndex
+                }
+                experience.stepIndexLookup[it]?.let { stepIndex ->
+                    this["stepIndexInGroup"] = stepIndex
+                }
             }
             error?.let {
                 this["message"] = it.message
@@ -70,14 +76,14 @@ internal sealed class ExperienceLifecycleEvent(
             }
         }
 
-    private val step: Step?
+    private val flatStepIndex: Int?
         get() = when (this) {
-            is StepSeen -> experience.flatSteps[stepIndex]
-            is StepInteraction -> experience.flatSteps[stepIndex]
-            is StepCompleted -> experience.flatSteps[stepIndex]
-            is StepError -> experience.flatSteps[stepError.stepIndex]
-            is StepRecovered -> experience.flatSteps[stepIndex]
-            is ExperienceDismissed -> experience.flatSteps[stepIndex]
+            is StepSeen -> stepIndex
+            is StepInteraction -> stepIndex
+            is StepCompleted -> stepIndex
+            is StepError -> stepError.stepIndex
+            is StepRecovered -> stepIndex
+            is ExperienceDismissed -> stepIndex
             else -> null
         }
 

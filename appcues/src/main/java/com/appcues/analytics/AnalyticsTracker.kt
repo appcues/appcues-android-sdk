@@ -5,6 +5,8 @@ import com.appcues.data.AppcuesRepository
 import com.appcues.data.remote.request.ActivityRequest
 import com.appcues.data.remote.request.EventRequest
 import com.appcues.ui.ExperienceRenderer
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import java.util.Timer
 import java.util.TimerTask
@@ -18,12 +20,18 @@ internal class AnalyticsTracker(
     private val experienceLifecycleTracker: ExperienceLifecycleTracker,
     private val analyticsPolicy: AnalyticsPolicy,
 ) {
+
     companion object {
+
         const val FLUSH_AFTER_MILLISECONDS: Long = 10000
     }
 
     private val pendingActivity = mutableListOf<ActivityRequest>()
     private var flushTask: TimerTask? = null
+
+    private val _analyticsFlow = MutableSharedFlow<ActivityRequest>(0)
+    val analyticsFlow: SharedFlow<ActivityRequest>
+        get() = _analyticsFlow
 
     init {
         appcuesCoroutineScope.launch {
@@ -70,6 +78,9 @@ internal class AnalyticsTracker(
     }
 
     private fun queueThenFlush(activity: ActivityRequest) {
+        updateAnalyticsFlow(activity)
+        // add new activity to pending activities and try to send all
+        // as a merged activity request
         synchronized(this) {
             flushTask?.cancel()
             pendingActivity.add(activity)
@@ -78,6 +89,10 @@ internal class AnalyticsTracker(
     }
 
     private fun flushThenSend(activity: ActivityRequest) {
+        updateAnalyticsFlow(activity)
+        // send all pending activities as a merged activity request
+        // then send another one for our newer activity
+        // (useful when we don't want to merge the properties)
         synchronized(this) {
             flushTask?.cancel()
             flushPendingActivity()
@@ -86,6 +101,8 @@ internal class AnalyticsTracker(
     }
 
     private fun queue(activity: ActivityRequest) {
+        updateAnalyticsFlow(activity)
+        // add activity to pending activities and re-schedule the flush task
         synchronized(this) {
             pendingActivity.add(activity)
             if (flushTask == null) {
@@ -95,6 +112,12 @@ internal class AnalyticsTracker(
                     }
                 }
             }
+        }
+    }
+
+    private fun updateAnalyticsFlow(activity: ActivityRequest) {
+        appcuesCoroutineScope.launch {
+            _analyticsFlow.emit(activity)
         }
     }
 
@@ -110,26 +133,28 @@ internal class AnalyticsTracker(
     private fun flush(activity: ActivityRequest) {
         appcuesCoroutineScope.launch {
             // this will respond with qualified experiences, if applicable
-            val experiences = repository.trackActivity(activity)
-            experienceRenderer.show(experiences)
+            repository.trackActivity(activity).also {
+                // we will try to show an experience from this list
+                experienceRenderer.show(it)
+            }
         }
     }
-}
 
-internal fun List<ActivityRequest>.merge(): ActivityRequest? {
-    if (isEmpty()) return null
-    val activity = first()
-    val events = mutableListOf<EventRequest>()
-    val profileUpdate = hashMapOf<String, Any>()
-    forEach { item ->
-        // merge events
-        item.events?.let {
-            events.addAll(it)
+    private fun List<ActivityRequest>.merge(): ActivityRequest? {
+        if (isEmpty()) return null
+        val activity = first()
+        val events = mutableListOf<EventRequest>()
+        val profileUpdate = hashMapOf<String, Any>()
+        forEach { item ->
+            // merge events
+            item.events?.let {
+                events.addAll(it)
+            }
+            // merge auto properties in profile update
+            if (item.profileUpdate != null) {
+                profileUpdate.putAll(item.profileUpdate)
+            }
         }
-        // merge auto properties in profile update
-        if (item.profileUpdate != null) {
-            profileUpdate.putAll(item.profileUpdate)
-        }
+        return activity.copy(events = events, profileUpdate = profileUpdate)
     }
-    return activity.copy(events = events, profileUpdate = profileUpdate)
 }

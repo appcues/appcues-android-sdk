@@ -6,6 +6,7 @@ import com.appcues.logging.Logcues
 import com.appcues.statemachine.StateMachine
 import com.appcues.ui.ExperienceRenderer
 import com.appcues.ui.debugger.AppcuesDebuggerManager
+import com.appcues.ui.debugger.DebuggerDataManager
 import org.koin.dsl.ScopeDSL
 
 internal object AppcuesKoin : KoinScopePlugin {
@@ -35,6 +36,14 @@ internal object AppcuesKoin : KoinScopePlugin {
                 gson = get(),
                 config = get(),
                 logcues = get()
+            )
+        }
+
+        scoped {
+            DebuggerDataManager(
+                appcuesConfig = get(),
+                storage = get(),
+                appcuesRemoteSource = get(),
             )
         }
     }

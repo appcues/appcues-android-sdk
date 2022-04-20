@@ -44,4 +44,7 @@ internal interface AppcuesService {
         @Path("account") account: String,
         @Path("experienceId") experienceId: String,
     ): ExperienceResponse
+
+    @GET("healthz")
+    suspend fun healthCheck()
 }
