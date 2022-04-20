@@ -9,8 +9,6 @@ import com.appcues.data.remote.response.ErrorResponse
 import com.appcues.data.remote.response.QualifyResponse
 import com.appcues.data.remote.response.experience.ExperienceResponse
 import com.appcues.util.ResultOf
-import com.appcues.util.ResultOf.Failure
-import com.appcues.util.ResultOf.Success
 import com.google.gson.Gson
 import com.google.gson.JsonParseException
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -81,8 +79,8 @@ internal class RetrofitAppcuesRemoteSource(
             appcuesService.healthCheck()
         }.let {
             when (it) {
-                is Failure -> false
-                is Success -> true
+                is ResultOf.Failure -> false
+                is ResultOf.Success -> it.value.ok
             }
         }
     }

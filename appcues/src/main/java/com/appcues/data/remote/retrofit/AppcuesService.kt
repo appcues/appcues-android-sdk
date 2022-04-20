@@ -1,6 +1,7 @@
 package com.appcues.data.remote.retrofit
 
 import com.appcues.data.remote.response.ActivityResponse
+import com.appcues.data.remote.response.HealthCheckResponse
 import com.appcues.data.remote.response.QualifyResponse
 import com.appcues.data.remote.response.experience.ExperienceResponse
 import okhttp3.RequestBody
@@ -46,5 +47,5 @@ internal interface AppcuesService {
     ): ExperienceResponse
 
     @GET("healthz")
-    suspend fun healthCheck()
+    suspend fun healthCheck(): HealthCheckResponse
 }
