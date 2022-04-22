@@ -108,7 +108,7 @@ internal fun BoxScope.DebuggerFloatingActionButton(
                 .padding(12.dp)
         ) {
             Image(
-                painter = painterResource(id = drawable.ic_debugger_appcues_logo),
+                painter = painterResource(id = drawable.appcues_ic_debugger_appcues_logo),
                 contentDescription = LocalContext.current.getString(R.string.debugger_fab_image_content_description)
             )
         }

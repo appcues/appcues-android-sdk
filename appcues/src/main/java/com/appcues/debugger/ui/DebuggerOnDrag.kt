@@ -68,7 +68,7 @@ private fun DismissDebuggerArea(onGloballyPositioned: (LayoutCoordinates) -> Uni
         contentAlignment = Alignment.Center
     ) {
         Image(
-            painter = painterResource(id = drawable.ic_dismiss),
+            painter = painterResource(id = drawable.appcues_ic_dismiss),
             modifier = Modifier.clip(RoundedCornerShape(percent = 100)),
             contentDescription = LocalContext.current.getString(R.string.debugger_fab_dismiss_image_content_description)
         )

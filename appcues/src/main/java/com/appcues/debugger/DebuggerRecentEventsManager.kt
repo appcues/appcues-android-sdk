@@ -13,6 +13,11 @@ import java.util.Date
 
 internal class DebuggerRecentEventsManager {
 
+    companion object {
+
+        private const val MAX_RECENT_EVENTS = 20
+    }
+
     private val events: ArrayList<DebuggerEventItem> = arrayListOf()
 
     private var filterType: EventType? = null
@@ -64,12 +69,7 @@ internal class DebuggerRecentEventsManager {
             }
         }
 
-        (filterType?.let { eventType ->
-            events.filter { it.type == eventType }.filterIndexed { index, _ -> index < 20 }
-        } ?: events.filterIndexed { index, _ -> index < 20 }
-            ).also {
-                _data.emit(it)
-            }
+        updateData()
     }
 
     private fun ArrayList<DebuggerEventItem>.addFirst(element: DebuggerEventItem) {
@@ -115,11 +115,14 @@ internal class DebuggerRecentEventsManager {
     suspend fun onApplyEventFilter(eventType: EventType?) = withContext(Dispatchers.IO) {
         filterType = eventType
 
-        (filterType?.let { eventType ->
-            events.filter { it.type == eventType }.filterIndexed { index, _ -> index < 20 }
-        } ?: events.filterIndexed { index, _ -> index < 20 }
-            ).also {
-                _data.emit(it)
-            }
+        updateData()
+    }
+
+    private suspend fun updateData() {
+        val list = filterType?.let { eventType ->
+            events.filter { it.type == eventType }.filterIndexed { index, _ -> index < MAX_RECENT_EVENTS }
+        } ?: events.filterIndexed { index, _ -> index < MAX_RECENT_EVENTS }
+
+        _data.emit(list)
     }
 }

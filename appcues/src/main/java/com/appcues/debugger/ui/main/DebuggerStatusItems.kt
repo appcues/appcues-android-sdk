@@ -42,10 +42,10 @@ internal fun DebuggerStatusItem.StatusItemIcon() {
 
 private fun StatusType.toResourceId(): Int {
     return when (this) {
-        StatusType.PHONE -> R.drawable.ic_mobile
-        StatusType.SUCCESS -> R.drawable.ic_success
-        StatusType.ERROR -> R.drawable.ic_error
-        StatusType.EXPERIENCE -> R.drawable.ic_experience
+        StatusType.PHONE -> R.drawable.appcues_ic_mobile
+        StatusType.SUCCESS -> R.drawable.appcues_ic_success
+        StatusType.ERROR -> R.drawable.appcues_ic_error
+        StatusType.EXPERIENCE -> R.drawable.appcues_ic_experience
         // we never need loading icon
         StatusType.LOADING -> 0
     }
@@ -93,7 +93,7 @@ internal fun DebuggerStatusItem.RefreshIcon() {
             modifier = Modifier
                 .padding(24.dp)
                 .size(24.dp),
-            painter = painterResource(id = R.drawable.ic_reload),
+            painter = painterResource(id = R.drawable.appcues_ic_reload),
             contentDescription = LocalContext.current.getString(R.string.debugger_status_reload_icon_content_description),
             contentScale = ContentScale.None
         )

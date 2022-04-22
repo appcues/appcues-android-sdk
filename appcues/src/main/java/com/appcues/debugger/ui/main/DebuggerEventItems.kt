@@ -59,7 +59,7 @@ internal fun DebuggerEventItem.EventItemContent(rowScope: RowScope) {
                     modifier = Modifier
                         .padding(end = 4.dp)
                         .size(12.dp),
-                    painter = painterResource(id = R.drawable.ic_clock),
+                    painter = painterResource(id = R.drawable.appcues_ic_clock),
                     contentDescription = LocalContext.current.getString(R.string.debugger_recent_events_timestamp_icon_content_description),
                     contentScale = ContentScale.Fit
                 )
