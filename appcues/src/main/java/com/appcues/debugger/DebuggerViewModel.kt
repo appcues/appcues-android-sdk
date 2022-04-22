@@ -146,7 +146,7 @@ internal class DebuggerViewModel(
         }
     }
 
-    fun onEventClick(eventItem: DebuggerEventItem) {
+    fun onEventClick() {
         // will be implemented next
     }
 }

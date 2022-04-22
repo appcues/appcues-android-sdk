@@ -156,7 +156,7 @@ private fun LazyListScope.recentEventsItemsHeader(currentFilter: EventType?, onA
                                 filterImagePosition.value = DpOffset(it.positionInRoot().x.toDp(), it.positionInRoot().y.toDp())
                             }
                         },
-                    painter = painterResource(id = if (it) R.drawable.ic_filter_on else R.drawable.ic_filter_off),
+                    painter = painterResource(id = if (it) R.drawable.appcues_ic_filter_on else R.drawable.appcues_ic_filter_off),
                     contentDescription = LocalContext.current.getString(R.string.debugger_recent_events_filter_icon_content_description),
                     contentScale = ContentScale.Inside
                 )
@@ -256,13 +256,13 @@ private fun EventType?.getTitleString(): Int {
 
 internal fun EventType?.toResourceId(): Int {
     return when (this) {
-        EXPERIENCE -> R.drawable.ic_experience
-        GROUP_UPDATE -> R.drawable.ic_group
-        USER_PROFILE -> R.drawable.ic_user_profile
-        CUSTOM -> R.drawable.ic_custom
-        SCREEN -> R.drawable.ic_screen
-        SESSION -> R.drawable.ic_session
-        else -> R.drawable.ic_all
+        EXPERIENCE -> R.drawable.appcues_ic_experience
+        GROUP_UPDATE -> R.drawable.appcues_ic_group
+        USER_PROFILE -> R.drawable.appcues_ic_user_profile
+        CUSTOM -> R.drawable.appcues_ic_custom
+        SCREEN -> R.drawable.appcues_ic_screen
+        SESSION -> R.drawable.appcues_ic_session
+        else -> R.drawable.appcues_ic_all
     }
 }
 
