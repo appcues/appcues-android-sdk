@@ -3,6 +3,7 @@ package com.appcues.debugger
 import android.os.Build
 import android.os.Build.VERSION
 import com.appcues.AppcuesConfig
+import com.appcues.BuildConfig
 import com.appcues.R
 import com.appcues.Storage
 import com.appcues.analytics.AnalyticsEvent
@@ -22,7 +23,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.withContext
 
-internal class DebuggerDataManager(
+internal class DebuggerStatusManager(
     storage: Storage,
     private val appcuesConfig: AppcuesConfig,
     private val appcuesRemoteSource: AppcuesRemoteSource,
@@ -46,8 +47,6 @@ internal class DebuggerDataManager(
 
     suspend fun start() = withContext(Dispatchers.IO) {
         connectToAppcues(false)
-        trackingScreens = null
-        updateData()
     }
 
     suspend fun onActivityRequest(activityRequest: ActivityRequest) = withContext(Dispatchers.IO) {
@@ -69,18 +68,13 @@ internal class DebuggerDataManager(
                         experienceShowingStep = contextResources.getString(R.string.debugger_status_experience_line1, group, step)
                     }
                 }
-                AnalyticsEvent.ExperienceCompleted.eventName -> {
+                AnalyticsEvent.ExperienceCompleted.eventName, AnalyticsEvent.ExperienceDismissed.eventName -> {
                     experienceName = null
                     experienceShowingStep = null
                 }
-                AnalyticsEvent.ExperienceDismissed.eventName -> {
-                    experienceName = null
-                    experienceShowingStep = null
-                }
+                else -> Unit
             }
         }
-
-        activityRequest.events?.any { it.name == AnalyticsEvent.ScreenView.eventName }?.let { trackingScreens = true }
 
         updateData()
     }
@@ -103,7 +97,7 @@ internal class DebuggerDataManager(
     )
 
     private fun sdkInfoItem() = DebuggerStatusItem(
-        title = contextResources.getString(R.string.debugger_status_sdk_title),
+        title = contextResources.getString(R.string.debugger_status_sdk_title, BuildConfig.SDK_VERSION),
         statusType = SUCCESS,
         line1 = contextResources.getString(R.string.debugger_status_sdk_line1, appcuesConfig.accountId),
         line2 = contextResources.getString(R.string.debugger_status_sdk_line2, appcuesConfig.applicationId)

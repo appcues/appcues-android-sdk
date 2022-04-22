@@ -14,7 +14,7 @@
     <string name="debugger_status_reload_icon_content_description">reload icon</string>
     <string name="debugger_status_device_title">"%1$s Android %2$s</string>
     <string name="debugger_status_experience_line1">"Showing group %1$s step %2$s"</string>
-    <string name="debugger_status_sdk_title">Installed SDK</string>
+    <string name="debugger_status_sdk_title">Installed SDK (%1$s)</string>
     <string name="debugger_status_sdk_line1">Account ID: %1$s</string>
     <string name="debugger_status_sdk_line2">Application ID: %1$s</string>
     <string name="debugger_status_check_connection_connecting_title">Connecting to Appcues</string>
@@ -26,5 +26,19 @@
     <string name="debugger_status_identity_success_title">User Identified</string>
     <string name="debugger_status_identity_loading_title">Identifying User</string>
     <string name="debugger_status_identity_loading_line1">waiting for any event…</string>
+
+    <string name="debugger_recent_events_title">Recent events</string>
+    <string name="debugger_recent_events_item_icon_content_description">Event icon</string>
+    <string name="debugger_recent_events_timestamp_icon_content_description">Timestamp icon</string>
+    <string name="debugger_recent_events_filter_icon_content_description">Filter icon</string>
+
+    <string name="debugger_recent_events_filter_experience">Experience</string>
+    <string name="debugger_recent_events_filter_group">Group</string>
+    <string name="debugger_recent_events_filter_profile">User Profile</string>
+    <string name="debugger_recent_events_filter_custom">Custom</string>
+    <string name="debugger_recent_events_filter_screen">Screen</string>
+    <string name="debugger_recent_events_filter_session">Session</string>
+    <string name="debugger_recent_events_filter_all">All</string>
+
 
 </resources>

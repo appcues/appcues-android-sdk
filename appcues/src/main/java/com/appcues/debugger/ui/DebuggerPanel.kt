@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -28,6 +27,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.appcues.debugger.DebuggerViewModel
+import com.appcues.debugger.ui.main.DebuggerMain
 import com.appcues.ui.theme.AppcuesColors
 
 @Composable
@@ -60,9 +60,7 @@ internal fun BoxScope.DebuggerPanel(debuggerState: MutableDebuggerState, debugge
                 .height(debuggerState.getExpandedContainerHeight())
                 .fillMaxWidth()
                 .background(Color.White)
-                .clickable(enabled = false, onClickLabel = null) {}
-                // adding padding top to make sure nothing is drawn below the FAB
-                .padding(top = 40.dp),
+                .clickable(enabled = false, onClickLabel = null) {},
             contentAlignment = Alignment.TopCenter
         ) {
             NavHost(navController = rememberNavController(), startDestination = "main") {
