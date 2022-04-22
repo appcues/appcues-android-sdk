@@ -37,8 +37,7 @@
                 <data android:scheme="appcues-example" android:host="group" />
             </intent-filter>
             <intent-filter>
-<!--                <data android:scheme="appcues-APPCUES_APPLICATION_ID" />-->
-                <data android:scheme="appcues-4b6b796f-1313-440a-b356-ee4b7abe931c" />
+                <data android:scheme="appcues-APPCUES_APPLICATION_ID" />
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
