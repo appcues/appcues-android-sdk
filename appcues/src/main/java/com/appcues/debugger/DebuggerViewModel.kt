@@ -12,7 +12,7 @@ import com.appcues.debugger.DebuggerViewModel.UIState.Expanded
 import com.appcues.debugger.DebuggerViewModel.UIState.Idle
 import com.appcues.debugger.model.DebuggerEventItem
 import com.appcues.debugger.model.DebuggerStatusItem
-import com.appcues.debugger.model.EventType.SCREEN
+import com.appcues.debugger.model.EventType
 import com.appcues.debugger.model.TapActionType
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,7 +28,9 @@ internal class DebuggerViewModel(
 
     private val analyticsTracker by inject<AnalyticsTracker>()
 
-    private val debuggerDataManager by inject<DebuggerDataManager>()
+    private val debuggerStatusManager by inject<DebuggerStatusManager>()
+
+    private val debuggerRecentEventsManager by inject<DebuggerRecentEventsManager>()
 
     sealed class UIState {
         object Creating : UIState()
@@ -54,27 +56,37 @@ internal class DebuggerViewModel(
     val events: StateFlow<List<DebuggerEventItem>>
         get() = _events
 
+    private val _currentFilter = MutableStateFlow<EventType?>(null)
+
+    val currentFilter: StateFlow<EventType?>
+        get() = _currentFilter
+
     init {
         viewModelScope.launch {
             analyticsTracker.analyticsFlow.collect { activityRequest ->
-                // dispatch to data manager so it can check for new experiences
+                // dispatch to status manager so it can check for new experiences
                 // and update status info if needed
-                debuggerDataManager.onActivityRequest(activityRequest)
-
-                activityRequest.events?.forEach {
-                    _events.value = _events.value.plus(DebuggerEventItem(name = it.name, type = SCREEN))
-                }
+                debuggerStatusManager.onActivityRequest(activityRequest)
+                // dispatch to recent events manager so it stores all recent events and emits only
+                // what is set by the filter
+                debuggerRecentEventsManager.onActivityRequest(activityRequest)
             }
         }
 
         viewModelScope.launch {
-            debuggerDataManager.data.collect { items ->
+            debuggerStatusManager.data.collect { items ->
                 _statusInfo.value = items
             }
         }
 
         viewModelScope.launch {
-            debuggerDataManager.start()
+            debuggerRecentEventsManager.data.collect { items ->
+                _events.value = items
+            }
+        }
+
+        viewModelScope.launch {
+            debuggerStatusManager.start()
         }
     }
 
@@ -123,7 +135,18 @@ internal class DebuggerViewModel(
 
     fun onStatusTapAction(tapActionType: TapActionType) {
         viewModelScope.launch {
-            debuggerDataManager.onTapAction(tapActionType)
+            debuggerStatusManager.onTapAction(tapActionType)
         }
+    }
+
+    fun onApplyEventFilter(eventType: EventType?) {
+        viewModelScope.launch {
+            _currentFilter.emit(eventType)
+            debuggerRecentEventsManager.onApplyEventFilter(eventType)
+        }
+    }
+
+    fun onEventClick(eventItem: DebuggerEventItem) {
+        // will be implemented next
     }
 }

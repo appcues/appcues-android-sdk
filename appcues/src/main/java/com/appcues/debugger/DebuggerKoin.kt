@@ -8,12 +8,16 @@ internal object DebuggerKoin : KoinScopePlugin {
 
     override fun ScopeDSL.install(config: AppcuesConfig) {
         scoped {
-            DebuggerDataManager(
+            DebuggerStatusManager(
                 storage = get(),
                 appcuesConfig = get(),
                 appcuesRemoteSource = get(),
                 contextResources = get(),
             )
+        }
+
+        scoped {
+            DebuggerRecentEventsManager()
         }
     }
 }
