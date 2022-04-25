@@ -73,7 +73,7 @@ internal fun DebuggerMain(debuggerViewModel: DebuggerViewModel) {
 
         recentEventsItemsHeader(isFilterOn.value) { debuggerViewModel.onApplyEventFilter(it) }
 
-        recentEventsItemsCompose(recentEvents.value) { debuggerViewModel.onEventClick(it) }
+        recentEventsItemsCompose(recentEvents.value) { debuggerViewModel.onEventClick() }
     }
 }
 
