@@ -145,8 +145,4 @@ internal class DebuggerViewModel(
             debuggerRecentEventsManager.onApplyEventFilter(eventType)
         }
     }
-
-    fun onEventClick() {
-        // will be implemented next
-    }
 }

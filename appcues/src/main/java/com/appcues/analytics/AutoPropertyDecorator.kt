@@ -26,12 +26,15 @@ internal class AutoPropertyDecorator(
     private val sessionMonitor: SessionMonitor,
     private val appcuesCoroutineScope: AppcuesCoroutineScope,
 ) {
-    private companion object {
+    companion object {
         // _sessionRandomizer is defined in the web SDK as: A random number between 1 and 100,
         // generated every time a user visits your site in a new browser window or tab.
         // It appears to be used for targeting a % of sessions as a sample.
-        const val SESSION_RANDOMIZER_LOWER_BOUND = 0
-        const val SESSION_RANDOMIZER_UPPER_BOUND = 100
+        private const val SESSION_RANDOMIZER_LOWER_BOUND = 0
+        private const val SESSION_RANDOMIZER_UPPER_BOUND = 100
+
+        const val IDENTITY_PROPERTY = "_identity"
+        const val UPDATED_AT_PROPERTY = "_updatedAt"
     }
 
     private var currentScreen: String? = null
@@ -62,7 +65,7 @@ internal class AutoPropertyDecorator(
             "userId" to storage.userId,
             "_isAnonymous" to storage.isAnonymous,
             "_localId" to storage.deviceId,
-            "_updatedAt" to Date().time,
+            UPDATED_AT_PROPERTY to Date().time,
             "_sessionId" to sessionMonitor.sessionId?.toString(),
             "_lastContentShownAt" to storage.lastContentShownAt?.time,
             "_lastBrowserLanguage" to getCurrentLocale(context).language,
@@ -99,7 +102,7 @@ internal class AutoPropertyDecorator(
             previousScreen = null
         }
 
-        attributes["_identity"] = autoProperties
+        attributes[IDENTITY_PROPERTY] = autoProperties
         context.putAll(contextProperties)
     }
 

@@ -54,6 +54,7 @@ android {
     shot {
         applicationId = "com.appcues"
     }
+
 }
 
 dependencies {
@@ -72,8 +73,8 @@ dependencies {
     kapt "androidx.room:room-compiler:2.4.2"
     // Image Loader
     implementation "io.coil-kt:coil-compose:1.4.0"
-    implementation("io.coil-kt:coil-gif:1.4.0")
-    implementation("io.coil-kt:coil-svg:1.4.0")
+    implementation "io.coil-kt:coil-gif:1.4.0"
+    implementation "io.coil-kt:coil-svg:1.4.0"
     // RESTApi
     implementation "com.squareup.retrofit2:retrofit:2.9.0"
     implementation "com.squareup.retrofit2:converter-gson:2.9.0"
@@ -85,6 +86,8 @@ dependencies {
     implementation "com.google.accompanist:accompanist-pager:0.23.1"
     // Webview
     implementation "com.google.accompanist:accompanist-webview:0.24.5-alpha"
+    // Navigation Animated
+    implementation "com.google.accompanist:accompanist-navigation-animation:0.23.1"
 
     testImplementation "junit:junit:4.13.2"
     testImplementation "com.squareup.okhttp3:mockwebserver:4.9.3"

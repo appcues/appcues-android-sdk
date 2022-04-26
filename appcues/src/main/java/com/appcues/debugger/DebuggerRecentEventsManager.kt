@@ -1,21 +1,29 @@
 package com.appcues.debugger
 
-import com.appcues.analytics.AnalyticsEvent
+import com.appcues.R
+import com.appcues.analytics.ActivityRequestBuilder
+import com.appcues.analytics.AutoPropertyDecorator
 import com.appcues.data.remote.request.ActivityRequest
+import com.appcues.data.remote.request.EventRequest
 import com.appcues.debugger.model.DebuggerEventItem
 import com.appcues.debugger.model.EventType
+import com.appcues.debugger.ui.toEventTitle
+import com.appcues.debugger.ui.toEventType
+import com.appcues.util.ContextResources
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.withContext
-import java.text.SimpleDateFormat
 import java.util.Date
 
-internal class DebuggerRecentEventsManager {
+internal class DebuggerRecentEventsManager(
+    private val contextResources: ContextResources,
+) {
 
     companion object {
 
         private const val MAX_RECENT_EVENTS = 20
+        private const val IDENTITY_PROPERTY_PREFIX = "_"
     }
 
     private val events: ArrayList<DebuggerEventItem> = arrayListOf()
@@ -28,17 +36,26 @@ internal class DebuggerRecentEventsManager {
         get() = _data
 
     suspend fun onActivityRequest(activityRequest: ActivityRequest) = withContext(Dispatchers.IO) {
-        val dateFormat = SimpleDateFormat("hh:mm:ss", java.util.Locale.getDefault())
         when {
             // event
             activityRequest.events != null -> {
                 activityRequest.events.forEach { event ->
+                    val type = event.name.toEventType()
+                    val title = event.name.toEventTitle()?.let { contextResources.getString(it) } ?: event.name
+
                     events.addFirst(
                         DebuggerEventItem(
-                            type = event.name.toEventType(),
-                            title = event.name.toEventTitle(),
-                            timestamp = dateFormat.format(event.timestamp),
-                            properties = event.attributes,
+                            type = type,
+                            title = title,
+                            timestamp = event.timestamp.time,
+                            name = getEventName(event, type, title),
+                            properties = event.attributes
+                                .filterOutScreenProperties(type)
+                                .filterOutAutoProperties()
+                                .toSortedList(),
+                            identityProperties = event.attributes
+                                .getAutoProperties()
+                                .toSortedList()
                         )
                     )
                 }
@@ -48,9 +65,11 @@ internal class DebuggerRecentEventsManager {
                 events.addFirst(
                     DebuggerEventItem(
                         type = EventType.GROUP_UPDATE,
-                        title = "Group Update",
-                        timestamp = dateFormat.format(Date()),
-                        properties = activityRequest.groupUpdate
+                        title = contextResources.getString(R.string.debugger_event_type_group_update_title),
+                        timestamp = Date().time,
+                        name = activityRequest.groupId ?: contextResources.getString(R.string.debugger_event_type_group_update_title),
+                        properties = activityRequest.groupUpdate.toSortedList(),
+                        identityProperties = null
                     )
                 )
             }
@@ -59,11 +78,13 @@ internal class DebuggerRecentEventsManager {
                 events.addFirst(
                     DebuggerEventItem(
                         type = EventType.USER_PROFILE,
-                        title = "Profile Update",
-                        // it should always contain _updatedAt property, this is just a safeguard
+                        title = contextResources.getString(R.string.debugger_event_type_profile_update_title),
+                        // it should always contain updated at property, this is just a safeguard
                         // in case something changes in the future to avoid unwanted exceptions
-                        timestamp = dateFormat.format((activityRequest.profileUpdate["_updatedAt"] as Long?)?.let { Date(it) } ?: Date()),
-                        properties = activityRequest.profileUpdate
+                        timestamp = (activityRequest.profileUpdate[AutoPropertyDecorator.UPDATED_AT_PROPERTY] as Long?) ?: Date().time,
+                        name = activityRequest.userId,
+                        properties = activityRequest.profileUpdate.toSortedList(),
+                        identityProperties = null
                     )
                 )
             }
@@ -72,44 +93,40 @@ internal class DebuggerRecentEventsManager {
         updateData()
     }
 
+    private fun Map<String, Any>.filterOutScreenProperties(eventType: EventType): Map<String, Any> {
+        return if (eventType == EventType.SCREEN) {
+            filterNot { it.key == ActivityRequestBuilder.SCREEN_TITLE_ATTRIBUTE }
+        } else this
+    }
+
+    private fun Map<String, Any>.filterOutAutoProperties(): Map<String, Any> {
+        return filterNot { it.key == AutoPropertyDecorator.IDENTITY_PROPERTY }
+    }
+
+    private fun Map<String, Any>.getAutoProperties(): Map<String, Any> {
+        @Suppress("UNCHECKED_CAST")
+        return (this[AutoPropertyDecorator.IDENTITY_PROPERTY] as Map<String, Any>?) ?: mapOf()
+    }
+
+    private fun getEventName(
+        event: EventRequest,
+        type: EventType,
+        title: String
+    ) = if (type == EventType.SCREEN && event.attributes.contains(ActivityRequestBuilder.SCREEN_TITLE_ATTRIBUTE))
+        event.attributes[ActivityRequestBuilder.SCREEN_TITLE_ATTRIBUTE] as String
+    else title
+
+    private fun Map<String, Any>.toSortedList(): List<Pair<String, Any>> = toList().let { list ->
+        arrayListOf<Pair<String, Any>>().apply {
+            addAll(list.filter { it.first.startsWith(IDENTITY_PROPERTY_PREFIX).not() }.sortByPropertyName())
+            addAll(list.filter { it.first.startsWith(IDENTITY_PROPERTY_PREFIX) }.sortByPropertyName())
+        }
+    }
+
+    private fun List<Pair<String, Any>>.sortByPropertyName(): List<Pair<String, Any>> = sortedBy { it.first }
+
     private fun ArrayList<DebuggerEventItem>.addFirst(element: DebuggerEventItem) {
         add(0, element)
-    }
-
-    private fun String.toEventType(): EventType = when (this) {
-        AnalyticsEvent.ScreenView.eventName -> EventType.SCREEN
-        AnalyticsEvent.SessionStarted.eventName,
-        AnalyticsEvent.SessionSuspended.eventName,
-        AnalyticsEvent.SessionResumed.eventName,
-        AnalyticsEvent.SessionReset.eventName -> EventType.SESSION
-        AnalyticsEvent.ExperienceStepSeen.eventName,
-        AnalyticsEvent.ExperienceStepInteraction.eventName,
-        AnalyticsEvent.ExperienceStepCompleted.eventName,
-        AnalyticsEvent.ExperienceStepError.eventName,
-        AnalyticsEvent.ExperienceStepRecovered.eventName,
-        AnalyticsEvent.ExperienceStarted.eventName,
-        AnalyticsEvent.ExperienceCompleted.eventName,
-        AnalyticsEvent.ExperienceDismissed.eventName,
-        AnalyticsEvent.ExperienceError.eventName -> EventType.EXPERIENCE
-        else -> EventType.CUSTOM
-    }
-
-    private fun String.toEventTitle(): String = when (this) {
-        AnalyticsEvent.ScreenView.eventName -> "Screen View"
-        AnalyticsEvent.SessionStarted.eventName -> "Session Started"
-        AnalyticsEvent.SessionSuspended.eventName -> "Session Suspended"
-        AnalyticsEvent.SessionResumed.eventName -> "Session Resumed"
-        AnalyticsEvent.SessionReset.eventName -> "Session Reset"
-        AnalyticsEvent.ExperienceStepSeen.eventName -> "Step Seen"
-        AnalyticsEvent.ExperienceStepInteraction.eventName -> "Step Interaction"
-        AnalyticsEvent.ExperienceStepCompleted.eventName -> "Step Completed"
-        AnalyticsEvent.ExperienceStepError.eventName -> "Step Error"
-        AnalyticsEvent.ExperienceStepRecovered.eventName -> "Step Recovered"
-        AnalyticsEvent.ExperienceStarted.eventName -> "Experience Started"
-        AnalyticsEvent.ExperienceCompleted.eventName -> "Experience Completed"
-        AnalyticsEvent.ExperienceDismissed.eventName -> "Experience Dismissed"
-        AnalyticsEvent.ExperienceError.eventName -> "Experience Error"
-        else -> "Event $this"
     }
 
     suspend fun onApplyEventFilter(eventType: EventType?) = withContext(Dispatchers.IO) {
