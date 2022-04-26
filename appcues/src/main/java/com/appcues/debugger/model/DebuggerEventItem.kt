@@ -3,8 +3,10 @@ package com.appcues.debugger.model
 internal data class DebuggerEventItem(
     val type: EventType,
     val title: String,
-    val timestamp: String,
-    val properties: HashMap<String, Any>?,
+    val timestamp: Long,
+    val name: String,
+    val properties: List<Pair<String, Any>>?,
+    val identityProperties: List<Pair<String, Any>>?
 )
 
 internal enum class EventType {

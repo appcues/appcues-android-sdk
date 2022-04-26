@@ -19,7 +19,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.appcues.R
 import com.appcues.debugger.model.DebuggerEventItem
+import com.appcues.debugger.ui.toResourceId
 import com.appcues.ui.theme.AppcuesColors
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 internal fun DebuggerEventItem.EventItemIcon() {
@@ -35,8 +39,11 @@ internal fun DebuggerEventItem.EventItemIcon() {
     )
 }
 
+private const val EVENT_DATE_FORMAT = "hh:mm:ss"
+
 @Composable
 internal fun DebuggerEventItem.EventItemContent(rowScope: RowScope) {
+    val dateFormat = SimpleDateFormat(EVENT_DATE_FORMAT, Locale.getDefault())
     with(rowScope) {
         Column(
             modifier = Modifier
@@ -64,7 +71,7 @@ internal fun DebuggerEventItem.EventItemContent(rowScope: RowScope) {
                     contentScale = ContentScale.Fit
                 )
                 Text(
-                    text = timestamp,
+                    text = dateFormat.format(Date(timestamp)),
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Normal,
                     color = AppcuesColors.OceanNight

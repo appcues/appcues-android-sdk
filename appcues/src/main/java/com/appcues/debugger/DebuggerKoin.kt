@@ -17,7 +17,9 @@ internal object DebuggerKoin : KoinScopePlugin {
         }
 
         scoped {
-            DebuggerRecentEventsManager()
+            DebuggerRecentEventsManager(
+                contextResources = get()
+            )
         }
     }
 }

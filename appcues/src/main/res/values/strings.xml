@@ -39,6 +39,31 @@
     <string name="debugger_recent_events_filter_screen">Screen</string>
     <string name="debugger_recent_events_filter_session">Session</string>
     <string name="debugger_recent_events_filter_all">All</string>
+    
+    <string name="debugger_event_type_group_update_title">Group Update</string>
+    <string name="debugger_event_type_profile_update_title">Profile Update</string>
 
+    <string name="debugger_event_type_screen_view_title">Screen View</string>
+    <string name="debugger_event_type_session_started_title">Session Started</string>
+    <string name="debugger_event_type_session_suspended_title">Session Suspended</string>
+    <string name="debugger_event_type_session_resumed_title">Session Resumed</string>
+    <string name="debugger_event_type_session_reset_title">Session Reset</string>
+    <string name="debugger_event_type_step_seen_title">Step Seen</string>
+    <string name="debugger_event_type_step_interaction_title">Step Interaction</string>
+    <string name="debugger_event_type_step_completed_title">Step Completed</string>
+    <string name="debugger_event_type_step_error_title">Step Error</string>
+    <string name="debugger_event_type_step_recovered_title">Step Recovered</string>
+    <string name="debugger_event_type_experience_started_title">Experience Started</string>
+    <string name="debugger_event_type_experience_completed_title">Experience Completed</string>
+    <string name="debugger_event_type_experience_dismissed_title">Experience Dismissed</string>
+    <string name="debugger_event_type_experience_error_title">Experience Error</string>
+
+    <string name="debugger_event_details_title">Event details</string>
+    <string name="debugger_event_details_properties_title">Properties</string>
+    <string name="debugger_event_details_identity_auto_properties_title">Identity auto-properties</string>
+    <string name="debugger_event_details_back_content_description">Back</string>
+    <string name="debugger_event_details_type_title">Type</string>
+    <string name="debugger_event_details_name_title">Name</string>
+    <string name="debugger_event_details_timestamp_title">Timestamp</string>
 
 </resources>

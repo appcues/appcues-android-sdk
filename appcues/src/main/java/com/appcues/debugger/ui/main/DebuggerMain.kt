@@ -2,13 +2,13 @@ package com.appcues.debugger.ui.main
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -45,26 +45,21 @@ import com.appcues.debugger.DebuggerViewModel
 import com.appcues.debugger.model.DebuggerEventItem
 import com.appcues.debugger.model.DebuggerStatusItem
 import com.appcues.debugger.model.EventType
-import com.appcues.debugger.model.EventType.CUSTOM
-import com.appcues.debugger.model.EventType.EXPERIENCE
-import com.appcues.debugger.model.EventType.GROUP_UPDATE
-import com.appcues.debugger.model.EventType.SCREEN
-import com.appcues.debugger.model.EventType.SESSION
-import com.appcues.debugger.model.EventType.USER_PROFILE
 import com.appcues.debugger.model.StatusType
 import com.appcues.debugger.model.TapActionType
+import com.appcues.debugger.ui.getTitleString
+import com.appcues.debugger.ui.toResourceId
 import com.appcues.ui.theme.AppcuesColors
 import kotlinx.coroutines.delay
 
 @Composable
-internal fun DebuggerMain(debuggerViewModel: DebuggerViewModel) {
+internal fun DebuggerMain(debuggerViewModel: DebuggerViewModel, onEventClick: (DebuggerEventItem) -> Unit) {
     val statusInfo = debuggerViewModel.statusInfo.collectAsState()
     val recentEvents = debuggerViewModel.events.collectAsState()
     val isFilterOn = debuggerViewModel.currentFilter.collectAsState()
 
     LazyColumn(
-        modifier = Modifier
-            .animateContentSize()
+        modifier = Modifier.fillMaxSize()
     ) {
 
         statusItemsHeader()
@@ -73,7 +68,7 @@ internal fun DebuggerMain(debuggerViewModel: DebuggerViewModel) {
 
         recentEventsItemsHeader(isFilterOn.value) { debuggerViewModel.onApplyEventFilter(it) }
 
-        recentEventsItemsCompose(recentEvents.value) { debuggerViewModel.onEventClick() }
+        recentEventsItemsCompose(recentEvents.value) { onEventClick(it) }
     }
 }
 
@@ -239,30 +234,6 @@ private fun ColumnScope.FilterEventTypeMenuItem(eventType: EventType?, isSelecte
                 .padding(start = 20.dp),
             text = LocalContext.current.getString(eventType.getTitleString())
         )
-    }
-}
-
-private fun EventType?.getTitleString(): Int {
-    return when (this) {
-        EXPERIENCE -> R.string.debugger_recent_events_filter_experience
-        GROUP_UPDATE -> R.string.debugger_recent_events_filter_group
-        USER_PROFILE -> R.string.debugger_recent_events_filter_profile
-        CUSTOM -> R.string.debugger_recent_events_filter_custom
-        SCREEN -> R.string.debugger_recent_events_filter_screen
-        SESSION -> R.string.debugger_recent_events_filter_session
-        else -> R.string.debugger_recent_events_filter_all
-    }
-}
-
-internal fun EventType?.toResourceId(): Int {
-    return when (this) {
-        EXPERIENCE -> R.drawable.appcues_ic_experience
-        GROUP_UPDATE -> R.drawable.appcues_ic_group
-        USER_PROFILE -> R.drawable.appcues_ic_user_profile
-        CUSTOM -> R.drawable.appcues_ic_custom
-        SCREEN -> R.drawable.appcues_ic_screen
-        SESSION -> R.drawable.appcues_ic_session
-        else -> R.drawable.appcues_ic_all
     }
 }
 
