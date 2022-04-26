@@ -13,12 +13,8 @@ import org.koin.dsl.ScopeDSL
 internal object ActionKoin : KoinScopePlugin {
 
     override fun ScopeDSL.install(config: AppcuesConfig) {
-        scoped {
-            ActionRegistry(
-                scope = get(),
-                logcues = get(),
-            )
-        }
+        scoped { ActionRegistry(scope = get(), logcues = get()) }
+        scoped { ActionProcessor(appcues = get(), appcuesCoroutineScope = get()) }
 
         factory { params ->
             CloseAction(

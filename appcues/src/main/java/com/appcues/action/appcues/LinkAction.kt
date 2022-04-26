@@ -25,28 +25,35 @@ internal class LinkAction(
     override suspend fun execute(appcues: Appcues) {
         // start web activity if url is not null
         if (url != null) {
-            if (openExternally) {
-                launchExternalBrowser(url)
-            } else {
-                launchInternalBrowser(url)
+            val uri = Uri.parse(url)
+            val scheme = uri.scheme?.lowercase()
+            if (scheme != null) {
+                // only HTTP or HTTPS URLs are eligible for Chrome Custom Tabs in-app browser
+                if (!openExternally && (scheme == "http" || scheme == "https")) {
+                    openCustomTabs(uri)
+                } else {
+                    // this will handle any in-app deep link scheme URLs OR any web urls that were
+                    // requested to open into the external browser application
+                    startNewIntent(uri)
+                }
             }
         }
     }
 
-    private fun launchExternalBrowser(url: String) {
+    private fun startNewIntent(uri: Uri) {
         Intent(Intent.ACTION_VIEW).apply {
-            data = Uri.parse(url)
+            data = uri
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
         }.also {
             context.startActivity(it)
         }
     }
 
-    private fun launchInternalBrowser(url: String) {
+    private fun openCustomTabs(uri: Uri) {
         CustomTabsIntent.Builder().build().apply {
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         }.also {
-            it.launchUrl(context, Uri.parse(url))
+            it.launchUrl(context, uri)
         }
     }
 }
