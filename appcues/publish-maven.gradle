@@ -65,6 +65,40 @@ afterEvaluate {
                 artifactId = appcuesProperties.getProperty("ARTIFACT_ID") + "-debug"
                 version = appcuesProperties.getProperty("VERSION")
             }
+            gpr(MavenPublication) {
+                from components.release
+
+                // You can then customize attributes of the publication as shown below.
+                groupId = appcuesProperties.getProperty("GROUP_ID")
+                artifactId = appcuesProperties.getProperty("ARTIFACT_ID")
+                version = appcuesProperties.getProperty("VERSION")
+
+                pom {
+                    name = appcuesProperties.getProperty("NAME")
+                    description = appcuesProperties.getProperty("DESCRIPTION")
+                    url = appcuesProperties.getProperty("ORG_URL")
+                    licenses {
+                        license {
+                            name = appcuesProperties.getProperty("LICENSE")
+                            url = appcuesProperties.getProperty("LICENSE_URL")
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = appcuesProperties.getProperty("ORG_ID")
+                            name = appcuesProperties.getProperty("ORG_NAME")
+                            organization = appcuesProperties.getProperty("ORG_NAME")
+                            organizationUrl = appcuesProperties.getProperty("ORG_URL")
+                            email = appcuesProperties.getProperty("ORG_EMAIL")
+                        }
+                    }
+                    scm {
+                        connection = 'scm:git:git://github.com/' + appcuesProperties.getProperty("GITHUB_PATH") + '.git'
+                        developerConnection = 'scm:git:ssh://github.com:' + appcuesProperties.getProperty("GITHUB_PATH") + '.git'
+                        url = 'https://github.com/' + appcuesProperties.getProperty("GITHUB_PATH")
+                    }
+                }
+            }
         }
         repositories {
             maven {
@@ -73,6 +107,14 @@ afterEvaluate {
                 credentials {
                     username = ossrhUsername
                     password = ossrhPassword
+                }
+            }
+            maven {
+                name = "GitHubPackages"
+                url = uri("https://maven.pkg.github.com/appcues/appcues-android-sdk")
+                credentials {
+                    username = System.getenv("GPR_USERNAME")
+                    password = System.getenv("GPR_TOKEN")
                 }
             }
         }
