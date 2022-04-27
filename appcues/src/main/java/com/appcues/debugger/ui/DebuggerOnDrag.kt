@@ -1,6 +1,8 @@
 package com.appcues.debugger.ui
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
@@ -14,6 +16,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.LayoutCoordinates
@@ -40,14 +43,14 @@ internal fun BoxScope.DebuggerOnDrag(
         enter = fadeIn(),
         exit = fadeOut()
     ) {
-        DismissDebuggerArea { debuggerState.initDismissAreaRect(it) }
+        DismissDebuggerArea(debuggerState) { debuggerState.initDismissAreaRect(it) }
     }
 
     // this means that debugger fab is not being dragged anymore and
     // its area is overlapping with dismissing area
     with(debuggerState.isDragging) {
         LaunchedEffect(targetState) {
-            if (targetState.not() && debuggerState.isFabInDismissingArea()) {
+            if (targetState.not() && debuggerState.isDraggingOverDismiss.value) {
                 onDismiss()
             }
         }
@@ -55,7 +58,11 @@ internal fun BoxScope.DebuggerOnDrag(
 }
 
 @Composable
-private fun DismissDebuggerArea(onGloballyPositioned: (LayoutCoordinates) -> Unit) {
+private fun DismissDebuggerArea(debuggerState: MutableDebuggerState, onGloballyPositioned: (LayoutCoordinates) -> Unit) {
+    val isDraggingAndColliding = debuggerState.isDragging.targetState && debuggerState.isDraggingOverDismiss.value
+    val size = animateDpAsState(if (isDraggingAndColliding) 50.dp else 44.dp)
+    val rotate = animateFloatAsState(if (isDraggingAndColliding) 90f else 0f)
+
     Box(
         modifier = Modifier
             .background(
@@ -69,7 +76,10 @@ private fun DismissDebuggerArea(onGloballyPositioned: (LayoutCoordinates) -> Uni
     ) {
         Image(
             painter = painterResource(id = drawable.appcues_ic_dismiss),
-            modifier = Modifier.clip(RoundedCornerShape(percent = 100)),
+            modifier = Modifier
+                .clip(RoundedCornerShape(percent = 100))
+                .size(size.value)
+                .rotate(rotate.value),
             contentDescription = LocalContext.current.getString(R.string.debugger_fab_dismiss_image_content_description)
         )
     }

@@ -22,7 +22,7 @@ internal class MutableDebuggerState(private val density: Density, private val is
         private const val GRID_FAB_POSITION = 4
         private val EXPANDED_CONTAINER_TOP_PADDING = 24.dp
 
-        private var lastKnownPosition = Offset(0f, 0f)
+        private var lastAnchoredPosition = Offset(0f, 0f)
     }
 
     val isVisible = MutableTransitionState(isCreating.not())
@@ -32,6 +32,7 @@ internal class MutableDebuggerState(private val density: Density, private val is
 
     val fabXOffset = mutableStateOf(value = 0f)
     val fabYOffset = mutableStateOf(value = 0f)
+    val isDraggingOverDismiss = mutableStateOf(value = false)
 
     private var boxSize = IntSize(0, 0)
     private var dismissRect = Rect(Offset(0f, 0f), Size(0f, 0f))
@@ -50,8 +51,8 @@ internal class MutableDebuggerState(private val density: Density, private val is
                 )
             } else {
                 updatePosition(
-                    x = lastKnownPosition.x,
-                    y = lastKnownPosition.y
+                    x = lastAnchoredPosition.x,
+                    y = lastAnchoredPosition.y
                 )
             }
         }
@@ -61,12 +62,14 @@ internal class MutableDebuggerState(private val density: Density, private val is
         return IntOffset(fabXOffset.value.roundToInt(), fabYOffset.value.roundToInt())
     }
 
-    fun updateFabOffsets(dragAmount: Offset) {
+    fun dragFabOffsets(dragAmount: Offset) {
         with(density) {
             updatePosition(
                 x = (fabXOffset.value + dragAmount.x).coerceIn(0f, boxSize.width.toFloat() - fabSize.toPx()),
                 y = (fabYOffset.value + dragAmount.y).coerceIn(0f, boxSize.height.toFloat() - fabSize.toPx())
             )
+
+            isDraggingOverDismiss.value = dismissRect.overlaps(fabRect)
         }
     }
 
@@ -76,7 +79,19 @@ internal class MutableDebuggerState(private val density: Density, private val is
         updateFabRect(x, y)
 
         // update global offset value with latest update
-        lastKnownPosition = Offset(x, y)
+        lastAnchoredPosition = Offset(getAnchorX(x), y)
+    }
+
+    private fun getAnchorX(x: Float): Float {
+        return with(density) {
+            val centerFabX = x + (fabSize.toPx() / 2)
+            val centerScreenX = boxSize.width / 2
+            if (centerFabX < centerScreenX) {
+                0f
+            } else {
+                boxSize.width - fabSize.toPx()
+            }
+        }
     }
 
     private fun updateFabRect(x: Float, y: Float) {
@@ -101,10 +116,6 @@ internal class MutableDebuggerState(private val density: Density, private val is
         }
     }
 
-    fun isFabInDismissingArea(): Boolean {
-        return dismissRect.overlaps(fabRect)
-    }
-
     fun getDismissAreaTargetXOffset(): Float {
         return dismissRect.center.x - fabRect.size.width / 2
     }
@@ -125,13 +136,7 @@ internal class MutableDebuggerState(private val density: Density, private val is
         }
     }
 
-    fun getLastIdleFabAnchor(): Offset {
-        return fabRect.topLeft
-    }
-
-    fun shouldAnimateToIdle(): Boolean {
-        return fabRect.topLeft.let {
-            it.x != fabXOffset.value && it.y != fabYOffset.value
-        }
+    fun getLastAnchoredPosition(): Offset {
+        return lastAnchoredPosition
     }
 }

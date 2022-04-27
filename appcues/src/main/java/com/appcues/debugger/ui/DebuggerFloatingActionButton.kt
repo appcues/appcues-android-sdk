@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.appcues.R
 import com.appcues.R.drawable
+import com.appcues.debugger.DebuggerViewModel
 import com.appcues.ui.theme.AppcuesColors
 
 private const val FAB_DRAGGING_SIZE_MULTIPLIER = 1.1f
@@ -49,9 +50,7 @@ private const val FAB_PAUSED_SIZE_MULTIPLIER = 0.0f
 @Composable
 internal fun BoxScope.DebuggerFloatingActionButton(
     debuggerState: MutableDebuggerState,
-    onDragEnd: () -> Unit,
-    onDrag: (Offset) -> Unit,
-    onClick: () -> Unit,
+    debuggerViewModel: DebuggerViewModel,
 ) {
     val resizeBy = animateFloatAsState(
         when {
@@ -94,9 +93,9 @@ internal fun BoxScope.DebuggerFloatingActionButton(
                 )
                 .clickableAndDraggable(
                     onClickLabel = LocalContext.current.getString(R.string.debugger_fab_on_click_label),
-                    onDragEnd = onDragEnd,
-                    onDrag = onDrag,
-                    onClick = onClick,
+                    onDragEnd = { debuggerViewModel.onDragEnd() },
+                    onDrag = { debuggerViewModel.onDragging(it) },
+                    onClick = { debuggerViewModel.onFabClick() }
                 )
                 .size(size = debuggerState.fabSize.times(resizeBy.value))
                 .clip(RoundedCornerShape(percent = 100))
