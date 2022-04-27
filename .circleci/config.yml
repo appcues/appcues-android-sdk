@@ -4,15 +4,66 @@
 version: 2.1
 
 # -------------------------
+#       PARAMETERS
+# -------------------------
+parameters:
+  deploy-sample:
+    type: boolean
+    default: false
+
+# -------------------------
 #          ORBS
 # -------------------------
 orbs:
   slack: circleci/slack@4.5.1
-  android: circleci/android@2.0.0
+  android: circleci/android@2.0.3
+  aws-s3: circleci/aws-s3@3.0
 
 # -------------------------
 #        REFERENCES
 # -------------------------
+references:
+  is_main: &is_main
+    matches:
+      pattern: '^main$'
+      value: << pipeline.git.branch >>
+
+# -------------------------
+#          COMMANDS
+# -------------------------
+commands:
+  install_with_cache:
+    description: 'Checkout from git and install gem and gradle dependencies'
+    steps:
+      - checkout
+      - restore_cache:
+          name: Restore gem cache
+          key: 3-gems-{{ checksum "Gemfile.lock" }}
+      - run:
+          name: Install gem dependencies
+          command: bundle check || bundle install
+      - save_cache:
+          name: Save gem cache
+          key: 3-gems-{{ checksum "Gemfile.lock" }}
+          paths:
+            - vendor/bundle
+      - aws-s3/copy:
+          from: 's3://appcues-mobile-certs/appcues.keystore'
+          to: './'
+      - run:
+          name: Generate Gradle cache key
+          command: ./checksum.sh /tmp/checksum.txt
+      - restore_cache:
+          name: Restore Gradle cache
+          key: gradle-{{ checksum "/tmp/checksum.txt" }}
+  save_gradle_cache:
+    description: 'Save Gradle cache'
+    steps:
+      - save_cache:
+          key: gradle-{{ checksum "/tmp/checksum.txt" }}
+          paths:
+            - ~/.gradle/caches
+            - ~/.gradle/wrapper
 
 # -------------------------
 #          JOBS
@@ -23,34 +74,42 @@ jobs:
     executor:
       name: android/android-machine
       resource-class: large
-      tag: 2021.10.1
-    environment:
-      JVM_OPTS: -Xmx3200m
+      tag: 2022.04.1 # https://circleci.com/developer/machine/image/android
     steps:
-      - checkout
-      - android/restore-gradle-cache
-      - android/restore-build-cache
+      - install_with_cache      
       - run:
-         name: Chmod permissions #if permission for Gradlew Dependencies fail, use this.
-         command: sudo chmod +x ./gradlew
-      - run:
-          name: Download Dependencies
-          command: ./gradlew androidDependencies
-      - android/save-gradle-cache
-      - android/save-build-cache
-      - run:
-          name: Run Tests
-          command: ./gradlew detekt test
-      - store_artifacts: # for display in Artifacts: https://circleci.com/docs/2.0/artifacts/
-          path: app/build/reports
-          destination: reports
-      - store_test_results: # for display in Test Summary: https://circleci.com/docs/2.0/collect-test-data/
-          path: app/build/test-results
-      # See https://circleci.com/docs/2.0/deployment-integrations/ for deploy examples
+          name: Run fastlane validate_code
+          command: bundle exec fastlane validate_code
+      - store_artifacts:
+          path: appcues/build/outputs
+          destination: sdk_outputs
+      - store_artifacts:
+          path: samples/kotlin-android-app/build/outputs
+          destination: sample_outputs
+      - store_test_results:
+          path: appcues/build/test-results
+      - save_gradle_cache          
       - slack/notify:
           event: fail
           template: basic_fail_1
           channel: team-mobile-bots
+
+  deploy_sample:
+    working_directory: ~/code
+    executor:
+      name: android/android-machine
+      resource-class: large
+      tag: 2022.04.1 # https://circleci.com/developer/machine/image/android
+    steps:
+      - install_with_cache      
+      - run:
+          name: Deploy sample to Google Play
+          command: bundle exec fastlane deploy_sample
+      - save_gradle_cache
+      - slack/notify:
+          event: pass
+          template: success_tagged_deploy_1
+          channel: team-mobile-bots 
 
 # --------------------------
 #        WORKFLOWS
@@ -58,10 +117,33 @@ jobs:
 workflows:
   version: 2
   pr_validation:
+    unless: *is_main
+    jobs:
+      - validate_code:
+          context:
+            - Appcues
+
+  build_and_deploy:
+    when:
+      and:
+        - *is_main
+        - << pipeline.parameters.deploy-sample >>
+    jobs:
+      - deploy_sample:
+          context:
+            - Appcues
+
+  # an empty workflow to avoid Build Error: "All Workflows have been filtered from this Pipeline. No Jobs have been run."
+  # the `when` selects for `is_main` and the filter ignores `main`.
+  no-op:
+    when:
+      and:
+        - *is_main
+        - not: << pipeline.parameters.deploy-sample >>
     jobs:
       - validate_code:
           filters:
             branches:
               ignore:
                 - main
-          context: Appcues
+            

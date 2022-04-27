@@ -6,11 +6,20 @@ plugins {
 android {
     compileSdk 31
 
+    signingConfigs {
+        release {
+            keyAlias System.getenv("KEYSTORE_ALIAS")
+            keyPassword System.getenv("KEYSTORE_PASSWORD")
+            storeFile file('../../appcues.keystore')
+            storePassword System.getenv("KEYSTORE_PASSWORD")
+        }
+    }
+
     defaultConfig {
         applicationId "com.appcues.samples.kotlin"
         minSdk 21
         targetSdk 31
-        versionCode 1
+        versionCode Integer.valueOf(System.getenv("CIRCLE_BUILD_NUM") ?: 1)
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -21,10 +30,12 @@ android {
 
     buildTypes {
         release {
+            signingConfig signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
