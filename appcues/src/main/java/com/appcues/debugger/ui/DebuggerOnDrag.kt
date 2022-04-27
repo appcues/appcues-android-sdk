@@ -57,11 +57,14 @@ internal fun BoxScope.DebuggerOnDrag(
     }
 }
 
+private const val ROTATE_90_DEGREES = 90f
+private const val ROTATE_NONE = 0f
+
 @Composable
 private fun DismissDebuggerArea(debuggerState: MutableDebuggerState, onGloballyPositioned: (LayoutCoordinates) -> Unit) {
     val isDraggingAndColliding = debuggerState.isDragging.targetState && debuggerState.isDraggingOverDismiss.value
     val size = animateDpAsState(if (isDraggingAndColliding) 50.dp else 44.dp)
-    val rotate = animateFloatAsState(if (isDraggingAndColliding) 90f else 0f)
+    val rotate = animateFloatAsState(if (isDraggingAndColliding) ROTATE_90_DEGREES else ROTATE_NONE)
 
     Box(
         modifier = Modifier
