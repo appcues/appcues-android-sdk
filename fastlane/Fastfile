@@ -1,0 +1,22 @@
+default_platform(:android)
+
+platform :android do
+
+  desc "Validate the code in the SDK repo works properly"
+  lane :validate_code do
+    gradle(task: 'detekt')
+    gradle(task: ':appcues:build')
+    gradle(task: ':samples:kotlin-android-app:bundleRelease')
+  end
+
+  desc "Deploy a new version to Google Play internal test"
+  lane :deploy_sample do
+    gradle(task: ':samples:kotlin-android-app:bundleRelease')
+    upload_to_play_store(
+      track: 'internal', 
+      skip_upload_apk: true, 
+      json_key_data: ENV["PLAY_STORE_API_KEY"],
+      rollout: '1'
+    )
+  end
+end
