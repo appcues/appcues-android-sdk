@@ -11,5 +11,5 @@ internal object AppcuesColors {
     val PurpleLuna = Color(color = 0xFFEEEEFF)
     val OceanNight = Color(color = 0xFF627293)
     val Infinity = Color(color = 0xFF242A35)
-    val BlackAlmostTransparent = Color(color = 0x40000000)
+    val BlackAlmostTransparent = Color(color = 0x20000000)
 }

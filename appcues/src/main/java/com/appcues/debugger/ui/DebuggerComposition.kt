@@ -60,9 +60,7 @@ internal fun DebuggerComposition(viewModel: DebuggerViewModel, onDismiss: () -> 
         // Fab is last because it will show on top of everything else in this composition
         DebuggerFloatingActionButton(
             debuggerState = debuggerState,
-            onDragEnd = { viewModel.onDragEnd() },
-            onDrag = { viewModel.onDragging(it) },
-            onClick = { viewModel.onFabClick() }
+            debuggerViewModel = viewModel,
         )
     }
 
@@ -99,18 +97,27 @@ private fun LaunchedUIStateEffect(
             when (state) {
                 Creating -> Unit
                 Idle -> {
-                    animateFabToIdle(debuggerState = debuggerState)
-
                     debuggerState.isVisible.targetState = true
-                    debuggerState.isDragging.targetState = false
-                    debuggerState.isExpanded.targetState = false
+                    // lets only animate to idle when we come form isExpanded
+                    if (debuggerState.isExpanded.targetState) {
+                        animateFabToIdle(debuggerState)
+
+                        debuggerState.isExpanded.targetState = false
+                    }
+                    // lets anchor to the side when we come from isDragging
+                    if (debuggerState.isDragging.targetState) {
+                        animateToAnchor(debuggerState)
+
+                        debuggerState.isDragging.targetState = false
+                    }
                 }
                 is Dragging -> {
+                    debuggerState.isExpanded.targetState = false
                     debuggerState.isDragging.targetState = true
-                    debuggerState.updateFabOffsets(state.dragAmount)
+                    debuggerState.dragFabOffsets(state.dragAmount)
                 }
                 Expanded -> {
-                    animateFabToExpanded(debuggerState = debuggerState)
+                    animateFabToExpanded(debuggerState)
 
                     debuggerState.isExpanded.targetState = true
                 }
@@ -150,13 +157,24 @@ private fun CoroutineScope.animateFabToExpanded(debuggerState: MutableDebuggerSt
     }
 }
 
-private fun CoroutineScope.animateFabToIdle(debuggerState: MutableDebuggerState) {
+private fun CoroutineScope.animateToAnchor(debuggerState: MutableDebuggerState) {
     with(debuggerState) {
-        if (shouldAnimateToIdle().not()) return
-
         launch {
             Animatable(fabXOffset.value).animateTo(
-                targetValue = getLastIdleFabAnchor().x,
+                targetValue = getLastAnchoredPosition().x,
+                animationSpec = tween(durationMillis = 300)
+            ) {
+                fabXOffset.value = value
+            }
+        }
+    }
+}
+
+private fun CoroutineScope.animateFabToIdle(debuggerState: MutableDebuggerState) {
+    with(debuggerState) {
+        launch {
+            Animatable(fabXOffset.value).animateTo(
+                targetValue = getLastAnchoredPosition().x,
                 animationSpec = tween(durationMillis = 350)
             ) {
                 fabXOffset.value = value
@@ -165,7 +183,7 @@ private fun CoroutineScope.animateFabToIdle(debuggerState: MutableDebuggerState)
 
         launch {
             Animatable(fabYOffset.value).animateTo(
-                targetValue = getLastIdleFabAnchor().y,
+                targetValue = getLastAnchoredPosition().y,
                 animationSpec = tween(durationMillis = 250)
             ) {
                 fabYOffset.value = value
