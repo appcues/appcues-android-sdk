@@ -9,9 +9,33 @@ def ossrhPassword = System.getenv("OSSRH_PASSWORD")
 def appcuesProperties = new Properties()
 file("appcues.properties").withInputStream { appcuesProperties.load(it) }
 
+private String generateVersionName() {
+    def appcuesProperties = new Properties()
+        file("appcues.properties").withInputStream { appcuesProperties.load(it) }
+
+    String major = appcuesProperties.getProperty("VERSION_MAJOR")
+    String minor = appcuesProperties.getProperty("VERSION_MINOR")
+    String patch = appcuesProperties.getProperty("VERSION_PATCH")
+    String classifier = appcuesProperties.getProperty("VERSION_CLASSIFIER")
+    String versionName = "${major}.${minor}.${patch}"
+
+    if (classifier != null) {
+        versionName += "-" + classifier
+    }
+
+    String build = System.getenv("CIRCLE_BUILD_NUM")
+    if (build != null) {
+        versionName += "+" + build
+    }
+
+    return versionName
+}
+
+def versionName = generateVersionName()
+
 android {
     defaultConfig {
-        buildConfigField "String", "SDK_VERSION", "\"${appcuesProperties.getProperty("VERSION")}\""
+        buildConfigField "String", "SDK_VERSION", "\"${versionName}\""
     }
 }
 
@@ -28,7 +52,7 @@ afterEvaluate {
                 // You can then customize attributes of the publication as shown below.
                 groupId = appcuesProperties.getProperty("GROUP_ID")
                 artifactId = appcuesProperties.getProperty("ARTIFACT_ID")
-                version = appcuesProperties.getProperty("VERSION")
+                version = versionName
 
                 pom {
                     name = appcuesProperties.getProperty("NAME")
@@ -63,7 +87,7 @@ afterEvaluate {
 
                 groupId = appcuesProperties.getProperty("GROUP_ID")
                 artifactId = appcuesProperties.getProperty("ARTIFACT_ID") + "-debug"
-                version = appcuesProperties.getProperty("VERSION")
+                version = versionName
             }
             gpr(MavenPublication) {
                 from components.release
@@ -71,7 +95,7 @@ afterEvaluate {
                 // You can then customize attributes of the publication as shown below.
                 groupId = appcuesProperties.getProperty("GROUP_ID")
                 artifactId = appcuesProperties.getProperty("ARTIFACT_ID")
-                version = appcuesProperties.getProperty("VERSION")
+                version = versionName
 
                 pom {
                     name = appcuesProperties.getProperty("NAME")
@@ -123,5 +147,11 @@ afterEvaluate {
     signing {
         useInMemoryPgpKeys(signingKey, signingKeyPwd)
         sign publishing.publications.release
+    }
+}
+
+task versionTxt()  {
+    doLast {
+        new File(projectDir.parentFile, "version.txt").text = "$versionName"
     }
 }

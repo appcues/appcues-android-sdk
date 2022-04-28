@@ -106,10 +106,113 @@ jobs:
           name: Deploy sample to Google Play
           command: bundle exec fastlane deploy_sample
       - save_gradle_cache
+      - run:
+          name: Get app version
+          command: echo 'export APPCUES_SAMPLE_VERSION=$(cat sample_version.txt)' >> $BASH_ENV
       - slack/notify:
           event: pass
-          template: success_tagged_deploy_1
-          channel: team-mobile-bots 
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "🚀 Android Sample Deployment Successful!",
+                    "emoji": true
+                  }
+                }
+              ],
+              "attachments": [
+                {
+                  "color": "#5C5CFF",
+                  "blocks": [
+                    {
+                      "type": "section",
+                      "text": {
+                        "type": "mrkdwn",
+                        "text": "Version *$APPCUES_SAMPLE_VERSION* deployed to <https://play.google.com/store/apps/details?id=com.appcues.samples.kotlin|Google Play>"
+                      }
+                    },
+                    {
+                      "type": "actions",
+                      "elements": [
+                        {
+                          "type": "button",
+                          "text": {
+                            "type": "plain_text",
+                            "text": "View Job",
+                            "emoji": true
+                          },
+                          "url": "$CIRCLE_BUILD_URL"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          channel: team-mobile-bots  
+
+  deploy_github_package:
+    working_directory: ~/code
+    executor:
+      name: android/android-machine
+      resource-class: large
+      tag: 2022.04.1 # https://circleci.com/developer/machine/image/android
+    steps:
+      - install_with_cache      
+      - run:
+          name: Deploy SDK to GitHub Package Registry
+          command: bundle exec fastlane deploy_github_package
+      - run:
+          name: Get package version
+          command: echo 'export APPCUES_SDK_VERSION=$(cat version.txt)' >> $BASH_ENV
+      # not saving gradle cache on this job since it is SDK only
+      - slack/notify:
+          event: pass
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "🚀 Android SDK Deployment Successful!",
+                    "emoji": true
+                  }
+                }
+              ],
+              "attachments": [
+                {
+                  "color": "#3DDC84",
+                  "blocks": [
+                    {
+                      "type": "section",
+                      "text": {
+                        "type": "mrkdwn",
+                        "text": "Version *$APPCUES_SDK_VERSION* deployed to <https://github.com/appcues/appcues-android-sdk/packages/1386739|GitHub Package Registry>"
+                      }
+                    },
+                    {
+                      "type": "actions",
+                      "elements": [
+                        {
+                          "type": "button",
+                          "text": {
+                            "type": "plain_text",
+                            "text": "View Job",
+                            "emoji": true
+                          },
+                          "url": "$CIRCLE_BUILD_URL"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          channel: team-mobile-bots    
 
 # --------------------------
 #        WORKFLOWS
@@ -123,7 +226,17 @@ workflows:
           context:
             - Appcues
 
-  build_and_deploy:
+  build_and_deploy_package:
+    when:
+      and:
+        - *is_main
+        - not: << pipeline.parameters.deploy-sample >>
+    jobs:
+      - deploy_github_package:
+          context:
+            - Appcues
+
+  build_and_deploy_sample:
     when:
       and:
         - *is_main
