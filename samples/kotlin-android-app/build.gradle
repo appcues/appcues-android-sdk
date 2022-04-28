@@ -67,3 +67,9 @@ dependencies {
     implementation 'androidx.navigation:navigation-fragment-ktx:2.4.1'
     implementation 'androidx.navigation:navigation-ui-ktx:2.4.1'
 }
+
+task versionTxt()  {
+    doLast {
+        new File(projectDir.parentFile.parentFile, "sample_version.txt").text = "$android.defaultConfig.versionCode ($android.defaultConfig.versionName)"
+    }
+}

@@ -9,6 +9,12 @@ platform :android do
     gradle(task: ':samples:kotlin-android-app:bundleRelease')
   end
 
+  desc "Deploy SDK release to GitHub Package Registry"
+  lane :deploy_github_package do
+    gradle(task: ':appcues:publishReleasePublicationToGitHubPackagesRepository')
+    gradle(task: ':appcues:versionTxt')
+  end
+
   desc "Deploy a new version to Google Play internal test"
   lane :deploy_sample do
     gradle(task: ':samples:kotlin-android-app:bundleRelease')
@@ -18,5 +24,6 @@ platform :android do
       json_key_data: ENV["PLAY_STORE_API_KEY"],
       rollout: '1'
     )
+    gradle(task: ':samples:kotlin-android-app:versionTxt')
   end
 end
