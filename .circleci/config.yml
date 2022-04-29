@@ -47,15 +47,15 @@ commands:
           key: 3-gems-{{ checksum "Gemfile.lock" }}
           paths:
             - vendor/bundle
-      - aws-s3/copy:
-          from: 's3://appcues-mobile-certs/appcues.keystore'
-          to: './'
-      - run:
-          name: Generate Gradle cache key
-          command: ./checksum.sh /tmp/checksum.txt
-      - restore_cache:
-          name: Restore Gradle cache
-          key: gradle-{{ checksum "/tmp/checksum.txt" }}
+      # - aws-s3/copy:
+      #     from: 's3://appcues-mobile-certs/appcues.keystore'
+      #     to: './'
+      # - run:
+      #     name: Generate Gradle cache key
+      #     command: ./checksum.sh /tmp/checksum.txt
+      # - restore_cache:
+      #     name: Restore Gradle cache
+      #     key: gradle-{{ checksum "/tmp/checksum.txt" }}
   save_gradle_cache:
     description: 'Save Gradle cache'
     steps:
@@ -105,10 +105,16 @@ jobs:
       - run:
           name: Deploy sample to Google Play
           command: bundle exec fastlane deploy_sample
-      - save_gradle_cache
+      # - save_gradle_cache
+      # - run:
+      #     name: Get app version
+      #     command: echo 'export APPCUES_SAMPLE_VERSION=$(cat sample_version.txt)' >> $BASH_ENV
       - run:
-          name: Get app version
-          command: echo 'export APPCUES_SAMPLE_VERSION=$(cat sample_version.txt)' >> $BASH_ENV
+          name: Get changelog
+          command: |
+            APPCUES_SAMPLE_CHANGELOG=$(cat ./fastlane/metadata/android/en-US/changelogs/$CIRCLE_BUILD_NUM.txt | tail -n 10 | sed '$!s/$/\\n/' | tr -d '\n')
+            echo $APPCUES_SAMPLE_CHANGELOG
+            echo "export APPCUES_SAMPLE_CHANGELOG='${APPCUES_SAMPLE_CHANGELOG}'" >> $BASH_ENV
       - slack/notify:
           event: pass
           custom: |
@@ -130,8 +136,9 @@ jobs:
                     {
                       "type": "section",
                       "text": {
-                        "type": "mrkdwn",
-                        "text": "Version *$APPCUES_SAMPLE_VERSION* deployed to <https://play.google.com/store/apps/details?id=com.appcues.samples.kotlin|Google Play>"
+                        "type": "plain_text",
+                        "text": "$APPCUES_SAMPLE_CHANGELOG",
+                        "emoji": true
                       }
                     },
                     {
@@ -145,6 +152,15 @@ jobs:
                             "emoji": true
                           },
                           "url": "$CIRCLE_BUILD_URL"
+                        },
+                                               {
+                          "type": "button",
+                          "text": {
+                            "type": "plain_text",
+                            "text": "View on Google Play",
+                            "emoji": true
+                          },
+                          "url": "https://play.google.com/store/apps/details?id=com.appcues.samples.kotlin"
                         }
                       ]
                     }
@@ -221,8 +237,9 @@ workflows:
   version: 2
   pr_validation:
     unless: *is_main
-    jobs:
-      - validate_code:
+    jobs:      
+      # - validate_code:
+      - deploy_sample:
           context:
             - Appcues
 
