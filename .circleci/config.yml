@@ -18,6 +18,7 @@ orbs:
   slack: circleci/slack@4.5.1
   android: circleci/android@2.0.3
   aws-s3: circleci/aws-s3@3.0
+  jq: circleci/jq@2.2.0
 
 # -------------------------
 #        REFERENCES
@@ -36,6 +37,7 @@ commands:
     description: 'Checkout from git and install gem and gradle dependencies'
     steps:
       - checkout
+      - jq/install
       - restore_cache:
           name: Restore gem cache
           key: 3-gems-{{ checksum "Gemfile.lock" }}
@@ -110,7 +112,7 @@ jobs:
           # some ideas from https://discuss.circleci.com/t/leveraging-circleci-api-to-include-build-logs-in-slack-notifications/39111
           name: Get changelog
           command: |
-            APPCUES_SAMPLE_CHANGELOG=$(cat ./fastlane/metadata/android/en-US/changelogs/$CIRCLE_BUILD_NUM.txt | tail -n 10 | sed '$!s/$/\\n/' | tr -d '\n')
+            APPCUES_SAMPLE_CHANGELOG=$(cat ./fastlane/metadata/android/en-US/changelogs/$CIRCLE_BUILD_NUM.txt | tail -n 10 | jq -aRs . | sed -e 's/^"//' -e 's/"$//')
             echo $APPCUES_SAMPLE_CHANGELOG
             echo "export APPCUES_SAMPLE_CHANGELOG='${APPCUES_SAMPLE_CHANGELOG}'" >> $BASH_ENV
       - slack/notify:
@@ -183,7 +185,7 @@ jobs:
           # some ideas from https://discuss.circleci.com/t/leveraging-circleci-api-to-include-build-logs-in-slack-notifications/39111
           name: Get changelog
           command: |
-            SDK_CHANGELOG=$(cat ./changelog/$CIRCLE_BUILD_NUM.txt | tail -n 10 | sed '$!s/$/\\n/' | tr -d '\n')
+            SDK_CHANGELOG=$(cat ./changelog/$CIRCLE_BUILD_NUM.txt | tail -n 10 | jq -aRs . | sed -e 's/^"//' -e 's/"$//')
             echo $SDK_CHANGELOG
             echo "export SDK_CHANGELOG='${SDK_CHANGELOG}'" >> $BASH_ENV
       # not saving gradle cache on this job since it is SDK only
