@@ -47,15 +47,15 @@ commands:
           key: 3-gems-{{ checksum "Gemfile.lock" }}
           paths:
             - vendor/bundle
-      # - aws-s3/copy:
-      #     from: 's3://appcues-mobile-certs/appcues.keystore'
-      #     to: './'
-      # - run:
-      #     name: Generate Gradle cache key
-      #     command: ./checksum.sh /tmp/checksum.txt
-      # - restore_cache:
-      #     name: Restore Gradle cache
-      #     key: gradle-{{ checksum "/tmp/checksum.txt" }}
+      - aws-s3/copy:
+          from: 's3://appcues-mobile-certs/appcues.keystore'
+          to: './'
+      - run:
+          name: Generate Gradle cache key
+          command: ./checksum.sh /tmp/checksum.txt
+      - restore_cache:
+          name: Restore Gradle cache
+          key: gradle-{{ checksum "/tmp/checksum.txt" }}
   save_gradle_cache:
     description: 'Save Gradle cache'
     steps:
@@ -105,11 +105,9 @@ jobs:
       - run:
           name: Deploy sample to Google Play
           command: bundle exec fastlane deploy_sample
-      # - save_gradle_cache
-      # - run:
-      #     name: Get app version
-      #     command: echo 'export APPCUES_SAMPLE_VERSION=$(cat sample_version.txt)' >> $BASH_ENV
+      - save_gradle_cache
       - run:
+          # some ideas from https://discuss.circleci.com/t/leveraging-circleci-api-to-include-build-logs-in-slack-notifications/39111
           name: Get changelog
           command: |
             APPCUES_SAMPLE_CHANGELOG=$(cat ./fastlane/metadata/android/en-US/changelogs/$CIRCLE_BUILD_NUM.txt | tail -n 10 | sed '$!s/$/\\n/' | tr -d '\n')
@@ -182,8 +180,12 @@ jobs:
           name: Deploy SDK to GitHub Package Registry
           command: bundle exec fastlane deploy_github_package
       - run:
-          name: Get package version
-          command: echo 'export APPCUES_SDK_VERSION=$(cat version.txt)' >> $BASH_ENV
+          # some ideas from https://discuss.circleci.com/t/leveraging-circleci-api-to-include-build-logs-in-slack-notifications/39111
+          name: Get changelog
+          command: |
+            SDK_CHANGELOG=$(cat ./changelog/$CIRCLE_BUILD_NUM.txt | tail -n 10 | sed '$!s/$/\\n/' | tr -d '\n')
+            echo $SDK_CHANGELOG
+            echo "export SDK_CHANGELOG='${SDK_CHANGELOG}'" >> $BASH_ENV
       # not saving gradle cache on this job since it is SDK only
       - slack/notify:
           event: pass
@@ -203,11 +205,12 @@ jobs:
                 {
                   "color": "#3DDC84",
                   "blocks": [
-                    {
+                  {
                       "type": "section",
                       "text": {
-                        "type": "mrkdwn",
-                        "text": "Version *$APPCUES_SDK_VERSION* deployed to <https://github.com/appcues/appcues-android-sdk/packages/1386739|GitHub Package Registry>"
+                        "type": "plain_text",
+                        "text": "$SDK_CHANGELOG",
+                        "emoji": true
                       }
                     },
                     {
@@ -221,6 +224,15 @@ jobs:
                             "emoji": true
                           },
                           "url": "$CIRCLE_BUILD_URL"
+                        },
+                        {
+                          "type": "button",
+                          "text": {
+                            "type": "plain_text",
+                            "text": "View Package",
+                            "emoji": true
+                          },
+                          "url": "https://github.com/appcues/appcues-android-sdk/packages/1386739"
                         }
                       ]
                     }
@@ -238,8 +250,7 @@ workflows:
   pr_validation:
     unless: *is_main
     jobs:      
-      # - validate_code:
-      - deploy_sample:
+      - validate_code:
           context:
             - Appcues
 
