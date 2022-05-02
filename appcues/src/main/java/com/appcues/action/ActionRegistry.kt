@@ -21,7 +21,7 @@ internal class ActionRegistry(
     private val logcues: Logcues
 ) : KoinScopeComponent {
 
-    private val actions: HashMap<String, ActionFactoryBlock> = hashMapOf()
+    private val actions: MutableMap<String, ActionFactoryBlock> = hashMapOf()
 
     init {
         register(CloseAction.TYPE) { get<CloseAction> { parametersOf(it) } }

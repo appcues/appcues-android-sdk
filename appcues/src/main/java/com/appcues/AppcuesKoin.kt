@@ -34,7 +34,6 @@ internal object AppcuesKoin : KoinScopePlugin {
                 appcuesRemoteSource = get(),
                 appcuesLocalSource = get(),
                 experienceMapper = get(),
-                gson = get(),
                 config = get(),
                 logcues = get()
             )

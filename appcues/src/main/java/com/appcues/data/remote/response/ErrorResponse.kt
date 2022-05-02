@@ -1,14 +1,17 @@
 package com.appcues.data.remote.response
 
-import com.google.gson.annotations.SerializedName
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 
+@JsonClass(generateAdapter = true)
 internal data class ErrorResponse(
     val error: Boolean,
-    @SerializedName("status_code")
+    @Json(name = "status_code")
     val statusCode: Int,
     val message: ErrorMessageResponse
 )
 
+@JsonClass(generateAdapter = true)
 internal data class ErrorMessageResponse(
     val description: String,
     val title: String,

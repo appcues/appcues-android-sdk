@@ -39,17 +39,17 @@ internal class AnalyticsTracker(
         }
     }
 
-    fun identify(properties: HashMap<String, Any>? = null) {
+    fun identify(properties: Map<String, Any>? = null) {
         if (!analyticsPolicy.canIdentify()) return
         flushThenSend(activityBuilder.identify(properties))
     }
 
     // convenience helper for internal events
-    fun track(event: AnalyticsEvent, properties: HashMap<String, Any>? = null, interactive: Boolean = true) {
+    fun track(event: AnalyticsEvent, properties: Map<String, Any>? = null, interactive: Boolean = true) {
         track(event.eventName, properties, interactive)
     }
 
-    fun track(name: String, properties: HashMap<String, Any>? = null, interactive: Boolean = true) {
+    fun track(name: String, properties: Map<String, Any>? = null, interactive: Boolean = true) {
         if (!analyticsPolicy.canTrackEvent()) return
         val activity = activityBuilder.track(name, properties)
         if (interactive) {
@@ -59,12 +59,12 @@ internal class AnalyticsTracker(
         }
     }
 
-    fun screen(title: String, properties: HashMap<String, Any>? = null) {
+    fun screen(title: String, properties: Map<String, Any>? = null) {
         if (!analyticsPolicy.canTrackScreen(title)) return
-        queueThenFlush(activityBuilder.screen(title, properties))
+        queueThenFlush(activityBuilder.screen(title, properties?.toMutableMap()))
     }
 
-    fun group(properties: HashMap<String, Any>? = null) {
+    fun group(properties: Map<String, Any>? = null) {
         if (!analyticsPolicy.canTrackGroup()) return
         flushThenSend(activityBuilder.group(properties))
     }

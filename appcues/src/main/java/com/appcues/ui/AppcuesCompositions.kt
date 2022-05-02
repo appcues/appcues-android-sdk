@@ -27,7 +27,7 @@ internal val LocalAppcuesActionDelegate = staticCompositionLocalOf { AppcuesActi
 
 internal data class AppcuesActions(val onAction: (ExperienceAction) -> Unit)
 
-internal val LocalAppcuesActions = staticCompositionLocalOf { hashMapOf<UUID, List<Action>>() }
+internal val LocalAppcuesActions = staticCompositionLocalOf<Map<UUID, List<Action>>> { hashMapOf() }
 
 /**
  * LocalAppcuesPagination is used to report back any page change that

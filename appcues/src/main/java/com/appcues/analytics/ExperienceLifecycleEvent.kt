@@ -54,7 +54,7 @@ internal sealed class ExperienceLifecycleEvent(
     val name: String
         get() = event.eventName
 
-    val properties: HashMap<String, Any>
+    val properties: Map<String, Any>
         get() = hashMapOf<String, Any>(
             "experienceId" to experience.id.toString().lowercase(),
             "experienceName" to experience.name,

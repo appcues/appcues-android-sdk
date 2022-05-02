@@ -10,14 +10,14 @@ internal class ActionsMapper(
     private val actionRegistry: ActionRegistry
 ) {
 
-    fun map(actions: HashMap<UUID, List<ActionResponse>>?, primitiveId: UUID): List<Action> {
+    fun map(actions: Map<UUID, List<ActionResponse>>?, primitiveId: UUID): List<Action> {
         return arrayListOf<Action>().apply {
             // get possible action list based on id, then map to Action model
             actions?.get(primitiveId)?.forEach { actionResponse -> actionResponse.toAction()?.let { add(it) } }
         }
     }
 
-    fun map(from: HashMap<UUID, List<ActionResponse>>?): HashMap<UUID, List<Action>> {
+    fun map(from: Map<UUID, List<ActionResponse>>?): Map<UUID, List<Action>> {
         if (from == null) return hashMapOf()
 
         return hashMapOf<UUID, List<Action>>().apply {

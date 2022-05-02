@@ -16,9 +16,9 @@ internal fun List<TraitResponse>.mergeTraits(other: List<TraitResponse>): List<T
     }
 }
 
-internal fun HashMap<UUID, List<ActionResponse>>?.mergeActions(
-    other: HashMap<UUID, List<ActionResponse>>?
-): HashMap<UUID, List<ActionResponse>>? {
+internal fun Map<UUID, List<ActionResponse>>?.mergeActions(
+    other: Map<UUID, List<ActionResponse>>?
+): Map<UUID, List<ActionResponse>>? {
     return when {
         // this is not null and not empty and other is null, return this
         this != null && isNotEmpty() && other == null -> this

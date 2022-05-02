@@ -58,7 +58,7 @@ class Appcues internal constructor(koinScope: Scope) {
      * [userId] Unique value identifying the user.
      * [properties] Optional properties that provide additional context about the user.
      */
-    fun identify(userId: String, properties: HashMap<String, Any>? = null) {
+    fun identify(userId: String, properties: Map<String, Any>? = null) {
         identify(false, userId, properties)
     }
 
@@ -68,7 +68,7 @@ class Appcues internal constructor(koinScope: Scope) {
      * [groupId] Unique value identifying the group.
      * [properties] Optional properties that provide additional context about the group.
      */
-    fun group(groupId: String?, properties: HashMap<String, Any>? = null) {
+    fun group(groupId: String?, properties: Map<String, Any>? = null) {
         storage.groupId = groupId
 
         (if (groupId.isNullOrEmpty()) null else properties).also {
@@ -78,10 +78,10 @@ class Appcues internal constructor(koinScope: Scope) {
 
     /**
      * Generate a unique Id for the current user when there is not a known identity to use in
-     * the {@link identity(String, HashMap<String, Any>) identity} call. This will cause the SDK
+     * the {@link identity(String, Map<String, Any>) identity} call. This will cause the SDK
      * to begin tracking activity and checking for qualified content.
      */
-    fun anonymous(properties: HashMap<String, Any>? = null) {
+    fun anonymous(properties: Map<String, Any>? = null) {
         // use the device ID as the default anonymous user ID, unless an override for generating
         // anonymous user IDs is supplied in the config builder
         val anonymousId = appcuesConfig.anonymousIdFactory?.invoke() ?: storage.deviceId
@@ -105,7 +105,7 @@ class Appcues internal constructor(koinScope: Scope) {
      * [name] Name of the event.
      * [properties] Optional properties that provide additional context about the event.
      */
-    fun track(name: String, properties: HashMap<String, Any>? = null) {
+    fun track(name: String, properties: Map<String, Any>? = null) {
         analyticsTracker.track(name, properties)
     }
 
@@ -115,7 +115,7 @@ class Appcues internal constructor(koinScope: Scope) {
      * [title] Name of the screen
      * [properties] Optional properties that provide additional context about the event.
      */
-    fun screen(title: String, properties: HashMap<String, Any>? = null) {
+    fun screen(title: String, properties: Map<String, Any>? = null) {
         analyticsTracker.screen(title, properties)
     }
 
@@ -139,7 +139,7 @@ class Appcues internal constructor(koinScope: Scope) {
      * usage:
      * registerTrait("my-trait") { MyCustomExperienceTrait() }
      */
-    fun registerTrait(type: String, traitFactory: (config: HashMap<String, Any>?) -> ExperienceTrait) {
+    fun registerTrait(type: String, traitFactory: (config: Map<String, Any>?) -> ExperienceTrait) {
         traitRegistry.register(type, traitFactory)
     }
 
@@ -152,7 +152,7 @@ class Appcues internal constructor(koinScope: Scope) {
      * usage:
      * registerAction("my-action") { MyCustomExperienceAction() }
      */
-    fun registerAction(type: String, actionFactory: (config: HashMap<String, Any>?) -> ExperienceAction) {
+    fun registerAction(type: String, actionFactory: (config: Map<String, Any>?) -> ExperienceAction) {
         actionRegistry.register(type, actionFactory)
     }
 
@@ -182,7 +182,7 @@ class Appcues internal constructor(koinScope: Scope) {
     fun onNewIntent(activity: Activity, intent: Intent?): Boolean =
         deeplinkHandler.handle(activity, intent)
 
-    private fun identify(isAnonymous: Boolean, userId: String, properties: HashMap<String, Any>?) {
+    private fun identify(isAnonymous: Boolean, userId: String, properties: Map<String, Any>?) {
         if (userId.isEmpty()) {
             logcues.info("Invalid userId - empty string") // possibly should be an error
             return

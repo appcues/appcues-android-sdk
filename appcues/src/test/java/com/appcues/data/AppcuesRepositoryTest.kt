@@ -9,7 +9,6 @@ import com.appcues.data.remote.response.experience.ExperienceResponse
 import com.appcues.logging.Logcues
 import com.appcues.util.ResultOf.Success
 import com.google.common.truth.Truth.assertThat
-import com.google.gson.Gson
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
@@ -20,7 +19,6 @@ class AppcuesRepositoryTest {
     private val appcuesRemoteSource: AppcuesRemoteSource = mockk()
     private val appcuesLocalSource: AppcuesLocalSource = mockk()
     private val experienceMapper: ExperienceMapper = mockk()
-    private val gson: Gson = mockk()
     private val config: AppcuesConfig = mockk()
     private val logcues: Logcues = mockk()
 
@@ -28,7 +26,6 @@ class AppcuesRepositoryTest {
         appcuesRemoteSource = appcuesRemoteSource,
         appcuesLocalSource = appcuesLocalSource,
         experienceMapper = experienceMapper,
-        gson = gson,
         config = config,
         logcues = logcues,
     )
