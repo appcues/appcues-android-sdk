@@ -16,7 +16,7 @@ internal data class Experience(
     // will run once when creating the experience
     val flatSteps: List<Step> = stepContainers.flatMap { it.steps }
 
-    val groupLookup: HashMap<Int, Int> = hashMapOf<Int, Int>().apply {
+    val groupLookup: Map<Int, Int> = hashMapOf<Int, Int>().apply {
         var stepIndex = 0
         stepContainers.forEachIndexed { index, stepContainer ->
             repeat(stepContainer.steps.size) {
@@ -25,7 +25,7 @@ internal data class Experience(
         }
     }
 
-    val stepIndexLookup: HashMap<Int, Int> = hashMapOf<Int, Int>().apply {
+    val stepIndexLookup: Map<Int, Int> = hashMapOf<Int, Int>().apply {
         flatSteps.forEachIndexed { stepIndex, step ->
             stepContainers.forEach {
                 val index = it.steps.indexOf(step)

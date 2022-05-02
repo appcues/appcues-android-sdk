@@ -1,20 +1,22 @@
 package com.appcues.data.remote.request
 
-import com.google.gson.annotations.SerializedName
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 import java.util.UUID
 
+@JsonClass(generateAdapter = true)
 internal data class ActivityRequest(
-    @SerializedName("request_id")
+    @Json(name = "request_id")
     val requestId: UUID = UUID.randomUUID(),
     val events: List<EventRequest>? = null,
-    @SerializedName("profile_update")
-    val profileUpdate: HashMap<String, Any>? = null,
-    @SerializedName("user_id")
+    @Json(name = "profile_update")
+    val profileUpdate: MutableMap<String, Any>? = null,
+    @Json(name = "user_id")
     val userId: String,
-    @SerializedName("account_id")
+    @Json(name = "account_id")
     val accountId: String,
-    @SerializedName("group_id")
+    @Json(name = "group_id")
     val groupId: String? = null,
-    @SerializedName("group_update")
-    val groupUpdate: HashMap<String, Any>? = null
+    @Json(name = "group_update")
+    val groupUpdate: Map<String, Any>? = null
 )

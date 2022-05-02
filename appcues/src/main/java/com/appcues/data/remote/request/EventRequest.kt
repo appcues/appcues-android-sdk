@@ -1,10 +1,12 @@
 package com.appcues.data.remote.request
 
+import com.squareup.moshi.JsonClass
 import java.util.Date
 
+@JsonClass(generateAdapter = true)
 internal data class EventRequest(
     val name: String,
     val timestamp: Date = Date(),
-    val attributes: HashMap<String, Any> = hashMapOf(),
-    val context: HashMap<String, Any> = hashMapOf()
+    val attributes: MutableMap<String, Any> = hashMapOf(),
+    val context: MutableMap<String, Any> = hashMapOf()
 )

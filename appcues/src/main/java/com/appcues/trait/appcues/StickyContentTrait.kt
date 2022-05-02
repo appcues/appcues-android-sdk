@@ -14,7 +14,7 @@ import com.appcues.ui.extensions.Compose
 import com.appcues.ui.extensions.alignStepOverlay
 
 internal class StickyContentTrait(
-    override val config: HashMap<String, Any>?,
+    override val config: Map<String, Any>?,
     stepContentMapper: StepContentMapper,
 ) : StepDecoratingTrait {
 

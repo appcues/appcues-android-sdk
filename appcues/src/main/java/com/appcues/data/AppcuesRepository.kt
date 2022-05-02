@@ -13,7 +13,6 @@ import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
 import com.appcues.util.doIfFailure
 import com.appcues.util.doIfSuccess
-import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -26,7 +25,6 @@ internal class AppcuesRepository(
     private val appcuesRemoteSource: AppcuesRemoteSource,
     private val appcuesLocalSource: AppcuesLocalSource,
     private val experienceMapper: ExperienceMapper,
-    private val gson: Gson,
     private val config: AppcuesConfig,
     private val logcues: Logcues,
 ) {
@@ -59,7 +57,12 @@ internal class AppcuesRepository(
 
     suspend fun trackActivity(activity: ActivityRequest): List<Experience> = withContext(Dispatchers.IO) {
 
-        val activityStorage = ActivityStorage(activity.requestId, activity.accountId, activity.userId, gson.toJson(activity))
+        val activityStorage = ActivityStorage(
+            activity.requestId,
+            activity.accountId,
+            activity.userId,
+            MoshiConfiguration.moshi.adapter(ActivityRequest::class.java).toJson(activity)
+        )
         val itemsToFlush = mutableListOf<ActivityStorage>()
 
         // need to protect thread-safety in this section where it is determining which activities in the queue each new

@@ -76,7 +76,7 @@ internal class AutoPropertyDecorator(
             "_sessionRandomizer" to sessionRandomizer,
         ).filterValues { it != null }.mapValues { it.value as Any }
 
-    val autoProperties: HashMap<String, Any>
+    val autoProperties: Map<String, Any>
         get() = hashMapOf<String, Any>().apply {
             putAll(applicationProperties)
             putAll(sessionProperties)

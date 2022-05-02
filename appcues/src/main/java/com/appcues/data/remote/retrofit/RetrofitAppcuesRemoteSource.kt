@@ -2,6 +2,7 @@ package com.appcues.data.remote.retrofit
 
 import com.appcues.SessionMonitor
 import com.appcues.Storage
+import com.appcues.data.MoshiConfiguration
 import com.appcues.data.remote.AppcuesRemoteSource
 import com.appcues.data.remote.RemoteError
 import com.appcues.data.remote.response.ActivityResponse
@@ -9,8 +10,7 @@ import com.appcues.data.remote.response.ErrorResponse
 import com.appcues.data.remote.response.QualifyResponse
 import com.appcues.data.remote.response.experience.ExperienceResponse
 import com.appcues.util.ResultOf
-import com.google.gson.Gson
-import com.google.gson.JsonParseException
+import com.squareup.moshi.JsonDataException
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.HttpException
@@ -19,7 +19,6 @@ internal class RetrofitAppcuesRemoteSource(
     private val appcuesService: AppcuesService,
     private val accountId: String,
     private val storage: Storage,
-    private val gson: Gson,
     private val sessionMonitor: SessionMonitor,
 ) : AppcuesRemoteSource {
 
@@ -69,8 +68,10 @@ internal class RetrofitAppcuesRemoteSource(
 
     private fun convertErrorBody(exception: HttpException): ErrorResponse? =
         try {
-            exception.response()?.errorBody()?.charStream()?.let { gson.fromJson(it, ErrorResponse::class.java) }
-        } catch (exception: JsonParseException) {
+            exception.response()?.errorBody()?.source()?.let {
+                MoshiConfiguration.moshi.adapter(ErrorResponse::class.java).fromJson(it)
+            }
+        } catch (exception: JsonDataException) {
             null
         }
 

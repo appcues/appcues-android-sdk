@@ -183,7 +183,7 @@ private fun Modifier.coloredShadow(
 
 internal data class PrimitiveGestureProperties(
     val onAction: (ExperienceAction) -> Unit,
-    val actions: HashMap<UUID, List<Action>>,
+    val actions: Map<UUID, List<Action>>,
     val interactionSource: MutableInteractionSource,
     val indication: Indication?,
     val enabled: Boolean = true,

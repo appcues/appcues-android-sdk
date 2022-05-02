@@ -21,7 +21,7 @@ internal class TraitRegistry(
     private val logcues: Logcues
 ) : KoinScopeComponent {
 
-    private val actions: HashMap<String, TraitFactoryBlock> = hashMapOf()
+    private val actions: MutableMap<String, TraitFactoryBlock> = hashMapOf()
 
     init {
         register(BackdropTrait.TYPE) { get<BackdropTrait> { parametersOf(it) } }

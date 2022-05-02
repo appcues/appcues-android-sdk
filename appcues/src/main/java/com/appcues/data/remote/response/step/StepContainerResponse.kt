@@ -8,5 +8,5 @@ internal data class StepContainerResponse(
     val id: UUID,
     val children: List<StepResponse>,
     val traits: List<TraitResponse>?,
-    val actions: HashMap<UUID, List<ActionResponse>>?
+    val actions: Map<UUID, List<ActionResponse>>?
 )

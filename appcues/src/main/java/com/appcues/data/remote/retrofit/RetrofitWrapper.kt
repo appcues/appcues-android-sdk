@@ -1,18 +1,17 @@
 package com.appcues.data.remote.retrofit
 
 import com.appcues.BuildConfig
-import com.google.gson.Gson
+import com.appcues.data.MoshiConfiguration
 import okhttp3.HttpUrl
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.moshi.MoshiConverterFactory
 import java.util.concurrent.TimeUnit.SECONDS
 import kotlin.reflect.KClass
 
 internal class RetrofitWrapper(
-    private val gson: Gson,
     private val url: HttpUrl,
     private val isDebug: Boolean = BuildConfig.DEBUG
 ) {
@@ -39,7 +38,7 @@ internal class RetrofitWrapper(
         return Retrofit.Builder()
             .baseUrl(url)
             .client(okHttp)
-            .addConverterFactory(GsonConverterFactory.create(gson))
+            .addConverterFactory(MoshiConverterFactory.create(MoshiConfiguration.moshi))
             .build()
     }
 

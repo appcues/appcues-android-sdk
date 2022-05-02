@@ -236,6 +236,7 @@ exceptions:
       - 'MalformedURLException'
       - 'NumberFormatException'
       - 'ParseException'
+      - 'JsonDataException'
     allowedExceptionNameRegex: '_|(ignore|expected).*'
   ThrowingExceptionFromFinally:
     active: true

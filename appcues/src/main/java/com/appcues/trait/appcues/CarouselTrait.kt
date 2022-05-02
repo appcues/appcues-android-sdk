@@ -14,10 +14,9 @@ import com.appcues.ui.LocalAppcuesPaginationDelegate
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
-import kotlinx.coroutines.flow.collect
 
 internal class CarouselTrait(
-    override val config: HashMap<String, Any>?,
+    override val config: Map<String, Any>?,
 ) : ContentHolderTrait {
 
     companion object {
