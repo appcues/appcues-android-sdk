@@ -116,6 +116,10 @@ jobs:
             echo $APPCUES_SAMPLE_CHANGELOG
             echo "export APPCUES_SAMPLE_CHANGELOG='${APPCUES_SAMPLE_CHANGELOG}'" >> $BASH_ENV
       - slack/notify:
+          event: fail
+          template: basic_fail_1
+          channel: team-mobile-bots
+      - slack/notify:
           event: pass
           custom: |
             {
@@ -189,6 +193,10 @@ jobs:
             echo $SDK_CHANGELOG
             echo "export SDK_CHANGELOG='${SDK_CHANGELOG}'" >> $BASH_ENV
       # not saving gradle cache on this job since it is SDK only
+      - slack/notify:
+          event: fail
+          template: basic_fail_1
+          channel: team-mobile-bots
       - slack/notify:
           event: pass
           custom: |

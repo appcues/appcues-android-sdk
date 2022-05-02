@@ -30,6 +30,7 @@ platform :android do
 
   desc "Deploy a new version to Google Play internal test"
   lane :deploy_sample do
+    sh("sh", "./replace-placeholders.sh", "kotlin-android-app", ENV["EX_APPCUES_ACCOUNT_ID"], ENV["EX_APPCUES_APPLICATION_ID"])
     gradle(task: ':samples:kotlin-android-app:versionTxt')
     gradle(task: ':samples:kotlin-android-app:bundleRelease')
 
