@@ -7,6 +7,6 @@ import java.util.UUID
 internal data class StepContainerResponse(
     val id: UUID,
     val children: List<StepResponse>,
-    val traits: List<TraitResponse>?,
-    val actions: Map<UUID, List<ActionResponse>>?
+    val traits: List<TraitResponse>,
+    val actions: Map<UUID, List<ActionResponse>>
 )

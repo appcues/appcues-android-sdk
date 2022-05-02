@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 
 internal class AnalyticsPolicy(
     private val sessionMonitor: SessionMonitor,
-    private val appcuesCoroutineScope: AppcuesCoroutineScope,
+    appcuesCoroutineScope: AppcuesCoroutineScope,
     private val stateMachine: StateMachine,
     private val logcues: Logcues,
 ) : LifecycleObserver {
