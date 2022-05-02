@@ -16,8 +16,8 @@ internal data class StepOrContainerResponse(
     val id: UUID,
     val children: List<StepResponse>?,
     val content: StepContentResponse?,
-    val traits: List<TraitResponse>?,
-    val actions: Map<UUID, List<ActionResponse>>?
+    val traits: List<TraitResponse>,
+    val actions: Map<UUID, List<ActionResponse>>
 )
 
 internal class StepContainerAdapter {
@@ -28,7 +28,7 @@ internal class StepContainerAdapter {
             stepOrContainer.content != null ->
                 StepContainerResponse(
                     id = UUID.randomUUID(),
-                    children = arrayListOf(StepResponse(stepOrContainer.id, stepOrContainer.content, null, null)),
+                    children = arrayListOf(StepResponse(stepOrContainer.id, stepOrContainer.content, listOf(), hashMapOf())),
                     traits = stepOrContainer.traits,
                     actions = stepOrContainer.actions,
                 )
@@ -44,7 +44,7 @@ internal class StepContainerAdapter {
     }
 
     @ToJson
-    @Suppress("UnusedPrivateMember")
+    @Suppress("UnusedPrivateMember", "UNUSED_PARAMETER") // required by Moshi
     fun toJson(value: StepContainerResponse): String {
         throw UnsupportedOperationException("step container only supports deserialization")
     }

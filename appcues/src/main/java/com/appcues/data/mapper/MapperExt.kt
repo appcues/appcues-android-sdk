@@ -16,23 +16,21 @@ internal fun List<TraitResponse>.mergeTraits(other: List<TraitResponse>): List<T
     }
 }
 
-internal fun Map<UUID, List<ActionResponse>>?.mergeActions(
+internal fun Map<UUID, List<ActionResponse>>.mergeActions(
     other: Map<UUID, List<ActionResponse>>?
-): Map<UUID, List<ActionResponse>>? {
+): Map<UUID, List<ActionResponse>> {
     return when {
-        // this is not null and not empty and other is null, return this
-        this != null && isNotEmpty() && other == null -> this
-        // this is null or empty and other is not null, return other
-        this.isNullOrEmpty() && other != null -> other
-        // this is not null and not empty and other is not null, return merge of both
-        this != null && isNotEmpty() && other != null -> hashMapOf<UUID, List<ActionResponse>>().also { hashMap ->
+        // other is null, return this
+        other == null -> this
+        // this is empty, return other
+        isEmpty() -> other
+        // this is not empty and other is not null, return merge of both
+        else -> hashMapOf<UUID, List<ActionResponse>>().also { hashMap ->
             forEach {
                 hashMap[it.key] = it.value.toMutableList().apply {
                     other[it.key]?.let { keyActions -> addAll(keyActions) }
                 }
             }
         }
-        // both are null, both are empty, etc..
-        else -> null
     }
 }

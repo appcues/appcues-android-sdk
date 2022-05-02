@@ -20,10 +20,10 @@ internal class StepMapper(
     fun map(
         from: StepResponse,
         superTraits: List<TraitResponse>,
-        superActions: Map<UUID, List<ActionResponse>>?,
+        superActions: Map<UUID, List<ActionResponse>>,
     ): Step {
-        val mergedTraits = from.traits?.mergeTraits(superTraits) ?: superTraits
-        val mergedActions = from.actions?.mergeActions(superActions) ?: superActions
+        val mergedTraits = from.traits.mergeTraits(superTraits)
+        val mergedActions = from.actions.mergeActions(superActions)
 
         return Step(
             id = from.id,

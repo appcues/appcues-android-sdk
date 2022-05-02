@@ -24,7 +24,7 @@ internal class AutoPropertyDecorator(
     config: AppcuesConfig,
     private val storage: Storage,
     private val sessionMonitor: SessionMonitor,
-    private val appcuesCoroutineScope: AppcuesCoroutineScope,
+    appcuesCoroutineScope: AppcuesCoroutineScope,
 ) {
     companion object {
         // _sessionRandomizer is defined in the web SDK as: A random number between 1 and 100,
