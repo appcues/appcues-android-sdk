@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import com.appcues.R
 import com.appcues.debugger.model.DebuggerEventItem
 import com.appcues.debugger.ui.getTitleString
+import com.appcues.debugger.ui.lazyColumnScrollIndicator
 import com.appcues.ui.theme.AppcuesColors
 import java.sql.Timestamp
 
@@ -48,8 +49,10 @@ internal fun DebuggerEventDetails(debuggerEventItem: DebuggerEventItem?, onBackP
     val lazyListState = rememberLazyListState()
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        state = lazyListState,
+        modifier = Modifier
+            .fillMaxSize()
+            .lazyColumnScrollIndicator(lazyListState),
+        state = lazyListState
     ) {
         detailsTitle()
 
