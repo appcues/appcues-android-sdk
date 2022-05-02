@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Divider
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
@@ -48,6 +49,7 @@ import com.appcues.debugger.model.EventType
 import com.appcues.debugger.model.StatusType
 import com.appcues.debugger.model.TapActionType
 import com.appcues.debugger.ui.getTitleString
+import com.appcues.debugger.ui.lazyColumnScrollIndicator
 import com.appcues.debugger.ui.toResourceId
 import com.appcues.ui.theme.AppcuesColors
 import kotlinx.coroutines.delay
@@ -58,8 +60,12 @@ internal fun DebuggerMain(debuggerViewModel: DebuggerViewModel, onEventClick: (D
     val recentEvents = debuggerViewModel.events.collectAsState()
     val isFilterOn = debuggerViewModel.currentFilter.collectAsState()
 
+    val lazyListState = rememberLazyListState()
     LazyColumn(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
+            .lazyColumnScrollIndicator(lazyListState),
+        state = lazyListState
     ) {
 
         statusItemsHeader()
