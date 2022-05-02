@@ -124,7 +124,7 @@ jobs:
                   "type": "header",
                   "text": {
                     "type": "plain_text",
-                    "text": "🚀 Android Sample Deployment Successful!",
+                    "text": "🚀 Android Sample App Deployed to Google Play",
                     "emoji": true
                   }
                 }
@@ -198,7 +198,7 @@ jobs:
                   "type": "header",
                   "text": {
                     "type": "plain_text",
-                    "text": "🚀 Android SDK Deployment Successful!",
+                    "text": "🚀 Android SDK Deployed to GitHub Package Registry",
                     "emoji": true
                   }
                 }
