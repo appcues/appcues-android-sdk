@@ -8,11 +8,9 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
 import com.appcues.samples.kotlin.ExampleApplication
 import com.appcues.samples.kotlin.R
 import com.appcues.samples.kotlin.databinding.FragmentEventsBinding
-import kotlinx.coroutines.launch
 
 class EventsFragment : Fragment() {
 
@@ -42,12 +40,6 @@ class EventsFragment : Fragment() {
 
         binding.buttonEvent2.setOnClickListener {
             appcues.track("event2")
-        }
-
-        binding.buttonSampleModal.setOnClickListener {
-            viewLifecycleOwner.lifecycleScope.launch {
-                appcues.show("1234")
-            }
         }
 
         return binding.root
