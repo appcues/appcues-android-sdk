@@ -258,7 +258,10 @@ jobs:
 workflows:
   version: 2
   pr_validation:
-    unless: *is_main
+    when:
+      and:
+        - not: *is_main
+        - not: << pipeline.parameters.deploy-sample >>
     jobs:      
       - validate_code:
           context:
@@ -275,10 +278,7 @@ workflows:
             - Appcues
 
   build_and_deploy_sample:
-    when:
-      and:
-        - *is_main
-        - << pipeline.parameters.deploy-sample >>
+    when: << pipeline.parameters.deploy-sample >>
     jobs:
       - deploy_sample:
           context:
