@@ -2,6 +2,8 @@
 <network-security-config xmlns:tools="http://schemas.android.com/tools">
     <base-config>
         <trust-anchors>
+            <!-- system default -->
+            <certificates src="system" />
             <!-- Trust user added CAs for debugging
                  NOTE: normally this would be in debug-overrides section ONLY!
                        but for this sample app, we allow for proxy testing. -->
