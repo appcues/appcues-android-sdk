@@ -1,9 +1,12 @@
 package com.appcues.statemachine
 
 import com.appcues.data.model.Experience
+import com.appcues.util.ResultOf
+import kotlinx.coroutines.CompletableDeferred
 
 internal sealed class SideEffect {
     data class ContinuationEffect(val action: Action) : SideEffect()
     data class PresentContainerEffect(val experience: Experience, val containerIndex: Int) : SideEffect()
     data class ReportErrorEffect(val error: Error) : SideEffect()
+    data class AwaitEffect(val completableDeferred: CompletableDeferred<ResultOf<State, Error>>) : SideEffect()
 }

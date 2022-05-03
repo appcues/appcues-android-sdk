@@ -6,7 +6,6 @@ import com.appcues.AppcuesCoroutineScope
 import com.appcues.action.ActionProcessor
 import com.appcues.action.ExperienceAction
 import com.appcues.data.model.StepContainer
-import com.appcues.statemachine.Action
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.RenderStep
 import com.appcues.statemachine.Action.StartStep
@@ -32,7 +31,7 @@ internal class AppcuesViewModel(
     sealed class UIState {
         object Idle : UIState()
         data class Rendering(val stepContainer: StepContainer, val position: Int) : UIState()
-        data class Dismissing(val continueAction: Action) : UIState()
+        data class Dismissing(val continueAction: suspend () -> Unit) : UIState()
     }
 
     private val stateMachine by inject<StateMachine>()
@@ -112,7 +111,7 @@ internal class AppcuesViewModel(
             // if current state is Rendering but position is different than current
             // then we report new position to state machine
             if (state is Rendering && state.position != index) {
-                viewModelScope.launch {
+                appcuesCoroutineScope.launch {
                     stateMachine.handleAction(StartStep(StepIndex(index)))
                 }
             }
@@ -123,7 +122,7 @@ internal class AppcuesViewModel(
         uiState.value.let { state ->
             // if current state IS Rendering then we process the action
             if (state is Rendering) {
-                viewModelScope.launch {
+                appcuesCoroutineScope.launch {
                     stateMachine.handleAction(EndExperience(false))
                 }
             }
@@ -134,8 +133,8 @@ internal class AppcuesViewModel(
         uiState.value.let { state ->
             // if current state IS dismissing we send the continueAction from EndingStep
             if (state is Dismissing) {
-                viewModelScope.launch {
-                    stateMachine.handleAction(state.continueAction)
+                appcuesCoroutineScope.launch {
+                    state.continueAction()
                 }
             }
         }

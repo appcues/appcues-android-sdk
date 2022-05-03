@@ -10,6 +10,7 @@ import com.appcues.statemachine.Action.StartExperience
 import com.appcues.statemachine.Action.StartStep
 import com.appcues.statemachine.Error.ExperienceError
 import com.appcues.statemachine.Error.StepError
+import com.appcues.statemachine.SideEffect.AwaitEffect
 import com.appcues.statemachine.SideEffect.ContinuationEffect
 import com.appcues.statemachine.SideEffect.PresentContainerEffect
 import com.appcues.statemachine.SideEffect.ReportErrorEffect
@@ -20,6 +21,8 @@ import com.appcues.statemachine.State.EndingStep
 import com.appcues.statemachine.State.Idling
 import com.appcues.statemachine.State.RenderingStep
 import com.appcues.statemachine.StepReference.StepIndex
+import com.appcues.util.ResultOf
+import kotlinx.coroutines.CompletableDeferred
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 
@@ -43,14 +46,18 @@ internal interface Transitions {
         return Transition(RenderingStep(experience, flatStepIndex, isFirst))
     }
 
-    fun RenderingStep.fromRenderingStepToEndingStep(action: StartStep): Transition {
+    fun RenderingStep.fromRenderingStepToEndingStep(action: StartStep, machine: StateMachine): Transition {
         return action.stepReference.getIndex(experience, flatStepIndex).let { nextStepIndex ->
             if (isValidStepIndex(nextStepIndex, experience)) {
                 if (experience.areStepsFromDifferentGroup(flatStepIndex, nextStepIndex)) {
                     // in different groups we want to wait for StartStep action from AppcuesViewModel
+                    val response = CompletableDeferred<ResultOf<State, Error>>()
                     Transition(
-                        state = EndingStep(experience, flatStepIndex, StartStep(action.stepReference)),
-                        sideEffect = null,
+                        state = EndingStep(experience, flatStepIndex) {
+                            val result = machine.handleAction(StartStep(action.stepReference))
+                            response.complete(result)
+                        },
+                        sideEffect = AwaitEffect(response)
                     )
                 } else {
                     // in same group we can continue to StartStep internally
@@ -66,18 +73,28 @@ internal interface Transitions {
         }
     }
 
-    fun RenderingStep.fromRenderingStepToEndingExperience(action: EndExperience): Transition {
+    fun RenderingStep.fromRenderingStepToEndingExperience(action: EndExperience, machine: StateMachine): Transition {
         return if (action.destroyed) {
             // this means the AppcuesActivity was destroyed externally (i.e. deeplink) and we should
             // immediately transition to EndingExperience - not rely on the UI to do it for us (it's gone)
-            Transition(EndingStep(experience, flatStepIndex, null), ContinuationEffect(action))
+            Transition(
+                state = EndingStep(experience, flatStepIndex, null),
+                sideEffect = ContinuationEffect(action)
+            )
         } else {
             // otherwise, its a natural end of experience from an in-experience action / dismiss
             // and should be communicated to the UI layer to dismiss itself.
             //
             // instead of using sideEffect we pass EndExperience on EndingStep
             // then AppcuesViewModel will continue to EndExperience when appropriate
-            Transition(EndingStep(experience, flatStepIndex, action), null)
+            val response = CompletableDeferred<ResultOf<State, Error>>()
+            Transition(
+                state = EndingStep(experience, flatStepIndex) {
+                    val result = machine.handleAction(action)
+                    response.complete(result)
+                },
+                sideEffect = AwaitEffect(response)
+            )
         }
     }
 

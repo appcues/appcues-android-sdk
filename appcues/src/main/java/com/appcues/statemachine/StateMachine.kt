@@ -10,6 +10,7 @@ import com.appcues.statemachine.Action.Reset
 import com.appcues.statemachine.Action.StartExperience
 import com.appcues.statemachine.Action.StartStep
 import com.appcues.statemachine.Error.ExperienceAlreadyActive
+import com.appcues.statemachine.SideEffect.AwaitEffect
 import com.appcues.statemachine.SideEffect.ContinuationEffect
 import com.appcues.statemachine.SideEffect.PresentContainerEffect
 import com.appcues.statemachine.SideEffect.ReportErrorEffect
@@ -104,6 +105,9 @@ internal class StateMachine(
                     // return the success for RenderingState - the resting state of machine
                     Success(updatedState)
                 }
+                is AwaitEffect -> {
+                    sideEffect.completableDeferred.await()
+                }
             }
         } else {
             // if no side effect, return success with current state
@@ -138,8 +142,8 @@ internal class StateMachine(
             // BeginningStep
             state is BeginningStep && action is RenderStep -> state.fromBeginningStepToRenderingStep(action)
             // RenderingStep
-            state is RenderingStep && action is StartStep -> state.fromRenderingStepToEndingStep(action)
-            state is RenderingStep && action is EndExperience -> state.fromRenderingStepToEndingExperience(action)
+            state is RenderingStep && action is StartStep -> state.fromRenderingStepToEndingStep(action, this@StateMachine)
+            state is RenderingStep && action is EndExperience -> state.fromRenderingStepToEndingExperience(action, this@StateMachine)
             // EndingStep
             state is EndingStep && action is EndExperience -> state.fromEndingStepToEndingExperience(action)
             state is EndingStep && action is StartStep -> state.fromEndingStepToBeginningStep(action)
