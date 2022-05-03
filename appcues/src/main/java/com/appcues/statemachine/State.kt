@@ -13,8 +13,7 @@ internal sealed class State(open val experience: Experience?) {
         val flatStepIndex: Int,
         // this works as a ContinuationSideEffect that AppcuesViewModel will
         // send to the state machine once it's done dismissing the current container
-        val dismissAndContinue: Action?
+        val dismissAndContinue: (suspend () -> Unit)?
     ) : State(experience)
-
     data class EndingExperience(override val experience: Experience, val flatStepIndex: Int, val markComplete: Boolean) : State(experience)
 }
