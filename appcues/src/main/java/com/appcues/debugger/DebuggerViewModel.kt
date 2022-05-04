@@ -17,6 +17,7 @@ import com.appcues.debugger.model.TapActionType
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectIndexed
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
@@ -62,31 +63,33 @@ internal class DebuggerViewModel(
         get() = _currentFilter
 
     init {
-        viewModelScope.launch {
-            analyticsTracker.analyticsFlow.collect { activityRequest ->
-                // dispatch to status manager so it can check for new experiences
-                // and update status info if needed
-                debuggerStatusManager.onActivityRequest(activityRequest)
-                // dispatch to recent events manager so it stores all recent events and emits only
-                // what is set by the filter
-                debuggerRecentEventsManager.onActivityRequest(activityRequest)
+        with(viewModelScope) {
+            launch {
+                analyticsTracker.analyticsFlow.collect { activityRequest ->
+                    // dispatch to status manager so it can check for new experiences
+                    // and update status info if needed
+                    debuggerStatusManager.onActivityRequest(activityRequest)
+                    // dispatch to recent events manager so it stores all recent events and emits only
+                    // what is set by the filter
+                    debuggerRecentEventsManager.onActivityRequest(activityRequest)
+                }
             }
-        }
 
-        viewModelScope.launch {
-            debuggerStatusManager.data.collect { items ->
-                _statusInfo.value = items
+            launch {
+                debuggerStatusManager.data.collect { items ->
+                    _statusInfo.value = items
+                }
             }
-        }
 
-        viewModelScope.launch {
-            debuggerRecentEventsManager.data.collect { items ->
-                _events.value = items
+            launch {
+                debuggerRecentEventsManager.data.collectIndexed { index, value ->
+                    // every time we start collecting we want to not show the elements that we take
+                    _events.value = if (index == 0) value.hideEventsForFab() else value
+                }
             }
-        }
-
-        viewModelScope.launch {
-            debuggerStatusManager.start()
+            launch {
+                debuggerStatusManager.start()
+            }
         }
     }
 
@@ -144,5 +147,15 @@ internal class DebuggerViewModel(
             _currentFilter.emit(eventType)
             debuggerRecentEventsManager.onApplyEventFilter(eventType)
         }
+    }
+
+    fun onDisplayedEventTimeout() {
+        viewModelScope.launch {
+            _events.value = _events.value.hideEventsForFab()
+        }
+    }
+
+    private fun List<DebuggerEventItem>.hideEventsForFab(): List<DebuggerEventItem> {
+        return toMutableList().onEach { it.showOnFab = false }
     }
 }

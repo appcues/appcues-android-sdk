@@ -78,7 +78,7 @@ private fun DismissDebuggerArea(debuggerState: MutableDebuggerState, onGloballyP
         contentAlignment = Alignment.Center
     ) {
         Image(
-            painter = painterResource(id = drawable.appcues_ic_dismiss),
+            painter = painterResource(id = drawable.appcues_ic_debugger_dismiss),
             modifier = Modifier
                 .clip(RoundedCornerShape(percent = 100))
                 .size(size.value)
