@@ -1,4 +1,6 @@
 # Appcues Android SDK
+[![CircleCI](https://circleci.com/gh/appcues/appcues-android-sdk.svg?style=shield&circle-token=d80a6bd72e608b1b62c104c87bfcfe8ea3faa7c1)](https://circleci.com/gh/appcues/appcues-android-sdk)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/appcues/appcues-android-sdk/blob/main/LICENSE)
 
 Appcues Android SDK allows you to integrate Appcues experiences into your native Android apps.
 
@@ -52,9 +54,7 @@ An instance of the Appcues Android SDK should be initialized when your app launc
 ```kotlin
 override fun onCreate() {
     super.onCreate()
-
-    appcues = Appcues.Builder(this, APPCUES_ACCOUNT_ID, APPCUES_APPLICATION_ID)
-        .build()
+    appcues = Appcues(this, APPCUES_ACCOUNT_ID, APPCUES_APPLICATION_ID)
 }
 ```
 
