@@ -1,6 +1,5 @@
 package com.appcues.di
 
-import com.appcues.AppcuesConfig
 import org.koin.dsl.ScopeDSL
 
 /**
@@ -12,9 +11,6 @@ internal interface KoinScopePlugin {
 
     /**
      * Used to load new scoped factories defined in [ScopeDSL]
-     *
-     * [config] AppcuesConfig for this session
-     *
      */
-    fun ScopeDSL.install(config: AppcuesConfig)
+    fun ScopeDSL.install()
 }

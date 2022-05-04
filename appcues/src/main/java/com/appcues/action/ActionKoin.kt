@@ -1,6 +1,5 @@
 package com.appcues.action
 
-import com.appcues.AppcuesConfig
 import com.appcues.action.appcues.CloseAction
 import com.appcues.action.appcues.ContinueAction
 import com.appcues.action.appcues.LaunchExperienceAction
@@ -12,7 +11,7 @@ import org.koin.dsl.ScopeDSL
 
 internal object ActionKoin : KoinScopePlugin {
 
-    override fun ScopeDSL.install(config: AppcuesConfig) {
+    override fun ScopeDSL.install() {
         scoped { ActionRegistry(scope = get(), logcues = get()) }
         scoped { ActionProcessor(appcues = get(), appcuesCoroutineScope = get()) }
 

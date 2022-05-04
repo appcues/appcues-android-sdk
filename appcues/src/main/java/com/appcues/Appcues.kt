@@ -7,7 +7,6 @@ import com.appcues.action.ActionRegistry
 import com.appcues.action.ExperienceAction
 import com.appcues.analytics.ActivityScreenTracking
 import com.appcues.analytics.AnalyticsTracker
-import com.appcues.builder.ApiHostBuilderValidator
 import com.appcues.debugger.AppcuesDebuggerManager
 import com.appcues.di.AppcuesKoinContext
 import com.appcues.logging.Logcues
@@ -16,9 +15,11 @@ import com.appcues.trait.TraitRegistry
 import com.appcues.ui.ExperienceRenderer
 import org.koin.core.scope.Scope
 
-class Appcues internal constructor(koinScope: Scope) {
-
-    private val appcuesConfig by koinScope.inject<AppcuesConfig>()
+class Appcues internal constructor(
+    context: Context,
+    val config: AppcuesConfig,
+) {
+    private val koinScope: Scope = AppcuesKoinContext.createAppcuesScope(context, this)
     private val experienceRenderer by koinScope.inject<ExperienceRenderer>()
     private val logcues by koinScope.inject<Logcues>()
     private val actionRegistry by koinScope.inject<ActionRegistry>()
@@ -30,15 +31,22 @@ class Appcues internal constructor(koinScope: Scope) {
     private val deeplinkHandler by koinScope.inject<DeeplinkHandler>()
     private val debuggerManager by koinScope.inject<AppcuesDebuggerManager>()
 
+    constructor(
+        context: Context,
+        accountId: String,
+        applicationId: String,
+        config: (AppcuesConfig.() -> Unit)? = null,
+    ) : this(context, AppcuesConfig(accountId, applicationId).apply { config?.invoke(this) })
+
     /**
      * Set the listener to be notified about the display of Experience content.
      */
-    var experienceListener: ExperienceListener? by appcuesConfig::experienceListener
+    var experienceListener: ExperienceListener? by config::experienceListener
 
     /**
      * Set the interceptor for additional control over SDK runtime behaviors.
      */
-    var interceptor: AppcuesInterceptor? by appcuesConfig::interceptor
+    var interceptor: AppcuesInterceptor? by config::interceptor
 
     init {
         sessionMonitor.start()
@@ -84,7 +92,7 @@ class Appcues internal constructor(koinScope: Scope) {
     fun anonymous(properties: Map<String, Any>? = null) {
         // use the device ID as the default anonymous user ID, unless an override for generating
         // anonymous user IDs is supplied in the config builder
-        val anonymousId = appcuesConfig.anonymousIdFactory?.invoke() ?: storage.deviceId
+        val anonymousId = config.anonymousIdFactory?.invoke() ?: storage.deviceId
         identify(true, anonymousId, properties)
     }
 
@@ -200,127 +208,5 @@ class Appcues internal constructor(koinScope: Scope) {
         }
 
         analyticsTracker.identify(properties)
-    }
-
-    class Builder(
-        private val context: Context,
-        private val accountId: String,
-        private val applicationId: String
-    ) {
-
-        private var _loggingLevel = LoggingLevel.NONE
-
-        fun logging(level: LoggingLevel) = apply {
-            _loggingLevel = level
-        }
-
-        private var _apiHostUrl: String? = null
-
-        /**
-         * Defines a custom api host for the SDK. If Not defined it will point to appcues
-         *
-         * [url] Custom Url as api host for the SDK. It will throw [IllegalArgumentException] if the given Url
-         *       does not start with 'http' and ends with '/'
-         */
-        fun apiHost(url: String) = apply {
-            ApiHostBuilderValidator().run {
-                _apiHostUrl = validate(url)
-            }
-        }
-
-        private var _anonymousIdFactory: (() -> String)? = null
-
-        /**
-         * Set the factory responsible for generating anonymous user IDs.
-         *
-         * [factory] factory (lambda) that returns an ID as a String.
-         */
-        fun anonymousIdFactory(factory: () -> String) = apply {
-            _anonymousIdFactory = factory
-        }
-
-        private var _sessionTimeout: Int = AppcuesConfig.SESSION_TIMEOUT_DEFAULT
-
-        /**
-         *  Set the session timeout for the configuration. This timeout value is used to determine if a new session is started
-         *  upon the application returning to the foreground. The default value is 1800 seconds (30 minutes).
-         *
-         *  [sessionTimeout] The timeout length, in seconds.
-         */
-        fun sessionTimeout(timeout: Int) = apply {
-            _sessionTimeout = timeout.coerceAtLeast(0)
-        }
-
-        private var _activityStorageMaxSize: Int = AppcuesConfig.ACTIVITY_STORAGE_MAX_SIZE
-
-        /**
-         * Set the activity storage max size for the configuration.  This value determines how many analytics requests can be
-         * stored on the local device and retried later, in the case of the device network connection being unavailable.
-         * Only the most recent requests, up to this count, are retained.
-         *
-         * [size] The number of items to store, maximum 25, minimum 0.
-         */
-        fun activityStorageMaxSize(size: Int) = apply {
-            _activityStorageMaxSize = size.coerceAtLeast(0).coerceAtMost(AppcuesConfig.ACTIVITY_STORAGE_MAX_SIZE)
-        }
-
-        private var _activityStorageMaxAge: Int? = null
-
-        /**
-         *  Sets the activity storage max age for the configuration.  This value determines how long an item can be stored
-         *  on the local device and retried later, in the case of hte device network connection being unavailable.  Only
-         *  requests that are more recent than the max age will be retried - or all, if not set.
-         *
-         *  [age] The max age, in seconds, since now.  The default is `nil`, meaning no max age.
-         */
-        fun activityStorageMaxAge(age: Int) = apply {
-            _activityStorageMaxAge = age.coerceAtLeast(0)
-        }
-
-        private var _interceptor: AppcuesInterceptor? = null
-
-        /**
-         * Set the interceptor for additional control over SDK runtime behaviors.
-         *
-         * [interceptor] The interceptor to use.
-         */
-        fun interceptor(interceptor: AppcuesInterceptor) = apply {
-            _interceptor = interceptor
-        }
-
-        private var _experienceListener: ExperienceListener? = null
-
-        /**
-         * Set the listener to be notified about the display of Experience content.
-         *
-         * [listener] The listener to use.
-         */
-        fun experienceListener(listener: ExperienceListener) = apply {
-            _experienceListener = listener
-        }
-
-        fun build(): Appcues {
-            return with(AppcuesKoinContext) {
-                createAppcues(
-                    context = context,
-                    appcuesConfig = AppcuesConfig(
-                        accountId = accountId,
-                        applicationId = applicationId,
-                        loggingLevel = _loggingLevel,
-                        apiHostUrl = _apiHostUrl,
-                        anonymousIdFactory = _anonymousIdFactory,
-                        sessionTimeout = _sessionTimeout,
-                        activityStorageMaxSize = _activityStorageMaxSize,
-                        activityStorageMaxAge = _activityStorageMaxAge,
-                        interceptor = _interceptor,
-                        experienceListener = _experienceListener,
-                    )
-                )
-            }
-        }
-    }
-
-    enum class LoggingLevel {
-        NONE, INFO, DEBUG
     }
 }

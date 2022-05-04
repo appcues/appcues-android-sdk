@@ -11,11 +11,12 @@ import org.koin.dsl.ScopeDSL
 
 internal object AppcuesKoin : KoinScopePlugin {
 
-    override fun ScopeDSL.install(config: AppcuesConfig) {
-        scoped { config }
-        scoped { Appcues(koinScope = this) }
+    override fun ScopeDSL.install() {
         scoped { AppcuesCoroutineScope(logcues = get()) }
-        scoped { Logcues(config.loggingLevel) }
+        scoped {
+            val config: AppcuesConfig = get()
+            Logcues(config.loggingLevel)
+        }
         scoped { StateMachine(appcuesCoroutineScope = get(), config = get()) }
         scoped { Storage(context = get(), config = get()) }
         scoped { DeeplinkHandler(config = get(), appcues = get(), experienceRenderer = get(), appcuesCoroutineScope = get()) }

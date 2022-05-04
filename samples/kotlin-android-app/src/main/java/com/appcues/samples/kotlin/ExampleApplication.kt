@@ -2,6 +2,7 @@ package com.appcues.samples.kotlin
 
 import android.app.Application
 import com.appcues.Appcues
+import com.appcues.LoggingLevel
 
 class ExampleApplication : Application() {
 
@@ -14,10 +15,8 @@ class ExampleApplication : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        val loggingLevel = if (BuildConfig.DEBUG) Appcues.LoggingLevel.DEBUG else Appcues.LoggingLevel.INFO
-
-        appcues = Appcues.Builder(this, BuildConfig.APPCUES_ACCOUNT_ID, BuildConfig.APPCUES_APPLICATION_ID)
-            .logging(loggingLevel)
-            .build()
+        appcues = Appcues(this, BuildConfig.APPCUES_ACCOUNT_ID, BuildConfig.APPCUES_APPLICATION_ID) {
+            loggingLevel = if (BuildConfig.DEBUG) LoggingLevel.DEBUG else LoggingLevel.INFO
+        }
     }
 }

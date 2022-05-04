@@ -1,11 +1,11 @@
 package com.appcues.logging
 
 import android.util.Log
-import com.appcues.Appcues
-import com.appcues.Appcues.LoggingLevel.DEBUG
-import com.appcues.Appcues.LoggingLevel.NONE
+import com.appcues.LoggingLevel
+import com.appcues.LoggingLevel.DEBUG
+import com.appcues.LoggingLevel.NONE
 
-class Logcues(private val loggingLevel: Appcues.LoggingLevel) {
+class Logcues(private val loggingLevel: LoggingLevel) {
 
     companion object {
 

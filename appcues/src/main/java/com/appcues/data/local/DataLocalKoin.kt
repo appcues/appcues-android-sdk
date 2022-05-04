@@ -10,7 +10,7 @@ import org.koin.dsl.ScopeDSL
 
 internal object DataLocalKoin : KoinScopePlugin {
 
-    override fun ScopeDSL.install(config: AppcuesConfig) {
+    override fun ScopeDSL.install() {
         scoped<AppcuesLocalSource> {
             RoomAppcuesLocalSource(
                 db = getAppcuesDatabase(
