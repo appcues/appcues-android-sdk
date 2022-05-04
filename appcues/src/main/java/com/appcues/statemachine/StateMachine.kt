@@ -2,7 +2,6 @@ package com.appcues.statemachine
 
 import com.appcues.AppcuesConfig
 import com.appcues.AppcuesCoroutineScope
-import com.appcues.data.model.Experience
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.RenderStep
 import com.appcues.statemachine.Action.ReportError
@@ -25,12 +24,11 @@ import com.appcues.statemachine.Transition.ErrorLoggingTransition
 import com.appcues.util.ResultOf
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
-import kotlinx.coroutines.channels.BufferOverflow.DROP_OLDEST
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
-import kotlin.reflect.KClass
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 internal class StateMachine(
     appcuesCoroutineScope: AppcuesCoroutineScope,
@@ -42,14 +40,14 @@ internal class StateMachine(
         get() = _stateFlow
 
     private val _errorFLow = MutableSharedFlow<Error>()
-    val errorFLow: SharedFlow<Error>
+    val errorFlow: SharedFlow<Error>
         get() = _errorFLow
 
-    // for internal convenience when one state transition depends on waiting for another transition
-    // to complete "outside the system" - i.e. a UI driven update
-    private val stateUpdateChannel = Channel<State>(capacity = 1, onBufferOverflow = DROP_OLDEST)
+    private var _currentState: State = Idling
+    val currentState: State
+        get() = _currentState
 
-    private var _currentState: State = Idling()
+    private var mutex = Mutex()
 
     init {
         appcuesCoroutineScope.launch {
@@ -61,15 +59,13 @@ internal class StateMachine(
                 }
             }
         }
-
-        appcuesCoroutineScope.launch {
-            stateFlow.collect {
-                stateUpdateChannel.send(it)
-            }
-        }
     }
 
-    suspend fun handleAction(action: Action): ResultOf<State, Error> {
+    suspend fun handleAction(action: Action): ResultOf<State, Error> = mutex.withLock {
+        return handleActionInternal(action)
+    }
+
+    private suspend fun handleActionInternal(action: Action): ResultOf<State, Error> {
         val transition = _currentState.take(action)
         val state = transition.state
         val sideEffect = transition.sideEffect
@@ -86,7 +82,7 @@ internal class StateMachine(
             return when (sideEffect) {
                 is ContinuationEffect -> {
                     // recursive call on continuations to get the final return value
-                    handleAction(sideEffect.action)
+                    handleActionInternal(sideEffect.action)
                 }
                 is ReportErrorEffect -> {
                     _errorFLow.emit(sideEffect.error)
@@ -96,14 +92,14 @@ internal class StateMachine(
                 is PresentContainerEffect -> {
                     // kick off UI
                     sideEffect.experience.stepContainers[sideEffect.containerIndex].presentingTrait.present()
-                    // wait on the RenderingStep state to flow in from the UI
 
-                    var updatedState = stateUpdateChannel.receive()
-                    while (updatedState.matching(RenderingStep::class, sideEffect.experience).not()) {
-                        updatedState = stateUpdateChannel.receive()
-                    }
+                    // wait on the RenderingStep state to flow in from the UI
+                    sideEffect.completion.await()
+
+                    // note: not handling a potential failure in presentation here - how could that occur?
+
                     // return the success for RenderingState - the resting state of machine
-                    Success(updatedState)
+                    Success(_currentState)
                 }
                 is AwaitEffect -> {
                     sideEffect.completableDeferred.await()
@@ -113,10 +109,6 @@ internal class StateMachine(
             // if no side effect, return success with current state
             return Success(_currentState)
         }
-    }
-
-    private fun <T : State> State.matching(clazz: KClass<T>, experience: Experience): Boolean {
-        return clazz.isInstance(this) && this.experience?.instanceId == experience.instanceId
     }
 
     private fun State.take(action: Action): Transition {
@@ -138,15 +130,23 @@ internal class StateMachine(
             // Idling
             state is Idling && action is StartExperience -> state.fromIdlingToBeginningExperience(action)
             // BeginningExperience
-            state is BeginningExperience && action is StartStep -> state.fromBeginningExperienceToBeginningStep(action)
+            state is BeginningExperience && action is StartStep -> state.fromBeginningExperienceToBeginningStep(action) {
+                handleActionInternal(RenderStep)
+            }
             // BeginningStep
             state is BeginningStep && action is RenderStep -> state.fromBeginningStepToRenderingStep(action)
             // RenderingStep
-            state is RenderingStep && action is StartStep -> state.fromRenderingStepToEndingStep(action, this@StateMachine)
-            state is RenderingStep && action is EndExperience -> state.fromRenderingStepToEndingExperience(action, this@StateMachine)
+            state is RenderingStep && action is StartStep -> state.fromRenderingStepToEndingStep(action) {
+                handleActionInternal(StartStep(action.stepReference))
+            }
+            state is RenderingStep && action is EndExperience -> state.fromRenderingStepToEndingExperience(action) {
+                handleActionInternal(action)
+            }
             // EndingStep
             state is EndingStep && action is EndExperience -> state.fromEndingStepToEndingExperience(action)
-            state is EndingStep && action is StartStep -> state.fromEndingStepToBeginningStep(action)
+            state is EndingStep && action is StartStep -> state.fromEndingStepToBeginningStep(action) {
+                handleActionInternal(RenderStep)
+            }
             // EndingExperience
             state is EndingExperience && action is Reset -> state.fromEndingExperienceToIdling(action)
             // No valid combination of state plus action
