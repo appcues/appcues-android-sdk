@@ -11,8 +11,7 @@ import com.appcues.debugger.ui.toEventTitle
 import com.appcues.debugger.ui.toEventType
 import com.appcues.util.ContextResources
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.withContext
 import java.util.Date
 
@@ -30,10 +29,12 @@ internal class DebuggerRecentEventsManager(
 
     private var filterType: EventType? = null
 
-    private val _data = MutableStateFlow<List<DebuggerEventItem>>(arrayListOf())
+    private val _data = MutableSharedFlow<List<DebuggerEventItem>>(replay = 1)
 
-    val data: StateFlow<List<DebuggerEventItem>>
+    val data: MutableSharedFlow<List<DebuggerEventItem>>
         get() = _data
+
+    private var lastEventId = 0
 
     suspend fun onActivityRequest(activityRequest: ActivityRequest) = withContext(Dispatchers.IO) {
         when {
@@ -45,6 +46,7 @@ internal class DebuggerRecentEventsManager(
 
                     events.addFirst(
                         DebuggerEventItem(
+                            id = lastEventId,
                             type = type,
                             title = title,
                             timestamp = event.timestamp.time,
@@ -58,12 +60,15 @@ internal class DebuggerRecentEventsManager(
                                 .toSortedList()
                         )
                     )
+
+                    lastEventId++
                 }
             }
             // group update
             activityRequest.groupUpdate != null -> {
                 events.addFirst(
                     DebuggerEventItem(
+                        id = lastEventId,
                         type = EventType.GROUP_UPDATE,
                         title = contextResources.getString(R.string.debugger_event_type_group_update_title),
                         timestamp = Date().time,
@@ -72,11 +77,13 @@ internal class DebuggerRecentEventsManager(
                         identityProperties = null
                     )
                 )
+                lastEventId++
             }
             // profile update
             activityRequest.profileUpdate != null -> {
                 events.addFirst(
                     DebuggerEventItem(
+                        id = lastEventId,
                         type = EventType.USER_PROFILE,
                         title = contextResources.getString(R.string.debugger_event_type_profile_update_title),
                         // it should always contain updated at property, this is just a safeguard
@@ -87,6 +94,8 @@ internal class DebuggerRecentEventsManager(
                         identityProperties = null
                     )
                 )
+
+                lastEventId++
             }
         }
 

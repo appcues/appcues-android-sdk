@@ -62,6 +62,41 @@ internal class MutableDebuggerState(private val density: Density, private val is
         return IntOffset(fabXOffset.value.roundToInt(), fabYOffset.value.roundToInt())
     }
 
+    fun getEventsProperties(): EventsProperties {
+        with(density) {
+            val isStart = fabXOffset.value + (fabSize.toPx() / 2) < boxSize.width / 2
+            val drawTop = fabYOffset.value + (fabSize.toPx() / 2) > boxSize.height / 2
+
+            // calculate X/Y based on anchor position
+            val offset = when {
+                isStart && drawTop -> {
+                    IntOffset(0, fabYOffset.value.toInt() - boxSize.height)
+                }
+                isStart && drawTop.not() -> {
+                    IntOffset(0, fabYOffset.value.toInt() + fabSize.toPx().toInt())
+                }
+                isStart.not() && drawTop -> {
+                    IntOffset(0, fabYOffset.value.toInt() - boxSize.height)
+                }
+                else -> {
+                    IntOffset(0, fabYOffset.value.toInt() + fabSize.toPx().toInt())
+                }
+            }
+
+            return EventsProperties(
+                positionOffset = offset,
+                anchorToStart = isStart,
+                drawTop = drawTop
+            )
+        }
+    }
+
+    data class EventsProperties(
+        val positionOffset: IntOffset,
+        val anchorToStart: Boolean,
+        val drawTop: Boolean
+    )
+
     fun dragFabOffsets(dragAmount: Offset) {
         with(density) {
             updatePosition(

@@ -62,6 +62,11 @@ internal fun DebuggerComposition(viewModel: DebuggerViewModel, onDismiss: () -> 
             debuggerState = debuggerState,
             debuggerViewModel = viewModel,
         )
+
+        DebuggerFloatingActionEvents(
+            debuggerState = debuggerState,
+            debuggerViewModel = viewModel,
+        )
     }
 
     with(debuggerState.isVisible) {
