@@ -9,15 +9,22 @@ An instance of the Appcues Android SDK ([`Appcues`](https://github.com/appcues/a
 ```kotlin
 override fun onCreate() {
     super.onCreate()
-
-     appcues = Appcues.Builder(this, APPCUES_ACCOUNT_ID, APPCUES_APPLICATION_ID)
-        .build()
+    appcues = Appcues(this, APPCUES_ACCOUNT_ID, APPCUES_APPLICATION_ID)
 }
 ```
 
-The `Appcues.Builder` class has a number of functions that may optionally be used to customize the behavior of the SDK. 
-
 Initializing the SDK requires you to provide two values, an Appcues account ID, and an Appcues mobile application ID. These values can be obtained from your [Appcues settings](https://studio.appcues.com/settings/account).
+
+An additional optional parameter can also be provided to customize the behavior of the SDK using the `AppcuesConfig`. For example, setting the logging level:
+
+```kotlin
+override fun onCreate() {
+    super.onCreate()
+    appcues = Appcues(this, APPCUES_ACCOUNT_ID, APPCUES_APPLICATION_ID) {
+        loggingLevel = LogginLevel.DEBUG
+    }
+}
+```
 
 ## Managing Users
 
@@ -32,7 +39,7 @@ appcues.identify(userId, properties)
 
 The inverse of identifying is resetting.  For example, if a user logs out of your app calling `reset()` will disable tracking of screens and events until a user is identified again.
 
-You can target users during anonymous usage in your application using `anonymous()` instead of `identify()`.  This can have implications on your billing based on active user counts.  The format of anonymous ID's can be customized with the `Appcues.Builder` using the `anonymousIdFactory` function.
+You can target users during anonymous usage in your application using `anonymous()` instead of `identify()`.  This can have implications on your billing based on active user counts.  The format of anonymous IDs can be customized during initialization with the `AppcuesConfig`, using the `anonymousIdFactory` property.
 
 
 ## Tracking Screens and Events
