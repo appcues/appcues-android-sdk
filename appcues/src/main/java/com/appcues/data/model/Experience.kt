@@ -7,6 +7,7 @@ internal data class Experience(
     val name: String,
     val stepContainers: List<StepContainer>,
     val published: Boolean,
+    val priority: ExperiencePriority,
 ) {
 
     // a unique identifier for this instance of the Experience, for comparison purposes, in the

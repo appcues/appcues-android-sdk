@@ -6,6 +6,8 @@ import com.appcues.data.mapper.mergeTraits
 import com.appcues.data.mapper.step.StepMapper
 import com.appcues.data.mapper.trait.TraitsMapper
 import com.appcues.data.model.Experience
+import com.appcues.data.model.ExperiencePriority
+import com.appcues.data.model.ExperiencePriority.NORMAL
 import com.appcues.data.model.StepContainer
 import com.appcues.data.remote.response.action.ActionResponse
 import com.appcues.data.remote.response.experience.ExperienceResponse
@@ -29,12 +31,13 @@ internal class ExperienceMapper(
     private val context: Context,
 ) {
 
-    fun map(from: ExperienceResponse): Experience {
+    fun map(from: ExperienceResponse, priority: ExperiencePriority = NORMAL): Experience {
         return Experience(
             id = from.id,
             name = from.name,
             stepContainers = from.steps.mapToStepContainer(from.traits, from.actions),
-            published = from.state != "DRAFT" // "DRAFT" is used for experience preview in builder
+            published = from.state != "DRAFT", // "DRAFT" is used for experience preview in builder
+            priority = priority,
         )
     }
 

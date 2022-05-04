@@ -4,7 +4,10 @@ import com.appcues.AppcuesConfig
 import com.appcues.SessionMonitor
 import com.appcues.data.AppcuesRepository
 import com.appcues.data.model.Experience
+import com.appcues.data.model.ExperiencePriority.NORMAL
+import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.StartExperience
+import com.appcues.statemachine.State.Idling
 import com.appcues.statemachine.StateMachine
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
@@ -20,6 +23,14 @@ internal class ExperienceRenderer(
         val canShow = config.interceptor?.canDisplayExperience(experience.id) ?: true
 
         if (!canShow) return false
+
+        // "event_trigger" or "forced" experience priority is NORMAL, "screen_view" is low -
+        // if an experience is currently showing and the new experience coming in is normal priority
+        // then it replaces whatever is currently showing - i.e. an "event_trigger" experience will
+        // supersede a "screen_view" triggered experience - per Appcues standard behavior
+        if (experience.priority == NORMAL && stateMachine.currentState != Idling) {
+            stateMachine.handleAction(EndExperience(false))
+        }
 
         return stateMachine.handleAction(StartExperience(experience)).run {
             when (this) {

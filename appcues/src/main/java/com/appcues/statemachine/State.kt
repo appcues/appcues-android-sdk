@@ -2,18 +2,25 @@ package com.appcues.statemachine
 
 import com.appcues.data.model.Experience
 
-internal sealed class State(open val experience: Experience?) {
+internal sealed class State() {
 
-    data class Idling(override val experience: Experience? = null) : State(experience)
-    data class BeginningExperience(override val experience: Experience) : State(experience)
-    data class BeginningStep(override val experience: Experience, val flatStepIndex: Int, val isFirst: Boolean) : State(experience)
-    data class RenderingStep(override val experience: Experience, val flatStepIndex: Int, val isFirst: Boolean) : State(experience)
+    object Idling : State()
+    data class BeginningExperience(val experience: Experience) : State()
+    data class BeginningStep(
+        val experience: Experience,
+        val flatStepIndex: Int,
+        val isFirst: Boolean,
+        // this is how the UI communicates success/failure in presentation
+        // back to the state machine
+        val presentationComplete: (suspend () -> Unit)?,
+    ) : State()
+    data class RenderingStep(val experience: Experience, val flatStepIndex: Int, val isFirst: Boolean) : State()
     data class EndingStep(
-        override val experience: Experience,
+        val experience: Experience,
         val flatStepIndex: Int,
         // this works as a ContinuationSideEffect that AppcuesViewModel will
         // send to the state machine once it's done dismissing the current container
         val dismissAndContinue: (suspend () -> Unit)?
-    ) : State(experience)
-    data class EndingExperience(override val experience: Experience, val flatStepIndex: Int, val markComplete: Boolean) : State(experience)
+    ) : State()
+    data class EndingExperience(val experience: Experience, val flatStepIndex: Int, val markComplete: Boolean) : State()
 }

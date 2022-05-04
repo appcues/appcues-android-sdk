@@ -7,7 +7,6 @@ import com.appcues.action.ActionProcessor
 import com.appcues.action.ExperienceAction
 import com.appcues.data.model.StepContainer
 import com.appcues.statemachine.Action.EndExperience
-import com.appcues.statemachine.Action.RenderStep
 import com.appcues.statemachine.Action.StartStep
 import com.appcues.statemachine.State.BeginningStep
 import com.appcues.statemachine.State.EndingStep
@@ -51,14 +50,10 @@ internal class AppcuesViewModel(
 
                 when (result) {
                     is BeginningStep -> {
-                        result.toRenderingState()?.run {
-                            _uiState.value = this
-
-                            // Notify state machine that we are rendering current step
-                            viewModelScope.launch {
-                                stateMachine.handleAction(RenderStep)
-                            }
+                        result.toRenderingState()?.let {
+                            _uiState.value = it
                         }
+                        result.presentationComplete?.invoke()
                     }
                     is EndingStep -> {
                         // dismiss will trigger exit animations and finish activity

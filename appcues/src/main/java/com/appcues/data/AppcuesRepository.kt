@@ -5,6 +5,9 @@ import com.appcues.data.local.AppcuesLocalSource
 import com.appcues.data.local.model.ActivityStorage
 import com.appcues.data.mapper.experience.ExperienceMapper
 import com.appcues.data.model.Experience
+import com.appcues.data.model.ExperiencePriority
+import com.appcues.data.model.ExperiencePriority.LOW
+import com.appcues.data.model.ExperiencePriority.NORMAL
 import com.appcues.data.remote.AppcuesRemoteSource
 import com.appcues.data.remote.RemoteError.NetworkError
 import com.appcues.data.remote.request.ActivityRequest
@@ -144,7 +147,8 @@ internal class AppcuesRepository(
             val qualifyResult = appcuesRemoteSource.qualify(activity.userId, activity.data)
 
             qualifyResult.doIfSuccess { response ->
-                experiences += response.experiences.map { experienceMapper.map(it) }
+                val priority: ExperiencePriority = if (response.qualificationReason == "screen_view") LOW else NORMAL
+                experiences += response.experiences.map { experienceMapper.map(it, priority) }
             }
 
             qualifyResult.doIfFailure {

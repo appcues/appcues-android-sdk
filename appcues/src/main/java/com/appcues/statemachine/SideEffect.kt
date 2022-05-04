@@ -6,7 +6,11 @@ import kotlinx.coroutines.CompletableDeferred
 
 internal sealed class SideEffect {
     data class ContinuationEffect(val action: Action) : SideEffect()
-    data class PresentContainerEffect(val experience: Experience, val containerIndex: Int) : SideEffect()
+    data class PresentContainerEffect(
+        val experience: Experience,
+        val containerIndex: Int,
+        val completion: CompletableDeferred<ResultOf<State, Error>>,
+    ) : SideEffect()
     data class ReportErrorEffect(val error: Error) : SideEffect()
     data class AwaitEffect(val completableDeferred: CompletableDeferred<ResultOf<State, Error>>) : SideEffect()
 }

@@ -72,7 +72,7 @@ internal class ExperienceLifecycleTracker(
     }
 
     private suspend fun observeErrors() {
-        stateMachine.errorFLow.collect {
+        stateMachine.errorFlow.collect {
             if (it.shouldTrack()) { // will not track for unpublished (preview) experiences
                 when (it) {
                     is Error.ExperienceError -> trackLifecycleEvent(ExperienceError(it))
