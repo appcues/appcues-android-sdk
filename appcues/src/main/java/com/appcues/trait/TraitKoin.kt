@@ -1,6 +1,5 @@
 package com.appcues.trait
 
-import com.appcues.AppcuesConfig
 import com.appcues.di.KoinScopePlugin
 import com.appcues.trait.appcues.BackdropTrait
 import com.appcues.trait.appcues.CarouselTrait
@@ -12,7 +11,7 @@ import org.koin.dsl.ScopeDSL
 
 internal object TraitKoin : KoinScopePlugin {
 
-    override fun ScopeDSL.install(config: AppcuesConfig) {
+    override fun ScopeDSL.install() {
         scoped {
             TraitRegistry(
                 scope = get(),

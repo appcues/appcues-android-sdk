@@ -1,13 +1,12 @@
 package com.appcues.analytics
 
-import com.appcues.AppcuesConfig
 import com.appcues.SessionMonitor
 import com.appcues.di.KoinScopePlugin
 import org.koin.dsl.ScopeDSL
 
 internal object AnalyticsKoin : KoinScopePlugin {
 
-    override fun ScopeDSL.install(config: AppcuesConfig) {
+    override fun ScopeDSL.install() {
         scoped { SessionMonitor(scope = this) }
         scoped {
             AutoPropertyDecorator(
