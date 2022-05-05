@@ -1,5 +1,5 @@
 package com.appcues.data.model.styling
 
-enum class ComponentContentMode {
+internal enum class ComponentContentMode {
     FILL, FIT
 }

@@ -34,9 +34,9 @@ internal val LocalAppcuesActions = staticCompositionLocalOf<Map<UUID, List<Actio
  * happened that is coming from outside of our internal SDK logic.
  * Usually used by traits that when dealing with multi-page containers
  */
-val LocalAppcuesPaginationDelegate = compositionLocalOf { AppcuesPagination {} }
+internal val LocalAppcuesPaginationDelegate = compositionLocalOf { AppcuesPagination {} }
 
-data class AppcuesPagination(val onPageChanged: (Int) -> Unit)
+internal data class AppcuesPagination(val onPageChanged: (Int) -> Unit)
 
 /**
  * AppcuesPaginationData is used to communicate between different traits
@@ -60,7 +60,7 @@ internal val appcuesPaginationData = mutableStateOf(AppcuesPaginationData(1, 0, 
  * that can be used to sync animations
  */
 @Composable
-fun rememberAppcuesPaginationState() = remember<State<AppcuesPaginationData>> { appcuesPaginationData }
+internal fun rememberAppcuesPaginationState() = remember<State<AppcuesPaginationData>> { appcuesPaginationData }
 
 internal val isContentVisible = MutableTransitionState(false)
 

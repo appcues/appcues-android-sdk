@@ -6,7 +6,7 @@ import com.appcues.trait.PresentingTrait
 import com.appcues.ui.AppcuesActivity
 import org.koin.core.scope.Scope
 
-class DefaultPresentingTrait(
+internal class DefaultPresentingTrait(
     override val config: AppcuesConfigMap,
     private val scope: Scope,
     private val context: Context,

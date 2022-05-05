@@ -5,7 +5,7 @@ import com.appcues.LoggingLevel
 import com.appcues.LoggingLevel.DEBUG
 import com.appcues.LoggingLevel.NONE
 
-class Logcues(private val loggingLevel: LoggingLevel) {
+internal class Logcues(private val loggingLevel: LoggingLevel) {
 
     companion object {
 

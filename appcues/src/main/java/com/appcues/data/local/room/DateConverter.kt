@@ -3,7 +3,7 @@ package com.appcues.data.local.room
 import androidx.room.TypeConverter
 import java.util.Date
 
-object DateConverter {
+internal object DateConverter {
 
     @TypeConverter
     fun toDate(timestamp: Long?): Date? {
