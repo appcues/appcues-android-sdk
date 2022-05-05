@@ -37,7 +37,10 @@ internal interface Transitions {
         }
     }
 
-    fun BeginningExperience.fromBeginningExperienceToBeginningStep(action: StartStep, continuation: suspend () -> ResultOf<State, Error>): Transition {
+    fun BeginningExperience.fromBeginningExperienceToBeginningStep(
+        action: StartStep,
+        continuation: suspend () -> ResultOf<State, Error>
+    ): Transition {
         val completion: CompletableDeferred<ResultOf<State, Error>> = CompletableDeferred()
         return Transition(
             BeginningStep(experience, 0, true) {
@@ -51,7 +54,10 @@ internal interface Transitions {
         return Transition(RenderingStep(experience, flatStepIndex, isFirst))
     }
 
-    fun RenderingStep.fromRenderingStepToEndingStep(action: StartStep, continuation: suspend () -> ResultOf<State, Error>): Transition {
+    fun RenderingStep.fromRenderingStepToEndingStep(
+        action: StartStep,
+        continuation: suspend () -> ResultOf<State, Error>
+    ): Transition {
         return action.stepReference.getIndex(experience, flatStepIndex).let { nextStepIndex ->
             if (isValidStepIndex(nextStepIndex, experience)) {
                 if (experience.areStepsFromDifferentGroup(flatStepIndex, nextStepIndex)) {
@@ -77,7 +83,10 @@ internal interface Transitions {
         }
     }
 
-    fun RenderingStep.fromRenderingStepToEndingExperience(action: EndExperience, continuation: suspend () -> ResultOf<State, Error>): Transition {
+    fun RenderingStep.fromRenderingStepToEndingExperience(
+        action: EndExperience,
+        continuation: suspend () -> ResultOf<State, Error>
+    ): Transition {
         return if (action.destroyed) {
             // this means the AppcuesActivity was destroyed externally (i.e. deeplink) and we should
             // immediately transition to EndingExperience - not rely on the UI to do it for us (it's gone)

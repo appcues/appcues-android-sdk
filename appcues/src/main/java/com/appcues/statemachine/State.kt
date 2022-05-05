@@ -2,7 +2,7 @@ package com.appcues.statemachine
 
 import com.appcues.data.model.Experience
 
-internal sealed class State() {
+internal sealed class State {
 
     object Idling : State()
     data class BeginningExperience(val experience: Experience) : State()
