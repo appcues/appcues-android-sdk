@@ -128,15 +128,19 @@ internal class AutoPropertyDecorator(
             context.resources.configuration.locale
         }
     }
-}
 
-fun Context.getAppVersion(): String = packageManager.getPackageInfo(packageName, 0).versionName
-fun Context.getAppBuild() =
-    if (VERSION.SDK_INT >= VERSION_CODES.P) {
-        packageManager.getPackageInfo(packageName, 0).longVersionCode
-    } else {
-        @Suppress("DEPRECATION")
-        packageManager.getPackageInfo(packageName, 0).versionCode.toLong()
+    private fun Context.getAppVersion(): String = packageManager.getPackageInfo(packageName, 0).versionName
+
+    private fun Context.getAppBuild() =
+        if (VERSION.SDK_INT >= VERSION_CODES.P) {
+            packageManager.getPackageInfo(packageName, 0).longVersionCode
+        } else {
+            @Suppress("DEPRECATION")
+            packageManager.getPackageInfo(packageName, 0).versionCode.toLong()
+        }
+    private fun Context.getAppName(): String = applicationInfo.loadLabel(packageManager).toString()
+
+    private fun String.capitalize(locale: Locale) = apply {
+        replaceFirstChar { if (it.isLowerCase()) it.titlecase(locale) else it.toString() }
     }
-fun Context.getAppName(): String = applicationInfo.loadLabel(packageManager).toString()
-fun String.capitalize(locale: Locale) = apply { replaceFirstChar { if (it.isLowerCase()) it.titlecase(locale) else it.toString() } }
+}
