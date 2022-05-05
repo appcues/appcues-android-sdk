@@ -4,7 +4,6 @@ import androidx.compose.ui.graphics.Color
 
 internal object AppcuesColors {
 
-    val AlmostWhite = Color(color = 0xFFFEFEFE)
     val WhisperBlue = Color(color = 0xFFE7ECF3)
     val HadfieldBlue = Color(color = 0xFF0D7EF9)
     val ShadyNeonBlue = Color(color = 0xFF5C5CFF)
