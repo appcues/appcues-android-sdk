@@ -39,9 +39,9 @@ internal class StateMachine(
     val stateFlow: SharedFlow<State>
         get() = _stateFlow
 
-    private val _errorFLow = MutableSharedFlow<Error>()
+    private val _errorFlow = MutableSharedFlow<Error>()
     val errorFlow: SharedFlow<Error>
-        get() = _errorFLow
+        get() = _errorFlow
 
     private var _currentState: State = Idling
     val currentState: State
@@ -85,7 +85,7 @@ internal class StateMachine(
                     handleActionInternal(sideEffect.action)
                 }
                 is ReportErrorEffect -> {
-                    _errorFLow.emit(sideEffect.error)
+                    _errorFlow.emit(sideEffect.error)
                     // return a failure if this call to `handleAction` ended with a reported error
                     Failure(sideEffect.error)
                 }

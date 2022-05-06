@@ -29,7 +29,12 @@ internal class ExperienceRenderer(
         // then it replaces whatever is currently showing - i.e. an "event_trigger" experience will
         // supersede a "screen_view" triggered experience - per Appcues standard behavior
         if (experience.priority == NORMAL && stateMachine.currentState != Idling) {
-            stateMachine.handleAction(EndExperience(false))
+            return stateMachine.handleAction(EndExperience(false)).run {
+                when (this) {
+                    is Success -> show(experience) // re-invoke show on the new experience now after dismiss
+                    is Failure -> false // dismiss failed - can't continue
+                }
+            }
         }
 
         return stateMachine.handleAction(StartExperience(experience)).run {
