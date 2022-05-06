@@ -35,7 +35,7 @@ internal class PagingDotsTrait(
 
     companion object {
         const val TYPE = "@appcues/paging-dots"
-        private const val DEFAULT_PADDING = 16
+        private const val DEFAULT_PADDING = 8
     }
 
     private val style = config.getConfigStyle("style")

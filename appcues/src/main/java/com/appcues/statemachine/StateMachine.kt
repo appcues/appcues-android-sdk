@@ -93,13 +93,8 @@ internal class StateMachine(
                     // kick off UI
                     sideEffect.experience.stepContainers[sideEffect.containerIndex].presentingTrait.present()
 
-                    // wait on the RenderingStep state to flow in from the UI
+                    // wait on the RenderingStep state to flow in from the UI, return that result
                     sideEffect.completion.await()
-
-                    // note: not handling a potential failure in presentation here - how could that occur?
-
-                    // return the success for RenderingState - the resting state of machine
-                    Success(_currentState)
                 }
                 is AwaitEffect -> {
                     sideEffect.completableDeferred.await()
