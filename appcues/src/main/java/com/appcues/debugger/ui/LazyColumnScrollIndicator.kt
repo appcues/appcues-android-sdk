@@ -86,6 +86,8 @@ private class VerticalScrollIndicatorState {
         isLastItemShowing = getItemsHeightAtBottom() == 0
         isFirstItemShowing = getItemsHeightAtTop() == 0
 
+        if (lastItemHeight == 0 || firstItemHeight == 0) return
+
         scrollOffset.value = if (isLastItemShowing) {
             // when we see the last item we get the remaining scroll space and use it as base to determine
             // how much we will move the indicator
@@ -104,22 +106,23 @@ private class VerticalScrollIndicatorState {
     }
 
     fun onLazyListInfoChanged(info: LazyListLayoutInfo) {
+        totalItemsCount = info.totalItemsCount
+        viewportHeight = info.viewportSize.height
+
+        if (info.visibleItemsInfo.isEmpty()) return
+
         // store updated values first before calculating anything
         firstItemHeight = info.visibleItemsInfo.first().size
         lastItemHeight = info.visibleItemsInfo.last().size
         lastItemOffset = info.visibleItemsInfo.last().offset
-        totalItemsCount = info.totalItemsCount
-        viewportHeight = info.viewportSize.height
 
-        if (info.visibleItemsInfo.isNotEmpty()) {
-            info.visibleItemsInfo.also {
-                // store current visible items index range
-                visibleItemsRange = IntRange(it.first().index, it.last().index)
+        info.visibleItemsInfo.also {
+            // store current visible items index range
+            visibleItemsRange = IntRange(it.first().index, it.last().index)
 
-                // calculate the indicator size only once based on visible items and total items in the list
-                if ((isLastItemShowing && isFirstItemShowing.not()) || indicatorSize.value == 0) {
-                    indicatorSize.value = getIndicatorSize()
-                }
+            // calculate the indicator size only once based on visible items and total items in the list
+            if ((isLastItemShowing && isFirstItemShowing.not()) || indicatorSize.value == 0) {
+                indicatorSize.value = getIndicatorSize()
             }
         }
     }

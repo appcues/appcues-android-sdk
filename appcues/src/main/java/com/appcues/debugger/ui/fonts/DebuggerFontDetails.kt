@@ -1,4 +1,4 @@
-package com.appcues.debugger.ui.details
+package com.appcues.debugger.ui.fonts
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
@@ -27,26 +27,33 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.appcues.R
-import com.appcues.debugger.model.DebuggerEventItem
-import com.appcues.debugger.ui.getTitleString
+import com.appcues.R.drawable
+import com.appcues.R.string
+import com.appcues.debugger.model.DebuggerFontItem
 import com.appcues.debugger.ui.lazyColumnScrollIndicator
 import com.appcues.ui.theme.AppcuesColors
-import java.sql.Timestamp
 
 private val FIRST_VISIBLE_ITEM_OFFSET_THRESHOLD = 56.dp
 
 @Composable
-internal fun DebuggerEventDetails(debuggerEventItem: DebuggerEventItem?, onBackPressed: () -> Unit) {
-    if (debuggerEventItem == null) return
+internal fun DebuggerFontDetails(
+    appSpecificFonts: List<DebuggerFontItem>,
+    systemFonts: List<DebuggerFontItem>,
+    onFontTap: (DebuggerFontItem) -> Unit,
+    onBackPressed: () -> Unit,
+) {
 
     val lazyListState = rememberLazyListState()
+    val clipboard = LocalClipboardManager.current
 
     LazyColumn(
         modifier = Modifier
@@ -54,20 +61,18 @@ internal fun DebuggerEventDetails(debuggerEventItem: DebuggerEventItem?, onBackP
             .lazyColumnScrollIndicator(lazyListState),
         state = lazyListState
     ) {
-        detailsTitle()
-
-        details(debuggerEventItem)
-
-        if (debuggerEventItem.properties != null && debuggerEventItem.properties.isNotEmpty()) {
-            propertiesTitle()
-
-            properties(debuggerEventItem.properties)
+        item {
+            Spacer(modifier = Modifier.height(60.dp))
         }
 
-        if (debuggerEventItem.identityProperties != null && debuggerEventItem.identityProperties.isNotEmpty()) {
-            identityPropertiesTitle()
+        if (appSpecificFonts.any()) {
+            sectionTitle(R.string.debugger_font_details_app_specific_title)
+            fonts(appSpecificFonts, onFontTap)
+        }
 
-            properties(debuggerEventItem.identityProperties)
+        if (systemFonts.any()) {
+            sectionTitle(R.string.debugger_font_details_system_title)
+            fonts(systemFonts, onFontTap)
         }
     }
 
@@ -92,22 +97,18 @@ internal fun DebuggerEventDetails(debuggerEventItem: DebuggerEventItem?, onBackP
             contentAlignment = Alignment.Center
         ) {
             Image(
-                painter = painterResource(id = R.drawable.appcues_ic_back),
-                contentDescription = LocalContext.current.getString(R.string.debugger_back_content_description)
+                painter = painterResource(id = drawable.appcues_ic_back),
+                contentDescription = LocalContext.current.getString(string.debugger_back_content_description)
             )
         }
     }
 }
 
-private fun LazyListScope.detailsTitle() {
-    item {
-        Spacer(modifier = Modifier.height(80.dp))
-    }
-
+private fun LazyListScope.sectionTitle(resId: Int) {
     item {
         Text(
-            text = LocalContext.current.getString(R.string.debugger_event_details_title),
-            modifier = Modifier.padding(start = 40.dp, top = 20.dp, bottom = 16.dp),
+            text = LocalContext.current.getString(resId),
+            modifier = Modifier.padding(start = 20.dp, top = 20.dp, bottom = 16.dp),
             fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold,
             color = AppcuesColors.HadfieldBlue,
@@ -115,54 +116,9 @@ private fun LazyListScope.detailsTitle() {
     }
 }
 
-private fun LazyListScope.details(event: DebuggerEventItem) {
-    item {
-        val context = LocalContext.current
-
-        ListItem(
-            key = context.getString(R.string.debugger_event_details_type_title),
-            value = context.getString(event.type.getTitleString())
-        )
-
-        ListItem(
-            key = context.getString(R.string.debugger_event_details_name_title),
-            value = event.name
-        )
-
-        ListItem(
-            key = context.getString(R.string.debugger_event_details_timestamp_title),
-            value = Timestamp(event.timestamp).toString()
-        )
-    }
-}
-
-private fun LazyListScope.propertiesTitle() {
-    item {
-        Text(
-            text = LocalContext.current.getString(R.string.debugger_event_details_properties_title),
-            modifier = Modifier.padding(start = 40.dp, top = 20.dp, bottom = 16.dp),
-            fontSize = 14.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = AppcuesColors.HadfieldBlue,
-        )
-    }
-}
-
-private fun LazyListScope.identityPropertiesTitle() {
-    item {
-        Text(
-            text = LocalContext.current.getString(R.string.debugger_event_details_identity_auto_properties_title),
-            modifier = Modifier.padding(start = 40.dp, top = 20.dp, bottom = 16.dp),
-            fontSize = 14.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = AppcuesColors.HadfieldBlue,
-        )
-    }
-}
-
-private fun LazyListScope.properties(properties: List<Pair<String, Any>>) {
+private fun LazyListScope.fonts(properties: List<DebuggerFontItem>, onFontTap: (DebuggerFontItem) -> Unit) {
     items(properties.toList()) { item ->
-        ListItem(key = item.first, value = item.second.toString())
+        ListItem(item, onFontTap)
     }
 
     item {
@@ -170,31 +126,28 @@ private fun LazyListScope.properties(properties: List<Pair<String, Any>>) {
     }
 }
 
+@OptIn(ExperimentalTextApi::class)
 @Composable
-private fun LazyItemScope.ListItem(key: String, value: String) {
+private fun LazyItemScope.ListItem(debuggerFont: DebuggerFontItem, onFontTap: (DebuggerFontItem) -> Unit) {
     Row(
         modifier = Modifier
             .fillParentMaxWidth()
+            .clickable { onFontTap(debuggerFont) }
             .padding(horizontal = 20.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(
             modifier = Modifier
                 .weight(1f)
-                .padding(vertical = 8.dp, horizontal = 20.dp),
+                .padding(vertical = 10.dp, horizontal = 0.dp),
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = key,
+                text = debuggerFont.name,
                 fontSize = 16.sp,
-                fontWeight = FontWeight.Normal,
+                fontWeight = debuggerFont.fontWeight,
+                fontFamily = debuggerFont.fontFamily,
                 color = AppcuesColors.Infinity
-            )
-            Text(
-                text = value,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Normal,
-                color = AppcuesColors.OceanNight
             )
         }
     }

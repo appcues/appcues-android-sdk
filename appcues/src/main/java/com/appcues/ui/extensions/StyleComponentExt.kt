@@ -1,6 +1,7 @@
 package com.appcues.ui.extensions
 
 import android.content.Context
+import android.graphics.Typeface
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
@@ -14,15 +15,6 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.appcues.data.model.styling.ComponentStyle
-import com.appcues.data.model.styling.ComponentStyle.ComponentFontWeight.BLACK
-import com.appcues.data.model.styling.ComponentStyle.ComponentFontWeight.BOLD
-import com.appcues.data.model.styling.ComponentStyle.ComponentFontWeight.HEAVY
-import com.appcues.data.model.styling.ComponentStyle.ComponentFontWeight.LIGHT
-import com.appcues.data.model.styling.ComponentStyle.ComponentFontWeight.MEDIUM
-import com.appcues.data.model.styling.ComponentStyle.ComponentFontWeight.REGULAR
-import com.appcues.data.model.styling.ComponentStyle.ComponentFontWeight.SEMI_BOLD
-import com.appcues.data.model.styling.ComponentStyle.ComponentFontWeight.THIN
-import com.appcues.data.model.styling.ComponentStyle.ComponentFontWeight.ULTRA_LIGHT
 import com.appcues.data.model.styling.ComponentStyle.ComponentHorizontalAlignment
 import com.appcues.data.model.styling.ComponentStyle.ComponentVerticalAlignment
 
@@ -51,27 +43,74 @@ internal fun ComponentStyle.getTextAlignment(): TextAlign? {
 
 internal fun ComponentStyle.getFontFamily(context: Context): FontFamily? {
     if (fontName != null) {
-        val fontId = context.resources.getIdentifier(fontName, "font", context.packageName)
-        if (fontId != 0) {
-            return FontFamily(Font(fontId))
+        if (fontName.lowercase().startsWith("system ")) {
+            // handle system fonts
+            // convention is name of: "System {FamilyName} {Weight}"
+            val tokens = fontName.split(" ")
+            if (tokens.count() > 1) {
+                val systemFontFamily = tokens[1]
+                return FontFamily.get(systemFontFamily)
+            }
+        } else {
+            // custom fonts
+
+            // it might be a font in resources
+            val fontId = context.resources.getIdentifier(fontName, "font", context.packageName)
+            if (fontId != 0) {
+                return FontFamily(Font(fontId))
+            }
+
+            // or it might be a font from assets
+            val assetName = "${fontName}.ttf"
+            val fontsInAssets = context.assets.list("fonts")
+            if (fontsInAssets != null && fontsInAssets.contains(assetName)) {
+                val typeface = Typeface.createFromAsset(context.assets, "fonts/${fontName}.ttf")
+                if (typeface != null) {
+                    return FontFamily(typeface)
+                }
+            }
         }
     }
     return null
 }
 
-internal fun ComponentStyle.getFontWeight(): FontWeight? {
-    return when (fontWeight) {
-        ULTRA_LIGHT -> FontWeight.ExtraLight
-        THIN -> FontWeight.Thin
-        LIGHT -> FontWeight.Light
-        REGULAR -> FontWeight.Normal
-        MEDIUM -> FontWeight.Medium
-        SEMI_BOLD -> FontWeight.SemiBold
-        BOLD -> FontWeight.Bold
-        HEAVY -> FontWeight.ExtraBold
-        BLACK -> FontWeight.Black
-        null -> null
+internal fun FontFamily.Companion.get(name: String): FontFamily {
+    return when (name.lowercase()) {
+        "serif" -> Serif
+        "sansserif" -> SansSerif
+        "monospace" -> Monospace
+        "cursive" -> Cursive
+        else -> Default
     }
+}
+
+internal fun FontWeight.Companion.get(name: String): FontWeight {
+    return when (name.lowercase()) {
+        "thin" -> Thin
+        "extralight" -> ExtraLight
+        "light" -> Light
+        "medium" -> Medium
+        "semibold" -> SemiBold
+        "bold" -> Bold
+        "extrabold" -> ExtraBold
+        "black" -> Black
+        else -> Normal
+    }
+}
+
+internal fun ComponentStyle.getFontWeight(): FontWeight? {
+    // font weight only supported on system fonts with naming convention
+    // convention is name of: "System {FamilyName} {Weight}"
+    if (fontName != null) {
+        if (fontName.lowercase().startsWith("system ")) {
+            val tokens = fontName.split(" ")
+            if (tokens.count() > 2) {
+                val systemFontWeight = tokens[2]
+                return FontWeight.get(systemFontWeight)
+            }
+        }
+    }
+    return null
 }
 
 internal fun ComponentStyle.getVerticalAlignment(): Alignment.Vertical {

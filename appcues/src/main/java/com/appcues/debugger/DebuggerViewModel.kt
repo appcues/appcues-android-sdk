@@ -11,6 +11,7 @@ import com.appcues.debugger.DebuggerViewModel.UIState.Dragging
 import com.appcues.debugger.DebuggerViewModel.UIState.Expanded
 import com.appcues.debugger.DebuggerViewModel.UIState.Idle
 import com.appcues.debugger.model.DebuggerEventItem
+import com.appcues.debugger.model.DebuggerFontItem
 import com.appcues.debugger.model.DebuggerStatusItem
 import com.appcues.debugger.model.EventType
 import com.appcues.debugger.model.TapActionType
@@ -32,6 +33,8 @@ internal class DebuggerViewModel(
     private val debuggerStatusManager by inject<DebuggerStatusManager>()
 
     private val debuggerRecentEventsManager by inject<DebuggerRecentEventsManager>()
+
+    private val debuggerFontManager by inject<DebuggerFontManager>()
 
     sealed class UIState {
         object Creating : UIState()
@@ -61,6 +64,12 @@ internal class DebuggerViewModel(
 
     val currentFilter: StateFlow<EventType?>
         get() = _currentFilter
+
+    val appSpecificFonts: List<DebuggerFontItem>
+        get() = debuggerFontManager.getAppSpecificFonts()
+
+    val systemFonts: List<DebuggerFontItem>
+        get() = debuggerFontManager.getSystemFonts()
 
     init {
         with(viewModelScope) {

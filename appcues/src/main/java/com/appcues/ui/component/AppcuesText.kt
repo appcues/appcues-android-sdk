@@ -14,7 +14,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import com.appcues.data.model.ExperiencePrimitive.TextPrimitive
 import com.appcues.data.model.styling.ComponentColor
-import com.appcues.data.model.styling.ComponentStyle.ComponentFontWeight.BLACK
 import com.appcues.data.model.styling.ComponentStyle.ComponentHorizontalAlignment.TRAILING
 import com.appcues.ui.LocalAppcuesActionDelegate
 import com.appcues.ui.LocalAppcuesActions
@@ -189,7 +188,6 @@ internal fun PreviewTestSystemFont() {
     val component = textComponent.copy(
         style = textComponent.style.copy(
             width = 180,
-            fontWeight = BLACK,
             fontSize = 15,
             foregroundColor = ComponentColor(light = 0xFFF5F7FA, dark = 0xFFF5F7FA),
             backgroundColor = ComponentColor(light = 0xFFFF5290, dark = 0xFFFF5290)

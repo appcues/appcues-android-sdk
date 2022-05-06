@@ -27,6 +27,9 @@
     <string name="debugger_status_identity_loading_title">Identifying User</string>
     <string name="debugger_status_identity_loading_line1">waiting for any event…</string>
 
+    <string name="debugger_info_title">Info</string>
+    <string name="debugger_info_fonts">Available Fonts</string>
+
     <string name="debugger_recent_events_title">Recent events</string>
     <string name="debugger_recent_events_item_icon_content_description">Event icon</string>
     <string name="debugger_recent_events_timestamp_icon_content_description">Timestamp icon</string>
@@ -58,12 +61,16 @@
     <string name="debugger_event_type_experience_dismissed_title">Experience Dismissed</string>
     <string name="debugger_event_type_experience_error_title">Experience Error</string>
 
+    <string name="debugger_back_content_description">Back</string>
     <string name="debugger_event_details_title">Event details</string>
     <string name="debugger_event_details_properties_title">Properties</string>
     <string name="debugger_event_details_identity_auto_properties_title">Identity auto-properties</string>
-    <string name="debugger_event_details_back_content_description">Back</string>
     <string name="debugger_event_details_type_title">Type</string>
     <string name="debugger_event_details_name_title">Name</string>
     <string name="debugger_event_details_timestamp_title">Timestamp</string>
+
+    <string name="debugger_font_details_app_specific_title">App-Specific Fonts</string>
+    <string name="debugger_font_details_system_title">System Fonts</string>
+    <string name="debugger_font_details_clipboard_message">"Copied to clipboard"</string>
 
 </resources>

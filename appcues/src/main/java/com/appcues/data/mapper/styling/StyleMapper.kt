@@ -34,7 +34,6 @@ internal class StyleMapper(
         borderWidth = from.borderWidth,
         fontName = from.fontName,
         fontSize = from.fontSize,
-        fontWeight = styleFontWeightMapper.map(from.fontWeight),
         letterSpacing = from.letterSpacing,
         lineHeight = from.lineHeight,
         textAlignment = from.textAlignment.toComponentHorizontalAlignment(),

@@ -23,7 +23,6 @@ internal data class ComponentStyle(
     // Text related properties
     val fontName: String? = null,
     val fontSize: Int? = null,
-    val fontWeight: ComponentFontWeight? = null,
     val letterSpacing: Int? = null,
     val lineHeight: Int? = null,
     val textAlignment: ComponentHorizontalAlignment? = null,
