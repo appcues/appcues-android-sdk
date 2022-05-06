@@ -165,10 +165,13 @@ private fun transitionsToBeginningStep(
         errorTransition(experience, currentStepIndex, "StepContainer for nextStepIndex $nextStepIndex not found")
     }
 } else {
-    // else we just move to rendering step
+    // else we just transition to BeginningStep, and the UI will invoke the continuation
+    // once render is complete
+    val completion: CompletableDeferred<ResultOf<State, Error>> = CompletableDeferred()
     Transition(
-        BeginningStep(experience, nextStepIndex, false, null),
-        ContinuationEffect(RenderStep)
+        BeginningStep(experience, nextStepIndex, false) {
+            completion.complete(continuation())
+        }
     )
 }
 
