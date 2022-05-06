@@ -2,10 +2,12 @@ package com.appcues.trait.appcues
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -58,8 +60,16 @@ internal class CarouselTrait(
 
         val horizontalPagerSize = remember { HorizontalPagerSize(pagerState) }
 
+        Spacer(
+            modifier = Modifier
+                .matchParentSize()
+                .onSizeChanged { horizontalPagerSize.onContainerFirstSized(it.height) }
+        )
+
         HorizontalPager(
-            modifier = Modifier.size(with(LocalDensity.current) { horizontalPagerSize.pagerContainerSize.toDp() }),
+            modifier = Modifier
+                // changes the size based on HorizontalPagerSize logic
+                .size(with(LocalDensity.current) { horizontalPagerSize.pagerContainerSize.toDp() }),
             count = containerPages.pageCount,
             state = pagerState,
             verticalAlignment = Alignment.Top
@@ -78,6 +88,8 @@ internal class CarouselTrait(
 
         val heightMap = mutableStateMapOf<Int, Int>()
 
+        val containerSize = mutableStateOf(0f)
+
         val pagerContainerSize
             get() = run {
                 val currentPageSize = heightMap[pagerState.currentPage] ?: 0
@@ -92,12 +104,28 @@ internal class CarouselTrait(
                 else
                     pagerState.currentPageOffset
 
-                (nextPageSize - currentPageSize) * offsetNormalized + currentPageSize
+                val pageSize = (nextPageSize - currentPageSize) * offsetNormalized + currentPageSize
+
+                // if pageSize is nan or zero we return it so does not restrict
+                // the size to whatever value is in containerSize
+                if (pageSize.isNaN() || pageSize == 0f) pageSize
+                // when we do know whats the size of the page and the container size then we
+                // use whatever is bigger value
+                else maxOf(pageSize, containerSize.value)
             }
 
         fun onHeightChanged(index: Int, height: Int) {
             if (height != 0 && heightMap[index] ?: 0 == 0) {
                 heightMap[index] = height
+            }
+        }
+
+        fun onContainerFirstSized(height: Int) {
+            // set the content Size only once to get whatever size is coming
+            // from parent Box. this is good because if no specific size is
+            // specified we will probably get a very low height.
+            if (containerSize.value == 0f) {
+                containerSize.value = height.toFloat()
             }
         }
     }
