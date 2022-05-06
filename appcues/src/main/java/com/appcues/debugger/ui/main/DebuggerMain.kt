@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.sp
 import com.appcues.R
 import com.appcues.debugger.DebuggerViewModel
 import com.appcues.debugger.model.DebuggerEventItem
+import com.appcues.debugger.model.DebuggerInfoItem
 import com.appcues.debugger.model.DebuggerStatusItem
 import com.appcues.debugger.model.EventType
 import com.appcues.debugger.model.StatusType
@@ -55,7 +56,11 @@ import com.appcues.ui.theme.AppcuesColors
 import kotlinx.coroutines.delay
 
 @Composable
-internal fun DebuggerMain(debuggerViewModel: DebuggerViewModel, onEventClick: (DebuggerEventItem) -> Unit) {
+internal fun DebuggerMain(
+    debuggerViewModel: DebuggerViewModel,
+    onEventClick: (DebuggerEventItem) -> Unit,
+    onFontsClick: () -> Unit,
+) {
     val statusInfo = debuggerViewModel.statusInfo.collectAsState()
     val recentEvents = debuggerViewModel.events.collectAsState()
     val isFilterOn = debuggerViewModel.currentFilter.collectAsState()
@@ -71,6 +76,10 @@ internal fun DebuggerMain(debuggerViewModel: DebuggerViewModel, onEventClick: (D
         statusItemsHeader()
 
         statusItemsCompose(statusInfo.value) { debuggerViewModel.onStatusTapAction(it) }
+
+        infoHeader()
+
+        infoItemsCompose { onFontsClick() }
 
         recentEventsItemsHeader(isFilterOn.value) { debuggerViewModel.onApplyEventFilter(it) }
 
@@ -115,6 +124,43 @@ private fun LazyListScope.statusItemsCompose(list: List<DebuggerStatusItem>, onT
                 StatusItemContent(rowScope = this@Row)
 
                 RefreshIcon()
+            }
+        }
+
+        ListItemDivider()
+    }
+}
+
+private fun LazyListScope.infoHeader() {
+    item {
+        Box(
+            modifier = Modifier
+                .fillParentMaxWidth()
+                .padding(top = 24.dp),
+            contentAlignment = Alignment.CenterStart
+        ) {
+            Text(
+                text = LocalContext.current.getString(R.string.debugger_info_title),
+                modifier = Modifier.padding(start = 40.dp),
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = AppcuesColors.HadfieldBlue,
+            )
+        }
+    }
+}
+
+private fun LazyListScope.infoItemsCompose(onFontTap: () -> Unit) {
+    item {
+        Row(
+            modifier = Modifier
+                .fillParentMaxWidth()
+                .clickable { onFontTap() }
+                .padding(horizontal = 20.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            with(DebuggerInfoItem(LocalContext.current.getString(R.string.debugger_info_fonts))) {
+                InfoItemContent(rowScope = this@Row)
             }
         }
 

@@ -1,5 +1,6 @@
 package com.appcues.debugger.ui
 
+import android.widget.Toast
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
@@ -26,12 +27,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraphBuilder
+import com.appcues.R
 import com.appcues.debugger.DebuggerViewModel
 import com.appcues.debugger.model.DebuggerEventItem
 import com.appcues.debugger.ui.details.DebuggerEventDetails
+import com.appcues.debugger.ui.fonts.DebuggerFontDetails
 import com.appcues.debugger.ui.main.DebuggerMain
 import com.appcues.ui.theme.AppcuesColors
 import com.google.accompanist.navigation.animation.AnimatedNavHost
@@ -45,6 +51,9 @@ private const val SLIDE_TRANSITION_MILLIS = 250
 internal fun BoxScope.DebuggerPanel(debuggerState: MutableDebuggerState, debuggerViewModel: DebuggerViewModel) {
     // don't show if current debugger is paused
     if (debuggerState.isPaused.value) return
+
+    val clipboard = LocalClipboardManager.current
+    val context = LocalContext.current
 
     AnimatedVisibility(
         visibleState = debuggerState.isExpanded,
@@ -78,23 +87,48 @@ internal fun BoxScope.DebuggerPanel(debuggerState: MutableDebuggerState, debugge
             val selectedEvent = remember { mutableStateOf<DebuggerEventItem?>(null) }
             val mainPage = "main"
             val eventDetailsPage = "event_details"
+            val fontDetailsPage = "font_details"
             AnimatedNavHost(navController = navController, startDestination = mainPage) {
                 mainComposable(
                     pageName = mainPage,
                     eventDetailsPage = eventDetailsPage
                 ) {
-                    DebuggerMain(debuggerViewModel) {
-                        selectedEvent.value = it
-                        navController.navigate(eventDetailsPage)
-                    }
+                    DebuggerMain(
+                        debuggerViewModel = debuggerViewModel,
+                        onEventClick = {
+                            selectedEvent.value = it
+                            navController.navigate(eventDetailsPage)
+                        },
+                        onFontsClick = {
+                            navController.navigate(fontDetailsPage)
+                        },
+                    )
                 }
-                eventDetailsComposable(
+                detailPageComposable(
                     pageName = eventDetailsPage,
                     mainPage = mainPage
                 ) {
                     DebuggerEventDetails(selectedEvent.value) {
                         navController.popBackStack()
                     }
+                }
+                detailPageComposable(
+                    pageName = fontDetailsPage,
+                    mainPage = mainPage
+                ) {
+                    DebuggerFontDetails(
+                        appSpecificFonts = debuggerViewModel.appSpecificFonts,
+                        systemFonts = debuggerViewModel.systemFonts,
+                        onFontTap = {
+                            clipboard.setText(AnnotatedString(it.name))
+                            val text = context.getString(R.string.debugger_font_details_clipboard_message)
+                            val toast = Toast.makeText(context, text, Toast.LENGTH_SHORT)
+                            toast.show()
+                        },
+                        onBackPressed = {
+                            navController.popBackStack()
+                        }
+                    )
                 }
             }
         }
@@ -137,7 +171,7 @@ private fun NavGraphBuilder.mainComposable(
 }
 
 @OptIn(ExperimentalAnimationApi::class)
-private fun NavGraphBuilder.eventDetailsComposable(
+private fun NavGraphBuilder.detailPageComposable(
     pageName: String,
     mainPage: String,
     content: @Composable AnimatedVisibilityScope.(NavBackStackEntry) -> Unit

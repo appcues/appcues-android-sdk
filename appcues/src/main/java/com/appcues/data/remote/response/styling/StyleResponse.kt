@@ -23,7 +23,6 @@ internal data class StyleResponse(
     val borderWidth: Int? = null,
     val fontName: String? = null,
     val fontSize: Int? = null,
-    val fontWeight: String? = null,
     val letterSpacing: Int? = null,
     val lineHeight: Int? = null,
     val textAlignment: String? = null,
