@@ -168,7 +168,7 @@ private fun transitionsToBeginningStep(
     // else we just move to rendering step
     Transition(
         BeginningStep(experience, nextStepIndex, false, null),
-        ContinuationEffect(StartStep(nextStepReference))
+        ContinuationEffect(RenderStep)
     )
 }
 
