@@ -12,7 +12,7 @@ internal sealed class State {
         val isFirst: Boolean,
         // this is how the UI communicates success/failure in presentation
         // back to the state machine
-        val presentationComplete: (suspend () -> Unit)?,
+        val presentationComplete: (suspend () -> Unit),
     ) : State()
     data class RenderingStep(val experience: Experience, val flatStepIndex: Int, val isFirst: Boolean) : State()
     data class EndingStep(
@@ -20,7 +20,9 @@ internal sealed class State {
         val flatStepIndex: Int,
         // this works as a ContinuationSideEffect that AppcuesViewModel will
         // send to the state machine once it's done dismissing the current container
-        val dismissAndContinue: (suspend () -> Unit)?
+        // the presence of a non-null value is what tells the UI to dismiss the current container,
+        // and it should be set to null if a dismiss is not requested (i.e. moving to next step in same container)
+        val dismissAndContinue: (suspend () -> Unit)?,
     ) : State()
     data class EndingExperience(val experience: Experience, val flatStepIndex: Int, val markComplete: Boolean) : State()
 }

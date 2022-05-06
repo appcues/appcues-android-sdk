@@ -53,7 +53,7 @@ internal class AppcuesViewModel(
                         result.toRenderingState()?.let {
                             _uiState.value = it
                         }
-                        result.presentationComplete?.invoke()
+                        result.presentationComplete.invoke()
                     }
                     is EndingStep -> {
                         // dismiss will trigger exit animations and finish activity
