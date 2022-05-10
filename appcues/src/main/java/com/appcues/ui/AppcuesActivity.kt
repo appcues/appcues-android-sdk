@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -121,7 +122,7 @@ internal class AppcuesActivity : AppCompatActivity() {
                 }
             }
             // create wrapper
-            contentWrappingTrait.WrapContent {
+            contentWrappingTrait.WrapContent { hasFixedHeight, contentPadding ->
                 Box(
                     contentAlignment = Alignment.TopCenter
                 ) {
@@ -135,19 +136,25 @@ internal class AppcuesActivity : AppCompatActivity() {
                                 with(steps[index]) {
                                     CompositionLocalProvider(LocalAppcuesActions provides actions) {
                                         // used to get the padding values from step decorating trait and apply to the Column
-                                        val rememberPadding = rememberStepDecoratingPadding(LocalDensity.current)
+                                        val density = LocalDensity.current
+                                        val stepDecoratingPadding = remember(this) { StepDecoratingPadding(density) }
                                         // Our page content
                                         Column(
                                             horizontalAlignment = Alignment.CenterHorizontally,
                                             modifier = Modifier
+                                                // if WrappingContent has a fixed height we fill height
+                                                // else we will scale according to content
+                                                .then(if (hasFixedHeight) Modifier.fillMaxHeight() else Modifier)
                                                 .verticalScroll(rememberScrollState())
-                                                .padding(paddingValues = rememberPadding.value.toPaddingValues())
+                                                // if we have contentPadding to apply from the WrapContent trait then we apply here
+                                                .then(if (contentPadding != null) Modifier.padding(contentPadding) else Modifier)
+                                                .padding(paddingValues = stepDecoratingPadding.paddingValues.value)
                                         ) {
                                             content.Compose()
                                         }
 
                                         // apply step decorating traits
-                                        traits.forEach { with(it) { Overlay(rememberPadding.value) } }
+                                        traits.forEach { with(it) { Overlay(stepDecoratingPadding) } }
                                     }
                                 }
                             }

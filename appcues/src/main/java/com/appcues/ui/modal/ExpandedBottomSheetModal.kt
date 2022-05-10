@@ -8,6 +8,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,10 +21,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.ui.AppcuesTraitAnimatedVisibility
+import com.appcues.ui.extensions.getPaddings
 import com.appcues.ui.extensions.modalStyle
 
 @Composable
-internal fun ExpandedBottomSheetModal(style: ComponentStyle?, content: @Composable () -> Unit) {
+internal fun ExpandedBottomSheetModal(
+    style: ComponentStyle?,
+    content: @Composable (hasFixedHeight: Boolean, contentPadding: PaddingValues?) -> Unit
+) {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.BottomCenter
@@ -44,7 +49,7 @@ internal fun ExpandedBottomSheetModal(style: ComponentStyle?, content: @Composab
                         isDark = isSystemInDarkTheme(),
                         modifier = Modifier.bottomSheetCorner(style),
                     ),
-                content = content,
+                content = { content(true, style?.getPaddings()) },
             )
         }
     }

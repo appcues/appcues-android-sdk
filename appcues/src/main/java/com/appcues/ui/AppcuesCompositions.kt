@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -100,9 +101,6 @@ fun AppcuesTraitAnimatedVisibility(
     )
 }
 
-@Composable
-internal fun rememberStepDecoratingPadding(density: Density) = remember { mutableStateOf(StepDecoratingPadding(density)) }
-
 class StepDecoratingPadding(private val density: Density) {
 
     private val topPaddingPx = mutableStateOf(0)
@@ -134,8 +132,8 @@ class StepDecoratingPadding(private val density: Density) {
         }
     }
 
-    internal fun toPaddingValues(): PaddingValues {
-        return with(density) {
+    val paddingValues = derivedStateOf {
+        with(density) {
             PaddingValues(
                 start = startPaddingPx.value.toDp(),
                 top = topPaddingPx.value.toDp(),

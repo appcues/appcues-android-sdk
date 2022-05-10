@@ -68,7 +68,6 @@ internal fun Modifier.modalStyle(
         .then(modifier)
         .styleBorder(style, isDark)
         .styleBackground(style, isDark)
-        .padding(style.getPaddings())
     else Modifier
 )
 

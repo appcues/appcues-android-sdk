@@ -11,16 +11,21 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.ui.AppcuesTraitAnimatedVisibility
+import com.appcues.ui.extensions.getPaddings
 import com.appcues.ui.extensions.modalStyle
 
 @Composable
-internal fun FullScreenModal(style: ComponentStyle?, content: @Composable () -> Unit) {
+internal fun FullScreenModal(
+    style: ComponentStyle?,
+    content: @Composable (hasFixedHeight: Boolean, contentPadding: PaddingValues?) -> Unit
+) {
     AppcuesTraitAnimatedVisibility(
         enter = enterTransition(),
         exit = exitTransition(),
@@ -34,7 +39,7 @@ internal fun FullScreenModal(style: ComponentStyle?, content: @Composable () -> 
                     style = style,
                     isDark = isSystemInDarkTheme()
                 ),
-            content = content,
+            content = { content(true, style?.getPaddings()) },
         )
     }
 }
