@@ -1,5 +1,6 @@
 package com.appcues.trait.appcues
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.getConfigOrDefault
@@ -25,7 +26,7 @@ internal class ModalTrait(
     private val style = config.getConfigStyle("style")
 
     @Composable
-    override fun WrapContent(content: @Composable () -> Unit) {
+    override fun WrapContent(content: @Composable (hasFixedHeight: Boolean, contentPadding: PaddingValues?) -> Unit) {
         when (presentationStyle) {
             "dialog" -> DialogModal(style, content)
             "full" -> FullScreenModal(style, content)
