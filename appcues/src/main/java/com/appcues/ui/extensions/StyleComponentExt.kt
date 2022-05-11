@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.sp
 import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.data.model.styling.ComponentStyle.ComponentHorizontalAlignment
 import com.appcues.data.model.styling.ComponentStyle.ComponentVerticalAlignment
+import java.io.File
 
 internal fun ComponentStyle.getMargins() = PaddingValues(
     start = marginLeading.dp,
@@ -42,15 +43,16 @@ internal fun ComponentStyle.getTextAlignment(): TextAlign? {
 }
 
 internal fun ComponentStyle.getFontFamily(context: Context): FontFamily? {
-    return FontFamily.getSystemFont(fontName)
+    return FontFamily.getSystemFontFamily(fontName)
         ?: FontFamily.getFontResource(context, fontName)
         ?: FontFamily.getFontAsset(context, fontName)
+        ?: FontFamily.getSystemFont(fontName)
 }
 
-internal fun FontFamily.Companion.getSystemFont(fontName: String?): FontFamily? {
+// handle system fonts available in Compose with variable weight
+// convention is name of: "System {FamilyName} {Weight}"
+private fun FontFamily.Companion.getSystemFontFamily(fontName: String?): FontFamily? {
     if (fontName != null && fontName.lowercase().startsWith("system ")) {
-        // handle system fonts
-        // convention is name of: "System {FamilyName} {Weight}"
         val tokens = fontName.split(" ")
         if (tokens.count() > 1) {
             val systemFontFamily = tokens[1]
@@ -60,7 +62,8 @@ internal fun FontFamily.Companion.getSystemFont(fontName: String?): FontFamily? 
     return null
 }
 
-internal fun FontFamily.Companion.getFontResource(context: Context, fontName: String?): FontFamily? {
+// try to load a custom font from a resource in the host application
+private fun FontFamily.Companion.getFontResource(context: Context, fontName: String?): FontFamily? {
     if (fontName != null) {
         val fontId = context.resources.getIdentifier(fontName, "font", context.packageName)
         if (fontId != 0) {
@@ -70,12 +73,27 @@ internal fun FontFamily.Companion.getFontResource(context: Context, fontName: St
     return null
 }
 
-internal fun FontFamily.Companion.getFontAsset(context: Context, fontName: String?): FontFamily? {
+// try to load a custom font from an embedded asset in the host application
+private fun FontFamily.Companion.getFontAsset(context: Context, fontName: String?): FontFamily? {
     if (fontName != null) {
         val assetName = "$fontName.ttf"
         val fontsInAssets = context.assets.list("fonts")
         if (fontsInAssets != null && fontsInAssets.contains(assetName)) {
             val typeface = Typeface.createFromAsset(context.assets, "fonts/$fontName.ttf")
+            if (typeface != null) {
+                return FontFamily(typeface)
+            }
+        }
+    }
+    return null
+}
+
+// try to load an individual font file from the Android system path
+private fun FontFamily.Companion.getSystemFont(fontName: String?): FontFamily? {
+    if (fontName != null) {
+        val file = File("/system/fonts/$fontName.ttf")
+        if (file.exists()) {
+            val typeface = Typeface.createFromFile(file)
             if (typeface != null) {
                 return FontFamily(typeface)
             }

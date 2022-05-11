@@ -9,6 +9,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.Typeface
 import com.appcues.debugger.model.DebuggerFontItem
 import com.appcues.logging.Logcues
+import java.io.File
 import java.io.IOException
 
 internal class DebuggerFontManager(
@@ -96,5 +97,20 @@ internal class DebuggerFontManager(
         addSystemFont("Cursive", FontFamily.Cursive)
 
         return debugFonts
+    }
+
+    fun getAllFonts(): List<DebuggerFontItem> {
+        val debugFonts = mutableListOf<DebuggerFontItem>()
+
+        File("/system/fonts/").listFiles()
+            ?.filter { it.name.endsWith(".ttf") }
+            ?.forEach {
+                val name = it.name.subSequence(0, it.name.lastIndexOf(".ttf")).toString()
+                val typeface = android.graphics.Typeface.createFromFile(it)
+                val fontFamily = FontFamily(typeface)
+                debugFonts.add(DebuggerFontItem(name, fontFamily, FontWeight.Normal))
+            }
+
+        return debugFonts.sortedBy { it.name }
     }
 }

@@ -47,6 +47,7 @@ private val FIRST_VISIBLE_ITEM_OFFSET_THRESHOLD = 56.dp
 internal fun DebuggerFontDetails(
     appSpecificFonts: List<DebuggerFontItem>,
     systemFonts: List<DebuggerFontItem>,
+    allFonts: List<DebuggerFontItem>,
     onFontTap: (DebuggerFontItem) -> Unit,
     onBackPressed: () -> Unit,
 ) {
@@ -71,6 +72,11 @@ internal fun DebuggerFontDetails(
         if (systemFonts.any()) {
             sectionTitle(R.string.debugger_font_details_system_title)
             fonts(systemFonts, onFontTap)
+        }
+
+        if (allFonts.any()) {
+            sectionTitle(R.string.debugger_font_details_all_title)
+            fonts(allFonts, onFontTap)
         }
     }
 

@@ -127,6 +127,7 @@ private fun BoxScope.DebuggerPanelPages(debuggerViewModel: DebuggerViewModel) {
             DebuggerFontDetails(
                 appSpecificFonts = debuggerViewModel.appSpecificFonts,
                 systemFonts = debuggerViewModel.systemFonts,
+                allFonts = debuggerViewModel.allFonts,
                 onFontTap = {
                     clipboard.setText(AnnotatedString(it.name))
                     Toast.makeText(
