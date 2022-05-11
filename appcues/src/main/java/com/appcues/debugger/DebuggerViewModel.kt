@@ -71,6 +71,9 @@ internal class DebuggerViewModel(
     val systemFonts: List<DebuggerFontItem>
         get() = debuggerFontManager.getSystemFonts()
 
+    val allFonts: List<DebuggerFontItem>
+        get() = debuggerFontManager.getAllFonts()
+
     init {
         with(viewModelScope) {
             launch {

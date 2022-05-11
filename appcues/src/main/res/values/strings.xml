@@ -71,6 +71,7 @@
 
     <string name="debugger_font_details_app_specific_title">App-Specific Fonts</string>
     <string name="debugger_font_details_system_title">System Fonts</string>
+    <string name="debugger_font_details_all_title">All Fonts</string>
     <string name="debugger_font_details_clipboard_message">"Copied to clipboard"</string>
 
 </resources>
