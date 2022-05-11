@@ -22,7 +22,7 @@ internal object DebuggerKoin : KoinScopePlugin {
         }
 
         scoped {
-            DebuggerFontManager(context = get())
+            DebuggerFontManager(context = get(), logcues = get())
         }
     }
 }

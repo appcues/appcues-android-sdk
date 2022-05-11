@@ -1,15 +1,19 @@
 package com.appcues.debugger
 
 import android.content.Context
+import android.content.res.Resources.NotFoundException
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.Typeface
 import com.appcues.debugger.model.DebuggerFontItem
+import com.appcues.logging.Logcues
+import java.io.IOException
 
 internal class DebuggerFontManager(
     private val context: Context,
+    private val logcues: Logcues,
 ) {
 
     private val weights = mapOf(
@@ -27,7 +31,12 @@ internal class DebuggerFontManager(
     fun getAppSpecificFonts(): List<DebuggerFontItem> {
 
         val debugFonts = mutableListOf<DebuggerFontItem>()
+        addFontResources(debugFonts)
+        addFontAssets(debugFonts)
+        return debugFonts.sortedBy { it.name }
+    }
 
+    private fun addFontResources(debugFonts: MutableList<DebuggerFontItem>) {
         // for API 26+ we can attempt to read any fonts from app Resources using
         // reflection on the app.package.name.R$font class
         if (VERSION.SDK_INT >= VERSION_CODES.O) {
@@ -41,30 +50,34 @@ internal class DebuggerFontManager(
                     val fontFamily = FontFamily(Typeface(typeface))
                     debugFonts.add(DebuggerFontItem(fontName, fontFamily, FontWeight.Normal))
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
+            } catch (ex: ClassNotFoundException) {
+                logcues.error(ex)
+            } catch (ex: NotFoundException) {
+                logcues.error(ex)
+            } catch (ex: IllegalAccessException) {
+                logcues.error(ex)
+            } catch (ex: IllegalArgumentException) {
+                logcues.error(ex)
             }
         }
+    }
 
+    private fun addFontAssets(debugFonts: MutableList<DebuggerFontItem>) {
         // also look for any fonts included by the app in /assets/fonts
         try {
-            val fontsInAssets = context.assets.list("fonts")
-            if (fontsInAssets != null) {
-                for (assetItem in fontsInAssets) {
-                    if (assetItem.endsWith(".ttf")) {
-                        val name = assetItem.subSequence(0, assetItem.lastIndexOf(".ttf")).toString()
-                        val typeface: android.graphics.Typeface =
-                            android.graphics.Typeface.createFromAsset(context.assets, "fonts/$assetItem")
-                        val fontFamily = FontFamily(Typeface(typeface))
-                        debugFonts.add(DebuggerFontItem(name, fontFamily, FontWeight.Normal))
-                    }
+            context.assets.list("fonts")
+                ?.filter {
+                    it.endsWith(".ttf")
+                }?.forEach {
+                    val name = it.subSequence(0, it.lastIndexOf(".ttf")).toString()
+                    val typeface: android.graphics.Typeface =
+                        android.graphics.Typeface.createFromAsset(context.assets, "fonts/$it")
+                    val fontFamily = FontFamily(Typeface(typeface))
+                    debugFonts.add(DebuggerFontItem(name, fontFamily, FontWeight.Normal))
                 }
-            }
-        } catch(e: Exception) {
-            e.printStackTrace()
+        } catch (ex: IOException) {
+            logcues.error(ex)
         }
-
-        return debugFonts.sortedBy { it.name }
     }
 
     fun getSystemFonts(): List<DebuggerFontItem> {
@@ -84,6 +97,4 @@ internal class DebuggerFontManager(
 
         return debugFonts
     }
-
-
 }

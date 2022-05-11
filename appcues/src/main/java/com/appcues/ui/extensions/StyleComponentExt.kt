@@ -42,32 +42,42 @@ internal fun ComponentStyle.getTextAlignment(): TextAlign? {
 }
 
 internal fun ComponentStyle.getFontFamily(context: Context): FontFamily? {
+    return FontFamily.getSystemFont(fontName)
+        ?: FontFamily.getFontResource(context, fontName)
+        ?: FontFamily.getFontAsset(context, fontName)
+}
+
+internal fun FontFamily.Companion.getSystemFont(fontName: String?): FontFamily? {
+    if (fontName != null && fontName.lowercase().startsWith("system ")) {
+        // handle system fonts
+        // convention is name of: "System {FamilyName} {Weight}"
+        val tokens = fontName.split(" ")
+        if (tokens.count() > 1) {
+            val systemFontFamily = tokens[1]
+            return FontFamily.get(systemFontFamily)
+        }
+    }
+    return null
+}
+
+internal fun FontFamily.Companion.getFontResource(context: Context, fontName: String?): FontFamily? {
     if (fontName != null) {
-        if (fontName.lowercase().startsWith("system ")) {
-            // handle system fonts
-            // convention is name of: "System {FamilyName} {Weight}"
-            val tokens = fontName.split(" ")
-            if (tokens.count() > 1) {
-                val systemFontFamily = tokens[1]
-                return FontFamily.get(systemFontFamily)
-            }
-        } else {
-            // custom fonts
+        val fontId = context.resources.getIdentifier(fontName, "font", context.packageName)
+        if (fontId != 0) {
+            return FontFamily(Font(fontId))
+        }
+    }
+    return null
+}
 
-            // it might be a font in resources
-            val fontId = context.resources.getIdentifier(fontName, "font", context.packageName)
-            if (fontId != 0) {
-                return FontFamily(Font(fontId))
-            }
-
-            // or it might be a font from assets
-            val assetName = "${fontName}.ttf"
-            val fontsInAssets = context.assets.list("fonts")
-            if (fontsInAssets != null && fontsInAssets.contains(assetName)) {
-                val typeface = Typeface.createFromAsset(context.assets, "fonts/${fontName}.ttf")
-                if (typeface != null) {
-                    return FontFamily(typeface)
-                }
+internal fun FontFamily.Companion.getFontAsset(context: Context, fontName: String?): FontFamily? {
+    if (fontName != null) {
+        val assetName = "$fontName.ttf"
+        val fontsInAssets = context.assets.list("fonts")
+        if (fontsInAssets != null && fontsInAssets.contains(assetName)) {
+            val typeface = Typeface.createFromAsset(context.assets, "fonts/$fontName.ttf")
+            if (typeface != null) {
+                return FontFamily(typeface)
             }
         }
     }
