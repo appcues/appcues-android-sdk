@@ -34,7 +34,8 @@ internal class DebuggerFontManager(
         val debugFonts = mutableListOf<DebuggerFontItem>()
         addFontResources(debugFonts)
         addFontAssets(debugFonts)
-        return debugFonts.sortedBy { it.name }
+        debugFonts.sortWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.name })
+        return debugFonts
     }
 
     private fun addFontResources(debugFonts: MutableList<DebuggerFontItem>) {
@@ -111,6 +112,8 @@ internal class DebuggerFontManager(
                 debugFonts.add(DebuggerFontItem(name, fontFamily, FontWeight.Normal))
             }
 
-        return debugFonts.sortedBy { it.name }
+        debugFonts.addAll(getAppSpecificFonts())
+        debugFonts.sortWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.name })
+        return debugFonts
     }
 }
