@@ -9,7 +9,6 @@ import com.appcues.data.remote.response.styling.StyleResponse
 
 internal class StyleMapper(
     private val styleColorMapper: StyleColorMapper = StyleColorMapper(),
-    private val styleFontWeightMapper: StyleFontWeightMapper = StyleFontWeightMapper(),
     private val styleShadowMapper: StyleShadowMapper = StyleShadowMapper(),
 ) {
 

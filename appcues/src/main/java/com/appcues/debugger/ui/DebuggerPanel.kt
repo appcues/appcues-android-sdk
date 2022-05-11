@@ -52,9 +52,6 @@ internal fun BoxScope.DebuggerPanel(debuggerState: MutableDebuggerState, debugge
     // don't show if current debugger is paused
     if (debuggerState.isPaused.value) return
 
-    val clipboard = LocalClipboardManager.current
-    val context = LocalContext.current
-
     AnimatedVisibility(
         visibleState = debuggerState.isExpanded,
         enter = fadeIn(),
@@ -83,54 +80,65 @@ internal fun BoxScope.DebuggerPanel(debuggerState: MutableDebuggerState, debugge
                 .clickable(enabled = false, onClickLabel = null) {},
             contentAlignment = Alignment.TopCenter
         ) {
-            val navController = rememberAnimatedNavController()
-            val selectedEvent = remember { mutableStateOf<DebuggerEventItem?>(null) }
-            val mainPage = "main"
-            val eventDetailsPage = "event_details"
-            val fontDetailsPage = "font_details"
-            AnimatedNavHost(navController = navController, startDestination = mainPage) {
-                mainComposable(
-                    pageName = mainPage,
-                    eventDetailsPage = eventDetailsPage
-                ) {
-                    DebuggerMain(
-                        debuggerViewModel = debuggerViewModel,
-                        onEventClick = {
-                            selectedEvent.value = it
-                            navController.navigate(eventDetailsPage)
-                        },
-                        onFontsClick = {
-                            navController.navigate(fontDetailsPage)
-                        },
-                    )
-                }
-                detailPageComposable(
-                    pageName = eventDetailsPage,
-                    mainPage = mainPage
-                ) {
-                    DebuggerEventDetails(selectedEvent.value) {
-                        navController.popBackStack()
-                    }
-                }
-                detailPageComposable(
-                    pageName = fontDetailsPage,
-                    mainPage = mainPage
-                ) {
-                    DebuggerFontDetails(
-                        appSpecificFonts = debuggerViewModel.appSpecificFonts,
-                        systemFonts = debuggerViewModel.systemFonts,
-                        onFontTap = {
-                            clipboard.setText(AnnotatedString(it.name))
-                            val text = context.getString(R.string.debugger_font_details_clipboard_message)
-                            val toast = Toast.makeText(context, text, Toast.LENGTH_SHORT)
-                            toast.show()
-                        },
-                        onBackPressed = {
-                            navController.popBackStack()
-                        }
-                    )
-                }
+            DebuggerPanelPages(debuggerViewModel)
+        }
+    }
+}
+
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+private fun BoxScope.DebuggerPanelPages(debuggerViewModel: DebuggerViewModel) {
+    val clipboard = LocalClipboardManager.current
+    val context = LocalContext.current
+
+    val navController = rememberAnimatedNavController()
+    val selectedEvent = remember { mutableStateOf<DebuggerEventItem?>(null) }
+    val mainPage = "main"
+    val eventDetailsPage = "event_details"
+    val fontDetailsPage = "font_details"
+    AnimatedNavHost(navController = navController, startDestination = mainPage) {
+        mainComposable(
+            pageName = mainPage,
+            eventDetailsPage = eventDetailsPage
+        ) {
+            DebuggerMain(
+                debuggerViewModel = debuggerViewModel,
+                onEventClick = {
+                    selectedEvent.value = it
+                    navController.navigate(eventDetailsPage)
+                },
+                onFontsClick = {
+                    navController.navigate(fontDetailsPage)
+                },
+            )
+        }
+        detailPageComposable(
+            pageName = eventDetailsPage,
+            mainPage = mainPage
+        ) {
+            DebuggerEventDetails(selectedEvent.value) {
+                navController.popBackStack()
             }
+        }
+        detailPageComposable(
+            pageName = fontDetailsPage,
+            mainPage = mainPage
+        ) {
+            DebuggerFontDetails(
+                appSpecificFonts = debuggerViewModel.appSpecificFonts,
+                systemFonts = debuggerViewModel.systemFonts,
+                onFontTap = {
+                    clipboard.setText(AnnotatedString(it.name))
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.debugger_font_details_clipboard_message),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                },
+                onBackPressed = {
+                    navController.popBackStack()
+                }
+            )
         }
     }
 }

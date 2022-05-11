@@ -27,7 +27,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -53,7 +52,6 @@ internal fun DebuggerFontDetails(
 ) {
 
     val lazyListState = rememberLazyListState()
-    val clipboard = LocalClipboardManager.current
 
     LazyColumn(
         modifier = Modifier
