@@ -65,7 +65,10 @@ private fun FontFamily.Companion.getSystemFontFamily(fontName: String?): FontFam
 // try to load a custom font from a resource in the host application
 private fun FontFamily.Companion.getFontResource(context: Context, fontName: String?): FontFamily? {
     if (fontName != null) {
-        val fontId = context.resources.getIdentifier(fontName, "font", context.packageName)
+        // this is an attempt to provide convenience to convert to valid resource names, for ex. if a font
+        // name of "Lato-Black" was used, it will auto convert to "lato_black" resource name
+        val resourceName = fontName.lowercase().replace("-", "_")
+        val fontId = context.resources.getIdentifier(resourceName, "font", context.packageName)
         if (fontId != 0) {
             return FontFamily(Font(fontId))
         }
