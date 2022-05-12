@@ -4,9 +4,7 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,6 +18,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Divider
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -137,23 +136,26 @@ private fun LazyItemScope.ListItem(debuggerFont: DebuggerFontItem, onFontTap: (D
         modifier = Modifier
             .fillParentMaxWidth()
             .clickable { onFontTap(debuggerFont) }
-            .padding(horizontal = 20.dp),
+            .padding(horizontal = 20.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Column(
+
+        Text(
+            text = debuggerFont.name,
+            fontSize = 16.sp,
+            fontWeight = debuggerFont.fontWeight,
+            fontFamily = debuggerFont.fontFamily,
+            color = AppcuesColors.Infinity
+        )
+        Spacer(modifier = Modifier.weight(1.0f))
+        Icon(
+            painter = painterResource(drawable.appcues_ic_copy),
+            contentDescription = LocalContext.current.getString(string.debugger_font_details_copy_icon_content_description),
             modifier = Modifier
-                .weight(1f)
-                .padding(vertical = 10.dp, horizontal = 0.dp),
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = debuggerFont.name,
-                fontSize = 16.sp,
-                fontWeight = debuggerFont.fontWeight,
-                fontFamily = debuggerFont.fontFamily,
-                color = AppcuesColors.Infinity
-            )
-        }
+                .padding(start = 10.dp)
+                .size(20.dp),
+            tint = AppcuesColors.SharkbaitOhAh,
+        )
     }
 
     ListItemDivider()

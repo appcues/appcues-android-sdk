@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -89,13 +90,13 @@ internal fun DebuggerStatusItem.StatusItemContent(rowScope: RowScope) {
 @Composable
 internal fun DebuggerStatusItem.RefreshIcon() {
     if (showRefreshIcon && statusType != StatusType.LOADING) {
-        Image(
+        Icon(
             modifier = Modifier
                 .padding(24.dp)
-                .size(24.dp),
+                .size(16.dp),
             painter = painterResource(id = R.drawable.appcues_ic_reload),
             contentDescription = LocalContext.current.getString(R.string.debugger_status_reload_icon_content_description),
-            contentScale = ContentScale.None
+            tint = AppcuesColors.SharkbaitOhAh
         )
     }
 }
