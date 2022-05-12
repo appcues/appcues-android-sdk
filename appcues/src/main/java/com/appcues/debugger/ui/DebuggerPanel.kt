@@ -21,6 +21,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -32,6 +34,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import com.appcues.R
 import com.appcues.debugger.DebuggerViewModel
@@ -51,6 +54,10 @@ private const val SLIDE_TRANSITION_MILLIS = 250
 internal fun BoxScope.DebuggerPanel(debuggerState: MutableDebuggerState, debuggerViewModel: DebuggerViewModel) {
     // don't show if current debugger is paused
     if (debuggerState.isPaused.value) return
+
+    // deeplink (if applicable) is used once, then reset
+    val deeplinkPath = debuggerState.deeplinkPath.value
+    debuggerState.deeplinkPath.value = null
 
     AnimatedVisibility(
         visibleState = debuggerState.isExpanded,
@@ -80,22 +87,20 @@ internal fun BoxScope.DebuggerPanel(debuggerState: MutableDebuggerState, debugge
                 .clickable(enabled = false, onClickLabel = null) {},
             contentAlignment = Alignment.TopCenter
         ) {
-            DebuggerPanelPages(debuggerViewModel)
+            DebuggerPanelPages(debuggerViewModel, deeplinkPath)
         }
     }
 }
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-private fun BoxScope.DebuggerPanelPages(debuggerViewModel: DebuggerViewModel) {
-    val clipboard = LocalClipboardManager.current
-    val context = LocalContext.current
-
+private fun BoxScope.DebuggerPanelPages(debuggerViewModel: DebuggerViewModel, deeplinkPath: String?) {
     val navController = rememberAnimatedNavController()
     val selectedEvent = remember { mutableStateOf<DebuggerEventItem?>(null) }
     val mainPage = "main"
     val eventDetailsPage = "event_details"
     val fontDetailsPage = "font_details"
+
     AnimatedNavHost(navController = navController, startDestination = mainPage) {
         mainComposable(
             pageName = mainPage,
@@ -111,36 +116,18 @@ private fun BoxScope.DebuggerPanelPages(debuggerViewModel: DebuggerViewModel) {
                     navController.navigate(fontDetailsPage)
                 },
             )
-        }
-        detailPageComposable(
-            pageName = eventDetailsPage,
-            mainPage = mainPage
-        ) {
-            DebuggerEventDetails(selectedEvent.value) {
-                navController.popBackStack()
+
+            LaunchedEffect(Unit) {
+                when (deeplinkPath) {
+                    "fonts" -> navController.navigate(fontDetailsPage)
+                    else -> Unit
+                }
             }
         }
-        detailPageComposable(
-            pageName = fontDetailsPage,
-            mainPage = mainPage
-        ) {
-            DebuggerFontDetails(
-                appSpecificFonts = debuggerViewModel.appSpecificFonts,
-                systemFonts = debuggerViewModel.systemFonts,
-                allFonts = debuggerViewModel.allFonts,
-                onFontTap = {
-                    clipboard.setText(AnnotatedString(it.name))
-                    Toast.makeText(
-                        context,
-                        context.getString(R.string.appcues_debugger_font_details_clipboard_message),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                },
-                onBackPressed = {
-                    navController.popBackStack()
-                }
-            )
-        }
+
+        eventDetailsComposable(eventDetailsPage, mainPage, selectedEvent, navController)
+
+        fontDetailsComposable(fontDetailsPage, mainPage, debuggerViewModel, navController)
     }
 }
 
@@ -203,4 +190,54 @@ private fun NavGraphBuilder.detailPageComposable(
         },
         content = content
     )
+}
+
+@OptIn(ExperimentalAnimationApi::class)
+private fun NavGraphBuilder.eventDetailsComposable(
+    pageName: String,
+    mainPage: String,
+    selectedEvent: MutableState<DebuggerEventItem?>,
+    navController: NavController,
+) {
+    detailPageComposable(
+        pageName = pageName,
+        mainPage = mainPage
+    ) {
+        DebuggerEventDetails(selectedEvent.value) {
+            navController.popBackStack()
+        }
+    }
+}
+
+@OptIn(ExperimentalAnimationApi::class)
+private fun NavGraphBuilder.fontDetailsComposable(
+    pageName: String,
+    mainPage: String,
+    debuggerViewModel: DebuggerViewModel,
+    navController: NavController,
+) {
+    detailPageComposable(
+        pageName = pageName,
+        mainPage = mainPage
+    ) {
+        val clipboard = LocalClipboardManager.current
+        val context = LocalContext.current
+
+        DebuggerFontDetails(
+            appSpecificFonts = debuggerViewModel.appSpecificFonts,
+            systemFonts = debuggerViewModel.systemFonts,
+            allFonts = debuggerViewModel.allFonts,
+            onFontTap = {
+                clipboard.setText(AnnotatedString(it.name))
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.appcues_debugger_font_details_clipboard_message),
+                    Toast.LENGTH_SHORT
+                ).show()
+            },
+            onBackPressed = {
+                navController.popBackStack()
+            }
+        )
+    }
 }

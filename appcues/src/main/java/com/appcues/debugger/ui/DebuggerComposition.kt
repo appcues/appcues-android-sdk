@@ -100,9 +100,10 @@ private fun LaunchedUIStateEffect(
     viewModel.uiState.collectAsState().value.let { state ->
         LaunchedEffect(state) {
             when (state) {
-                Creating -> Unit
-                Idle -> {
+                Creating -> {
                     debuggerState.isVisible.targetState = true
+                }
+                Idle -> {
                     // lets only animate to idle when we come form isExpanded
                     if (debuggerState.isExpanded.targetState) {
                         animateFabToIdle(debuggerState)
@@ -121,9 +122,9 @@ private fun LaunchedUIStateEffect(
                     debuggerState.isDragging.targetState = true
                     debuggerState.dragFabOffsets(state.dragAmount)
                 }
-                Expanded -> {
+                is Expanded -> {
+                    debuggerState.deeplinkPath.value = state.deeplinkPath
                     animateFabToExpanded(debuggerState)
-
                     debuggerState.isExpanded.targetState = true
                 }
                 Dismissing -> {

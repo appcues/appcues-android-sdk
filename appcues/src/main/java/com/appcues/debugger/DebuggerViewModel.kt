@@ -26,6 +26,7 @@ import org.koin.core.scope.Scope
 
 internal class DebuggerViewModel(
     override val scope: Scope,
+    private val deeplinkPath: String?,
 ) : ViewModel(), KoinScopeComponent {
 
     private val analyticsTracker by inject<AnalyticsTracker>()
@@ -40,7 +41,7 @@ internal class DebuggerViewModel(
         object Creating : UIState()
         object Idle : UIState()
         data class Dragging(val dragAmount: Offset) : UIState()
-        object Expanded : UIState()
+        data class Expanded(val deeplinkPath: String? = null) : UIState()
         object Dismissing : UIState()
         object Dismissed : UIState()
     }
@@ -106,7 +107,7 @@ internal class DebuggerViewModel(
     }
 
     fun onInit() {
-        _uiState.value = Idle
+        _uiState.value = if (deeplinkPath.isNullOrEmpty()) Idle else Expanded(deeplinkPath)
     }
 
     fun onDismissAnimationCompleted() {
@@ -130,20 +131,20 @@ internal class DebuggerViewModel(
 
     fun onFabClick() {
         if (_uiState.value == Idle) {
-            _uiState.value = Expanded
-        } else if (_uiState.value == Expanded) {
+            _uiState.value = Expanded()
+        } else if (_uiState.value is Expanded) {
             _uiState.value = Idle
         }
     }
 
     fun onBackPress() {
-        if (_uiState.value == Expanded) {
+        if (_uiState.value is Expanded) {
             _uiState.value = Idle
         }
     }
 
     fun onBackdropClick() {
-        if (_uiState.value == Expanded) {
+        if (_uiState.value is Expanded) {
             _uiState.value = Idle
         }
     }

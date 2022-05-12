@@ -41,10 +41,10 @@ internal class AppcuesDebuggerManager(context: Context, private val koinScope: S
         }
     }
 
-    fun start(activity: Activity) {
+    fun start(activity: Activity, deeplinkPath: String? = null) {
         this.currentActivity = activity
         coroutineScope.coroutineContext.cancelChildren()
-        debuggerViewModel = DebuggerViewModel(scope = koinScope).also {
+        debuggerViewModel = DebuggerViewModel(koinScope, deeplinkPath).also {
             coroutineScope.launch {
                 it.uiState.collect { state -> onBackPressCallback.isEnabled = state is Expanded }
             }
