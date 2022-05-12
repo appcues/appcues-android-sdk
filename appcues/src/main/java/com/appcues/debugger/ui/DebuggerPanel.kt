@@ -60,7 +60,7 @@ internal fun BoxScope.DebuggerPanel(debuggerState: MutableDebuggerState, debugge
         Spacer(
             modifier = Modifier
                 .fillMaxSize()
-                .background(AppcuesColors.BlackAlmostTransparent)
+                .background(AppcuesColors.DebuggerBackdrop)
                 .clickable { debuggerViewModel.onBackdropClick() }
         )
     }
