@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Divider
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -193,11 +194,11 @@ private fun LazyListScope.recentEventsItemsHeader(currentFilter: EventType?, onA
                 targetState = currentFilter != null,
                 modifier = Modifier.align(Alignment.CenterEnd)
             ) {
-                Image(
+                Icon(
                     modifier = Modifier
                         .clickable { isFilterExpanded.value = true }
                         .padding(12.dp)
-                        .size(24.dp)
+                        .size(16.dp)
                         .onPlaced {
                             with(density) {
                                 filterImagePosition.value = DpOffset(it.positionInRoot().x.toDp(), it.positionInRoot().y.toDp())
@@ -205,7 +206,7 @@ private fun LazyListScope.recentEventsItemsHeader(currentFilter: EventType?, onA
                         },
                     painter = painterResource(id = if (it) R.drawable.appcues_ic_filter_on else R.drawable.appcues_ic_filter_off),
                     contentDescription = LocalContext.current.getString(R.string.debugger_recent_events_filter_icon_content_description),
-                    contentScale = ContentScale.Inside
+                    tint = AppcuesColors.SharkbaitOhAh
                 )
             }
 
