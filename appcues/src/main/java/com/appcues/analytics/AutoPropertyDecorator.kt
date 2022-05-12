@@ -57,7 +57,7 @@ internal class AutoPropertyDecorator(
         "_sdkVersion" to BuildConfig.SDK_VERSION,
         "_sdkName" to "appcues-android",
         "_osVersion" to "${VERSION.SDK_INT}",
-        "_deviceType" to context.resources.getString(R.string.device_type),
+        "_deviceType" to context.resources.getString(R.string.appcues_device_type),
         "_deviceModel" to getDeviceName(),
     )
 

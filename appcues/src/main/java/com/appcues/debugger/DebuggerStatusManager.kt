@@ -65,7 +65,7 @@ internal class DebuggerStatusManager(
                         val group = it.first().toInt() + 1
                         val step = it.last().toInt() + 1
 
-                        experienceShowingStep = contextResources.getString(R.string.debugger_status_experience_line1, group, step)
+                        experienceShowingStep = contextResources.getString(R.string.appcues_debugger_status_experience_line1, group, step)
                     }
                 }
                 AnalyticsEvent.ExperienceCompleted.eventName, AnalyticsEvent.ExperienceDismissed.eventName -> {
@@ -92,29 +92,29 @@ internal class DebuggerStatusManager(
     }
 
     private fun deviceInfoItem() = DebuggerStatusItem(
-        title = contextResources.getString(R.string.debugger_status_device_title, Build.MANUFACTURER, VERSION.RELEASE),
+        title = contextResources.getString(R.string.appcues_debugger_status_device_title, Build.MANUFACTURER, VERSION.RELEASE),
         statusType = PHONE,
     )
 
     private fun sdkInfoItem() = DebuggerStatusItem(
-        title = contextResources.getString(R.string.debugger_status_sdk_title, BuildConfig.SDK_VERSION),
+        title = contextResources.getString(R.string.appcues_debugger_status_sdk_title, BuildConfig.SDK_VERSION),
         statusType = SUCCESS,
-        line1 = contextResources.getString(R.string.debugger_status_sdk_line1, appcuesConfig.accountId),
-        line2 = contextResources.getString(R.string.debugger_status_sdk_line2, appcuesConfig.applicationId)
+        line1 = contextResources.getString(R.string.appcues_debugger_status_sdk_line1, appcuesConfig.accountId),
+        line2 = contextResources.getString(R.string.appcues_debugger_status_sdk_line2, appcuesConfig.applicationId)
     )
 
     private fun connectionCheckItem() = (connectedToAppcues?.let { if (it) SUCCESS else ERROR } ?: LOADING).let { statusType ->
         DebuggerStatusItem(
             title = statusType.let {
                 when (it) {
-                    SUCCESS -> R.string.debugger_status_check_connection_connected_title
-                    LOADING -> R.string.debugger_status_check_connection_connecting_title
-                    else -> R.string.debugger_status_check_connection_error_title
+                    SUCCESS -> R.string.appcues_debugger_status_check_connection_connected_title
+                    LOADING -> R.string.appcues_debugger_status_check_connection_connecting_title
+                    else -> R.string.appcues_debugger_status_check_connection_error_title
                 }
             }.let { contextResources.getString(it) },
             line1 = statusType.let {
                 when (it) {
-                    ERROR -> R.string.debugger_status_check_connection_error_line1
+                    ERROR -> R.string.appcues_debugger_status_check_connection_error_line1
                     else -> null
                 }
             }?.let { contextResources.getString(it) },
@@ -126,10 +126,10 @@ internal class DebuggerStatusManager(
 
     private fun trackingScreenCheckItem() = (trackingScreens?.let { if (it) SUCCESS else ERROR } ?: LOADING).let { statusType ->
         DebuggerStatusItem(
-            title = contextResources.getString(R.string.debugger_status_check_screen_tracking_title),
+            title = contextResources.getString(R.string.appcues_debugger_status_check_screen_tracking_title),
             line1 = statusType.let {
                 when (it) {
-                    LOADING -> R.string.debugger_status_check_screen_tracking_loading_line1
+                    LOADING -> R.string.appcues_debugger_status_check_screen_tracking_loading_line1
                     else -> null
                 }
             }?.let { contextResources.getString(it) },
@@ -139,14 +139,14 @@ internal class DebuggerStatusManager(
 
     private fun identityItem() = userIdentified?.let {
         DebuggerStatusItem(
-            title = contextResources.getString(R.string.debugger_status_identity_success_title),
+            title = contextResources.getString(R.string.appcues_debugger_status_identity_success_title),
             line1 = userIdentified,
             statusType = SUCCESS,
         )
     } ?: run {
         DebuggerStatusItem(
-            title = contextResources.getString(R.string.debugger_status_identity_loading_title),
-            line1 = contextResources.getString(R.string.debugger_status_identity_loading_line1),
+            title = contextResources.getString(R.string.appcues_debugger_status_identity_loading_title),
+            line1 = contextResources.getString(R.string.appcues_debugger_status_identity_loading_line1),
             statusType = LOADING,
         )
     }

@@ -132,7 +132,7 @@ private fun BoxScope.DebuggerPanelPages(debuggerViewModel: DebuggerViewModel) {
                     clipboard.setText(AnnotatedString(it.name))
                     Toast.makeText(
                         context,
-                        context.getString(R.string.debugger_font_details_clipboard_message),
+                        context.getString(R.string.appcues_debugger_font_details_clipboard_message),
                         Toast.LENGTH_SHORT
                     ).show()
                 },

@@ -98,7 +98,7 @@ private fun LazyListScope.statusItemsHeader() {
             contentAlignment = Alignment.CenterStart
         ) {
             Text(
-                text = LocalContext.current.getString(R.string.debugger_status_title),
+                text = LocalContext.current.getString(R.string.appcues_debugger_status_title),
                 modifier = Modifier.padding(start = 40.dp),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
@@ -141,7 +141,7 @@ private fun LazyListScope.infoHeader() {
             contentAlignment = Alignment.CenterStart
         ) {
             Text(
-                text = LocalContext.current.getString(R.string.debugger_info_title),
+                text = LocalContext.current.getString(R.string.appcues_debugger_info_title),
                 modifier = Modifier.padding(start = 40.dp),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
@@ -160,7 +160,7 @@ private fun LazyListScope.infoItemsCompose(onFontTap: () -> Unit) {
                 .padding(horizontal = 20.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            with(DebuggerInfoItem(LocalContext.current.getString(R.string.debugger_info_fonts))) {
+            with(DebuggerInfoItem(LocalContext.current.getString(R.string.appcues_debugger_info_fonts))) {
                 InfoItemContent(rowScope = this@Row)
             }
         }
@@ -184,7 +184,7 @@ private fun LazyListScope.recentEventsItemsHeader(currentFilter: EventType?, onA
                 modifier = Modifier
                     .padding(start = 28.dp)
                     .align(Alignment.CenterStart),
-                text = LocalContext.current.getString(R.string.debugger_recent_events_title),
+                text = LocalContext.current.getString(R.string.appcues_debugger_recent_events_title),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = AppcuesColors.HadfieldBlue,
@@ -205,7 +205,7 @@ private fun LazyListScope.recentEventsItemsHeader(currentFilter: EventType?, onA
                             }
                         },
                     painter = painterResource(id = if (it) R.drawable.appcues_ic_filter_on else R.drawable.appcues_ic_filter_off),
-                    contentDescription = LocalContext.current.getString(R.string.debugger_recent_events_filter_icon_content_description),
+                    contentDescription = LocalContext.current.getString(R.string.appcues_debugger_recent_events_filter_icon_description),
                     tint = AppcuesColors.SharkbaitOhAh
                 )
             }
@@ -277,7 +277,7 @@ private fun ColumnScope.FilterEventTypeMenuItem(eventType: EventType?, isSelecte
                 .padding(vertical = 12.dp)
                 .size(24.dp),
             painter = painterResource(id = eventType.toResourceId()),
-            contentDescription = LocalContext.current.getString(R.string.debugger_recent_events_item_icon_content_description),
+            contentDescription = LocalContext.current.getString(R.string.appcues_debugger_recent_events_item_icon_description),
             contentScale = ContentScale.None
         )
 

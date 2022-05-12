@@ -33,7 +33,7 @@ internal fun DebuggerEventItem.EventItemIcon() {
 
     Image(
         painter = painterResource(id = type.toResourceId()),
-        contentDescription = LocalContext.current.getString(R.string.debugger_recent_events_item_icon_content_description),
+        contentDescription = LocalContext.current.getString(R.string.appcues_debugger_recent_events_item_icon_description),
         modifier = iconModifier,
         contentScale = ContentScale.None
     )
@@ -67,7 +67,7 @@ internal fun DebuggerEventItem.EventItemContent(rowScope: RowScope) {
                         .padding(end = 4.dp)
                         .size(12.dp),
                     painter = painterResource(id = R.drawable.appcues_ic_clock),
-                    contentDescription = LocalContext.current.getString(R.string.debugger_recent_events_timestamp_icon_content_description),
+                    contentDescription = LocalContext.current.getString(R.string.appcues_debugger_recent_events_timestamp_icon_description),
                     contentScale = ContentScale.Fit
                 )
                 Text(

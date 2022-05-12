@@ -34,8 +34,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.appcues.R
-import com.appcues.R.drawable
-import com.appcues.R.string
 import com.appcues.debugger.model.DebuggerFontItem
 import com.appcues.debugger.ui.lazyColumnScrollIndicator
 import com.appcues.ui.theme.AppcuesColors
@@ -64,17 +62,17 @@ internal fun DebuggerFontDetails(
         }
 
         if (appSpecificFonts.any()) {
-            sectionTitle(R.string.debugger_font_details_app_specific_title)
+            sectionTitle(R.string.appcues_debugger_font_details_app_specific_title)
             fonts(appSpecificFonts, onFontTap)
         }
 
         if (systemFonts.any()) {
-            sectionTitle(R.string.debugger_font_details_system_title)
+            sectionTitle(R.string.appcues_debugger_font_details_system_title)
             fonts(systemFonts, onFontTap)
         }
 
         if (allFonts.any()) {
-            sectionTitle(R.string.debugger_font_details_all_title)
+            sectionTitle(R.string.appcues_debugger_font_details_all_title)
             fonts(allFonts, onFontTap)
         }
     }
@@ -100,8 +98,8 @@ internal fun DebuggerFontDetails(
             contentAlignment = Alignment.Center
         ) {
             Image(
-                painter = painterResource(id = drawable.appcues_ic_back),
-                contentDescription = LocalContext.current.getString(string.debugger_back_content_description)
+                painter = painterResource(id = R.drawable.appcues_ic_back),
+                contentDescription = LocalContext.current.getString(R.string.appcues_debugger_back_description)
             )
         }
     }
@@ -149,8 +147,8 @@ private fun LazyItemScope.ListItem(debuggerFont: DebuggerFontItem, onFontTap: (D
         )
         Spacer(modifier = Modifier.weight(1.0f))
         Icon(
-            painter = painterResource(drawable.appcues_ic_copy),
-            contentDescription = LocalContext.current.getString(string.debugger_font_details_copy_icon_content_description),
+            painter = painterResource(R.drawable.appcues_ic_copy),
+            contentDescription = LocalContext.current.getString(R.string.appcues_debugger_font_details_copy_icon_description),
             modifier = Modifier
                 .padding(start = 10.dp)
                 .size(20.dp),
