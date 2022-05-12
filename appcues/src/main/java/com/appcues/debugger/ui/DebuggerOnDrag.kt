@@ -70,7 +70,7 @@ private fun DismissDebuggerArea(debuggerState: MutableDebuggerState, onGloballyP
         modifier = Modifier
             .background(
                 brush = Brush.radialGradient(
-                    listOf(AppcuesColors.BlackAlmostTransparent, Color.Transparent)
+                    listOf(AppcuesColors.DebuggerDismissArea, Color.Transparent)
                 )
             )
             .size(168.dp)
