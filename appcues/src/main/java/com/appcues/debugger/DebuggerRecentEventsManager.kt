@@ -70,9 +70,10 @@ internal class DebuggerRecentEventsManager(
                     DebuggerEventItem(
                         id = lastEventId,
                         type = EventType.GROUP_UPDATE,
-                        title = contextResources.getString(R.string.debugger_event_type_group_update_title),
+                        title = contextResources.getString(R.string.appcues_debugger_event_type_group_update_title),
                         timestamp = Date().time,
-                        name = activityRequest.groupId ?: contextResources.getString(R.string.debugger_event_type_group_update_title),
+                        name = activityRequest.groupId
+                            ?: contextResources.getString(R.string.appcues_debugger_event_type_group_update_title),
                         properties = activityRequest.groupUpdate.toSortedList(),
                         identityProperties = null
                     )
@@ -85,7 +86,7 @@ internal class DebuggerRecentEventsManager(
                     DebuggerEventItem(
                         id = lastEventId,
                         type = EventType.USER_PROFILE,
-                        title = contextResources.getString(R.string.debugger_event_type_profile_update_title),
+                        title = contextResources.getString(R.string.appcues_debugger_event_type_profile_update_title),
                         // it should always contain updated at property, this is just a safeguard
                         // in case something changes in the future to avoid unwanted exceptions
                         timestamp = (activityRequest.profileUpdate[AutoPropertyDecorator.UPDATED_AT_PROPERTY] as Long?) ?: Date().time,

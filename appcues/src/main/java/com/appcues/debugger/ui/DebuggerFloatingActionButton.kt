@@ -8,7 +8,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -19,6 +18,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Icon
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -29,6 +29,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.consumeAllChanges
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -92,7 +93,7 @@ internal fun BoxScope.DebuggerFloatingActionButton(
                     shape = RoundedCornerShape(percent = 100)
                 )
                 .clickableAndDraggable(
-                    onClickLabel = LocalContext.current.getString(R.string.debugger_fab_on_click_label),
+                    onClickLabel = LocalContext.current.getString(R.string.appcues_debugger_fab_on_click_label),
                     onDragEnd = { debuggerViewModel.onDragEnd() },
                     onDrag = { debuggerViewModel.onDragging(it) },
                     onClick = { debuggerViewModel.onFabClick() }
@@ -104,11 +105,13 @@ internal fun BoxScope.DebuggerFloatingActionButton(
                         listOf(AppcuesColors.ShadyNeonBlue, AppcuesColors.PurpleAnemone)
                     )
                 )
-                .padding(12.dp)
+                .padding(12.dp),
+            contentAlignment = Alignment.Center,
         ) {
-            Image(
-                painter = painterResource(id = drawable.appcues_ic_debugger_appcues_logo),
-                contentDescription = LocalContext.current.getString(R.string.debugger_fab_image_content_description)
+            Icon(
+                painter = painterResource(id = drawable.appcues_ic_white_logo),
+                tint = Color.White,
+                contentDescription = LocalContext.current.getString(R.string.appcues_debugger_fab_image_content_description)
             )
         }
     }

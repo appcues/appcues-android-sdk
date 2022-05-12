@@ -52,7 +52,7 @@ internal class SkippableTrait(
         ) {
             Image(
                 painter = painterResource(id = R.drawable.appcues_ic_experience_dismiss),
-                contentDescription = stringResource(id = R.string.skippable_trait_dismiss),
+                contentDescription = stringResource(id = R.string.appcues_skippable_trait_dismiss),
             )
         }
     }

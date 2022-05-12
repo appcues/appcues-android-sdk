@@ -34,7 +34,7 @@ internal fun DebuggerStatusItem.StatusItemIcon() {
     } else {
         Image(
             painter = painterResource(id = statusType.toResourceId()),
-            contentDescription = LocalContext.current.getString(R.string.debugger_status_item_icon_content_description, title),
+            contentDescription = LocalContext.current.getString(R.string.appcues_debugger_status_item_icon_content_description, title),
             modifier = iconModifier,
             contentScale = ContentScale.None
         )
@@ -95,7 +95,7 @@ internal fun DebuggerStatusItem.RefreshIcon() {
                 .padding(24.dp)
                 .size(16.dp),
             painter = painterResource(id = R.drawable.appcues_ic_reload),
-            contentDescription = LocalContext.current.getString(R.string.debugger_status_reload_icon_content_description),
+            contentDescription = LocalContext.current.getString(R.string.appcues_debugger_status_reload_icon_content_description),
             tint = AppcuesColors.SharkbaitOhAh
         )
     }

@@ -21,6 +21,8 @@ android {
         consumerProguardFiles "consumer-rules.pro"
     }
 
+    resourcePrefix 'appcues_'
+
     buildTypes {
         release {
             minifyEnabled false

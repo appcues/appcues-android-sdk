@@ -83,7 +83,7 @@ private fun DismissDebuggerArea(debuggerState: MutableDebuggerState, onGloballyP
                 .clip(RoundedCornerShape(percent = 100))
                 .size(size.value)
                 .rotate(rotate.value),
-            contentDescription = LocalContext.current.getString(R.string.debugger_fab_dismiss_image_content_description)
+            contentDescription = LocalContext.current.getString(R.string.appcues_debugger_fab_dismiss_image_content_description)
         )
     }
 }

@@ -1,78 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- SDK -->
-    <string name="skippable_trait_dismiss">dismiss</string>
+    <string name="appcues_skippable_trait_dismiss">dismiss</string>
 
     <!-- Debugger Fab -->
-    <string name="debugger_fab_on_click_label">Appcues debugger details</string>
-    <string name="debugger_fab_image_content_description">Appcues floating action button</string>
-    <string name="debugger_fab_dismiss_image_content_description">Appcues floating action button dismissing area</string>
+    <string name="appcues_debugger_fab_on_click_label">Appcues debugger details</string>
+    <string name="appcues_debugger_fab_image_content_description">Appcues floating action button</string>
+    <string name="appcues_debugger_fab_dismiss_image_content_description">Appcues floating action button dismissing area</string>
 
     <!-- Debugger Panel -->
-    <string name="debugger_status_title">Status</string>
-    <string name="debugger_status_item_icon_content_description">%1$s icon</string>
-    <string name="debugger_status_reload_icon_content_description">reload icon</string>
-    <string name="debugger_status_device_title">"%1$s Android %2$s</string>
-    <string name="debugger_status_experience_line1">"Showing group %1$s step %2$s"</string>
-    <string name="debugger_status_sdk_title">Installed SDK (%1$s)</string>
-    <string name="debugger_status_sdk_line1">Account ID: %1$s</string>
-    <string name="debugger_status_sdk_line2">Application ID: %1$s</string>
-    <string name="debugger_status_check_connection_connecting_title">Connecting to Appcues</string>
-    <string name="debugger_status_check_connection_connected_title">Connected to Appcues</string>
-    <string name="debugger_status_check_connection_error_title">Appcues is unreachable</string>
-    <string name="debugger_status_check_connection_error_line1">Please check your connection or firewalls.</string>
-    <string name="debugger_status_check_screen_tracking_title">Tracking Screens</string>
-    <string name="debugger_status_check_screen_tracking_loading_line1">waiting for screen event…</string>
-    <string name="debugger_status_identity_success_title">User Identified</string>
-    <string name="debugger_status_identity_loading_title">Identifying User</string>
-    <string name="debugger_status_identity_loading_line1">waiting for any event…</string>
+    <string name="appcues_debugger_status_title">Status</string>
+    <string name="appcues_debugger_status_item_icon_content_description">%1$s icon</string>
+    <string name="appcues_debugger_status_reload_icon_content_description">reload icon</string>
+    <string name="appcues_debugger_status_device_title">"%1$s Android %2$s</string>
+    <string name="appcues_debugger_status_experience_line1">"Showing group %1$s step %2$s"</string>
+    <string name="appcues_debugger_status_sdk_title">Installed SDK (%1$s)</string>
+    <string name="appcues_debugger_status_sdk_line1">Account ID: %1$s</string>
+    <string name="appcues_debugger_status_sdk_line2">Application ID: %1$s</string>
+    <string name="appcues_debugger_status_check_connection_connecting_title">Connecting to Appcues</string>
+    <string name="appcues_debugger_status_check_connection_connected_title">Connected to Appcues</string>
+    <string name="appcues_debugger_status_check_connection_error_title">Appcues is unreachable</string>
+    <string name="appcues_debugger_status_check_connection_error_line1">Please check your connection or firewalls.</string>
+    <string name="appcues_debugger_status_check_screen_tracking_title">Tracking Screens</string>
+    <string name="appcues_debugger_status_check_screen_tracking_loading_line1">waiting for screen event…</string>
+    <string name="appcues_debugger_status_identity_success_title">User Identified</string>
+    <string name="appcues_debugger_status_identity_loading_title">Identifying User</string>
+    <string name="appcues_debugger_status_identity_loading_line1">waiting for any event…</string>
 
-    <string name="debugger_info_title">Info</string>
-    <string name="debugger_info_fonts">Available Fonts</string>
+    <string name="appcues_debugger_info_title">Info</string>
+    <string name="appcues_debugger_info_fonts">Available Fonts</string>
+    <string name="appcues_debugger_recent_events_title">Recent events</string>
+    <string name="appcues_debugger_recent_events_item_icon_description">Event icon</string>
+    <string name="appcues_debugger_recent_events_timestamp_icon_description">Timestamp icon</string>
+    <string name="appcues_debugger_recent_events_filter_icon_description">Filter icon</string>
 
-    <string name="debugger_recent_events_title">Recent events</string>
-    <string name="debugger_recent_events_item_icon_content_description">Event icon</string>
-    <string name="debugger_recent_events_timestamp_icon_content_description">Timestamp icon</string>
-    <string name="debugger_recent_events_filter_icon_content_description">Filter icon</string>
-
-    <string name="debugger_recent_events_filter_experience">Experience</string>
-    <string name="debugger_recent_events_filter_group">Group</string>
-    <string name="debugger_recent_events_filter_profile">User Profile</string>
-    <string name="debugger_recent_events_filter_custom">Custom</string>
-    <string name="debugger_recent_events_filter_screen">Screen</string>
-    <string name="debugger_recent_events_filter_session">Session</string>
-    <string name="debugger_recent_events_filter_all">All</string>
+    <string name="appcues_debugger_recent_events_filter_experience">Experience</string>
+    <string name="appcues_debugger_recent_events_filter_group">Group</string>
+    <string name="appcues_debugger_recent_events_filter_profile">User Profile</string>
+    <string name="appcues_debugger_recent_events_filter_custom">Custom</string>
+    <string name="appcues_debugger_recent_events_filter_screen">Screen</string>
+    <string name="appcues_debugger_recent_events_filter_session">Session</string>
+    <string name="appcues_debugger_recent_events_filter_all">All</string>
     
-    <string name="debugger_event_type_group_update_title">Group Update</string>
-    <string name="debugger_event_type_profile_update_title">Profile Update</string>
+    <string name="appcues_debugger_event_type_group_update_title">Group Update</string>
+    <string name="appcues_debugger_event_type_profile_update_title">Profile Update</string>
 
-    <string name="debugger_event_type_screen_view_title">Screen View</string>
-    <string name="debugger_event_type_session_started_title">Session Started</string>
-    <string name="debugger_event_type_session_suspended_title">Session Suspended</string>
-    <string name="debugger_event_type_session_resumed_title">Session Resumed</string>
-    <string name="debugger_event_type_session_reset_title">Session Reset</string>
-    <string name="debugger_event_type_step_seen_title">Step Seen</string>
-    <string name="debugger_event_type_step_interaction_title">Step Interaction</string>
-    <string name="debugger_event_type_step_completed_title">Step Completed</string>
-    <string name="debugger_event_type_step_error_title">Step Error</string>
-    <string name="debugger_event_type_step_recovered_title">Step Recovered</string>
-    <string name="debugger_event_type_experience_started_title">Experience Started</string>
-    <string name="debugger_event_type_experience_completed_title">Experience Completed</string>
-    <string name="debugger_event_type_experience_dismissed_title">Experience Dismissed</string>
-    <string name="debugger_event_type_experience_error_title">Experience Error</string>
+    <string name="appcues_debugger_event_type_screen_view_title">Screen View</string>
+    <string name="appcues_debugger_event_type_session_started_title">Session Started</string>
+    <string name="appcues_debugger_event_type_session_suspended_title">Session Suspended</string>
+    <string name="appcues_debugger_event_type_session_resumed_title">Session Resumed</string>
+    <string name="appcues_debugger_event_type_session_reset_title">Session Reset</string>
+    <string name="appcues_debugger_event_type_step_seen_title">Step Seen</string>
+    <string name="appcues_debugger_event_type_step_interaction_title">Step Interaction</string>
+    <string name="appcues_debugger_event_type_step_completed_title">Step Completed</string>
+    <string name="appcues_debugger_event_type_step_error_title">Step Error</string>
+    <string name="appcues_debugger_event_type_step_recovered_title">Step Recovered</string>
+    <string name="appcues_debugger_event_type_experience_started_title">Experience Started</string>
+    <string name="appcues_debugger_event_type_experience_completed_title">Experience Completed</string>
+    <string name="appcues_debugger_event_type_experience_dismissed_title">Experience Dismissed</string>
+    <string name="appcues_debugger_event_type_experience_error_title">Experience Error</string>
 
-    <string name="debugger_back_content_description">Back</string>
-    <string name="debugger_event_details_title">Event details</string>
-    <string name="debugger_event_details_properties_title">Properties</string>
-    <string name="debugger_event_details_identity_auto_properties_title">Identity auto-properties</string>
-    <string name="debugger_event_details_type_title">Type</string>
-    <string name="debugger_event_details_name_title">Name</string>
-    <string name="debugger_event_details_timestamp_title">Timestamp</string>
+    <string name="appcues_debugger_back_description">Back</string>
+    <string name="appcues_debugger_event_details_title">Event details</string>
+    <string name="appcues_debugger_event_details_properties_title">Properties</string>
+    <string name="appcues_debugger_event_details_identity_auto_properties_title">Identity auto-properties</string>
+    <string name="appcues_debugger_event_details_type_title">Type</string>
+    <string name="appcues_debugger_event_details_name_title">Name</string>
+    <string name="appcues_debugger_event_details_timestamp_title">Timestamp</string>
 
-    <string name="debugger_font_details_app_specific_title">App-Specific Fonts</string>
-    <string name="debugger_font_details_system_title">System Fonts</string>
-    <string name="debugger_font_details_all_title">All Fonts</string>
-    <string name="debugger_font_details_clipboard_message">"Copied to clipboard"</string>
-    <string name="debugger_font_details_copy_icon_content_description">Copy icon</string>
+    <string name="appcues_debugger_font_details_app_specific_title">App-Specific Fonts</string>
+    <string name="appcues_debugger_font_details_system_title">System Fonts</string>
+    <string name="appcues_debugger_font_details_all_title">All Fonts</string>
+    <string name="appcues_debugger_font_details_clipboard_message">"Copied to clipboard"</string>
+    <string name="appcues_debugger_font_details_copy_icon_description">Copy icon</string>
 
 </resources>
