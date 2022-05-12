@@ -3,6 +3,7 @@ package com.appcues
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
+import com.appcues.debugger.AppcuesDebuggerManager
 import com.appcues.ui.ExperienceRenderer
 import kotlinx.coroutines.launch
 
@@ -11,6 +12,7 @@ internal class DeeplinkHandler(
     private val appcues: Appcues,
     private val experienceRenderer: ExperienceRenderer,
     private val appcuesCoroutineScope: AppcuesCoroutineScope,
+    private val debuggerManager: AppcuesDebuggerManager,
 ) {
 
     fun handle(activity: Activity, intent: Intent?): Boolean {
@@ -36,8 +38,9 @@ internal class DeeplinkHandler(
                     }
                     handled = true
                 }
-                segments.count() == 1 && segments[0] == "debugger" -> {
-                    appcues.debug(activity)
+                segments.any() && segments[0] == "debugger" -> {
+                    val deeplinkPath = if (segments.count() > 1) segments[1] else null
+                    debuggerManager.start(activity, deeplinkPath)
                     handled = true
                 }
             }
