@@ -15,4 +15,6 @@ internal data class ExperienceResponse(
     val traits: List<TraitResponse>,
     val steps: List<StepContainerResponse>,
     val state: String?,
+    val type: String?,
+    val publishedAt: Long?,
 )
