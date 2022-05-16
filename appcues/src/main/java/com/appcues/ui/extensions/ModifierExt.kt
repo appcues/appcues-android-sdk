@@ -236,7 +236,7 @@ private fun List<Action>.toLongPressMotionOrNull(block: (ExperienceAction) -> Un
 internal fun Modifier.imageAspectRatio(intrinsicSize: ComponentSize?) = this.then(
     // apply aspectRatio only when intrinsicSize is not null or any values is 0
     if (intrinsicSize != null && (intrinsicSize.width > 0 && intrinsicSize.height > 0)) {
-        Modifier.aspectRatio(ratio = intrinsicSize.width.toFloat() / intrinsicSize.height.toFloat())
+        Modifier.aspectRatio(ratio = intrinsicSize.width.toFloat() / intrinsicSize.height.toFloat(), matchHeightConstraintsFirst = true)
     } else Modifier
 )
 

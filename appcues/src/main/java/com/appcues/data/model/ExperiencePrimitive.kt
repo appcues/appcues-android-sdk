@@ -1,7 +1,7 @@
 package com.appcues.data.model
 
 import com.appcues.data.model.styling.ComponentContentMode
-import com.appcues.data.model.styling.ComponentContentMode.FILL
+import com.appcues.data.model.styling.ComponentContentMode.FIT
 import com.appcues.data.model.styling.ComponentDistribution
 import com.appcues.data.model.styling.ComponentDistribution.CENTER
 import com.appcues.data.model.styling.ComponentSize
@@ -31,7 +31,7 @@ internal sealed class ExperiencePrimitive(
         val url: String,
         val accessibilityLabel: String?,
         val intrinsicSize: ComponentSize?,
-        val contentMode: ComponentContentMode = FILL,
+        val contentMode: ComponentContentMode = FIT,
         val blurHash: String? = null,
     ) : ExperiencePrimitive(id, style)
 

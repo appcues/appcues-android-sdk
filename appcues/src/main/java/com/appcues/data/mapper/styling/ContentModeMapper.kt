@@ -8,7 +8,7 @@ internal class ContentModeMapper {
         return when (from) {
             "fill" -> ComponentContentMode.FILL
             "fit" -> ComponentContentMode.FIT
-            else -> ComponentContentMode.FILL
+            else -> ComponentContentMode.FIT
         }
     }
 }
