@@ -2,6 +2,8 @@
 [![CircleCI](https://circleci.com/gh/appcues/appcues-android-sdk.svg?style=shield&circle-token=d80a6bd72e608b1b62c104c87bfcfe8ea3faa7c1)](https://circleci.com/gh/appcues/appcues-android-sdk)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/appcues/appcues-android-sdk/blob/main/LICENSE)
 
+> NOTE: This project is currently in the Beta phase. For new or existing customers interested in learning more about our mobile product, please visit our [website](https://www.appcues.com/mobile).   We encourage you to try out this new library. Please provide feedback via Github issues/PRs, and feel free to submit pull requests.
+
 Appcues Android SDK allows you to integrate Appcues experiences into your native Android apps.
 
 The SDK is a Kotlin library for sending user properties and events to the Appcues API and retrieving and rendering Appcues content based on those properties and events.
@@ -64,13 +66,18 @@ Initializing the SDK requires you to provide two values: `APPCUES_ACCOUNT_ID` an
 
 Supporting debugging and experience previewing is not required for the Appcues Android SDK to function, but it is necessary for the optimal Appcues builder experience. Refer to the [Debug Guide](https://github.com/appcues/appcues-android-sdk/blob/main/Debugging.md) for details.
 
+### Identifying Users
+
+In order to target content to the right users at the right time, you need to identify users and send Appcues data about them. A user is identified with a unique ID.
+
+- `identify(userId)`
+
 ### Tracking Screens and Events
 
 Events are the “actions” your users take in your application, which can be anything from clicking a certain button to viewing a specific screen. Once you’ve installed and initialized the Appcues Android SDK, you can start tracking screens and events using the following methods:
 
-- `identify(userId:)`
-- `track(name:)`
-- `screen(title:)`
+- `track(name)`
+- `screen(title)`
 
 Refer to the full [Getting Started Guide](https://github.com/appcues/appcues-android-sdk/blob/main/GettingStarted.md) for more details.
 
