@@ -12,6 +12,8 @@ import com.appcues.debugger.ui.toEventType
 import com.appcues.util.ContextResources
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.util.Date
 
@@ -28,6 +30,7 @@ internal class DebuggerRecentEventsManager(
     private val events: ArrayList<DebuggerEventItem> = arrayListOf()
 
     private var filterType: EventType? = null
+    private val mutex = Mutex()
 
     private val _data = MutableSharedFlow<List<DebuggerEventItem>>(replay = 1)
 
@@ -145,7 +148,9 @@ internal class DebuggerRecentEventsManager(
         updateData()
     }
 
-    private suspend fun updateData() {
+    private suspend fun updateData() = mutex.withLock {
+        // this filtering of the `events` list is guarded with a Mutex since other threads
+        // could update this list while we are processing through it
         val list = filterType?.let { eventType ->
             events.filter { it.type == eventType }.filterIndexed { index, _ -> index < MAX_RECENT_EVENTS }
         } ?: events.filterIndexed { index, _ -> index < MAX_RECENT_EVENTS }

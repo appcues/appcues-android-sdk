@@ -87,7 +87,7 @@ internal fun DebuggerComposition(viewModel: DebuggerViewModel, onDismiss: () -> 
 
     // run once to transition state in viewModel
     LaunchedEffect(Unit) {
-        viewModel.onInit()
+        viewModel.onRender()
     }
 }
 

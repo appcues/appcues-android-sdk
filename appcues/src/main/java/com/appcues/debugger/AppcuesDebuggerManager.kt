@@ -11,12 +11,14 @@ import androidx.activity.OnBackPressedCallback
 import androidx.compose.material.MaterialTheme
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.viewModelScope
 import com.appcues.R
 import com.appcues.debugger.DebuggerViewModel.UIState.Expanded
 import com.appcues.debugger.ui.DebuggerComposition
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import org.koin.core.scope.Scope
@@ -35,7 +37,6 @@ internal class AppcuesDebuggerManager(context: Context, private val koinScope: S
     private lateinit var currentActivity: Activity
 
     private val onBackPressCallback = object : OnBackPressedCallback(false) {
-
         override fun handleOnBackPressed() {
             debuggerViewModel?.onBackPress()
         }
@@ -44,31 +45,30 @@ internal class AppcuesDebuggerManager(context: Context, private val koinScope: S
     fun start(activity: Activity, deeplinkPath: String? = null) {
         this.currentActivity = activity
         coroutineScope.coroutineContext.cancelChildren()
-        debuggerViewModel = DebuggerViewModel(koinScope, deeplinkPath).also {
-            coroutineScope.launch {
-                it.uiState.collect { state -> onBackPressCallback.isEnabled = state is Expanded }
-            }
-
-            addDebuggerView(activity, it)
+        // it is possible to re-enter start without a stop (deeplinks) - in which case we continue to
+        // use the VM we already have - else, make new one here
+        val viewModel = debuggerViewModel ?: DebuggerViewModel(koinScope)
+        debuggerViewModel = viewModel // and save reference
+        viewModel.onStart(deeplinkPath)
+        coroutineScope.launch {
+            viewModel.uiState.collect { state -> onBackPressCallback.isEnabled = state is Expanded }
         }
-
+        addDebuggerView(activity, viewModel)
         application.registerActivityLifecycleCallbacks(this)
-
         setDebuggerBackPressCallback(activity)
     }
 
     private fun stop() {
         coroutineScope.coroutineContext.cancelChildren()
-
         removeDebuggerView(this.currentActivity)
-
+        debuggerViewModel?.viewModelScope?.cancel() // stop the VM from listening to app activity
         application.unregisterActivityLifecycleCallbacks(this)
         onBackPressCallback.remove()
+        debuggerViewModel = null // remove the reference to the current VM - new one will be made on next start()
     }
 
     override fun onActivityResumed(activity: Activity) {
         this.currentActivity = activity
-
         debuggerViewModel?.let { addDebuggerView(activity, it) }
     }
 
