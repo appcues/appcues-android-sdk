@@ -17,7 +17,8 @@ internal data class StepOrContainerResponse(
     val children: List<StepResponse>?,
     val content: StepContentResponse?,
     val traits: List<TraitResponse>,
-    val actions: Map<UUID, List<ActionResponse>>
+    val actions: Map<UUID, List<ActionResponse>>,
+    val type: String?,
 )
 
 internal class StepContainerAdapter {
@@ -28,7 +29,15 @@ internal class StepContainerAdapter {
             stepOrContainer.content != null ->
                 StepContainerResponse(
                     id = UUID.randomUUID(),
-                    children = arrayListOf(StepResponse(stepOrContainer.id, stepOrContainer.content, listOf(), hashMapOf())),
+                    children = arrayListOf(
+                        StepResponse(
+                            id = stepOrContainer.id,
+                            content = stepOrContainer.content,
+                            traits = listOf(),
+                            actions = hashMapOf(),
+                            type = stepOrContainer.type,
+                        )
+                    ),
                     traits = stepOrContainer.traits,
                     actions = stepOrContainer.actions,
                 )

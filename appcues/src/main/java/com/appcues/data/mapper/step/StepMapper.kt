@@ -29,7 +29,8 @@ internal class StepMapper(
             id = from.id,
             content = stepContentMapper.map(from.content),
             traits = traitsMapper.map(mergedTraits).filterIsInstance(StepDecoratingTrait::class.java),
-            actions = actionsMapper.map(mergedActions)
+            actions = actionsMapper.map(mergedActions),
+            type = from.type,
         )
     }
 }

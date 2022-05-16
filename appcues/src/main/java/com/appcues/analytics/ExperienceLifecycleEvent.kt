@@ -55,24 +55,28 @@ internal sealed class ExperienceLifecycleEvent(
         get() = event.eventName
 
     val properties: Map<String, Any>
-        get() = hashMapOf<String, Any>(
+        get() = hashMapOf<String, Any?>(
             "experienceId" to experience.id.toString().lowercase(),
             "experienceName" to experience.name,
+            "experienceType" to experience.type,
+            "version" to experience.publishedAt,
             // items in the spec that we are not ready for yet:
             // "version" to experience.version -- not included in response?
             // "localeName" to "", -- add locale values to analytics for localized experiences
             // "localeId" to "", -- add locale values to analytics for localized experiences
         ).apply {
             flatStepIndex?.let {
-                this["stepId"] = experience.flatSteps[it].id.toString()
+                val step = experience.flatSteps[it]
+                this["stepId"] = step.id.toString()
                 // this is required by SDK debugger to know which step and group is currently showing
                 this["stepIndex"] = "${experience.groupLookup[it] ?: 0},${experience.stepIndexLookup[it] ?: 0}"
+                this["stepType"] = step.type
             }
             error?.let {
                 this["message"] = it.message
                 this["errorId"] = it.id.toString()
             }
-        }
+        }.filterValues { it != null }.mapValues { it.value as Any }
 
     private val flatStepIndex: Int?
         get() = when (this) {

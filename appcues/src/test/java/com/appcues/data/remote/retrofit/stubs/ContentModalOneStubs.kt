@@ -18,6 +18,8 @@ import java.util.UUID
 internal val contentModalOneStubs = ExperienceResponse(
     id = UUID.fromString("9f4baa80-8f6a-41b1-a7b9-979da5c175e2"),
     state = "PUBLISHED",
+    type = "mobile",
+    publishedAt = 1643221968554,
     name = "POC Modal One",
     theme = null,
     actions = null,
@@ -28,6 +30,7 @@ internal val contentModalOneStubs = ExperienceResponse(
             children = arrayListOf(
                 StepResponse(
                     id = UUID.fromString("68c0d4b4-4909-4d4a-9ce4-7af8b04efab2"),
+                    type = "modal",
                     content = StepContentResponse(
                         id = UUID.fromString("2cf7dbf7-c6be-4130-b642-85861f9c6b6a"),
                         type = "stack",

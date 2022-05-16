@@ -10,5 +10,6 @@ internal data class StepResponse(
     val id: UUID,
     val content: StepContentResponse,
     val traits: List<TraitResponse>,
-    val actions: Map<UUID, List<ActionResponse>>
+    val actions: Map<UUID, List<ActionResponse>>,
+    val type: String?,
 )

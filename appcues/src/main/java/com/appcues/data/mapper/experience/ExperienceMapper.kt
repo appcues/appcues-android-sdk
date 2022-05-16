@@ -38,6 +38,8 @@ internal class ExperienceMapper(
             stepContainers = from.steps.mapToStepContainer(from.traits, from.actions),
             published = from.state != "DRAFT", // "DRAFT" is used for experience preview in builder
             priority = priority,
+            type = from.type,
+            publishedAt = from.publishedAt,
         )
     }
 

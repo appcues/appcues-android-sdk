@@ -49,6 +49,7 @@
         {
           "id": "68c0d4b4-4909-4d4a-9ce4-7af8b04efab2",
           "parentId": "6c2b7488-309c-432f-b62e-9f8539b46c9d",
+          "type": "modal",
           "contentType": "application/json",
           "content": {
             "type": "stack",
@@ -222,7 +223,7 @@
     }
   ],
   "traits": [],
-  "type": "experience",
+  "type": "mobile",
   "updatedAt": 1643221968568,
   "updatedBy": "dae301f0-bd74-4f75-8db2-8ab12f9930ac"
 }
