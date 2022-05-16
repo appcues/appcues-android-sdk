@@ -26,7 +26,6 @@ import org.koin.core.scope.Scope
 
 internal class DebuggerViewModel(
     override val scope: Scope,
-    private val deeplinkPath: String?,
 ) : ViewModel(), KoinScopeComponent {
 
     private val analyticsTracker by inject<AnalyticsTracker>()
@@ -75,6 +74,8 @@ internal class DebuggerViewModel(
     val allFonts: List<DebuggerFontItem>
         get() = debuggerFontManager.getAllFonts()
 
+    private var deeplinkPath: String? = null
+
     init {
         with(viewModelScope) {
             launch {
@@ -106,7 +107,27 @@ internal class DebuggerViewModel(
         }
     }
 
-    fun onInit() {
+    fun onStart(deeplinkPath: String?) {
+        if (deeplinkPath.isNullOrEmpty()) {
+            // if no path is given, and currently expanded, go back to idle
+            if (_uiState.value is Expanded) {
+                _uiState.value = Idle
+            }
+            return
+        }
+
+        when (_uiState.value) {
+            // if still in initial start of debugger - save the path for onRender to use
+            Creating -> this.deeplinkPath = deeplinkPath
+            // if currently idle and a new link comes in - expand to that link
+            Idle -> _uiState.value = Expanded(deeplinkPath)
+            // otherwise, no valid link action available
+            else -> Unit
+        }
+    }
+
+    fun onRender() {
+        // if we had a deeplink from initial startup, process it now
         _uiState.value = if (deeplinkPath.isNullOrEmpty()) Idle else Expanded(deeplinkPath)
     }
 
