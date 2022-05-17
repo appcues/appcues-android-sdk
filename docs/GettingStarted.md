@@ -66,4 +66,4 @@ The Appcues Android SDK supports basic automatic screen tracking for Activities.
 
 ## Debugging
 
-See [Configuring the Appcues URL Scheme](https://github.com/appcues/appcues-android-sdk/blob/main/URLSchemeConfiguring.md) for setup instructions and then refer to Refer to the [Debug Guide](https://github.com/appcues/appcues-android-sdk/blob/main/Debugging.md) for usage details.
+See [Configuring the Appcues URL Scheme](https://github.com/appcues/appcues-android-sdk/blob/main/docs/URLSchemeConfiguring.md) for setup instructions and then refer to Refer to the [Debug Guide](https://github.com/appcues/appcues-android-sdk/blob/main/docs/Debugging.md) for usage details.
