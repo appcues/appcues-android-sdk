@@ -14,6 +14,8 @@ An [`ExperienceTrait`](https://github.com/appcues/appcues-android-sdk/blob/main/
 
 A trait can be registered with `appcues.registerTrait(type, factory)`.
 
+For more information about traits, [`click here`](https://github.com/appcues/appcues-android-sdk/blob/main/docs/Traits.md)
+
 
 ## Listening and Intercepting Experiences
 

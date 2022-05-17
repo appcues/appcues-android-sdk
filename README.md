@@ -79,11 +79,11 @@ Events are the “actions” your users take in your application, which can be a
 - `track(name)`
 - `screen(title)`
 
-Refer to the full [Getting Started Guide](https://github.com/appcues/appcues-android-sdk/blob/main/GettingStarted.md) for more details.
+Refer to the full [Getting Started Guide](https://github.com/appcues/appcues-android-sdk/blob/main/docs/GettingStarted.md) for more details.
 
 ## 🛠 Customization
 
-Refer to the [Extending Guide](https://github.com/appcues/appcues-android-sdk/blob/main/Extending.md) for details.
+Refer to the [Extending Guide](https://github.com/appcues/appcues-android-sdk/blob/main/docs/Extending.md) for details.
 
 ## 📝 Documentation
 

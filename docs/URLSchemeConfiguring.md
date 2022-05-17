@@ -60,4 +60,4 @@ private fun handleLinkIntent(intent: Intent?) {
 
 Test that the URL scheme handling is set up correctly by navigating to `appcues-APPCUES_APPLICATION_ID://debugger` in your browser on the device with the app installed.
 
-See the [Debug Guide](https://github.com/appcues/appcues-android-sdk/blob/main/Debugging.md) for details on the functionality of the debugger.
+See the [Debug Guide](https://github.com/appcues/appcues-android-sdk/blob/main/docs/Debugging.md) for details on the functionality of the debugger.
