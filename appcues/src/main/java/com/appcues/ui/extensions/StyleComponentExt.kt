@@ -119,15 +119,24 @@ internal fun FontWeight.Companion.get(name: String): FontWeight {
     // NOTE: naming conventions here match iOS, rather than Android system defaults
     // for ease of use in the Appcues builder across platforms
     return when (name.lowercase()) {
-        "ultralight" -> Thin    // 100
-        "thin" -> ExtraLight    // 200
-        "light" -> Light        // 300
-        "medium" -> Medium      // 500
-        "semibold" -> SemiBold  // 600
-        "bold" -> Bold          // 700
-        "heavy" -> ExtraBold    // 800
-        "black" -> Black        // 900
-        else -> Normal          // 400
+        // 100
+        "ultralight" -> Thin
+        // 200
+        "thin" -> ExtraLight
+        // 300
+        "light" -> Light
+        // 500
+        "medium" -> Medium
+        // 600
+        "semibold" -> SemiBold
+        // 700
+        "bold" -> Bold
+        // 800
+        "heavy" -> ExtraBold
+        // 900
+        "black" -> Black
+        // 400
+        else -> Normal
     }
 }
 
