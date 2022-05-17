@@ -17,15 +17,17 @@ internal class DebuggerFontManager(
     private val logcues: Logcues,
 ) {
 
+    // NOTE: naming conventions here match iOS, rather than Android system defaults
+    // for ease of use in the Appcues builder across platforms
     private val weights = mapOf(
-        FontWeight.Thin to "Thin",
-        FontWeight.ExtraLight to "ExtraLight",
+        FontWeight.Thin to "Ultralight",
+        FontWeight.ExtraLight to "Thin",
         FontWeight.Light to "Light",
-        FontWeight.Normal to "Normal",
+        FontWeight.Normal to "Regular",
         FontWeight.Medium to "Medium",
-        FontWeight.SemiBold to "SemiBold",
+        FontWeight.SemiBold to "Semibold",
         FontWeight.Bold to "Bold",
-        FontWeight.ExtraBold to "ExtraBold",
+        FontWeight.ExtraBold to "Heavy",
         FontWeight.Black to "Black",
     )
 
@@ -92,10 +94,11 @@ internal class DebuggerFontManager(
         }
 
         addSystemFont("Default", FontFamily.Default)
+        addSystemFont("Monospaced", FontFamily.Monospace)
         addSystemFont("Serif", FontFamily.Serif)
-        addSystemFont("SansSerif", FontFamily.SansSerif)
-        addSystemFont("Monospace", FontFamily.Monospace)
-        addSystemFont("Cursive", FontFamily.Cursive)
+        // NOTE: using Monospaced to match iOS conventions for cross platform builder ease
+        // also excluding SansSerif (same as Default) and Cursive.
+        // Those options can still be found and used under All Fonts in Debugger if required
 
         return debugFonts
     }

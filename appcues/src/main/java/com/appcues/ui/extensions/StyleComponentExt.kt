@@ -109,23 +109,25 @@ internal fun FontFamily.Companion.get(name: String): FontFamily {
     return when (name.lowercase()) {
         "serif" -> Serif
         "sansserif" -> SansSerif
-        "monospace" -> Monospace
+        "monospaced" -> Monospace
         "cursive" -> Cursive
         else -> Default
     }
 }
 
 internal fun FontWeight.Companion.get(name: String): FontWeight {
+    // NOTE: naming conventions here match iOS, rather than Android system defaults
+    // for ease of use in the Appcues builder across platforms
     return when (name.lowercase()) {
-        "thin" -> Thin
-        "extralight" -> ExtraLight
-        "light" -> Light
-        "medium" -> Medium
-        "semibold" -> SemiBold
-        "bold" -> Bold
-        "extrabold" -> ExtraBold
-        "black" -> Black
-        else -> Normal
+        "ultralight" -> Thin    // 100
+        "thin" -> ExtraLight    // 200
+        "light" -> Light        // 300
+        "medium" -> Medium      // 500
+        "semibold" -> SemiBold  // 600
+        "bold" -> Bold          // 700
+        "heavy" -> ExtraBold    // 800
+        "black" -> Black        // 900
+        else -> Normal          // 400
     }
 }
 
