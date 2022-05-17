@@ -31,8 +31,9 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 internal class StateMachine(
-    appcuesCoroutineScope: AppcuesCoroutineScope,
+    private val appcuesCoroutineScope: AppcuesCoroutineScope,
     private val config: AppcuesConfig,
+    initialState: State = Idling
 ) {
 
     private val _stateFlow = MutableSharedFlow<State>(1)
@@ -43,9 +44,9 @@ internal class StateMachine(
     val errorFlow: SharedFlow<Error>
         get() = _errorFlow
 
-    private var _currentState: State = Idling
-    val currentState: State
-        get() = _currentState
+    private var _state: State = initialState
+    val state: State
+        get() = _state
 
     private var mutex = Mutex()
 
@@ -66,13 +67,13 @@ internal class StateMachine(
     }
 
     private suspend fun handleActionInternal(action: Action): ResultOf<State, Error> {
-        val transition = _currentState.take(action)
+        val transition = _state.take(action)
         val state = transition.state
         val sideEffect = transition.sideEffect
 
         if (state != null) {
             // update current state
-            _currentState = state
+            _state = state
 
             // emit state change to all listeners via flow
             _stateFlow.emit(state)
@@ -97,12 +98,12 @@ internal class StateMachine(
                     sideEffect.completion.await()
                 }
                 is AwaitEffect -> {
-                    sideEffect.completableDeferred.await()
+                    sideEffect.completion.await()
                 }
             }
         } else {
             // if no side effect, return success with current state
-            return Success(_currentState)
+            return Success(_state)
         }
     }
 
@@ -123,27 +124,42 @@ internal class StateMachine(
     private fun takeValidStateTransitions(state: State, action: Action) = with(Transitions) {
         when {
             // Idling
-            state is Idling && action is StartExperience -> state.fromIdlingToBeginningExperience(action)
+            state is Idling && action is StartExperience ->
+                state.fromIdlingToBeginningExperience(action)
+
             // BeginningExperience
-            state is BeginningExperience && action is StartStep -> state.fromBeginningExperienceToBeginningStep(action) {
-                handleActionInternal(RenderStep)
-            }
+            state is BeginningExperience && action is StartStep ->
+                state.fromBeginningExperienceToBeginningStep(action, appcuesCoroutineScope) {
+                    handleActionInternal(RenderStep)
+                }
+
             // BeginningStep
-            state is BeginningStep && action is RenderStep -> state.fromBeginningStepToRenderingStep(action)
+            state is BeginningStep && action is RenderStep ->
+                state.fromBeginningStepToRenderingStep(action)
+
             // RenderingStep
-            state is RenderingStep && action is StartStep -> state.fromRenderingStepToEndingStep(action) {
-                handleActionInternal(StartStep(action.stepReference))
-            }
-            state is RenderingStep && action is EndExperience -> state.fromRenderingStepToEndingExperience(action) {
-                handleActionInternal(action)
-            }
+            state is RenderingStep && action is StartStep ->
+                state.fromRenderingStepToEndingStep(action, appcuesCoroutineScope) {
+                    handleActionInternal(StartStep(action.stepReference))
+                }
+
+            state is RenderingStep && action is EndExperience ->
+                state.fromRenderingStepToEndingExperience(action, appcuesCoroutineScope) {
+                    handleActionInternal(action)
+                }
+
             // EndingStep
-            state is EndingStep && action is EndExperience -> state.fromEndingStepToEndingExperience(action)
-            state is EndingStep && action is StartStep -> state.fromEndingStepToBeginningStep(action) {
-                handleActionInternal(RenderStep)
-            }
+            state is EndingStep && action is EndExperience ->
+                state.fromEndingStepToEndingExperience(action)
+
+            state is EndingStep && action is StartStep ->
+                state.fromEndingStepToBeginningStep(action, appcuesCoroutineScope) {
+                    handleActionInternal(RenderStep)
+                }
+
             // EndingExperience
             state is EndingExperience && action is Reset -> state.fromEndingExperienceToIdling(action)
+
             // No valid combination of state plus action
             else -> null
         }

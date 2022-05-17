@@ -12,5 +12,5 @@ internal sealed class SideEffect {
         val completion: CompletableDeferred<ResultOf<State, Error>>,
     ) : SideEffect()
     data class ReportErrorEffect(val error: Error) : SideEffect()
-    data class AwaitEffect(val completableDeferred: CompletableDeferred<ResultOf<State, Error>>) : SideEffect()
+    data class AwaitEffect(val completion: CompletableDeferred<ResultOf<State, Error>>) : SideEffect()
 }

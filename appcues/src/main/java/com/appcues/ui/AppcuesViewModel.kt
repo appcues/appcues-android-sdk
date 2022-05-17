@@ -30,7 +30,7 @@ internal class AppcuesViewModel(
     sealed class UIState {
         object Idle : UIState()
         data class Rendering(val stepContainer: StepContainer, val position: Int) : UIState()
-        data class Dismissing(val continueAction: suspend () -> Unit) : UIState()
+        data class Dismissing(val continueAction: () -> Unit) : UIState()
     }
 
     private val stateMachine by inject<StateMachine>()
@@ -128,9 +128,7 @@ internal class AppcuesViewModel(
         uiState.value.let { state ->
             // if current state IS dismissing we send the continueAction from EndingStep
             if (state is Dismissing) {
-                appcuesCoroutineScope.launch {
-                    state.continueAction()
-                }
+                state.continueAction()
             }
         }
     }

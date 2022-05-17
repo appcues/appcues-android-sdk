@@ -26,12 +26,20 @@ internal class ContinueAction(
     private val id = config.getConfig<String>("stepID")
 
     override suspend fun execute(appcues: Appcues) {
-        when {
+        val stepRef = when {
             index != null -> StepReference.StepIndex(index)
             id != null -> StepReference.StepId(UUID.fromString(id))
             else -> StepReference.StepOffset(offset)
-        }.let {
-            stateMachine.handleAction(StartStep(it))
         }
+
+        // NOTE: there is a bug in kotlin that required this function to be revised slightly when upgrading from kotlin 1.6.0 to 1.6.21 to make the
+        // suspend call to the state machine NOT be a tail call inside of a let, chained off the when statement.
+        //
+        // I don't understand the inner details, but hopefully fixed in 1.7.0 upcoming.  Without this change, an exception is thrown like
+        // "ClassCastException: class CoroutineSingletons cannot be cast to class..."
+        // Capturing this here in case any other similar issue pops up in the future.
+        //
+        // https://youtrack.jetbrains.com/issue/KT-51818/ClassCastException-class-CoroutineSingletons-cannot-be-cast-to-c#focus=Comments-27-6035324.0-0
+        stateMachine.handleAction(StartStep(stepRef))
     }
 }
