@@ -2,7 +2,9 @@
 [![CircleCI](https://circleci.com/gh/appcues/appcues-android-sdk.svg?style=shield&circle-token=d80a6bd72e608b1b62c104c87bfcfe8ea3faa7c1)](https://circleci.com/gh/appcues/appcues-android-sdk)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/appcues/appcues-android-sdk/blob/main/LICENSE)
 
-> NOTE: This project is currently in the Beta phase. For new or existing customers interested in learning more about our mobile product, please visit our [website](https://www.appcues.com/mobile).   We encourage you to try out this new library. Please provide feedback via Github issues/PRs, and feel free to submit pull requests.
+>NOTE: This is a pre-release project for testing as a part of our mobile beta program. If you are interested in learning more about our mobile product and testing it before it is officially released, please [visit our site](https://www.appcues.com/mobile) and request early access.  
+>
+>If you have been contacted to be a part of our mobile beta program, we encourage you to try out this library and  provide feedback via Github issues and pull requests.  Please note this library will not operate if you are not part of the mobile beta program.
 
 Appcues Android SDK allows you to integrate Appcues experiences into your native Android apps.
 
