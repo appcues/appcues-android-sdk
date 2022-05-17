@@ -23,6 +23,8 @@ import com.appcues.statemachine.State.RenderingStep
 import com.appcues.statemachine.StepReference.StepIndex
 import com.appcues.util.ResultOf
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 
@@ -39,14 +41,17 @@ internal interface Transitions {
 
     fun BeginningExperience.fromBeginningExperienceToBeginningStep(
         action: StartStep,
+        coroutineScope: CoroutineScope,
         continuation: suspend () -> ResultOf<State, Error>
     ): Transition {
         val completion: CompletableDeferred<ResultOf<State, Error>> = CompletableDeferred()
         return Transition(
-            BeginningStep(experience, 0, true) {
-                completion.complete(continuation())
+            state = BeginningStep(experience, 0, true) {
+                coroutineScope.launch {
+                    completion.complete(continuation())
+                }
             },
-            PresentContainerEffect(experience, 0, completion)
+            sideEffect = PresentContainerEffect(experience, 0, completion)
         )
     }
 
@@ -56,6 +61,7 @@ internal interface Transitions {
 
     fun RenderingStep.fromRenderingStepToEndingStep(
         action: StartStep,
+        coroutineScope: CoroutineScope,
         continuation: suspend () -> ResultOf<State, Error>
     ): Transition {
         return action.stepReference.getIndex(experience, flatStepIndex).let { nextStepIndex ->
@@ -65,7 +71,9 @@ internal interface Transitions {
                     val response = CompletableDeferred<ResultOf<State, Error>>()
                     Transition(
                         state = EndingStep(experience, flatStepIndex) {
-                            response.complete(continuation())
+                            coroutineScope.launch {
+                                response.complete(continuation())
+                            }
                         },
                         sideEffect = AwaitEffect(response)
                     )
@@ -85,6 +93,7 @@ internal interface Transitions {
 
     fun RenderingStep.fromRenderingStepToEndingExperience(
         action: EndExperience,
+        coroutineScope: CoroutineScope,
         continuation: suspend () -> ResultOf<State, Error>
     ): Transition {
         return if (action.destroyed) {
@@ -103,7 +112,9 @@ internal interface Transitions {
             val response = CompletableDeferred<ResultOf<State, Error>>()
             Transition(
                 state = EndingStep(experience, flatStepIndex) {
-                    response.complete(continuation())
+                    coroutineScope.launch {
+                        response.complete(continuation())
+                    }
                 },
                 sideEffect = AwaitEffect(response)
             )
@@ -114,13 +125,17 @@ internal interface Transitions {
         return Transition(EndingExperience(experience, flatStepIndex, action.markComplete), ContinuationEffect(Reset))
     }
 
-    fun EndingStep.fromEndingStepToBeginningStep(action: StartStep, continuation: suspend () -> ResultOf<State, Error>): Transition {
+    fun EndingStep.fromEndingStepToBeginningStep(
+        action: StartStep,
+        coroutineScope: CoroutineScope,
+        continuation: suspend () -> ResultOf<State, Error>
+    ): Transition {
         // get next step index
         return action.stepReference.getIndex(experience, flatStepIndex).let { nextStepIndex ->
             // check if next step index is valid for this experience
             if (isValidStepIndex(nextStepIndex, experience)) {
                 // check if current step and next step are from different step container
-                transitionsToBeginningStep(experience, flatStepIndex, nextStepIndex, action.stepReference, continuation)
+                transitionsToBeginningStep(coroutineScope, experience, flatStepIndex, nextStepIndex, continuation)
             } else {
                 // next step index is out of bounds error
                 errorTransition(experience, flatStepIndex, "Step at ${action.stepReference} does not exist")
@@ -145,20 +160,22 @@ private fun isValidStepIndex(stepIndex: Int?, experience: Experience): Boolean {
 }
 
 private fun transitionsToBeginningStep(
+    coroutineScope: CoroutineScope,
     experience: Experience,
     currentStepIndex: Int,
     nextStepIndex: Int,
-    nextStepReference: StepReference,
     continuation: suspend () -> ResultOf<State, Error>,
 ) = if (experience.areStepsFromDifferentGroup(currentStepIndex, nextStepIndex)) {
     // given that steps are from different container, we now get step container index to present
     experience.groupLookup[nextStepIndex]?.let { stepContainerIndex ->
         val completion: CompletableDeferred<ResultOf<State, Error>> = CompletableDeferred()
         Transition(
-            BeginningStep(experience, nextStepIndex, false) {
-                completion.complete(continuation())
+            state = BeginningStep(experience, nextStepIndex, false) {
+                coroutineScope.launch {
+                    completion.complete(continuation())
+                }
             },
-            PresentContainerEffect(experience, stepContainerIndex, completion)
+            sideEffect = PresentContainerEffect(experience, stepContainerIndex, completion)
         )
     } ?: run {
         // this should never happen at this point. but better to safe guard anyways
@@ -169,9 +186,12 @@ private fun transitionsToBeginningStep(
     // once render is complete
     val completion: CompletableDeferred<ResultOf<State, Error>> = CompletableDeferred()
     Transition(
-        BeginningStep(experience, nextStepIndex, false) {
-            completion.complete(continuation())
-        }
+        state = BeginningStep(experience, nextStepIndex, false) {
+            coroutineScope.launch {
+                completion.complete(continuation())
+            }
+        },
+        sideEffect = AwaitEffect(completion)
     )
 }
 
