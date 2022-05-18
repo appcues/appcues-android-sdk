@@ -54,6 +54,7 @@ internal fun DebuggerFontDetails(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
+            .background(AppcuesColors.DebuggerBackground)
             .lazyColumnScrollIndicator(lazyListState),
         state = lazyListState
     ) {

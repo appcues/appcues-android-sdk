@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavHostController
 import com.appcues.R
 import com.appcues.debugger.DebuggerViewModel
 import com.appcues.debugger.model.DebuggerEventItem
@@ -52,7 +53,13 @@ private const val SLIDE_TRANSITION_MILLIS = 250
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 internal fun BoxScope.DebuggerPanel(debuggerState: MutableDebuggerState, debuggerViewModel: DebuggerViewModel) {
+    val navController = rememberAnimatedNavController()
+    val selectedEvent = remember { mutableStateOf<DebuggerEventItem?>(null) }
+
     // don't show if current debugger is paused
+    // IMPORTANT: any "remember" calls (like above) that affect the content of the expanded debugger pane, or subpages,
+    // need to happen before this short-circuit return is executed, otherwise state will not be properly retained
+    // on background/foreground
     if (debuggerState.isPaused.value) return
 
     // deeplink (if applicable) is used once, then reset
@@ -87,16 +94,19 @@ internal fun BoxScope.DebuggerPanel(debuggerState: MutableDebuggerState, debugge
                 .clickable(enabled = false, onClickLabel = null) {},
             contentAlignment = Alignment.TopCenter
         ) {
-            DebuggerPanelPages(debuggerViewModel, deeplinkPath)
+            DebuggerPanelPages(navController, selectedEvent, debuggerViewModel, deeplinkPath)
         }
     }
 }
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-private fun BoxScope.DebuggerPanelPages(debuggerViewModel: DebuggerViewModel, deeplinkPath: String?) {
-    val navController = rememberAnimatedNavController()
-    val selectedEvent = remember { mutableStateOf<DebuggerEventItem?>(null) }
+private fun BoxScope.DebuggerPanelPages(
+    navController: NavHostController,
+    selectedEvent: MutableState<DebuggerEventItem?>,
+    debuggerViewModel: DebuggerViewModel,
+    deeplinkPath: String?
+) {
     val mainPage = "main"
     val eventDetailsPage = "event_details"
     val fontDetailsPage = "font_details"

@@ -51,6 +51,7 @@ internal fun DebuggerEventDetails(debuggerEventItem: DebuggerEventItem?, onBackP
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
+            .background(AppcuesColors.DebuggerBackground)
             .lazyColumnScrollIndicator(lazyListState),
         state = lazyListState
     ) {

@@ -37,7 +37,7 @@ internal fun DebuggerComposition(viewModel: DebuggerViewModel, onDismiss: () -> 
     val debuggerState by remember { mutableStateOf(MutableDebuggerState(density, viewModel.uiState.value == Creating)) }
 
     // listening for lifecycle changes to update isPaused properly
-    LocalLifecycleOwner.current.lifecycle.observeAsSate().let {
+    LocalLifecycleOwner.current.lifecycle.observeAsState().let {
         debuggerState.isPaused.value = it.value == Event.ON_PAUSE
     }
 
@@ -239,15 +239,15 @@ private fun CoroutineScope.animateFabToDismiss(
 }
 
 @Composable
-private fun Lifecycle.observeAsSate(): MutableState<Event> {
+private fun Lifecycle.observeAsState(): MutableState<Event> {
     val state = remember { mutableStateOf(ON_ANY) }
     DisposableEffect(this) {
         val observer = LifecycleEventObserver { _, event ->
             state.value = event
         }
-        this@observeAsSate.addObserver(observer)
+        this@observeAsState.addObserver(observer)
         onDispose {
-            this@observeAsSate.removeObserver(observer)
+            this@observeAsState.removeObserver(observer)
         }
     }
     return state
