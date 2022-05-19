@@ -30,7 +30,7 @@ internal class TestContentWrappingTrait : ContentWrappingTrait {
     override val config: Map<String, Any>? = null
     @Composable
     @Suppress("EmptyFunctionBlock")
-    override fun WrapContent(content: (hasFixedHeight: Boolean, contentPadding: PaddingValues?) -> Unit) { }
+    override fun WrapContent(content: @Composable (hasFixedHeight: Boolean, contentPadding: PaddingValues?) -> Unit) { }
 }
 
 // an experience with a group having 3 steps, then a single step group
