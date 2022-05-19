@@ -46,7 +46,7 @@ internal class AppcuesActivity : AppCompatActivity() {
                         EXTRA_SCOPE_ID to scopeId
                     )
                 )
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_HISTORY
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
             }
     }
 
