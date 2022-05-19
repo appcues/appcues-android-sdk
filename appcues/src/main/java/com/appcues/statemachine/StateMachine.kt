@@ -40,7 +40,7 @@ internal class StateMachine(
     val stateFlow: SharedFlow<State>
         get() = _stateFlow
 
-    private val _errorFlow = MutableSharedFlow<Error>()
+    private val _errorFlow = MutableSharedFlow<Error>(1)
     val errorFlow: SharedFlow<Error>
         get() = _errorFlow
 

@@ -42,9 +42,9 @@ internal fun mockExperience(onPresent: (() -> Unit)? = null) =
         stepContainers = listOf(
             StepContainer(
                 steps = listOf(
-                    mockStep,
-                    mockStep,
-                    mockStep,
+                    mockStep(UUID.fromString("01d8a05a-3a55-4ecc-872d-d140cd628902")),
+                    mockStep(UUID.fromString("945e9689-8707-4196-8aa5-7c00c479bdab")),
+                    mockStep(UUID.fromString("933f975e-7d38-4285-847d-ae4166b97618")),
                 ),
                 presentingTrait = TestPresentingTrait(onPresent),
                 contentHolderTrait = TestContentHolderTrait(),
@@ -54,7 +54,7 @@ internal fun mockExperience(onPresent: (() -> Unit)? = null) =
             ),
             StepContainer(
                 steps = listOf(
-                    mockStep,
+                    mockStep(UUID.fromString("0f6cda9d-17f0-4c0d-b8e7-e4fb94a128d9")),
                 ),
                 presentingTrait = TestPresentingTrait(onPresent),
                 contentHolderTrait = TestContentHolderTrait(),
@@ -68,9 +68,9 @@ internal fun mockExperience(onPresent: (() -> Unit)? = null) =
         publishedAt = 1652895835000
     )
 
-internal val mockStep =
+internal fun mockStep(id: UUID) =
     Step(
-        id = UUID.fromString("6277c1b1-4bd3-4158-ae17-a888a8abc6d9"),
+        id = id,
         content = TextPrimitive(
             id = UUID.fromString("df3bbe3e-8bdb-417a-b644-5e23862786b2"),
             text = ""
