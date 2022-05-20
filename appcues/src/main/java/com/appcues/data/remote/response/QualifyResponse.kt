@@ -12,5 +12,5 @@ internal data class QualifyResponse(
     val performedQualification: Boolean,
 
     @Json(name = "qualification_reason")
-    val qualificationReason: String // screen_view, event_trigger, forced
+    val qualificationReason: String? // screen_view, event_trigger, forced
 )
