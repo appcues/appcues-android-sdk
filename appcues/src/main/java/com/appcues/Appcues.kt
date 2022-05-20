@@ -50,6 +50,8 @@ class Appcues internal constructor(
 
     init {
         sessionMonitor.start()
+
+        logcues.info("Appcues SDK $version initialized")
     }
 
     /**
@@ -192,7 +194,7 @@ class Appcues internal constructor(
 
     private fun identify(isAnonymous: Boolean, userId: String, properties: Map<String, Any>?) {
         if (userId.isEmpty()) {
-            logcues.info("Invalid userId - empty string") // possibly should be an error
+            logcues.error("Invalid userId - empty string")
             return
         }
 

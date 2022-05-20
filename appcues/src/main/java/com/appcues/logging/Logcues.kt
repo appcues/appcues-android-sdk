@@ -18,6 +18,12 @@ internal class Logcues(private val loggingLevel: LoggingLevel) {
         }
     }
 
+    fun error(message: String) {
+        if (loggingLevel > NONE) {
+            Log.e(TAG, message)
+        }
+    }
+
     fun error(exception: Exception) {
         if (loggingLevel == DEBUG) {
             throw exception
