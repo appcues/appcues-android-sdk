@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,6 +32,12 @@ import com.appcues.ui.extensions.WindowInfo.Orientation.PORTRAIT
 import com.appcues.ui.extensions.getPaddings
 import com.appcues.ui.extensions.modalStyle
 
+private const val WIDTH_MOBILE = 1f
+private const val WIDTH_TABLET_PORTRAIT = 0.9f
+private const val WIDTH_TABLET_LANDSCAPE = 0.7f
+private const val HEIGHT_MOBILE = 1f
+private const val HEIGHT_TABLET = 0.85f
+
 @Composable
 internal fun FullScreenModal(
     style: ComponentStyle?,
@@ -41,36 +48,10 @@ internal fun FullScreenModal(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.BottomCenter,
     ) {
-        val fullWidth = derivedStateOf {
-            when (windowInfo.deviceType) {
-                MOBILE -> 1f
-                TABLET -> when (windowInfo.orientation) {
-                    PORTRAIT -> 0.9f
-                    LANDSCAPE -> 0.7f
-                }
-            }
-        }
-
-        val fullHeight = derivedStateOf {
-            when (windowInfo.deviceType) {
-                MOBILE -> 1f
-                TABLET -> 0.85f
-            }
-        }
-
-        val enterAnimation = derivedStateOf {
-            when (windowInfo.deviceType) {
-                MOBILE -> enterTransition()
-                TABLET -> dialogEnterTransition()
-            }
-        }
-
-        val exitAnimation = derivedStateOf {
-            when (windowInfo.deviceType) {
-                MOBILE -> exitTransition()
-                TABLET -> dialogExitTransition()
-            }
-        }
+        val fullWidth = widthDerivedOf(windowInfo)
+        val fullHeight = heightDerivedOf(windowInfo)
+        val enterAnimation = enterTransitionDerivedOf(windowInfo)
+        val exitAnimation = exitTransitionDerivedOf(windowInfo)
 
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -94,6 +75,45 @@ internal fun FullScreenModal(
                     content = { content(true, style?.getPaddings()) },
                 )
             }
+        }
+    }
+}
+
+private fun widthDerivedOf(windowInfo: WindowInfo): State<Float> {
+    return derivedStateOf {
+        when (windowInfo.deviceType) {
+            MOBILE -> WIDTH_MOBILE
+            TABLET -> when (windowInfo.orientation) {
+                PORTRAIT -> WIDTH_TABLET_PORTRAIT
+                LANDSCAPE -> WIDTH_TABLET_LANDSCAPE
+            }
+        }
+    }
+}
+
+private fun heightDerivedOf(windowInfo: WindowInfo): State<Float> {
+    return derivedStateOf {
+        when (windowInfo.deviceType) {
+            MOBILE -> HEIGHT_MOBILE
+            TABLET -> HEIGHT_TABLET
+        }
+    }
+}
+
+private fun enterTransitionDerivedOf(windowInfo: WindowInfo): State<EnterTransition> {
+    return derivedStateOf {
+        when (windowInfo.deviceType) {
+            MOBILE -> enterTransition()
+            TABLET -> dialogEnterTransition()
+        }
+    }
+}
+
+private fun exitTransitionDerivedOf(windowInfo: WindowInfo): State<ExitTransition> {
+    return derivedStateOf {
+        when (windowInfo.deviceType) {
+            MOBILE -> exitTransition()
+            TABLET -> dialogExitTransition()
         }
     }
 }

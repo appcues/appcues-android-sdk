@@ -14,19 +14,24 @@ import com.appcues.ui.extensions.WindowInfo.ScreenType.COMPACT
 import com.appcues.ui.extensions.WindowInfo.ScreenType.EXPANDED
 import com.appcues.ui.extensions.WindowInfo.ScreenType.MEDIUM
 
+private const val WIDTH_COMPACT = 600
+private const val WIDTH_MEDIUM = 840
+private const val HEIGHT_COMPACT = 480
+private const val HEIGHT_MEDIUM = 900
+
 @Composable
 internal fun rememberWindowInfo(): WindowInfo {
     val configuration = LocalConfiguration.current
 
     val screenWidthType = when {
-        configuration.screenWidthDp < 600 -> COMPACT
-        configuration.screenWidthDp < 840 -> MEDIUM
+        configuration.screenWidthDp < WIDTH_COMPACT -> COMPACT
+        configuration.screenWidthDp < WIDTH_MEDIUM -> MEDIUM
         else -> EXPANDED
     }
 
     val screenHeightType = when {
-        configuration.screenHeightDp < 480 -> COMPACT
-        configuration.screenHeightDp < 900 -> MEDIUM
+        configuration.screenHeightDp < HEIGHT_COMPACT -> COMPACT
+        configuration.screenHeightDp < HEIGHT_MEDIUM -> MEDIUM
         else -> EXPANDED
     }
 

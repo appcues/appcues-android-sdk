@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,6 +30,13 @@ import com.appcues.ui.extensions.WindowInfo.Orientation.PORTRAIT
 import com.appcues.ui.extensions.getPaddings
 import com.appcues.ui.extensions.modalStyle
 
+private const val WIDTH_MOBILE = 1f
+private const val WIDTH_TABLET_PORTRAIT = 0.6f
+private const val WIDTH_TABLET_LANDSCAPE = 0.5f
+private const val HEIGHT_MOBILE_PORTRAIT = 0.55f
+private const val HEIGHT_MOBILE_LANDSCAPE = 1f
+private const val HEIGHT_TABLET = 0.6f
+
 @Composable
 internal fun BottomSheetModal(
     style: ComponentStyle?,
@@ -39,39 +47,10 @@ internal fun BottomSheetModal(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.BottomCenter,
     ) {
-        val fullWidth = derivedStateOf {
-            when (windowInfo.deviceType) {
-                MOBILE -> 1f
-                TABLET -> when (windowInfo.orientation) {
-                    PORTRAIT -> 0.6f
-                    LANDSCAPE -> 0.5f
-                }
-            }
-        }
-
-        val fullHeight = derivedStateOf {
-            when (windowInfo.deviceType) {
-                MOBILE -> when (windowInfo.orientation) {
-                    PORTRAIT -> 0.55f
-                    LANDSCAPE -> 1f
-                }
-                TABLET -> 0.6f
-            }
-        }
-
-        val enterAnimation = derivedStateOf {
-            when (windowInfo.deviceType) {
-                MOBILE -> enterTransition()
-                TABLET -> dialogEnterTransition()
-            }
-        }
-
-        val exitAnimation = derivedStateOf {
-            when (windowInfo.deviceType) {
-                MOBILE -> exitTransition()
-                TABLET -> dialogExitTransition()
-            }
-        }
+        val width = widthDerivedOf(windowInfo)
+        val height = heightDerivedOf(windowInfo)
+        val enterAnimation = enterTransitionDerivedOf(windowInfo)
+        val exitAnimation = exitTransitionDerivedOf(windowInfo)
 
         Box(
             modifier = Modifier
@@ -86,8 +65,8 @@ internal fun BottomSheetModal(
                 Surface(
                     modifier = Modifier
                         // will fill max width
-                        .fillMaxWidth(fullWidth.value)
-                        .fillMaxHeight(fullHeight.value)
+                        .fillMaxWidth(width.value)
+                        .fillMaxHeight(height.value)
                         // default modal style modifiers
                         .modalStyle(
                             style = style,
@@ -97,6 +76,48 @@ internal fun BottomSheetModal(
                     content = { content(true, style?.getPaddings()) },
                 )
             }
+        }
+    }
+}
+
+private fun widthDerivedOf(windowInfo: WindowInfo): State<Float> {
+    return derivedStateOf {
+        when (windowInfo.deviceType) {
+            MOBILE -> WIDTH_MOBILE
+            TABLET -> when (windowInfo.orientation) {
+                PORTRAIT -> WIDTH_TABLET_PORTRAIT
+                LANDSCAPE -> WIDTH_TABLET_LANDSCAPE
+            }
+        }
+    }
+}
+
+private fun heightDerivedOf(windowInfo: WindowInfo): State<Float> {
+    return derivedStateOf {
+        when (windowInfo.deviceType) {
+            MOBILE -> when (windowInfo.orientation) {
+                PORTRAIT -> HEIGHT_MOBILE_PORTRAIT
+                LANDSCAPE -> HEIGHT_MOBILE_LANDSCAPE
+            }
+            TABLET -> HEIGHT_TABLET
+        }
+    }
+}
+
+private fun enterTransitionDerivedOf(windowInfo: WindowInfo): State<EnterTransition> {
+    return derivedStateOf {
+        when (windowInfo.deviceType) {
+            MOBILE -> enterTransition()
+            TABLET -> dialogEnterTransition()
+        }
+    }
+}
+
+private fun exitTransitionDerivedOf(windowInfo: WindowInfo): State<ExitTransition> {
+    return derivedStateOf {
+        when (windowInfo.deviceType) {
+            MOBILE -> exitTransition()
+            TABLET -> dialogExitTransition()
         }
     }
 }
