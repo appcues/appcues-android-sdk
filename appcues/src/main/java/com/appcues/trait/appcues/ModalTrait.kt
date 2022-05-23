@@ -6,6 +6,7 @@ import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.getConfigOrDefault
 import com.appcues.data.model.getConfigStyle
 import com.appcues.trait.ContentWrappingTrait
+import com.appcues.ui.extensions.rememberWindowInfo
 import com.appcues.ui.modal.BottomSheetModal
 import com.appcues.ui.modal.DialogModal
 import com.appcues.ui.modal.ExpandedBottomSheetModal
@@ -27,11 +28,13 @@ internal class ModalTrait(
 
     @Composable
     override fun WrapContent(content: @Composable (hasFixedHeight: Boolean, contentPadding: PaddingValues?) -> Unit) {
+        val windowInfo = rememberWindowInfo()
+
         when (presentationStyle) {
-            "dialog" -> DialogModal(style, content)
-            "full" -> FullScreenModal(style, content)
-            "sheet" -> ExpandedBottomSheetModal(style, content)
-            "halfSheet" -> BottomSheetModal(style, content)
+            "dialog" -> DialogModal(style, content, windowInfo)
+            "full" -> FullScreenModal(style, content, windowInfo)
+            "sheet" -> ExpandedBottomSheetModal(style, content, windowInfo)
+            "halfSheet" -> BottomSheetModal(style, content, windowInfo)
             // what to do if presentationStyle is not valid?
             else -> Unit
         }

@@ -1,47 +1,62 @@
 package com.appcues.ui.modal
 
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.ui.AppcuesTraitAnimatedVisibility
+import com.appcues.ui.extensions.WindowInfo
+import com.appcues.ui.extensions.WindowInfo.ScreenType.COMPACT
+import com.appcues.ui.extensions.WindowInfo.ScreenType.EXPANDED
+import com.appcues.ui.extensions.WindowInfo.ScreenType.MEDIUM
 import com.appcues.ui.extensions.getPaddings
 import com.appcues.ui.extensions.modalStyle
-import com.appcues.ui.extensions.styleShadow
 
 private const val SCREEN_PADDING = 0.05
 
 @Composable
 internal fun DialogModal(
     style: ComponentStyle?,
-    content: @Composable (hasFixedHeight: Boolean, contentPadding: PaddingValues?) -> Unit
+    content: @Composable (hasFixedHeight: Boolean, contentPadding: PaddingValues?) -> Unit,
+    windowInfo: WindowInfo
 ) {
     val configuration = LocalConfiguration.current
     val dialogHorizontalMargin = (configuration.screenWidthDp * SCREEN_PADDING).dp
     val dialogVerticalMargin = (configuration.screenHeightDp * SCREEN_PADDING).dp
     val isDark = isSystemInDarkTheme()
 
+    val maxWidth = derivedStateOf {
+        when (windowInfo.screenWidthType) {
+            COMPACT -> 400.dp
+            MEDIUM -> 480.dp
+            EXPANDED -> 560.dp
+        }
+    }
+
+    val maxHeight = derivedStateOf {
+        when (windowInfo.screenHeightType) {
+            COMPACT -> Dp.Unspecified
+            MEDIUM -> 800.dp
+            EXPANDED -> 900.dp
+        }
+    }
+
     AppcuesTraitAnimatedVisibility(
-        enter = enterTransition(),
-        exit = exitTransition(),
+        enter = dialogEnterTransition(),
+        exit = dialogExitTransition(),
     ) {
         Surface(
             modifier = Modifier
+                .sizeIn(maxWidth = maxWidth.value, maxHeight = maxHeight.value)
                 .fillMaxWidth()
                 // container padding based on screen size
                 .padding(horizontal = dialogHorizontalMargin, vertical = dialogVerticalMargin)
@@ -49,28 +64,9 @@ internal fun DialogModal(
                 .modalStyle(
                     style = style,
                     isDark = isDark,
-                    modifier = Modifier
-                        .styleShadow(style, isDark)
-                        .dialogCorner(style),
+                    modifier = Modifier.dialogModifier(style, isDark),
                 ),
             content = { content(false, style?.getPaddings()) },
         )
     }
 }
-
-@OptIn(ExperimentalAnimationApi::class)
-private fun enterTransition(): EnterTransition {
-    return tween<Float>(durationMillis = 250).let {
-        fadeIn(it) + scaleIn(it, initialScale = 0.8f)
-    }
-}
-
-private fun exitTransition(): ExitTransition {
-    return fadeOut(tween(durationMillis = 100))
-}
-
-private fun Modifier.dialogCorner(style: ComponentStyle?) = this.then(
-    if (style?.cornerRadius != null && style.cornerRadius != 0) Modifier
-        .clip(RoundedCornerShape(style.cornerRadius.dp))
-    else Modifier
-)

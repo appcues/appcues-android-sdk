@@ -117,9 +117,7 @@ internal class AppcuesActivity : AppCompatActivity() {
         with(state.stepContainer) {
             // apply backdrop traits
             backdropTraits.forEach {
-                with(it) {
-                    Backdrop()
-                }
+                with(it) { Backdrop() }
             }
             // create wrapper
             contentWrappingTrait.WrapContent { hasFixedHeight, contentPadding ->
