@@ -98,7 +98,7 @@ private fun Modifier.styleBorder(
     }
 )
 
-private fun Modifier.styleSize(style: ComponentStyle, noSizeFillMax: Boolean = false) = this.then(
+internal fun Modifier.styleSize(style: ComponentStyle, noSizeFillMax: Boolean = false) = this.then(
     when {
         // when style contains both width and height
         style.width != null && style.height != null -> when {
@@ -121,7 +121,7 @@ private fun Modifier.styleSize(style: ComponentStyle, noSizeFillMax: Boolean = f
         style.width != null -> if (style.width == -1) Modifier.fillMaxWidth() else Modifier.width(style.width.dp)
         // if only height is not null, we fill max in case its -1 else we set the height
         style.height != null -> if (style.height == -1) Modifier.fillMaxHeight() else Modifier.height(style.height.dp)
-        // at the end we fill max size in case there is no width/height but the primitive (like image) is fillmax by default
+        // at the end we fill max size in case there is no width/height but the primitive (like image) is fill max by default
         noSizeFillMax -> Modifier.fillMaxSize()
         else -> Modifier
     }
@@ -234,7 +234,7 @@ private fun List<Action>.toLongPressMotionOrNull(block: (ExperienceAction) -> Un
 }
 
 internal fun Modifier.imageAspectRatio(intrinsicSize: ComponentSize?) = this.then(
-    // apply aspectRatio only when intrinsicSize is not null or any values is 0
+    // apply aspectRatio only when intrinsicSize is not null or any values is bigger than 0
     if (intrinsicSize != null && (intrinsicSize.width > 0 && intrinsicSize.height > 0)) {
         Modifier.aspectRatio(ratio = intrinsicSize.width.toFloat() / intrinsicSize.height.toFloat(), matchHeightConstraintsFirst = true)
     } else Modifier
