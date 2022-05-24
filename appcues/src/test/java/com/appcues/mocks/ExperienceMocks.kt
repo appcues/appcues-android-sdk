@@ -1,4 +1,4 @@
-package com.appcues.statemachine
+package com.appcues.mocks
 
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.PaddingValues

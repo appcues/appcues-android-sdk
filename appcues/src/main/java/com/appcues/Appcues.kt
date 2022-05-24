@@ -15,28 +15,29 @@ import com.appcues.trait.TraitRegistry
 import com.appcues.ui.ExperienceRenderer
 import org.koin.core.scope.Scope
 
-class Appcues internal constructor(
+fun Appcues(
     context: Context,
-    val config: AppcuesConfig,
-) {
-    private val koinScope: Scope = AppcuesKoinContext.createAppcuesScope(context, this)
+    accountId: String,
+    applicationId: String,
+    config: (AppcuesConfig.() -> Unit)? = null,
+): Appcues =
+    // This creates the Koin Scope and initializes the Appcues instance within, then returns the Appcues instance
+    // ready to go with the necessary dependency configuration in its scope.
+    AppcuesKoinContext.createAppcuesScope(context, AppcuesConfig(accountId, applicationId).apply { config?.invoke(this) }).get()
+
+class Appcues internal constructor(koinScope: Scope) {
+
+    private val config by koinScope.inject<AppcuesConfig>()
     private val experienceRenderer by koinScope.inject<ExperienceRenderer>()
     private val logcues by koinScope.inject<Logcues>()
     private val actionRegistry by koinScope.inject<ActionRegistry>()
     private val traitRegistry by koinScope.inject<TraitRegistry>()
     private val analyticsTracker by koinScope.inject<AnalyticsTracker>()
-    private val storage by koinScope.inject<Storage>()
+    internal val storage by koinScope.inject<Storage>()
     private val sessionMonitor by koinScope.inject<SessionMonitor>()
     private val activityScreenTracking by koinScope.inject<ActivityScreenTracking>()
     private val deeplinkHandler by koinScope.inject<DeeplinkHandler>()
     private val debuggerManager by koinScope.inject<AppcuesDebuggerManager>()
-
-    constructor(
-        context: Context,
-        accountId: String,
-        applicationId: String,
-        config: (AppcuesConfig.() -> Unit)? = null,
-    ) : this(context, AppcuesConfig(accountId, applicationId).apply { config?.invoke(this) })
 
     /**
      * Set the listener to be notified about the display of Experience content.
