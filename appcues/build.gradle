@@ -75,9 +75,9 @@ dependencies {
     implementation "androidx.room:room-ktx:2.4.2"
     kapt "androidx.room:room-compiler:2.4.2"
     // Image Loader
-    implementation "io.coil-kt:coil-compose:1.4.0"
-    implementation "io.coil-kt:coil-gif:1.4.0"
-    implementation "io.coil-kt:coil-svg:1.4.0"
+    implementation "io.coil-kt:coil-compose:2.1.0"
+    implementation "io.coil-kt:coil-gif:2.1.0"
+    implementation "io.coil-kt:coil-svg:2.1.0"
     // RESTApi
     implementation "com.squareup.retrofit2:retrofit:2.9.0"
     implementation "com.squareup.retrofit2:converter-moshi:2.9.0"
