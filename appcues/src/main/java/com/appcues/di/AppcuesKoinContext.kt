@@ -2,6 +2,7 @@ package com.appcues.di
 
 import android.content.Context
 import com.appcues.Appcues
+import com.appcues.AppcuesConfig
 import com.appcues.AppcuesKoin
 import com.appcues.action.ActionKoin
 import com.appcues.analytics.AnalyticsKoin
@@ -40,9 +41,9 @@ internal object AppcuesKoinContext {
 
     private fun getScope(scopeId: String): Scope = koin.getOrCreateScope(scopeId = scopeId, qualifier = named(scopeId))
 
-    fun createAppcuesScope(context: Context, appcues: Appcues): Scope {
+    fun createAppcuesScope(context: Context, config: AppcuesConfig): Scope {
         startKoin(context)
-        return createScope(appcues)
+        return createScope(config)
     }
 
     private fun startKoin(context: Context) {
@@ -54,23 +55,23 @@ internal object AppcuesKoinContext {
         }
     }
 
-    private fun createScope(appcues: Appcues): Scope {
+    private fun createScope(config: AppcuesConfig): Scope {
         return generateNewScopeId().let { scopeId ->
             getScope(scopeId).also {
-                koinPlugins.installModule(it, appcues)
+                koinPlugins.installModule(it, config)
             }
         }
     }
 
     private fun generateNewScopeId() = UUID.randomUUID().toString()
 
-    private fun List<KoinScopePlugin>.installModule(scope: Scope, appcues: Appcues) {
+    private fun List<KoinScopePlugin>.installModule(scope: Scope, config: AppcuesConfig) {
         koinApp.modules(
             module {
                 scope(named(scope.id)) {
-                    scoped { appcues }
-                    scoped { appcues.config }
+                    scoped { config }
                     scoped { scope }
+                    scoped { Appcues(scope) }
                     // run install for each KoinScopePlugin
                     forEach {
                         with(it) { install() }

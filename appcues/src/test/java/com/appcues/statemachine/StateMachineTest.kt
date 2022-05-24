@@ -1,11 +1,11 @@
 package com.appcues.statemachine
 
-import com.appcues.AppcuesConfig
 import com.appcues.AppcuesCoroutineScope
-import com.appcues.LoggingLevel.NONE
+import com.appcues.AppcuesKoinTestRule
+import com.appcues.AppcuesScopeTest
 import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperiencePriority.NORMAL
-import com.appcues.logging.Logcues
+import com.appcues.mocks.mockExperience
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.ReportError
 import com.appcues.statemachine.Action.Reset
@@ -24,40 +24,29 @@ import com.appcues.statemachine.StepReference.StepId
 import com.appcues.statemachine.StepReference.StepIndex
 import com.appcues.statemachine.StepReference.StepOffset
 import com.appcues.util.ResultOf
-import com.appcues.util.ResultOf.Success
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeout
-import org.junit.After
 import org.junit.Rule
 import org.junit.Test
+import org.koin.core.component.get
 import java.util.UUID
 import kotlin.time.Duration.Companion.seconds
 
 @ExperimentalCoroutinesApi
-class StateMachineTest {
+class StateMachineTest : AppcuesScopeTest {
 
     @get:Rule
-    val mainDispatcherRule = MainDispatcherRule()
-
-    private val logcues: Logcues = Logcues(NONE)
-    private val scope = AppcuesCoroutineScope(logcues)
-    private val config: AppcuesConfig = AppcuesConfig("00000", "123")
-
-    @After
-    fun tearDown() {
-        scope.coroutineContext.cancelChildren()
-    }
+    override val koinTestRule = AppcuesKoinTestRule()
 
     @Test
     fun `initial state SHOULD be Idling`() {
         // GIVEN
-        val stateMachine = StateMachine(scope, config)
+        val stateMachine = StateMachine(get(), get())
 
         // THEN
         assertThat(stateMachine.state).isEqualTo(Idling)
@@ -368,7 +357,8 @@ class StateMachineTest {
     ): StateMachine {
         val stateFlowCompletion: CompletableDeferred<Boolean> = CompletableDeferred()
         val errorFlowCompletion: CompletableDeferred<Boolean> = CompletableDeferred()
-        val machine = StateMachine(scope, config, state)
+        val scope: AppcuesCoroutineScope = get()
+        val machine = StateMachine(scope, get(), state)
         // this collect on the stateFlow simulates the function of the UI
         // that is required to progress the state machine forward on UI present/dismiss
         scope.launch {
