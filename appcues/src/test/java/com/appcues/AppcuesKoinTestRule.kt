@@ -40,7 +40,7 @@ class AppcuesKoinTestRule : TestWatcher() {
 
         Dispatchers.setMain(StandardTestDispatcher())
 
-        startKoin{
+        startKoin {
             val scopeId = UUID.randomUUID().toString()
             scope = koin.getOrCreateScope(scopeId = scopeId, qualifier = named(scopeId))
             modules(
