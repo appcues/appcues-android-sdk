@@ -121,6 +121,8 @@ internal class DebuggerViewModel(
             Creating -> this.deeplinkPath = deeplinkPath
             // if currently idle and a new link comes in - expand to that link
             Idle -> _uiState.value = Expanded(deeplinkPath)
+            // currently open - reset to the new path
+            is Expanded -> _uiState.value = Expanded(deeplinkPath)
             // otherwise, no valid link action available
             else -> Unit
         }
@@ -191,5 +193,10 @@ internal class DebuggerViewModel(
 
     private fun List<DebuggerEventItem>.hideEventsForFab(): List<DebuggerEventItem> {
         return toMutableList().onEach { it.showOnFab = false }
+    }
+
+    fun onDetailDismiss() {
+        // reset the view state to remove any deeplink path
+        _uiState.value = Expanded()
     }
 }
