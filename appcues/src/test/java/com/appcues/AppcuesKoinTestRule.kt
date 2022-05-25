@@ -6,8 +6,10 @@ import com.appcues.analytics.AnalyticsTracker
 import com.appcues.debugger.AppcuesDebuggerManager
 import com.appcues.logging.Logcues
 import com.appcues.mocks.storageMockk
+import com.appcues.statemachine.StateMachine
 import com.appcues.trait.TraitRegistry
 import com.appcues.ui.ExperienceRenderer
+import com.appcues.util.LinkOpener
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -48,6 +50,7 @@ class AppcuesKoinTestRule : TestWatcher() {
                     scope(named(scope.id)) {
                         scoped { AppcuesConfig("00000", "123") }
                         scoped { scope }
+                        scoped { AppcuesCoroutineScope(get()) }
                         scoped { mockk<AnalyticsTracker>(relaxed = true) }
                         scoped { mockk<SessionMonitor>(relaxed = true) }
                         scoped { mockk<Logcues>(relaxed = true) }
@@ -57,9 +60,10 @@ class AppcuesKoinTestRule : TestWatcher() {
                         scoped { mockk<TraitRegistry>(relaxed = true) }
                         scoped { mockk<ActionRegistry>(relaxed = true) }
                         scoped { mockk<DeeplinkHandler>(relaxed = true) }
-                        scoped { AppcuesCoroutineScope(get()) }
+                        scoped { mockk<StateMachine>(relaxed = true) }
+                        scoped { mockk<LinkOpener>(relaxed = true) }
                         scoped { storageMockk() }
-                        scoped { Appcues(scope) }
+                        scoped { mockk<Appcues>(relaxed = true) }
                     }
                 }
             )

@@ -32,7 +32,11 @@ internal fun AppcuesConfigMap.getConfigInt(key: String): Int? {
     if (this == null) return null
     // get value by key as Int?
     return get(key)?.let {
-        if (it is Double) it.toInt() else null
+        when (it) {
+            is Double -> it.toInt()
+            is Int -> it
+            else -> null
+        }
     }
 }
 

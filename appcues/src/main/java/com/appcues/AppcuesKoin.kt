@@ -7,6 +7,7 @@ import com.appcues.logging.Logcues
 import com.appcues.statemachine.StateMachine
 import com.appcues.ui.ExperienceRenderer
 import com.appcues.util.ContextResources
+import com.appcues.util.LinkOpener
 import org.koin.dsl.ScopeDSL
 
 internal object AppcuesKoin : KoinScopePlugin {
@@ -47,5 +48,6 @@ internal object AppcuesKoin : KoinScopePlugin {
                 logcues = get()
             )
         }
+        scoped { LinkOpener(get()) }
     }
 }

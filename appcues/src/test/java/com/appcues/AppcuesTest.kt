@@ -34,7 +34,7 @@ internal class AppcuesTest : AppcuesScopeTest {
 
     @Before
     fun setUp() {
-        appcues = get()
+        appcues = Appcues(get())
     }
 
     @Test
