@@ -1,4 +1,5 @@
 # Appcues Android SDK
+[![maven](https://img.shields.io/maven-central/v/com.appcues/appcues)](https://repo1.maven.org/maven2/com/appcues/appcues/)
 [![CircleCI](https://circleci.com/gh/appcues/appcues-android-sdk.svg?style=shield&circle-token=d80a6bd72e608b1b62c104c87bfcfe8ea3faa7c1)](https://circleci.com/gh/appcues/appcues-android-sdk)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/appcues/appcues-android-sdk/blob/main/LICENSE)
 
