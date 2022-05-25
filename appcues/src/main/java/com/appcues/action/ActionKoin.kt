@@ -25,7 +25,7 @@ internal object ActionKoin : KoinScopePlugin {
         factory { params ->
             LinkAction(
                 config = params.getOrNull(),
-                context = get(),
+                linkOpener = get(),
             )
         }
 
