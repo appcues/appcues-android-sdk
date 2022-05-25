@@ -62,10 +62,6 @@ internal fun BoxScope.DebuggerPanel(debuggerState: MutableDebuggerState, debugge
     // on background/foreground
     if (debuggerState.isPaused.value) return
 
-    // deeplink (if applicable) is used once, then reset
-    val deeplinkPath = debuggerState.deeplinkPath.value
-    debuggerState.deeplinkPath.value = null
-
     AnimatedVisibility(
         visibleState = debuggerState.isExpanded,
         enter = fadeIn(),
@@ -94,7 +90,7 @@ internal fun BoxScope.DebuggerPanel(debuggerState: MutableDebuggerState, debugge
                 .clickable(enabled = false, onClickLabel = null) {},
             contentAlignment = Alignment.TopCenter
         ) {
-            DebuggerPanelPages(navController, selectedEvent, debuggerViewModel, deeplinkPath)
+            DebuggerPanelPages(navController, selectedEvent, debuggerViewModel, debuggerState)
         }
     }
 }
@@ -105,11 +101,12 @@ private fun BoxScope.DebuggerPanelPages(
     navController: NavHostController,
     selectedEvent: MutableState<DebuggerEventItem?>,
     debuggerViewModel: DebuggerViewModel,
-    deeplinkPath: String?
+    debuggerState: MutableDebuggerState,
 ) {
     val mainPage = "main"
     val eventDetailsPage = "event_details"
     val fontDetailsPage = "font_details"
+    val deeplinkPath = debuggerState.deeplinkPath.value
 
     AnimatedNavHost(navController = navController, startDestination = mainPage) {
         mainComposable(
@@ -127,7 +124,7 @@ private fun BoxScope.DebuggerPanelPages(
                 },
             )
 
-            LaunchedEffect(Unit) {
+            LaunchedEffect(deeplinkPath) {
                 when (deeplinkPath) {
                     "fonts" -> navController.navigate(fontDetailsPage)
                     else -> Unit
@@ -137,7 +134,7 @@ private fun BoxScope.DebuggerPanelPages(
 
         eventDetailsComposable(eventDetailsPage, mainPage, selectedEvent, navController)
 
-        fontDetailsComposable(fontDetailsPage, mainPage, debuggerViewModel, navController)
+        fontDetailsComposable(fontDetailsPage, mainPage, debuggerViewModel, debuggerState, navController)
     }
 }
 
@@ -224,6 +221,7 @@ private fun NavGraphBuilder.fontDetailsComposable(
     pageName: String,
     mainPage: String,
     debuggerViewModel: DebuggerViewModel,
+    debuggerState: MutableDebuggerState,
     navController: NavController,
 ) {
     detailPageComposable(
@@ -246,7 +244,9 @@ private fun NavGraphBuilder.fontDetailsComposable(
                 ).show()
             },
             onBackPressed = {
+                debuggerState.deeplinkPath.value = null
                 navController.popBackStack()
+                debuggerViewModel.onDetailDismiss()
             }
         )
     }
