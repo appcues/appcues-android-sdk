@@ -1,0 +1,54 @@
+apply plugin: 'jacoco'
+
+jacoco {
+    toolVersion = "0.8.7"
+}
+
+// https://medium.com/jamf-engineering/android-kotlin-code-coverage-with-jacoco-sonar-and-gradle-plugin-6-x-3933ed503a6e
+
+project.afterEvaluate {
+
+    android.libraryVariants.all { variant ->
+
+        def variantName = variant.name
+        def unitTestTask = "test${variantName.capitalize()}UnitTest"
+
+        // add this task in "dependsOn" below to also include UI tests
+        //def androidTestCoverageTask = "create${variantName.capitalize()}CoverageReport"
+
+        tasks.create(name: "${variantName}UnitTestCoverage", type: JacocoReport, dependsOn: ["$unitTestTask"]) {
+
+            group = "Reporting"
+            description = "Generate Jacoco coverage reports for the ${variantName.capitalize()} build"
+
+            reports {
+                html.enabled  true
+                xml.enabled  true
+                csv.enabled  true
+            }
+
+            def excludes = [
+                    '**/R.class',
+                    '**/R$*.class',
+                    '**/BuildConfig.*',
+                    '**/Manifest*.*',
+                    '**/*Test*.*',
+                    'android/**/*.*',
+                    '**/*Koin*.*',
+                    '**/appcues/ui/**/*.*',
+                    '**/appcues/debugger/ui/**/*.*',
+            ]
+
+            def javaClasses = fileTree(dir: variant.javaCompileProvider.get().destinationDir, excludes: excludes)
+            def kotlinClasses = fileTree(dir: "${buildDir}/tmp/kotlin-classes/${variantName}", excludes: excludes)
+            classDirectories.setFrom(files([javaClasses, kotlinClasses]))
+
+            def variantSourceSets = variant.sourceSets.java.srcDirs.collect { it.path }.flatten()
+            sourceDirectories.setFrom(project.files(variantSourceSets))
+
+            // can use below to get UI output as well in future, if desired
+            // def androidTestsData = fileTree(dir: "${buildDir}/outputs/code_coverage/${variantName}AndroidTest/connected/", includes: ["**/*.ec"])
+            executionData(files(["$project.buildDir/jacoco/${unitTestTask}.exec"]))
+        }
+    }
+}
