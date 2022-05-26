@@ -9,6 +9,11 @@ platform :android do
     gradle(task: ':samples:kotlin-android-app:bundleRelease')
   end
 
+  desc "Generate unit test code coverage report"
+  lane :code_coverage do
+    gradle(task: ':appcues:debugUnitTestCoverage')
+  end
+
   desc "Deploy SDK release to GitHub Package Registry"
   lane :deploy_github_package do
     gradle(task: ':appcues:versionTxt')

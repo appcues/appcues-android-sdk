@@ -19,6 +19,7 @@ orbs:
   android: circleci/android@2.0.3
   aws-s3: circleci/aws-s3@3.0
   jq: circleci/jq@2.2.0
+  codecov: codecov/codecov@3.1.1
 
 # -------------------------
 #        REFERENCES
@@ -185,6 +186,11 @@ jobs:
       - run:
           name: Deploy SDK to GitHub Package Registry
           command: bundle exec fastlane deploy_github_package
+      - run:
+          name: Generate code coverage report
+          command: bundle exec fastlane code_coverage
+      - codecov/upload:
+          file: "./appcues/build/reports/jacoco/debugUnitTestCoverage/debugUnitTestCoverage.xml"
       - run:
           # some ideas from https://discuss.circleci.com/t/leveraging-circleci-api-to-include-build-logs-in-slack-notifications/39111
           name: Get changelog
