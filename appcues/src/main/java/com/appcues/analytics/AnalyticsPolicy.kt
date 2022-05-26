@@ -1,8 +1,7 @@
 package com.appcues.analytics
 
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleObserver
-import androidx.lifecycle.OnLifecycleEvent
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.appcues.AppcuesCoroutineScope
 import com.appcues.SessionMonitor
@@ -17,7 +16,7 @@ internal class AnalyticsPolicy(
     appcuesCoroutineScope: AppcuesCoroutineScope,
     private val stateMachine: StateMachine,
     private val logcues: Logcues,
-) : LifecycleObserver {
+) : DefaultLifecycleObserver {
 
     private var lastScreen: String? = null
     private var activeExperienceScreen: String? = null
@@ -44,9 +43,7 @@ internal class AnalyticsPolicy(
         }
     }
 
-    @Suppress("unused")
-    @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-    fun onLifecycleProcessPause() {
+    override fun onPause(owner: LifecycleOwner) {
         // this is to handle the edge case of
         // (1) screen view qualifies an experience
         // (2) experience completes and returns to customer activity

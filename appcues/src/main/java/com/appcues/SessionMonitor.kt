@@ -1,8 +1,7 @@
 package com.appcues
 
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleObserver
-import androidx.lifecycle.OnLifecycleEvent
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.appcues.analytics.AnalyticsEvent
 import com.appcues.analytics.AnalyticsTracker
@@ -17,7 +16,7 @@ import java.util.concurrent.TimeUnit
 
 internal class SessionMonitor(
     override val scope: Scope,
-) : LifecycleObserver, KoinScopeComponent {
+) : KoinScopeComponent, DefaultLifecycleObserver {
 
     // lazy prop inject here to avoid circular dependency
     private val analyticsTracker by inject<AnalyticsTracker>()
@@ -60,8 +59,7 @@ internal class SessionMonitor(
         return false
     }
 
-    @OnLifecycleEvent(Lifecycle.Event.ON_START)
-    fun onAppForegrounded() {
+    override fun onStart(owner: LifecycleOwner) {
         val backgroundTime = applicationBackgrounded?.time
         if (_sessionId == null || backgroundTime == null) return
 
@@ -75,8 +73,7 @@ internal class SessionMonitor(
         }
     }
 
-    @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
-    fun onAppBackgrounded() {
+    override fun onStop(owner: LifecycleOwner) {
         if (_sessionId == null) return
         applicationBackgrounded = Date()
         analyticsTracker.track(AnalyticsEvent.SessionSuspended, null, false)

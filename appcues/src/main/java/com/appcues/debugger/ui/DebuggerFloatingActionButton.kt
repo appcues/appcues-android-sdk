@@ -30,7 +30,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.consumeAllChanges
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -155,7 +154,7 @@ private fun Modifier.clickableAndDraggable(
                 detectDragGestures(
                     onDragEnd = { onDragEnd() },
                     onDrag = { change, dragAmount ->
-                        change.consumeAllChanges()
+                        change.consume()
                         onDrag(dragAmount)
                     }
                 )
