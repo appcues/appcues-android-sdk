@@ -25,15 +25,9 @@ android {
     resourcePrefix 'appcues_'
 
     buildTypes {
-        debug {
-            debuggable true
-            minifyEnabled false
-            testCoverageEnabled true
-        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            testCoverageEnabled true
         }
     }
 
