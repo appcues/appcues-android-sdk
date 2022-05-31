@@ -74,7 +74,7 @@ internal fun DebuggerEventItem.EventItemContent(rowScope: RowScope) {
                     text = dateFormat.format(Date(timestamp)),
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Normal,
-                    color = AppcuesColors.OceanNight
+                    color = AppcuesColors.SharkbaitOhAh
                 )
             }
         }

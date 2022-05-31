@@ -199,7 +199,6 @@ private fun NavGraphBuilder.detailPageComposable(
     )
 }
 
-@OptIn(ExperimentalAnimationApi::class)
 private fun NavGraphBuilder.eventDetailsComposable(
     pageName: String,
     mainPage: String,
@@ -216,7 +215,6 @@ private fun NavGraphBuilder.eventDetailsComposable(
     }
 }
 
-@OptIn(ExperimentalAnimationApi::class)
 private fun NavGraphBuilder.fontDetailsComposable(
     pageName: String,
     mainPage: String,

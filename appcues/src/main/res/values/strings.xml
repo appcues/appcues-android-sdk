@@ -73,5 +73,7 @@
     <string name="appcues_debugger_font_details_all_title">All Fonts</string>
     <string name="appcues_debugger_font_details_clipboard_message">"Copied to clipboard"</string>
     <string name="appcues_debugger_font_details_copy_icon_description">Copy icon</string>
+    <string name="appcues_debugger_font_details_clean_filter">Clear</string>
+    <string name="appcues_debugger_font_details_hint">"Search…"</string>
 
 </resources>

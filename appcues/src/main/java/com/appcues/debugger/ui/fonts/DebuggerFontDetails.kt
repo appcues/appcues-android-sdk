@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -22,6 +23,11 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,16 +35,18 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.appcues.R
+import com.appcues.R.string
 import com.appcues.debugger.model.DebuggerFontItem
+import com.appcues.debugger.ui.AppcuesSearchView
 import com.appcues.debugger.ui.lazyColumnScrollIndicator
 import com.appcues.ui.theme.AppcuesColors
 
-private val FIRST_VISIBLE_ITEM_OFFSET_THRESHOLD = 56.dp
+private val FIRST_VISIBLE_ITEM_OFFSET_THRESHOLD = 32.dp
 
 @Composable
 internal fun DebuggerFontDetails(
@@ -48,6 +56,25 @@ internal fun DebuggerFontDetails(
     onFontTap: (DebuggerFontItem) -> Unit,
     onBackPressed: () -> Unit,
 ) {
+
+    val filter = remember { mutableStateOf(String()) }
+    val appSpecificFontsFiltered = derivedStateOf {
+        if (filter.value.isNotEmpty()) {
+            appSpecificFonts.filter { it.name.lowercase().contains(filter.value) }
+        } else appSpecificFonts
+    }
+
+    val systemFontsFiltered = derivedStateOf {
+        if (filter.value.isNotEmpty()) {
+            systemFonts.filter { it.name.lowercase().contains(filter.value) }
+        } else systemFonts
+    }
+
+    val allFontsFiltered = derivedStateOf {
+        if (filter.value.isNotEmpty()) {
+            allFonts.filter { it.name.lowercase().contains(filter.value) }
+        } else allFonts
+    }
 
     val lazyListState = rememberLazyListState()
 
@@ -59,40 +86,81 @@ internal fun DebuggerFontDetails(
         state = lazyListState
     ) {
         item {
-            Spacer(modifier = Modifier.height(60.dp))
+            Spacer(modifier = Modifier.height(88.dp))
         }
 
-        if (appSpecificFonts.any()) {
+        if (appSpecificFontsFiltered.value.any()) {
             sectionTitle(R.string.appcues_debugger_font_details_app_specific_title)
-            fonts(appSpecificFonts, onFontTap)
+            fonts(appSpecificFontsFiltered.value, onFontTap)
         }
 
-        if (systemFonts.any()) {
+        if (systemFontsFiltered.value.any()) {
             sectionTitle(R.string.appcues_debugger_font_details_system_title)
-            fonts(systemFonts, onFontTap)
+            fonts(systemFontsFiltered.value, onFontTap)
         }
 
-        if (allFonts.any()) {
+        if (allFontsFiltered.value.any()) {
             sectionTitle(R.string.appcues_debugger_font_details_all_title)
-            fonts(allFonts, onFontTap)
+            fonts(allFontsFiltered.value, onFontTap)
         }
     }
 
     val keepBackButtonDocked = lazyListState.firstVisibleItemIndex == 0 &&
         with(LocalDensity.current) { lazyListState.firstVisibleItemScrollOffset.toDp() < FIRST_VISIBLE_ITEM_OFFSET_THRESHOLD }
-
     val elevation = animateDpAsState(if (keepBackButtonDocked) 0.dp else 12.dp)
 
+    FontDetailsOverlay(elevation, onBackPressed, filter)
+}
+
+@Composable
+private fun FontDetailsOverlay(
+    elevation: State<Dp>,
+    onBackPressed: () -> Unit,
+    filter: MutableState<String>
+) {
     Box(
         modifier = Modifier
-            .padding(top = 12.dp, start = 8.dp)
+            .fillMaxSize()
+            .padding(vertical = 32.dp, horizontal = 8.dp)
+    ) {
+
+        BackButton(
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(top = 8.dp),
+            elevation = elevation.value
+        ) { onBackPressed() }
+
+        AppcuesSearchView(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .fillMaxWidth()
+                .padding(start = 60.dp, top = 12.dp, end = 8.dp),
+            height = 40.dp,
+            elevation = elevation.value,
+            hint = LocalContext.current.getString(string.appcues_debugger_font_details_hint),
+            inputDelay = 300,
+        ) { filter.value = it.lowercase() }
+    }
+}
+
+@Composable
+private fun BackButton(
+    modifier: Modifier = Modifier,
+    elevation: Dp,
+    onBackPressed: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .then(modifier)
             .size(48.dp)
+            .clip(RoundedCornerShape(percent = 100))
             .clickable { onBackPressed() },
         contentAlignment = Alignment.Center
     ) {
         Box(
             modifier = Modifier
-                .shadow(elevation.value, RoundedCornerShape(percent = 100))
+                .shadow(elevation, RoundedCornerShape(percent = 100))
                 .clip(RoundedCornerShape(percent = 100))
                 .size(32.dp)
                 .background(MaterialTheme.colors.surface),
@@ -128,7 +196,6 @@ private fun LazyListScope.fonts(properties: List<DebuggerFontItem>, onFontTap: (
     }
 }
 
-@OptIn(ExperimentalTextApi::class)
 @Composable
 private fun LazyItemScope.ListItem(debuggerFont: DebuggerFontItem, onFontTap: (DebuggerFontItem) -> Unit) {
     Row(

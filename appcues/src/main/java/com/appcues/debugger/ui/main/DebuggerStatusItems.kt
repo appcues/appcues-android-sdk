@@ -72,7 +72,7 @@ internal fun DebuggerStatusItem.StatusItemContent(rowScope: RowScope) {
                     text = it,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Normal,
-                    color = AppcuesColors.OceanNight
+                    color = AppcuesColors.SharkbaitOhAh
                 )
             }
             line2?.let {
@@ -80,7 +80,7 @@ internal fun DebuggerStatusItem.StatusItemContent(rowScope: RowScope) {
                     text = it,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Normal,
-                    color = AppcuesColors.OceanNight
+                    color = AppcuesColors.SharkbaitOhAh
                 )
             }
         }
