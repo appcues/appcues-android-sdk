@@ -70,7 +70,7 @@ internal fun FullScreenModal(
                         .modalStyle(
                             style = style,
                             isDark = isSystemInDarkTheme(),
-                            modifier = Modifier.fullModifier(windowInfo, style, isSystemInDarkTheme()),
+                            modifier = Modifier.fullModifier(windowInfo),
                         ),
                     content = { content(true, style?.getPaddings()) },
                 )

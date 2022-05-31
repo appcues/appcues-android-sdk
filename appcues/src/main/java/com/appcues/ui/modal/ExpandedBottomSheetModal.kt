@@ -67,7 +67,7 @@ internal fun ExpandedBottomSheetModal(
                         .modalStyle(
                             style = style,
                             isDark = isSystemInDarkTheme(),
-                            modifier = Modifier.sheetModifier(windowInfo, style, isSystemInDarkTheme()),
+                            modifier = Modifier.sheetModifier(windowInfo, style),
                         ),
                     content = { content(true, style?.getPaddings()) },
                 )

@@ -66,7 +66,6 @@ internal fun Modifier.modalStyle(
     if (style != null) Modifier
         .padding(style.getMargins())
         .then(modifier)
-        .styleBorder(style, isDark)
         .styleBackground(style, isDark)
     else Modifier
 )
@@ -86,7 +85,7 @@ private fun Modifier.styleBackground(
     }
 )
 
-private fun Modifier.styleBorder(
+internal fun Modifier.styleBorder(
     style: ComponentStyle,
     isDark: Boolean
 ) = this.then(
@@ -146,7 +145,7 @@ internal fun Modifier.styleShadow(style: ComponentStyle?, isDark: Boolean): Modi
     )
 }
 
-private fun Modifier.coloredShadow(
+internal fun Modifier.coloredShadow(
     color: Color,
     radius: Dp = 0.dp,
     offsetX: Dp = 0.dp,
