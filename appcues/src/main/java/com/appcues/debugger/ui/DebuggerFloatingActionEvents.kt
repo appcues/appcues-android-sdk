@@ -120,12 +120,12 @@ private fun LazyItemScope.Item(event: DebuggerEventItem, isAnchoredStart: Boolea
         ) {
             Image(
                 modifier = Modifier.size(14.dp),
-                colorFilter = ColorFilter.tint(AppcuesColors.OceanNight),
+                colorFilter = ColorFilter.tint(AppcuesColors.SharkbaitOhAh),
                 painter = painterResource(id = event.type.toResourceId()),
                 contentDescription = LocalContext.current.getString(event.type.getTitleString())
             )
 
-            Text(fontSize = 12.sp, text = event.title, color = AppcuesColors.OceanNight)
+            Text(fontSize = 12.sp, text = event.title, color = AppcuesColors.SharkbaitOhAh)
         }
     }
 

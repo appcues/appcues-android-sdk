@@ -195,7 +195,7 @@ private fun LazyItemScope.ListItem(key: String, value: String) {
                 text = value,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Normal,
-                color = AppcuesColors.OceanNight
+                color = AppcuesColors.SharkbaitOhAh
             )
         }
     }
