@@ -92,7 +92,11 @@ internal fun AppcuesSearchView(
                     isFocusOn.value = it.isFocused
                 },
             value = text.value,
-            onValueChange = { text.value = it },
+            onValueChange = {
+                if (isFocusOn.value) {
+                    text.value = it
+                }
+            },
             singleLine = true,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(
@@ -101,7 +105,9 @@ internal fun AppcuesSearchView(
             cursorBrush = SolidColor(AppcuesColors.Infinity)
         )
 
-        SearchViewOverlay(isFocusOn, height, text, keyboardController, focusManager, hint)
+        SearchViewOverlay(isFocusOn, height, keyboardController, focusManager, hint) {
+            text.value = TextFieldValue(String())
+        }
 
         LaunchedEffect(text.value) {
             if (firstComposition.value) {
@@ -124,17 +130,17 @@ internal fun AppcuesSearchView(
 private fun BoxScope.SearchViewOverlay(
     isFocusOn: MutableState<Boolean>,
     height: Dp,
-    text: MutableState<TextFieldValue>,
     keyboardController: SoftwareKeyboardController?,
     focusManager: FocusManager,
-    hint: String
+    hint: String,
+    onClear: () -> Unit,
 ) {
     if (isFocusOn.value) {
         val iconModifier = Companion
             .align(Alignment.CenterEnd)
             .size(height)
             .clickable {
-                text.value = TextFieldValue(String())
+                onClear()
                 isFocusOn.value = false
                 keyboardController?.hide()
                 focusManager.clearFocus()
