@@ -72,9 +72,7 @@ internal fun AppcuesSearchView(
             .border(1.dp, border.value, RoundedCornerShape(cornerDp.value))
             .background(MaterialTheme.colors.surface)
             .height(height)
-            .clickable(interactionSource = MutableInteractionSource(), indication = null) {
-                focusRequester.requestFocus()
-            },
+            .clickable(interactionSource = MutableInteractionSource(), indication = null) { focusRequester.requestFocus() },
     ) {
         val text = remember { mutableStateOf(TextFieldValue(String())) }
         val keyboardController = LocalSoftwareKeyboardController.current
@@ -105,9 +103,7 @@ internal fun AppcuesSearchView(
             cursorBrush = SolidColor(AppcuesColors.Infinity)
         )
 
-        SearchViewOverlay(isFocusOn, height, keyboardController, focusManager, hint) {
-            text.value = TextFieldValue(String())
-        }
+        SearchViewOverlay(isFocusOn, height, keyboardController, focusManager, hint) { text.value = TextFieldValue(String()) }
 
         LaunchedEffect(text.value) {
             if (firstComposition.value) {
