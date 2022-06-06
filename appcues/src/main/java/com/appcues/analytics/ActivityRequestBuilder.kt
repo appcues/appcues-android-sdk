@@ -12,6 +12,7 @@ internal class ActivityRequestBuilder(
 ) {
 
     companion object {
+
         const val SCREEN_TITLE_ATTRIBUTE = "screenTitle"
         const val SCREEN_TITLE_CONTEXT = "screen_title"
     }
@@ -35,13 +36,16 @@ internal class ActivityRequestBuilder(
     fun track(name: String, properties: Map<String, Any>? = null): ActivityRequest {
         // must do this decoration first, so that any auto-prop updates resulting from it get applied before
         // using in the profileUpdate below
-        val events = listOf(decorator.decorateTrack(EventRequest(name = name, attributes = properties?.toMutableMap() ?: hashMapOf())))
+        val trackEvent = decorator.decorateTrack(
+            EventRequest(name = name, attributes = properties?.toMutableMap() ?: hashMapOf())
+        )
+
         return ActivityRequest(
             userId = storage.userId,
             profileUpdate = decorator.autoProperties.toMutableMap(),
             accountId = config.accountId,
             groupId = storage.groupId,
-            events = events
+            events = listOf(trackEvent)
         )
     }
 
@@ -56,6 +60,7 @@ internal class ActivityRequestBuilder(
                 context = hashMapOf(SCREEN_TITLE_CONTEXT to title)
             )
         )
+
         return ActivityRequest(
             userId = storage.userId,
             profileUpdate = decorator.autoProperties.toMutableMap(),

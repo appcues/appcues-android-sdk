@@ -10,7 +10,7 @@ internal object AnalyticsKoin : KoinScopePlugin {
         scoped { SessionMonitor(scope = this) }
         scoped {
             AutoPropertyDecorator(
-                context = get(),
+                contextResources = get(),
                 config = get(),
                 storage = get(),
                 sessionMonitor = get(),
