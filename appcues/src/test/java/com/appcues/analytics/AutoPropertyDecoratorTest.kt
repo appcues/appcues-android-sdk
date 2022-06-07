@@ -6,15 +6,19 @@ import com.appcues.SessionMonitor
 import com.appcues.Storage
 import com.appcues.data.remote.request.ActivityRequest
 import com.appcues.data.remote.request.EventRequest
+import com.appcues.rules.MainDispatcherRule
 import com.appcues.util.ContextResources
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
 class AutoPropertyDecoratorTest {
+
+    @get:Rule
+    val dispatcherRule = MainDispatcherRule()
 
     private val config: AppcuesConfig = mockk<AppcuesConfig>(relaxed = true).apply {
         every { applicationId } returns "applicationId"
@@ -27,14 +31,18 @@ class AutoPropertyDecoratorTest {
     private val storage: Storage = mockk(relaxed = true)
     private val sessionMonitor: SessionMonitor = mockk(relaxed = true)
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    private val autoPropertyDecorator = AutoPropertyDecorator(
-        config = config,
-        appcuesCoroutineScope = AppcuesCoroutineScope(mockk(), UnconfinedTestDispatcher()),
-        contextResources = contextResources,
-        storage = storage,
-        sessionMonitor = sessionMonitor,
-    )
+    private lateinit var autoPropertyDecorator: AutoPropertyDecorator
+
+    @Before
+    fun setup() {
+        autoPropertyDecorator = AutoPropertyDecorator(
+            config = config,
+            appcuesCoroutineScope = AppcuesCoroutineScope(mockk()),
+            contextResources = contextResources,
+            storage = storage,
+            sessionMonitor = sessionMonitor,
+        )
+    }
 
     @Test
     fun `autoProperties SHOULD contain 21 amount of elements`() {
@@ -112,7 +120,7 @@ class AutoPropertyDecoratorTest {
         with(autoPropertyDecorator.decorateTrack(event)) {
             // then
             assertThat(attributes.containsKey("_identity")).isTrue()
-            with(attributes["_identity"] as Map<String, Any>) {
+            with(attributes["_identity"] as Map<*, *>) {
                 assertThat(containsKey("_lastScreenTitle")).isFalse()
                 assertThat(get("_currentScreenTitle")).isEqualTo("Screen 1")
                 assertThat(get("_sessionPageviews")).isEqualTo(1)
@@ -122,7 +130,7 @@ class AutoPropertyDecoratorTest {
         with(autoPropertyDecorator.decorateTrack(event2)) {
             // then
             assertThat(attributes.containsKey("_identity")).isTrue()
-            with(attributes["_identity"] as Map<String, Any>) {
+            with(attributes["_identity"] as Map<*, *>) {
                 assertThat(get("_lastScreenTitle")).isEqualTo("Screen 1")
                 assertThat(get("_currentScreenTitle")).isEqualTo("Screen 2")
                 assertThat(get("_sessionPageviews")).isEqualTo(2)
@@ -139,11 +147,14 @@ class AutoPropertyDecoratorTest {
         // when
         with(autoPropertyDecorator.decorateTrack(event)) {
             // then
-            with(attributes["_identity"] as Map<String, Any>) {
+            with(attributes["_identity"] as Map<*, *>) {
                 assertThat(containsKey("_lastScreenTitle")).isFalse()
                 assertThat(containsKey("_currentScreenTitle")).isFalse()
                 assertThat(get("_sessionPageviews")).isEqualTo(0)
-                assertThat(get("_sessionRandomizer")).isNotEqualTo(0)
+                assertThat(get("_sessionRandomizer") as Int).let {
+                    it.isAtLeast(0)
+                    it.isAtMost(100)
+                }
             }
         }
     }
@@ -154,22 +165,21 @@ class AutoPropertyDecoratorTest {
         val event = EventRequest(
             name = AnalyticsEvent.SessionStarted.eventName,
         )
-        var sessionRandomizer = 0
+        val sessionSets = mutableSetOf<Int>()
         // when
-        with(autoPropertyDecorator.decorateTrack(event)) {
-            // then
-            with(attributes["_identity"] as Map<String, Any>) {
-                assertThat(get("_sessionRandomizer")).isNotEqualTo(sessionRandomizer)
-                sessionRandomizer = get("_sessionRandomizer") as Int
+        for (i in 0..10) {
+            // doing this ten times to make sure we account for some luck
+            with(autoPropertyDecorator.decorateTrack(event)) {
+                // then
+                with(attributes["_identity"] as Map<*, *>) {
+                    println("i is $i: ${get("_sessionRandomizer") as Int}")
+                    sessionSets.add(get("_sessionRandomizer") as Int)
+                }
             }
         }
-        // when
-        with(autoPropertyDecorator.decorateTrack(event)) {
-            // then
-            with(attributes["_identity"] as Map<String, Any>) {
-                assertThat(get("_sessionRandomizer")).isNotEqualTo(sessionRandomizer)
-            }
-        }
+
+        // session set size should be greater than 1, meaning we are working with different numbers every time.
+        assertThat(sessionSets.size).isGreaterThan(1)
     }
 
     @Test
@@ -184,7 +194,7 @@ class AutoPropertyDecoratorTest {
     }
 
     @Test
-    fun `decorateIdentity SHOULD put autoProperties to profileUpdate map`() {
+    fun `decorateIdentity SHOULD put custom properties into profileUpdate map`() {
         // given
         val activityRequest = ActivityRequest(
             userId = "test userId",

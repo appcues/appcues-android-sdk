@@ -1,8 +1,8 @@
 package com.appcues.action.appcues
 
 import com.appcues.Appcues
-import com.appcues.AppcuesKoinTestRule
 import com.appcues.AppcuesScopeTest
+import com.appcues.rules.KoinScopeRule
 import com.google.common.truth.Truth
 import io.mockk.Called
 import io.mockk.coVerify
@@ -17,7 +17,7 @@ import java.util.UUID
 internal class LaunchExperienceActionTest : AppcuesScopeTest {
 
     @get:Rule
-    override val koinTestRule = AppcuesKoinTestRule()
+    override val koinTestRule = KoinScopeRule()
 
     @Test
     fun `launch experience SHOULD have expected type name`() {

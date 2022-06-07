@@ -1,7 +1,7 @@
 package com.appcues.action.appcues
 
-import com.appcues.AppcuesKoinTestRule
 import com.appcues.AppcuesScopeTest
+import com.appcues.rules.KoinScopeRule
 import com.appcues.statemachine.Action.StartStep
 import com.appcues.statemachine.StateMachine
 import com.appcues.statemachine.StepReference.StepId
@@ -20,7 +20,7 @@ import java.util.UUID
 internal class ContinueActionTest : AppcuesScopeTest {
 
     @get:Rule
-    override val koinTestRule = AppcuesKoinTestRule()
+    override val koinTestRule = KoinScopeRule()
 
     @Test
     fun `continue SHOULD have expected type name`() {

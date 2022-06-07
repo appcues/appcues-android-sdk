@@ -1,9 +1,9 @@
 package com.appcues.action.appcues
 
 import com.appcues.Appcues
-import com.appcues.AppcuesKoinTestRule
 import com.appcues.AppcuesScopeTest
 import com.appcues.Storage
+import com.appcues.rules.KoinScopeRule
 import com.google.common.truth.Truth.assertThat
 import io.mockk.Called
 import io.mockk.coVerify
@@ -17,7 +17,7 @@ import org.koin.core.component.get
 internal class UpdateProfileActionTest : AppcuesScopeTest {
 
     @get:Rule
-    override val koinTestRule = AppcuesKoinTestRule()
+    override val koinTestRule = KoinScopeRule()
 
     @Test
     fun `update profile SHOULD have expected type name`() {

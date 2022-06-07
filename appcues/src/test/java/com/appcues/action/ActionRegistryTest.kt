@@ -1,21 +1,19 @@
 package com.appcues.action
 
-import com.appcues.AppcuesKoinTestRule
 import com.appcues.AppcuesScopeTest
 import com.appcues.logging.Logcues
+import com.appcues.rules.KoinScopeRule
 import com.google.common.truth.Truth.assertThat
 import io.mockk.mockk
 import io.mockk.verify
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Rule
 import org.junit.Test
 import org.koin.core.component.get
 
-@OptIn(ExperimentalCoroutinesApi::class)
 internal class ActionRegistryTest : AppcuesScopeTest {
 
     @get:Rule
-    override val koinTestRule = AppcuesKoinTestRule()
+    override val koinTestRule = KoinScopeRule()
 
     @Test
     fun `get SHOULD return registered ExperienceAction`() {

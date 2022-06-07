@@ -7,6 +7,7 @@ import com.appcues.action.ExperienceAction
 import com.appcues.analytics.ActivityScreenTracking
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.debugger.AppcuesDebuggerManager
+import com.appcues.rules.KoinScopeRule
 import com.appcues.trait.ExperienceTrait
 import com.appcues.trait.TraitRegistry
 import com.appcues.ui.ExperienceRenderer
@@ -28,7 +29,7 @@ import java.util.UUID
 internal class AppcuesTest : AppcuesScopeTest {
 
     @get:Rule
-    override val koinTestRule = AppcuesKoinTestRule()
+    override val koinTestRule = KoinScopeRule()
 
     private lateinit var appcues: Appcues
 

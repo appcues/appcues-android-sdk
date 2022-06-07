@@ -1,5 +1,10 @@
-package com.appcues
+package com.appcues.rules
 
+import com.appcues.Appcues
+import com.appcues.AppcuesConfig
+import com.appcues.AppcuesCoroutineScope
+import com.appcues.DeeplinkHandler
+import com.appcues.SessionMonitor
 import com.appcues.action.ActionRegistry
 import com.appcues.analytics.ActivityScreenTracking
 import com.appcues.analytics.AnalyticsTracker
@@ -11,11 +16,6 @@ import com.appcues.trait.TraitRegistry
 import com.appcues.ui.ExperienceRenderer
 import com.appcues.util.LinkOpener
 import io.mockk.mockk
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.setMain
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 import org.koin.core.context.startKoin
@@ -26,21 +26,17 @@ import org.koin.dsl.module
 import org.koin.mp.KoinPlatformTools
 import java.util.UUID
 
-// modeled after KoinTestRule, but adapted for our Scoped dependency concept
-// https://github.com/InsertKoinIO/koin/blob/main/core/koin-test-junit4/src/main/kotlin/org/koin/test/KoinTestRule.kt
-//
-// also handles coroutine usage of main dispatcher in unit test https://stackoverflow.com/a/70865589 via
-// Dispatchers.setMain and Dispatchers.resetMain calls below
-@OptIn(ExperimentalCoroutinesApi::class)
-class AppcuesKoinTestRule : TestWatcher() {
+/**
+ * modeled after KoinTestRule, but adapted for our Scoped dependency concept
+ * https://github.com/InsertKoinIO/koin/blob/main/core/koin-test-junit4/src/main/kotlin/org/koin/test/KoinTestRule.kt
+ */
+class KoinScopeRule : TestWatcher() {
 
     lateinit var scope: Scope
 
     override fun starting(description: Description) {
         // close any existing instance
         KoinPlatformTools.defaultContext().getOrNull()?.close()
-
-        Dispatchers.setMain(StandardTestDispatcher())
 
         startKoin {
             val scopeId = UUID.randomUUID().toString()
@@ -72,6 +68,5 @@ class AppcuesKoinTestRule : TestWatcher() {
 
     override fun finished(description: Description) {
         stopKoin()
-        Dispatchers.resetMain()
     }
 }

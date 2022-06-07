@@ -7,6 +7,7 @@ import com.appcues.data.model.Experience
 import com.appcues.data.remote.request.ActivityRequest
 import com.appcues.data.remote.request.EventRequest
 import com.appcues.logging.Logcues
+import com.appcues.rules.MainDispatcherRule
 import com.appcues.ui.ExperienceRenderer
 import com.google.common.truth.Truth.assertThat
 import io.mockk.Called
@@ -16,16 +17,17 @@ import io.mockk.coVerifySequence
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
 class AnalyticsTrackerTest {
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    private val coroutineScope = AppcuesCoroutineScope(Logcues(NONE), UnconfinedTestDispatcher())
+    @get:Rule
+    val dispatcherRule = MainDispatcherRule()
+
+    private val coroutineScope = AppcuesCoroutineScope(Logcues(NONE))
     private val repository: AppcuesRepository = mockk()
     private val experienceRenderer: ExperienceRenderer = mockk()
     private val activityBuilder: ActivityRequestBuilder = mockk()
@@ -34,17 +36,19 @@ class AnalyticsTrackerTest {
 
     private val analyticsFlowUpdates: ArrayList<ActivityRequest> = arrayListOf()
 
-    private val analyticsTracker = AnalyticsTracker(
-        appcuesCoroutineScope = coroutineScope,
-        repository = repository,
-        experienceRenderer = experienceRenderer,
-        activityBuilder = activityBuilder,
-        experienceLifecycleTracker = experienceLifecycleTracker,
-        analyticsPolicy = analyticsPolicy,
-    )
+    private lateinit var analyticsTracker: AnalyticsTracker
 
     @Before
     fun setup() {
+        analyticsTracker = AnalyticsTracker(
+            appcuesCoroutineScope = coroutineScope,
+            repository = repository,
+            experienceRenderer = experienceRenderer,
+            activityBuilder = activityBuilder,
+            experienceLifecycleTracker = experienceLifecycleTracker,
+            analyticsPolicy = analyticsPolicy,
+        )
+
         coroutineScope.launch {
             analyticsTracker.analyticsFlow.collect {
                 analyticsFlowUpdates.add(it)
@@ -59,7 +63,7 @@ class AnalyticsTrackerTest {
     }
 
     @Test
-    fun `identify SHOULD trigger experienceLifecycleTracker start`() {
+    fun `identify SHOULD update analyticsFlow`() {
         // given
         every { analyticsPolicy.canIdentify() } returns true
         every { activityBuilder.identify(any()) } returns mockk()
