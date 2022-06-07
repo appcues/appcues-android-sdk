@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    compileSdk 31
+    compileSdk 32
 
     signingConfigs {
         release {
@@ -18,7 +18,7 @@ android {
     defaultConfig {
         applicationId "com.appcues.samples.kotlin"
         minSdk 21
-        targetSdk 31
+        targetSdk 32
         versionCode Integer.valueOf(System.getenv("CIRCLE_BUILD_NUM") ?: 1)
         versionName "1.0"
 
