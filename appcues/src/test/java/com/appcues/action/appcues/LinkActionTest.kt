@@ -1,8 +1,8 @@
 package com.appcues.action.appcues
 
 import android.net.Uri
-import com.appcues.AppcuesKoinTestRule
 import com.appcues.AppcuesScopeTest
+import com.appcues.rules.KoinScopeRule
 import com.appcues.util.LinkOpener
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
@@ -20,7 +20,7 @@ import org.koin.core.component.get
 internal class LinkActionTest : AppcuesScopeTest {
 
     @get:Rule
-    override val koinTestRule = AppcuesKoinTestRule()
+    override val koinTestRule = KoinScopeRule()
 
     @Before
     fun setUp() {

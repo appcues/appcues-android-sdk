@@ -1,7 +1,7 @@
 package com.appcues.action.appcues
 
-import com.appcues.AppcuesKoinTestRule
 import com.appcues.AppcuesScopeTest
+import com.appcues.rules.KoinScopeRule
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.StateMachine
 import com.google.common.truth.Truth.assertThat
@@ -16,7 +16,7 @@ import org.koin.core.component.get
 internal class CloseActionTest : AppcuesScopeTest {
 
     @get:Rule
-    override val koinTestRule = AppcuesKoinTestRule()
+    override val koinTestRule = KoinScopeRule()
 
     @Test
     fun `close SHOULD have expected type name`() {

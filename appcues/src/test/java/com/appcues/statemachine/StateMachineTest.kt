@@ -1,11 +1,12 @@
 package com.appcues.statemachine
 
 import com.appcues.AppcuesCoroutineScope
-import com.appcues.AppcuesKoinTestRule
 import com.appcues.AppcuesScopeTest
 import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperiencePriority.NORMAL
 import com.appcues.mocks.mockExperience
+import com.appcues.rules.KoinScopeRule
+import com.appcues.rules.MainDispatcherRule
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.Pause
 import com.appcues.statemachine.Action.RenderStep
@@ -45,7 +46,10 @@ import kotlin.time.Duration.Companion.seconds
 class StateMachineTest : AppcuesScopeTest {
 
     @get:Rule
-    override val koinTestRule = AppcuesKoinTestRule()
+    override val koinTestRule = KoinScopeRule()
+
+    @get:Rule
+    val dispatcherRule = MainDispatcherRule()
 
     @Test
     fun `initial state SHOULD be Idling`() {
