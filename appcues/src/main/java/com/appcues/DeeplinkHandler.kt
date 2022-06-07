@@ -20,10 +20,12 @@ internal class DeeplinkHandler(
         val linkData: Uri? = intent?.data
         var handled = false
 
-        if (linkAction == Intent.ACTION_VIEW &&
-            linkData?.scheme == "appcues-${config.applicationId}" &&
-            linkData.host == "sdk"
-        ) {
+        if (linkData == null) return handled
+
+        val validScheme = linkData.scheme == "appcues-${config.applicationId}" || linkData.scheme == "appcues-democues"
+        val validHost = linkData.host == "sdk"
+
+        if (linkAction == Intent.ACTION_VIEW && validScheme && validHost) {
             val segments = linkData.pathSegments
             when {
                 segments.count() == 2 && segments[0] == "experience_preview" -> {
