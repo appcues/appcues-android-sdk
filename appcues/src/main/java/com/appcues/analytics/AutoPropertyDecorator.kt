@@ -12,7 +12,6 @@ import com.appcues.data.remote.request.EventRequest
 import com.appcues.util.ContextResources
 import kotlinx.coroutines.launch
 import java.util.Date
-import kotlin.random.Random
 
 internal class AutoPropertyDecorator(
     config: AppcuesConfig,
@@ -20,15 +19,10 @@ internal class AutoPropertyDecorator(
     private val contextResources: ContextResources,
     private val storage: Storage,
     private val sessionMonitor: SessionMonitor,
+    private val sessionRandomizer: SessionRandomizer,
 ) {
 
     companion object {
-
-        // _sessionRandomizer is defined in the web SDK as: A random number between 1 and 100,
-        // generated every time a user visits your site in a new browser window or tab.
-        // It appears to be used for targeting a % of sessions as a sample.
-        private const val SESSION_RANDOMIZER_LOWER_BOUND = 0
-        private const val SESSION_RANDOMIZER_UPPER_BOUND = 100
 
         const val IDENTITY_PROPERTY = "_identity"
         const val UPDATED_AT_PROPERTY = "_updatedAt"
@@ -37,7 +31,7 @@ internal class AutoPropertyDecorator(
     private var currentScreen: String? = null
     private var previousScreen: String? = null
     private var sessionPageviews = 0
-    private var sessionRandomizer: Int? = 0
+    private var sessionRandomId: Int = 0
 
     private val contextProperties = hashMapOf<String, Any>(
         "app_id" to config.applicationId,
@@ -70,7 +64,7 @@ internal class AutoPropertyDecorator(
             "_currentScreenTitle" to currentScreen,
             "_lastScreenTitle" to previousScreen,
             "_sessionPageviews" to sessionPageviews,
-            "_sessionRandomizer" to sessionRandomizer,
+            "_sessionRandomizer" to sessionRandomId,
         ).filterValues { it != null }.mapValues { it.value as Any }
 
     val autoProperties: Map<String, Any>
@@ -94,7 +88,7 @@ internal class AutoPropertyDecorator(
         } else if (event.name == AnalyticsEvent.SessionStarted.eventName) {
             // special handling for session start events
             sessionPageviews = 0
-            sessionRandomizer = Random.nextInt(SESSION_RANDOMIZER_LOWER_BOUND, SESSION_RANDOMIZER_UPPER_BOUND)
+            sessionRandomId = sessionRandomizer.get()
             currentScreen = null
             previousScreen = null
         }
