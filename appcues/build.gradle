@@ -94,6 +94,9 @@ dependencies {
     implementation "com.google.accompanist:accompanist-webview:0.24.9-beta"
     // Navigation Animated
     implementation "com.google.accompanist:accompanist-navigation-animation:0.24.9-beta"
+    // Play In-App Review
+    implementation 'com.google.android.play:review:2.0.0'
+    implementation 'com.google.android.play:review-ktx:2.0.0'
 
     testImplementation "junit:junit:4.13.2"
     testImplementation "com.squareup.okhttp3:mockwebserver:4.9.3"
