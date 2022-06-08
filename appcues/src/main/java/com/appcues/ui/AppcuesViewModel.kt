@@ -7,6 +7,8 @@ import com.appcues.action.ActionProcessor
 import com.appcues.action.ExperienceAction
 import com.appcues.data.model.StepContainer
 import com.appcues.statemachine.Action.EndExperience
+import com.appcues.statemachine.Action.Pause
+import com.appcues.statemachine.Action.Resume
 import com.appcues.statemachine.Action.StartStep
 import com.appcues.statemachine.State.BeginningStep
 import com.appcues.statemachine.State.EndingStep
@@ -130,6 +132,18 @@ internal class AppcuesViewModel(
             if (state is Dismissing) {
                 state.continueAction()
             }
+        }
+    }
+
+    fun onPause() {
+        appcuesCoroutineScope.launch {
+            stateMachine.handleAction(Pause)
+        }
+    }
+
+    fun onResume() {
+        appcuesCoroutineScope.launch {
+            stateMachine.handleAction(Resume)
         }
     }
 }

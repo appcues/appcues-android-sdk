@@ -8,6 +8,7 @@ import com.appcues.data.model.ExperiencePriority.NORMAL
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.StartExperience
 import com.appcues.statemachine.State.Idling
+import com.appcues.statemachine.State.Paused
 import com.appcues.statemachine.StateMachine
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
@@ -28,7 +29,13 @@ internal class ExperienceRenderer(
         // if an experience is currently showing and the new experience coming in is normal priority
         // then it replaces whatever is currently showing - i.e. an "event_trigger" experience will
         // supersede a "screen_view" triggered experience - per Appcues standard behavior
-        if (experience.priority == NORMAL && stateMachine.state != Idling) {
+        val priorityOverride = experience.priority == NORMAL && stateMachine.state != Idling
+        // additionally - if there is a current Experience running in the Paused state - this means
+        // that the AppcuesActivity has been covered up by another Activity in the foreground with priority,
+        // and whatever is now requesting to display on top should take precedence since the host application
+        // has opened another activity on top of a previous Experience that is no longer visible.
+        val isPaused = stateMachine.state is Paused
+        if (priorityOverride || isPaused) {
             return stateMachine.handleAction(EndExperience(false)).run {
                 when (this) {
                     is Success -> show(experience) // re-invoke show on the new experience now after dismiss

@@ -8,7 +8,6 @@
         <activity
             android:name=".ui.AppcuesActivity"
             android:exported="false"
-            android:noHistory="true"
             android:theme="@style/Appcues.AppcuesActivityTheme" />
     </application>
 

@@ -25,4 +25,5 @@ internal sealed class State {
         val dismissAndContinue: (() -> Unit)?,
     ) : State()
     data class EndingExperience(val experience: Experience, val flatStepIndex: Int, val markComplete: Boolean) : State()
+    data class Paused(val state: State) : State()
 }

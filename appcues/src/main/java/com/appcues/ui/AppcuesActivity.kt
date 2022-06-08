@@ -66,6 +66,16 @@ internal class AppcuesActivity : AppCompatActivity() {
         }
     }
 
+    override fun onPause() {
+        super.onPause()
+        viewModel.onPause()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.onResume()
+    }
+
     @Composable
     private fun Composition() {
         CompositionLocalProvider(
