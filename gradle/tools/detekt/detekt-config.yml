@@ -237,6 +237,7 @@ exceptions:
       - 'NumberFormatException'
       - 'ParseException'
       - 'JsonDataException'
+      - 'TimeoutCancellationException'
     allowedExceptionNameRegex: '_|(ignore|expected).*'
   ThrowingExceptionFromFinally:
     active: true

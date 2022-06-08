@@ -4,6 +4,7 @@ import com.appcues.action.appcues.CloseAction
 import com.appcues.action.appcues.ContinueAction
 import com.appcues.action.appcues.LaunchExperienceAction
 import com.appcues.action.appcues.LinkAction
+import com.appcues.action.appcues.RequestReviewAction
 import com.appcues.action.appcues.TrackEventAction
 import com.appcues.action.appcues.UpdateProfileAction
 import com.appcues.di.KoinScopePlugin
@@ -52,6 +53,14 @@ internal object ActionKoin : KoinScopePlugin {
             UpdateProfileAction(
                 config = params.getOrNull(),
                 storage = get(),
+            )
+        }
+
+        factory { params ->
+            RequestReviewAction(
+                config = params.getOrNull(),
+                context = get(),
+                koinScope = get(),
             )
         }
     }
