@@ -9,4 +9,6 @@ internal sealed class Action {
     data class EndExperience(val destroyed: Boolean, val markComplete: Boolean = false) : Action()
     object Reset : Action()
     data class ReportError(val error: Error) : Action()
+    object Pause : Action()
+    object Resume : Action()
 }

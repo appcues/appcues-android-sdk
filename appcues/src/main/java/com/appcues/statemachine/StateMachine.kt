@@ -3,9 +3,11 @@ package com.appcues.statemachine
 import com.appcues.AppcuesConfig
 import com.appcues.AppcuesCoroutineScope
 import com.appcues.statemachine.Action.EndExperience
+import com.appcues.statemachine.Action.Pause
 import com.appcues.statemachine.Action.RenderStep
 import com.appcues.statemachine.Action.ReportError
 import com.appcues.statemachine.Action.Reset
+import com.appcues.statemachine.Action.Resume
 import com.appcues.statemachine.Action.StartExperience
 import com.appcues.statemachine.Action.StartStep
 import com.appcues.statemachine.Error.ExperienceAlreadyActive
@@ -18,6 +20,7 @@ import com.appcues.statemachine.State.BeginningStep
 import com.appcues.statemachine.State.EndingExperience
 import com.appcues.statemachine.State.EndingStep
 import com.appcues.statemachine.State.Idling
+import com.appcues.statemachine.State.Paused
 import com.appcues.statemachine.State.RenderingStep
 import com.appcues.statemachine.Transition.EmptyTransition
 import com.appcues.statemachine.Transition.ErrorLoggingTransition
@@ -159,6 +162,15 @@ internal class StateMachine(
 
             // EndingExperience
             state is EndingExperience && action is Reset -> state.fromEndingExperienceToIdling(action)
+
+            // Pause
+            action is Pause -> Transition(Paused(state))
+
+            // Resume
+            state is Paused && action is Resume -> Transition(state.state)
+
+            // EndingExperience while paused
+            state is Paused && action is EndExperience -> Transition(state.state, ContinuationEffect(action))
 
             // No valid combination of state plus action
             else -> null
