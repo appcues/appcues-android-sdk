@@ -30,6 +30,9 @@ class AutoPropertyDecoratorTest {
 
     private val storage: Storage = mockk(relaxed = true)
     private val sessionMonitor: SessionMonitor = mockk(relaxed = true)
+    private val sessionRandomizer: SessionRandomizer = mockk<SessionRandomizer>().apply {
+        every { get() } returns 10
+    }
 
     private lateinit var autoPropertyDecorator: AutoPropertyDecorator
 
@@ -41,6 +44,7 @@ class AutoPropertyDecoratorTest {
             contextResources = contextResources,
             storage = storage,
             sessionMonitor = sessionMonitor,
+            sessionRandomizer = sessionRandomizer,
         )
     }
 
@@ -151,10 +155,6 @@ class AutoPropertyDecoratorTest {
                 assertThat(containsKey("_lastScreenTitle")).isFalse()
                 assertThat(containsKey("_currentScreenTitle")).isFalse()
                 assertThat(get("_sessionPageviews")).isEqualTo(0)
-                assertThat(get("_sessionRandomizer") as Int).let {
-                    it.isAtLeast(0)
-                    it.isAtMost(100)
-                }
             }
         }
     }
@@ -165,21 +165,13 @@ class AutoPropertyDecoratorTest {
         val event = EventRequest(
             name = AnalyticsEvent.SessionStarted.eventName,
         )
-        val sessionSets = mutableSetOf<Int>()
         // when
-        for (i in 0..10) {
-            // doing this ten times to make sure we account for some luck
-            with(autoPropertyDecorator.decorateTrack(event)) {
-                // then
-                with(attributes["_identity"] as Map<*, *>) {
-                    println("i is $i: ${get("_sessionRandomizer") as Int}")
-                    sessionSets.add(get("_sessionRandomizer") as Int)
-                }
+        with(autoPropertyDecorator.decorateTrack(event)) {
+            // then
+            with(attributes["_identity"] as Map<*, *>) {
+                assertThat(get("_sessionRandomizer") as Int).isEqualTo(10)
             }
         }
-
-        // session set size should be greater than 1, meaning we are working with different numbers every time.
-        assertThat(sessionSets.size).isGreaterThan(1)
     }
 
     @Test

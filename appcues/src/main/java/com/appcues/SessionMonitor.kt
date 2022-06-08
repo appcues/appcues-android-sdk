@@ -79,6 +79,6 @@ internal class SessionMonitor(
         analyticsTracker.track(AnalyticsEvent.SessionSuspended, null, false)
 
         // ensure any pending in-memory analytics get processed asap
-        analyticsTracker.flushAsync()
+        analyticsTracker.flushPendingActivity()
     }
 }
