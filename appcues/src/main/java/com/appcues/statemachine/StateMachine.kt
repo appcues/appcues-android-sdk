@@ -161,16 +161,19 @@ internal class StateMachine(
                 }
 
             // EndingExperience
-            state is EndingExperience && action is Reset -> state.fromEndingExperienceToIdling(action)
+            state is EndingExperience && action is Reset ->
+                state.fromEndingExperienceToIdling(action)
+
+            // Paused
+            state is Paused && action is Resume ->
+                Transition(state.state)
+
+            state is Paused && action is EndExperience ->
+                Transition(state.state, ContinuationEffect(action))
 
             // Pause
-            action is Pause -> Transition(Paused(state))
-
-            // Resume
-            state is Paused && action is Resume -> Transition(state.state)
-
-            // EndingExperience while paused
-            state is Paused && action is EndExperience -> Transition(state.state, ContinuationEffect(action))
+            action is Pause && state !is Paused ->
+                Transition(Paused(state))
 
             // No valid combination of state plus action
             else -> null

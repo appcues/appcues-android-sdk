@@ -7,8 +7,11 @@ import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperiencePriority.NORMAL
 import com.appcues.mocks.mockExperience
 import com.appcues.statemachine.Action.EndExperience
+import com.appcues.statemachine.Action.Pause
+import com.appcues.statemachine.Action.RenderStep
 import com.appcues.statemachine.Action.ReportError
 import com.appcues.statemachine.Action.Reset
+import com.appcues.statemachine.Action.Resume
 import com.appcues.statemachine.Action.StartExperience
 import com.appcues.statemachine.Action.StartStep
 import com.appcues.statemachine.Error.ExperienceAlreadyActive
@@ -19,6 +22,7 @@ import com.appcues.statemachine.State.BeginningStep
 import com.appcues.statemachine.State.EndingExperience
 import com.appcues.statemachine.State.EndingStep
 import com.appcues.statemachine.State.Idling
+import com.appcues.statemachine.State.Paused
 import com.appcues.statemachine.State.RenderingStep
 import com.appcues.statemachine.StepReference.StepId
 import com.appcues.statemachine.StepReference.StepIndex
@@ -158,6 +162,58 @@ class StateMachineTest : AppcuesScopeTest {
         val initialState = RenderingStep(experience, 1, false)
         val stateMachine = initMachine(initialState)
         val action = EndExperience(destroyed = true, markComplete = false)
+        val targetState = Idling
+
+        // WHEN
+        val result = stateMachine.handleAction(action)
+
+        // THEN
+        assertThat(result.successValue()).isEqualTo(targetState)
+        assertThat(stateMachine.state).isEqualTo(targetState)
+    }
+
+    @Test
+    fun `RenderingStep SHOULD transition to Paused WHEN action is Pause`() = runTest {
+        // GIVEN
+        val experience = mockExperience()
+        val initialState = RenderingStep(experience, 1, false)
+        val stateMachine = initMachine(initialState)
+        val action = Pause
+        val targetState = Paused(initialState)
+
+        // WHEN
+        val result = stateMachine.handleAction(action)
+
+        // THEN
+        assertThat(result.successValue()).isEqualTo(targetState)
+        assertThat(stateMachine.state).isEqualTo(targetState)
+    }
+
+    @Test
+    fun `Paused SHOULD transition back to previous state WHEN action is Resume`() = runTest {
+        // GIVEN
+        val experience = mockExperience()
+        val pausedState = BeginningStep(experience, 1, false) { }
+        val initialState = Paused(pausedState)
+        val stateMachine = initMachine(initialState)
+        val action = Resume
+
+        // WHEN
+        val result = stateMachine.handleAction(action)
+
+        // THEN
+        assertThat(result.successValue()).isEqualTo(pausedState)
+        assertThat(stateMachine.state).isEqualTo(pausedState)
+    }
+
+    @Test
+    fun `Paused SHOULD transition back to previous state THEN to Idling WHEN action is EndExperience`() = runTest {
+        // GIVEN
+        val experience = mockExperience()
+        val pausedState = EndingStep(experience, 1, null)
+        val initialState = Paused(pausedState)
+        val stateMachine = initMachine(initialState)
+        val action = EndExperience(false)
         val targetState = Idling
 
         // WHEN
@@ -347,6 +403,102 @@ class StateMachineTest : AppcuesScopeTest {
 
         // THEN
         assertThat(completion.await(1.seconds)).isTrue()
+    }
+
+    // No-op transitions - ignored
+    @Test
+    fun `Idling SHOULD NOT transition WHEN action is something other than StartExperience or Pause`() = runTest {
+        // GIVEN
+        val initialState = Idling
+        val stateMachine = initMachine(initialState)
+        val action = Reset
+
+        // WHEN
+        val result = stateMachine.handleAction(action)
+
+        // THEN
+        assertThat(result.successValue()).isEqualTo(initialState)
+        assertThat(stateMachine.state).isEqualTo(initialState)
+    }
+
+    @Test
+    fun `BeginningExperience SHOULD NOT transition WHEN action is something other than StartStep or Pause`() = runTest {
+        // GIVEN
+        val experience = mockExperience()
+        val initialState = BeginningExperience(experience)
+        val stateMachine = initMachine(initialState)
+        val action = RenderStep
+
+        // WHEN
+        val result = stateMachine.handleAction(action)
+
+        // THEN
+        assertThat(result.successValue()).isEqualTo(initialState)
+        assertThat(stateMachine.state).isEqualTo(initialState)
+    }
+
+    @Test
+    fun `BeginningStep SHOULD NOT transition WHEN action is something other than RenderStep or Pause`() = runTest {
+        // GIVEN
+        val experience = mockExperience()
+        val initialState = BeginningStep(experience, 1, false) { }
+        val stateMachine = initMachine(initialState)
+        val action = StartStep(StepOffset(1))
+
+        // WHEN
+        val result = stateMachine.handleAction(action)
+
+        // THEN
+        assertThat(result.successValue()).isEqualTo(initialState)
+        assertThat(stateMachine.state).isEqualTo(initialState)
+    }
+
+    @Test
+    fun `EndingStep SHOULD NOT transition WHEN action is something other than EndExperience, Start Step or Pause`() = runTest {
+        // GIVEN
+        val experience = mockExperience()
+        val initialState = EndingStep(experience, 0, null)
+        val stateMachine = initMachine(initialState)
+        val action = Reset
+
+        // WHEN
+        val result = stateMachine.handleAction(action)
+
+        // THEN
+        assertThat(result.successValue()).isEqualTo(initialState)
+        assertThat(stateMachine.state).isEqualTo(initialState)
+    }
+
+    @Test
+    fun `EndingExperience SHOULD NOT transition WHEN action is something other than Reset or Pause`() = runTest {
+        // GIVEN
+        val experience = mockExperience()
+        val initialState = EndingExperience(experience, 1, false)
+        val stateMachine = initMachine(initialState)
+        val action = RenderStep
+
+        // WHEN
+        val result = stateMachine.handleAction(action)
+
+        // THEN
+        assertThat(result.successValue()).isEqualTo(initialState)
+        assertThat(stateMachine.state).isEqualTo(initialState)
+    }
+
+    @Test
+    fun `Paused SHOULD NOT transition WHEN action is something other than Resume or EndExperience`() = runTest {
+        // GIVEN
+        val experience = mockExperience()
+        val initialState = Paused(Idling)
+        val stateMachine = initMachine(initialState)
+        val action = Pause
+
+        // WHEN
+        val result = stateMachine.handleAction(action)
+
+        // THEN
+        assertThat(result.successValue()).isEqualTo(initialState)
+        assertThat(stateMachine.state).isEqualTo(initialState)
     }
 
     // Helpers
