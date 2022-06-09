@@ -2,15 +2,11 @@ package com.appcues.analytics
 
 import com.appcues.AppcuesCoroutineScope
 import com.appcues.LoggingLevel.NONE
-import com.appcues.data.AppcuesRepository
-import com.appcues.data.model.Experience
 import com.appcues.data.remote.request.ActivityRequest
 import com.appcues.logging.Logcues
 import com.appcues.rules.MainDispatcherRule
-import com.appcues.ui.ExperienceRenderer
 import com.google.common.truth.Truth.assertThat
 import io.mockk.Called
-import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
@@ -26,12 +22,10 @@ class AnalyticsTrackerTest {
     val dispatcherRule = MainDispatcherRule()
 
     private val coroutineScope = AppcuesCoroutineScope(Logcues(NONE))
-    private val repository: AppcuesRepository = mockk()
-    private val experienceRenderer: ExperienceRenderer = mockk()
     private val activityBuilder: ActivityRequestBuilder = mockk()
     private val experienceLifecycleTracker: ExperienceLifecycleTracker = mockk(relaxed = true)
     private val analyticsPolicy: AnalyticsPolicy = mockk()
-    private val analyticsQueueManager: AnalyticsQueueManager = mockk(relaxed = true)
+    private val analyticsQueueProcessor: AnalyticsQueueProcessor = mockk(relaxed = true)
 
     private val analyticsFlowUpdates: ArrayList<ActivityRequest> = arrayListOf()
 
@@ -41,12 +35,10 @@ class AnalyticsTrackerTest {
     fun setup() {
         analyticsTracker = AnalyticsTracker(
             appcuesCoroutineScope = coroutineScope,
-            repository = repository,
-            experienceRenderer = experienceRenderer,
             activityBuilder = activityBuilder,
             experienceLifecycleTracker = experienceLifecycleTracker,
             analyticsPolicy = analyticsPolicy,
-            analyticsQueueManager = analyticsQueueManager,
+            analyticsQueueProcessor = analyticsQueueProcessor,
         )
 
         coroutineScope.launch {
@@ -69,7 +61,7 @@ class AnalyticsTrackerTest {
         // when
         analyticsTracker.identify()
         // then
-        verify { analyticsQueueManager wasNot Called }
+        verify { analyticsQueueProcessor wasNot Called }
     }
 
     @Test
@@ -82,7 +74,7 @@ class AnalyticsTrackerTest {
         analyticsTracker.identify()
         // then
         assertThat(analyticsFlowUpdates).hasSize(1)
-        verify { analyticsQueueManager.flushThenSend(activity, any()) }
+        verify { analyticsQueueProcessor.flushThenSend(activity) }
     }
 
     @Test
@@ -92,7 +84,7 @@ class AnalyticsTrackerTest {
         // when
         analyticsTracker.track("event1")
         // then
-        verify { analyticsQueueManager wasNot Called }
+        verify { analyticsQueueProcessor wasNot Called }
     }
 
     @Test
@@ -105,7 +97,7 @@ class AnalyticsTrackerTest {
         analyticsTracker.track("event1", interactive = true)
         // then
         assertThat(analyticsFlowUpdates).hasSize(1)
-        verify { analyticsQueueManager.queueThenFlush(activity, any()) }
+        verify { analyticsQueueProcessor.queueThenFlush(activity) }
     }
 
     @Test
@@ -118,7 +110,7 @@ class AnalyticsTrackerTest {
         analyticsTracker.track("event1", interactive = false)
         // then
         assertThat(analyticsFlowUpdates).hasSize(1)
-        verify { analyticsQueueManager.queue(activity, any()) }
+        verify { analyticsQueueProcessor.queue(activity) }
     }
 
     @Test
@@ -128,7 +120,7 @@ class AnalyticsTrackerTest {
         // when
         analyticsTracker.screen("title")
         // then
-        verify { analyticsQueueManager wasNot Called }
+        verify { analyticsQueueProcessor wasNot Called }
     }
 
     @Test
@@ -141,7 +133,7 @@ class AnalyticsTrackerTest {
         analyticsTracker.screen("title")
         // then
         assertThat(analyticsFlowUpdates).hasSize(1)
-        verify { analyticsQueueManager.queueThenFlush(activity, any()) }
+        verify { analyticsQueueProcessor.queueThenFlush(activity) }
     }
 
     @Test
@@ -151,7 +143,7 @@ class AnalyticsTrackerTest {
         // when
         analyticsTracker.group()
         // then
-        verify { analyticsQueueManager wasNot Called }
+        verify { analyticsQueueProcessor wasNot Called }
     }
 
     @Test
@@ -164,7 +156,7 @@ class AnalyticsTrackerTest {
         analyticsTracker.group()
         // then
         assertThat(analyticsFlowUpdates).hasSize(1)
-        verify { analyticsQueueManager.flushThenSend(activity, any()) }
+        verify { analyticsQueueProcessor.flushThenSend(activity) }
     }
 
     @Test
@@ -172,23 +164,6 @@ class AnalyticsTrackerTest {
         // when
         analyticsTracker.flushPendingActivity()
         // then
-        verify { analyticsQueueManager.flushAsync(any()) }
-    }
-
-    @Test
-    fun `send SHOULD be called on callbacks`() {
-        // given
-        val activity = mockk<ActivityRequest>()
-        every { analyticsQueueManager.flushAsync(any()) } answers {
-            val function = firstArg() as ((ActivityRequest) -> Unit)
-            function(activity)
-        }
-        val listExperience = listOf<Experience>(mockk())
-        coEvery { repository.trackActivity(activity) } returns listExperience
-        // when
-        analyticsTracker.flushPendingActivity()
-        // then
-        coVerify { repository.trackActivity(activity) }
-        coVerify { experienceRenderer.show(listExperience) }
+        verify { analyticsQueueProcessor.flushAsync() }
     }
 }

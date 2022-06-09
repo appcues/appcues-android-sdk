@@ -1,21 +1,17 @@
 package com.appcues.analytics
 
 import com.appcues.AppcuesCoroutineScope
-import com.appcues.data.AppcuesRepository
 import com.appcues.data.remote.request.ActivityRequest
-import com.appcues.ui.ExperienceRenderer
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 
 internal class AnalyticsTracker(
     private val appcuesCoroutineScope: AppcuesCoroutineScope,
-    private val repository: AppcuesRepository,
-    private val experienceRenderer: ExperienceRenderer,
     private val activityBuilder: ActivityRequestBuilder,
     private val experienceLifecycleTracker: ExperienceLifecycleTracker,
     private val analyticsPolicy: AnalyticsPolicy,
-    private val analyticsQueueManager: AnalyticsQueueManager,
+    private val analyticsQueueProcessor: AnalyticsQueueProcessor,
 ) {
 
     private val _analyticsFlow = MutableSharedFlow<ActivityRequest>(1)
@@ -34,7 +30,7 @@ internal class AnalyticsTracker(
         activityBuilder.identify(properties).let {
             updateAnalyticsFlow(it)
 
-            analyticsQueueManager.flushThenSend(it, ::send)
+            analyticsQueueProcessor.flushThenSend(it)
         }
     }
 
@@ -50,9 +46,9 @@ internal class AnalyticsTracker(
             updateAnalyticsFlow(it)
 
             if (interactive) {
-                analyticsQueueManager.queueThenFlush(it, ::send)
+                analyticsQueueProcessor.queueThenFlush(it)
             } else {
-                analyticsQueueManager.queue(it, ::send)
+                analyticsQueueProcessor.queue(it)
             }
         }
     }
@@ -63,7 +59,7 @@ internal class AnalyticsTracker(
         activityBuilder.screen(title, properties?.toMutableMap()).let {
             updateAnalyticsFlow(it)
 
-            analyticsQueueManager.queueThenFlush(it, ::send)
+            analyticsQueueProcessor.queueThenFlush(it)
         }
     }
 
@@ -73,29 +69,19 @@ internal class AnalyticsTracker(
         activityBuilder.group(properties).let {
             updateAnalyticsFlow(it)
 
-            analyticsQueueManager.flushThenSend(it, ::send)
+            analyticsQueueProcessor.flushThenSend(it)
         }
     }
 
     // to be called when any pending activity should immediately be flushed to cache, and network if possible
     // i.e. app going to background / being killed
     fun flushPendingActivity() {
-        analyticsQueueManager.flushAsync(::send)
+        analyticsQueueProcessor.flushAsync()
     }
 
     private fun updateAnalyticsFlow(activity: ActivityRequest) {
         appcuesCoroutineScope.launch {
             _analyticsFlow.emit(activity)
-        }
-    }
-
-    private fun send(activity: ActivityRequest) {
-        appcuesCoroutineScope.launch {
-            // this will respond with qualified experiences, if applicable
-            repository.trackActivity(activity).also {
-                // we will try to show an experience from this list
-                experienceRenderer.show(it)
-            }
         }
     }
 }

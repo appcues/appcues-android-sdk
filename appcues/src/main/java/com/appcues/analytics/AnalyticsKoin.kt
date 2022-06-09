@@ -1,6 +1,8 @@
 package com.appcues.analytics
 
 import com.appcues.SessionMonitor
+import com.appcues.analytics.AnalyticsQueueProcessor.AnalyticsQueueScheduler
+import com.appcues.analytics.AnalyticsQueueProcessor.QueueScheduler
 import com.appcues.di.KoinScopePlugin
 import org.koin.dsl.ScopeDSL
 
@@ -23,16 +25,22 @@ internal object AnalyticsKoin : KoinScopePlugin {
         scoped { ExperienceLifecycleTracker(scope = this) }
         scoped { AnalyticsPolicy(sessionMonitor = get(), appcuesCoroutineScope = get(), stateMachine = get(), logcues = get()) }
         scoped { ActivityScreenTracking(context = get(), analyticsTracker = get(), logcues = get()) }
-        scoped { AnalyticsQueueManager() }
+        scoped<QueueScheduler> { AnalyticsQueueScheduler() }
+        scoped {
+            AnalyticsQueueProcessor(
+                appcuesCoroutineScope = get(),
+                experienceRenderer = get(),
+                repository = get(),
+                analyticsQueueScheduler = get()
+            )
+        }
         scoped {
             AnalyticsTracker(
                 appcuesCoroutineScope = get(),
-                experienceRenderer = get(),
                 activityBuilder = get(),
                 experienceLifecycleTracker = get(),
-                repository = get(),
                 analyticsPolicy = get(),
-                analyticsQueueManager = get()
+                analyticsQueueProcessor = get()
             )
         }
     }

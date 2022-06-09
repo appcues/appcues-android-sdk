@@ -31,7 +31,7 @@ class AutoPropertyDecoratorTest {
     private val storage: Storage = mockk(relaxed = true)
     private val sessionMonitor: SessionMonitor = mockk(relaxed = true)
     private val sessionRandomizer: SessionRandomizer = mockk<SessionRandomizer>().apply {
-        every { get() } returns 10
+        every { get() } returns 1
     }
 
     private lateinit var autoPropertyDecorator: AutoPropertyDecorator
@@ -165,11 +165,21 @@ class AutoPropertyDecoratorTest {
         val event = EventRequest(
             name = AnalyticsEvent.SessionStarted.eventName,
         )
+        every { sessionRandomizer.get() } returns 10
         // when
         with(autoPropertyDecorator.decorateTrack(event)) {
             // then
             with(attributes["_identity"] as Map<*, *>) {
                 assertThat(get("_sessionRandomizer") as Int).isEqualTo(10)
+            }
+        }
+        // given
+        every { sessionRandomizer.get() } returns 82
+        // when
+        with(autoPropertyDecorator.decorateTrack(event)) {
+            // then
+            with(attributes["_identity"] as Map<*, *>) {
+                assertThat(get("_sessionRandomizer") as Int).isEqualTo(82)
             }
         }
     }
