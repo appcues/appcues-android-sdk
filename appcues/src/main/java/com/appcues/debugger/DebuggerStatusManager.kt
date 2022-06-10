@@ -34,7 +34,7 @@ internal class DebuggerStatusManager(
 
     private var trackingScreens: Boolean? = null
 
-    private var userIdentified: String? = storage.userId.let { it.ifEmpty { null } }
+    private var userIdentified: String? = storage.userId.ifEmpty { null }
 
     private var experienceName: String? = null
 
@@ -50,7 +50,7 @@ internal class DebuggerStatusManager(
     }
 
     suspend fun onActivityRequest(activityRequest: ActivityRequest) = withContext(Dispatchers.IO) {
-        userIdentified = activityRequest.userId
+        userIdentified = activityRequest.userId.ifEmpty { null }
 
         activityRequest.events?.forEach { event ->
             when (event.name) {
@@ -71,6 +71,9 @@ internal class DebuggerStatusManager(
                 AnalyticsEvent.ExperienceCompleted.eventName, AnalyticsEvent.ExperienceDismissed.eventName -> {
                     experienceName = null
                     experienceShowingStep = null
+                }
+                AnalyticsEvent.SessionReset.eventName -> {
+                    userIdentified = null
                 }
                 else -> Unit
             }
