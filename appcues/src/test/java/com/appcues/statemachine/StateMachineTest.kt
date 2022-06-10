@@ -173,6 +173,25 @@ class StateMachineTest : AppcuesScopeTest {
     }
 
     @Test
+    fun `RenderingStep SHOULD transition to Idling WHEN action is StartStep with offset 1 and already on the last step`() = runTest {
+        // continue with offset:1 acts just like a close, when already on the last step
+
+        // GIVEN
+        val experience = mockExperience()
+        val initialState = RenderingStep(experience, 3, false)
+        val stateMachine = initMachine(initialState)
+        val action = StartStep(StepOffset(1))
+        val targetState = Idling
+
+        // WHEN
+        val result = stateMachine.handleAction(action)
+
+        // THEN
+        assertThat(result.successValue()).isEqualTo(targetState)
+        assertThat(stateMachine.state).isEqualTo(targetState)
+    }
+
+    @Test
     fun `RenderingStep SHOULD transition to Paused WHEN action is Pause`() = runTest {
         // GIVEN
         val experience = mockExperience()
@@ -271,6 +290,38 @@ class StateMachineTest : AppcuesScopeTest {
         // GIVEN
         val experience = mockExperience()
         val initialState = RenderingStep(experience, 1, false)
+        val stateMachine = initMachine(initialState)
+        val action = StartStep(StepIndex(1000))
+
+        // WHEN
+        val result = stateMachine.handleAction(action)
+
+        // THEN
+        assertThat(result.failureReason()).isInstanceOf(StepError::class.java)
+        assertThat(stateMachine.state).isEqualTo(initialState)
+    }
+
+    @Test
+    fun `RenderingStep SHOULD NOT transition WHEN action is StartStep with offset other than 1 on the last step`() = runTest {
+        // GIVEN
+        val experience = mockExperience()
+        val initialState = RenderingStep(experience, 3, false)
+        val stateMachine = initMachine(initialState)
+        val action = StartStep(StepOffset(2))
+
+        // WHEN
+        val result = stateMachine.handleAction(action)
+
+        // THEN
+        assertThat(result.failureReason()).isInstanceOf(StepError::class.java)
+        assertThat(stateMachine.state).isEqualTo(initialState)
+    }
+
+    @Test
+    fun `RenderingStep SHOULD NOT transition WHEN action is StartStep with index on the last step`() = runTest {
+        // GIVEN
+        val experience = mockExperience()
+        val initialState = RenderingStep(experience, 3, false)
         val stateMachine = initMachine(initialState)
         val action = StartStep(StepIndex(1000))
 

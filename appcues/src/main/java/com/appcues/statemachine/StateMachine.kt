@@ -22,8 +22,11 @@ import com.appcues.statemachine.State.EndingStep
 import com.appcues.statemachine.State.Idling
 import com.appcues.statemachine.State.Paused
 import com.appcues.statemachine.State.RenderingStep
+import com.appcues.statemachine.StepReference.StepOffset
 import com.appcues.statemachine.Transition.EmptyTransition
 import com.appcues.statemachine.Transition.ErrorLoggingTransition
+import com.appcues.statemachine.Transitions.Companion.fromRenderingStepToEndingExperience
+import com.appcues.statemachine.Transitions.Companion.fromRenderingStepToEndingStep
 import com.appcues.util.ResultOf
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
@@ -142,9 +145,7 @@ internal class StateMachine(
 
             // RenderingStep
             state is RenderingStep && action is StartStep ->
-                state.fromRenderingStepToEndingStep(action, appcuesCoroutineScope) {
-                    handleActionInternal(StartStep(action.stepReference))
-                }
+                determineStartStepTransition(state, action)
 
             state is RenderingStep && action is EndExperience ->
                 state.fromRenderingStepToEndingExperience(action, appcuesCoroutineScope) {
@@ -177,6 +178,26 @@ internal class StateMachine(
 
             // No valid combination of state plus action
             else -> null
+        }
+    }
+
+    // helper to determine if StartStep should try to resolve and start the next step, or shortcut
+    // to end the experience, if a continue action is executed while already on the last step
+    private fun determineStartStepTransition(state: RenderingStep, action: StartStep): Transition {
+        if (state.flatStepIndex == state.experience.flatSteps.size - 1) {
+            // we are sitting on the last step if we get here - check if this is a continue with offset 1 (default continue)
+            if (action.stepReference is StepOffset && action.stepReference.offset == 1) {
+                // for a continue -> next, on the last step, treat this the same as a close
+                val endExperience = EndExperience(destroyed = false)
+                return state.fromRenderingStepToEndingExperience(endExperience, appcuesCoroutineScope) {
+                    handleActionInternal(endExperience)
+                }
+            }
+        }
+
+        // default behavior, attempt to start the requested step
+        return state.fromRenderingStepToEndingStep(action, appcuesCoroutineScope) {
+            handleActionInternal(StartStep(action.stepReference))
         }
     }
 }
