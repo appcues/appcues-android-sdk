@@ -125,7 +125,7 @@ private fun LazyItemScope.Item(event: DebuggerEventItem, isAnchoredStart: Boolea
                 contentDescription = LocalContext.current.getString(event.type.getTitleString())
             )
 
-            Text(fontSize = 12.sp, text = event.title, color = AppcuesColors.SharkbaitOhAh)
+            Text(fontSize = 12.sp, text = event.name, color = AppcuesColors.SharkbaitOhAh)
         }
     }
 
