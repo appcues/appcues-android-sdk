@@ -15,6 +15,8 @@ import androidx.lifecycle.viewModelScope
 import com.appcues.R
 import com.appcues.debugger.DebuggerViewModel.UIState.Expanded
 import com.appcues.debugger.ui.DebuggerComposition
+import com.appcues.util.getNavigationBarHeight
+import com.appcues.util.getStatusBarHeight
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -100,7 +102,10 @@ internal class AppcuesDebuggerManager(context: Context, private val koinScope: S
 
                         id = R.id.appcues_debugger_view
 
-                        layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
+                        layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT).apply {
+                            // adds margin top and bottom according to visible status and navigation bar
+                            setMargins(0, context.getStatusBarHeight(), 0, context.getNavigationBarHeight())
+                        }
 
                         setContent {
                             MaterialTheme {
@@ -126,9 +131,7 @@ internal class AppcuesDebuggerManager(context: Context, private val koinScope: S
 
     private fun getParentView(activity: Activity): ViewGroup {
         // if there is any difference in API levels we can handle it here
-        return activity.window.decorView.findViewById<ViewGroup>(android.R.id.content)
-            .let { it.parent as ViewGroup }
-            .let { it.parent as ViewGroup }
+        return activity.window.decorView.rootView as ViewGroup
     }
 
     private fun setDebuggerBackPressCallback(activity: Activity) {

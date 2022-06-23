@@ -52,69 +52,76 @@ internal fun BoxScope.DebuggerFloatingActionButton(
     debuggerState: MutableDebuggerState,
     debuggerViewModel: DebuggerViewModel,
 ) {
-    val resizeBy = animateFloatAsState(
-        when {
-            // if its dragging and paused we diminish so it doesn't mess with current RESUMED debugger
-            // important for our case where we have transparent activity on top of customer's
-            // and we know we have two debuggers showing at the same time. one on top of the other.
-            debuggerState.isDragging.targetState && debuggerState.isPaused.value -> FAB_PAUSED_SIZE_MULTIPLIER
-            debuggerState.isDragging.targetState -> FAB_DRAGGING_SIZE_MULTIPLIER
-            else -> FAB_DEFAULT_SIZE_MULTIPLIER
-        }
-    )
-    AnimatedVisibility(
-        visibleState = debuggerState.isVisible,
-        enter = scaleIn() + fadeIn(),
-        exit = scaleOut() + fadeOut(),
-        modifier = Modifier
-            .align(Alignment.TopStart)
-            // this is used along with the dynamic size of FAB Box below
-            // so we create the nice effect of enlarging equally to all directions
-            .offsetResize(
-                offset = debuggerState.getFabPositionAsIntOffset(),
-                originalSize = debuggerState.fabSize,
-                resizeBy = resizeBy.value,
-            )
-    ) {
-        val elevation = animateDpAsState(
-            targetValue = when {
-                debuggerState.isDragging.targetState -> 8.dp
-                debuggerState.isExpanded.targetState -> 2.dp
-                debuggerState.isVisible.currentState -> 4.dp
-                else -> 0.dp
-            }
-        )
+    val resizeBy = resizeAnimatedState(debuggerState)
 
-        Box(
+    // only draw if IntOffset is not null
+    debuggerState.getFabPositionAsIntOffset()?.let { offset ->
+        AnimatedVisibility(
+            visibleState = debuggerState.isVisible,
+            enter = scaleIn() + fadeIn(),
+            exit = scaleOut() + fadeOut(),
             modifier = Modifier
-                .shadow(
-                    elevation = elevation.value,
-                    shape = RoundedCornerShape(percent = 100)
+                .align(Alignment.TopStart)
+                // this is used along with the dynamic size of FAB Box below
+                // so we create the nice effect of enlarging equally to all directions
+                .offsetResize(
+                    offset = offset,
+                    originalSize = debuggerState.fabSize,
+                    resizeBy = resizeBy.value,
                 )
-                .clickableAndDraggable(
-                    onClickLabel = LocalContext.current.getString(R.string.appcues_debugger_fab_on_click_label),
-                    onDragEnd = { debuggerViewModel.onDragEnd() },
-                    onDrag = { debuggerViewModel.onDragging(it) },
-                    onClick = { debuggerViewModel.onFabClick() }
-                )
-                .size(size = debuggerState.fabSize.times(resizeBy.value))
-                .clip(RoundedCornerShape(percent = 100))
-                .background(
-                    brush = Brush.horizontalGradient(
-                        listOf(AppcuesColors.ShadyNeonBlue, AppcuesColors.PurpleAnemone)
-                    )
-                )
-                .padding(12.dp),
-            contentAlignment = Alignment.Center,
         ) {
-            Icon(
-                painter = painterResource(id = drawable.appcues_ic_white_logo),
-                tint = Color.White,
-                contentDescription = LocalContext.current.getString(R.string.appcues_debugger_fab_image_content_description)
+            val elevation = animateDpAsState(
+                targetValue = when {
+                    debuggerState.isDragging.targetState -> 8.dp
+                    debuggerState.isExpanded.targetState -> 2.dp
+                    debuggerState.isVisible.currentState -> 4.dp
+                    else -> 0.dp
+                }
             )
+
+            Box(
+                modifier = Modifier
+                    .shadow(
+                        elevation = elevation.value,
+                        shape = RoundedCornerShape(percent = 100)
+                    )
+                    .clickableAndDraggable(
+                        onClickLabel = LocalContext.current.getString(R.string.appcues_debugger_fab_on_click_label),
+                        onDragEnd = { debuggerViewModel.onDragEnd() },
+                        onDrag = { debuggerViewModel.onDragging(it) },
+                        onClick = { debuggerViewModel.onFabClick() }
+                    )
+                    .size(size = debuggerState.fabSize.times(resizeBy.value))
+                    .clip(RoundedCornerShape(percent = 100))
+                    .background(
+                        brush = Brush.horizontalGradient(
+                            listOf(AppcuesColors.ShadyNeonBlue, AppcuesColors.PurpleAnemone)
+                        )
+                    )
+                    .padding(12.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    painter = painterResource(id = drawable.appcues_ic_white_logo),
+                    tint = Color.White,
+                    contentDescription = LocalContext.current.getString(R.string.appcues_debugger_fab_image_content_description)
+                )
+            }
         }
     }
 }
+
+@Composable
+private fun resizeAnimatedState(debuggerState: MutableDebuggerState) = animateFloatAsState(
+    when {
+        // if its dragging and paused we diminish so it doesn't mess with current RESUMED debugger
+        // important for our case where we have transparent activity on top of customer's
+        // and we know we have two debuggers showing at the same time. one on top of the other.
+        debuggerState.isDragging.targetState && debuggerState.isPaused.value -> FAB_PAUSED_SIZE_MULTIPLIER
+        debuggerState.isDragging.targetState -> FAB_DRAGGING_SIZE_MULTIPLIER
+        else -> FAB_DEFAULT_SIZE_MULTIPLIER
+    }
+)
 
 private fun Modifier.offsetResize(offset: IntOffset, originalSize: Dp, resizeBy: Float) = then(
     Modifier.offset {
