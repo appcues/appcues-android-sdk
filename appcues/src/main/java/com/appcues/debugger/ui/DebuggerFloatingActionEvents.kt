@@ -84,7 +84,8 @@ internal fun BoxScope.DebuggerFloatingActionEvents(
             LazyColumn(
                 modifier = Modifier.animateContentSize(),
                 verticalArrangement = Arrangement.spacedBy(4.dp),
-                reverseLayout = eventsProperties.drawTop
+                reverseLayout = eventsProperties.drawTop,
+                userScrollEnabled = false,
             ) {
                 items(events, key = { it.id }) { event ->
                     Item(event, eventsProperties.anchorToStart) { debuggerViewModel.onDisplayedEventTimeout() }

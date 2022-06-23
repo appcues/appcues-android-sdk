@@ -30,8 +30,8 @@ internal class MutableDebuggerState(private val density: Density, private val is
     val isExpanded = MutableTransitionState(false)
     val isPaused = mutableStateOf(value = false)
 
-    val fabXOffset = mutableStateOf(value = 0f)
-    val fabYOffset = mutableStateOf(value = 0f)
+    val fabXOffset = mutableStateOf(value = -1f)
+    val fabYOffset = mutableStateOf(value = -1f)
     val isDraggingOverDismiss = mutableStateOf(value = false)
 
     val deeplinkPath = mutableStateOf<String?>(value = null)
@@ -60,7 +60,10 @@ internal class MutableDebuggerState(private val density: Density, private val is
         }
     }
 
-    fun getFabPositionAsIntOffset(): IntOffset {
+    fun getFabPositionAsIntOffset(): IntOffset? {
+        // in case the value is initial value we return null
+        if (fabXOffset.value < 0f || fabYOffset.value < 0f) return null
+
         return IntOffset(fabXOffset.value.roundToInt(), fabYOffset.value.roundToInt())
     }
 
