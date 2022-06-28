@@ -556,6 +556,19 @@ class StateMachineTest : AppcuesScopeTest {
         assertThat(stateMachine.state).isEqualTo(initialState)
     }
 
+    @Test
+    fun `stop SHOULD call handleAction with EndExperience`() = runTest {
+        // GIVEN
+        val experience = mockExperience()
+        val stateMachine = initMachine(RenderingStep(experience, 2, false))
+
+        // WHEN
+        stateMachine.stop()
+
+        // THEN
+        assertThat(stateMachine.state).isEqualTo(Idling)
+    }
+
     // Helpers
     private suspend fun initMachine(
         state: State,

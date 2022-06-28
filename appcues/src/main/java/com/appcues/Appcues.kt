@@ -184,7 +184,9 @@ class Appcues internal constructor(koinScope: Scope) {
     /**
      * Signals to Appcues that this instance should stop all on going jobs
      *
-     * Should be called before losing reference to the instance to ensure internal cleanup.
+     * This method is only expected to be called if you are intending to fully remove
+     * an Appcues SDK instance and create a new one. This is not normally an expected
+     * behavior for most use cases of the SDK.
      */
     fun stop() {
         debuggerManager.stop()
