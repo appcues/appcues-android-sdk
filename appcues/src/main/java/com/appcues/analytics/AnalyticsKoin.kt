@@ -40,7 +40,8 @@ internal object AnalyticsKoin : KoinScopePlugin {
                 activityBuilder = get(),
                 experienceLifecycleTracker = get(),
                 analyticsPolicy = get(),
-                analyticsQueueProcessor = get()
+                analyticsQueueProcessor = get(),
+                config = get(),
             )
         }
     }

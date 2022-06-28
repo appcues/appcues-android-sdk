@@ -25,7 +25,7 @@ internal class ActivityScreenTracking(
         try {
             val info = packageManager.getActivityInfo(activity.componentName, PackageManager.GET_META_DATA)
             val activityLabel = info.loadLabel(packageManager)
-            analyticsTracker.screen(activityLabel.toString())
+            analyticsTracker.screen(activityLabel.toString(), isInternal = true)
         } catch (ex: PackageManager.NameNotFoundException) {
             logcues.error(ex)
         }
