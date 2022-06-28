@@ -8,11 +8,11 @@ import com.appcues.analytics.ActivityScreenTracking
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.debugger.AppcuesDebuggerManager
 import com.appcues.rules.KoinScopeRule
+import com.appcues.rules.MainDispatcherRule
 import com.appcues.trait.ExperienceTrait
 import com.appcues.trait.TraitRegistry
 import com.appcues.ui.ExperienceRenderer
 import com.google.common.truth.Truth.assertThat
-import io.mockk.Called
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.verify
@@ -30,6 +30,9 @@ internal class AppcuesTest : AppcuesScopeTest {
 
     @get:Rule
     override val koinTestRule = KoinScopeRule()
+
+    @get:Rule
+    val dispatcherRule = MainDispatcherRule()
 
     private lateinit var appcues: Appcues
 
@@ -49,7 +52,7 @@ internal class AppcuesTest : AppcuesScopeTest {
         appcues.identify(userId)
 
         // THEN
-        verify { tracker wasNot Called }
+        verify(exactly = 0) { tracker.identify(any()) }
         // called once at startup automatically, which is ignored, but not again since no valid user
         verify(exactly = 1) { sessionMonitor.start() }
     }

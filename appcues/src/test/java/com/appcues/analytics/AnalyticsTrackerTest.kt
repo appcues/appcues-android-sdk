@@ -39,12 +39,11 @@ class AnalyticsTrackerTest {
             experienceLifecycleTracker = experienceLifecycleTracker,
             analyticsPolicy = analyticsPolicy,
             analyticsQueueProcessor = analyticsQueueProcessor,
-            config = mockk(relaxed = true),
         )
 
         coroutineScope.launch {
             analyticsTracker.analyticsFlow.collect {
-                analyticsFlowUpdates.add(it)
+                analyticsFlowUpdates.add(it.request)
             }
         }
     }
