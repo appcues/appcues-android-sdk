@@ -220,6 +220,22 @@ internal class AppcuesTest : AppcuesScopeTest {
     }
 
     @Test
+    fun `stop SHOULD stop some background dependencies`() {
+        // GIVEN
+        val debuggerManager: AppcuesDebuggerManager = get()
+        val activityScreenTracking: ActivityScreenTracking = get()
+        val experienceRenderer: ExperienceRenderer = get()
+
+        // WHEN
+        appcues.stop()
+
+        // THEN
+        verify { debuggerManager.stop() }
+        verify { activityScreenTracking.stop() }
+        verify { experienceRenderer.stop() }
+    }
+
+    @Test
     fun `onNewIntent SHOULD call the DeeplinkHandler to handle the link`() {
         // GIVEN
         val activity: Activity = mockk(relaxed = true)
