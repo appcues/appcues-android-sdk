@@ -48,7 +48,9 @@ internal class SessionMonitor(
     }
 
     fun reset() {
-        analyticsTracker.track(AnalyticsEvent.SessionReset, null, false)
+        // this is interactive: true since a reset should flush to network immediately (with previous user ID)
+        // and the next session start will be sent in a new request, with the new user ID
+        analyticsTracker.track(AnalyticsEvent.SessionReset, null, true)
         _sessionId = null
     }
 
