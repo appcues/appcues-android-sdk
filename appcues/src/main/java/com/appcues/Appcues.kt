@@ -203,6 +203,17 @@ class Appcues internal constructor(koinScope: Scope) {
     }
 
     /**
+     * Signals to Appcues that this instance should stop all on going jobs
+     *
+     * Should be called before losing reference to the instance to ensure internal cleanup.
+     */
+    fun stop() {
+        debuggerManager.stop()
+        activityScreenTracking.stop()
+        experienceRenderer.stop()
+    }
+
+    /**
      * Notify Appcues of a new Intent to check for deep link content.  This should be used to pass along Intents
      * that may be using the custom Appcues scheme, for things like previewing experiences.
      *

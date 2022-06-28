@@ -20,6 +20,13 @@ internal class ActivityScreenTracking(
         logcues.info("Automatic screen tracking enabled")
     }
 
+    fun stop() {
+        val application = context.applicationContext as Application
+        application.unregisterActivityLifecycleCallbacks(this)
+
+        logcues.info("Automatic screen tracking disabled")
+    }
+
     override fun onActivityStarted(activity: Activity) {
         val packageManager = activity.packageManager
         try {
