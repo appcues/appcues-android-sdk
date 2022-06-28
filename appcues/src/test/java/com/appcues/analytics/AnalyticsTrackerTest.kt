@@ -39,6 +39,7 @@ class AnalyticsTrackerTest {
             experienceLifecycleTracker = experienceLifecycleTracker,
             analyticsPolicy = analyticsPolicy,
             analyticsQueueProcessor = analyticsQueueProcessor,
+            config = mockk(relaxed = true),
         )
 
         coroutineScope.launch {
@@ -68,7 +69,7 @@ class AnalyticsTrackerTest {
     fun `identify SHOULD update analyticsFlow AND flushThenSend`() {
         // given
         every { analyticsPolicy.canIdentify() } returns true
-        val activity: ActivityRequest = mockk()
+        val activity: ActivityRequest = mockk(relaxed = true)
         every { activityBuilder.identify(any()) } returns activity
         // when
         analyticsTracker.identify()
@@ -91,7 +92,7 @@ class AnalyticsTrackerTest {
     fun `track SHOULD update analyticsFlow AND queueThenFlush WHEN interactive is true`() {
         // given
         every { analyticsPolicy.canTrackEvent() } returns true
-        val activity: ActivityRequest = mockk()
+        val activity: ActivityRequest = mockk(relaxed = true)
         every { activityBuilder.track(any()) } returns activity
         // when
         analyticsTracker.track("event1", interactive = true)
@@ -104,7 +105,7 @@ class AnalyticsTrackerTest {
     fun `track SHOULD update analyticsFlow AND queue WHEN interactive is false`() {
         // given
         every { analyticsPolicy.canTrackEvent() } returns true
-        val activity: ActivityRequest = mockk()
+        val activity: ActivityRequest = mockk(relaxed = true)
         every { activityBuilder.track(any()) } returns activity
         // when
         analyticsTracker.track("event1", interactive = false)
@@ -127,7 +128,7 @@ class AnalyticsTrackerTest {
     fun `screen SHOULD update analyticsFlow AND queueThenFlush`() {
         // given
         every { analyticsPolicy.canTrackScreen("title") } returns true
-        val activity: ActivityRequest = mockk()
+        val activity: ActivityRequest = mockk(relaxed = true)
         every { activityBuilder.screen(any()) } returns activity
         // when
         analyticsTracker.screen("title")
@@ -150,7 +151,7 @@ class AnalyticsTrackerTest {
     fun `group SHOULD update analyticsFlow AND flushThenSend`() {
         // given
         every { analyticsPolicy.canTrackGroup() } returns true
-        val activity: ActivityRequest = mockk()
+        val activity: ActivityRequest = mockk(relaxed = true)
         every { activityBuilder.group() } returns activity
         // when
         analyticsTracker.group()

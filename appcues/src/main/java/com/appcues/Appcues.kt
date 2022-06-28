@@ -6,6 +6,7 @@ import android.content.Intent
 import com.appcues.action.ActionRegistry
 import com.appcues.action.ExperienceAction
 import com.appcues.analytics.ActivityScreenTracking
+import com.appcues.analytics.AnalyticsListener
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.debugger.AppcuesDebuggerManager
 import com.appcues.di.AppcuesKoinContext
@@ -43,6 +44,11 @@ class Appcues internal constructor(koinScope: Scope) {
      * Set the listener to be notified about the display of Experience content.
      */
     var experienceListener: ExperienceListener? by config::experienceListener
+
+    /**
+     * Sets the listener to be notified about published analytics.
+     */
+    var analyticsListener: AnalyticsListener? by config::analyticsListener
 
     /**
      * Set the interceptor for additional control over SDK runtime behaviors.

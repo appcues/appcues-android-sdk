@@ -1,6 +1,7 @@
 package com.appcues
 
 import com.appcues.LoggingLevel.NONE
+import com.appcues.analytics.AnalyticsListener
 
 data class AppcuesConfig(
     val accountId: String,
@@ -56,4 +57,9 @@ data class AppcuesConfig(
      * Set the listener to be notified about the display of Experience content.
      */
     var experienceListener: ExperienceListener? = null
+
+    /**
+     * Sets the listener to be notified about published analytics.
+     */
+    var analyticsListener: AnalyticsListener? = null
 }

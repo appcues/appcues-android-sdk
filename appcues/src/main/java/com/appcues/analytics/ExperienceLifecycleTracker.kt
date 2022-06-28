@@ -85,7 +85,7 @@ internal class ExperienceLifecycleTracker(
     }
 
     private fun trackLifecycleEvent(event: ExperienceLifecycleEvent) {
-        analyticsTracker.track(event.name, event.properties, false)
+        analyticsTracker.track(event.name, event.properties, interactive = false, isInternal = true)
     }
 
     private fun State.shouldTrack(): Boolean =
