@@ -33,6 +33,9 @@ data class AppcuesConfig(
      *  upon the application returning to the foreground. The default value is 1800 seconds (30 minutes).
      */
     var sessionTimeout: Int = SESSION_TIMEOUT_DEFAULT
+        set(value) {
+            field = value.coerceAtLeast(0)
+        }
 
     /**
      * Set the activity storage max size for the configuration - maximum 25, minimum 0. This value determines how many analytics
@@ -40,6 +43,9 @@ data class AppcuesConfig(
      * Only the most recent requests, up to this count, are retained.
      */
     var activityStorageMaxSize: Int = ACTIVITY_STORAGE_MAX_SIZE
+        set(value) {
+            field = value.coerceAtLeast(0).coerceAtMost(ACTIVITY_STORAGE_MAX_SIZE)
+        }
 
     /**
      *  Sets the activity storage max age for the configuration.  This value determines how long an item can be stored
@@ -47,6 +53,9 @@ data class AppcuesConfig(
      *  requests that are more recent than the max age will be retried - or all, if not set.
      */
     var activityStorageMaxAge: Int? = null
+        set(value) {
+            field = value?.coerceAtLeast(0)
+        }
 
     /**
      * Set the interceptor for additional control over SDK runtime behaviors.
