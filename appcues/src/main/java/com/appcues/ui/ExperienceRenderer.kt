@@ -87,4 +87,8 @@ internal class ExperienceRenderer(
 
         return false
     }
+
+    fun stop() {
+        stateMachine.stop()
+    }
 }

@@ -9,7 +9,6 @@ import kotlinx.coroutines.launch
 
 internal class DeeplinkHandler(
     private val config: AppcuesConfig,
-    private val appcues: Appcues,
     private val experienceRenderer: ExperienceRenderer,
     private val appcuesCoroutineScope: AppcuesCoroutineScope,
     private val debuggerManager: AppcuesDebuggerManager,

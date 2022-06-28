@@ -60,7 +60,7 @@ internal class AppcuesDebuggerManager(context: Context, private val koinScope: S
         setDebuggerBackPressCallback(activity)
     }
 
-    private fun stop() {
+    fun stop() {
         coroutineScope.coroutineContext.cancelChildren()
         removeDebuggerView(this.currentActivity)
         debuggerViewModel?.viewModelScope?.cancel() // stop the VM from listening to app activity

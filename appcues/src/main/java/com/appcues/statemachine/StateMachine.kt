@@ -200,4 +200,10 @@ internal class StateMachine(
             handleActionInternal(StartStep(action.stepReference))
         }
     }
+
+    fun stop() {
+        appcuesCoroutineScope.launch {
+            handleAction(EndExperience(destroyed = true))
+        }
+    }
 }

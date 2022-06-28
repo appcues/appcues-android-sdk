@@ -23,7 +23,6 @@ internal object AppcuesKoin : KoinScopePlugin {
         scoped {
             DeeplinkHandler(
                 config = get(),
-                appcues = get(),
                 experienceRenderer = get(),
                 appcuesCoroutineScope = get(),
                 debuggerManager = get(),
