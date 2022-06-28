@@ -5,15 +5,23 @@ import android.content.Context
 import android.content.Intent
 import com.appcues.action.ActionRegistry
 import com.appcues.action.ExperienceAction
+import com.appcues.analytics.ActivityRequestBuilder
 import com.appcues.analytics.ActivityScreenTracking
+import com.appcues.analytics.AnalyticType.EVENT
+import com.appcues.analytics.AnalyticType.GROUP
+import com.appcues.analytics.AnalyticType.IDENTIFY
+import com.appcues.analytics.AnalyticType.SCREEN
 import com.appcues.analytics.AnalyticsListener
 import com.appcues.analytics.AnalyticsTracker
+import com.appcues.analytics.TrackingData
+import com.appcues.data.remote.request.EventRequest
 import com.appcues.debugger.AppcuesDebuggerManager
 import com.appcues.di.AppcuesKoinContext
 import com.appcues.logging.Logcues
 import com.appcues.trait.ExperienceTrait
 import com.appcues.trait.TraitRegistry
 import com.appcues.ui.ExperienceRenderer
+import kotlinx.coroutines.launch
 import org.koin.core.scope.Scope
 
 fun Appcues(
@@ -34,11 +42,12 @@ class Appcues internal constructor(koinScope: Scope) {
     private val actionRegistry by koinScope.inject<ActionRegistry>()
     private val traitRegistry by koinScope.inject<TraitRegistry>()
     private val analyticsTracker by koinScope.inject<AnalyticsTracker>()
-    internal val storage by koinScope.inject<Storage>()
+    private val storage by koinScope.inject<Storage>()
     private val sessionMonitor by koinScope.inject<SessionMonitor>()
     private val activityScreenTracking by koinScope.inject<ActivityScreenTracking>()
     private val deeplinkHandler by koinScope.inject<DeeplinkHandler>()
     private val debuggerManager by koinScope.inject<AppcuesDebuggerManager>()
+    private val appcuesCoroutineScope by koinScope.inject<AppcuesCoroutineScope>()
 
     /**
      * Set the listener to be notified about the display of Experience content.
@@ -59,6 +68,12 @@ class Appcues internal constructor(koinScope: Scope) {
         sessionMonitor.start()
 
         logcues.info("Appcues SDK $version initialized")
+
+        appcuesCoroutineScope.launch {
+            analyticsTracker.analyticsFlow.collect {
+                publishTracking(it)
+            }
+        }
     }
 
     /**
@@ -217,5 +232,26 @@ class Appcues internal constructor(koinScope: Scope) {
         }
 
         analyticsTracker.identify(properties)
+    }
+
+    // if a listener is attached, this will publish tracked analytics so that a host application would be able to
+    // observe and re-broadcast tracking data as desired.
+    private fun publishTracking(data: TrackingData) {
+
+        fun EventRequest.screenTitle(): String? =
+            attributes[ActivityRequestBuilder.SCREEN_TITLE_ATTRIBUTE] as? String
+
+        analyticsListener?.let { listener ->
+            when (data.type) {
+                EVENT -> data.request.events?.forEach {
+                    listener.trackedAnalytic(EVENT, it.name, it.attributes, data.isInternal)
+                }
+                IDENTIFY -> listener.trackedAnalytic(IDENTIFY, storage.userId, data.request.profileUpdate, data.isInternal)
+                GROUP -> listener.trackedAnalytic(GROUP, storage.groupId, data.request.groupUpdate, data.isInternal)
+                SCREEN -> data.request.events?.forEach {
+                    listener.trackedAnalytic(SCREEN, it.screenTitle(), it.attributes, data.isInternal)
+                }
+            }
+        }
     }
 }

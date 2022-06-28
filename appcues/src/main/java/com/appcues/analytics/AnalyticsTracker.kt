@@ -1,11 +1,10 @@
 package com.appcues.analytics
 
-import com.appcues.AppcuesConfig
 import com.appcues.AppcuesCoroutineScope
-import com.appcues.analytics.AnalyticsListener.AnalyticType.EVENT
-import com.appcues.analytics.AnalyticsListener.AnalyticType.GROUP
-import com.appcues.analytics.AnalyticsListener.AnalyticType.IDENTIFY
-import com.appcues.analytics.AnalyticsListener.AnalyticType.SCREEN
+import com.appcues.analytics.AnalyticType.EVENT
+import com.appcues.analytics.AnalyticType.GROUP
+import com.appcues.analytics.AnalyticType.IDENTIFY
+import com.appcues.analytics.AnalyticType.SCREEN
 import com.appcues.data.remote.request.ActivityRequest
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -17,11 +16,10 @@ internal class AnalyticsTracker(
     private val experienceLifecycleTracker: ExperienceLifecycleTracker,
     private val analyticsPolicy: AnalyticsPolicy,
     private val analyticsQueueProcessor: AnalyticsQueueProcessor,
-    private val config: AppcuesConfig,
 ) {
 
-    private val _analyticsFlow = MutableSharedFlow<ActivityRequest>(1)
-    val analyticsFlow: SharedFlow<ActivityRequest>
+    private val _analyticsFlow = MutableSharedFlow<TrackingData>(1)
+    val analyticsFlow: SharedFlow<TrackingData>
         get() = _analyticsFlow
 
     init {
@@ -34,11 +32,9 @@ internal class AnalyticsTracker(
         if (!analyticsPolicy.canIdentify()) return
 
         activityBuilder.identify(properties).let {
-            updateAnalyticsFlow(it)
+            updateAnalyticsFlow(IDENTIFY, false, it)
 
             analyticsQueueProcessor.flushThenSend(it)
-
-            config.analyticsListener?.trackedAnalytic(IDENTIFY, it.userId, it.profileUpdate, false)
         }
     }
 
@@ -51,16 +47,12 @@ internal class AnalyticsTracker(
         if (!analyticsPolicy.canTrackEvent()) return
 
         activityBuilder.track(name, properties).let { activityRequest ->
-            updateAnalyticsFlow(activityRequest)
+            updateAnalyticsFlow(EVENT, isInternal, activityRequest)
 
             if (interactive) {
                 analyticsQueueProcessor.queueThenFlush(activityRequest)
             } else {
                 analyticsQueueProcessor.queue(activityRequest)
-            }
-
-            activityRequest.events?.forEach {
-                config.analyticsListener?.trackedAnalytic(EVENT, it.name, it.attributes, isInternal)
             }
         }
     }
@@ -69,13 +61,8 @@ internal class AnalyticsTracker(
         if (!analyticsPolicy.canTrackScreen(title)) return
 
         activityBuilder.screen(title, properties?.toMutableMap()).let { activityRequest ->
-            updateAnalyticsFlow(activityRequest)
-
+            updateAnalyticsFlow(SCREEN, isInternal, activityRequest)
             analyticsQueueProcessor.queueThenFlush(activityRequest)
-
-            activityRequest.events?.forEach {
-                config.analyticsListener?.trackedAnalytic(SCREEN, it.name, it.attributes, isInternal)
-            }
         }
     }
 
@@ -83,11 +70,8 @@ internal class AnalyticsTracker(
         if (!analyticsPolicy.canTrackGroup()) return
 
         activityBuilder.group(properties).let {
-            updateAnalyticsFlow(it)
-
+            updateAnalyticsFlow(GROUP, false, it)
             analyticsQueueProcessor.flushThenSend(it)
-
-            config.analyticsListener?.trackedAnalytic(GROUP, it.groupId, it.groupUpdate, false)
         }
     }
 
@@ -97,9 +81,9 @@ internal class AnalyticsTracker(
         analyticsQueueProcessor.flushAsync()
     }
 
-    private fun updateAnalyticsFlow(activity: ActivityRequest) {
+    private fun updateAnalyticsFlow(type: AnalyticType, isInternal: Boolean, activity: ActivityRequest) {
         appcuesCoroutineScope.launch {
-            _analyticsFlow.emit(activity)
+            _analyticsFlow.emit(TrackingData(type, isInternal, activity))
         }
     }
 }

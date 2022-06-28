@@ -4,14 +4,6 @@ package com.appcues.analytics
  * Provides a method to listen for analytics published by the SDK.
  */
 interface AnalyticsListener {
-
-    /**
-     * Represents the different types of analytics published by the SDK.
-     */
-    enum class AnalyticType {
-        IDENTIFY, GROUP, EVENT, SCREEN
-    }
-
     /**
      * Notifies the listener when Appcues analytics tracking occurs.
      *

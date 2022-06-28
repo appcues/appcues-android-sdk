@@ -79,13 +79,13 @@ internal class DebuggerViewModel(
     init {
         with(viewModelScope) {
             launch {
-                analyticsTracker.analyticsFlow.collect { activityRequest ->
+                analyticsTracker.analyticsFlow.collect { trackingData ->
                     // dispatch to status manager so it can check for new experiences
                     // and update status info if needed
-                    debuggerStatusManager.onActivityRequest(activityRequest)
+                    debuggerStatusManager.onActivityRequest(trackingData.request)
                     // dispatch to recent events manager so it stores all recent events and emits only
                     // what is set by the filter
-                    debuggerRecentEventsManager.onActivityRequest(activityRequest)
+                    debuggerRecentEventsManager.onActivityRequest(trackingData.request)
                 }
             }
 
