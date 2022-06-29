@@ -62,7 +62,7 @@ internal class AppcuesDebuggerManager(context: Context, private val koinScope: S
 
     fun stop() {
         coroutineScope.coroutineContext.cancelChildren()
-        removeDebuggerView(this.currentActivity)
+        removeDebuggerView()
         debuggerViewModel?.viewModelScope?.cancel() // stop the VM from listening to app activity
         application.unregisterActivityLifecycleCallbacks(this)
         onBackPressCallback.remove()
@@ -121,8 +121,11 @@ internal class AppcuesDebuggerManager(context: Context, private val koinScope: S
         }
     }
 
-    private fun removeDebuggerView(activity: Activity) {
-        getParentView(activity).also {
+    private fun removeDebuggerView() {
+        // does nothing if currentActivity is not initialized
+        if (this::currentActivity.isInitialized.not()) return
+
+        getParentView(currentActivity).also {
             it.findViewById<ComposeView?>(R.id.appcues_debugger_view)?.run {
                 it.removeView(this)
             }
