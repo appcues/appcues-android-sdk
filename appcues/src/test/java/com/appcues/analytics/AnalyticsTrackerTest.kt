@@ -2,6 +2,7 @@ package com.appcues.analytics
 
 import com.appcues.AppcuesCoroutineScope
 import com.appcues.LoggingLevel.NONE
+import com.appcues.analytics.AnalyticsEvent.SessionStarted
 import com.appcues.data.remote.request.ActivityRequest
 import com.appcues.logging.Logcues
 import com.appcues.rules.MainDispatcherRule
@@ -27,7 +28,7 @@ class AnalyticsTrackerTest {
     private val analyticsPolicy: AnalyticsPolicy = mockk()
     private val analyticsQueueProcessor: AnalyticsQueueProcessor = mockk(relaxed = true)
 
-    private val analyticsFlowUpdates: ArrayList<ActivityRequest> = arrayListOf()
+    private val analyticsFlowUpdates: ArrayList<TrackingData> = arrayListOf()
 
     private lateinit var analyticsTracker: AnalyticsTracker
 
@@ -43,7 +44,7 @@ class AnalyticsTrackerTest {
 
         coroutineScope.launch {
             analyticsTracker.analyticsFlow.collect {
-                analyticsFlowUpdates.add(it.request)
+                analyticsFlowUpdates.add(it)
             }
         }
     }
@@ -75,6 +76,9 @@ class AnalyticsTrackerTest {
         // then
         assertThat(analyticsFlowUpdates).hasSize(1)
         verify { analyticsQueueProcessor.flushThenSend(activity) }
+        assertThat(analyticsFlowUpdates.first().type).isEqualTo(AnalyticType.IDENTIFY)
+        assertThat(analyticsFlowUpdates.first().isInternal).isFalse()
+        assertThat(analyticsFlowUpdates.first().request).isEqualTo(activity)
     }
 
     @Test
@@ -98,6 +102,9 @@ class AnalyticsTrackerTest {
         // then
         assertThat(analyticsFlowUpdates).hasSize(1)
         verify { analyticsQueueProcessor.queueThenFlush(activity) }
+        assertThat(analyticsFlowUpdates.first().type).isEqualTo(AnalyticType.EVENT)
+        assertThat(analyticsFlowUpdates.first().isInternal).isFalse()
+        assertThat(analyticsFlowUpdates.first().request).isEqualTo(activity)
     }
 
     @Test
@@ -111,6 +118,9 @@ class AnalyticsTrackerTest {
         // then
         assertThat(analyticsFlowUpdates).hasSize(1)
         verify { analyticsQueueProcessor.queue(activity) }
+        assertThat(analyticsFlowUpdates.first().type).isEqualTo(AnalyticType.EVENT)
+        assertThat(analyticsFlowUpdates.first().isInternal).isFalse()
+        assertThat(analyticsFlowUpdates.first().request).isEqualTo(activity)
     }
 
     @Test
@@ -134,6 +144,9 @@ class AnalyticsTrackerTest {
         // then
         assertThat(analyticsFlowUpdates).hasSize(1)
         verify { analyticsQueueProcessor.queueThenFlush(activity) }
+        assertThat(analyticsFlowUpdates.first().type).isEqualTo(AnalyticType.SCREEN)
+        assertThat(analyticsFlowUpdates.first().isInternal).isFalse()
+        assertThat(analyticsFlowUpdates.first().request).isEqualTo(activity)
     }
 
     @Test
@@ -157,6 +170,9 @@ class AnalyticsTrackerTest {
         // then
         assertThat(analyticsFlowUpdates).hasSize(1)
         verify { analyticsQueueProcessor.flushThenSend(activity) }
+        assertThat(analyticsFlowUpdates.first().type).isEqualTo(AnalyticType.GROUP)
+        assertThat(analyticsFlowUpdates.first().isInternal).isFalse()
+        assertThat(analyticsFlowUpdates.first().request).isEqualTo(activity)
     }
 
     @Test
@@ -165,5 +181,19 @@ class AnalyticsTrackerTest {
         analyticsTracker.flushPendingActivity()
         // then
         verify { analyticsQueueProcessor.flushAsync() }
+    }
+
+    @Test
+    fun `track internal event SHOULD update analyticsFlow with internal event`() {
+        // given
+        every { analyticsPolicy.canTrackEvent() } returns true
+        val activity: ActivityRequest = mockk(relaxed = true)
+        every { activityBuilder.track(any(), any()) } returns activity
+        // when
+        analyticsTracker.track(SessionStarted)
+        // then
+        assertThat(analyticsFlowUpdates.first().isInternal).isTrue()
+        assertThat(analyticsFlowUpdates.first().type).isEqualTo(AnalyticType.EVENT)
+        assertThat(analyticsFlowUpdates.first().request).isEqualTo(activity)
     }
 }
