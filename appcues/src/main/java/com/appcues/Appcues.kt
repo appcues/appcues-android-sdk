@@ -3,6 +3,7 @@ package com.appcues
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import androidx.annotation.VisibleForTesting
 import com.appcues.action.ActionRegistry
 import com.appcues.action.ExperienceAction
 import com.appcues.analytics.ActivityRequestBuilder
@@ -249,7 +250,8 @@ class Appcues internal constructor(koinScope: Scope) {
 
     // if a listener is attached, this will publish tracked analytics so that a host application would be able to
     // observe and re-broadcast tracking data as desired.
-    private fun publishTracking(data: TrackingData) {
+    @VisibleForTesting
+    internal fun publishTracking(data: TrackingData) {
 
         fun EventRequest.screenTitle(): String? =
             attributes[ActivityRequestBuilder.SCREEN_TITLE_ATTRIBUTE] as? String
