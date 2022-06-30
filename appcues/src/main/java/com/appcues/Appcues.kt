@@ -22,7 +22,6 @@ import com.appcues.trait.ExperienceTrait
 import com.appcues.trait.TraitRegistry
 import com.appcues.ui.ExperienceRenderer
 import kotlinx.coroutines.launch
-import org.koin.android.BuildConfig
 import org.koin.core.scope.Scope
 
 /**
