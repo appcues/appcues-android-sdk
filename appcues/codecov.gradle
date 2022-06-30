@@ -37,6 +37,10 @@ project.afterEvaluate {
                     '**/*Koin*.*',
                     '**/appcues/ui/**/*.*',
                     '**/appcues/debugger/ui/**/*.*',
+                    '**/appcues/trait/appcues/*.*',
+                    '**/appcues/data/local/room/*.*',
+                    '**/appcues/data/remote/response/**/*Adapter.*',
+                    '**/appcues/data/remote/request/*Adapter.*',
             ]
 
             def javaClasses = fileTree(dir: variant.javaCompileProvider.get().destinationDir, excludes: excludes)
