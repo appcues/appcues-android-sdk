@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Density
 import com.appcues.action.ExperienceAction
 import com.appcues.data.model.Action
+import com.appcues.trait.AppcuesPaginationData
 import java.util.UUID
 
 // used to register callback for all Actions triggered from primitives
@@ -38,20 +39,6 @@ internal val LocalAppcuesActions = staticCompositionLocalOf<Map<UUID, List<Actio
 internal val LocalAppcuesPaginationDelegate = compositionLocalOf { AppcuesPagination {} }
 
 internal data class AppcuesPagination(val onPageChanged: (Int) -> Unit)
-
-/**
- * AppcuesPaginationData is used to communicate between different traits
- * information regarding pagination.
- *
- * Every [ContentHolderTrait] should update this information if other
- * traits are supposed to react to stuff like page changes, horizontal scrolling
- * between pages, etc..
- */
-data class AppcuesPaginationData(
-    val pageCount: Int,
-    val currentPage: Int,
-    val scrollOffset: Float
-)
 
 internal val appcuesPaginationData = mutableStateOf(AppcuesPaginationData(1, 0, 0.0f))
 
@@ -78,68 +65,3 @@ internal fun LaunchOnHideAnimationCompleted(block: () -> Unit) {
 // we could make this public to give more flexibility in the future
 @Composable
 internal fun rememberAppcuesContentVisibility() = remember { isContentVisible }
-
-/**
- * AppcuesTraitAnimatedVisibility is used to animate traits based on internal state of Appcues SDK
- *
- * Right after the ExperiencePresentingTrait starts the step it will trigger the enter animation, also
- * before the ExperiencePresentingTrait is finished it will go over the exit animation as well.
- */
-@Composable
-fun AppcuesTraitAnimatedVisibility(
-    modifier: Modifier = Modifier,
-    enter: EnterTransition = fadeIn() + expandIn(),
-    exit: ExitTransition = fadeOut() + shrinkOut(),
-    content: @Composable() AnimatedVisibilityScope.() -> Unit
-) {
-    AnimatedVisibility(
-        modifier = modifier,
-        visibleState = rememberAppcuesContentVisibility(),
-        enter = enter,
-        exit = exit,
-        content = content
-    )
-}
-
-class StepDecoratingPadding(private val density: Density) {
-
-    private val topPaddingPx = mutableStateOf(0)
-    private val bottomPaddingPx = mutableStateOf(0)
-    private val startPaddingPx = mutableStateOf(0)
-    private val endPaddingPx = mutableStateOf(0)
-
-    fun setTopPadding(px: Int) {
-        if (topPaddingPx.value < px) {
-            topPaddingPx.value = px
-        }
-    }
-
-    fun setBottomPadding(px: Int) {
-        if (bottomPaddingPx.value < px) {
-            bottomPaddingPx.value = px
-        }
-    }
-
-    fun setStartPadding(px: Int) {
-        if (startPaddingPx.value < px) {
-            startPaddingPx.value = px
-        }
-    }
-
-    fun setEndPadding(px: Int) {
-        if (endPaddingPx.value < px) {
-            endPaddingPx.value = px
-        }
-    }
-
-    val paddingValues = derivedStateOf {
-        with(density) {
-            PaddingValues(
-                start = startPaddingPx.value.toDp(),
-                top = topPaddingPx.value.toDp(),
-                end = endPaddingPx.value.toDp(),
-                bottom = bottomPaddingPx.value.toDp()
-            )
-        }
-    }
-}

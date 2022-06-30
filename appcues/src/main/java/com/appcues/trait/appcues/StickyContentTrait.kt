@@ -8,10 +8,10 @@ import androidx.compose.ui.Modifier
 import com.appcues.data.mapper.step.StepContentMapper
 import com.appcues.data.model.getConfig
 import com.appcues.data.model.getConfigPrimitive
+import com.appcues.trait.StepDecoratingPadding
 import com.appcues.trait.StepDecoratingTrait
-import com.appcues.ui.StepDecoratingPadding
+import com.appcues.trait.alignStepOverlay
 import com.appcues.ui.extensions.Compose
-import com.appcues.ui.extensions.alignStepOverlay
 
 internal class StickyContentTrait(
     override val config: Map<String, Any>?,

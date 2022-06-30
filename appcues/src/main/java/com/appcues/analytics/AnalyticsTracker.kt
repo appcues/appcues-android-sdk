@@ -1,10 +1,11 @@
 package com.appcues.analytics
 
+import com.appcues.AnalyticType
 import com.appcues.AppcuesCoroutineScope
-import com.appcues.analytics.AnalyticType.EVENT
-import com.appcues.analytics.AnalyticType.GROUP
-import com.appcues.analytics.AnalyticType.IDENTIFY
-import com.appcues.analytics.AnalyticType.SCREEN
+import com.appcues.AnalyticType.EVENT
+import com.appcues.AnalyticType.GROUP
+import com.appcues.AnalyticType.IDENTIFY
+import com.appcues.AnalyticType.SCREEN
 import com.appcues.data.remote.request.ActivityRequest
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow

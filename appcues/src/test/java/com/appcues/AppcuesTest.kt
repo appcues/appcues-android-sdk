@@ -6,12 +6,11 @@ import com.appcues.action.ActionRegistry
 import com.appcues.action.ExperienceAction
 import com.appcues.analytics.ActivityRequestBuilder
 import com.appcues.analytics.ActivityScreenTracking
-import com.appcues.analytics.AnalyticType.EVENT
-import com.appcues.analytics.AnalyticType.GROUP
-import com.appcues.analytics.AnalyticType.IDENTIFY
-import com.appcues.analytics.AnalyticType.SCREEN
+import com.appcues.AnalyticType.EVENT
+import com.appcues.AnalyticType.GROUP
+import com.appcues.AnalyticType.IDENTIFY
+import com.appcues.AnalyticType.SCREEN
 import com.appcues.analytics.AnalyticsEvent
-import com.appcues.analytics.AnalyticsListener
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.analytics.TrackingData
 import com.appcues.data.remote.request.ActivityRequest

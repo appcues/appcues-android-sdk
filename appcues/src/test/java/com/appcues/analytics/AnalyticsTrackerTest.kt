@@ -1,5 +1,6 @@
 package com.appcues.analytics
 
+import com.appcues.AnalyticType
 import com.appcues.AppcuesCoroutineScope
 import com.appcues.LoggingLevel.NONE
 import com.appcues.analytics.AnalyticsEvent.SessionStarted

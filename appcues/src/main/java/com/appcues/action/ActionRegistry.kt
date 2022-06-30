@@ -15,7 +15,7 @@ import org.koin.core.parameter.parametersOf
 import org.koin.core.scope.Scope
 import kotlin.collections.set
 
-typealias ActionFactoryBlock = (config: AppcuesConfigMap) -> ExperienceAction
+internal typealias ActionFactoryBlock = (config: AppcuesConfigMap) -> ExperienceAction
 
 internal class ActionRegistry(
     override val scope: Scope,
