@@ -90,7 +90,7 @@ Refer to the [Extending Guide](https://github.com/appcues/appcues-android-sdk/bl
 
 ## 📝 Documentation
 
-Full documentation is available at https://docs.appcues.com/
+SDK Documentation is available at https://appcues.github.io/appcues-android-sdk and full Appcues documentation is available at https://docs.appcues.com/
 
 ## 🎬 Samples
 
