@@ -2,14 +2,14 @@ package com.appcues
 
 import android.app.Activity
 import android.content.Intent
-import com.appcues.action.ActionRegistry
-import com.appcues.action.ExperienceAction
-import com.appcues.analytics.ActivityRequestBuilder
-import com.appcues.analytics.ActivityScreenTracking
 import com.appcues.AnalyticType.EVENT
 import com.appcues.AnalyticType.GROUP
 import com.appcues.AnalyticType.IDENTIFY
 import com.appcues.AnalyticType.SCREEN
+import com.appcues.action.ActionRegistry
+import com.appcues.action.ExperienceAction
+import com.appcues.analytics.ActivityRequestBuilder
+import com.appcues.analytics.ActivityScreenTracking
 import com.appcues.analytics.AnalyticsEvent
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.analytics.TrackingData
