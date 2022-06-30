@@ -4,14 +4,14 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import androidx.annotation.VisibleForTesting
-import com.appcues.action.ActionRegistry
-import com.appcues.action.ExperienceAction
-import com.appcues.analytics.ActivityRequestBuilder
-import com.appcues.analytics.ActivityScreenTracking
 import com.appcues.AnalyticType.EVENT
 import com.appcues.AnalyticType.GROUP
 import com.appcues.AnalyticType.IDENTIFY
 import com.appcues.AnalyticType.SCREEN
+import com.appcues.action.ActionRegistry
+import com.appcues.action.ExperienceAction
+import com.appcues.analytics.ActivityRequestBuilder
+import com.appcues.analytics.ActivityScreenTracking
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.analytics.TrackingData
 import com.appcues.data.remote.request.EventRequest
@@ -22,6 +22,7 @@ import com.appcues.trait.ExperienceTrait
 import com.appcues.trait.TraitRegistry
 import com.appcues.ui.ExperienceRenderer
 import kotlinx.coroutines.launch
+import org.koin.android.BuildConfig
 import org.koin.core.scope.Scope
 
 /**
