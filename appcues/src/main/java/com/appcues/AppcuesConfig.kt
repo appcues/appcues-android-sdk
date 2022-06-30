@@ -48,7 +48,7 @@ data class AppcuesConfig(
         }
 
     /**
-     *  Sets the activity storage max age for the configuration.  This value determines how long an item can be stored
+     *  Sets the activity storage max age for the configuration, in seconds.  This value determines how long an item can be stored
      *  on the local device and retried later, in the case of the device network connection being unavailable.  Only
      *  requests that are more recent than the max age will be retried - or all, if not set.
      */
