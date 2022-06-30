@@ -26,6 +26,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.core.os.bundleOf
 import com.appcues.di.AppcuesKoinContext
 import com.appcues.trait.ContentHolderTrait.ContainerPages
+import com.appcues.trait.StepDecoratingPadding
 import com.appcues.ui.AppcuesViewModel.UIState
 import com.appcues.ui.AppcuesViewModel.UIState.Dismissing
 import com.appcues.ui.AppcuesViewModel.UIState.Rendering

@@ -8,11 +8,13 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.21"
         classpath "com.karumi:shot:5.13.0"
         classpath "org.jacoco:org.jacoco.core:0.8.7"
+        classpath "org.jetbrains.dokka:kotlin-as-java-plugin:1.7.0"
     }
 }
 
 plugins {
     id "io.gitlab.arturbosch.detekt" version "1.19.0"
+    id "org.jetbrains.dokka" version "1.7.0"
 }
 
 allprojects {

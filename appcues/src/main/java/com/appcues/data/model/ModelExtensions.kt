@@ -8,7 +8,7 @@ import com.appcues.data.model.styling.ComponentColor
 import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.data.remote.response.step.StepContentResponse
 
-typealias AppcuesConfigMap = Map<String, Any>?
+internal typealias AppcuesConfigMap = Map<String, Any>?
 
 internal inline fun <reified T : Any?> AppcuesConfigMap.getConfigOrDefault(key: String, default: T): T {
     // if hash config is null, return default

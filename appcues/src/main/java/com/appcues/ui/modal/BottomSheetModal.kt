@@ -21,7 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.appcues.data.model.styling.ComponentStyle
-import com.appcues.ui.AppcuesTraitAnimatedVisibility
+import com.appcues.trait.AppcuesTraitAnimatedVisibility
 import com.appcues.ui.extensions.WindowInfo
 import com.appcues.ui.extensions.WindowInfo.DeviceType.MOBILE
 import com.appcues.ui.extensions.WindowInfo.DeviceType.TABLET

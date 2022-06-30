@@ -1,13 +1,15 @@
 package com.appcues
 
 import com.appcues.LoggingLevel.NONE
-import com.appcues.analytics.AnalyticsListener
 
-data class AppcuesConfig(
-    val accountId: String,
-    val applicationId: String,
+/**
+ * A configuration object that defines the behavior and policies for Appcues.
+ */
+data class AppcuesConfig internal constructor(
+    internal val accountId: String,
+    internal val applicationId: String,
 ) {
-    companion object {
+    internal companion object {
         const val SESSION_TIMEOUT_DEFAULT = 1800 // 30 minutes by default
         const val ACTIVITY_STORAGE_MAX_SIZE = 25
     }

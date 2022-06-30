@@ -8,11 +8,10 @@ import com.appcues.action.ActionRegistry
 import com.appcues.action.ExperienceAction
 import com.appcues.analytics.ActivityRequestBuilder
 import com.appcues.analytics.ActivityScreenTracking
-import com.appcues.analytics.AnalyticType.EVENT
-import com.appcues.analytics.AnalyticType.GROUP
-import com.appcues.analytics.AnalyticType.IDENTIFY
-import com.appcues.analytics.AnalyticType.SCREEN
-import com.appcues.analytics.AnalyticsListener
+import com.appcues.AnalyticType.EVENT
+import com.appcues.AnalyticType.GROUP
+import com.appcues.AnalyticType.IDENTIFY
+import com.appcues.AnalyticType.SCREEN
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.analytics.TrackingData
 import com.appcues.data.remote.request.EventRequest
@@ -25,6 +24,14 @@ import com.appcues.ui.ExperienceRenderer
 import kotlinx.coroutines.launch
 import org.koin.core.scope.Scope
 
+/**
+ * Construct and return an instance of the Appcues SDK.
+ *
+ * @param [context] The Android Context used by the host application.
+ * @param [accountId] The Appcues Account ID found in Studio settings.
+ * @param [applicationId] The Appcues Application ID found in Studio settings.
+ * @param [config] Optional, additional settings on AppcuesConfig to use when initializing the SDK.
+ */
 fun Appcues(
     context: Context,
     accountId: String,
@@ -35,6 +42,10 @@ fun Appcues(
     // ready to go with the necessary dependency configuration in its scope.
     AppcuesKoinContext.createAppcuesScope(context, AppcuesConfig(accountId, applicationId).apply { config?.invoke(this) }).get()
 
+/**
+ * The main entry point for using Appcues functionality in your application - tracking
+ * analytics and rendering experiences.
+ */
 class Appcues internal constructor(koinScope: Scope) {
 
     private val config by koinScope.inject<AppcuesConfig>()
@@ -88,8 +99,8 @@ class Appcues internal constructor(koinScope: Scope) {
     /**
      * Identify the user and determine if they should see Appcues content.
      *
-     * [userId] Unique value identifying the user.
-     * [properties] Optional properties that provide additional context about the user.
+     * @param userId Unique value identifying the user.
+     * @param properties Optional properties that provide additional context about the user.
      */
     fun identify(userId: String, properties: Map<String, Any>? = null) {
         identify(false, userId, properties)
@@ -98,8 +109,8 @@ class Appcues internal constructor(koinScope: Scope) {
     /**
      * Identify a group for the current user.
      *
-     * [groupId] Unique value identifying the group.
-     * [properties] Optional properties that provide additional context about the group.
+     * @param groupId Unique value identifying the group.
+     * @param properties Optional properties that provide additional context about the group.
      */
     fun group(groupId: String?, properties: Map<String, Any>? = null) {
         storage.groupId = groupId
@@ -113,6 +124,8 @@ class Appcues internal constructor(koinScope: Scope) {
      * Generate a unique Id for the current user when there is not a known identity to use in
      * the {@link identity(String, Map<String, Any>) identity} call. This will cause the SDK
      * to begin tracking activity and checking for qualified content.
+     *
+     * @param properties Optional properties that provide additional context about the anonymous user.
      */
     fun anonymous(properties: Map<String, Any>? = null) {
         // use the device ID as the default anonymous user ID, unless an override for generating
@@ -135,8 +148,8 @@ class Appcues internal constructor(koinScope: Scope) {
     /**
      * Track an action taken by a user.
      *
-     * [name] Name of the event.
-     * [properties] Optional properties that provide additional context about the event.
+     * @param name Name of the event.
+     * @param properties Optional properties that provide additional context about the event.
      */
     fun track(name: String, properties: Map<String, Any>? = null) {
         analyticsTracker.track(name, properties)
@@ -145,19 +158,19 @@ class Appcues internal constructor(koinScope: Scope) {
     /**
      * Track an screen viewed by a user.
      *
-     * [title] Name of the screen
-     * [properties] Optional properties that provide additional context about the event.
+     * @param title Name of the screen
+     * @param properties Optional properties that provide additional context about the screen.
      */
     fun screen(title: String, properties: Map<String, Any>? = null) {
         analyticsTracker.screen(title, properties)
     }
 
     /**
-     * Forces specific Appcues experience to appear for the current user by passing in the [experienceId].
+     * Renders the specified Appcues experience for the current user.
      *
-     * [experienceId] ID of the experience.
+     * @param experienceId ID of the experience.
      *
-     * * @return true if experience content was able to be shown, false if not.
+     * @return True if experience content was able to be shown, false if not.
      */
     suspend fun show(experienceId: String): Boolean {
         return experienceRenderer.show(experienceId)
@@ -166,8 +179,8 @@ class Appcues internal constructor(koinScope: Scope) {
     /**
      * Register a trait that can customize an Experience.
      *
-     * [type] type of the action that is sent by the experience. ex: "my-trait"
-     * [traitFactory] factory (lambda) responsible for creating the ExperienceTrait registered for given [type]
+     * @param type Type of the action that is sent by the experience. ex: "my-trait"
+     * @param traitFactory Factory (lambda) responsible for creating the ExperienceTrait registered for given [type]
      *
      * usage:
      * registerTrait("my-trait") { MyCustomExperienceTrait() }
@@ -179,8 +192,8 @@ class Appcues internal constructor(koinScope: Scope) {
     /**
      * Register an action that can be activated in an Experience.
      *
-     * [type] type of the action that is sent by the experience. ex: "my-action"
-     * [actionFactory] factory (lambda) responsible for creating the ExperienceAction registered for given [type]
+     * @param type Type of the action that is sent by the experience. ex: "my-action"
+     * @param actionFactory Factory (lambda) responsible for creating the ExperienceAction registered for given [type]
      *
      * usage:
      * registerAction("my-action") { MyCustomExperienceAction() }
@@ -197,14 +210,16 @@ class Appcues internal constructor(koinScope: Scope) {
     }
 
     /**
-     * Set Appcues to start in Debug mode
+     * Starts the Appcues Debugger over the specified Activity.
+     *
+     * @param activity The Activity to launch the debugger over.
      */
     fun debug(activity: Activity) {
         debuggerManager.start(activity)
     }
 
     /**
-     * Signals to Appcues that this instance should stop all on going jobs
+     * Signals to Appcues that this instance should stop all ongoing jobs.
      *
      * This method is only expected to be called if you are intending to fully remove
      * an Appcues SDK instance and create a new one. This is not normally an expected
@@ -220,10 +235,10 @@ class Appcues internal constructor(koinScope: Scope) {
      * Notify Appcues of a new Intent to check for deep link content.  This should be used to pass along Intents
      * that may be using the custom Appcues scheme, for things like previewing experiences.
      *
-     * [activity] the current activity handling the intent
-     * [intent] the Intent that the Appcues SDK should check for deep link content.
+     * @param activity Current activity handling the intent
+     * @param intent Intent that the Appcues SDK should check for deep link content.
      *
-     * @return true if a deep link was handled by the Appcues SDK, false if not - meaning the host application should process.
+     * @return True if a deep link was handled by the Appcues SDK, false if not - meaning the host application should process.
      */
     fun onNewIntent(activity: Activity, intent: Intent?): Boolean =
         deeplinkHandler.handle(activity, intent)

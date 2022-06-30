@@ -15,8 +15,8 @@ import androidx.compose.ui.Modifier
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.getConfigColor
 import com.appcues.data.model.styling.ComponentColor
+import com.appcues.trait.AppcuesTraitAnimatedVisibility
 import com.appcues.trait.BackdropDecoratingTrait
-import com.appcues.ui.AppcuesTraitAnimatedVisibility
 import com.appcues.ui.extensions.getColor
 
 internal class BackdropTrait(

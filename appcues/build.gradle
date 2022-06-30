@@ -3,6 +3,7 @@ plugins {
     id 'kotlin-android'
     id 'shot'
     id 'kotlin-kapt'
+    id 'org.jetbrains.dokka'
 }
 
 apply from: 'publish-maven.gradle'
