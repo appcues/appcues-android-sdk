@@ -153,7 +153,7 @@ internal fun Modifier.coloredShadow(
 ) = drawBehind {
 
     val shadowColor = color.toArgb()
-    val transparent = color.copy(alpha = 0.2f).toArgb()
+    val transparent = color.copy(alpha = 0.0f).toArgb()
 
     drawIntoCanvas {
         val paint = Paint()
@@ -161,7 +161,7 @@ internal fun Modifier.coloredShadow(
         frameworkPaint.color = transparent
 
         frameworkPaint.setShadowLayer(
-            4.dp.toPx(),
+            radius.toPx(),
             offsetX.toPx(),
             offsetY.toPx(),
             shadowColor
@@ -172,8 +172,8 @@ internal fun Modifier.coloredShadow(
             0f,
             this.size.width,
             this.size.height,
-            radius.toPx(),
-            radius.toPx(),
+            0f,
+            0f,
             paint
         )
     }
