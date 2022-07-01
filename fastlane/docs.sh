@@ -2,14 +2,24 @@
 
 repoName="appcues-android-sdk"
 initialBranch=$(git rev-parse --abbrev-ref HEAD)
-# versionFile="./Sources/AppcuesKit/Version.swift"
 
-# # get last line in Version.swift
-# versionLine=$(tail -n 1 $versionFile)
-# # split at the =
-# version=$(cut -d "=" -f2- <<< "$versionLine")
-# # remove quotes and spaces
-# version=$(sed "s/[' \"]//g" <<< "$version")
+# read the properties file
+while IFS= read -r line; do
+    key="${line%% =*}"
+    value="${line#*= }"
+    eval "$key"="'$value'"
+done < ./appcues/appcues.properties
+versionMajor=$VERSION_MAJOR
+versionMinor=$VERSION_MINOR
+versionPatch=$VERSION_PATCH
+versionClassifier=$VERSION_CLASSIFIER
+
+# construct the version string
+version="$versionMajor.$versionMinor.$versionPatch"
+if [ ! -z "$versionClassifier" ]
+then
+    version="$version-$versionClassifier"
+fi
 
 # check that we're on the `main` branch
 if [ $initialBranch != 'main' ]
@@ -35,7 +45,7 @@ unzip -o ../docs.zip
 rm ../docs.zip
 
 git add .
-git commit -m "📝 Update compiled docs"
+git commit -m "📝 Update compiled docs for $version"
 git push
 
 git checkout $initialBranch
