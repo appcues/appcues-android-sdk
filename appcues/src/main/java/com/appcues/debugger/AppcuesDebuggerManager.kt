@@ -44,7 +44,7 @@ internal class AppcuesDebuggerManager(context: Context, private val koinScope: S
         }
     }
 
-    fun start(activity: Activity, deeplinkPath: String? = null) {
+    fun start(activity: Activity, deeplinkPath: String? = null) = activity.runOnUiThread {
         this.currentActivity = activity
         coroutineScope.coroutineContext.cancelChildren()
         // it is possible to re-enter start without a stop (deeplinks) - in which case we continue to
