@@ -14,25 +14,6 @@ platform :android do
     gradle(task: ':appcues:debugUnitTestCoverage')
   end
 
-  desc "Deploy SDK release to GitHub Package Registry"
-  lane :deploy_github_package do
-    gradle(task: ':appcues:versionTxt')
-    gradle(task: ':appcues:publishReleasePublicationToGitHubPackagesRepository')
-
-    sdk_version=File.read("../version.txt")
-
-    git_log = changelog_from_git_commits(
-      commits_count: 5,
-      pretty: "- [%as] %s"
-    )
-    changelog_message = "Version #{sdk_version}\n\nLatest commits on #{ENV["CIRCLE_BRANCH"]}:\n" + git_log
-    
-    metadata_dir = "../changelog"
-    version_changelog = metadata_dir + "/#{ENV["CIRCLE_BUILD_NUM"]}.txt"
-    sh("mkdir", "-p", metadata_dir)
-    sh("echo '#{changelog_message}' > #{version_changelog}")
-  end
-
   desc "Deploy a new version to Google Play internal test"
   lane :deploy_sample do
     sh("sh", "./replace-placeholders.sh", "kotlin-android-app", ENV["EX_APPCUES_ACCOUNT_ID"], ENV["EX_APPCUES_APPLICATION_ID"])

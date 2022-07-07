@@ -23,13 +23,13 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 Validate the code in the SDK repo works properly
 
-### android deploy_github_package
+### android code_coverage
 
 ```sh
-[bundle exec] fastlane android deploy_github_package
+[bundle exec] fastlane android code_coverage
 ```
 
-Deploy SDK release to GitHub Package Registry
+Generate unit test code coverage report
 
 ### android deploy_sample
 

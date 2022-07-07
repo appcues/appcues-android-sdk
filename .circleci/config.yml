@@ -175,7 +175,7 @@ jobs:
             }
           channel: team-mobile-bots  
 
-  deploy_github_package:
+  update_code_coverage:
     working_directory: ~/code
     executor:
       name: android/android-machine
@@ -184,79 +184,15 @@ jobs:
     steps:
       - install_with_cache      
       - run:
-          name: Deploy SDK to GitHub Package Registry
-          command: bundle exec fastlane deploy_github_package
-      - run:
           name: Generate code coverage report
           command: bundle exec fastlane code_coverage
       - codecov/upload:
           file: "./appcues/build/reports/jacoco/debugUnitTestCoverage/debugUnitTestCoverage.xml"
-      - run:
-          # some ideas from https://discuss.circleci.com/t/leveraging-circleci-api-to-include-build-logs-in-slack-notifications/39111
-          name: Get changelog
-          command: |
-            SDK_CHANGELOG=$(cat ./changelog/$CIRCLE_BUILD_NUM.txt | tail -n 10 | jq -aRs . | sed -e 's/^"//' -e 's/"$//')
-            echo $SDK_CHANGELOG
-            echo "export SDK_CHANGELOG='${SDK_CHANGELOG}'" >> $BASH_ENV
       # not saving gradle cache on this job since it is SDK only
       - slack/notify:
           event: fail
           template: basic_fail_1
           channel: team-mobile-bots
-      - slack/notify:
-          event: pass
-          custom: |
-            {
-              "blocks": [
-                {
-                  "type": "header",
-                  "text": {
-                    "type": "plain_text",
-                    "text": "🚀 Android SDK Deployed to GitHub Package Registry",
-                    "emoji": true
-                  }
-                }
-              ],
-              "attachments": [
-                {
-                  "color": "#3DDC84",
-                  "blocks": [
-                  {
-                      "type": "section",
-                      "text": {
-                        "type": "plain_text",
-                        "text": "$SDK_CHANGELOG",
-                        "emoji": true
-                      }
-                    },
-                    {
-                      "type": "actions",
-                      "elements": [
-                        {
-                          "type": "button",
-                          "text": {
-                            "type": "plain_text",
-                            "text": "View Job",
-                            "emoji": true
-                          },
-                          "url": "$CIRCLE_BUILD_URL"
-                        },
-                        {
-                          "type": "button",
-                          "text": {
-                            "type": "plain_text",
-                            "text": "View Package",
-                            "emoji": true
-                          },
-                          "url": "https://github.com/appcues/appcues-android-sdk/packages/1386739"
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            }
-          channel: team-mobile-bots    
 
 # --------------------------
 #        WORKFLOWS
@@ -273,13 +209,13 @@ workflows:
           context:
             - Appcues
 
-  build_and_deploy_package:
+  code_coverage:
     when:
       and:
         - *is_main
         - not: << pipeline.parameters.deploy-sample >>
     jobs:
-      - deploy_github_package:
+      - update_code_coverage:
           context:
             - Appcues
 
