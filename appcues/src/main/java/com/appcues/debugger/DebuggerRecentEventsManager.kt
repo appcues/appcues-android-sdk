@@ -2,6 +2,7 @@ package com.appcues.debugger
 
 import com.appcues.R
 import com.appcues.analytics.ActivityRequestBuilder
+import com.appcues.analytics.AnalyticsEvent
 import com.appcues.analytics.AutoPropertyDecorator
 import com.appcues.data.remote.request.ActivityRequest
 import com.appcues.data.remote.request.EventRequest
@@ -46,6 +47,8 @@ internal class DebuggerRecentEventsManager(
                 activityRequest.events.forEach { event ->
                     val type = event.name.toEventType()
                     val title = event.name.toEventTitle()?.let { contextResources.getString(it) } ?: event.name
+
+                    clearEventsOnSessionReset(event)
 
                     events.addFirst(
                         DebuggerEventItem(
@@ -104,6 +107,13 @@ internal class DebuggerRecentEventsManager(
         }
 
         updateData()
+    }
+
+    private fun clearEventsOnSessionReset(event: EventRequest) {
+        // When session reset we clear the current list and start a new one
+        if (event.name == AnalyticsEvent.SessionReset.eventName) {
+            events.clear()
+        }
     }
 
     private fun Map<String, Any>.filterOutScreenProperties(eventType: EventType): Map<String, Any> {
