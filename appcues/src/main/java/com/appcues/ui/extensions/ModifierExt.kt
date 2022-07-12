@@ -133,6 +133,7 @@ internal fun Modifier.styleShadow(style: ComponentStyle?, isDark: Boolean): Modi
         if (style?.shadow != null) Modifier.coloredShadow(
             color = style.shadow.color.getColor(isDark),
             radius = style.shadow.radius.dp,
+            cornerRadius = style.cornerRadius.dp,
             offsetX = style.shadow.x.dp,
             offsetY = style.shadow.y.dp,
         )
@@ -143,6 +144,7 @@ internal fun Modifier.styleShadow(style: ComponentStyle?, isDark: Boolean): Modi
 internal fun Modifier.coloredShadow(
     color: Color,
     radius: Dp = 0.dp,
+    cornerRadius: Dp = 0.dp,
     offsetX: Dp = 0.dp,
     offsetY: Dp = 0.dp
 ) = drawBehind {
@@ -167,8 +169,8 @@ internal fun Modifier.coloredShadow(
             0f,
             this.size.width,
             this.size.height,
-            0f,
-            0f,
+            cornerRadius.toPx(),
+            cornerRadius.toPx(),
             paint
         )
     }
