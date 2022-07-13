@@ -13,6 +13,7 @@ apply from: 'codecov.gradle'
 ext.room_version = '2.4.2'
 ext.compose_version = '1.2.0-rc03'
 ext.compose_compiler_version = '1.2.0'
+ext.accompanist_version = '0.24.13-rc'
 
 android {
     compileSdk 32
@@ -98,11 +99,11 @@ dependencies {
     implementation "io.insert-koin:koin-core:3.1.4"
     implementation "io.insert-koin:koin-android:3.1.4"
     // View Pager
-    implementation "com.google.accompanist:accompanist-pager:0.24.9-beta"
+    implementation "com.google.accompanist:accompanist-pager:$accompanist_version"
     // Webview
-    implementation "com.google.accompanist:accompanist-webview:0.24.9-beta"
+    implementation "com.google.accompanist:accompanist-webview:$accompanist_version"
     // Navigation Animated
-    implementation "com.google.accompanist:accompanist-navigation-animation:0.24.9-beta"
+    implementation "com.google.accompanist:accompanist-navigation-animation:$accompanist_version"
     // Play In-App Review
     implementation 'com.google.android.play:review:2.0.0'
     implementation 'com.google.android.play:review-ktx:2.0.0'
