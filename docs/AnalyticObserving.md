@@ -4,24 +4,16 @@ An [`AnalyticsListener`](https://appcues.github.io/appcues-android-sdk/appcues/c
 
 ## Registering the AnalyticsListener
 
-One of the types in your application can implement the [`AnalyticsListener`](https://appcues.github.io/appcues-android-sdk/appcues/com.appcues/-analytics-listener/index.html) interface. In the usage example below, this is implemented on the main `Application` subclass. This interface defines a single function [`trackedAnalytic(type, value, properties, isInternal)`](https://appcues.github.io/appcues-android-sdk/appcues/com.appcues/-analytics-listener/tracked-analytic.html), which provides access to the analytics tracking being done by the SDK.
+The application should supply an implementation of the [`AnalyticsListener`](https://appcues.github.io/appcues-android-sdk/appcues/com.appcues/-analytics-listener/index.html) interface, to be set during or after initialization of the Appcues SDK. In the usage example below, the implementation is created and assigned inline, during the configuration of the SDK, using the [`AppcuesConfig.analyticsListener`](https://appcues.github.io/appcues-android-sdk/appcues/com.appcues/-appcues-config/analytics-listener.html) property.  This property can also be set on the Appcues instance after it is created, using the [`Appcues.analyticsListener`](https://appcues.github.io/appcues-android-sdk/appcues/com.appcues/-appcues/analytics-listener.html) property. 
+
+The interface defines a single function [`trackedAnalytic(type, value, properties, isInternal)`](https://appcues.github.io/appcues-android-sdk/appcues/com.appcues/-analytics-listener/tracked-analytic.html), which provides access to the analytics tracking being done by the SDK.
 
 ```kotlin
-class ExampleApplication : Application(), AnalyticsListener {
-    override fun trackedAnalytic(type: AnalyticType, value: String?, properties: Map<String, Any>?, isInternal: Boolean) {
-        // process and use the analytics tracking information
-    }
-}
-```
-
-Set the listener for the Appcues Android SDK to use. In the usage example below, this is done in the ExampleApplication `onCreate()`. The listener can be provided during SDK initialization as a configuration property, as shown below, or set later after the SDK initialization completes.
-
-```kotlin
-override fun onCreate() {
-    super.onCreate()
-
-    appcues = Appcues(this, "APPCUES_ACCOUNT_ID", "APPCUES_APPLICATION_ID") {
-        analyticsListener = this@ExampleApplication
+appcues = Appcues(this, "APPCUES_ACCOUNT_ID", "APPCUES_APPLICATION_ID") {
+    analyticsListener = object: AnalyticsListener {
+        override fun trackedAnalytic(type: AnalyticType, value: String?, properties: Map<String, Any>?, isInternal: Boolean) {
+            // process and use the analytics tracking information
+        }
     }
 }
 ```
