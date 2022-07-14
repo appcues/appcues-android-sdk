@@ -50,6 +50,12 @@ internal sealed class ExperiencePrimitive(
         val distribution: ComponentDistribution = CENTER,
     ) : ExperiencePrimitive(id, style)
 
+    data class BoxPrimitive(
+        override val id: UUID,
+        override val style: ComponentStyle = ComponentStyle(),
+        val items: List<ExperiencePrimitive>,
+    ) : ExperiencePrimitive(id, style)
+
     data class EmbedHtmlPrimitive(
         override val id: UUID,
         override val style: ComponentStyle = ComponentStyle(),

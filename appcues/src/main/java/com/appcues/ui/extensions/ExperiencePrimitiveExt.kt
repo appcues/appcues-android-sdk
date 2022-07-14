@@ -2,6 +2,7 @@ package com.appcues.ui.extensions
 
 import androidx.compose.runtime.Composable
 import com.appcues.data.model.ExperiencePrimitive
+import com.appcues.data.model.ExperiencePrimitive.BoxPrimitive
 import com.appcues.data.model.ExperiencePrimitive.ButtonPrimitive
 import com.appcues.data.model.ExperiencePrimitive.EmbedHtmlPrimitive
 import com.appcues.data.model.ExperiencePrimitive.HorizontalStackPrimitive
@@ -17,5 +18,6 @@ internal fun ExperiencePrimitive.Compose() = when (this) {
     is TextPrimitive -> Compose()
     is HorizontalStackPrimitive -> Compose()
     is VerticalStackPrimitive -> Compose()
+    is BoxPrimitive -> Compose()
     is EmbedHtmlPrimitive -> Compose()
 }
