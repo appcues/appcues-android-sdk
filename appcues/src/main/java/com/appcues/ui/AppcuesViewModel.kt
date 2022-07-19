@@ -136,13 +136,13 @@ internal class AppcuesViewModel(
     }
 
     fun onPause() {
-        appcuesCoroutineScope.launch {
+        viewModelScope.launch {
             stateMachine.handleAction(Pause)
         }
     }
 
     fun onResume() {
-        appcuesCoroutineScope.launch {
+        viewModelScope.launch {
             stateMachine.handleAction(Resume)
         }
     }
