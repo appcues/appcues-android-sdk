@@ -1,6 +1,9 @@
 package com.appcues.data.mapper.experience
 
 import android.content.Context
+import com.appcues.action.ExperienceAction
+import com.appcues.action.appcues.LaunchExperienceAction
+import com.appcues.action.appcues.LinkAction
 import com.appcues.data.mapper.mergeActions
 import com.appcues.data.mapper.mergeTraits
 import com.appcues.data.mapper.step.StepMapper
@@ -40,6 +43,10 @@ internal class ExperienceMapper(
             priority = priority,
             type = from.type,
             publishedAt = from.publishedAt,
+            completionActions = arrayListOf<ExperienceAction>().apply {
+                from.redirectUrl?.let { add(LinkAction(scope, it)) }
+                from.nextContentId?.let { add(LaunchExperienceAction(it)) }
+            }
         )
     }
 

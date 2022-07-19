@@ -2,6 +2,7 @@
 
 package com.appcues.statemachine
 
+import android.util.Log
 import com.appcues.data.model.Experience
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.RenderStep
@@ -13,6 +14,7 @@ import com.appcues.statemachine.Error.StepError
 import com.appcues.statemachine.SideEffect.AwaitEffect
 import com.appcues.statemachine.SideEffect.ContinuationEffect
 import com.appcues.statemachine.SideEffect.PresentContainerEffect
+import com.appcues.statemachine.SideEffect.ProcessActions
 import com.appcues.statemachine.SideEffect.ReportErrorEffect
 import com.appcues.statemachine.State.BeginningExperience
 import com.appcues.statemachine.State.BeginningStep
@@ -31,6 +33,7 @@ import kotlin.contracts.contract
 internal interface Transitions {
 
     fun Idling.fromIdlingToBeginningExperience(action: StartExperience): Transition {
+        Log.i("Appcues", "fromIdlingToBeginningExperience ${action.experience.name}")
         return if (action.experience.stepContainers.isNotEmpty()) {
             Transition(BeginningExperience(action.experience), ContinuationEffect(StartStep(StepIndex(0))))
         } else {
@@ -56,6 +59,7 @@ internal interface Transitions {
     }
 
     fun BeginningStep.fromBeginningStepToRenderingStep(action: RenderStep): Transition {
+        Log.i("Appcues", "fromBeginningStepToRenderingStep ${experience.name}")
         return Transition(RenderingStep(experience, flatStepIndex, isFirst))
     }
 
@@ -144,7 +148,7 @@ internal interface Transitions {
     }
 
     fun EndingExperience.fromEndingExperienceToIdling(action: Reset): Transition {
-        return Transition(Idling)
+        return Transition(Idling, if (isExperienceCompleted()) ProcessActions(experience.completionActions) else null)
     }
 
     companion object : Transitions

@@ -18,7 +18,7 @@ internal object AppcuesKoin : KoinScopePlugin {
             val config: AppcuesConfig = get()
             Logcues(config.loggingLevel)
         }
-        scoped { StateMachine(appcuesCoroutineScope = get(), config = get()) }
+        scoped { StateMachine(appcuesCoroutineScope = get(), config = get(), actionProcessor = get()) }
         scoped { Storage(context = get(), config = get()) }
         scoped {
             DeeplinkHandler(

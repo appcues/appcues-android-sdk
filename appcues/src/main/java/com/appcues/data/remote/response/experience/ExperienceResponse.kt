@@ -17,4 +17,6 @@ internal data class ExperienceResponse(
     val state: String?,
     val type: String?,
     val publishedAt: Long?,
+    val nextContentId: String?,
+    val redirectUrl: String?,
 )

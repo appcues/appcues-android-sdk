@@ -1,5 +1,6 @@
 package com.appcues.analytics
 
+import android.util.Log
 import com.appcues.Storage
 import com.appcues.analytics.ExperienceLifecycleEvent.ExperienceCompleted
 import com.appcues.analytics.ExperienceLifecycleEvent.ExperienceDismissed
@@ -57,12 +58,14 @@ internal class ExperienceLifecycleTracker(
                         trackLifecycleEvent(StepCompleted(it.experience, it.flatStepIndex))
                     }
                     is EndingExperience -> {
-                        if (it.markComplete || it.flatStepIndex == it.experience.flatSteps.count() - 1) {
+                        if (it.isExperienceCompleted()) {
                             // if ending on the last step OR an action requested it be considered complete explicitly,
                             // track the experience_completed event
+                            Log.i("Appcues", "Experience ${it.experience.name} Completed")
                             trackLifecycleEvent(ExperienceCompleted(it.experience))
                         } else {
                             // otherwise its considered experience_dismissed (not completed)
+                            Log.i("Appcues", "Experience ${it.experience.name} Dismissed")
                             trackLifecycleEvent(ExperienceDismissed(it.experience, it.flatStepIndex))
                         }
                     }

@@ -2,6 +2,7 @@ package com.appcues.statemachine
 
 import com.appcues.AppcuesConfig
 import com.appcues.AppcuesCoroutineScope
+import com.appcues.action.ActionProcessor
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.Pause
 import com.appcues.statemachine.Action.RenderStep
@@ -14,6 +15,7 @@ import com.appcues.statemachine.Error.ExperienceAlreadyActive
 import com.appcues.statemachine.SideEffect.AwaitEffect
 import com.appcues.statemachine.SideEffect.ContinuationEffect
 import com.appcues.statemachine.SideEffect.PresentContainerEffect
+import com.appcues.statemachine.SideEffect.ProcessActions
 import com.appcues.statemachine.SideEffect.ReportErrorEffect
 import com.appcues.statemachine.State.BeginningExperience
 import com.appcues.statemachine.State.BeginningStep
@@ -39,6 +41,7 @@ import kotlinx.coroutines.sync.withLock
 internal class StateMachine(
     private val appcuesCoroutineScope: AppcuesCoroutineScope,
     private val config: AppcuesConfig,
+    private val actionProcessor: ActionProcessor,
     initialState: State = Idling
 ) {
 
@@ -105,6 +108,10 @@ internal class StateMachine(
                 }
                 is AwaitEffect -> {
                     sideEffect.completion.await()
+                }
+                is ProcessActions -> {
+                    sideEffect.actions.forEach { actionProcessor.process(it) }
+                    Success(_state)
                 }
             }
         } else {

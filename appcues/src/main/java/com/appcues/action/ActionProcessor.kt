@@ -1,14 +1,14 @@
 package com.appcues.action
 
-import com.appcues.Appcues
 import com.appcues.AppcuesCoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
+import org.koin.core.scope.Scope
 
 // Responsible for queueing up any ExperienceActions to run in sequential order,
 // to allow for things like closing current experience + launching a new experience, for example.
 internal class ActionProcessor(
-    private val appcues: Appcues,
+    private val scope: Scope,
     private val appcuesCoroutineScope: AppcuesCoroutineScope,
 ) {
 
@@ -17,7 +17,7 @@ internal class ActionProcessor(
     init {
         appcuesCoroutineScope.launch {
             for (action in actionQueue) {
-                action.execute(appcues)
+                action.execute(scope.get())
             }
         }
     }
