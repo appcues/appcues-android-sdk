@@ -14,6 +14,7 @@ internal sealed class State {
         // back to the state machine
         val presentationComplete: (() -> Unit),
     ) : State()
+
     data class RenderingStep(val experience: Experience, val flatStepIndex: Int, val isFirst: Boolean) : State()
     data class EndingStep(
         val experience: Experience,
@@ -24,6 +25,11 @@ internal sealed class State {
         // and it should be set to null if a dismiss is not requested (i.e. moving to next step in same container)
         val dismissAndContinue: (() -> Unit)?,
     ) : State()
-    data class EndingExperience(val experience: Experience, val flatStepIndex: Int, val markComplete: Boolean) : State()
+
+    data class EndingExperience(val experience: Experience, val flatStepIndex: Int, val markComplete: Boolean) : State() {
+        // this defines whether the experience was completed or dismissed
+        fun isExperienceCompleted() = markComplete || flatStepIndex == experience.flatSteps.count() - 1
+    }
+
     data class Paused(val state: State) : State()
 }

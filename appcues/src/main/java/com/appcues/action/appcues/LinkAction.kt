@@ -7,15 +7,27 @@ import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.getConfig
 import com.appcues.data.model.getConfigOrDefault
 import com.appcues.util.LinkOpener
+import org.koin.core.scope.Scope
+import kotlin.collections.set
 
 internal class LinkAction(
+    scope: Scope,
     override val config: AppcuesConfigMap,
-    private val linkOpener: LinkOpener,
 ) : ExperienceAction {
 
     companion object {
+
         const val TYPE = "@appcues/link"
     }
+
+    constructor(koinScope: Scope, redirectUrl: String) : this(
+        koinScope,
+        hashMapOf<String, Any>().apply {
+            this["url"] = redirectUrl
+        }
+    )
+
+    private val linkOpener: LinkOpener = scope.get()
 
     private val url: String? = config.getConfig("url")
     private val openExternally = config.getConfigOrDefault("openExternally", false)

@@ -9,7 +9,14 @@ internal class LaunchExperienceAction(
     override val config: AppcuesConfigMap,
 ) : ExperienceAction {
 
+    constructor(experienceId: String) : this(
+        hashMapOf<String, Any>().apply {
+            this["experienceID"] = experienceId
+        }
+    )
+
     companion object {
+
         const val TYPE = "@appcues/launch-experience"
     }
 

@@ -1,5 +1,6 @@
 package com.appcues.data.model
 
+import com.appcues.action.ExperienceAction
 import java.util.UUID
 
 internal data class Experience(
@@ -10,6 +11,7 @@ internal data class Experience(
     val priority: ExperiencePriority,
     val type: String?,
     val publishedAt: Long?,
+    val completionActions: List<ExperienceAction>,
 ) {
 
     // a unique identifier for this instance of the Experience, for comparison purposes, in the
