@@ -7,7 +7,6 @@ import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.getConfig
 import com.appcues.data.model.getConfigOrDefault
 import com.appcues.util.LinkOpener
-import kotlin.collections.set
 
 internal class LinkAction(
     override val config: AppcuesConfigMap,
@@ -20,9 +19,7 @@ internal class LinkAction(
     }
 
     constructor(redirectUrl: String, linkOpener: LinkOpener) : this(
-        hashMapOf<String, Any>().apply {
-            this["url"] = redirectUrl
-        },
+        hashMapOf<String, Any>("url" to redirectUrl),
         linkOpener
     )
 

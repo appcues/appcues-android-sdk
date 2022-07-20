@@ -20,7 +20,7 @@ internal class ActionRegistryTest : AppcuesScopeTest {
         // GIVEN
         val type = "myAction"
         val action: ExperienceAction = mockk()
-        val registry = ActionRegistry(get(), get())
+        val registry = ActionRegistry(get())
         registry.register(type) { action }
 
         // WHEN
@@ -36,7 +36,7 @@ internal class ActionRegistryTest : AppcuesScopeTest {
         val type = "myAction"
         val action: ExperienceAction = mockk()
         val actionDupe: ExperienceAction = mockk()
-        val registry = ActionRegistry(get(), get())
+        val registry = ActionRegistry(get())
         val logcues: Logcues = get()
         registry.register(type) { action }
         registry.register(type) { actionDupe }

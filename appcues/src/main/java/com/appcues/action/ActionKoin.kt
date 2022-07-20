@@ -13,7 +13,7 @@ import org.koin.dsl.ScopeDSL
 internal object ActionKoin : KoinScopePlugin {
 
     override fun ScopeDSL.install() {
-        scoped { ActionRegistry(scope = get(), logcues = get()) }
+        scoped { ActionRegistry(scope = get()) }
         scoped { ActionProcessor(scope = get()) }
 
         factory { params ->

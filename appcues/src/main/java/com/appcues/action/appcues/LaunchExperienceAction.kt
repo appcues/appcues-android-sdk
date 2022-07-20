@@ -10,9 +10,7 @@ internal class LaunchExperienceAction(
 ) : ExperienceAction {
 
     constructor(experienceId: String) : this(
-        hashMapOf<String, Any>().apply {
-            this["experienceID"] = experienceId
-        }
+        hashMapOf<String, Any>("experienceID" to experienceId)
     )
 
     companion object {
