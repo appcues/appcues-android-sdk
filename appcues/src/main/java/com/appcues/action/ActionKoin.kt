@@ -14,7 +14,7 @@ internal object ActionKoin : KoinScopePlugin {
 
     override fun ScopeDSL.install() {
         scoped { ActionRegistry(scope = get(), logcues = get()) }
-        scoped { ActionProcessor(scope = get(), appcuesCoroutineScope = get()) }
+        scoped { ActionProcessor(scope = get()) }
 
         factory { params ->
             CloseAction(
@@ -25,8 +25,8 @@ internal object ActionKoin : KoinScopePlugin {
 
         factory { params ->
             LinkAction(
-                scope = this,
                 config = params.getOrNull(),
+                linkOpener = get(),
             )
         }
 

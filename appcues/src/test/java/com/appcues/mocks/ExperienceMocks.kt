@@ -46,7 +46,8 @@ internal fun mockExperience(onPresent: (() -> Unit)? = null) =
         ),
         published = true,
         priority = NORMAL,
-        publishedAt = 1652895835000
+        publishedAt = 1652895835000,
+        completionActions = arrayListOf()
     )
 
 internal fun mockStep(id: UUID) =

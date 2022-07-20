@@ -23,6 +23,8 @@ internal val contentModalOneStubs = ExperienceResponse(
     name = "POC Modal One",
     theme = null,
     actions = null,
+    nextContentId = null,
+    redirectUrl = null,
     traits = arrayListOf(),
     steps = arrayListOf(
         StepContainerResponse(
