@@ -2,6 +2,7 @@ package com.appcues.statemachine
 
 import com.appcues.AppcuesCoroutineScope
 import com.appcues.AppcuesScopeTest
+import com.appcues.action.ActionProcessor
 import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperiencePriority.NORMAL
 import com.appcues.mocks.mockExperience
@@ -30,6 +31,9 @@ import com.appcues.statemachine.StepReference.StepIndex
 import com.appcues.statemachine.StepReference.StepOffset
 import com.appcues.util.ResultOf
 import com.google.common.truth.Truth.assertThat
+import io.mockk.Called
+import io.mockk.coVerify
+import io.mockk.coVerifySequence
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitAll
@@ -539,6 +543,44 @@ class StateMachineTest : AppcuesScopeTest {
         // THEN
         assertThat(result.successValue()).isEqualTo(initialState)
         assertThat(stateMachine.state).isEqualTo(initialState)
+    }
+
+    @Test
+    fun `EndingExperience SHOULD call action processor WHEN experience is completed`() = runTest {
+        // GIVEN
+        val experience = mockExperience()
+        val initialState = EndingExperience(experience, 1, true)
+        val stateMachine = initMachine(initialState)
+        val action = Reset
+
+        // WHEN
+        val result = stateMachine.handleAction(action)
+
+        // THEN
+        assertThat(result.successValue()).isEqualTo(Idling)
+        assertThat(stateMachine.state).isEqualTo(Idling)
+        coVerifySequence {
+            experience.completionActions.forEach {
+                koinTestRule.scope.get<ActionProcessor>().process(it)
+            }
+        }
+    }
+
+    @Test
+    fun `EndingExperience SHOULD NOT call action processor WHEN experience is NOT completed`() = runTest {
+        // GIVEN
+        val experience = mockExperience()
+        val initialState = EndingExperience(experience, 1, false)
+        val stateMachine = initMachine(initialState)
+        val action = Reset
+
+        // WHEN
+        val result = stateMachine.handleAction(action)
+
+        // THEN
+        assertThat(result.successValue()).isEqualTo(Idling)
+        assertThat(stateMachine.state).isEqualTo(Idling)
+        coVerify { koinTestRule.scope.get<ActionProcessor>() wasNot Called }
     }
 
     @Test

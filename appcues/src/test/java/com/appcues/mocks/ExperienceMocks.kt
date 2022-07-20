@@ -1,5 +1,7 @@
 package com.appcues.mocks
 
+import com.appcues.action.appcues.LaunchExperienceAction
+import com.appcues.action.appcues.TrackEventAction
 import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperiencePrimitive.TextPrimitive
 import com.appcues.data.model.ExperiencePriority.NORMAL
@@ -47,7 +49,7 @@ internal fun mockExperience(onPresent: (() -> Unit)? = null) =
         published = true,
         priority = NORMAL,
         publishedAt = 1652895835000,
-        completionActions = arrayListOf()
+        completionActions = arrayListOf(LaunchExperienceAction("1234"), TrackEventAction(hashMapOf()))
     )
 
 internal fun mockStep(id: UUID) =
