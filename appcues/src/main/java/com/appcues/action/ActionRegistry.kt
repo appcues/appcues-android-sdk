@@ -11,16 +11,16 @@ import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.logging.Logcues
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.get
+import org.koin.core.component.inject
 import org.koin.core.parameter.parametersOf
 import org.koin.core.scope.Scope
 import kotlin.collections.set
 
 internal typealias ActionFactoryBlock = (config: AppcuesConfigMap) -> ExperienceAction
 
-internal class ActionRegistry(
-    override val scope: Scope,
-    private val logcues: Logcues
-) : KoinScopeComponent {
+internal class ActionRegistry(override val scope: Scope) : KoinScopeComponent {
+
+    private val logcues: Logcues by inject()
 
     private val actions: MutableMap<String, ActionFactoryBlock> = hashMapOf()
 
