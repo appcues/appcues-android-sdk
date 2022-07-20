@@ -17,10 +17,25 @@ platform :android do
   desc "Deploy a new version to Google Play internal test"
   lane :deploy_sample do
     sh("sh", "./replace-placeholders.sh", "kotlin-android-app", ENV["EX_APPCUES_ACCOUNT_ID"], ENV["EX_APPCUES_APPLICATION_ID"])
-    gradle(task: ':samples:kotlin-android-app:versionTxt')
-    gradle(task: ':samples:kotlin-android-app:bundleRelease')
+    
+    keystorePath = File.join(Dir.pwd, "..", "appcues.keystore")
+    sample_version = "1.0.0-#{ENV["CIRCLE_BUILD_NUM"]}"
 
-    sample_version=File.read("../sample_version.txt")
+    gradle(
+      task: 'bundle',
+      build_type: 'Release',
+      project_dir: 'samples/kotlin-android-app',
+      gradle_path: '../../gradlew',
+      print_command: true,
+      properties: {
+        "android.injected.signing.store.file" => keystorePath,
+        "android.injected.signing.store.password" => ENV["KEYSTORE_PASSWORD"],
+        "android.injected.signing.key.alias" => ENV["KEYSTORE_ALIAS"],
+        "android.injected.signing.key.password" => ENV["KEYSTORE_PASSWORD"],
+        "android.injected.version.code" => ENV["CIRCLE_BUILD_NUM"].to_i,
+        "android.injected.version.name" => sample_version,
+      }
+    )
 
     git_log = changelog_from_git_commits(
       commits_count: 5,
