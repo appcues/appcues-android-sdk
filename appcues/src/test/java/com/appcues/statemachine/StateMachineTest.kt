@@ -54,7 +54,7 @@ class StateMachineTest : AppcuesScopeTest {
     @Test
     fun `initial state SHOULD be Idling`() {
         // GIVEN
-        val stateMachine = StateMachine(get(), get())
+        val stateMachine = StateMachine(get(), get(), get())
 
         // THEN
         assertThat(stateMachine.state).isEqualTo(Idling)
@@ -259,7 +259,8 @@ class StateMachineTest : AppcuesScopeTest {
             published = true,
             priority = NORMAL,
             type = "mobile",
-            publishedAt = 1652895835000
+            publishedAt = 1652895835000,
+            completionActions = arrayListOf(),
         )
         val initialState = Idling
         val stateMachine = initMachine(initialState)
@@ -543,7 +544,6 @@ class StateMachineTest : AppcuesScopeTest {
     @Test
     fun `Paused SHOULD NOT transition WHEN action is something other than Resume or EndExperience`() = runTest {
         // GIVEN
-        val experience = mockExperience()
         val initialState = Paused(Idling)
         val stateMachine = initMachine(initialState)
         val action = Pause
@@ -578,7 +578,7 @@ class StateMachineTest : AppcuesScopeTest {
         val stateFlowCompletion: CompletableDeferred<Boolean> = CompletableDeferred()
         val errorFlowCompletion: CompletableDeferred<Boolean> = CompletableDeferred()
         val scope: AppcuesCoroutineScope = get()
-        val machine = StateMachine(scope, get(), state)
+        val machine = StateMachine(scope, get(), get(), state)
         // this collect on the stateFlow simulates the function of the UI
         // that is required to progress the state machine forward on UI present/dismiss
         scope.launch {

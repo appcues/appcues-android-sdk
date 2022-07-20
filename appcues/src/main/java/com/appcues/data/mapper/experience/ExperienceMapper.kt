@@ -44,7 +44,7 @@ internal class ExperienceMapper(
             type = from.type,
             publishedAt = from.publishedAt,
             completionActions = arrayListOf<ExperienceAction>().apply {
-                from.redirectUrl?.let { add(LinkAction(scope, it)) }
+                from.redirectUrl?.let { add(LinkAction(it, scope.get())) }
                 from.nextContentId?.let { add(LaunchExperienceAction(it)) }
             }
         )

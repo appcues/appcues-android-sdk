@@ -5,6 +5,7 @@ import com.appcues.AppcuesConfig
 import com.appcues.AppcuesCoroutineScope
 import com.appcues.DeeplinkHandler
 import com.appcues.SessionMonitor
+import com.appcues.action.ActionProcessor
 import com.appcues.action.ActionRegistry
 import com.appcues.analytics.ActivityScreenTracking
 import com.appcues.analytics.AnalyticsTracker
@@ -60,6 +61,7 @@ class KoinScopeRule : TestWatcher() {
                         scoped { mockk<LinkOpener>(relaxed = true) }
                         scoped { storageMockk() }
                         scoped { mockk<Appcues>(relaxed = true) }
+                        scoped { mockk<ActionProcessor>(relaxed = true) }
                     }
                 }
             )

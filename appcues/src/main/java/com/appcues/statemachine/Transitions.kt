@@ -2,7 +2,6 @@
 
 package com.appcues.statemachine
 
-import android.util.Log
 import com.appcues.data.model.Experience
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.RenderStep
@@ -33,7 +32,6 @@ import kotlin.contracts.contract
 internal interface Transitions {
 
     fun Idling.fromIdlingToBeginningExperience(action: StartExperience): Transition {
-        Log.i("Appcues", "fromIdlingToBeginningExperience ${action.experience.name}")
         return if (action.experience.stepContainers.isNotEmpty()) {
             Transition(BeginningExperience(action.experience), ContinuationEffect(StartStep(StepIndex(0))))
         } else {
@@ -59,7 +57,6 @@ internal interface Transitions {
     }
 
     fun BeginningStep.fromBeginningStepToRenderingStep(action: RenderStep): Transition {
-        Log.i("Appcues", "fromBeginningStepToRenderingStep ${experience.name}")
         return Transition(RenderingStep(experience, flatStepIndex, isFirst))
     }
 
