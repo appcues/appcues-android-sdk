@@ -14,6 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
+import com.appcues.data.model.ExperiencePrimitive
+import com.appcues.ui.primitive.Compose
 
 /**
  * Official AppcuesTheme for all compositions
@@ -50,9 +52,9 @@ private fun getColors(isDark: Boolean): Colors {
  * This is supposed to be used during inspection mode (Preview) only.
  */
 @Composable
-internal fun AppcuesPreview(
+internal fun AppcuesPreviewPrimitive(
     isDark: Boolean = isSystemInDarkTheme(),
-    content: @Composable () -> Unit
+    primitiveBuilder: () -> ExperiencePrimitive
 ) {
     LocalConfiguration.current.uiMode = if (isDark) Configuration.UI_MODE_NIGHT_YES else Configuration.UI_MODE_NIGHT_NO
 
@@ -61,7 +63,7 @@ internal fun AppcuesPreview(
             modifier = Modifier.background(MaterialTheme.colors.surface),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            content()
+            primitiveBuilder().Compose()
         }
     }
 }

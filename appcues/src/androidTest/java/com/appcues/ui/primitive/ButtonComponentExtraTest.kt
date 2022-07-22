@@ -1,4 +1,4 @@
-package com.appcues.ui.component
+package com.appcues.ui.primitive
 
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onRoot
@@ -6,33 +6,42 @@ import com.karumi.shot.ScreenshotTest
 import org.junit.Rule
 import org.junit.Test
 
-class VerticalStackComponentTest : ScreenshotTest {
+class ButtonComponentExtraTest : ScreenshotTest {
 
     @get:Rule
     val composeRule = createComposeRule()
 
     @Test
-    fun testPreviewTestVerticalAlignment() {
+    fun testPreviewButtonBorder() {
         composeRule.setContent {
-            PreviewTestVerticalAlignment()
+            PreviewButtonBorder()
         }
 
         compareScreenshot(composeRule.onRoot())
     }
 
     @Test
-    fun testPreviewTestVerticalDefault() {
+    fun testPreviewButtonComplexContents() {
         composeRule.setContent {
-            PreviewTestVerticalDefault()
+            PreviewButtonComplexContents()
         }
 
         compareScreenshot(composeRule.onRoot())
     }
 
     @Test
-    fun testPreviewTestVerticalLayout() {
+    fun testPreviewButtonDefault() {
         composeRule.setContent {
-            PreviewTestVerticalLayout()
+            PreviewButtonDefault()
+        }
+
+        compareScreenshot(composeRule.onRoot())
+    }
+
+    @Test
+    fun testPreviewButtonGeneral() {
+        composeRule.setContent {
+            PreviewButtonGeneral()
         }
 
         compareScreenshot(composeRule.onRoot())

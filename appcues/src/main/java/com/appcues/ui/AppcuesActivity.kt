@@ -30,7 +30,7 @@ import com.appcues.trait.StepDecoratingPadding
 import com.appcues.ui.AppcuesViewModel.UIState
 import com.appcues.ui.AppcuesViewModel.UIState.Dismissing
 import com.appcues.ui.AppcuesViewModel.UIState.Rendering
-import com.appcues.ui.extensions.Compose
+import com.appcues.ui.primitive.Compose
 import com.appcues.ui.theme.AppcuesTheme
 import org.koin.core.scope.Scope
 

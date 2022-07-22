@@ -28,4 +28,5 @@ internal data class StyleResponse(
     val textAlignment: String? = null,
     val verticalAlignment: String? = null,
     val horizontalAlignment: String? = null,
+    val backgroundImage: StyleBackgroundImageResponse? = null,
 )

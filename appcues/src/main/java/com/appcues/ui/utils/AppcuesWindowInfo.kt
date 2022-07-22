@@ -1,4 +1,4 @@
-package com.appcues.ui.extensions
+package com.appcues.ui.utils
 
 import android.content.res.Configuration
 import androidx.compose.runtime.Composable
@@ -6,13 +6,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.appcues.ui.extensions.WindowInfo.DeviceType.MOBILE
-import com.appcues.ui.extensions.WindowInfo.DeviceType.TABLET
-import com.appcues.ui.extensions.WindowInfo.Orientation.LANDSCAPE
-import com.appcues.ui.extensions.WindowInfo.Orientation.PORTRAIT
-import com.appcues.ui.extensions.WindowInfo.ScreenType.COMPACT
-import com.appcues.ui.extensions.WindowInfo.ScreenType.EXPANDED
-import com.appcues.ui.extensions.WindowInfo.ScreenType.MEDIUM
+import com.appcues.ui.utils.AppcuesWindowInfo.DeviceType.MOBILE
+import com.appcues.ui.utils.AppcuesWindowInfo.DeviceType.TABLET
+import com.appcues.ui.utils.AppcuesWindowInfo.Orientation.LANDSCAPE
+import com.appcues.ui.utils.AppcuesWindowInfo.Orientation.PORTRAIT
+import com.appcues.ui.utils.AppcuesWindowInfo.ScreenType.COMPACT
+import com.appcues.ui.utils.AppcuesWindowInfo.ScreenType.EXPANDED
+import com.appcues.ui.utils.AppcuesWindowInfo.ScreenType.MEDIUM
 
 private const val WIDTH_COMPACT = 600
 private const val WIDTH_MEDIUM = 840
@@ -20,7 +20,7 @@ private const val HEIGHT_COMPACT = 480
 private const val HEIGHT_MEDIUM = 900
 
 @Composable
-internal fun rememberWindowInfo(): WindowInfo {
+internal fun rememberAppcuesWindowInfo(): AppcuesWindowInfo {
     val configuration = LocalConfiguration.current
 
     val screenWidthType = when {
@@ -53,7 +53,7 @@ internal fun rememberWindowInfo(): WindowInfo {
         }
     }
     return remember(configuration) {
-        WindowInfo(
+        AppcuesWindowInfo(
             screenWidthType = screenWidthType,
             screenHeightType = screenHeightType,
             widthDp = configuration.screenWidthDp.dp,
@@ -64,7 +64,7 @@ internal fun rememberWindowInfo(): WindowInfo {
     }
 }
 
-internal data class WindowInfo(
+internal data class AppcuesWindowInfo(
     val screenWidthType: ScreenType,
     val screenHeightType: ScreenType,
     val widthDp: Dp,

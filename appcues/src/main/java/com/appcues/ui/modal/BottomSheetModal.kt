@@ -22,13 +22,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.trait.AppcuesTraitAnimatedVisibility
-import com.appcues.ui.extensions.WindowInfo
-import com.appcues.ui.extensions.WindowInfo.DeviceType.MOBILE
-import com.appcues.ui.extensions.WindowInfo.DeviceType.TABLET
-import com.appcues.ui.extensions.WindowInfo.Orientation.LANDSCAPE
-import com.appcues.ui.extensions.WindowInfo.Orientation.PORTRAIT
 import com.appcues.ui.extensions.getPaddings
 import com.appcues.ui.extensions.modalStyle
+import com.appcues.ui.utils.AppcuesWindowInfo
+import com.appcues.ui.utils.AppcuesWindowInfo.DeviceType.MOBILE
+import com.appcues.ui.utils.AppcuesWindowInfo.DeviceType.TABLET
+import com.appcues.ui.utils.AppcuesWindowInfo.Orientation.LANDSCAPE
+import com.appcues.ui.utils.AppcuesWindowInfo.Orientation.PORTRAIT
 
 private const val WIDTH_MOBILE = 1f
 private const val WIDTH_TABLET_PORTRAIT = 0.6f
@@ -41,21 +41,21 @@ private const val HEIGHT_TABLET = 0.6f
 internal fun BottomSheetModal(
     style: ComponentStyle?,
     content: @Composable (hasFixedHeight: Boolean, contentPadding: PaddingValues?) -> Unit,
-    windowInfo: WindowInfo,
+    appcuesWindowInfo: AppcuesWindowInfo,
 ) {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.BottomCenter,
     ) {
-        val width = widthDerivedOf(windowInfo)
-        val height = heightDerivedOf(windowInfo)
-        val enterAnimation = enterTransitionDerivedOf(windowInfo)
-        val exitAnimation = exitTransitionDerivedOf(windowInfo)
+        val width = widthDerivedOf(appcuesWindowInfo)
+        val height = heightDerivedOf(appcuesWindowInfo)
+        val enterAnimation = enterTransitionDerivedOf(appcuesWindowInfo)
+        val exitAnimation = exitTransitionDerivedOf(appcuesWindowInfo)
 
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .then(if (windowInfo.deviceType == TABLET) Modifier.padding(bottom = 156.dp) else Modifier),
+                .then(if (appcuesWindowInfo.deviceType == TABLET) Modifier.padding(bottom = 156.dp) else Modifier),
             contentAlignment = Alignment.BottomCenter
         ) {
             AppcuesTraitAnimatedVisibility(
@@ -71,7 +71,7 @@ internal fun BottomSheetModal(
                         .modalStyle(
                             style = style,
                             isDark = isSystemInDarkTheme(),
-                            modifier = Modifier.sheetModifier(windowInfo, style),
+                            modifier = Modifier.sheetModifier(appcuesWindowInfo, style),
                         ),
                     content = { content(true, style?.getPaddings()) },
                 )
@@ -80,11 +80,11 @@ internal fun BottomSheetModal(
     }
 }
 
-private fun widthDerivedOf(windowInfo: WindowInfo): State<Float> {
+private fun widthDerivedOf(appcuesWindowInfo: AppcuesWindowInfo): State<Float> {
     return derivedStateOf {
-        when (windowInfo.deviceType) {
+        when (appcuesWindowInfo.deviceType) {
             MOBILE -> WIDTH_MOBILE
-            TABLET -> when (windowInfo.orientation) {
+            TABLET -> when (appcuesWindowInfo.orientation) {
                 PORTRAIT -> WIDTH_TABLET_PORTRAIT
                 LANDSCAPE -> WIDTH_TABLET_LANDSCAPE
             }
@@ -92,10 +92,10 @@ private fun widthDerivedOf(windowInfo: WindowInfo): State<Float> {
     }
 }
 
-private fun heightDerivedOf(windowInfo: WindowInfo): State<Float> {
+private fun heightDerivedOf(appcuesWindowInfo: AppcuesWindowInfo): State<Float> {
     return derivedStateOf {
-        when (windowInfo.deviceType) {
-            MOBILE -> when (windowInfo.orientation) {
+        when (appcuesWindowInfo.deviceType) {
+            MOBILE -> when (appcuesWindowInfo.orientation) {
                 PORTRAIT -> HEIGHT_MOBILE_PORTRAIT
                 LANDSCAPE -> HEIGHT_MOBILE_LANDSCAPE
             }
@@ -104,18 +104,18 @@ private fun heightDerivedOf(windowInfo: WindowInfo): State<Float> {
     }
 }
 
-private fun enterTransitionDerivedOf(windowInfo: WindowInfo): State<EnterTransition> {
+private fun enterTransitionDerivedOf(appcuesWindowInfo: AppcuesWindowInfo): State<EnterTransition> {
     return derivedStateOf {
-        when (windowInfo.deviceType) {
+        when (appcuesWindowInfo.deviceType) {
             MOBILE -> enterTransition()
             TABLET -> dialogEnterTransition()
         }
     }
 }
 
-private fun exitTransitionDerivedOf(windowInfo: WindowInfo): State<ExitTransition> {
+private fun exitTransitionDerivedOf(appcuesWindowInfo: AppcuesWindowInfo): State<ExitTransition> {
     return derivedStateOf {
-        when (windowInfo.deviceType) {
+        when (appcuesWindowInfo.deviceType) {
             MOBILE -> exitTransition()
             TABLET -> dialogExitTransition()
         }
