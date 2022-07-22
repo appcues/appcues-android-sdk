@@ -11,7 +11,7 @@ import com.appcues.data.model.getConfigPrimitive
 import com.appcues.trait.StepDecoratingPadding
 import com.appcues.trait.StepDecoratingTrait
 import com.appcues.trait.alignStepOverlay
-import com.appcues.ui.extensions.Compose
+import com.appcues.ui.primitive.Compose
 
 internal class StickyContentTrait(
     override val config: Map<String, Any>?,

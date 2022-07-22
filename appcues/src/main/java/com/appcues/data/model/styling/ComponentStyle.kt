@@ -16,6 +16,7 @@ internal data class ComponentStyle(
     val foregroundColor: ComponentColor? = null,
     val backgroundColor: ComponentColor? = null,
     val backgroundGradient: List<ComponentColor>? = null,
+    val backgroundImage: ComponentBackgroundImage? = null,
     val borderColor: ComponentColor? = null,
     val borderWidth: Int? = null,
     val shadow: ComponentShadow? = null,
@@ -30,8 +31,6 @@ internal data class ComponentStyle(
     // Container related properties
     val verticalAlignment: ComponentVerticalAlignment? = null,
     val horizontalAlignment: ComponentHorizontalAlignment? = null,
-
-    // missing properties: backgroundGradient, shadow
 ) {
 
     enum class ComponentFontWeight {

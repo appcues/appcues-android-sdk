@@ -1,4 +1,4 @@
-package com.appcues.ui.arrangement
+package com.appcues.ui.utils
 
 import androidx.compose.foundation.layout.Arrangement.HorizontalOrVertical
 import androidx.compose.ui.unit.Density

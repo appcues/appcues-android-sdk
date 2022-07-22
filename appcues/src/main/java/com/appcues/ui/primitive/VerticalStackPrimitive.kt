@@ -1,13 +1,10 @@
-package com.appcues.ui.component
+package com.appcues.ui.primitive
 
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.ProvideTextStyle
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -20,34 +17,18 @@ import com.appcues.data.model.styling.ComponentColor
 import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.data.model.styling.ComponentStyle.ComponentHorizontalAlignment.LEADING
 import com.appcues.data.model.styling.ComponentStyle.ComponentHorizontalAlignment.TRAILING
-import com.appcues.ui.LocalAppcuesActionDelegate
-import com.appcues.ui.LocalAppcuesActions
-import com.appcues.ui.extensions.Compose
-import com.appcues.ui.extensions.PrimitiveGestureProperties
 import com.appcues.ui.extensions.getHorizontalAlignment
 import com.appcues.ui.extensions.getTextStyle
-import com.appcues.ui.extensions.primitiveStyle
-import com.appcues.ui.theme.AppcuesPreview
+import com.appcues.ui.theme.AppcuesPreviewPrimitive
 import java.util.UUID
 
 @Composable
-internal fun VerticalStackPrimitive.Compose() {
+internal fun VerticalStackPrimitive.Compose(modifier: Modifier) {
     Column(
-        modifier = Modifier.primitiveStyle(
-            component = this,
-            gestureProperties = PrimitiveGestureProperties(
-                onAction = LocalAppcuesActionDelegate.current.onAction,
-                actions = LocalAppcuesActions.current,
-                interactionSource = remember { MutableInteractionSource() },
-                indication = rememberRipple(),
-                enabled = remember { true },
-            ),
-            isDark = isSystemInDarkTheme()
-        ),
+        modifier = modifier,
         horizontalAlignment = style.getHorizontalAlignment(),
         verticalArrangement = Arrangement.spacedBy(spacing.dp, Alignment.CenterVertically)
     ) {
-
         ProvideTextStyle(style.getTextStyle(LocalContext.current, isSystemInDarkTheme())) {
             items.forEach { it.Compose() }
         }
@@ -90,58 +71,52 @@ private val items = arrayListOf(
 @Composable
 @Preview(name = "stack-Vertical-alignment.json", group = "extra")
 internal fun PreviewTestVerticalAlignment() {
-    val component = VerticalStackPrimitive(
-        id = UUID.randomUUID(),
-        style = ComponentStyle(
-            horizontalAlignment = TRAILING,
-            backgroundColor = ComponentColor(light = 0xFFCDCDFA, dark = 0xFFCDCDFA)
-        ),
-        items = items
-    )
-
-    AppcuesPreview {
-        component.Compose()
+    AppcuesPreviewPrimitive {
+        VerticalStackPrimitive(
+            id = UUID.randomUUID(),
+            style = ComponentStyle(
+                horizontalAlignment = TRAILING,
+                backgroundColor = ComponentColor(light = 0xFFCDCDFA, dark = 0xFFCDCDFA)
+            ),
+            items = items
+        )
     }
 }
 
 @Composable
 @Preview(name = "stack-Vertical-default.json", group = "extra")
 internal fun PreviewTestVerticalDefault() {
-    val component = VerticalStackPrimitive(
-        id = UUID.randomUUID(),
-        style = ComponentStyle(
-            backgroundColor = ComponentColor(light = 0xFFCDCDFA, dark = 0xFFCDCDFA)
-        ),
-        items = items
-    )
-
-    AppcuesPreview {
-        component.Compose()
+    AppcuesPreviewPrimitive {
+        VerticalStackPrimitive(
+            id = UUID.randomUUID(),
+            style = ComponentStyle(
+                backgroundColor = ComponentColor(light = 0xFFCDCDFA, dark = 0xFFCDCDFA)
+            ),
+            items = items
+        )
     }
 }
 
 @Composable
 @Preview(name = "stack-Vertical-layout.json", group = "extra")
 internal fun PreviewTestVerticalLayout() {
-    val component = VerticalStackPrimitive(
-        id = UUID.randomUUID(),
-        spacing = 20,
-        style = ComponentStyle(
-            marginTop = 5,
-            marginLeading = 4,
-            marginBottom = 6,
-            marginTrailing = 3,
-            paddingTop = 6,
-            paddingLeading = 7,
-            paddingBottom = 9,
-            paddingTrailing = 10,
-            horizontalAlignment = LEADING,
-            backgroundColor = ComponentColor(light = 0xFFCDCDFA, dark = 0xFFCDCDFA)
-        ),
-        items = items
-    )
-
-    AppcuesPreview {
-        component.Compose()
+    AppcuesPreviewPrimitive {
+        VerticalStackPrimitive(
+            id = UUID.randomUUID(),
+            spacing = 20,
+            style = ComponentStyle(
+                marginTop = 5,
+                marginLeading = 4,
+                marginBottom = 6,
+                marginTrailing = 3,
+                paddingTop = 6,
+                paddingLeading = 7,
+                paddingBottom = 9,
+                paddingTrailing = 10,
+                horizontalAlignment = LEADING,
+                backgroundColor = ComponentColor(light = 0xFFCDCDFA, dark = 0xFFCDCDFA)
+            ),
+            items = items
+        )
     }
 }
