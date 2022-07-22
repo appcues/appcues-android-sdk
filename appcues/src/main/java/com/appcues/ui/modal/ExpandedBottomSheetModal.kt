@@ -20,13 +20,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.trait.AppcuesTraitAnimatedVisibility
-import com.appcues.ui.extensions.WindowInfo
-import com.appcues.ui.extensions.WindowInfo.DeviceType.MOBILE
-import com.appcues.ui.extensions.WindowInfo.DeviceType.TABLET
-import com.appcues.ui.extensions.WindowInfo.Orientation.LANDSCAPE
-import com.appcues.ui.extensions.WindowInfo.Orientation.PORTRAIT
 import com.appcues.ui.extensions.getPaddings
 import com.appcues.ui.extensions.modalStyle
+import com.appcues.ui.utils.AppcuesWindowInfo
+import com.appcues.ui.utils.AppcuesWindowInfo.DeviceType.MOBILE
+import com.appcues.ui.utils.AppcuesWindowInfo.DeviceType.TABLET
+import com.appcues.ui.utils.AppcuesWindowInfo.Orientation.LANDSCAPE
+import com.appcues.ui.utils.AppcuesWindowInfo.Orientation.PORTRAIT
 
 private const val WIDTH_MOBILE = 1f
 private const val WIDTH_TABLET_PORTRAIT = 0.7f
@@ -39,7 +39,7 @@ private const val HEIGHT_TABLET = 0.7f
 internal fun ExpandedBottomSheetModal(
     style: ComponentStyle?,
     content: @Composable (hasFixedHeight: Boolean, contentPadding: PaddingValues?) -> Unit,
-    windowInfo: WindowInfo,
+    windowInfo: AppcuesWindowInfo,
 ) {
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -76,7 +76,7 @@ internal fun ExpandedBottomSheetModal(
     }
 }
 
-private fun widthDerivedOf(windowInfo: WindowInfo): State<Float> {
+private fun widthDerivedOf(windowInfo: AppcuesWindowInfo): State<Float> {
     return derivedStateOf {
         when (windowInfo.deviceType) {
             MOBILE -> WIDTH_MOBILE
@@ -88,7 +88,7 @@ private fun widthDerivedOf(windowInfo: WindowInfo): State<Float> {
     }
 }
 
-private fun heightDerivedOf(windowInfo: WindowInfo): State<Float> {
+private fun heightDerivedOf(windowInfo: AppcuesWindowInfo): State<Float> {
     return derivedStateOf {
         when (windowInfo.deviceType) {
             MOBILE -> when (windowInfo.orientation) {
@@ -100,7 +100,7 @@ private fun heightDerivedOf(windowInfo: WindowInfo): State<Float> {
     }
 }
 
-private fun enterTransitionDerivedOf(windowInfo: WindowInfo): State<EnterTransition> {
+private fun enterTransitionDerivedOf(windowInfo: AppcuesWindowInfo): State<EnterTransition> {
     return derivedStateOf {
         when (windowInfo.deviceType) {
             MOBILE -> enterTransition()
@@ -109,7 +109,7 @@ private fun enterTransitionDerivedOf(windowInfo: WindowInfo): State<EnterTransit
     }
 }
 
-private fun exitTransitionDerivedOf(windowInfo: WindowInfo): State<ExitTransition> {
+private fun exitTransitionDerivedOf(windowInfo: AppcuesWindowInfo): State<ExitTransition> {
     return derivedStateOf {
         when (windowInfo.deviceType) {
             MOBILE -> exitTransition()

@@ -17,15 +17,26 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.appcues.ui.blurhash
+package com.appcues.ui.utils
 
 import android.graphics.Bitmap
 import android.graphics.Color
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import kotlin.math.cos
 import kotlin.math.pow
 import kotlin.math.withSign
 
-internal object BlurHashDecoder {
+private const val PLACEHOLDER_SIZE_PX = 32
+
+@Composable
+internal fun rememberBlurHashDecoded(blurHash: String?): Bitmap? {
+    return remember(blurHash) {
+        BlurHashDecoder.decode(blurHash, PLACEHOLDER_SIZE_PX, PLACEHOLDER_SIZE_PX)
+    }
+}
+
+private object BlurHashDecoder {
 
     // cache Math.cos() calculations to improve performance.
     // The number of calculations can be huge for many bitmaps: width * height * numCompX * numCompY * 2 * nBitmaps

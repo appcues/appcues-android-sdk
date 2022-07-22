@@ -1,12 +1,9 @@
-package com.appcues.ui.component
+package com.appcues.ui.primitive
 
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material.ProvideTextStyle
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
@@ -17,33 +14,17 @@ import com.appcues.data.model.styling.ComponentColor
 import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.data.model.styling.ComponentStyle.ComponentHorizontalAlignment
 import com.appcues.data.model.styling.ComponentStyle.ComponentVerticalAlignment
-import com.appcues.ui.LocalAppcuesActionDelegate
-import com.appcues.ui.LocalAppcuesActions
-import com.appcues.ui.extensions.Compose
-import com.appcues.ui.extensions.PrimitiveGestureProperties
 import com.appcues.ui.extensions.getBoxAlignment
 import com.appcues.ui.extensions.getTextStyle
-import com.appcues.ui.extensions.primitiveStyle
-import com.appcues.ui.theme.AppcuesPreview
+import com.appcues.ui.theme.AppcuesPreviewPrimitive
 import java.util.UUID
 
 @Composable
-internal fun BoxPrimitive.Compose() {
+internal fun BoxPrimitive.Compose(modifier: Modifier) {
     Box(
-        modifier = Modifier.primitiveStyle(
-            component = this,
-            gestureProperties = PrimitiveGestureProperties(
-                onAction = LocalAppcuesActionDelegate.current.onAction,
-                actions = LocalAppcuesActions.current,
-                interactionSource = remember { MutableInteractionSource() },
-                indication = rememberRipple(),
-                enabled = remember { true },
-            ),
-            isDark = isSystemInDarkTheme()
-        ),
+        modifier = modifier,
         contentAlignment = style.getBoxAlignment(),
     ) {
-
         ProvideTextStyle(style.getTextStyle(LocalContext.current, isSystemInDarkTheme())) {
             items.forEach { it.Compose() }
         }
@@ -86,30 +67,26 @@ private val items = arrayListOf(
 @Composable
 @Preview
 internal fun PreviewTestBoxDefault() {
-    val component = BoxPrimitive(
-        id = UUID.randomUUID(),
-        items = items
-    )
-
-    AppcuesPreview {
-        component.Compose()
+    AppcuesPreviewPrimitive {
+        BoxPrimitive(
+            id = UUID.randomUUID(),
+            items = items
+        )
     }
 }
 
 @Composable
 @Preview
 internal fun PreviewTestBoxAlignment() {
-    val component = BoxPrimitive(
-        id = UUID.randomUUID(),
-        style = ComponentStyle(
-            backgroundColor = ComponentColor(light = 0xFFCDCDFA, dark = 0xFFCDCDFA),
-            verticalAlignment = ComponentVerticalAlignment.BOTTOM,
-            horizontalAlignment = ComponentHorizontalAlignment.TRAILING,
-        ),
-        items = items
-    )
-
-    AppcuesPreview {
-        component.Compose()
+    AppcuesPreviewPrimitive {
+        BoxPrimitive(
+            id = UUID.randomUUID(),
+            style = ComponentStyle(
+                backgroundColor = ComponentColor(light = 0xFFCDCDFA, dark = 0xFFCDCDFA),
+                verticalAlignment = ComponentVerticalAlignment.BOTTOM,
+                horizontalAlignment = ComponentHorizontalAlignment.TRAILING,
+            ),
+            items = items
+        )
     }
 }

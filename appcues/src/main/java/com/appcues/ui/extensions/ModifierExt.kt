@@ -33,7 +33,10 @@ import com.appcues.data.model.styling.ComponentSize
 import com.appcues.data.model.styling.ComponentStyle
 import java.util.UUID
 
-internal fun Modifier.primitiveStyle(
+/**
+ * Used by ExperiencePrimitive Compose
+ */
+internal fun Modifier.outerPrimitiveStyle(
     component: ExperiencePrimitive,
     gestureProperties: PrimitiveGestureProperties,
     isDark: Boolean,
@@ -49,7 +52,17 @@ internal fun Modifier.primitiveStyle(
             .styleCorner(style)
             .styleBorder(style, isDark)
             .styleBackground(style, isDark, defaultBackgroundColor)
-            .padding(style.getPaddings())
+    }
+)
+
+/**
+ * Should be used by any children of ExperiencePrimitive Compose
+ *
+ * eg. ButtonPrimitive, ImagePrimitive
+ */
+internal fun Modifier.innerPrimitiveStyle(component: ExperiencePrimitive) = this.then(
+    with(component) {
+        Modifier.padding(style.getPaddings())
     }
 )
 
@@ -70,14 +83,23 @@ private fun Modifier.styleBackground(
     isDark: Boolean,
     defaultColor: Color? = null
 ) = this.then(
+    Modifier
+        .styleBackgroundColor(style, isDark, defaultColor)
+        .styleBackgroundGradient(style, isDark)
+)
+
+private fun Modifier.styleBackgroundColor(style: ComponentStyle, isDark: Boolean, defaultColor: Color? = null) = this.then(
     when {
-        style.backgroundGradient != null -> Modifier.background(
-            Brush.horizontalGradient(style.backgroundGradient.map { Color(if (isDark) it.dark else it.light) })
-        )
         style.backgroundColor != null -> Modifier.background(style.backgroundColor.getColor(isDark))
         defaultColor != null -> Modifier.background(defaultColor)
         else -> Modifier
     }
+)
+
+private fun Modifier.styleBackgroundGradient(style: ComponentStyle, isDark: Boolean) = this.then(
+    if (style.backgroundGradient != null)
+        Modifier.background(Brush.horizontalGradient(style.backgroundGradient.map { Color(if (isDark) it.dark else it.light) }))
+    else Modifier
 )
 
 internal fun Modifier.styleBorder(

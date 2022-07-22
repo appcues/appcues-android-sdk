@@ -176,6 +176,13 @@ internal fun ComponentStyle.getHorizontalAlignment(): Alignment.Horizontal {
 internal fun ComponentStyle?.getBoxAlignment(): Alignment {
     if (this == null) return Alignment.Center
 
+    return getBoxAlignment(horizontalAlignment, verticalAlignment)
+}
+
+internal fun getBoxAlignment(
+    horizontalAlignment: ComponentHorizontalAlignment?,
+    verticalAlignment: ComponentVerticalAlignment?
+): Alignment {
     val horizontalBias = when (horizontalAlignment) {
         ComponentHorizontalAlignment.LEADING -> -1f
         ComponentHorizontalAlignment.CENTER -> 0f

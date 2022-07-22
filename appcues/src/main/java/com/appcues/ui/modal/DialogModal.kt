@@ -15,12 +15,12 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.trait.AppcuesTraitAnimatedVisibility
-import com.appcues.ui.extensions.WindowInfo
-import com.appcues.ui.extensions.WindowInfo.ScreenType.COMPACT
-import com.appcues.ui.extensions.WindowInfo.ScreenType.EXPANDED
-import com.appcues.ui.extensions.WindowInfo.ScreenType.MEDIUM
 import com.appcues.ui.extensions.getPaddings
 import com.appcues.ui.extensions.modalStyle
+import com.appcues.ui.utils.AppcuesWindowInfo
+import com.appcues.ui.utils.AppcuesWindowInfo.ScreenType.COMPACT
+import com.appcues.ui.utils.AppcuesWindowInfo.ScreenType.EXPANDED
+import com.appcues.ui.utils.AppcuesWindowInfo.ScreenType.MEDIUM
 
 private val MAX_WIDTH_COMPACT_DP = 400.dp
 private val MAX_WIDTH_MEDIUM_DP = 480.dp
@@ -34,7 +34,7 @@ private const val SCREEN_PADDING = 0.05
 internal fun DialogModal(
     style: ComponentStyle?,
     content: @Composable (hasFixedHeight: Boolean, contentPadding: PaddingValues?) -> Unit,
-    windowInfo: WindowInfo
+    windowInfo: AppcuesWindowInfo
 ) {
     val configuration = LocalConfiguration.current
     val dialogHorizontalMargin = (configuration.screenWidthDp * SCREEN_PADDING).dp
@@ -65,7 +65,7 @@ internal fun DialogModal(
     }
 }
 
-private fun maxWidthDerivedOf(windowInfo: WindowInfo): State<Dp> {
+private fun maxWidthDerivedOf(windowInfo: AppcuesWindowInfo): State<Dp> {
     return derivedStateOf {
         when (windowInfo.screenWidthType) {
             COMPACT -> MAX_WIDTH_COMPACT_DP
@@ -75,7 +75,7 @@ private fun maxWidthDerivedOf(windowInfo: WindowInfo): State<Dp> {
     }
 }
 
-private fun maxHeightDerivedOf(windowInfo: WindowInfo): State<Dp> {
+private fun maxHeightDerivedOf(windowInfo: AppcuesWindowInfo): State<Dp> {
     return derivedStateOf {
         when (windowInfo.screenHeightType) {
             COMPACT -> MAX_HEIGHT_COMPACT_DP

@@ -2,14 +2,13 @@ package com.appcues.data.mapper.styling
 
 import com.appcues.data.model.styling.ComponentColor
 import com.appcues.data.model.styling.ComponentStyle
-import com.appcues.data.model.styling.ComponentStyle.ComponentHorizontalAlignment
-import com.appcues.data.model.styling.ComponentStyle.ComponentVerticalAlignment
 import com.appcues.data.remote.response.styling.StyleGradientColorResponse
 import com.appcues.data.remote.response.styling.StyleResponse
 
 internal class StyleMapper(
     private val styleColorMapper: StyleColorMapper = StyleColorMapper(),
     private val styleShadowMapper: StyleShadowMapper = StyleShadowMapper(),
+    private val styleBackgroundImageMapper: StyleBackgroundImageMapper = StyleBackgroundImageMapper()
 ) {
 
     fun map(from: StyleResponse?) = if (from != null) ComponentStyle(
@@ -26,6 +25,7 @@ internal class StyleMapper(
         cornerRadius = from.cornerRadius,
         foregroundColor = styleColorMapper.map(from.foregroundColor),
         backgroundColor = styleColorMapper.map(from.backgroundColor),
+        backgroundImage = styleBackgroundImageMapper.map(from.backgroundImage),
         shadow = styleShadowMapper.map(from.shadow),
         // Not dealing with direction, every gradient is horizontal from start to end
         backgroundGradient = from.backgroundGradient.toComponentColorList(),
@@ -39,24 +39,6 @@ internal class StyleMapper(
         verticalAlignment = from.verticalAlignment.toComponentVerticalAlignment(),
         horizontalAlignment = from.horizontalAlignment.toComponentHorizontalAlignment(),
     ) else ComponentStyle()
-
-    private fun String?.toComponentVerticalAlignment(): ComponentVerticalAlignment? {
-        return when (this) {
-            "top" -> ComponentVerticalAlignment.TOP
-            "center" -> ComponentVerticalAlignment.CENTER
-            "bottom" -> ComponentVerticalAlignment.BOTTOM
-            else -> null
-        }
-    }
-
-    private fun String?.toComponentHorizontalAlignment(): ComponentHorizontalAlignment? {
-        return when (this) {
-            "leading" -> ComponentHorizontalAlignment.LEADING
-            "trailing" -> ComponentHorizontalAlignment.TRAILING
-            "center" -> ComponentHorizontalAlignment.CENTER
-            else -> null
-        }
-    }
 
     private fun StyleGradientColorResponse?.toComponentColorList(): List<ComponentColor>? {
         if (this == null) return null

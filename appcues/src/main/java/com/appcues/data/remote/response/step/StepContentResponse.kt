@@ -1,7 +1,7 @@
 package com.appcues.data.remote.response.step
 
-import com.appcues.data.remote.response.styling.SizeResponse
 import com.appcues.data.remote.response.styling.StyleResponse
+import com.appcues.data.remote.response.styling.StyleSizeResponse
 import com.squareup.moshi.JsonClass
 import java.util.UUID
 
@@ -16,7 +16,7 @@ internal data class StepContentResponse(
     val embed: String? = null,
     val contentMode: String? = null,
     val blurHash: String? = null,
-    val intrinsicSize: SizeResponse? = null,
+    val intrinsicSize: StyleSizeResponse? = null,
     val accessibilityLabel: String? = null,
     val text: String? = null,
     val content: StepContentResponse? = null,

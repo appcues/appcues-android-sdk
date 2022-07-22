@@ -6,11 +6,11 @@ import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.getConfigOrDefault
 import com.appcues.data.model.getConfigStyle
 import com.appcues.trait.ContentWrappingTrait
-import com.appcues.ui.extensions.rememberWindowInfo
 import com.appcues.ui.modal.BottomSheetModal
 import com.appcues.ui.modal.DialogModal
 import com.appcues.ui.modal.ExpandedBottomSheetModal
 import com.appcues.ui.modal.FullScreenModal
+import com.appcues.ui.utils.rememberAppcuesWindowInfo
 
 internal class ModalTrait(
     override val config: AppcuesConfigMap,
@@ -28,7 +28,7 @@ internal class ModalTrait(
 
     @Composable
     override fun WrapContent(content: @Composable (hasFixedHeight: Boolean, contentPadding: PaddingValues?) -> Unit) {
-        val windowInfo = rememberWindowInfo()
+        val windowInfo = rememberAppcuesWindowInfo()
 
         when (presentationStyle) {
             "dialog" -> DialogModal(style, content, windowInfo)

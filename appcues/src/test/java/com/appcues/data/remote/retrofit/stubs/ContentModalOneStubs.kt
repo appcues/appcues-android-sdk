@@ -7,11 +7,11 @@ import com.appcues.data.remote.response.experience.ExperienceResponse
 import com.appcues.data.remote.response.step.StepContainerResponse
 import com.appcues.data.remote.response.step.StepContentResponse
 import com.appcues.data.remote.response.step.StepResponse
-import com.appcues.data.remote.response.styling.SizeResponse
 import com.appcues.data.remote.response.styling.StyleColorResponse
 import com.appcues.data.remote.response.styling.StyleGradientColorResponse
 import com.appcues.data.remote.response.styling.StyleResponse
 import com.appcues.data.remote.response.styling.StyleShadowResponse
+import com.appcues.data.remote.response.styling.StyleSizeResponse
 import com.appcues.data.remote.response.trait.TraitResponse
 import java.util.UUID
 
@@ -55,7 +55,7 @@ internal val contentModalOneStubs = ExperienceResponse(
                                             accessibilityLabel = "Mountains at night",
                                             contentMode = "fill",
                                             blurHash = "LDAmob}[k6tSxyoMNFR*005RaiV?",
-                                            intrinsicSize = SizeResponse(
+                                            intrinsicSize = StyleSizeResponse(
                                                 width = 1920,
                                                 height = 1280,
                                             ),

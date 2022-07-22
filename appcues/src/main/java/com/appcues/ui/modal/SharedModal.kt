@@ -13,13 +13,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.appcues.data.model.styling.ComponentStyle
-import com.appcues.ui.extensions.WindowInfo
-import com.appcues.ui.extensions.WindowInfo.DeviceType.MOBILE
-import com.appcues.ui.extensions.WindowInfo.DeviceType.TABLET
-import com.appcues.ui.extensions.WindowInfo.Orientation.PORTRAIT
 import com.appcues.ui.extensions.coloredShadow
 import com.appcues.ui.extensions.styleBorder
 import com.appcues.ui.extensions.styleShadow
+import com.appcues.ui.utils.AppcuesWindowInfo
+import com.appcues.ui.utils.AppcuesWindowInfo.DeviceType.MOBILE
+import com.appcues.ui.utils.AppcuesWindowInfo.DeviceType.TABLET
+import com.appcues.ui.utils.AppcuesWindowInfo.Orientation.PORTRAIT
 
 @OptIn(ExperimentalAnimationApi::class)
 internal fun dialogEnterTransition(): EnterTransition {
@@ -43,7 +43,7 @@ internal fun Modifier.dialogModifier(style: ComponentStyle?, isDark: Boolean) =
                 Modifier
         )
 
-internal fun Modifier.sheetModifier(windowInfo: WindowInfo, style: ComponentStyle?) = then(
+internal fun Modifier.sheetModifier(windowInfo: AppcuesWindowInfo, style: ComponentStyle?) = then(
     when (windowInfo.deviceType) {
         MOBILE -> if (windowInfo.orientation == PORTRAIT && style?.cornerRadius != null && style.cornerRadius != 0)
             Modifier.clip(RoundedCornerShape(topStart = style.cornerRadius.dp, topEnd = style.cornerRadius.dp))
@@ -59,7 +59,7 @@ internal fun Modifier.sheetModifier(windowInfo: WindowInfo, style: ComponentStyl
     }
 )
 
-internal fun Modifier.fullModifier(windowInfo: WindowInfo) = then(
+internal fun Modifier.fullModifier(windowInfo: AppcuesWindowInfo) = then(
     when (windowInfo.deviceType) {
         MOBILE -> Modifier
         TABLET ->

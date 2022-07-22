@@ -1,4 +1,4 @@
-package com.appcues.ui.component
+package com.appcues.ui.primitive
 
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onRoot
