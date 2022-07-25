@@ -46,20 +46,20 @@ private val items = arrayListOf(
             id = UUID.randomUUID(),
             text = "Button 1",
             style = ComponentStyle(
-                fontSize = 17,
+                fontSize = 17.0,
                 foregroundColor = ComponentColor(light = 0xFFFFFFFF, dark = 0xFFFFFFFF)
             )
         ),
         style = ComponentStyle(
-            paddingTop = 8,
-            paddingTrailing = 18,
-            paddingBottom = 8,
-            paddingLeading = 18,
+            paddingTop = 8.0,
+            paddingTrailing = 18.0,
+            paddingBottom = 8.0,
+            paddingLeading = 18.0,
             backgroundGradient = arrayListOf(
                 ComponentColor(light = 0xFF5C5CFF, dark = 0xFF5C5CFF),
                 ComponentColor(light = 0xFF8960FF, dark = 0xFF8960FF)
             ),
-            cornerRadius = 6
+            cornerRadius = 6.0
         )
     ),
     TextPrimitive(
@@ -103,16 +103,16 @@ internal fun PreviewTestVerticalLayout() {
     AppcuesPreviewPrimitive {
         VerticalStackPrimitive(
             id = UUID.randomUUID(),
-            spacing = 20,
+            spacing = 20.0,
             style = ComponentStyle(
-                marginTop = 5,
-                marginLeading = 4,
-                marginBottom = 6,
-                marginTrailing = 3,
-                paddingTop = 6,
-                paddingLeading = 7,
-                paddingBottom = 9,
-                paddingTrailing = 10,
+                marginTop = 5.0,
+                marginLeading = 4.0,
+                marginBottom = 6.0,
+                marginTrailing = 3.0,
+                paddingTop = 6.0,
+                paddingLeading = 7.0,
+                paddingBottom = 9.0,
+                paddingTrailing = 10.0,
                 horizontalAlignment = LEADING,
                 backgroundColor = ComponentColor(light = 0xFFCDCDFA, dark = 0xFFCDCDFA)
             ),

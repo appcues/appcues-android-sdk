@@ -12,15 +12,15 @@ class StyleMapperTest {
     fun `map SHOULD map from StyleResponse to StyleComponent`() {
         // Given
         val from = StyleResponse(
-            marginLeading = 1,
-            marginTop = 2,
-            marginTrailing = 3,
-            marginBottom = 4,
-            paddingLeading = 5,
-            paddingTop = 6,
-            paddingBottom = 7,
-            paddingTrailing = 8,
-            cornerRadius = 9,
+            marginLeading = 1.0,
+            marginTop = 2.0,
+            marginTrailing = 3.0,
+            marginBottom = 4.0,
+            paddingLeading = 5.0,
+            paddingTop = 6.0,
+            paddingBottom = 7.0,
+            paddingTrailing = 8.0,
+            cornerRadius = 9.0,
         )
         // When
         val result = mapper.map(from)

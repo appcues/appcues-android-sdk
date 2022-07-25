@@ -8,7 +8,7 @@ import kotlin.math.roundToInt
 
 internal object AppcuesArrangement {
 
-    internal fun spacedCenter(space: Int = 0) = object : HorizontalOrVertical {
+    internal fun spacedCenter(space: Double = 0.0) = object : HorizontalOrVertical {
         override val spacing = space.dp
 
         override fun toString() = "AppcuesArrangement#spacedCenter"
@@ -56,7 +56,7 @@ internal object AppcuesArrangement {
         }
     }
 
-    internal fun spacedEvenly(space: Int = 0) = object : HorizontalOrVertical {
+    internal fun spacedEvenly(space: Double = 0.0) = object : HorizontalOrVertical {
         override val spacing = space.dp
 
         override fun toString() = "AppcuesArrangement#spacedEvenly"

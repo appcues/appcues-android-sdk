@@ -20,6 +20,7 @@ import com.appcues.ui.utils.AppcuesWindowInfo
 import com.appcues.ui.utils.AppcuesWindowInfo.DeviceType.MOBILE
 import com.appcues.ui.utils.AppcuesWindowInfo.DeviceType.TABLET
 import com.appcues.ui.utils.AppcuesWindowInfo.Orientation.PORTRAIT
+import com.appcues.util.ne
 
 @OptIn(ExperimentalAnimationApi::class)
 internal fun dialogEnterTransition(): EnterTransition {
@@ -35,7 +36,7 @@ internal fun dialogExitTransition(): ExitTransition {
 internal fun Modifier.dialogModifier(style: ComponentStyle?, isDark: Boolean) =
     then(Modifier.styleShadow(style, isDark))
         .then(
-            if (style?.cornerRadius != null && style.cornerRadius != 0)
+            if (style?.cornerRadius != null && style.cornerRadius ne 0.0)
                 Modifier
                     .clip(RoundedCornerShape(style.cornerRadius.dp))
                     .styleBorder(style, isDark)
@@ -45,7 +46,7 @@ internal fun Modifier.dialogModifier(style: ComponentStyle?, isDark: Boolean) =
 
 internal fun Modifier.sheetModifier(windowInfo: AppcuesWindowInfo, style: ComponentStyle?) = then(
     when (windowInfo.deviceType) {
-        MOBILE -> if (windowInfo.orientation == PORTRAIT && style?.cornerRadius != null && style.cornerRadius != 0)
+        MOBILE -> if (windowInfo.orientation == PORTRAIT && style?.cornerRadius != null && style.cornerRadius ne 0.0)
             Modifier.clip(RoundedCornerShape(topStart = style.cornerRadius.dp, topEnd = style.cornerRadius.dp))
         else
             Modifier
