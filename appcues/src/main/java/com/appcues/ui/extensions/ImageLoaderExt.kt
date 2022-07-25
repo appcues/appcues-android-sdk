@@ -48,7 +48,7 @@ internal fun Context.blurHashPlaceholder(decodedBlurHash: Bitmap?, intrinsicSize
             .let { bitmap ->
                 if (intrinsicSize != null) {
                     // if we know the intrinsicSize we scale the place holder accordingly
-                    Bitmap.createScaledBitmap(bitmap, intrinsicSize.width, intrinsicSize.height, false)
+                    Bitmap.createScaledBitmap(bitmap, intrinsicSize.width.toInt(), intrinsicSize.height.toInt(), false)
                 } else bitmap
             }
             .asImageBitmap()

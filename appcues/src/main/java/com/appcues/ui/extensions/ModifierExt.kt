@@ -33,6 +33,8 @@ import com.appcues.data.model.ExperiencePrimitive
 import com.appcues.data.model.ExperiencePrimitive.ImagePrimitive
 import com.appcues.data.model.styling.ComponentSize
 import com.appcues.data.model.styling.ComponentStyle
+import com.appcues.util.eq
+import com.appcues.util.ne
 import java.util.UUID
 
 /**
@@ -119,7 +121,7 @@ internal fun Modifier.styleBorder(
     style: ComponentStyle,
     isDark: Boolean
 ) = this.then(
-    if (style.borderWidth != null && style.borderWidth != 0 && style.borderColor != null) {
+    if (style.borderWidth != null && style.borderWidth ne 0.0 && style.borderColor != null) {
         Modifier
             .border(style.borderWidth.dp, style.borderColor.getColor(isDark), RoundedCornerShape(style.cornerRadius.dp))
     } else {
@@ -132,14 +134,14 @@ internal fun Modifier.styleSize(style: ComponentStyle, noSizeFillMax: Boolean = 
         // when style contains both width and height
         style.width != null && style.height != null -> when {
             // we fill max if both properties are -1
-            style.width == -1 && style.height == -1 -> Modifier.fillMaxSize()
+            style.width eq -1.0 && style.height eq -1.0 -> Modifier.fillMaxSize()
             // or we set height and fill width in case only width is -1
-            style.width == -1 ->
+            style.width eq -1.0 ->
                 Modifier
                     .height(style.height.dp)
                     .fillMaxWidth()
             // or we set width and fill height in case only height is -1
-            style.height == -1 ->
+            style.height eq -1.0 ->
                 Modifier
                     .width(style.width.dp)
                     .fillMaxHeight()
@@ -147,9 +149,9 @@ internal fun Modifier.styleSize(style: ComponentStyle, noSizeFillMax: Boolean = 
             else -> Modifier.size(style.width.dp, style.height.dp)
         }
         // if only width is not null, we fill max in case its -1 else we set the width
-        style.width != null -> if (style.width == -1) Modifier.fillMaxWidth() else Modifier.width(style.width.dp)
+        style.width != null -> if (style.width eq -1.0) Modifier.fillMaxWidth() else Modifier.width(style.width.dp)
         // if only height is not null, we fill max in case its -1 else we set the height
-        style.height != null -> if (style.height == -1) Modifier.fillMaxHeight() else Modifier.height(style.height.dp)
+        style.height != null -> if (style.height eq -1.0) Modifier.fillMaxHeight() else Modifier.height(style.height.dp)
         // at the end we fill max size in case there is no width/height but the primitive (like image) is fill max by default
         noSizeFillMax -> Modifier.fillMaxSize()
         else -> Modifier
@@ -158,7 +160,7 @@ internal fun Modifier.styleSize(style: ComponentStyle, noSizeFillMax: Boolean = 
 
 private fun Modifier.styleCorner(style: ComponentStyle) = this.then(
     when {
-        style.cornerRadius != 0 -> Modifier.clip(RoundedCornerShape(style.cornerRadius.dp))
+        style.cornerRadius ne 0.0 -> Modifier.clip(RoundedCornerShape(style.cornerRadius.dp))
         else -> Modifier
     }
 )

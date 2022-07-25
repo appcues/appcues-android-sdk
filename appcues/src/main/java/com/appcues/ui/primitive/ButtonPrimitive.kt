@@ -52,16 +52,16 @@ internal fun PreviewButtonBorder() {
                 )
             ),
             style = ComponentStyle(
-                paddingTop = 8,
-                paddingLeading = 18,
-                paddingBottom = 8,
-                paddingTrailing = 18,
-                marginTop = 1,
-                marginLeading = 1,
-                marginBottom = 1,
-                marginTrailing = 1,
-                cornerRadius = 10,
-                borderWidth = 1,
+                paddingTop = 8.0,
+                paddingLeading = 18.0,
+                paddingBottom = 8.0,
+                paddingTrailing = 18.0,
+                marginTop = 1.0,
+                marginLeading = 1.0,
+                marginBottom = 1.0,
+                marginTrailing = 1.0,
+                cornerRadius = 10.0,
+                borderWidth = 1.0,
                 borderColor = ComponentColor(light = 0xFF5C5CFF, dark = 0xFF5C5CFF)
             )
         )
@@ -76,7 +76,7 @@ internal fun PreviewButtonComplexContents() {
             id = UUID.randomUUID(),
             content = HorizontalStackPrimitive(
                 id = UUID.randomUUID(),
-                spacing = 8,
+                spacing = 8.0,
                 items = arrayListOf(
                     TextPrimitive(
                         id = UUID.randomUUID(),
@@ -89,11 +89,11 @@ internal fun PreviewButtonComplexContents() {
                 )
             ),
             style = ComponentStyle(
-                paddingTop = 8,
-                paddingLeading = 8,
-                paddingBottom = 8,
-                paddingTrailing = 8,
-                cornerRadius = 2,
+                paddingTop = 8.0,
+                paddingLeading = 8.0,
+                paddingBottom = 8.0,
+                paddingTrailing = 8.0,
+                cornerRadius = 2.0,
                 foregroundColor = ComponentColor(light = 0xFF0B1A38, dark = 0xFF0B1A38),
                 backgroundColor = ComponentColor(light = 0xFF20E0D6, dark = 0xFF20E0D6),
             )
@@ -126,29 +126,29 @@ internal fun PreviewButtonGeneral() {
                 id = UUID.randomUUID(),
                 text = "Button 1",
                 style = ComponentStyle(
-                    fontSize = 17,
+                    fontSize = 17.0,
                     foregroundColor = ComponentColor(light = 0xFFFFFFFF, dark = 0xFFFFFFFF)
                 )
             ),
             style = ComponentStyle(
-                marginTop = 10,
-                marginTrailing = 10,
-                marginBottom = 10,
-                marginLeading = 10,
-                paddingTop = 8,
-                paddingLeading = 18,
-                paddingBottom = 8,
-                paddingTrailing = 18,
+                marginTop = 10.0,
+                marginTrailing = 10.0,
+                marginBottom = 10.0,
+                marginLeading = 10.0,
+                paddingTop = 8.0,
+                paddingLeading = 18.0,
+                paddingBottom = 8.0,
+                paddingTrailing = 18.0,
                 backgroundGradient = arrayListOf(
                     ComponentColor(light = 0xFF5C5CFF, dark = 0xFF5C5CFF),
                     ComponentColor(light = 0xFF8960FF, dark = 0xFF8960FF)
                 ),
-                cornerRadius = 6,
+                cornerRadius = 6.0,
                 shadow = ComponentShadow(
                     color = ComponentColor(light = 0xFF778899, dark = 0xFF778899),
-                    radius = 6,
-                    x = 2,
-                    y = 2,
+                    radius = 6.0,
+                    x = 2.0,
+                    y = 2.0,
                 )
             )
         )

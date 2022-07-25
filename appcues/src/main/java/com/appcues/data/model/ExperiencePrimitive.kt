@@ -39,14 +39,14 @@ internal sealed class ExperiencePrimitive(
         override val id: UUID,
         override val style: ComponentStyle = ComponentStyle(),
         val items: List<ExperiencePrimitive>,
-        val spacing: Int = 0,
+        val spacing: Double = 0.0,
     ) : ExperiencePrimitive(id, style)
 
     data class HorizontalStackPrimitive(
         override val id: UUID,
         override val style: ComponentStyle = ComponentStyle(),
         val items: List<ExperiencePrimitive>,
-        val spacing: Int = 0,
+        val spacing: Double = 0.0,
         val distribution: ComponentDistribution = CENTER,
     ) : ExperiencePrimitive(id, style)
 

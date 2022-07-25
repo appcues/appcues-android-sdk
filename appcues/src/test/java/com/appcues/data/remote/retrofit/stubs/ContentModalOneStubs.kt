@@ -56,8 +56,8 @@ internal val contentModalOneStubs = ExperienceResponse(
                                             contentMode = "fill",
                                             blurHash = "LDAmob}[k6tSxyoMNFR*005RaiV?",
                                             intrinsicSize = StyleSizeResponse(
-                                                width = 1920,
-                                                height = 1280,
+                                                width = 1920.0,
+                                                height = 1280.0,
                                             ),
                                             style = StyleResponse(
                                                 backgroundColor = StyleColorResponse(
@@ -82,12 +82,12 @@ internal val contentModalOneStubs = ExperienceResponse(
                                             type = "text",
                                             text = "Ready to make your\nworkflow simpler?",
                                             style = StyleResponse(
-                                                marginTop = 20,
-                                                marginBottom = 5,
+                                                marginTop = 20.0,
+                                                marginBottom = 5.0,
                                                 fontName = "Lato-Black",
-                                                fontSize = 20,
+                                                fontSize = 20.0,
                                                 textAlignment = "center",
-                                                lineHeight = 24,
+                                                lineHeight = 24.0,
                                                 foregroundColor = StyleColorResponse(
                                                     light = "#394455",
                                                     dark = "#ffffff"
@@ -111,14 +111,14 @@ internal val contentModalOneStubs = ExperienceResponse(
                                             type = "text",
                                             text = "Take a few moments to learn how to best use our features.",
                                             style = StyleResponse(
-                                                marginTop = 10,
-                                                marginLeading = 30,
-                                                marginBottom = 15,
-                                                marginTrailing = 30,
+                                                marginTop = 10.0,
+                                                marginLeading = 30.0,
+                                                marginBottom = 15.0,
+                                                marginTrailing = 30.0,
                                                 fontName = "Lato-Regular",
-                                                fontSize = 17,
+                                                fontSize = 17.0,
                                                 textAlignment = "center",
-                                                lineHeight = 19,
+                                                lineHeight = 19.0,
                                                 foregroundColor = StyleColorResponse(
                                                     light = "#394455",
                                                     dark = "#ffffff"
@@ -147,18 +147,18 @@ internal val contentModalOneStubs = ExperienceResponse(
                                                 text = "Button 1",
                                                 style = StyleResponse(
                                                     fontName = "Lato-Bold",
-                                                    fontSize = 17,
+                                                    fontSize = 17.0,
                                                     foregroundColor = StyleColorResponse(
                                                         light = "#ffffff"
                                                     )
                                                 )
                                             ),
                                             style = StyleResponse(
-                                                paddingTop = 8,
-                                                paddingLeading = 18,
-                                                paddingBottom = 8,
-                                                paddingTrailing = 18,
-                                                marginBottom = 25,
+                                                paddingTop = 8.0,
+                                                paddingLeading = 18.0,
+                                                paddingBottom = 8.0,
+                                                paddingTrailing = 18.0,
+                                                marginBottom = 25.0,
                                                 backgroundGradient = StyleGradientColorResponse(
                                                     colors = arrayListOf(
                                                         StyleColorResponse(light = "#5C5CFF"),
@@ -167,12 +167,12 @@ internal val contentModalOneStubs = ExperienceResponse(
                                                     startPoint = "leading",
                                                     endPoint = "trailing",
                                                 ),
-                                                cornerRadius = 6,
+                                                cornerRadius = 6.0,
                                                 shadow = StyleShadowResponse(
                                                     color = StyleColorResponse(light = "#777777ee"),
-                                                    radius = 3,
-                                                    x = 0,
-                                                    y = 2
+                                                    radius = 3.0,
+                                                    x = 0.0,
+                                                    y = 2.0
                                                 )
                                             )
                                         )

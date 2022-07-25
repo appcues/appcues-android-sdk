@@ -59,10 +59,10 @@ internal fun PreviewTextComponentColor() {
 internal fun PreviewTextComponentLineHeight() {
     Column {
         AppcuesPreviewPrimitive {
-            textPrimitive.copy(style = textPrimitive.style.copy(lineHeight = 30))
+            textPrimitive.copy(style = textPrimitive.style.copy(lineHeight = 30.0))
         }
         AppcuesPreviewPrimitive {
-            textPrimitive.copy(style = textPrimitive.style.copy(lineHeight = 40))
+            textPrimitive.copy(style = textPrimitive.style.copy(lineHeight = 40.0))
         }
     }
 }
@@ -72,11 +72,11 @@ internal fun PreviewTextComponentLineHeight() {
 internal fun PreviewTextComponentLetterSpacing() {
     Column {
         AppcuesPreviewPrimitive {
-            textPrimitive.copy(style = textPrimitive.style.copy(letterSpacing = 5))
+            textPrimitive.copy(style = textPrimitive.style.copy(letterSpacing = 5.0))
         }
 
         AppcuesPreviewPrimitive {
-            textPrimitive.copy(style = textPrimitive.style.copy(letterSpacing = 10))
+            textPrimitive.copy(style = textPrimitive.style.copy(letterSpacing = 10.0))
         }
     }
 }
@@ -95,16 +95,16 @@ internal fun PreviewTestBorder() {
     AppcuesPreviewPrimitive {
         textPrimitive.copy(
             style = textPrimitive.style.copy(
-                paddingTop = 5,
-                paddingLeading = 5,
-                paddingBottom = 5,
-                paddingTrailing = 5,
-                marginTop = 2,
-                marginTrailing = 2,
-                marginBottom = 2,
-                marginLeading = 2,
-                cornerRadius = 10,
-                borderWidth = 4,
+                paddingTop = 5.0,
+                paddingLeading = 5.0,
+                paddingBottom = 5.0,
+                paddingTrailing = 5.0,
+                marginTop = 2.0,
+                marginTrailing = 2.0,
+                marginBottom = 2.0,
+                marginLeading = 2.0,
+                cornerRadius = 10.0,
+                borderWidth = 4.0,
                 borderColor = ComponentColor(light = 0xFF5C5CFF, dark = 0xFF5C5CFF)
             )
         )
@@ -117,8 +117,8 @@ internal fun PreviewTestFixedSize() {
     AppcuesPreviewPrimitive {
         textPrimitive.copy(
             style = textPrimitive.style.copy(
-                width = 200,
-                height = 24,
+                width = 200.0,
+                height = 24.0,
                 foregroundColor = ComponentColor(light = 0xFFFFFFFF, dark = 0xFFFFFFFF),
                 backgroundColor = ComponentColor(light = 0xFF5C5CFF, dark = 0xFF5C5CFF)
             )
@@ -132,14 +132,14 @@ internal fun PreviewTestLayout() {
     AppcuesPreviewPrimitive {
         textPrimitive.copy(
             style = textPrimitive.style.copy(
-                marginTop = 5,
-                marginLeading = 4,
-                marginBottom = 6,
-                marginTrailing = 3,
-                paddingTop = 6,
-                paddingLeading = 7,
-                paddingBottom = 9,
-                paddingTrailing = 10,
+                marginTop = 5.0,
+                marginLeading = 4.0,
+                marginBottom = 6.0,
+                marginTrailing = 3.0,
+                paddingTop = 6.0,
+                paddingLeading = 7.0,
+                paddingBottom = 9.0,
+                paddingTrailing = 10.0,
                 foregroundColor = ComponentColor(light = 0xFFFFFFFF, dark = 0xFFFFFFFF),
                 backgroundColor = ComponentColor(light = 0xFF5C5CFF, dark = 0xFF5C5CFF)
             )
@@ -153,8 +153,8 @@ internal fun PreviewTestSystemFont() {
     AppcuesPreviewPrimitive {
         textPrimitive.copy(
             style = textPrimitive.style.copy(
-                width = 180,
-                fontSize = 15,
+                width = 180.0,
+                fontSize = 15.0,
                 foregroundColor = ComponentColor(light = 0xFFF5F7FA, dark = 0xFFF5F7FA),
                 backgroundColor = ComponentColor(light = 0xFFFF5290, dark = 0xFFFF5290)
             )
@@ -168,13 +168,13 @@ internal fun PreviewTestTypography() {
     AppcuesPreviewPrimitive {
         textPrimitive.copy(
             style = textPrimitive.style.copy(
-                paddingTop = 8,
-                paddingLeading = 8,
-                paddingBottom = 8,
-                paddingTrailing = 2,
-                fontSize = 12,
-                letterSpacing = 6,
-                lineHeight = 30,
+                paddingTop = 8.0,
+                paddingLeading = 8.0,
+                paddingBottom = 8.0,
+                paddingTrailing = 2.0,
+                fontSize = 12.0,
+                letterSpacing = 6.0,
+                lineHeight = 30.0,
                 textAlignment = TRAILING,
                 foregroundColor = ComponentColor(light = 0xFF0B1A38, dark = 0xFF0B1A38),
             )

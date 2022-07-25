@@ -12,8 +12,8 @@ class SizeMapperTest {
     fun `map SHOULD map from SizeResponse to ComponentSize`() {
         // Given
         val from = StyleSizeResponse(
-            width = 1000,
-            height = 2000
+            width = 1000.0,
+            height = 2000.0
         )
         // When
         val result = mapper.map(from)
