@@ -1,5 +1,6 @@
 package com.appcues.ui.extensions
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Indication
 import androidx.compose.foundation.background
@@ -29,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import com.appcues.action.ExperienceAction
 import com.appcues.data.model.Action
 import com.appcues.data.model.ExperiencePrimitive
+import com.appcues.data.model.ExperiencePrimitive.ImagePrimitive
 import com.appcues.data.model.styling.ComponentSize
 import com.appcues.data.model.styling.ComponentStyle
 import java.util.UUID
@@ -52,6 +54,17 @@ internal fun Modifier.outerPrimitiveStyle(
             .styleCorner(style)
             .styleBorder(style, isDark)
             .styleBackground(style, isDark, defaultBackgroundColor)
+            .stylePrimitive(this)
+    }
+)
+
+private fun Modifier.stylePrimitive(experiencePrimitive: ExperiencePrimitive) = this.then(
+    when (experiencePrimitive) {
+        is ImagePrimitive ->
+            Modifier
+                .animateContentSize()
+                .imageAspectRatio(experiencePrimitive.intrinsicSize)
+        else -> Modifier
     }
 )
 
