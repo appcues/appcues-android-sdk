@@ -13,7 +13,7 @@ import com.appcues.statemachine.Action.StartStep
 import com.appcues.statemachine.State.BeginningStep
 import com.appcues.statemachine.State.EndingStep
 import com.appcues.statemachine.StateMachine
-import com.appcues.statemachine.StepReference.StepIndex
+import com.appcues.statemachine.StepReference.StepGroupPageIndex
 import com.appcues.ui.AppcuesViewModel.UIState.Dismissing
 import com.appcues.ui.AppcuesViewModel.UIState.Idle
 import com.appcues.ui.AppcuesViewModel.UIState.Rendering
@@ -109,7 +109,7 @@ internal class AppcuesViewModel(
             // then we report new position to state machine
             if (state is Rendering && state.position != index) {
                 appcuesCoroutineScope.launch {
-                    stateMachine.handleAction(StartStep(StepIndex(index)))
+                    stateMachine.handleAction(StartStep(StepGroupPageIndex(index)))
                 }
             }
         }

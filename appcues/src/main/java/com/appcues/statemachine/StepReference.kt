@@ -25,6 +25,18 @@ internal sealed class StepReference {
         }
     }
 
+    data class StepGroupPageIndex(val index: Int) : StepReference() {
+
+        override fun getIndex(experience: Experience, currentStepIndex: Int): Int? {
+            // finds the group this step belongs to
+            return experience.groupLookup[currentStepIndex]
+                // get the id of that index we are trying to show start from that same group
+                ?.let { groupIndex -> experience.stepContainers[groupIndex].steps[index].id }
+                // get the index from flatSteps
+                ?.let { experience.flatSteps.indexOfFirst { step -> step.id == it } }
+        }
+    }
+
     data class StepOffset(val offset: Int) : StepReference() {
 
         override fun getIndex(experience: Experience, currentStepIndex: Int): Int? {
