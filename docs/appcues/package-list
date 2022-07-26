@@ -41,6 +41,7 @@ $dokka.location:com.appcues.trait/StepDecoratingTrait///PointingToDeclaration/a
 $dokka.location:com.appcues.trait/StepDecoratingTrait/Overlay/androidx.compose.foundation.layout.BoxScope#com.appcues.trait.StepDecoratingPadding/PointingToDeclaration/appcues/com.appcues.trait/-step-decorating-trait/-overlay.html
 $dokka.location:com.appcues////PointingToDeclaration/appcues/com.appcues/index.html
 $dokka.location:com.appcues//Appcues/#android.content.Context#kotlin.String#kotlin.String#kotlin.Function1[com.appcues.AppcuesConfig,kotlin.Unit]?/PointingToDeclaration/appcues/com.appcues/-appcues.html
+$dokka.location:com.appcues//SnapshotTest/#kotlin.String/PointingToDeclaration/appcues/com.appcues/-snapshot-test.html
 $dokka.location:com.appcues/AnalyticType.EVENT///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}appcues/com.appcues/-analytic-type/-e-v-e-n-t/index.html
 $dokka.location:com.appcues/AnalyticType.GROUP///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}appcues/com.appcues/-analytic-type/-g-r-o-u-p/index.html
 $dokka.location:com.appcues/AnalyticType.IDENTIFY///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}appcues/com.appcues/-analytic-type/-i-d-e-n-t-i-f-y/index.html
