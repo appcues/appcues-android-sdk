@@ -16,6 +16,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
@@ -55,11 +56,12 @@ internal class AppcuesActivity : AppCompatActivity() {
 
     private val viewModel: AppcuesViewModel by viewModels { AppcuesViewModelFactory(scope) }
 
+    private val shakeGestureListener: ShakeGestureListener by lazy { ShakeGestureListener(context = this) }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         // remove enter animation from this activity
         overridePendingTransition(0, 0)
         super.onCreate(savedInstanceState)
-
         setContent {
             AppcuesTheme {
                 Composition()
@@ -67,14 +69,16 @@ internal class AppcuesActivity : AppCompatActivity() {
         }
     }
 
-    override fun onPause() {
-        super.onPause()
-        viewModel.onPause()
-    }
-
     override fun onResume() {
         super.onResume()
         viewModel.onResume()
+        shakeGestureListener.start()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        viewModel.onPause()
+        shakeGestureListener.stop()
     }
 
     @Composable
@@ -125,6 +129,16 @@ internal class AppcuesActivity : AppCompatActivity() {
 
     @Composable
     private fun BoxScope.ComposeLastRenderingState(state: Rendering) {
+        LaunchedEffect(state.isPreview) {
+            if (state.isPreview) {
+                shakeGestureListener.addListener(true) {
+                    viewModel.refreshPreview()
+                }
+            } else {
+                shakeGestureListener.clearListener()
+            }
+        }
+
         with(state.stepContainer) {
             // apply backdrop traits
             backdropTraits.forEach {
