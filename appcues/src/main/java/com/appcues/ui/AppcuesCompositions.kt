@@ -7,6 +7,7 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
+import coil.ImageLoader
 import com.appcues.action.ExperienceAction
 import com.appcues.data.model.Action
 import com.appcues.trait.AppcuesPaginationData
@@ -18,6 +19,9 @@ internal val LocalAppcuesActionDelegate = staticCompositionLocalOf { AppcuesActi
 internal data class AppcuesActions(val onAction: (ExperienceAction) -> Unit)
 
 internal val LocalAppcuesActions = staticCompositionLocalOf<Map<UUID, List<Action>>> { hashMapOf() }
+
+// used to support UI testing and mocking of image loading
+internal val LocalImageLoader = staticCompositionLocalOf<ImageLoader?> { null }
 
 /**
  * LocalAppcuesPagination is used to report back any page change that
