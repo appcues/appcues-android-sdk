@@ -1,0 +1,7 @@
+tasks.dokkaHtml.configure {
+    dokkaSourceSets {
+        debug {
+            suppress.set(true)
+        }
+    }
+}
