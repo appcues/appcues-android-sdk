@@ -23,6 +23,7 @@ import com.appcues.data.model.ExperiencePrimitive.VerticalStackPrimitive
 import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.ui.LocalAppcuesActionDelegate
 import com.appcues.ui.LocalAppcuesActions
+import com.appcues.ui.LocalImageLoader
 import com.appcues.ui.extensions.PrimitiveGestureProperties
 import com.appcues.ui.extensions.blurHashPlaceholder
 import com.appcues.ui.extensions.getBoxAlignment
@@ -90,10 +91,11 @@ internal fun BoxScope.BackgroundImage(style: ComponentStyle) {
                 modifier = Modifier.matchParentSize(),
                 model = context.getImageRequest(imageUrl, contentMode),
                 contentDescription = null,
-                imageLoader = context.getImageLoader(),
+                imageLoader = LocalImageLoader.current ?: context.getImageLoader(),
                 placeholder = context.blurHashPlaceholder(decodedBlurHash, intrinsicSize),
                 contentScale = contentMode.toImageAsyncContentScale(),
-                alignment = getBoxAlignment(horizontalAlignment, verticalAlignment)
+                alignment = getBoxAlignment(horizontalAlignment, verticalAlignment),
+                error = context.blurHashPlaceholder(decodedBlurHash, intrinsicSize),
             )
         }
     }
