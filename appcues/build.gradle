@@ -9,6 +9,7 @@ plugins {
 apply from: 'publish-maven.gradle'
 apply from: 'copy-dependencies.gradle'
 apply from: 'codecov.gradle'
+apply from: 'dokka.gradle'
 
 ext.room_version = '2.4.2'
 ext.compose_version = '1.2.0-rc03'
