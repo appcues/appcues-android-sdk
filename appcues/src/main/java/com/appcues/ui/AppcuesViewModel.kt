@@ -32,7 +32,9 @@ internal class AppcuesViewModel(
 
     sealed class UIState {
         object Idle : UIState()
-        data class Rendering(val stepContainer: StepContainer, val position: Int, val isPreview: Boolean) : UIState()
+        data class Rendering(val experienceId: UUID, val stepContainer: StepContainer, val position: Int, val isPreview: Boolean) :
+            UIState()
+
         data class Dismissing(val continueAction: () -> Unit) : UIState()
     }
 
@@ -40,8 +42,6 @@ internal class AppcuesViewModel(
     private val actionProcessor by inject<ActionProcessor>()
     private val appcuesCoroutineScope by inject<AppcuesCoroutineScope>()
     private val experienceRenderer by inject<ExperienceRenderer>()
-
-    private var currentExperienceId: UUID? = null
 
     private val _uiState = MutableStateFlow<UIState>(Idle)
 
@@ -98,10 +98,8 @@ internal class AppcuesViewModel(
             val stepIndexInContainer = stepIndexLookup[flatStepIndex]
             // if both are valid ids we return Rendering else null
             if (containerId != null && stepIndexInContainer != null) {
-                // set the current experience id for later usage on refresh preview
-                currentExperienceId = id
                 // returns rendering state
-                Rendering(stepContainers[containerId], stepIndexInContainer, published.not())
+                Rendering(id, stepContainers[containerId], stepIndexInContainer, published.not())
             } else null
         }
     }
@@ -155,9 +153,12 @@ internal class AppcuesViewModel(
     }
 
     fun refreshPreview() {
-        currentExperienceId?.let {
-            appcuesCoroutineScope.launch {
-                experienceRenderer.preview(it.toString())
+        uiState.value.let { state ->
+            // if current state IS Rendering and we are Previewing then we refresh
+            if (state is Rendering && state.isPreview) {
+                appcuesCoroutineScope.launch {
+                    experienceRenderer.preview(state.experienceId.toString())
+                }
             }
         }
     }
