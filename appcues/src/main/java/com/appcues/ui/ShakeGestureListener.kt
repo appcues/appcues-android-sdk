@@ -12,34 +12,30 @@ import android.os.Build.VERSION_CODES
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
-import kotlin.math.abs
+import kotlin.math.sqrt
 
 internal class ShakeGestureListener(private val context: Context) : SensorEventListener {
 
     companion object {
 
-        private const val TICK_RATE = 60
-        private const val SPEED_NORMALIZER = 10000
-        private const val SHAKE_SPEED_THRESHOLD = 700
-        private const val SHAKE_COUNT_THRESHOLD = 3
+        // global delay between shake events in millis
+        private const val SHAKE_DELAY = 1500L
+        // min acceleration to count as a shake
+        private const val SHAKE_MIN_ACCELERATION = 15
 
         private const val NOTIFICATION_VIBRATION_TIME = 250L
         private const val NOTIFICATION_VIBRATION_AMPLITUDE = 80
 
-        private const val VALUE_X = 0
-        private const val VALUE_Y = 1
-        private const val VALUE_Z = 2
+        private var lastShakeTime = 0L
     }
 
     private var sensorManager: SensorManager? = null
     private var shakeListener: (() -> Unit)? = null
     private var shouldVibrate: Boolean = false
 
-    private var lastTickTime: Long = 0
-    private var lastValueX = -1.0f
-    private var lastValueY = -1.0f
-    private var lastValueZ = -1.0f
-    private var shakeCount: Int = 0
+    private var acceleration = SensorManager.STANDARD_GRAVITY
+    private var currentAcceleration = SensorManager.STANDARD_GRAVITY
+    private var lastAcceleration = SensorManager.STANDARD_GRAVITY
 
     fun addListener(shouldVibrate: Boolean, listener: () -> Unit) {
         // set the listener and call start
@@ -83,45 +79,27 @@ internal class ShakeGestureListener(private val context: Context) : SensorEventL
         sensorManager = null
     }
 
-    override fun onSensorChanged(event: SensorEvent?) = with(event) {
-        val currentTime = System.currentTimeMillis()
-        val deltaTime = currentTime - lastTickTime
-        // return when event is null (safety check)
-        if (
-            this == null ||
-            // event type is other than accelerometer (should not happen because we are only listening to it)
-            sensor.type != Sensor.TYPE_ACCELEROMETER ||
-            // time is from last update is less than defined tick rate
-            deltaTime < TICK_RATE
-        ) return
+    override fun onSensorChanged(event: SensorEvent?) {
+        with(event) {
+            if (this == null || sensor.type != Sensor.TYPE_ACCELEROMETER) return
 
-        lastTickTime = currentTime
+            val currentTime = System.currentTimeMillis()
 
-        // do math to figure out speed
-        val x = values[VALUE_X]
-        val y = values[VALUE_Y]
-        val z = values[VALUE_X]
-        val speed: Float = abs(x + y + z - lastValueX - lastValueY - lastValueY) / deltaTime * SPEED_NORMALIZER
+            // Fetching x,y,z values
+            val x = values[0]
+            val y = values[1]
+            val z = values[2]
+            lastAcceleration = currentAcceleration
+            currentAcceleration = (sqrt(x * x + y * y + z * z) - SensorManager.STANDARD_GRAVITY).coerceAtLeast(0f)
+            val delta: Float = currentAcceleration - lastAcceleration
+            acceleration += delta
 
-        // if speed is greater than speed threshold
-        if (speed > SHAKE_SPEED_THRESHOLD) {
-            // increment shake count
-            shakeCount++
-            // check if its a real shake
-            if (shakeCount > SHAKE_COUNT_THRESHOLD) {
-                // notify and clean shakeCount
+            val deltaTime = currentTime - lastShakeTime
+            if (acceleration > SHAKE_MIN_ACCELERATION && deltaTime > SHAKE_DELAY) {
                 notifyListener()
-                shakeCount = 0
+                lastShakeTime = currentTime
             }
-        } else {
-            // last gesture was not part of a shake so we clear this value too
-            shakeCount = 0
         }
-
-        // update with new values
-        lastValueX = values[VALUE_X]
-        lastValueY = values[VALUE_Y]
-        lastValueZ = values[VALUE_Z]
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) = Unit
