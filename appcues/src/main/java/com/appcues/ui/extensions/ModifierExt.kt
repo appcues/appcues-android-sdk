@@ -33,8 +33,7 @@ import com.appcues.data.model.ExperiencePrimitive
 import com.appcues.data.model.ExperiencePrimitive.ImagePrimitive
 import com.appcues.data.model.styling.ComponentSize
 import com.appcues.data.model.styling.ComponentStyle
-import com.appcues.ui.utils.appcuesMargins
-import com.appcues.ui.utils.appcuesPaddings
+import com.appcues.ui.utils.margin
 import com.appcues.util.eq
 import com.appcues.util.ne
 import java.util.UUID
@@ -51,7 +50,7 @@ internal fun Modifier.outerPrimitiveStyle(
 ) = this.then(
     with(component) {
         Modifier
-            .appcuesMargins(style.getMargins())
+            .margin(style.getMargins())
             .styleShadow(style, isDark)
             .styleSize(style, noSizeFillMax)
             .actions(id, gestureProperties)
@@ -79,7 +78,7 @@ private fun Modifier.stylePrimitive(experiencePrimitive: ExperiencePrimitive) = 
  */
 internal fun Modifier.innerPrimitiveStyle(component: ExperiencePrimitive) = this.then(
     with(component) {
-        Modifier.appcuesPaddings(style.getPaddings())
+        Modifier.padding(style.getPaddings())
     }
 )
 

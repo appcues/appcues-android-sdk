@@ -16,12 +16,12 @@ import androidx.compose.ui.unit.constrainWidth
 import androidx.compose.ui.unit.offset
 
 @Stable
-internal fun Modifier.appcuesMargins(paddingValues: PaddingValues) =
+internal fun Modifier.margin(paddingValues: PaddingValues) =
     this.then(
         MarginValuesModifier(
             paddingValues = paddingValues,
             inspectorInfo = debugInspectorInfo {
-                name = "appcuesMargins"
+                name = "margin"
                 properties["marginValues"] = paddingValues
             }
         )

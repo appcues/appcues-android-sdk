@@ -27,10 +27,10 @@ internal fun ComponentStyle.getMargins() = PaddingValues(
 )
 
 internal fun ComponentStyle.getPaddings() = PaddingValues(
-    start = paddingLeading.dp,
-    bottom = paddingBottom.dp,
-    top = paddingTop.dp,
-    end = paddingTrailing.dp,
+    start = paddingLeading.dp.coerceAtLeast(0.dp),
+    bottom = paddingBottom.dp.coerceAtLeast(0.dp),
+    top = paddingTop.dp.coerceAtLeast(0.dp),
+    end = paddingTrailing.dp.coerceAtLeast(0.dp),
 )
 
 internal fun ComponentStyle.getTextAlignment(): TextAlign? {
