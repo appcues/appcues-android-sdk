@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -45,15 +46,34 @@ internal class CarouselTrait(
 
         val localPagination = LocalAppcuesPaginationDelegate.current
 
+        // keep track if programmatically scrolling to a page, so we don't raise
+        // page change events for intermediate pages during the scroll
+        val scrollingToPage = remember { mutableStateOf<Int?>(null) }
+
         // state machine changed the page, so we animate to that page
         LaunchedEffect(containerPages.currentPage) {
-            pagerState.animateScrollToPage(containerPages.currentPage)
+            // only trigger the scroll if we are not already on the desired page
+            if (pagerState.currentPage != containerPages.currentPage) {
+                // store this value so we can guard against excess page change events below
+                scrollingToPage.value = containerPages.currentPage
+                pagerState.animateScrollToPage(containerPages.currentPage)
+            }
         }
 
         // we scrolled over to next page, so we notify the local pagination listener
         LaunchedEffect(pagerState) {
             snapshotFlow { pagerState.currentPage }
-                .collect { localPagination.onPageChanged(it) }
+                .collect {
+                    if (scrollingToPage.value != null) {
+                        // if we've reached the destination of a programmatic scroll, clear this value
+                        // and re-enable page change events for user interaction.
+                        // otherwise, leave value as-is, as we are still processing a programmatic scroll
+                        scrollingToPage.value = if (it == scrollingToPage.value) null else scrollingToPage.value
+                    } else {
+                        // normal user interaction has changed the page, update listener
+                        localPagination.onPageChanged(it)
+                    }
+                }
         }
 
         // this is a workaround a problem that was found with this HorizontalPager
