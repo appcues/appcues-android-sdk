@@ -80,7 +80,7 @@ internal class AppcuesDebuggerManager(context: Context, private val koinScope: S
         // control native back press by enabling and disabling on our side
         setDebuggerBackPressCallback(activity)
         // also to make sure that if they change fragment, we will register again after the new fragment is attached
-        (activity as FragmentActivity).supportFragmentManager.addFragmentOnAttachListener { _, _ ->
+        (activity as? FragmentActivity)?.supportFragmentManager?.addFragmentOnAttachListener { _, _ ->
             setDebuggerBackPressCallback(activity)
         }
     }
