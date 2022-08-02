@@ -45,7 +45,6 @@
     <string name="appcues_debugger_event_type_group_update_title">Group Update</string>
     <string name="appcues_debugger_event_type_profile_update_title">Profile Update</string>
 
-    <string name="appcues_debugger_event_type_screen_view_title">Screen View</string>
     <string name="appcues_debugger_event_type_session_started_title">Session Started</string>
     <string name="appcues_debugger_event_type_session_suspended_title">Session Suspended</string>
     <string name="appcues_debugger_event_type_session_resumed_title">Session Resumed</string>

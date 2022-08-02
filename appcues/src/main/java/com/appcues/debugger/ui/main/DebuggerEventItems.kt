@@ -52,7 +52,7 @@ internal fun DebuggerEventItem.EventItemContent(rowScope: RowScope) {
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = title,
+                text = name,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Normal,
                 color = AppcuesColors.Infinity
