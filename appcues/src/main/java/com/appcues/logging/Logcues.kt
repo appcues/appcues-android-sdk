@@ -2,7 +2,6 @@ package com.appcues.logging
 
 import android.util.Log
 import com.appcues.LoggingLevel
-import com.appcues.LoggingLevel.DEBUG
 import com.appcues.LoggingLevel.NONE
 
 internal class Logcues(private val loggingLevel: LoggingLevel) {
@@ -25,9 +24,7 @@ internal class Logcues(private val loggingLevel: LoggingLevel) {
     }
 
     fun error(exception: Exception) {
-        if (loggingLevel == DEBUG) {
-            throw exception
-        } else if (loggingLevel > NONE) {
+        if (loggingLevel > NONE) {
             Log.e(TAG, exception.message.toString())
         }
     }
