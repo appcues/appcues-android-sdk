@@ -53,7 +53,6 @@ internal fun String.toEventType(): EventType = when (this) {
 }
 
 internal fun String.toEventTitle(): Int? = when (this) {
-    AnalyticsEvent.ScreenView.eventName -> R.string.appcues_debugger_event_type_screen_view_title
     AnalyticsEvent.SessionStarted.eventName -> R.string.appcues_debugger_event_type_session_started_title
     AnalyticsEvent.SessionSuspended.eventName -> R.string.appcues_debugger_event_type_session_suspended_title
     AnalyticsEvent.SessionResumed.eventName -> R.string.appcues_debugger_event_type_session_resumed_title

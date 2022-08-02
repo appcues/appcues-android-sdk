@@ -5,7 +5,6 @@ import kotlin.random.Random
 internal data class DebuggerEventItem(
     val id: Int,
     val type: EventType,
-    val title: String,
     val timestamp: Long,
     val name: String,
     val properties: List<Pair<String, Any>>?,

@@ -46,7 +46,8 @@ internal class DebuggerRecentEventsManager(
             activityRequest.events != null -> {
                 activityRequest.events.forEach { event ->
                     val type = event.name.toEventType()
-                    val title = event.name.toEventTitle()?.let { contextResources.getString(it) } ?: event.name
+                    val title = event.name.toEventTitle()?.let { contextResources.getString(it) }
+                    val displayName = getEventDisplayName(event, type, title)
 
                     clearEventsOnSessionReset(event)
 
@@ -54,9 +55,8 @@ internal class DebuggerRecentEventsManager(
                         DebuggerEventItem(
                             id = lastEventId,
                             type = type,
-                            title = title,
                             timestamp = event.timestamp.time,
-                            name = getEventName(event, type, title),
+                            name = displayName,
                             properties = event.attributes
                                 .filterOutScreenProperties(type)
                                 .filterOutAutoProperties()
@@ -76,7 +76,6 @@ internal class DebuggerRecentEventsManager(
                     DebuggerEventItem(
                         id = lastEventId,
                         type = EventType.GROUP_UPDATE,
-                        title = contextResources.getString(R.string.appcues_debugger_event_type_group_update_title),
                         timestamp = Date().time,
                         name = activityRequest.groupId
                             ?: contextResources.getString(R.string.appcues_debugger_event_type_group_update_title),
@@ -92,7 +91,6 @@ internal class DebuggerRecentEventsManager(
                     DebuggerEventItem(
                         id = lastEventId,
                         type = EventType.USER_PROFILE,
-                        title = contextResources.getString(R.string.appcues_debugger_event_type_profile_update_title),
                         // it should always contain updated at property, this is just a safeguard
                         // in case something changes in the future to avoid unwanted exceptions
                         timestamp = (activityRequest.profileUpdate[AutoPropertyDecorator.UPDATED_AT_PROPERTY] as Long?) ?: Date().time,
@@ -131,13 +129,16 @@ internal class DebuggerRecentEventsManager(
         return (this[AutoPropertyDecorator.IDENTITY_PROPERTY] as Map<String, Any>?) ?: mapOf()
     }
 
-    private fun getEventName(
+    private fun getEventDisplayName(
         event: EventRequest,
         type: EventType,
-        title: String
+        title: String?
     ) = if (type == EventType.SCREEN && event.attributes.contains(ActivityRequestBuilder.SCREEN_TITLE_ATTRIBUTE))
+    // screen views are a special case where the title is the screen title
         event.attributes[ActivityRequestBuilder.SCREEN_TITLE_ATTRIBUTE] as String
-    else title
+    else
+    // otherwise - use the given title for system events or the event name for custom events
+        title ?: event.name
 
     private fun Map<String, Any>.toSortedList(): List<Pair<String, Any>> = toList().let { list ->
         arrayListOf<Pair<String, Any>>().apply {
