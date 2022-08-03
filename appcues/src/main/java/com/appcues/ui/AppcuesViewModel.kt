@@ -141,6 +141,8 @@ internal class AppcuesViewModel(
     }
 
     fun onPause() {
+        if (uiState.value is Dismissing) return
+
         viewModelScope.launch {
             stateMachine.handleAction(Pause)
         }

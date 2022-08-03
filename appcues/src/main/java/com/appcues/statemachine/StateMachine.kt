@@ -84,8 +84,10 @@ internal class StateMachine(
             // update current state
             _state = state
 
-            // emit state change to all listeners via flow
-            _stateFlow.emit(state)
+            if (transition.emitStateChange) {
+                // emit state change to all listeners via flow
+                _stateFlow.emit(state)
+            }
         }
 
         if (sideEffect != null) {
@@ -174,7 +176,7 @@ internal class StateMachine(
 
             // Paused
             state is Paused && action is Resume ->
-                Transition(state.state)
+                Transition(state.state, emitStateChange = false)
 
             state is Paused && action is EndExperience ->
                 Transition(state.state, ContinuationEffect(action))

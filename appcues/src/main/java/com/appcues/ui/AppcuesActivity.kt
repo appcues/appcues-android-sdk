@@ -24,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.core.os.bundleOf
 import com.appcues.di.AppcuesKoinContext
 import com.appcues.trait.ContentHolderTrait.ContainerPages
@@ -172,6 +173,7 @@ internal class AppcuesActivity : AppCompatActivity() {
                                                 // if we have contentPadding to apply from the WrapContent trait then we apply here
                                                 .then(if (contentPadding != null) Modifier.padding(contentPadding) else Modifier)
                                                 .padding(paddingValues = stepDecoratingPadding.paddingValues.value)
+                                                .testTag("page_$index")
                                         ) {
                                             content.Compose()
                                         }
