@@ -19,9 +19,13 @@ internal class ShakeGestureListener(private val context: Context) : SensorEventL
     companion object {
 
         // global delay between shake events in millis
-        private const val SHAKE_DELAY = 1500L
+        private const val SHAKE_DELAY = 2000L
+
         // min acceleration to count as a shake
         private const val SHAKE_MIN_ACCELERATION = 15
+        private const val SHAKE_MAX_ACCELERATION = 40
+        private const val SHAKE_COUNT_THRESHOLD = 3
+        private const val SHAKE_MOTION_WINDOW = 500L
 
         private const val NOTIFICATION_VIBRATION_TIME = 250L
         private const val NOTIFICATION_VIBRATION_AMPLITUDE = 80
@@ -36,6 +40,9 @@ internal class ShakeGestureListener(private val context: Context) : SensorEventL
     private var acceleration = SensorManager.STANDARD_GRAVITY
     private var currentAcceleration = SensorManager.STANDARD_GRAVITY
     private var lastAcceleration = SensorManager.STANDARD_GRAVITY
+
+    private var shakeCount = 0
+    private var lastShakeMotion = 0L
 
     fun addListener(shouldVibrate: Boolean, listener: () -> Unit) {
         // set the listener and call start
@@ -69,7 +76,7 @@ internal class ShakeGestureListener(private val context: Context) : SensorEventL
                 it.registerListener(
                     this,
                     it.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
-                    SensorManager.SENSOR_DELAY_NORMAL
+                    SensorManager.SENSOR_DELAY_GAME
                 )
             }
     }
@@ -81,9 +88,11 @@ internal class ShakeGestureListener(private val context: Context) : SensorEventL
 
     override fun onSensorChanged(event: SensorEvent?) {
         with(event) {
-            if (this == null || sensor.type != Sensor.TYPE_ACCELEROMETER) return
-
             val currentTime = System.currentTimeMillis()
+            val deltaTime = currentTime - lastShakeTime
+
+            // guard checks
+            if (this == null || sensor.type != Sensor.TYPE_ACCELEROMETER || deltaTime < SHAKE_DELAY) return
 
             // Fetching x,y,z values
             val x = values[0]
@@ -94,10 +103,23 @@ internal class ShakeGestureListener(private val context: Context) : SensorEventL
             val delta: Float = currentAcceleration - lastAcceleration
             acceleration += delta
 
-            val deltaTime = currentTime - lastShakeTime
-            if (acceleration > SHAKE_MIN_ACCELERATION && deltaTime > SHAKE_DELAY) {
-                notifyListener()
-                lastShakeTime = currentTime
+            // if we are in shake motion, we check to see if we are above the below the threshold
+            // before moving forward.
+            if (shakeCount != 0 && (currentTime - lastShakeMotion) > SHAKE_MOTION_WINDOW) {
+                shakeCount = 0
+                return
+            }
+
+            // if acceleration is ok we set the lastShakeMotion to current Time
+            if (acceleration > SHAKE_MIN_ACCELERATION && acceleration < SHAKE_MAX_ACCELERATION) {
+                lastShakeMotion = currentTime
+                // and if we got consecutive shake counts before shakeCount set to zero again
+                // then it means we detected a shake motion
+                if (++shakeCount >= SHAKE_COUNT_THRESHOLD) {
+                    notifyListener()
+                    lastShakeTime = currentTime
+                    shakeCount = 0
+                }
             }
         }
     }
