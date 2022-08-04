@@ -7,9 +7,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -31,8 +28,10 @@ import com.appcues.action.ExperienceAction
 import com.appcues.data.model.Action
 import com.appcues.data.model.ExperiencePrimitive
 import com.appcues.data.model.ExperiencePrimitive.ImagePrimitive
+import com.appcues.data.model.styling.ComponentContentMode
 import com.appcues.data.model.styling.ComponentSize
 import com.appcues.data.model.styling.ComponentStyle
+import com.appcues.ui.utils.AppcuesAspectRatioModifier
 import com.appcues.ui.utils.margin
 import com.appcues.util.eq
 import com.appcues.util.ne
@@ -46,29 +45,26 @@ internal fun Modifier.outerPrimitiveStyle(
     gestureProperties: PrimitiveGestureProperties,
     isDark: Boolean,
     defaultBackgroundColor: Color? = null,
-    noSizeFillMax: Boolean = false,
 ) = this.then(
     with(component) {
         Modifier
             .margin(style.getMargins())
             .styleShadow(style, isDark)
-            .styleSize(style, noSizeFillMax)
+            .styleSize(style)
             .actions(id, gestureProperties)
             .styleCorner(style)
             .styleBorder(style, isDark)
             .styleBackground(style, isDark, defaultBackgroundColor)
-            .stylePrimitive(this)
     }
 )
 
-private fun Modifier.stylePrimitive(experiencePrimitive: ExperiencePrimitive) = this.then(
-    when (experiencePrimitive) {
-        is ImagePrimitive ->
-            Modifier
-                .animateContentSize()
-                .imageAspectRatio(experiencePrimitive.intrinsicSize)
-        else -> Modifier
-    }
+internal fun Modifier.styleImageAspect(imagePrimitive: ImagePrimitive) = this.then(
+    Modifier
+        .animateContentSize()
+        .imageAspectRatio(
+            intrinsicSize = imagePrimitive.intrinsicSize,
+            contentMode = imagePrimitive.contentMode,
+        )
 )
 
 /**
@@ -130,31 +126,31 @@ internal fun Modifier.styleBorder(
     }
 )
 
-internal fun Modifier.styleSize(style: ComponentStyle, noSizeFillMax: Boolean = false) = this.then(
+internal fun Modifier.styleSize(style: ComponentStyle, contentMode: ComponentContentMode = ComponentContentMode.FIT) = this.then(
     when {
         // when style contains both width and height
         style.width != null && style.height != null -> when {
-            // we fill max if both properties are -1
-            style.width eq -1.0 && style.height eq -1.0 -> Modifier.fillMaxSize()
-            // or we set height and fill width in case only width is -1
+            // fill width in case only width is -1
             style.width eq -1.0 ->
                 Modifier
                     .height(style.height.dp)
                     .fillMaxWidth()
-            // or we set width and fill height in case only height is -1
-            style.height eq -1.0 ->
-                Modifier
-                    .width(style.width.dp)
-                    .fillMaxHeight()
             // else we set size with width and height
             else -> Modifier.size(style.width.dp, style.height.dp)
         }
         // if only width is not null, we fill max in case its -1 else we set the width
         style.width != null -> if (style.width eq -1.0) Modifier.fillMaxWidth() else Modifier.width(style.width.dp)
-        // if only height is not null, we fill max in case its -1 else we set the height
-        style.height != null -> if (style.height eq -1.0) Modifier.fillMaxHeight() else Modifier.height(style.height.dp)
-        // at the end we fill max size in case there is no width/height but the primitive (like image) is fill max by default
-        noSizeFillMax -> Modifier.fillMaxSize()
+        // if only height is not null, we set the height
+        style.height != null -> Modifier.height(style.height.dp).styleDefaultWidth(contentMode)
+        // at the end we fill max width if there is no width/height but the primitive (like image) is set to FILL
+        contentMode == ComponentContentMode.FILL -> Modifier.fillMaxWidth()
+        else -> Modifier
+    }
+)
+
+private fun Modifier.styleDefaultWidth(contentMode: ComponentContentMode) = this.then(
+    when (contentMode) {
+        ComponentContentMode.FILL -> Modifier.fillMaxWidth()
         else -> Modifier
     }
 )
@@ -267,9 +263,19 @@ private fun List<Action>.toLongPressMotionOrNull(block: (ExperienceAction) -> Un
         ?.run { { forEach { block(it) } } }
 }
 
-internal fun Modifier.imageAspectRatio(intrinsicSize: ComponentSize?) = this.then(
+internal fun Modifier.imageAspectRatio(
+    intrinsicSize: ComponentSize?,
+    contentMode: ComponentContentMode = ComponentContentMode.FILL,
+) = this.then(
     // apply aspectRatio only when intrinsicSize is not null or any values is bigger than 0
     if (intrinsicSize != null && (intrinsicSize.width > 0 && intrinsicSize.height > 0)) {
-        Modifier.aspectRatio(ratio = intrinsicSize.width.toFloat() / intrinsicSize.height.toFloat(), matchHeightConstraintsFirst = true)
+        Modifier.appcuesAspectRatio(
+            ratio = intrinsicSize.width.toFloat() / intrinsicSize.height.toFloat(),
+            contentMode = contentMode
+        )
     } else Modifier
+)
+
+internal fun Modifier.appcuesAspectRatio(ratio: Float, contentMode: ComponentContentMode) = this.then(
+    AppcuesAspectRatioModifier(ratio, contentMode)
 )

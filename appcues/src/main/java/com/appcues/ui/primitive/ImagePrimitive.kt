@@ -9,6 +9,7 @@ import com.appcues.ui.LocalImageLoader
 import com.appcues.ui.extensions.blurHashPlaceholder
 import com.appcues.ui.extensions.getImageLoader
 import com.appcues.ui.extensions.getImageRequest
+import com.appcues.ui.extensions.styleImageAspect
 import com.appcues.ui.extensions.styleSize
 import com.appcues.ui.extensions.toImageAsyncContentScale
 import com.appcues.ui.utils.rememberBlurHashDecoded
@@ -19,7 +20,7 @@ internal fun ImagePrimitive.Compose(modifier: Modifier) {
     val decodedBlurHash = rememberBlurHashDecoded(blurHash = blurHash)
 
     AsyncImage(
-        modifier = modifier.then(Modifier.styleSize(style, true)),
+        modifier = modifier.then(Modifier.styleSize(style, contentMode).styleImageAspect(this)),
         model = context.getImageRequest(url, contentMode),
         contentDescription = accessibilityLabel,
         imageLoader = LocalImageLoader.current ?: context.getImageLoader(),
