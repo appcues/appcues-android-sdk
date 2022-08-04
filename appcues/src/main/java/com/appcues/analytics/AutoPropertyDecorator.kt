@@ -28,6 +28,7 @@ internal class AutoPropertyDecorator(
         const val UPDATED_AT_PROPERTY = "_updatedAt"
     }
 
+    private var userAgent: String? = null
     private var currentScreen: String? = null
     private var previousScreen: String? = null
     private var sessionPageviews = 0
@@ -70,12 +71,14 @@ internal class AutoPropertyDecorator(
     val autoProperties: Map<String, Any>
         get() = hashMapOf<String, Any>().apply {
             putAll(applicationProperties)
+            // add userAgent if exists (userAgent is a mutable property loaded asynchronously) and can be null
+            userAgent?.let { put("_userAgent", it) }
             putAll(sessionProperties)
         }
 
     init {
         appcuesCoroutineScope.launch {
-            applicationProperties["_userAgent"] = contextResources.getUserAgent()
+            userAgent = contextResources.getUserAgent()
         }
     }
 

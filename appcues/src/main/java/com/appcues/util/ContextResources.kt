@@ -55,7 +55,7 @@ internal class ContextResources(private val context: Context) {
         return getCurrentLocale(context).language
     }
 
-    suspend fun getUserAgent() = withContext(Dispatchers.Main) {
+    suspend fun getUserAgent(): String? = withContext(Dispatchers.Main) {
         // this must be on main thread
         return@withContext WebView(context).settings.userAgentString
     }
