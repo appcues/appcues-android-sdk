@@ -19,7 +19,7 @@ internal class TrackEventActionTest : AppcuesScopeTest {
     override val koinTestRule = KoinScopeRule()
 
     @Test
-    fun `tracke event SHOULD have expected type name`() {
+    fun `track event SHOULD have expected type name`() {
         assertThat(TrackEventAction.TYPE).isEqualTo("@appcues/track")
     }
 
