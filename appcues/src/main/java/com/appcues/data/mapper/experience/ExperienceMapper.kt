@@ -20,7 +20,7 @@ import com.appcues.trait.ContainerDecoratingTrait
 import com.appcues.trait.ContentHolderTrait
 import com.appcues.trait.ContentWrappingTrait
 import com.appcues.trait.ExperienceTrait
-import com.appcues.trait.ExperienceTrait.ExperienceTraitLevel.EXPERIENCE
+import com.appcues.trait.ExperienceTrait.ExperienceTraitLevel.GROUP
 import com.appcues.trait.PresentingTrait
 import com.appcues.trait.appcues.DefaultContentHolderTrait
 import com.appcues.trait.appcues.DefaultPresentingTrait
@@ -55,7 +55,7 @@ internal class ExperienceMapper(
         superActions: Map<UUID, List<ActionResponse>>?
     ) = map { stepContainerResponse ->
         val mappedTraits = traitsMapper.map(stepContainerResponse.traits)
-        val mergedTraits = mappedTraits.mergeTraits(superTraits, EXPERIENCE)
+        val mergedTraits = mappedTraits.mergeTraits(superTraits, GROUP)
         val mergedActions = stepContainerResponse.actions.mergeActions(superActions)
 
         // this is where we will use groups to organize steps into stepContainers

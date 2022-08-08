@@ -1,7 +1,12 @@
 package com.appcues.trait.appcues
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.invisibleToUser
+import androidx.compose.ui.semantics.semantics
 import com.appcues.data.mapper.step.StepContentMapper
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.getConfigPrimitive
@@ -43,8 +48,17 @@ internal class BackgroundContentTrait(
         Decorate()
     }
 
+    @OptIn(ExperimentalComposeUiApi::class)
     @Composable
     private fun BoxScope.Decorate() {
-        content?.Compose(this)
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                // merge all children nodes to this one, and mark as invisibleToUser so talkback wont read.
+                // this is the same as old xml: importantForAccessibility = false
+                .semantics(true) { invisibleToUser() }
+        ) {
+            content?.Compose(this)
+        }
     }
 }

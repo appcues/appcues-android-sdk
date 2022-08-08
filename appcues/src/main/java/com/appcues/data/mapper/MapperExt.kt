@@ -9,7 +9,10 @@ internal fun List<ExperienceTrait>.mergeTraits(others: List<ExperienceTrait>, le
     return mutableListOf<ExperienceTrait>().apply {
         addAll(this@mergeTraits)
 
-        others.filter { other -> other.level > level }
+        others
+            // filters out traits that should not be propagated to children nodes
+            .filter { other -> other.level >= level }
+            // then we merge based on its type (prioritize whats on the child node)
             .forEach { other -> if (none { it.type == other.type }) add(other) }
     }
 }
