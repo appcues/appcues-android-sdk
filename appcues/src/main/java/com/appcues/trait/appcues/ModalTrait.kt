@@ -6,7 +6,6 @@ import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.getConfigOrDefault
 import com.appcues.data.model.getConfigStyle
 import com.appcues.trait.ContentWrappingTrait
-import com.appcues.trait.ExperienceTrait.ExperienceTraitLevel
 import com.appcues.ui.modal.BottomSheetModal
 import com.appcues.ui.modal.DialogModal
 import com.appcues.ui.modal.ExpandedBottomSheetModal
@@ -21,10 +20,6 @@ internal class ModalTrait(
 
         const val TYPE = "@appcues/modal"
     }
-
-    override val type = TYPE
-
-    override val level = ExperienceTraitLevel.GROUP
 
     // should we have a default presentation style?
     private val presentationStyle = config.getConfigOrDefault("presentationStyle", "full")

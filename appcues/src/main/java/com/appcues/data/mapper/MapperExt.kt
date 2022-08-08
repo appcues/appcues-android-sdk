@@ -1,19 +1,21 @@
 package com.appcues.data.mapper
 
 import com.appcues.data.remote.response.action.ActionResponse
-import com.appcues.trait.ExperienceTrait
+import com.appcues.data.remote.response.trait.TraitResponse
 import com.appcues.trait.ExperienceTrait.ExperienceTraitLevel
 import java.util.UUID
 
-internal fun List<ExperienceTrait>.mergeTraits(others: List<ExperienceTrait>, level: ExperienceTraitLevel): List<ExperienceTrait> {
-    return mutableListOf<ExperienceTrait>().apply {
+internal typealias LeveledTraitResponse = Pair<TraitResponse, ExperienceTraitLevel>
+
+internal fun List<LeveledTraitResponse>.mergeTraits(other: List<LeveledTraitResponse>): List<LeveledTraitResponse> {
+    return mutableListOf<LeveledTraitResponse>().apply {
         addAll(this@mergeTraits)
 
-        others
-            // filters out traits that should not be propagated to children nodes
-            .filter { other -> other.level >= level }
-            // then we merge based on its type (prioritize whats on the child node)
-            .forEach { other -> if (none { it.type == other.type }) add(other) }
+        other.forEach { trait ->
+            if (none { it.first.type == trait.first.type }) {
+                add(trait)
+            }
+        }
     }
 }
 

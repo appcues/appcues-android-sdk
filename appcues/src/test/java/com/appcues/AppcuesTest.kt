@@ -19,6 +19,7 @@ import com.appcues.debugger.AppcuesDebuggerManager
 import com.appcues.rules.KoinScopeRule
 import com.appcues.rules.MainDispatcherRule
 import com.appcues.trait.ExperienceTrait
+import com.appcues.trait.ExperienceTrait.ExperienceTraitLevel
 import com.appcues.trait.TraitRegistry
 import com.appcues.ui.ExperienceRenderer
 import com.google.common.truth.Truth.assertThat
@@ -276,7 +277,7 @@ internal class AppcuesTest : AppcuesScopeTest {
         val registry: TraitRegistry = get()
         val type = "myTrait"
         val trait: ExperienceTrait = mockk()
-        val factory: (Map<String, Any>?) -> ExperienceTrait = { trait }
+        val factory: (Map<String, Any>?, ExperienceTraitLevel) -> ExperienceTrait = { _, _ -> trait }
 
         // WHEN
         appcues.registerTrait(type, factory)

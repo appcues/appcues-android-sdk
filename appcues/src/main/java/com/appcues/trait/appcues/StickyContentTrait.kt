@@ -8,7 +8,6 @@ import androidx.compose.ui.Modifier
 import com.appcues.data.mapper.step.StepContentMapper
 import com.appcues.data.model.getConfig
 import com.appcues.data.model.getConfigPrimitive
-import com.appcues.trait.ExperienceTrait.ExperienceTraitLevel
 import com.appcues.trait.StepDecoratingPadding
 import com.appcues.trait.StepDecoratingTrait
 import com.appcues.trait.StepDecoratingTrait.StepDecoratingType
@@ -24,10 +23,6 @@ internal class StickyContentTrait(
 
         const val TYPE = "@appcues/sticky-content"
     }
-
-    override val type = TYPE
-
-    override val level = ExperienceTraitLevel.STEP
 
     override val stepComposeOrder = StepDecoratingType.OVERLAY
 

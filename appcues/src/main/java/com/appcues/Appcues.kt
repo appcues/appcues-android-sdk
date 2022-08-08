@@ -19,6 +19,7 @@ import com.appcues.debugger.AppcuesDebuggerManager
 import com.appcues.di.AppcuesKoinContext
 import com.appcues.logging.Logcues
 import com.appcues.trait.ExperienceTrait
+import com.appcues.trait.ExperienceTrait.ExperienceTraitLevel
 import com.appcues.trait.TraitRegistry
 import com.appcues.ui.ExperienceRenderer
 import kotlinx.coroutines.launch
@@ -37,10 +38,10 @@ fun Appcues(
     accountId: String,
     applicationId: String,
     config: (AppcuesConfig.() -> Unit)? = null,
-): Appcues =
+): Appcues = AppcuesKoinContext
     // This creates the Koin Scope and initializes the Appcues instance within, then returns the Appcues instance
     // ready to go with the necessary dependency configuration in its scope.
-    AppcuesKoinContext.createAppcuesScope(context, AppcuesConfig(accountId, applicationId).apply { config?.invoke(this) }).get()
+    .createAppcuesScope(context, AppcuesConfig(accountId, applicationId).apply { config?.invoke(this) }).get()
 
 /**
  * The main entry point for using Appcues functionality in your application - tracking
@@ -181,11 +182,12 @@ class Appcues internal constructor(koinScope: Scope) {
      *
      * @param type Type of the action that is sent by the experience. ex: "my-trait"
      * @param traitFactory Factory (lambda) responsible for creating the ExperienceTrait registered for given [type]
-     *
+     *                     config is an optional map that will be mapped and used to invoke the custom trait with
+     *                     level defines where that trait was found in the json nodes, varying from EXPERIENCE, GROUP, STEP
      * usage:
      * registerTrait("my-trait") { MyCustomExperienceTrait() }
      */
-    fun registerTrait(type: String, traitFactory: (config: Map<String, Any>?) -> ExperienceTrait) {
+    fun registerTrait(type: String, traitFactory: (config: Map<String, Any>?, level: ExperienceTraitLevel) -> ExperienceTrait) {
         traitRegistry.register(type, traitFactory)
     }
 

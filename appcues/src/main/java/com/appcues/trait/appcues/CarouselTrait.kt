@@ -15,7 +15,6 @@ import androidx.compose.ui.layout.onSizeChanged
 import com.appcues.trait.AppcuesPaginationData
 import com.appcues.trait.ContentHolderTrait
 import com.appcues.trait.ContentHolderTrait.ContainerPages
-import com.appcues.trait.ExperienceTrait.ExperienceTraitLevel
 import com.appcues.ui.LocalAppcuesPaginationDelegate
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
@@ -31,10 +30,6 @@ internal class CarouselTrait(
 
         const val TYPE = "@appcues/carousel"
     }
-
-    override val type = TYPE
-
-    override val level = ExperienceTraitLevel.GROUP
 
     @OptIn(ExperimentalPagerApi::class)
     @Composable
