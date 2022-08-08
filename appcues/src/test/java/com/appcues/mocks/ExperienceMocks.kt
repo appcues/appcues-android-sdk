@@ -32,8 +32,8 @@ internal fun mockExperience(onPresent: (() -> Unit)? = null) =
                 presentingTrait = mockPresentingTrait(onPresent),
                 contentHolderTrait = mockk(relaxed = true),
                 contentWrappingTrait = mockk(relaxed = true),
-                backdropTraits = listOf(),
-                containerTraits = listOf(),
+                backdropDecoratingTraits = listOf(),
+                containerDecoratingTraits = listOf(),
             ),
             StepContainer(
                 steps = listOf(
@@ -42,8 +42,8 @@ internal fun mockExperience(onPresent: (() -> Unit)? = null) =
                 presentingTrait = mockPresentingTrait(onPresent),
                 contentHolderTrait = mockk(relaxed = true),
                 contentWrappingTrait = mockk(relaxed = true),
-                backdropTraits = listOf(),
-                containerTraits = listOf(),
+                backdropDecoratingTraits = listOf(),
+                containerDecoratingTraits = listOf(),
             )
         ),
         published = true,
@@ -59,7 +59,7 @@ internal fun mockStep(id: UUID) =
             id = UUID.fromString("df3bbe3e-8bdb-417a-b644-5e23862786b2"),
             text = ""
         ),
-        traits = listOf(),
+        stepDecoratingTraits = listOf(),
         actions = mapOf(),
         type = "modal"
     )

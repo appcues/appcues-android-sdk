@@ -17,6 +17,7 @@ import com.appcues.data.model.getConfigColor
 import com.appcues.data.model.styling.ComponentColor
 import com.appcues.trait.AppcuesTraitAnimatedVisibility
 import com.appcues.trait.BackdropDecoratingTrait
+import com.appcues.trait.ExperienceTrait.ExperienceTraitLevel
 import com.appcues.ui.extensions.getColor
 
 internal class BackdropTrait(
@@ -26,6 +27,10 @@ internal class BackdropTrait(
     companion object {
         const val TYPE = "@appcues/backdrop"
     }
+
+    override val type = TYPE
+
+    override val level = ExperienceTraitLevel.GROUP
 
     private val backgroundColor = config.getConfigColor("backgroundColor")
 

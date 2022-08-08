@@ -1,12 +1,12 @@
 package com.appcues.ui.extensions
 
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Indication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -27,7 +27,6 @@ import androidx.compose.ui.unit.dp
 import com.appcues.action.ExperienceAction
 import com.appcues.data.model.Action
 import com.appcues.data.model.ExperiencePrimitive
-import com.appcues.data.model.ExperiencePrimitive.ImagePrimitive
 import com.appcues.data.model.styling.ComponentContentMode
 import com.appcues.data.model.styling.ComponentSize
 import com.appcues.data.model.styling.ComponentStyle
@@ -45,26 +44,18 @@ internal fun Modifier.outerPrimitiveStyle(
     gestureProperties: PrimitiveGestureProperties,
     isDark: Boolean,
     defaultBackgroundColor: Color? = null,
+    matchParentBox: BoxScope? = null,
 ) = this.then(
     with(component) {
         Modifier
             .margin(style.getMargins())
             .styleShadow(style, isDark)
-            .styleSize(style)
+            .styleSize(style, matchParentBox)
             .actions(id, gestureProperties)
             .styleCorner(style)
             .styleBorder(style, isDark)
             .styleBackground(style, isDark, defaultBackgroundColor)
     }
-)
-
-internal fun Modifier.styleImageAspect(imagePrimitive: ImagePrimitive) = this.then(
-    Modifier
-        .animateContentSize()
-        .imageAspectRatio(
-            intrinsicSize = imagePrimitive.intrinsicSize,
-            contentMode = imagePrimitive.contentMode,
-        )
 )
 
 /**
@@ -126,8 +117,13 @@ internal fun Modifier.styleBorder(
     }
 )
 
-internal fun Modifier.styleSize(style: ComponentStyle, contentMode: ComponentContentMode = ComponentContentMode.FIT) = this.then(
+internal fun Modifier.styleSize(
+    style: ComponentStyle,
+    matchParentBox: BoxScope? = null,
+    contentMode: ComponentContentMode = ComponentContentMode.FIT,
+) = this.then(
     when {
+        matchParentBox != null -> with(matchParentBox) { Modifier.matchParentSize() }
         // when style contains both width and height
         style.width != null && style.height != null -> when {
             // fill width in case only width is -1
@@ -141,7 +137,10 @@ internal fun Modifier.styleSize(style: ComponentStyle, contentMode: ComponentCon
         // if only width is not null, we fill max in case its -1 else we set the width
         style.width != null -> if (style.width eq -1.0) Modifier.fillMaxWidth() else Modifier.width(style.width.dp)
         // if only height is not null, we set the height
-        style.height != null -> Modifier.height(style.height.dp).styleDefaultWidth(contentMode)
+        style.height != null ->
+            Modifier
+                .height(style.height.dp)
+                .styleDefaultWidth(contentMode)
         // at the end we fill max width if there is no width/height but the primitive (like image) is set to FILL
         contentMode == ComponentContentMode.FILL -> Modifier.fillMaxWidth()
         else -> Modifier

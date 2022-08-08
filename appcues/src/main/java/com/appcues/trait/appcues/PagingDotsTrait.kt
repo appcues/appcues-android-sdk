@@ -25,6 +25,8 @@ import androidx.compose.ui.unit.dp
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.getConfigStyle
 import com.appcues.trait.ContainerDecoratingTrait
+import com.appcues.trait.ContainerDecoratingTrait.ContainerDecoratingType
+import com.appcues.trait.ExperienceTrait.ExperienceTraitLevel
 import com.appcues.ui.extensions.getBoxAlignment
 import com.appcues.ui.extensions.getColor
 import com.appcues.ui.rememberAppcuesPaginationState
@@ -34,14 +36,21 @@ internal class PagingDotsTrait(
 ) : ContainerDecoratingTrait {
 
     companion object {
+
         const val TYPE = "@appcues/paging-dots"
         private const val DEFAULT_PADDING = 8.0
     }
 
+    override val type = TYPE
+
+    override val level = ExperienceTraitLevel.GROUP
+
+    override val containerComposeOrder = ContainerDecoratingType.OVERLAY
+
     private val style = config.getConfigStyle("style")
 
     @Composable
-    override fun BoxScope.Overlay() {
+    override fun BoxScope.DecorateContainer() {
         val paginationData = rememberAppcuesPaginationState()
         val pageCount = paginationData.value.pageCount
 

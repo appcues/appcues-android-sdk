@@ -3,6 +3,7 @@ package com.appcues.trait
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.logging.Logcues
 import com.appcues.trait.appcues.BackdropTrait
+import com.appcues.trait.appcues.BackgroundContentTrait
 import com.appcues.trait.appcues.CarouselTrait
 import com.appcues.trait.appcues.ModalTrait
 import com.appcues.trait.appcues.PagingDotsTrait
@@ -30,6 +31,7 @@ internal class TraitRegistry(
         register(CarouselTrait.TYPE) { get<CarouselTrait> { parametersOf(it) } }
         register(PagingDotsTrait.TYPE) { get<PagingDotsTrait> { parametersOf(it) } }
         register(StickyContentTrait.TYPE) { get<StickyContentTrait> { parametersOf(it) } }
+        register(BackgroundContentTrait.TYPE) { get<BackgroundContentTrait> { parametersOf(it) } }
     }
 
     operator fun get(key: String): TraitFactoryBlock? {

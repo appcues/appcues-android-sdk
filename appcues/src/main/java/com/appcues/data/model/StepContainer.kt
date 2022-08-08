@@ -11,6 +11,6 @@ internal data class StepContainer(
     val presentingTrait: PresentingTrait,
     val contentHolderTrait: ContentHolderTrait,
     val contentWrappingTrait: ContentWrappingTrait,
-    val backdropTraits: List<BackdropDecoratingTrait>,
-    val containerTraits: List<ContainerDecoratingTrait>,
+    val backdropDecoratingTraits: List<BackdropDecoratingTrait>,
+    val containerDecoratingTraits: List<ContainerDecoratingTrait>,
 )
