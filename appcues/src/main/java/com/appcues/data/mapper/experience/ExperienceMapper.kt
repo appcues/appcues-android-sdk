@@ -4,6 +4,7 @@ import android.content.Context
 import com.appcues.action.ExperienceAction
 import com.appcues.action.appcues.LaunchExperienceAction
 import com.appcues.action.appcues.LinkAction
+import com.appcues.data.mapper.LeveledTraitResponse
 import com.appcues.data.mapper.mergeActions
 import com.appcues.data.mapper.mergeTraits
 import com.appcues.data.mapper.step.StepMapper
@@ -20,6 +21,7 @@ import com.appcues.trait.ContainerDecoratingTrait
 import com.appcues.trait.ContentHolderTrait
 import com.appcues.trait.ContentWrappingTrait
 import com.appcues.trait.ExperienceTrait
+import com.appcues.trait.ExperienceTrait.ExperienceTraitLevel.EXPERIENCE
 import com.appcues.trait.ExperienceTrait.ExperienceTraitLevel.GROUP
 import com.appcues.trait.PresentingTrait
 import com.appcues.trait.appcues.DefaultContentHolderTrait
@@ -35,10 +37,11 @@ internal class ExperienceMapper(
 ) {
 
     fun map(from: ExperienceResponse, priority: ExperiencePriority = NORMAL): Experience {
+        val experienceTraits = from.traits.map { it to EXPERIENCE }
         return Experience(
             id = from.id,
             name = from.name,
-            stepContainers = from.steps.mapToStepContainer(traitsMapper.map(from.traits), from.actions),
+            stepContainers = from.steps.mapToStepContainer(experienceTraits, from.actions),
             published = from.state != "DRAFT", // "DRAFT" is used for experience preview in builder
             priority = priority,
             type = from.type,
@@ -51,23 +54,24 @@ internal class ExperienceMapper(
     }
 
     private fun List<StepContainerResponse>.mapToStepContainer(
-        superTraits: List<ExperienceTrait>,
-        superActions: Map<UUID, List<ActionResponse>>?
+        experienceTraits: List<LeveledTraitResponse>,
+        experienceActions: Map<UUID, List<ActionResponse>>?
     ) = map { stepContainerResponse ->
-        val mappedTraits = traitsMapper.map(stepContainerResponse.traits)
-        val mergedTraits = mappedTraits.mergeTraits(superTraits, GROUP)
-        val mergedActions = stepContainerResponse.actions.mergeActions(superActions)
+        val containerTraits = stepContainerResponse.traits.map { it to GROUP }
+        val mergedTraits = containerTraits.mergeTraits(experienceTraits)
+        val mappedTraits = traitsMapper.map(mergedTraits)
+        val mergedActions = stepContainerResponse.actions.mergeActions(experienceActions)
 
         // this is where we will use groups to organize steps into stepContainers
         // also merge all necessary traits for each step
         StepContainer(
             steps = stepContainerResponse.children.map { step -> stepMapper.map(step, mergedTraits, mergedActions) },
-            presentingTrait = mergedTraits.getExperiencePresentingTraitOrDefault(),
-            contentHolderTrait = mergedTraits.getContainerCreatingTraitOrDefault(),
+            presentingTrait = mappedTraits.getExperiencePresentingTraitOrDefault(),
+            contentHolderTrait = mappedTraits.getContainerCreatingTraitOrDefault(),
             // what should we do if no content wrapping trait is found?
-            contentWrappingTrait = mergedTraits.filterIsInstance<ContentWrappingTrait>().first(),
-            backdropDecoratingTraits = mergedTraits.filterIsInstance<BackdropDecoratingTrait>(),
-            containerDecoratingTraits = mergedTraits.filterIsInstance<ContainerDecoratingTrait>(),
+            contentWrappingTrait = mappedTraits.filterIsInstance<ContentWrappingTrait>().first(),
+            backdropDecoratingTraits = mappedTraits.filterIsInstance<BackdropDecoratingTrait>(),
+            containerDecoratingTraits = mappedTraits.filterIsInstance<ContainerDecoratingTrait>(),
         )
     }
 

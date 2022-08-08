@@ -2,6 +2,7 @@ package com.appcues.trait
 
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.logging.Logcues
+import com.appcues.trait.ExperienceTrait.ExperienceTraitLevel
 import com.appcues.trait.appcues.BackdropTrait
 import com.appcues.trait.appcues.BackgroundContentTrait
 import com.appcues.trait.appcues.CarouselTrait
@@ -15,7 +16,7 @@ import org.koin.core.parameter.parametersOf
 import org.koin.core.scope.Scope
 import kotlin.collections.set
 
-internal typealias TraitFactoryBlock = (config: AppcuesConfigMap) -> ExperienceTrait
+internal typealias TraitFactoryBlock = (config: AppcuesConfigMap, level: ExperienceTraitLevel) -> ExperienceTrait
 
 internal class TraitRegistry(
     override val scope: Scope,
@@ -25,13 +26,13 @@ internal class TraitRegistry(
     private val actions: MutableMap<String, TraitFactoryBlock> = hashMapOf()
 
     init {
-        register(BackdropTrait.TYPE) { get<BackdropTrait> { parametersOf(it) } }
-        register(ModalTrait.TYPE) { get<ModalTrait> { parametersOf(it) } }
-        register(SkippableTrait.TYPE) { get<SkippableTrait> { parametersOf(it) } }
-        register(CarouselTrait.TYPE) { get<CarouselTrait> { parametersOf(it) } }
-        register(PagingDotsTrait.TYPE) { get<PagingDotsTrait> { parametersOf(it) } }
-        register(StickyContentTrait.TYPE) { get<StickyContentTrait> { parametersOf(it) } }
-        register(BackgroundContentTrait.TYPE) { get<BackgroundContentTrait> { parametersOf(it) } }
+        register(BackdropTrait.TYPE) { config, _ -> get<BackdropTrait> { parametersOf(config) } }
+        register(ModalTrait.TYPE) { config, _ -> get<ModalTrait> { parametersOf(config) } }
+        register(SkippableTrait.TYPE) { config, _ -> get<SkippableTrait> { parametersOf(config) } }
+        register(CarouselTrait.TYPE) { config, _ -> get<CarouselTrait> { parametersOf(config) } }
+        register(PagingDotsTrait.TYPE) { config, _ -> get<PagingDotsTrait> { parametersOf(config) } }
+        register(StickyContentTrait.TYPE) { config, _ -> get<StickyContentTrait> { parametersOf(config) } }
+        register(BackgroundContentTrait.TYPE) { config, level -> get<BackgroundContentTrait> { parametersOf(config, level) } }
     }
 
     operator fun get(key: String): TraitFactoryBlock? {

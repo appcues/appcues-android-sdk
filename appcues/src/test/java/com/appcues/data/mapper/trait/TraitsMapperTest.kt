@@ -2,6 +2,7 @@ package com.appcues.data.mapper.trait
 
 import com.appcues.data.remote.response.trait.TraitResponse
 import com.appcues.trait.ExperienceTrait
+import com.appcues.trait.ExperienceTrait.ExperienceTraitLevel
 import com.appcues.trait.TraitFactoryBlock
 import com.appcues.trait.TraitRegistry
 import com.google.common.truth.Truth.assertThat
@@ -20,15 +21,16 @@ class TraitsMapperTest {
         // Given
         val type = "trait-type"
         val config = hashMapOf<String, Any>()
+        val level = ExperienceTraitLevel.STEP
         val from = arrayListOf(
             TraitResponse(
                 type = type,
                 config = config
-            )
+            ) to level
         )
         val experienceTrait: ExperienceTrait = mockk()
         val traitFactoryBlock = mockk<TraitFactoryBlock>()
-        every { traitFactoryBlock.invoke(config) } returns experienceTrait
+        every { traitFactoryBlock.invoke(config, level) } returns experienceTrait
         every { traitRegistry[type] } returns traitFactoryBlock
         // When
         val result = mapper.map(from)

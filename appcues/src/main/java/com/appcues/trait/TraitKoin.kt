@@ -62,6 +62,7 @@ internal object TraitKoin : KoinScopePlugin {
         factory { params ->
             BackgroundContentTrait(
                 config = params.getOrNull(),
+                level = params.get(),
                 stepContentMapper = get(),
             )
         }

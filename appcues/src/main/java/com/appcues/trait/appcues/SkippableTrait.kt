@@ -25,7 +25,6 @@ import com.appcues.statemachine.StateMachine
 import com.appcues.trait.BackdropDecoratingTrait
 import com.appcues.trait.ContainerDecoratingTrait
 import com.appcues.trait.ContainerDecoratingTrait.ContainerDecoratingType
-import com.appcues.trait.ExperienceTrait.ExperienceTraitLevel
 import kotlinx.coroutines.launch
 
 internal class SkippableTrait(
@@ -38,10 +37,6 @@ internal class SkippableTrait(
 
         const val TYPE = "@appcues/skippable"
     }
-
-    override val type = TYPE
-
-    override val level = ExperienceTraitLevel.GROUP
 
     override val containerComposeOrder = ContainerDecoratingType.OVERLAY
 
