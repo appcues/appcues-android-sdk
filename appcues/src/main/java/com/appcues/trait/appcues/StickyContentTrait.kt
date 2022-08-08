@@ -8,8 +8,10 @@ import androidx.compose.ui.Modifier
 import com.appcues.data.mapper.step.StepContentMapper
 import com.appcues.data.model.getConfig
 import com.appcues.data.model.getConfigPrimitive
+import com.appcues.trait.ExperienceTrait.ExperienceTraitLevel
 import com.appcues.trait.StepDecoratingPadding
 import com.appcues.trait.StepDecoratingTrait
+import com.appcues.trait.StepDecoratingTrait.StepDecoratingType
 import com.appcues.trait.alignStepOverlay
 import com.appcues.ui.primitive.Compose
 
@@ -23,12 +25,17 @@ internal class StickyContentTrait(
         const val TYPE = "@appcues/sticky-content"
     }
 
-    private val edge = config.getConfig<String>("edge")
+    override val type = TYPE
 
+    override val level = ExperienceTraitLevel.STEP
+
+    override val stepComposeOrder = StepDecoratingType.OVERLAY
+
+    private val edge = config.getConfig<String>("edge")
     private val content = config.getConfigPrimitive("content", stepContentMapper)
 
     @Composable
-    override fun BoxScope.Overlay(stepDecoratingPadding: StepDecoratingPadding) {
+    override fun BoxScope.DecorateStep(stepDecoratingPadding: StepDecoratingPadding) {
         content?.let {
             Box(
                 modifier = Modifier.alignStepOverlay(this, edge.edgeToAlignment(), stepDecoratingPadding),

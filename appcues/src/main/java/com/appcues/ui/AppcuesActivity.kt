@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -26,9 +27,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.core.os.bundleOf
+import com.appcues.data.model.Step
+import com.appcues.data.model.StepContainer
 import com.appcues.di.AppcuesKoinContext
+import com.appcues.trait.ContainerDecoratingTrait.ContainerDecoratingType
 import com.appcues.trait.ContentHolderTrait.ContainerPages
 import com.appcues.trait.StepDecoratingPadding
+import com.appcues.trait.StepDecoratingTrait.StepDecoratingType
 import com.appcues.ui.AppcuesViewModel.UIState
 import com.appcues.ui.AppcuesViewModel.UIState.Dismissing
 import com.appcues.ui.AppcuesViewModel.UIState.Rendering
@@ -142,14 +147,14 @@ internal class AppcuesActivity : AppCompatActivity() {
 
         with(state.stepContainer) {
             // apply backdrop traits
-            backdropTraits.forEach {
+            backdropDecoratingTraits.forEach {
                 with(it) { Backdrop() }
             }
             // create wrapper
             contentWrappingTrait.WrapContent { hasFixedHeight, contentPadding ->
-                Box(
-                    contentAlignment = Alignment.TopCenter
-                ) {
+                Box(contentAlignment = Alignment.TopCenter) {
+                    ApplyUnderlayDecoratingTraits(this)
+
                     // Apply content holder trait
                     with(contentHolderTrait) {
                         // create object that will passed down to CreateContentHolder
@@ -162,24 +167,12 @@ internal class AppcuesActivity : AppCompatActivity() {
                                         // used to get the padding values from step decorating trait and apply to the Column
                                         val density = LocalDensity.current
                                         val stepDecoratingPadding = remember(this) { StepDecoratingPadding(density) }
-                                        // Our page content
-                                        Column(
-                                            horizontalAlignment = Alignment.CenterHorizontally,
-                                            modifier = Modifier
-                                                // if WrappingContent has a fixed height we fill height
-                                                // else we will scale according to content
-                                                .then(if (hasFixedHeight) Modifier.fillMaxHeight() else Modifier)
-                                                .verticalScroll(rememberScrollState())
-                                                // if we have contentPadding to apply from the WrapContent trait then we apply here
-                                                .then(if (contentPadding != null) Modifier.padding(contentPadding) else Modifier)
-                                                .padding(paddingValues = stepDecoratingPadding.paddingValues.value)
-                                                .testTag("page_$index")
-                                        ) {
-                                            content.Compose()
-                                        }
 
-                                        // apply step decorating traits
-                                        traits.forEach { with(it) { Overlay(stepDecoratingPadding) } }
+                                        ApplyUnderlayDecoratingTraits(this@Box, stepDecoratingPadding)
+
+                                        ComposeStepContent(index, hasFixedHeight, contentPadding, stepDecoratingPadding)
+
+                                        ApplyOverlayDecoratingTraits(this@Box, stepDecoratingPadding)
                                     }
                                 }
                             }
@@ -190,15 +183,62 @@ internal class AppcuesActivity : AppCompatActivity() {
                             it.syncPaginationData()
                         }
                     }
-                    // Compose all container traits on top of the content Column
-                    containerTraits.forEach {
-                        with(it) {
-                            Overlay()
-                        }
-                    }
+
+                    ApplyOverlayDecoratingTraits(this)
                 }
             }
         }
+    }
+
+    @Composable
+    private fun StepContainer.ApplyUnderlayDecoratingTraits(boxScope: BoxScope) {
+        containerDecoratingTraits
+            .filter { it.containerComposeOrder == ContainerDecoratingType.UNDERLAY }
+            .forEach { it.run { boxScope.DecorateContainer() } }
+    }
+
+    @Composable
+    private fun StepContainer.ApplyOverlayDecoratingTraits(boxScope: BoxScope) {
+        containerDecoratingTraits
+            .filter { it.containerComposeOrder == ContainerDecoratingType.OVERLAY }
+            .forEach { it.run { boxScope.DecorateContainer() } }
+    }
+
+    @Composable
+    private fun Step.ComposeStepContent(
+        index: Int,
+        hasFixedHeight: Boolean,
+        contentPadding: PaddingValues?,
+        stepDecoratingPadding: StepDecoratingPadding
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                // if WrappingContent has a fixed height we fill height
+                // else we will scale according to content
+                .then(if (hasFixedHeight) Modifier.fillMaxHeight() else Modifier)
+                .verticalScroll(rememberScrollState())
+                // if we have contentPadding to apply from the WrapContent trait then we apply here
+                .then(if (contentPadding != null) Modifier.padding(contentPadding) else Modifier)
+                .padding(paddingValues = stepDecoratingPadding.paddingValues.value)
+                .testTag("page_$index")
+        ) {
+            content.Compose()
+        }
+    }
+
+    @Composable
+    private fun Step.ApplyUnderlayDecoratingTraits(boxScope: BoxScope, stepDecoratingPadding: StepDecoratingPadding) {
+        stepDecoratingTraits
+            .filter { it.stepComposeOrder == StepDecoratingType.UNDERLAY }
+            .forEach { it.run { boxScope.DecorateStep(stepDecoratingPadding) } }
+    }
+
+    @Composable
+    private fun Step.ApplyOverlayDecoratingTraits(boxScope: BoxScope, stepDecoratingPadding: StepDecoratingPadding) {
+        stepDecoratingTraits
+            .filter { it.stepComposeOrder == StepDecoratingType.OVERLAY }
+            .forEach { it.run { boxScope.DecorateStep(stepDecoratingPadding) } }
     }
 
     override fun onBackPressed() {

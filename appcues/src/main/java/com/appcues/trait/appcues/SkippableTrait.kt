@@ -24,6 +24,8 @@ import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.StateMachine
 import com.appcues.trait.BackdropDecoratingTrait
 import com.appcues.trait.ContainerDecoratingTrait
+import com.appcues.trait.ContainerDecoratingTrait.ContainerDecoratingType
+import com.appcues.trait.ExperienceTrait.ExperienceTraitLevel
 import kotlinx.coroutines.launch
 
 internal class SkippableTrait(
@@ -33,11 +35,18 @@ internal class SkippableTrait(
 ) : ContainerDecoratingTrait, BackdropDecoratingTrait {
 
     companion object {
+
         const val TYPE = "@appcues/skippable"
     }
 
+    override val type = TYPE
+
+    override val level = ExperienceTraitLevel.GROUP
+
+    override val containerComposeOrder = ContainerDecoratingType.OVERLAY
+
     @Composable
-    override fun BoxScope.Overlay() {
+    override fun BoxScope.DecorateContainer() {
         IconButton(
             modifier = Modifier
                 .align(Alignment.TopEnd)

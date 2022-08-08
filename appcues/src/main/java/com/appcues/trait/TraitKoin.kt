@@ -2,6 +2,7 @@ package com.appcues.trait
 
 import com.appcues.di.KoinScopePlugin
 import com.appcues.trait.appcues.BackdropTrait
+import com.appcues.trait.appcues.BackgroundContentTrait
 import com.appcues.trait.appcues.CarouselTrait
 import com.appcues.trait.appcues.ModalTrait
 import com.appcues.trait.appcues.PagingDotsTrait
@@ -53,6 +54,13 @@ internal object TraitKoin : KoinScopePlugin {
 
         factory { params ->
             StickyContentTrait(
+                config = params.getOrNull(),
+                stepContentMapper = get(),
+            )
+        }
+
+        factory { params ->
+            BackgroundContentTrait(
                 config = params.getOrNull(),
                 stepContentMapper = get(),
             )

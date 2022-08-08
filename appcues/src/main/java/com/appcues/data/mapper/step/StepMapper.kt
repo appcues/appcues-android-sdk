@@ -7,7 +7,8 @@ import com.appcues.data.mapper.trait.TraitsMapper
 import com.appcues.data.model.Step
 import com.appcues.data.remote.response.action.ActionResponse
 import com.appcues.data.remote.response.step.StepResponse
-import com.appcues.data.remote.response.trait.TraitResponse
+import com.appcues.trait.ExperienceTrait
+import com.appcues.trait.ExperienceTrait.ExperienceTraitLevel.GROUP
 import com.appcues.trait.StepDecoratingTrait
 import java.util.UUID
 
@@ -19,16 +20,17 @@ internal class StepMapper(
 
     fun map(
         from: StepResponse,
-        superTraits: List<TraitResponse>,
+        superTraits: List<ExperienceTrait>,
         superActions: Map<UUID, List<ActionResponse>>,
     ): Step {
-        val mergedTraits = from.traits.mergeTraits(superTraits)
+        val mappedTraits = traitsMapper.map(from.traits)
+        val mergedTraits = mappedTraits.mergeTraits(superTraits, GROUP)
         val mergedActions = from.actions.mergeActions(superActions)
 
         return Step(
             id = from.id,
             content = stepContentMapper.map(from.content),
-            traits = traitsMapper.map(mergedTraits).filterIsInstance(StepDecoratingTrait::class.java),
+            stepDecoratingTraits = mergedTraits.filterIsInstance(StepDecoratingTrait::class.java),
             actions = actionsMapper.map(mergedActions),
             type = from.type,
         )

@@ -35,7 +35,7 @@ import com.appcues.ui.extensions.toImageAsyncContentScale
 import com.appcues.ui.utils.rememberBlurHashDecoded
 
 @Composable
-internal fun ExperiencePrimitive.Compose() {
+internal fun ExperiencePrimitive.Compose(matchParentBox: BoxScope? = null) {
     Box(
         modifier = Modifier.outerPrimitiveStyle(
             component = this,
@@ -47,7 +47,8 @@ internal fun ExperiencePrimitive.Compose() {
                 enabled = remember { true },
                 role = getRole()
             ),
-            isDark = isSystemInDarkTheme()
+            isDark = isSystemInDarkTheme(),
+            matchParentBox = matchParentBox,
         ),
         contentAlignment = Alignment.Center
     ) {
@@ -60,7 +61,7 @@ internal fun ExperiencePrimitive.Compose() {
                 is ButtonPrimitive -> Compose(modifier)
                 is EmbedHtmlPrimitive -> Compose(modifier)
                 is HorizontalStackPrimitive -> Compose(modifier)
-                is ImagePrimitive -> Compose(modifier)
+                is ImagePrimitive -> Compose(modifier, matchParentBox)
                 is TextPrimitive -> Compose(modifier)
                 is VerticalStackPrimitive -> Compose(modifier)
             }
