@@ -20,7 +20,7 @@ internal class DefaultPresentingTrait(
 
     override val type = TYPE
 
-    override val level = ExperienceTraitLevel.EXPERIENCE
+    override val level = ExperienceTraitLevel.GROUP
 
     override fun present() {
         context.startActivity(AppcuesActivity.getIntent(context, scope.id))

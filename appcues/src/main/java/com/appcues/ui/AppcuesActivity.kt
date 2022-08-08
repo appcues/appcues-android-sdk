@@ -153,7 +153,7 @@ internal class AppcuesActivity : AppCompatActivity() {
             // create wrapper
             contentWrappingTrait.WrapContent { hasFixedHeight, contentPadding ->
                 Box(contentAlignment = Alignment.TopCenter) {
-                    ApplyUnderlayDecoratingTraits(this)
+                    ApplyUnderlayContainerTraits(this)
 
                     // Apply content holder trait
                     with(contentHolderTrait) {
@@ -168,11 +168,11 @@ internal class AppcuesActivity : AppCompatActivity() {
                                         val density = LocalDensity.current
                                         val stepDecoratingPadding = remember(this) { StepDecoratingPadding(density) }
 
-                                        ApplyUnderlayDecoratingTraits(this@Box, stepDecoratingPadding)
+                                        ApplyUnderlayStepTraits(this@Box, stepDecoratingPadding)
 
                                         ComposeStepContent(index, hasFixedHeight, contentPadding, stepDecoratingPadding)
 
-                                        ApplyOverlayDecoratingTraits(this@Box, stepDecoratingPadding)
+                                        ApplyOverlayStepTraits(this@Box, stepDecoratingPadding)
                                     }
                                 }
                             }
@@ -184,21 +184,21 @@ internal class AppcuesActivity : AppCompatActivity() {
                         }
                     }
 
-                    ApplyOverlayDecoratingTraits(this)
+                    ApplyOverlayContainerTraits(this)
                 }
             }
         }
     }
 
     @Composable
-    private fun StepContainer.ApplyUnderlayDecoratingTraits(boxScope: BoxScope) {
+    private fun StepContainer.ApplyUnderlayContainerTraits(boxScope: BoxScope) {
         containerDecoratingTraits
             .filter { it.containerComposeOrder == ContainerDecoratingType.UNDERLAY }
             .forEach { it.run { boxScope.DecorateContainer() } }
     }
 
     @Composable
-    private fun StepContainer.ApplyOverlayDecoratingTraits(boxScope: BoxScope) {
+    private fun StepContainer.ApplyOverlayContainerTraits(boxScope: BoxScope) {
         containerDecoratingTraits
             .filter { it.containerComposeOrder == ContainerDecoratingType.OVERLAY }
             .forEach { it.run { boxScope.DecorateContainer() } }
@@ -228,14 +228,14 @@ internal class AppcuesActivity : AppCompatActivity() {
     }
 
     @Composable
-    private fun Step.ApplyUnderlayDecoratingTraits(boxScope: BoxScope, stepDecoratingPadding: StepDecoratingPadding) {
+    private fun Step.ApplyUnderlayStepTraits(boxScope: BoxScope, stepDecoratingPadding: StepDecoratingPadding) {
         stepDecoratingTraits
             .filter { it.stepComposeOrder == StepDecoratingType.UNDERLAY }
             .forEach { it.run { boxScope.DecorateStep(stepDecoratingPadding) } }
     }
 
     @Composable
-    private fun Step.ApplyOverlayDecoratingTraits(boxScope: BoxScope, stepDecoratingPadding: StepDecoratingPadding) {
+    private fun Step.ApplyOverlayStepTraits(boxScope: BoxScope, stepDecoratingPadding: StepDecoratingPadding) {
         stepDecoratingTraits
             .filter { it.stepComposeOrder == StepDecoratingType.OVERLAY }
             .forEach { it.run { boxScope.DecorateStep(stepDecoratingPadding) } }
