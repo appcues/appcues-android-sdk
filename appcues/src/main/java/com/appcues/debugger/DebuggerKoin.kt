@@ -12,6 +12,7 @@ internal object DebuggerKoin : KoinScopePlugin {
                 appcuesConfig = get(),
                 appcuesRemoteSource = get(),
                 contextResources = get(),
+                context = get(),
             )
         }
 
