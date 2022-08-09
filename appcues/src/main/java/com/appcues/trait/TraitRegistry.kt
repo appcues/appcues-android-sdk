@@ -2,7 +2,6 @@ package com.appcues.trait
 
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.logging.Logcues
-import com.appcues.trait.ExperienceTrait.ExperienceTraitLevel
 import com.appcues.trait.appcues.BackdropTrait
 import com.appcues.trait.appcues.BackgroundContentTrait
 import com.appcues.trait.appcues.CarouselTrait

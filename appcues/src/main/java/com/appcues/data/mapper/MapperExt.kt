@@ -2,7 +2,7 @@ package com.appcues.data.mapper
 
 import com.appcues.data.remote.response.action.ActionResponse
 import com.appcues.data.remote.response.trait.TraitResponse
-import com.appcues.trait.ExperienceTrait.ExperienceTraitLevel
+import com.appcues.trait.ExperienceTraitLevel
 import java.util.UUID
 
 internal typealias LeveledTraitResponse = Pair<TraitResponse, ExperienceTraitLevel>

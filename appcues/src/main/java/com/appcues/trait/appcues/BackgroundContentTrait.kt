@@ -12,9 +12,9 @@ import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.getConfigPrimitive
 import com.appcues.trait.ContainerDecoratingTrait
 import com.appcues.trait.ContainerDecoratingTrait.ContainerDecoratingType
-import com.appcues.trait.ExperienceTrait.ExperienceTraitLevel
-import com.appcues.trait.ExperienceTrait.ExperienceTraitLevel.GROUP
-import com.appcues.trait.ExperienceTrait.ExperienceTraitLevel.STEP
+import com.appcues.trait.ExperienceTraitLevel
+import com.appcues.trait.ExperienceTraitLevel.GROUP
+import com.appcues.trait.ExperienceTraitLevel.STEP
 import com.appcues.trait.StepDecoratingPadding
 import com.appcues.trait.StepDecoratingTrait
 import com.appcues.trait.StepDecoratingTrait.StepDecoratingType

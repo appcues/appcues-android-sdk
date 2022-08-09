@@ -19,7 +19,7 @@ import com.appcues.debugger.AppcuesDebuggerManager
 import com.appcues.rules.KoinScopeRule
 import com.appcues.rules.MainDispatcherRule
 import com.appcues.trait.ExperienceTrait
-import com.appcues.trait.ExperienceTrait.ExperienceTraitLevel
+import com.appcues.trait.ExperienceTraitLevel
 import com.appcues.trait.TraitRegistry
 import com.appcues.ui.ExperienceRenderer
 import com.google.common.truth.Truth.assertThat
