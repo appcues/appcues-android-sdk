@@ -3,7 +3,7 @@ package com.appcues.rules
 import com.appcues.Appcues
 import com.appcues.AppcuesConfig
 import com.appcues.AppcuesCoroutineScope
-import com.appcues.DeeplinkHandler
+import com.appcues.DeepLinkHandler
 import com.appcues.SessionMonitor
 import com.appcues.action.ActionProcessor
 import com.appcues.action.ActionRegistry
@@ -56,7 +56,7 @@ class KoinScopeRule : TestWatcher() {
                         scoped { mockk<ActivityScreenTracking>(relaxed = true) }
                         scoped { mockk<TraitRegistry>(relaxed = true) }
                         scoped { mockk<ActionRegistry>(relaxed = true) }
-                        scoped { mockk<DeeplinkHandler>(relaxed = true) }
+                        scoped { mockk<DeepLinkHandler>(relaxed = true) }
                         scoped { mockk<StateMachine>(relaxed = true) }
                         scoped { mockk<LinkOpener>(relaxed = true) }
                         scoped { storageMockk() }

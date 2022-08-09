@@ -123,7 +123,7 @@ private fun LaunchedUIStateEffect(
                     debuggerState.dragFabOffsets(state.dragAmount)
                 }
                 is Expanded -> {
-                    debuggerState.deeplinkPath.value = state.deeplinkPath
+                    debuggerState.deepLinkPath.value = state.deepLinkPath
                     animateFabToExpanded(debuggerState)
                     debuggerState.isExpanded.targetState = true
                 }

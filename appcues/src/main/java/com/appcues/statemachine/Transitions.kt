@@ -98,7 +98,7 @@ internal interface Transitions {
         continuation: suspend () -> ResultOf<State, Error>
     ): Transition {
         return if (action.destroyed) {
-            // this means the AppcuesActivity was destroyed externally (i.e. deeplink) and we should
+            // this means the AppcuesActivity was destroyed externally (i.e. deep link) and we should
             // immediately transition to EndingExperience - not rely on the UI to do it for us (it's gone)
             Transition(
                 state = EndingStep(experience, flatStepIndex, null),

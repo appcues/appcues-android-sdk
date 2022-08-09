@@ -7,7 +7,7 @@ import com.appcues.debugger.AppcuesDebuggerManager
 import com.appcues.ui.ExperienceRenderer
 import kotlinx.coroutines.launch
 
-internal class DeeplinkHandler(
+internal class DeepLinkHandler(
     private val config: AppcuesConfig,
     private val experienceRenderer: ExperienceRenderer,
     private val appcuesCoroutineScope: AppcuesCoroutineScope,
@@ -40,8 +40,8 @@ internal class DeeplinkHandler(
                     handled = true
                 }
                 segments.any() && segments[0] == "debugger" -> {
-                    val deeplinkPath = if (segments.count() > 1) segments[1] else null
-                    debuggerManager.start(activity, deeplinkPath)
+                    val deepLinkPath = if (segments.count() > 1) segments[1] else null
+                    debuggerManager.start(activity, deepLinkPath)
                     handled = true
                 }
             }

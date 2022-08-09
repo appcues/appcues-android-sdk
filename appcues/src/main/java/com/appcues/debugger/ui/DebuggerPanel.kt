@@ -106,7 +106,7 @@ private fun BoxScope.DebuggerPanelPages(
     val mainPage = "main"
     val eventDetailsPage = "event_details"
     val fontDetailsPage = "font_details"
-    val deeplinkPath = debuggerState.deeplinkPath.value
+    val deepLinkPath = debuggerState.deepLinkPath.value
 
     AnimatedNavHost(navController = navController, startDestination = mainPage) {
         mainComposable(
@@ -124,8 +124,8 @@ private fun BoxScope.DebuggerPanelPages(
                 },
             )
 
-            LaunchedEffect(deeplinkPath) {
-                when (deeplinkPath) {
+            LaunchedEffect(deepLinkPath) {
+                when (deepLinkPath) {
                     "fonts" -> navController.navigate(fontDetailsPage)
                     else -> Unit
                 }
@@ -242,7 +242,7 @@ private fun NavGraphBuilder.fontDetailsComposable(
                 ).show()
             },
             onBackPressed = {
-                debuggerState.deeplinkPath.value = null
+                debuggerState.deepLinkPath.value = null
                 navController.popBackStack()
                 debuggerViewModel.onDetailDismiss()
             }

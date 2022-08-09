@@ -75,13 +75,13 @@ internal class AppcuesViewModel(
     }
 
     // handling the special case where the AppcuesActivity is removed by the OS from outside
-    // normal experience interactions (i.e. a deeplink)
+    // normal experience interactions (i.e. a deep link)
     override fun onCleared() {
         super.onCleared()
 
         uiState.value.let { state ->
             // if current state IS Rendering this means that the Activity was removed
-            // from an external source (ex deeplink) and we should end the experience
+            // from an external source (ex deep link) and we should end the experience
             if (state is Rendering) {
                 appcuesCoroutineScope.launch {
                     stateMachine.handleAction(EndExperience(true))

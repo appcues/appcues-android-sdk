@@ -58,7 +58,7 @@ class Appcues internal constructor(koinScope: Scope) {
     private val storage by koinScope.inject<Storage>()
     private val sessionMonitor by koinScope.inject<SessionMonitor>()
     private val activityScreenTracking by koinScope.inject<ActivityScreenTracking>()
-    private val deeplinkHandler by koinScope.inject<DeeplinkHandler>()
+    private val deepLinkHandler by koinScope.inject<DeepLinkHandler>()
     private val debuggerManager by koinScope.inject<AppcuesDebuggerManager>()
     private val appcuesCoroutineScope by koinScope.inject<AppcuesCoroutineScope>()
 
@@ -245,7 +245,7 @@ class Appcues internal constructor(koinScope: Scope) {
      * @return True if a deep link was handled by the Appcues SDK, false if not - meaning the host application should process.
      */
     fun onNewIntent(activity: Activity, intent: Intent?): Boolean =
-        deeplinkHandler.handle(activity, intent)
+        deepLinkHandler.handle(activity, intent)
 
     private fun identify(isAnonymous: Boolean, userId: String, properties: Map<String, Any>?) {
         if (userId.isEmpty()) {

@@ -163,7 +163,7 @@ class StateMachineTest : AppcuesScopeTest {
 
     @Test
     fun `RenderingStep SHOULD transition to Idling WHEN action is EndExperience with destroyed true`() = runTest {
-        // the experience Activity being destroyed externally would do this - ex: deeplink elsewhere
+        // the experience Activity being destroyed externally would do this - ex: deep link elsewhere
 
         // GIVEN
         val experience = mockExperience()
