@@ -154,7 +154,7 @@ internal class DebuggerStatusManager(
             title = contextResources.getString(R.string.appcues_debugger_status_check_deeplink_title),
             line1 = deepLinkErrorText,
             statusType = statusType,
-            showRefreshIcon = statusType != SUCCESS,
+            showRefreshIcon = statusType == UNKNOWN,
             tapActionType = DEEPLINK_CHECK
         )
     }
