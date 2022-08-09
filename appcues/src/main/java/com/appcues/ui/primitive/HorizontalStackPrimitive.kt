@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material.ProvideTextStyle
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
@@ -28,14 +29,16 @@ import java.util.UUID
 
 @Composable
 internal fun HorizontalStackPrimitive.Compose(modifier: Modifier) {
+
+    val verticalAlignment = style.getVerticalAlignment(CenterVertically)
     Row(
         modifier = modifier,
         horizontalArrangement = distribution.toHorizontalArrangement(spacing),
-        verticalAlignment = style.getVerticalAlignment()
+        verticalAlignment = verticalAlignment
     ) {
         ProvideTextStyle(style.getTextStyle(LocalContext.current, isSystemInDarkTheme())) {
             items.forEach {
-                ItemBox(distribution = distribution, style = it.style) {
+                ItemBox(distribution = distribution, style = it.style, parentVerticalAlignment = verticalAlignment) {
                     it.Compose()
                 }
             }
@@ -47,11 +50,12 @@ internal fun HorizontalStackPrimitive.Compose(modifier: Modifier) {
 private fun RowScope.ItemBox(
     distribution: ComponentDistribution,
     style: ComponentStyle,
+    parentVerticalAlignment: Alignment.Vertical,
     content: @Composable BoxScope.() -> Unit
 ) {
     Box(
         modifier = Modifier
-            .align(style.getVerticalAlignment())
+            .align(style.getVerticalAlignment(parentVerticalAlignment))
             .then(if (distribution == ComponentDistribution.EQUAL) Modifier.weight(1f) else Modifier),
         contentAlignment = style.getBoxAlignment(),
         content = content

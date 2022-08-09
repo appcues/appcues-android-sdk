@@ -155,12 +155,12 @@ internal fun ComponentStyle.getFontWeight(): FontWeight? {
     return null
 }
 
-internal fun ComponentStyle.getVerticalAlignment(): Alignment.Vertical {
+internal fun ComponentStyle.getVerticalAlignment(default: Alignment.Vertical): Alignment.Vertical {
     return when (verticalAlignment) {
         ComponentVerticalAlignment.TOP -> Alignment.Top
         ComponentVerticalAlignment.CENTER -> Alignment.CenterVertically
         ComponentVerticalAlignment.BOTTOM -> Alignment.Bottom
-        null -> Alignment.CenterVertically
+        null -> default
     }
 }
 
