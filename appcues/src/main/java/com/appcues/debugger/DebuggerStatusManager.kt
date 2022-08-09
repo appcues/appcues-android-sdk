@@ -151,7 +151,7 @@ internal class DebuggerStatusManager(
 
     private fun deepLinkCheckItem() = (deepLinkConfigured?.let { if (it) SUCCESS else ERROR } ?: UNKNOWN).let { statusType ->
         DebuggerStatusItem(
-            title = contextResources.getString(R.string.appcues_debugger_status_check_deeplink_title),
+            title = contextResources.getString(R.string.appcues_debugger_status_check_deep_link_title),
             line1 = deepLinkErrorText,
             statusType = statusType,
             showRefreshIcon = statusType == UNKNOWN,
@@ -249,12 +249,12 @@ internal class DebuggerStatusManager(
                 if (deepLinkValidationToken != null) {
                     deepLinkValidationToken = null
                     deepLinkConfigured = false
-                    deepLinkErrorText = contextResources.getString(R.string.appcues_debugger_status_check_deeplink_error_handler)
+                    deepLinkErrorText = contextResources.getString(R.string.appcues_debugger_status_check_deep_link_error_handler)
                     updateData()
                 }
             } else {
                 deepLinkConfigured = false
-                deepLinkErrorText = contextResources.getString(R.string.appcues_debugger_status_check_deeplink_error_manifest)
+                deepLinkErrorText = contextResources.getString(R.string.appcues_debugger_status_check_deep_link_error_manifest)
                 updateData()
             }
         }

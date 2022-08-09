@@ -21,7 +21,7 @@ internal object AppcuesKoin : KoinScopePlugin {
         scoped { StateMachine(appcuesCoroutineScope = get(), config = get(), actionProcessor = get()) }
         scoped { Storage(context = get(), config = get()) }
         scoped {
-            DeeplinkHandler(
+            DeepLinkHandler(
                 config = get(),
                 experienceRenderer = get(),
                 appcuesCoroutineScope = get(),

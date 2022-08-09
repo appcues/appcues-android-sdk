@@ -34,7 +34,7 @@ internal class MutableDebuggerState(private val density: Density, private val is
     val fabYOffset = mutableStateOf(value = -1f)
     val isDraggingOverDismiss = mutableStateOf(value = false)
 
-    val deeplinkPath = mutableStateOf<String?>(value = null)
+    val deepLinkPath = mutableStateOf<String?>(value = null)
 
     private var boxSize = IntSize(0, 0)
     private var dismissRect = Rect(Offset(0f, 0f), Size(0f, 0f))

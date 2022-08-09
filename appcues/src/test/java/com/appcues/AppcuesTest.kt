@@ -246,17 +246,17 @@ internal class AppcuesTest : AppcuesScopeTest {
     }
 
     @Test
-    fun `onNewIntent SHOULD call the DeeplinkHandler to handle the link`() {
+    fun `onNewIntent SHOULD call the DeepLinkHandler to handle the link`() {
         // GIVEN
         val activity: Activity = mockk(relaxed = true)
         val intent: Intent = mockk(relaxed = true)
-        val deeplinkHandler: DeeplinkHandler = get()
+        val deepLinkHandler: DeepLinkHandler = get()
 
         // WHEN
         appcues.onNewIntent(activity, intent)
 
         // THEN
-        verify { deeplinkHandler.handle(activity, intent) }
+        verify { deepLinkHandler.handle(activity, intent) }
     }
 
     @Test
