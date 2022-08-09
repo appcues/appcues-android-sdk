@@ -10,9 +10,10 @@ internal data class DebuggerStatusItem(
 )
 
 internal enum class StatusType {
-    PHONE, LOADING, SUCCESS, ERROR, EXPERIENCE
+    PHONE, LOADING, SUCCESS, ERROR, EXPERIENCE, UNKNOWN
 }
 
 internal enum class TapActionType {
-    HEALTH_CHECK
+    HEALTH_CHECK,
+    DEEPLINK_CHECK,
 }

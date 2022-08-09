@@ -114,6 +114,10 @@ internal class DebuggerViewModel(
                 _uiState.value = Idle
             }
             return
+        } else {
+            // the deep link might be from the debugger checking that the configuration is correct
+            // pass along to allow it to check
+            debuggerStatusManager.checkDeepLinkValidation(deeplinkPath)
         }
 
         when (_uiState.value) {

@@ -47,6 +47,7 @@ private fun StatusType.toResourceId(): Int {
         StatusType.SUCCESS -> R.drawable.appcues_ic_success
         StatusType.ERROR -> R.drawable.appcues_ic_error
         StatusType.EXPERIENCE -> R.drawable.appcues_ic_experience
+        StatusType.UNKNOWN -> R.drawable.appcues_ic_unknown
         // we never need loading icon
         StatusType.LOADING -> 0
     }
