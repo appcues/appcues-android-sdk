@@ -8,7 +8,7 @@ import com.appcues.data.mapper.trait.TraitsMapper
 import com.appcues.data.model.Step
 import com.appcues.data.remote.response.action.ActionResponse
 import com.appcues.data.remote.response.step.StepResponse
-import com.appcues.trait.ExperienceTrait.ExperienceTraitLevel.STEP
+import com.appcues.trait.ExperienceTraitLevel.STEP
 import com.appcues.trait.StepDecoratingTrait
 import java.util.UUID
 

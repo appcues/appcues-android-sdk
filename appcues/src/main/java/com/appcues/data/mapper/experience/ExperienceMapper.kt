@@ -21,8 +21,8 @@ import com.appcues.trait.ContainerDecoratingTrait
 import com.appcues.trait.ContentHolderTrait
 import com.appcues.trait.ContentWrappingTrait
 import com.appcues.trait.ExperienceTrait
-import com.appcues.trait.ExperienceTrait.ExperienceTraitLevel.EXPERIENCE
-import com.appcues.trait.ExperienceTrait.ExperienceTraitLevel.GROUP
+import com.appcues.trait.ExperienceTraitLevel.EXPERIENCE
+import com.appcues.trait.ExperienceTraitLevel.GROUP
 import com.appcues.trait.PresentingTrait
 import com.appcues.trait.appcues.DefaultContentHolderTrait
 import com.appcues.trait.appcues.DefaultPresentingTrait

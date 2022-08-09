@@ -2,7 +2,7 @@ package com.appcues.data.mapper.trait
 
 import com.appcues.data.remote.response.trait.TraitResponse
 import com.appcues.trait.ExperienceTrait
-import com.appcues.trait.ExperienceTrait.ExperienceTraitLevel
+import com.appcues.trait.ExperienceTraitLevel
 import com.appcues.trait.TraitFactoryBlock
 import com.appcues.trait.TraitRegistry
 import com.google.common.truth.Truth.assertThat
