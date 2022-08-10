@@ -49,6 +49,11 @@ fun Appcues(
  */
 class Appcues internal constructor(koinScope: Scope) {
 
+    companion object {
+        val version: String
+            get() = BuildConfig.SDK_VERSION
+    }
+
     private val config by koinScope.inject<AppcuesConfig>()
     private val experienceRenderer by koinScope.inject<ExperienceRenderer>()
     private val logcues by koinScope.inject<Logcues>()
@@ -95,7 +100,7 @@ class Appcues internal constructor(koinScope: Scope) {
      * @return Current version.
      */
     val version: String
-        get() = "${BuildConfig.SDK_VERSION}-${BuildConfig.BUILD_TYPE}"
+        get() = Appcues.version
 
     /**
      * Identify the user and determine if they should see Appcues content.
