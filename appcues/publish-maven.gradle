@@ -19,7 +19,7 @@ private String generateVersionName() {
     String classifier = appcuesProperties.getProperty("VERSION_CLASSIFIER")
     String versionName = "${major}.${minor}.${patch}"
 
-    if (classifier != null) {
+    if (classifier?.trim()) {
         versionName += "-" + classifier
     }
     
