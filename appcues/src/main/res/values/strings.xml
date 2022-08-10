@@ -14,14 +14,15 @@
     <string name="appcues_debugger_status_reload_icon_content_description">reload icon</string>
     <string name="appcues_debugger_status_device_title">"%1$s Android %2$s</string>
     <string name="appcues_debugger_status_experience_line1">"Showing group %1$s step %2$s"</string>
-    <string name="appcues_debugger_status_sdk_title">Installed SDK (%1$s)</string>
+    <string name="appcues_debugger_status_sdk_title">Installed SDK %1$s</string>
     <string name="appcues_debugger_status_sdk_line1">Account ID: %1$s</string>
     <string name="appcues_debugger_status_sdk_line2">Application ID: %1$s</string>
     <string name="appcues_debugger_status_check_connection_connecting_title">Connecting to Appcues</string>
     <string name="appcues_debugger_status_check_connection_connected_title">Connected to Appcues</string>
     <string name="appcues_debugger_status_check_connection_error_title">Appcues is unreachable</string>
     <string name="appcues_debugger_status_check_connection_error_line1">Please check your connection or firewalls.</string>
-    <string name="appcues_debugger_status_check_deep_link_title">Appcues Deep Link Configured</string>
+    <string name="appcues_debugger_status_check_deep_link_title">Appcues Deep Link</string>
+    <string name="appcues_debugger_status_check_deep_link_instruction">Tap to check configuration</string>
     <string name="appcues_debugger_status_check_deep_link_error_manifest">Error 1: AndroidManifest intent-filter scheme missing</string>
     <string name="appcues_debugger_status_check_deep_link_error_handler">Error 2: Appcues SDK not receiving links</string>
     <string name="appcues_debugger_status_check_screen_tracking_title">Tracking Screens</string>

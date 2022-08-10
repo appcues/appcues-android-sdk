@@ -96,10 +96,11 @@ internal class DebuggerStatusManager(
         updateData()
     }
 
-    fun checkDeepLinkValidation(deepLinkPath: String) {
+    suspend fun checkDeepLinkValidation(deepLinkPath: String) {
         if (deepLinkPath == deepLinkValidationToken) {
             deepLinkConfigured = true
             deepLinkValidationToken = null
+            updateData()
         }
     }
 
@@ -152,7 +153,13 @@ internal class DebuggerStatusManager(
     private fun deepLinkCheckItem() = (deepLinkConfigured?.let { if (it) SUCCESS else ERROR } ?: UNKNOWN).let { statusType ->
         DebuggerStatusItem(
             title = contextResources.getString(R.string.appcues_debugger_status_check_deep_link_title),
-            line1 = deepLinkErrorText,
+            line1 = statusType.let {
+                when (it) {
+                    UNKNOWN -> contextResources.getString(R.string.appcues_debugger_status_check_deep_link_instruction)
+                    ERROR -> deepLinkErrorText
+                    else -> null
+                }
+            },
             statusType = statusType,
             showRefreshIcon = statusType == UNKNOWN,
             tapActionType = DEEPLINK_CHECK
