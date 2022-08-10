@@ -59,7 +59,8 @@ internal fun DebuggerStatusItem.StatusItemContent(rowScope: RowScope) {
         Column(
             modifier = Modifier
                 .weight(1f)
-                .padding(vertical = 8.dp),
+                .padding(vertical = 8.dp)
+                .padding(end = 8.dp),
             verticalArrangement = Arrangement.Center
         ) {
             Text(

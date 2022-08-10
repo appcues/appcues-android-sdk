@@ -117,7 +117,9 @@ internal class DebuggerViewModel(
         } else {
             // the deep link might be from the debugger checking that the configuration is correct
             // pass along to allow it to check
-            debuggerStatusManager.checkDeepLinkValidation(deepLinkPath)
+            viewModelScope.launch {
+                debuggerStatusManager.checkDeepLinkValidation(deepLinkPath)
+            }
         }
 
         when (_uiState.value) {
