@@ -50,6 +50,9 @@ fun Appcues(
 class Appcues internal constructor(koinScope: Scope) {
 
     companion object {
+        /**
+         * The current version of Appcues SDK.
+         */
         val version: String
             get() = BuildConfig.SDK_VERSION
     }
@@ -95,9 +98,7 @@ class Appcues internal constructor(koinScope: Scope) {
     }
 
     /**
-     * Returns the current version of Appcues SDK.
-     *
-     * @return Current version.
+     * The current version of Appcues SDK.
      */
     val version: String
         get() = Appcues.version
