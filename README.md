@@ -24,7 +24,7 @@ The SDK is a Kotlin library for sending user properties and events to the Appcue
 
 ### Installation
 
-Add the Appcues Android SDK dependency to your application. There are options for a standard installation, or for usage through a Segment plugin.
+Add the Appcues Android SDK dependency to your application. There are options for a standard installation, or for usage through a Segment plugin. An installation [tutorial video](https://appcues.wistia.com/medias/g6l6u32cjh) is also available for reference.
 
 #### Standard Installation
 
