@@ -1,9 +1,14 @@
 package com.appcues.debugger
 
+import com.appcues.AnalyticType.EVENT
+import com.appcues.AnalyticType.GROUP
+import com.appcues.AnalyticType.IDENTIFY
+import com.appcues.AnalyticType.SCREEN
 import com.appcues.R
 import com.appcues.analytics.ActivityRequestBuilder
 import com.appcues.analytics.AnalyticsEvent
 import com.appcues.analytics.AutoPropertyDecorator
+import com.appcues.analytics.TrackingData
 import com.appcues.data.remote.request.ActivityRequest
 import com.appcues.data.remote.request.EventRequest
 import com.appcues.debugger.model.DebuggerEventItem
@@ -40,71 +45,75 @@ internal class DebuggerRecentEventsManager(
 
     private var lastEventId = 0
 
-    suspend fun onActivityRequest(activityRequest: ActivityRequest) = withContext(Dispatchers.IO) {
-        when {
-            // event
-            activityRequest.events != null -> {
-                activityRequest.events.forEach { event ->
-                    val type = event.name.toEventType()
-                    val title = event.name.toEventTitle()?.let { contextResources.getString(it) }
-                    val displayName = getEventDisplayName(event, type, title)
-
-                    clearEventsOnSessionReset(event)
-
-                    events.addFirst(
-                        DebuggerEventItem(
-                            id = lastEventId,
-                            type = type,
-                            timestamp = event.timestamp.time,
-                            name = displayName,
-                            properties = event.attributes
-                                .filterOutScreenProperties(type)
-                                .filterOutAutoProperties()
-                                .toSortedList(),
-                            identityProperties = event.attributes
-                                .getAutoProperties()
-                                .toSortedList()
-                        )
-                    )
-
-                    lastEventId++
-                }
-            }
-            // group update
-            activityRequest.groupUpdate != null -> {
-                events.addFirst(
-                    DebuggerEventItem(
-                        id = lastEventId,
-                        type = EventType.GROUP_UPDATE,
-                        timestamp = Date().time,
-                        name = activityRequest.groupId
-                            ?: contextResources.getString(R.string.appcues_debugger_event_type_group_update_title),
-                        properties = activityRequest.groupUpdate.toSortedList(),
-                        identityProperties = null
-                    )
-                )
-                lastEventId++
-            }
-            // profile update
-            activityRequest.profileUpdate != null -> {
-                events.addFirst(
-                    DebuggerEventItem(
-                        id = lastEventId,
-                        type = EventType.USER_PROFILE,
-                        // it should always contain updated at property, this is just a safeguard
-                        // in case something changes in the future to avoid unwanted exceptions
-                        timestamp = (activityRequest.profileUpdate[AutoPropertyDecorator.UPDATED_AT_PROPERTY] as Long?) ?: Date().time,
-                        name = activityRequest.userId,
-                        properties = activityRequest.profileUpdate.toSortedList(),
-                        identityProperties = null
-                    )
-                )
-
-                lastEventId++
-            }
+    suspend fun onTrackingData(trackingData: TrackingData) = withContext(Dispatchers.IO) {
+        when (trackingData.type) {
+            IDENTIFY -> onIdentifyActivityRequest(trackingData.request)
+            GROUP -> onGroupUpdateActivityRequest(trackingData.request)
+            EVENT -> onActivityRequest(trackingData.request)
+            SCREEN -> onActivityRequest(trackingData.request)
         }
 
         updateData()
+    }
+
+    private fun onIdentifyActivityRequest(request: ActivityRequest) {
+        events.addFirst(
+            DebuggerEventItem(
+                id = lastEventId,
+                type = EventType.USER_PROFILE,
+                // it should always contain updated at property, this is just a safeguard
+                // in case something changes in the future to avoid unwanted exceptions
+                timestamp = (request.profileUpdate?.get(AutoPropertyDecorator.UPDATED_AT_PROPERTY) as Long?) ?: Date().time,
+                name = request.userId,
+                properties = request.profileUpdate?.toSortedList(),
+                identityProperties = null
+            )
+        )
+
+        lastEventId++
+    }
+
+    private fun onGroupUpdateActivityRequest(request: ActivityRequest) {
+        events.addFirst(
+            DebuggerEventItem(
+                id = lastEventId,
+                type = EventType.GROUP_UPDATE,
+                timestamp = Date().time,
+                name = request.groupId
+                    ?: contextResources.getString(R.string.appcues_debugger_event_type_group_update_title),
+                properties = request.groupUpdate?.toSortedList(),
+                identityProperties = null
+            )
+        )
+        lastEventId++
+    }
+
+    private fun onActivityRequest(request: ActivityRequest) {
+        request.events?.forEach { event ->
+            val type = event.name.toEventType()
+            val title = event.name.toEventTitle()?.let { contextResources.getString(it) }
+            val displayName = getEventDisplayName(event, type, title)
+
+            clearEventsOnSessionReset(event)
+
+            events.addFirst(
+                DebuggerEventItem(
+                    id = lastEventId,
+                    type = type,
+                    timestamp = event.timestamp.time,
+                    name = displayName,
+                    properties = event.attributes
+                        .filterOutScreenProperties(type)
+                        .filterOutAutoProperties()
+                        .toSortedList(),
+                    identityProperties = event.attributes
+                        .getAutoProperties()
+                        .toSortedList()
+                )
+            )
+
+            lastEventId++
+        }
     }
 
     private fun clearEventsOnSessionReset(event: EventRequest) {
