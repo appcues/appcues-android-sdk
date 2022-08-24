@@ -47,6 +47,6 @@ internal class ActionRegistryTest : AppcuesScopeTest {
         // THEN
         assertThat(action).isEqualTo(actionFromRegistry)
         assertThat(action).isNotEqualTo(actionDupe)
-        verify { logcues.error(exception = any()) }
+        verify { logcues.error(throwable = any()) }
     }
 }
