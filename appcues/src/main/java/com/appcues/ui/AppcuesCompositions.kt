@@ -35,7 +35,11 @@ internal data class AppcuesPagination(val onPageChanged: (Int) -> Unit)
 
 internal val appcuesPaginationData = mutableStateOf(AppcuesPaginationData(1, 0, 0.0f))
 
-internal val LocalLogcues = staticCompositionLocalOf<Logcues?> { null }
+internal val LocalLogcues = staticCompositionLocalOf<Logcues> { noLocalProvidedFor("LocalLogcues") }
+
+private fun noLocalProvidedFor(name: String): Nothing {
+    error("CompositionLocal $name not present")
+}
 
 /**
  * rememberAppcuesPaginationState is used by traits that wants to know updates about pagination data
