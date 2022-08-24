@@ -8,6 +8,7 @@ import androidx.compose.ui.platform.LocalContext
 import coil.compose.AsyncImage
 import com.appcues.data.model.ExperiencePrimitive.ImagePrimitive
 import com.appcues.ui.LocalImageLoader
+import com.appcues.ui.LocalLogcues
 import com.appcues.ui.extensions.blurHashPlaceholder
 import com.appcues.ui.extensions.getImageLoader
 import com.appcues.ui.extensions.getImageRequest
@@ -19,6 +20,7 @@ import com.appcues.ui.utils.rememberBlurHashDecoded
 @Composable
 internal fun ImagePrimitive.Compose(modifier: Modifier, matchParentBox: BoxScope? = null) {
     val context = LocalContext.current
+    val logcues = LocalLogcues.current
     val decodedBlurHash = rememberBlurHashDecoded(blurHash = blurHash)
 
     AsyncImage(
@@ -29,6 +31,9 @@ internal fun ImagePrimitive.Compose(modifier: Modifier, matchParentBox: BoxScope
         placeholder = context.blurHashPlaceholder(decodedBlurHash, intrinsicSize),
         contentScale = contentMode.toImageAsyncContentScale(),
         error = context.blurHashPlaceholder(decodedBlurHash, intrinsicSize),
+        onError = {
+            logcues?.error(it.result.throwable)
+        },
     )
 }
 
