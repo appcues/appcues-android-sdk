@@ -32,7 +32,7 @@ internal fun ImagePrimitive.Compose(modifier: Modifier, matchParentBox: BoxScope
         contentScale = contentMode.toImageAsyncContentScale(),
         error = context.blurHashPlaceholder(decodedBlurHash, intrinsicSize),
         onError = {
-            logcues?.error(it.result.throwable)
+            logcues.error(it.result.throwable)
         },
     )
 }

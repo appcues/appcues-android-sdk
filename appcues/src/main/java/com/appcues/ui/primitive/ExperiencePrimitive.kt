@@ -100,7 +100,7 @@ internal fun BoxScope.BackgroundImage(style: ComponentStyle) {
                 alignment = getBoxAlignment(horizontalAlignment, verticalAlignment),
                 error = context.blurHashPlaceholder(decodedBlurHash, intrinsicSize),
                 onError = {
-                    logcues?.error(it.result.throwable)
+                    logcues.error(it.result.throwable)
                 },
             )
         }
