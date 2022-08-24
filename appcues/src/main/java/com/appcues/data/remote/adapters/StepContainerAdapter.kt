@@ -1,8 +1,8 @@
 package com.appcues.data.remote.adapters
 
 import com.appcues.data.remote.response.action.ActionResponse
+import com.appcues.data.remote.response.step.primitive.PrimitiveResponse
 import com.appcues.data.remote.response.step.StepContainerResponse
-import com.appcues.data.remote.response.step.StepContentResponse
 import com.appcues.data.remote.response.step.StepResponse
 import com.appcues.data.remote.response.trait.TraitResponse
 import com.squareup.moshi.FromJson
@@ -15,7 +15,7 @@ import java.util.UUID
 internal data class StepOrContainerResponse(
     val id: UUID,
     val children: List<StepResponse>?,
-    val content: StepContentResponse?,
+    val content: PrimitiveResponse?,
     val traits: List<TraitResponse>,
     val actions: Map<UUID, List<ActionResponse>>,
     val type: String?,

@@ -6,7 +6,7 @@ import com.appcues.data.mapper.styling.StyleColorMapper
 import com.appcues.data.mapper.styling.StyleMapper
 import com.appcues.data.model.styling.ComponentColor
 import com.appcues.data.model.styling.ComponentStyle
-import com.appcues.data.remote.response.step.StepContentResponse
+import com.appcues.data.remote.response.step.primitive.PrimitiveResponse
 
 internal typealias AppcuesConfigMap = Map<String, Any>?
 
@@ -48,7 +48,7 @@ internal fun AppcuesConfigMap.getConfigStyle(key: String): ComponentStyle? {
 
 internal fun AppcuesConfigMap.getConfigPrimitive(key: String, stepContentMapper: StepContentMapper): ExperiencePrimitive? {
     return getConfig<Any>(key)?.let {
-        val stepContentResponse = MoshiConfiguration.fromAny<StepContentResponse>(it)
+        val stepContentResponse = MoshiConfiguration.fromAny<PrimitiveResponse>(it)
         return if (stepContentResponse != null) {
             stepContentMapper.map(stepContentResponse)
         } else null
