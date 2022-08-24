@@ -10,6 +10,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import coil.ImageLoader
 import com.appcues.action.ExperienceAction
 import com.appcues.data.model.Action
+import com.appcues.logging.Logcues
 import com.appcues.trait.AppcuesPaginationData
 import java.util.UUID
 
@@ -33,6 +34,8 @@ internal val LocalAppcuesPaginationDelegate = compositionLocalOf { AppcuesPagina
 internal data class AppcuesPagination(val onPageChanged: (Int) -> Unit)
 
 internal val appcuesPaginationData = mutableStateOf(AppcuesPaginationData(1, 0, 0.0f))
+
+internal val LocalLogcues = staticCompositionLocalOf<Logcues?> { null }
 
 /**
  * rememberAppcuesPaginationState is used by traits that wants to know updates about pagination data

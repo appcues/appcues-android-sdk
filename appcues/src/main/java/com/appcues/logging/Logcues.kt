@@ -23,9 +23,9 @@ internal class Logcues(private val loggingLevel: LoggingLevel) {
         }
     }
 
-    fun error(exception: Exception) {
+    fun error(throwable: Throwable) {
         if (loggingLevel > NONE) {
-            Log.e(TAG, exception.message.toString())
+            Log.e(TAG, throwable.message.toString())
         }
     }
 }

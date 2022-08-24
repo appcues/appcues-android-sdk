@@ -24,6 +24,7 @@ import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.ui.LocalAppcuesActionDelegate
 import com.appcues.ui.LocalAppcuesActions
 import com.appcues.ui.LocalImageLoader
+import com.appcues.ui.LocalLogcues
 import com.appcues.ui.extensions.PrimitiveGestureProperties
 import com.appcues.ui.extensions.blurHashPlaceholder
 import com.appcues.ui.extensions.getBoxAlignment
@@ -86,6 +87,7 @@ internal fun BoxScope.BackgroundImage(style: ComponentStyle) {
     if (style.backgroundImage != null) {
         with(style.backgroundImage) {
             val context = LocalContext.current
+            val logcues = LocalLogcues.current
             val decodedBlurHash = rememberBlurHashDecoded(blurHash = blurHash)
 
             AsyncImage(
@@ -97,6 +99,9 @@ internal fun BoxScope.BackgroundImage(style: ComponentStyle) {
                 contentScale = contentMode.toImageAsyncContentScale(),
                 alignment = getBoxAlignment(horizontalAlignment, verticalAlignment),
                 error = context.blurHashPlaceholder(decodedBlurHash, intrinsicSize),
+                onError = {
+                    logcues?.error(it.result.throwable)
+                },
             )
         }
     }

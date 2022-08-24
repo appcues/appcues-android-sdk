@@ -91,7 +91,8 @@ internal class AppcuesActivity : AppCompatActivity() {
     private fun Composition() {
         CompositionLocalProvider(
             LocalAppcuesActionDelegate provides AppcuesActions { viewModel.onAction(it) },
-            LocalAppcuesPaginationDelegate provides AppcuesPagination { viewModel.onPageChanged(it) }
+            LocalAppcuesPaginationDelegate provides AppcuesPagination { viewModel.onPageChanged(it) },
+            LocalLogcues provides scope.get(),
         ) {
             Box(
                 modifier = Modifier.fillMaxSize(),
