@@ -36,7 +36,7 @@ internal object MoshiConfiguration {
         }
     }
 
-    private fun getPrimitiveFactory() : JsonAdapter.Factory {
+    private fun getPrimitiveFactory(): JsonAdapter.Factory {
         return PolymorphicJsonAdapterFactory.of(PrimitiveResponse::class.java, "type")
             .withSubtype(BoxPrimitiveResponse::class.java, PrimitiveResponse.Type.BOX.jsonName)
             .withSubtype(ButtonPrimitiveResponse::class.java, PrimitiveResponse.Type.BUTTON.jsonName)
