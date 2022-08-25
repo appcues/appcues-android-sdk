@@ -2,8 +2,8 @@ package com.appcues.data.model
 
 import com.appcues.data.MoshiConfiguration
 import com.appcues.data.mapper.step.mapPrimitive
-import com.appcues.data.mapper.styling.mapComponentStyle
 import com.appcues.data.mapper.styling.mapComponentColor
+import com.appcues.data.mapper.styling.mapComponentStyle
 import com.appcues.data.model.styling.ComponentColor
 import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.data.remote.response.step.primitive.PrimitiveResponse
