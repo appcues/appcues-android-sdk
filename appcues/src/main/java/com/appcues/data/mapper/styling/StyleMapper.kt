@@ -5,7 +5,7 @@ import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.data.remote.response.styling.StyleGradientColorResponse
 import com.appcues.data.remote.response.styling.StyleResponse
 
-internal fun StyleResponse?.map(): ComponentStyle {
+internal fun StyleResponse?.mapComponentStyle(): ComponentStyle {
     if (this == null) return ComponentStyle()
 
     fun StyleGradientColorResponse?.toComponentColorList(): List<ComponentColor>? {

@@ -6,8 +6,6 @@ import org.junit.Test
 
 class SizeMapperTest {
 
-    private val mapper = SizeMapper()
-
     @Test
     fun `map SHOULD map from SizeResponse to ComponentSize`() {
         // Given
@@ -16,9 +14,10 @@ class SizeMapperTest {
             height = 2000.0
         )
         // When
-        val result = mapper.map(from)
+        val result = from.mapComponentSize()
         // Then
-        with(result) {
+        assertThat(result).isNotNull()
+        with(result!!) {
             assertThat(width).isEqualTo(1000)
             assertThat(height).isEqualTo(2000)
         }
