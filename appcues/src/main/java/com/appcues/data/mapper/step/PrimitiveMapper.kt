@@ -1,7 +1,7 @@
 package com.appcues.data.mapper.step
 
 import com.appcues.data.mapper.AppcuesMappingException
-import com.appcues.data.mapper.styling.map
+import com.appcues.data.mapper.styling.mapComponentStyle
 import com.appcues.data.mapper.styling.mapComponentContentMode
 import com.appcues.data.mapper.styling.mapComponentSize
 import com.appcues.data.model.ExperiencePrimitive
@@ -47,24 +47,24 @@ internal fun PrimitiveResponse.mapPrimitive(): ExperiencePrimitive {
 private fun TextPrimitiveResponse.mapTextPrimitive() = TextPrimitive(
     id = id,
     text = text,
-    style = style.map(),
+    style = style.mapComponentStyle(),
 )
 
 private fun BoxPrimitiveResponse.mapBoxPrimitive() = BoxPrimitive(
     id = id,
     items = items.map { it.mapPrimitive() },
-    style = style.map(),
+    style = style.mapComponentStyle(),
 )
 
 private fun ButtonPrimitiveResponse.mapButtonPrimitive() = ButtonPrimitive(
     id = id,
     content = content.mapPrimitive(),
-    style = style.map(),
+    style = style.mapComponentStyle(),
 )
 
 private fun EmbedPrimitiveResponse.mapEmbedPrimitive() = EmbedHtmlPrimitive(
     id = id,
-    style = style.map(),
+    style = style.mapComponentStyle(),
     embed = embed,
     intrinsicSize = intrinsicSize.mapComponentSize(),
 )
@@ -73,7 +73,7 @@ private fun ImagePrimitiveResponse.mapImagePrimitive() = ImagePrimitive(
     id = id,
     url = imageUrl,
     accessibilityLabel = accessibilityLabel,
-    style = style.map(),
+    style = style.mapComponentStyle(),
     intrinsicSize = intrinsicSize.mapComponentSize(),
     contentMode = mapComponentContentMode(contentMode),
     blurHash = blurHash,
@@ -90,7 +90,7 @@ private fun StackPrimitiveResponse.mapVerticalStack(): VerticalStackPrimitive {
         id = id,
         items = items.map { it.mapPrimitive() },
         spacing = spacing,
-        style = style.map(),
+        style = style.mapComponentStyle(),
     )
 }
 
@@ -100,7 +100,7 @@ private fun StackPrimitiveResponse.mapHorizontalStack(): HorizontalStackPrimitiv
         items = items.map { it.mapPrimitive() },
         distribution = mapComponentDistribution(distribution),
         spacing = spacing,
-        style = style.map(),
+        style = style.mapComponentStyle(),
     )
 }
 
@@ -112,7 +112,7 @@ private fun mapComponentDistribution(value: String?) = when (value) {
 
 private fun TextInputPrimitiveResponse.mapTextInputPrimitive() = TextInputPrimitive(
     id = id,
-    style = style.map(),
+    style = style.mapComponentStyle(),
     label = label.mapTextPrimitive(),
     placeholder = placeholder,
     defaultValue = defaultValue,
@@ -120,7 +120,7 @@ private fun TextInputPrimitiveResponse.mapTextInputPrimitive() = TextInputPrimit
     numberOfLines = numberOfLines ?: 1,
     maxLength = maxLength,
     dataType = mapComponentDataType(dataType),
-    textFieldStyle = textFieldStyle.map(),
+    textFieldStyle = textFieldStyle.mapComponentStyle(),
 )
 
 private fun mapComponentDataType(value: String?) = when (value) {
@@ -135,7 +135,7 @@ private fun mapComponentDataType(value: String?) = when (value) {
 
 private fun OptionSelectPrimitiveResponse.mapOptionSelectPrimitive() = OptionSelectPrimitive(
     id = id,
-    style = style.map(),
+    style = style.mapComponentStyle(),
     label = label.mapTextPrimitive(),
     selectMode = mapComponentSelectMode(selectMode),
     options = options.map { OptionItem(it.value, it.content.mapPrimitive(), it.selectedContent?.mapPrimitive()) },

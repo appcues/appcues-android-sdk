@@ -6,8 +6,6 @@ import org.junit.Test
 
 class StyleColorMapperTest {
 
-    private val mapper = StyleColorMapper()
-
     @Test
     fun `map SHOULD map from StyleColorResponse to ColorComponent`() {
         // Given
@@ -16,10 +14,10 @@ class StyleColorMapperTest {
             dark = "#896000"
         )
         // When
-        val result = mapper.map(from)
+        val result = from.mapComponentColor()
         // Then
         assertThat(result).isNotNull()
-        with(result!!) {
+        with(result) {
             assertThat(light).isEqualTo(0xFF8960FF)
             assertThat(dark).isEqualTo(0xFF896000)
         }
@@ -33,10 +31,9 @@ class StyleColorMapperTest {
             dark = "#860"
         )
         // When
-        val result = mapper.map(from)
+        val result = from.mapComponentColor()
         // Then
-        assertThat(result).isNotNull()
-        with(result!!) {
+        with(result) {
             assertThat(light).isEqualTo(0xFF8866FF)
             assertThat(dark).isEqualTo(0xFF886600)
         }
@@ -50,10 +47,9 @@ class StyleColorMapperTest {
             dark = "#B860"
         )
         // When
-        val result = mapper.map(from)
+        val result = from.mapComponentColor()
         // Then
-        assertThat(result).isNotNull()
-        with(result!!) {
+        with(result) {
             assertThat(light).isEqualTo(0xFFAA8866)
             assertThat(dark).isEqualTo(0x00BB8866)
         }
@@ -67,10 +63,9 @@ class StyleColorMapperTest {
             dark = "#FFFFFFFF"
         )
         // When
-        val result = mapper.map(from)
+        val result = from.mapComponentColor()
         // Then
-        assertThat(result).isNotNull()
-        with(result!!) {
+        with(result) {
             assertThat(light).isEqualTo(0x6FA0B1A8)
             assertThat(dark).isEqualTo(0xFFFFFFFF)
         }
@@ -84,22 +79,11 @@ class StyleColorMapperTest {
             dark = null
         )
         // When
-        val result = mapper.map(from)
+        val result = from.mapComponentColor()
         // Then
-        assertThat(result).isNotNull()
-        with(result!!) {
+        with(result) {
             assertThat(light).isEqualTo(0xFFAA8866)
             assertThat(dark).isEqualTo(0xFFAA8866)
         }
-    }
-
-    @Test
-    fun `map SHOULD map from null to null`() {
-        // Given
-        val from = null
-        // When
-        val result = mapper.map(from)
-        // Then
-        assertThat(result).isNull()
     }
 }

@@ -2,7 +2,7 @@ package com.appcues.data.model
 
 import com.appcues.data.MoshiConfiguration
 import com.appcues.data.mapper.step.mapPrimitive
-import com.appcues.data.mapper.styling.map
+import com.appcues.data.mapper.styling.mapComponentStyle
 import com.appcues.data.mapper.styling.mapComponentColor
 import com.appcues.data.model.styling.ComponentColor
 import com.appcues.data.model.styling.ComponentStyle
@@ -44,7 +44,7 @@ internal fun AppcuesConfigMap.getConfigInt(key: String): Int? {
 
 internal fun AppcuesConfigMap.getConfigStyle(key: String): ComponentStyle? {
     return getConfig<Any>(key)?.let {
-        MoshiConfiguration.fromAny<StyleResponse>(it).map()
+        MoshiConfiguration.fromAny<StyleResponse>(it).mapComponentStyle()
     }
 }
 

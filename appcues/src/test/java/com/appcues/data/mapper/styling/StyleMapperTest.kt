@@ -6,8 +6,6 @@ import org.junit.Test
 
 class StyleMapperTest {
 
-    private val mapper = StyleMapper()
-
     @Test
     fun `map SHOULD map from StyleResponse to StyleComponent`() {
         // Given
@@ -23,7 +21,7 @@ class StyleMapperTest {
             cornerRadius = 9.0,
         )
         // When
-        val result = mapper.map(from)
+        val result = from.mapComponentStyle()
         // Then
         with(result) {
             assertThat(marginLeading).isEqualTo(1)
@@ -43,7 +41,7 @@ class StyleMapperTest {
         // Given
         val from = null
         // When
-        val result = mapper.map(from)
+        val result = from.mapComponentStyle()
         // Then
         with(result) {
             assertThat(marginLeading).isEqualTo(0)
