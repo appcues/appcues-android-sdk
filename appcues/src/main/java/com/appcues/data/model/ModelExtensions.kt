@@ -1,12 +1,14 @@
 package com.appcues.data.model
 
 import com.appcues.data.MoshiConfiguration
-import com.appcues.data.mapper.step.StepContentMapper
-import com.appcues.data.mapper.styling.StyleColorMapper
-import com.appcues.data.mapper.styling.StyleMapper
+import com.appcues.data.mapper.step.mapPrimitive
+import com.appcues.data.mapper.styling.map
+import com.appcues.data.mapper.styling.mapComponentColor
 import com.appcues.data.model.styling.ComponentColor
 import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.data.remote.response.step.primitive.PrimitiveResponse
+import com.appcues.data.remote.response.styling.StyleColorResponse
+import com.appcues.data.remote.response.styling.StyleResponse
 
 internal typealias AppcuesConfigMap = Map<String, Any>?
 
@@ -42,21 +44,18 @@ internal fun AppcuesConfigMap.getConfigInt(key: String): Int? {
 
 internal fun AppcuesConfigMap.getConfigStyle(key: String): ComponentStyle? {
     return getConfig<Any>(key)?.let {
-        StyleMapper().map(MoshiConfiguration.fromAny(it))
+        MoshiConfiguration.fromAny<StyleResponse>(it).map()
     }
 }
 
-internal fun AppcuesConfigMap.getConfigPrimitive(key: String, stepContentMapper: StepContentMapper): ExperiencePrimitive? {
+internal fun AppcuesConfigMap.getConfigPrimitive(key: String): ExperiencePrimitive? {
     return getConfig<Any>(key)?.let {
-        val stepContentResponse = MoshiConfiguration.fromAny<PrimitiveResponse>(it)
-        return if (stepContentResponse != null) {
-            stepContentMapper.map(stepContentResponse)
-        } else null
+        MoshiConfiguration.fromAny<PrimitiveResponse>(it)?.mapPrimitive()
     }
 }
 
 internal fun AppcuesConfigMap.getConfigColor(key: String): ComponentColor? {
     return getConfig<Any>(key)?.let {
-        StyleColorMapper().map(MoshiConfiguration.fromAny(it))
+        MoshiConfiguration.fromAny<StyleColorResponse>(it)?.mapComponentColor()
     }
 }

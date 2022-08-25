@@ -2,8 +2,12 @@ package com.appcues.data.model
 
 import com.appcues.data.model.styling.ComponentContentMode
 import com.appcues.data.model.styling.ComponentContentMode.FIT
+import com.appcues.data.model.styling.ComponentControlPosition
+import com.appcues.data.model.styling.ComponentDataType
+import com.appcues.data.model.styling.ComponentDisplayFormat
 import com.appcues.data.model.styling.ComponentDistribution
 import com.appcues.data.model.styling.ComponentDistribution.CENTER
+import com.appcues.data.model.styling.ComponentSelectMode
 import com.appcues.data.model.styling.ComponentSize
 import com.appcues.data.model.styling.ComponentStyle
 import java.util.UUID
@@ -62,4 +66,35 @@ internal sealed class ExperiencePrimitive(
         val embed: String,
         val intrinsicSize: ComponentSize?,
     ) : ExperiencePrimitive(id, style)
+
+    data class TextInputPrimitive(
+        override val id: UUID,
+        override val style: ComponentStyle = ComponentStyle(),
+        val label: TextPrimitive,
+        val placeholder: String?,
+        val defaultValue: String?,
+        val required: Boolean,
+        val numberOfLines: Int,
+        val maxLength: Int?,
+        val dataType: ComponentDataType,
+        val textFieldStyle: ComponentStyle,
+    ) : ExperiencePrimitive(id, style)
+
+    data class OptionSelectPrimitive(
+        override val id: UUID,
+        override val style: ComponentStyle = ComponentStyle(),
+        val label: TextPrimitive,
+        val selectMode: ComponentSelectMode,
+        val options: List<OptionItem>,
+        val defaultValue: List<String>,
+        val required: Boolean,
+        val controlPosition: ComponentControlPosition,
+        val displayFormat: ComponentDisplayFormat,
+    ) : ExperiencePrimitive(id, style) {
+        data class OptionItem(
+            val value: String,
+            val content: ExperiencePrimitive,
+            val selectedContent: ExperiencePrimitive? = null,
+        )
+    }
 }

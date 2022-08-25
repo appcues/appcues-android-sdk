@@ -7,7 +7,6 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.invisibleToUser
 import androidx.compose.ui.semantics.semantics
-import com.appcues.data.mapper.step.StepContentMapper
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.getConfigPrimitive
 import com.appcues.trait.ContainerDecoratingTrait
@@ -23,7 +22,6 @@ import com.appcues.ui.primitive.Compose
 internal class BackgroundContentTrait(
     override val config: AppcuesConfigMap,
     private val level: ExperienceTraitLevel,
-    stepContentMapper: StepContentMapper,
 ) : ContainerDecoratingTrait, StepDecoratingTrait {
 
     companion object {
@@ -35,7 +33,7 @@ internal class BackgroundContentTrait(
 
     override val containerComposeOrder = ContainerDecoratingType.UNDERLAY
 
-    private val content = config.getConfigPrimitive("content", stepContentMapper)
+    private val content = config.getConfigPrimitive("content")
 
     @Composable
     override fun BoxScope.DecorateStep(stepDecoratingPadding: StepDecoratingPadding) {

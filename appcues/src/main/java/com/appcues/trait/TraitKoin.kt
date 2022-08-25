@@ -55,7 +55,6 @@ internal object TraitKoin : KoinScopePlugin {
         factory { params ->
             StickyContentTrait(
                 config = params.getOrNull(),
-                stepContentMapper = get(),
             )
         }
 
@@ -63,7 +62,6 @@ internal object TraitKoin : KoinScopePlugin {
             BackgroundContentTrait(
                 config = params.getOrNull(),
                 level = params.get(),
-                stepContentMapper = get(),
             )
         }
     }

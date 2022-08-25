@@ -13,7 +13,6 @@ import com.appcues.trait.StepDecoratingTrait
 import java.util.UUID
 
 internal class StepMapper(
-    private val stepContentMapper: StepContentMapper,
     private val traitsMapper: TraitsMapper,
     private val actionsMapper: ActionsMapper,
 ) {
@@ -29,7 +28,7 @@ internal class StepMapper(
 
         return Step(
             id = from.id,
-            content = stepContentMapper.map(from.content),
+            content = from.content.mapPrimitive(),
             stepDecoratingTraits = traitsMapper.map(mergedTraits).filterIsInstance(StepDecoratingTrait::class.java),
             actions = actionsMapper.map(mergedActions),
             type = from.type,
