@@ -18,6 +18,8 @@ import com.appcues.data.model.ExperiencePrimitive.ButtonPrimitive
 import com.appcues.data.model.ExperiencePrimitive.EmbedHtmlPrimitive
 import com.appcues.data.model.ExperiencePrimitive.HorizontalStackPrimitive
 import com.appcues.data.model.ExperiencePrimitive.ImagePrimitive
+import com.appcues.data.model.ExperiencePrimitive.OptionSelectPrimitive
+import com.appcues.data.model.ExperiencePrimitive.TextInputPrimitive
 import com.appcues.data.model.ExperiencePrimitive.TextPrimitive
 import com.appcues.data.model.ExperiencePrimitive.VerticalStackPrimitive
 import com.appcues.data.model.styling.ComponentStyle
@@ -65,12 +67,18 @@ internal fun ExperiencePrimitive.Compose(matchParentBox: BoxScope? = null) {
                 is ImagePrimitive -> Compose(modifier, matchParentBox)
                 is TextPrimitive -> Compose(modifier)
                 is VerticalStackPrimitive -> Compose(modifier)
+                is TextInputPrimitive -> throw NotImplementedError()
+                is OptionSelectPrimitive -> throw NotImplementedError()
             }
         }
     }
 }
 
 private fun ExperiencePrimitive.getRole(): Role {
+    // This is for any tap actions in the experience which currently only
+    // apply to Buttons.  There is not really a role for TextInput for instance,
+    // but it also never actually gets used since we don't attach actions to those.
+    // If they did have tap actions, presumably the Button Role would be appropriate.
     return when (this) {
         is VerticalStackPrimitive -> Role.Button
         is BoxPrimitive -> Role.Button
@@ -79,6 +87,8 @@ private fun ExperiencePrimitive.getRole(): Role {
         is HorizontalStackPrimitive -> Role.Button
         is ImagePrimitive -> Role.Image
         is TextPrimitive -> Role.Button
+        is TextInputPrimitive -> Role.Button
+        is OptionSelectPrimitive -> Role.Button
     }
 }
 

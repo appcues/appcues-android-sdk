@@ -3,20 +3,13 @@ package com.appcues.data.mapper.styling
 import com.appcues.data.model.styling.ComponentShadow
 import com.appcues.data.remote.response.styling.StyleShadowResponse
 
-internal class StyleShadowMapper(
-    private val styleColorMapper: StyleColorMapper = StyleColorMapper(),
-) {
+internal fun StyleShadowResponse.mapComponentShadow(): ComponentShadow? {
+    val componentColor = color.mapComponentColor()
 
-    fun map(from: StyleShadowResponse?): ComponentShadow? {
-        if (from == null) return null
-
-        val componentColor = styleColorMapper.map(from.color) ?: return null
-
-        return ComponentShadow(
-            color = componentColor,
-            radius = from.radius,
-            x = from.x,
-            y = from.y,
-        )
-    }
+    return ComponentShadow(
+        color = componentColor,
+        radius = radius,
+        x = x,
+        y = y,
+    )
 }

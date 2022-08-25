@@ -1,5 +1,6 @@
 package com.appcues.data.remote.response.step.primitive
 
+import com.appcues.data.model.ExperiencePrimitive.OptionSelectPrimitive.OptionItem
 import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.Type.BLOCK
 import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.Type.BOX
 import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.Type.BUTTON
@@ -79,14 +80,14 @@ internal sealed class PrimitiveResponse(
 
     internal data class OptionSelectPrimitiveResponse(
         val id: UUID,
-        val style: StyleResponse? = null,
+        val style: StyleResponse?,
         val label: TextPrimitiveResponse,
         val selectMode: String,
         val options: List<OptionItem>,
-        val defaultValue: List<String> = listOf(),
-        val required: Boolean = false,
-        val controlPosition: String = "leading",
-        val displayFormat: String = "verticalList",
+        val defaultValue: List<String>?,
+        val required: Boolean?,
+        val controlPosition: String?,
+        val displayFormat: String?,
     ) : PrimitiveResponse(OPTION_SELECT) {
 
         data class OptionItem(
@@ -100,12 +101,12 @@ internal sealed class PrimitiveResponse(
         val id: UUID,
         val style: StyleResponse? = null,
         val label: TextPrimitiveResponse,
-        val placeholder: String? = null,
-        val defaultValue: String? = null,
-        val required: Boolean = false,
-        val numberOfLines: Int = 1,
-        val maxLength: Int? = null,
-        val dataType: String = "text",
-        val textFieldStyle: StyleResponse? = null,
+        val placeholder: String?,
+        val defaultValue: String?,
+        val required: Boolean?,
+        val numberOfLines: Int?,
+        val maxLength: Int?,
+        val dataType: String?,
+        val textFieldStyle: StyleResponse?,
     ) : PrimitiveResponse(TEXT_INPUT)
 }
