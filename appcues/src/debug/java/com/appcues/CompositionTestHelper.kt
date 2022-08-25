@@ -11,9 +11,10 @@ import com.appcues.data.mapper.step.primitives.EmbedPrimitiveMapper
 import com.appcues.data.mapper.step.primitives.ImagePrimitiveMapper
 import com.appcues.data.mapper.step.primitives.StackPrimitiveMapper
 import com.appcues.data.mapper.step.primitives.TextPrimitiveMapper
-import com.appcues.data.model.ExperiencePrimitive
 import com.appcues.data.remote.response.step.StepContentResponse
+import com.appcues.logging.Logcues
 import com.appcues.ui.LocalImageLoader
+import com.appcues.ui.LocalLogcues
 import com.appcues.ui.primitive.Compose
 
 @Composable
@@ -29,7 +30,10 @@ fun ComposeContent(json: String, imageLoader: ImageLoader) {
     )
     val primitive = mapper.map(response!!)
 
-    CompositionLocalProvider(LocalImageLoader provides imageLoader) {
+    CompositionLocalProvider(
+        LocalImageLoader provides imageLoader,
+        LocalLogcues provides Logcues(LoggingLevel.DEBUG)
+    ) {
         primitive.Compose()
     }
 }
