@@ -20,10 +20,13 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.core.os.bundleOf
@@ -39,6 +42,9 @@ import com.appcues.ui.AppcuesViewModel.UIState.Dismissing
 import com.appcues.ui.AppcuesViewModel.UIState.Rendering
 import com.appcues.ui.primitive.Compose
 import com.appcues.ui.theme.AppcuesTheme
+import com.appcues.ui.utils.margin
+import com.appcues.util.getNavigationBarHeight
+import com.appcues.util.getStatusBarHeight
 import org.koin.core.scope.Scope
 
 internal class AppcuesActivity : AppCompatActivity() {
@@ -95,7 +101,9 @@ internal class AppcuesActivity : AppCompatActivity() {
             LocalLogcues provides scope.get(),
         ) {
             Box(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .margin(rememberSystemMarginsState().value),
                 contentAlignment = Alignment.Center,
             ) {
                 // collect all UIState
@@ -116,6 +124,16 @@ internal class AppcuesActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    @Composable
+    private fun rememberSystemMarginsState(): State<PaddingValues> {
+        val density = LocalDensity.current
+        val topMargin = rememberUpdatedState(newValue = with(density) { LocalContext.current.getStatusBarHeight().toDp() })
+        val bottomMargin = rememberUpdatedState(newValue = with(density) { LocalContext.current.getNavigationBarHeight().toDp() })
+        // will calculate status bar height and navigation bar height and return it in PaddingValues
+        // this is derived state to handle possible changes to values in top and bottom margin
+        return derivedStateOf { PaddingValues(top = topMargin.value, bottom = bottomMargin.value) }
     }
 
     @Composable
