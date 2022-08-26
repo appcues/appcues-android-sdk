@@ -3,8 +3,11 @@ package com.appcues.data.model
 import com.appcues.data.model.styling.ComponentContentMode
 import com.appcues.data.model.styling.ComponentContentMode.FIT
 import com.appcues.data.model.styling.ComponentControlPosition
+import com.appcues.data.model.styling.ComponentControlPosition.LEADING
 import com.appcues.data.model.styling.ComponentDataType
+import com.appcues.data.model.styling.ComponentDataType.TEXT
 import com.appcues.data.model.styling.ComponentDisplayFormat
+import com.appcues.data.model.styling.ComponentDisplayFormat.VERTICAL_LIST
 import com.appcues.data.model.styling.ComponentDistribution
 import com.appcues.data.model.styling.ComponentDistribution.CENTER
 import com.appcues.data.model.styling.ComponentSelectMode
@@ -71,13 +74,13 @@ internal sealed class ExperiencePrimitive(
         override val id: UUID,
         override val style: ComponentStyle = ComponentStyle(),
         val label: TextPrimitive,
-        val placeholder: String?,
-        val defaultValue: String?,
-        val required: Boolean,
-        val numberOfLines: Int,
-        val maxLength: Int?,
-        val dataType: ComponentDataType,
-        val textFieldStyle: ComponentStyle,
+        val placeholder: String? = null,
+        val defaultValue: String? = null,
+        val required: Boolean = false,
+        val numberOfLines: Int = 1,
+        val maxLength: Int? = null,
+        val dataType: ComponentDataType = TEXT,
+        val textFieldStyle: ComponentStyle = ComponentStyle(),
     ) : ExperiencePrimitive(id, style)
 
     data class OptionSelectPrimitive(
@@ -86,10 +89,10 @@ internal sealed class ExperiencePrimitive(
         val label: TextPrimitive,
         val selectMode: ComponentSelectMode,
         val options: List<OptionItem>,
-        val defaultValue: List<String>,
-        val required: Boolean,
-        val controlPosition: ComponentControlPosition,
-        val displayFormat: ComponentDisplayFormat,
+        val defaultValue: List<String> = listOf(),
+        val required: Boolean = false,
+        val controlPosition: ComponentControlPosition = LEADING,
+        val displayFormat: ComponentDisplayFormat = VERTICAL_LIST,
     ) : ExperiencePrimitive(id, style) {
         data class OptionItem(
             val value: String,

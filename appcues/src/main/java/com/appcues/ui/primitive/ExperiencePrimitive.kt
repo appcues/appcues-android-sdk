@@ -67,8 +67,8 @@ internal fun ExperiencePrimitive.Compose(matchParentBox: BoxScope? = null) {
                 is ImagePrimitive -> Compose(modifier, matchParentBox)
                 is TextPrimitive -> Compose(modifier)
                 is VerticalStackPrimitive -> Compose(modifier)
-                is TextInputPrimitive -> throw NotImplementedError()
-                is OptionSelectPrimitive -> throw NotImplementedError()
+                is TextInputPrimitive -> Compose(modifier)
+                is OptionSelectPrimitive -> Compose(modifier)
             }
         }
     }
