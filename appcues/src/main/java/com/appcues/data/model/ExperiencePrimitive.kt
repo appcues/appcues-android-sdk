@@ -89,7 +89,7 @@ internal sealed class ExperiencePrimitive(
         val label: TextPrimitive,
         val selectMode: ComponentSelectMode,
         val options: List<OptionItem>,
-        val defaultValue: List<String> = listOf(),
+        val defaultValue: Set<String> = setOf(),
         val required: Boolean = false,
         val controlPosition: ComponentControlPosition = LEADING,
         val displayFormat: ComponentDisplayFormat = VERTICAL_LIST,

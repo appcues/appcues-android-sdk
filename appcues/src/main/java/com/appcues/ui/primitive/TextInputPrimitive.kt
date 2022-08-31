@@ -7,10 +7,9 @@ import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
@@ -25,6 +24,8 @@ import com.appcues.data.model.styling.ComponentDataType.NAME
 import com.appcues.data.model.styling.ComponentDataType.NUMBER
 import com.appcues.data.model.styling.ComponentDataType.PHONE
 import com.appcues.data.model.styling.ComponentDataType.TEXT
+import com.appcues.ui.ExperienceStepFormItem.SingleTextFormItem
+import com.appcues.ui.LocalExperienceStepFormStateDelegate
 import com.appcues.ui.extensions.applyStyle
 import com.appcues.ui.theme.AppcuesPreviewPrimitive
 import java.util.UUID
@@ -32,16 +33,21 @@ import java.util.UUID
 @Composable
 internal fun TextInputPrimitive.Compose(modifier: Modifier) {
 
-    var text by remember { mutableStateOf(defaultValue ?: "") }
+    val formState = LocalExperienceStepFormStateDelegate.current
+    val text = remember { mutableStateOf(defaultValue ?: "") }
+
+    LaunchedEffect(key1 = text.value) {
+        formState.captureFormItem(this@Compose.id, SingleTextFormItem(label.text, required, text.value))
+    }
 
     // TBD what this should actually look like in our product, and how builder
     // styling options will apply.
     // Several customization options for TextField noted here https://stackoverflow.com/a/68592613
     TextField(
-        value = text,
+        value = text.value,
         onValueChange = {
             if (maxLength == null || it.length <= maxLength) {
-                text = it
+                text.value = it
             }
         },
         modifier = modifier,

@@ -84,7 +84,7 @@ internal sealed class PrimitiveResponse(
         val label: TextPrimitiveResponse,
         val selectMode: String,
         val options: List<OptionItem>,
-        val defaultValue: List<String>?,
+        val defaultValue: Set<String>?,
         val required: Boolean?,
         val controlPosition: String?,
         val displayFormat: String?,
