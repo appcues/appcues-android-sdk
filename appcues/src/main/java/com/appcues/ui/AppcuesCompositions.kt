@@ -37,6 +37,8 @@ internal val appcuesPaginationData = mutableStateOf(AppcuesPaginationData(1, 0, 
 
 internal val LocalLogcues = staticCompositionLocalOf<Logcues> { noLocalProvidedFor("LocalLogcues") }
 
+internal val LocalExperienceStepFormStateDelegate = compositionLocalOf { ExperienceStepFormState() }
+
 private fun noLocalProvidedFor(name: String): Nothing {
     error("CompositionLocal $name not present")
 }
