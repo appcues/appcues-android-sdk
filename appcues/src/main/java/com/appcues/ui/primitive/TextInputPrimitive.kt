@@ -32,6 +32,7 @@ import com.appcues.data.model.styling.ComponentDataType.TEXT
 import com.appcues.ui.ExperienceStepFormItem.SingleTextFormItem
 import com.appcues.ui.LocalExperienceStepFormStateDelegate
 import com.appcues.ui.extensions.applyStyle
+import com.appcues.ui.extensions.getColor
 import com.appcues.ui.extensions.getHorizontalAlignment
 import com.appcues.ui.theme.AppcuesPreviewPrimitive
 import java.util.UUID
@@ -79,8 +80,8 @@ internal fun TextInputPrimitive.Compose(modifier: Modifier) {
             colors = TextFieldDefaults.textFieldColors(
                 backgroundColor = Color.Transparent,
                 cursorColor = Color.Black,
-                focusedIndicatorColor = Color.LightGray,
-                unfocusedIndicatorColor = Color.LightGray
+                focusedIndicatorColor = textFieldStyle.borderColor?.getColor(isSystemInDarkTheme()) ?: Color.Transparent,
+                unfocusedIndicatorColor = textFieldStyle.borderColor?.getColor(isSystemInDarkTheme()) ?: Color.Transparent,
             ),
         )
     }
