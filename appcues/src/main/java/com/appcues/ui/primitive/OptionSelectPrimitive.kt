@@ -29,7 +29,6 @@ import com.appcues.data.model.styling.ComponentControlPosition.TOP
 import com.appcues.data.model.styling.ComponentControlPosition.TRAILING
 import com.appcues.data.model.styling.ComponentDisplayFormat.HORIZONTAL_LIST
 import com.appcues.data.model.styling.ComponentDisplayFormat.PICKER
-import com.appcues.data.model.styling.ComponentDisplayFormat.VERTICAL_LIST
 import com.appcues.data.model.styling.ComponentSelectMode
 import com.appcues.data.model.styling.ComponentSelectMode.MULTIPLE
 import com.appcues.data.model.styling.ComponentSelectMode.SINGLE
@@ -76,7 +75,7 @@ internal fun OptionSelectPrimitive.Compose(modifier: Modifier) {
                     }
                 }
             }
-            displayFormat == VERTICAL_LIST -> {
+            else -> { // VERTICAL_LIST case or a fallback (i.e. a PICKER but with multi-select, invalid)
                 Column(horizontalAlignment = Alignment.Start) {
                     options.ComposeSelections(
                         selectedValues = selectedValues.value,
