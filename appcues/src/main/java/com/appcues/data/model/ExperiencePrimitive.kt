@@ -1,5 +1,6 @@
 package com.appcues.data.model
 
+import com.appcues.data.model.styling.ComponentColor
 import com.appcues.data.model.styling.ComponentContentMode
 import com.appcues.data.model.styling.ComponentContentMode.FIT
 import com.appcues.data.model.styling.ComponentControlPosition
@@ -74,13 +75,14 @@ internal sealed class ExperiencePrimitive(
         override val id: UUID,
         override val style: ComponentStyle = ComponentStyle(),
         val label: TextPrimitive,
-        val placeholder: String? = null,
+        val placeholder: ExperiencePrimitive? = null,
         val defaultValue: String? = null,
         val required: Boolean = false,
         val numberOfLines: Int = 1,
         val maxLength: Int? = null,
         val dataType: ComponentDataType = TEXT,
         val textFieldStyle: ComponentStyle = ComponentStyle(),
+        val cursorColor: ComponentColor? = null,
     ) : ExperiencePrimitive(id, style)
 
     data class OptionSelectPrimitive(
@@ -93,6 +95,11 @@ internal sealed class ExperiencePrimitive(
         val required: Boolean = false,
         val controlPosition: ComponentControlPosition = LEADING,
         val displayFormat: ComponentDisplayFormat = VERTICAL_LIST,
+        val pickerStyle: ComponentStyle? = ComponentStyle(),
+        val placeholder: ExperiencePrimitive? = null,
+        val selectedColor: ComponentColor? = null,
+        val unselectedColor: ComponentColor? = null,
+        val accentColor: ComponentColor? = null,
     ) : ExperiencePrimitive(id, style) {
         data class OptionItem(
             val value: String,

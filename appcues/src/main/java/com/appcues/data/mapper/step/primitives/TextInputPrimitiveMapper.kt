@@ -1,5 +1,6 @@
 package com.appcues.data.mapper.step.primitives
 
+import com.appcues.data.mapper.styling.mapComponentColor
 import com.appcues.data.mapper.styling.mapComponentStyle
 import com.appcues.data.model.ExperiencePrimitive.TextInputPrimitive
 import com.appcues.data.model.styling.ComponentDataType
@@ -9,13 +10,14 @@ internal fun TextInputPrimitiveResponse.mapTextInputPrimitive() = TextInputPrimi
     id = id,
     style = style.mapComponentStyle(),
     label = label.mapTextPrimitive(),
-    placeholder = placeholder,
+    placeholder = placeholder?.mapTextPrimitive(),
     defaultValue = defaultValue,
     required = required ?: false,
     numberOfLines = numberOfLines ?: 1,
     maxLength = maxLength,
     dataType = mapComponentDataType(dataType),
     textFieldStyle = textFieldStyle.mapComponentStyle(),
+    cursorColor = cursorColor?.mapComponentColor(),
 )
 
 private fun mapComponentDataType(value: String?) = when (value) {

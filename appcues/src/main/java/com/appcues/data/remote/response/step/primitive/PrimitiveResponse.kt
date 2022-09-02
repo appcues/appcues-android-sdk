@@ -10,6 +10,7 @@ import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.Type.OP
 import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.Type.STACK
 import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.Type.TEXT
 import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.Type.TEXT_INPUT
+import com.appcues.data.remote.response.styling.StyleColorResponse
 import com.appcues.data.remote.response.styling.StyleResponse
 import com.appcues.data.remote.response.styling.StyleSizeResponse
 import java.util.UUID
@@ -88,6 +89,11 @@ internal sealed class PrimitiveResponse(
         val required: Boolean?,
         val controlPosition: String?,
         val displayFormat: String?,
+        val placeholder: PrimitiveResponse?,
+        val pickerStyle: StyleResponse?,
+        val selectedColor: StyleColorResponse?,
+        val unselectedColor: StyleColorResponse?,
+        val accentColor: StyleColorResponse?,
     ) : PrimitiveResponse(OPTION_SELECT) {
 
         data class OptionItem(
@@ -101,12 +107,13 @@ internal sealed class PrimitiveResponse(
         val id: UUID,
         val style: StyleResponse? = null,
         val label: TextPrimitiveResponse,
-        val placeholder: String?,
+        val placeholder: TextPrimitiveResponse?,
         val defaultValue: String?,
         val required: Boolean?,
         val numberOfLines: Int?,
         val maxLength: Int?,
         val dataType: String?,
         val textFieldStyle: StyleResponse?,
+        val cursorColor: StyleColorResponse?,
     ) : PrimitiveResponse(TEXT_INPUT)
 }
