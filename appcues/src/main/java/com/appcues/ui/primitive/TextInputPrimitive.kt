@@ -6,8 +6,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.LocalTextStyle
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -34,6 +34,7 @@ import com.appcues.ui.LocalExperienceStepFormStateDelegate
 import com.appcues.ui.extensions.applyStyle
 import com.appcues.ui.extensions.getColor
 import com.appcues.ui.extensions.getHorizontalAlignment
+import com.appcues.ui.extensions.styleBorder
 import com.appcues.ui.theme.AppcuesPreviewPrimitive
 import java.util.UUID
 
@@ -61,7 +62,9 @@ internal fun TextInputPrimitive.Compose(modifier: Modifier) {
                     text.value = it
                 }
             },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .styleBorder(textFieldStyle, isSystemInDarkTheme()),
             textStyle = LocalTextStyle.current.applyStyle(
                 style = textFieldStyle,
                 context = LocalContext.current,
@@ -71,17 +74,17 @@ internal fun TextInputPrimitive.Compose(modifier: Modifier) {
             maxLines = numberOfLines,
             singleLine = numberOfLines == 1,
             placeholder = placeholder?.let {
-                // future plan is to replace this with a text primitive directly
                 {
-                    Text(text = it)
+                    it.Compose()
                 }
             },
             keyboardOptions = KeyboardOptions(keyboardType = mapKeyboardType(dataType)),
             colors = TextFieldDefaults.textFieldColors(
                 backgroundColor = Color.Transparent,
-                cursorColor = Color.Black,
-                focusedIndicatorColor = textFieldStyle.borderColor?.getColor(isSystemInDarkTheme()) ?: Color.Transparent,
-                unfocusedIndicatorColor = textFieldStyle.borderColor?.getColor(isSystemInDarkTheme()) ?: Color.Transparent,
+                // the builder should always send this value, but default to the theme like the standard default behavior
+                cursorColor = cursorColor?.getColor(isSystemInDarkTheme()) ?: MaterialTheme.colors.primary,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
             ),
         )
     }

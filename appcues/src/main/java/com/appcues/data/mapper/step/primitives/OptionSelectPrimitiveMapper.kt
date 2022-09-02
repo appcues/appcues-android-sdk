@@ -1,6 +1,7 @@
 package com.appcues.data.mapper.step.primitives
 
 import com.appcues.data.mapper.step.mapPrimitive
+import com.appcues.data.mapper.styling.mapComponentColor
 import com.appcues.data.mapper.styling.mapComponentStyle
 import com.appcues.data.model.ExperiencePrimitive.OptionSelectPrimitive
 import com.appcues.data.model.ExperiencePrimitive.OptionSelectPrimitive.OptionItem
@@ -19,6 +20,11 @@ internal fun OptionSelectPrimitiveResponse.mapOptionSelectPrimitive() = OptionSe
     required = required ?: false,
     controlPosition = mapComponentControlPosition(controlPosition),
     displayFormat = mapComponentDisplayFormat(displayFormat),
+    pickerStyle = pickerStyle?.mapComponentStyle(),
+    placeholder = placeholder?.mapPrimitive(),
+    selectedColor = selectedColor?.mapComponentColor(),
+    unselectedColor = unselectedColor?.mapComponentColor(),
+    accentColor = accentColor?.mapComponentColor()
 )
 
 private fun mapComponentSelectMode(value: String) = when (value) {

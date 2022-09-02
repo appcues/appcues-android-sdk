@@ -2,13 +2,20 @@ package com.appcues.ui.primitive
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.Checkbox
 import androidx.compose.material.CheckboxDefaults
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.RadioButton
 import androidx.compose.material.RadioButtonDefaults
 import androidx.compose.runtime.Composable
@@ -20,6 +27,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.unit.dp
+import com.appcues.R
+import com.appcues.data.model.ExperiencePrimitive
 import com.appcues.data.model.ExperiencePrimitive.OptionSelectPrimitive
 import com.appcues.data.model.styling.ComponentControlPosition
 import com.appcues.data.model.styling.ComponentControlPosition.BOTTOM
@@ -32,10 +44,13 @@ import com.appcues.data.model.styling.ComponentDisplayFormat.PICKER
 import com.appcues.data.model.styling.ComponentSelectMode
 import com.appcues.data.model.styling.ComponentSelectMode.MULTIPLE
 import com.appcues.data.model.styling.ComponentSelectMode.SINGLE
+import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.ui.ExperienceStepFormItem.MultipleTextFormItem
 import com.appcues.ui.ExperienceStepFormItem.SingleTextFormItem
 import com.appcues.ui.LocalExperienceStepFormStateDelegate
+import com.appcues.ui.extensions.getColor
 import com.appcues.ui.extensions.getHorizontalAlignment
+import com.appcues.ui.extensions.styleBorder
 
 @Composable
 internal fun OptionSelectPrimitive.Compose(modifier: Modifier) {
@@ -60,7 +75,12 @@ internal fun OptionSelectPrimitive.Compose(modifier: Modifier) {
 
         when {
             selectMode == SINGLE && displayFormat == PICKER -> {
-                options.ComposePicker(selectedValues = selectedValues.value) {
+                options.ComposePicker(
+                    selectedValues = selectedValues.value,
+                    modifier = Modifier.styleBorder(pickerStyle ?: ComponentStyle(), isSystemInDarkTheme()),
+                    placeholder = placeholder,
+                    accentColor = accentColor?.getColor(isSystemInDarkTheme()),
+                ) {
                     selectedValues.value = it
                 }
             }
@@ -69,7 +89,10 @@ internal fun OptionSelectPrimitive.Compose(modifier: Modifier) {
                     options.ComposeSelections(
                         selectedValues = selectedValues.value,
                         selectMode = selectMode,
-                        controlPosition = controlPosition
+                        controlPosition = controlPosition,
+                        selectedColor = selectedColor.getColor(isSystemInDarkTheme()),
+                        unselectedColor = unselectedColor.getColor(isSystemInDarkTheme()),
+                        accentColor = accentColor.getColor(isSystemInDarkTheme()),
                     ) {
                         selectedValues.value = it
                     }
@@ -80,7 +103,10 @@ internal fun OptionSelectPrimitive.Compose(modifier: Modifier) {
                     options.ComposeSelections(
                         selectedValues = selectedValues.value,
                         selectMode = selectMode,
-                        controlPosition = controlPosition
+                        controlPosition = controlPosition,
+                        selectedColor = selectedColor.getColor(isSystemInDarkTheme()),
+                        unselectedColor = unselectedColor.getColor(isSystemInDarkTheme()),
+                        accentColor = accentColor.getColor(isSystemInDarkTheme()),
                     ) {
                         selectedValues.value = it
                     }
@@ -95,6 +121,9 @@ private fun List<OptionSelectPrimitive.OptionItem>.ComposeSelections(
     selectedValues: Set<String>,
     selectMode: ComponentSelectMode,
     controlPosition: ComponentControlPosition,
+    selectedColor: Color?,
+    unselectedColor: Color?,
+    accentColor: Color?,
     valueSelectionChanged: (Set<String>) -> Unit,
 ) {
     forEach {
@@ -105,7 +134,7 @@ private fun List<OptionSelectPrimitive.OptionItem>.ComposeSelections(
                     // in single select (radio), you cannot deselect an item
                     // only select a new one.
                     if (selected) {
-                        val set = mutableSetOf<String>(value)
+                        val set = mutableSetOf(value)
                         valueSelectionChanged(set)
                     }
                 }
@@ -121,20 +150,20 @@ private fun List<OptionSelectPrimitive.OptionItem>.ComposeSelections(
 
         when (controlPosition) {
             LEADING -> Row(verticalAlignment = Alignment.CenterVertically) {
-                selectMode.Compose(selected = isSelected) { updateSelection(it.value, !isSelected) }
+                selectMode.Compose(isSelected, selectedColor, unselectedColor, accentColor) { updateSelection(it.value, !isSelected) }
                 it.content.Compose()
             }
             TRAILING -> Row(verticalAlignment = Alignment.CenterVertically) {
                 it.content.Compose()
-                selectMode.Compose(selected = isSelected) { updateSelection(it.value, !isSelected) }
+                selectMode.Compose(isSelected, selectedColor, unselectedColor, accentColor) { updateSelection(it.value, !isSelected) }
             }
             TOP -> Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                selectMode.Compose(selected = isSelected) { updateSelection(it.value, !isSelected) }
+                selectMode.Compose(isSelected, selectedColor, unselectedColor, accentColor) { updateSelection(it.value, !isSelected) }
                 it.content.Compose()
             }
             BOTTOM -> Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 it.content.Compose()
-                selectMode.Compose(selected = isSelected) { updateSelection(it.value, !isSelected) }
+                selectMode.Compose(isSelected, selectedColor, unselectedColor, accentColor) { updateSelection(it.value, !isSelected) }
             }
             HIDDEN -> Box(modifier = Modifier.clickable { updateSelection(it.value, !isSelected) }) {
                 it.content.Compose()
@@ -146,6 +175,9 @@ private fun List<OptionSelectPrimitive.OptionItem>.ComposeSelections(
 @Composable
 private fun ComponentSelectMode.Compose(
     selected: Boolean,
+    selectedColor: Color?,
+    unselectedColor: Color?,
+    accentColor: Color?,
     selectionToggled: () -> Unit,
 ) {
     when (this) {
@@ -153,10 +185,10 @@ private fun ComponentSelectMode.Compose(
             RadioButton(
                 selected = selected,
                 onClick = selectionToggled,
-                // TBD: how will builder supply desired styling for colors
                 colors = RadioButtonDefaults.colors(
-                    selectedColor = Color.DarkGray,
-                    unselectedColor = Color.DarkGray,
+                    // the builder should always send these values, but default to the theme like the standard default behavior
+                    selectedColor = selectedColor ?: MaterialTheme.colors.secondary,
+                    unselectedColor = unselectedColor ?: MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
                 )
             )
         }
@@ -164,11 +196,11 @@ private fun ComponentSelectMode.Compose(
             Checkbox(
                 checked = selected,
                 onCheckedChange = { selectionToggled() },
-                // TBD: how will builder supply desired styling for colors
                 colors = CheckboxDefaults.colors(
-                    checkedColor = Color.DarkGray,
-                    uncheckedColor = Color.DarkGray,
-                    checkmarkColor = Color.White,
+                    // the builder should always send these values, but default to the theme like the standard default behavior
+                    checkedColor = selectedColor ?: MaterialTheme.colors.secondary,
+                    uncheckedColor = unselectedColor ?: MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
+                    checkmarkColor = accentColor ?: MaterialTheme.colors.surface,
                 )
             )
         }
@@ -178,15 +210,34 @@ private fun ComponentSelectMode.Compose(
 @Composable
 private fun List<OptionSelectPrimitive.OptionItem>.ComposePicker(
     selectedValues: Set<String>,
+    modifier: Modifier,
+    placeholder: ExperiencePrimitive?,
+    accentColor: Color?,
     valueSelectionChanged: (Set<String>) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
     Box(modifier = Modifier.clickable(onClick = { expanded = true })) {
         // 1. render the selected item as the collapsed state
-        // TBD: what if no selected value? some placeholder?
-        // design pending
-        selectedValues.firstOrNull()?.let { selectedValue ->
-            this@ComposePicker.firstOrNull { it.value == selectedValue }?.content?.Compose()
+        Row(modifier = modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            // we should always either have a selected item, or a placeholder, or this will just be a blank
+            // box with a dropdown arrow
+            val selectedValue = selectedValues.firstOrNull()
+            if (selectedValue != null) {
+                // if we have a selected value, we assume one of our options will match it, and compose it
+                this@ComposePicker.firstOrNull { it.value == selectedValue }?.content?.Compose()
+            } else {
+                // no selection, render a placeholder, if exists
+                placeholder?.Compose()
+            }
+            Spacer(modifier = Modifier.weight(1.0f))
+            Icon(
+                modifier = Modifier
+                    .padding(all = 14.dp)
+                    .size(size = 20.dp),
+                contentDescription = null,
+                imageVector = ImageVector.vectorResource(id = R.drawable.appcues_ic_drop_down),
+                tint = accentColor ?: MaterialTheme.colors.secondary,
+            )
         }
         // 2. the dropdown menu for selection that shows on expanded state
         DropdownMenu(
