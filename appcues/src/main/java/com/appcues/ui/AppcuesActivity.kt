@@ -242,7 +242,7 @@ internal class AppcuesActivity : AppCompatActivity() {
                 .padding(paddingValues = stepDecoratingPadding.paddingValues.value)
                 .testTag("page_$index")
         ) {
-            CompositionLocalProvider(LocalExperienceStepFormStateDelegate provides ExperienceStepFormState()) {
+            CompositionLocalProvider(LocalExperienceStepFormStateDelegate provides formState) {
                 content.Compose()
             }
         }

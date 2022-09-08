@@ -19,7 +19,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.RadioButton
 import androidx.compose.material.RadioButtonDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,8 +45,6 @@ import com.appcues.data.model.styling.ComponentSelectMode
 import com.appcues.data.model.styling.ComponentSelectMode.MULTIPLE
 import com.appcues.data.model.styling.ComponentSelectMode.SINGLE
 import com.appcues.data.model.styling.ComponentStyle
-import com.appcues.ui.ExperienceStepFormItem.MultipleTextFormItem
-import com.appcues.ui.ExperienceStepFormItem.SingleTextFormItem
 import com.appcues.ui.LocalExperienceStepFormStateDelegate
 import com.appcues.ui.extensions.getColor
 import com.appcues.ui.extensions.getHorizontalAlignment
@@ -56,14 +53,11 @@ import com.appcues.ui.extensions.styleBorder
 @Composable
 internal fun OptionSelectPrimitive.Compose(modifier: Modifier) {
     val formState = LocalExperienceStepFormStateDelegate.current
-    val selectedValues = remember { mutableStateOf(defaultValue) }
+    val selectedValues = remember { mutableStateOf(formState.getValue(this)) }
 
-    LaunchedEffect(key1 = selectedValues.value) {
-        val formItem = when (selectMode) {
-            MULTIPLE -> MultipleTextFormItem(label.text, required, selectedValues.value)
-            SINGLE -> SingleTextFormItem(label.text, required, selectedValues.value.firstOrNull() ?: "")
-        }
-        formState.captureFormItem(this@Compose.id, formItem)
+    fun setSelectedValues(values: Set<String>) {
+        selectedValues.value = values
+        formState.setValue(this, values)
     }
 
     Column(
@@ -82,7 +76,7 @@ internal fun OptionSelectPrimitive.Compose(modifier: Modifier) {
                     placeholder = placeholder,
                     accentColor = accentColor?.getColor(isSystemInDarkTheme()),
                 ) {
-                    selectedValues.value = it
+                    setSelectedValues(it)
                 }
             }
             displayFormat == HORIZONTAL_LIST -> {
@@ -95,7 +89,7 @@ internal fun OptionSelectPrimitive.Compose(modifier: Modifier) {
                         unselectedColor = unselectedColor.getColor(isSystemInDarkTheme()),
                         accentColor = accentColor.getColor(isSystemInDarkTheme()),
                     ) {
-                        selectedValues.value = it
+                        setSelectedValues(it)
                     }
                 }
             }
@@ -109,7 +103,7 @@ internal fun OptionSelectPrimitive.Compose(modifier: Modifier) {
                         unselectedColor = unselectedColor.getColor(isSystemInDarkTheme()),
                         accentColor = accentColor.getColor(isSystemInDarkTheme()),
                     ) {
-                        selectedValues.value = it
+                        setSelectedValues(it)
                     }
                 }
             }
