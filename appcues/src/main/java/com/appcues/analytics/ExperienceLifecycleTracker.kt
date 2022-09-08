@@ -7,6 +7,8 @@ import com.appcues.analytics.ExperienceLifecycleEvent.ExperienceError
 import com.appcues.analytics.ExperienceLifecycleEvent.ExperienceStarted
 import com.appcues.analytics.ExperienceLifecycleEvent.StepCompleted
 import com.appcues.analytics.ExperienceLifecycleEvent.StepError
+import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction
+import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType.FORM_SUBMITTED
 import com.appcues.analytics.ExperienceLifecycleEvent.StepSeen
 import com.appcues.statemachine.Error
 import com.appcues.statemachine.State
@@ -55,6 +57,15 @@ internal class ExperienceLifecycleTracker(
                     }
                     is EndingStep -> {
                         trackLifecycleEvent(StepCompleted(it.experience, it.flatStepIndex))
+
+                        // TESTING!
+                        // this is a spot where we can output the interaction analytics to validate structure, but still TBD
+                        // on the rules around when these should be submitted related to actions in the UI.  Also, may need
+                        // a way to plug in user profile attributes with the form answers, as web does.
+                        val formState = it.experience.flatSteps[it.flatStepIndex].formState
+                        if (formState.formItems.any() && formState.isFormComplete.value) {
+                            trackLifecycleEvent(StepInteraction(it.experience, it.flatStepIndex, FORM_SUBMITTED))
+                        }
                     }
                     is EndingExperience -> {
                         if (it.isExperienceCompleted()) {

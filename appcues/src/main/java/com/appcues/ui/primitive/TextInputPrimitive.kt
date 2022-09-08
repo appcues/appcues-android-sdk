@@ -10,7 +10,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -29,7 +28,6 @@ import com.appcues.data.model.styling.ComponentDataType.NAME
 import com.appcues.data.model.styling.ComponentDataType.NUMBER
 import com.appcues.data.model.styling.ComponentDataType.PHONE
 import com.appcues.data.model.styling.ComponentDataType.TEXT
-import com.appcues.ui.ExperienceStepFormItem.SingleTextFormItem
 import com.appcues.ui.LocalExperienceStepFormStateDelegate
 import com.appcues.ui.extensions.applyStyle
 import com.appcues.ui.extensions.getColor
@@ -42,11 +40,7 @@ import java.util.UUID
 internal fun TextInputPrimitive.Compose(modifier: Modifier) {
 
     val formState = LocalExperienceStepFormStateDelegate.current
-    val text = remember { mutableStateOf(defaultValue ?: "") }
-
-    LaunchedEffect(key1 = text.value) {
-        formState.captureFormItem(this@Compose.id, SingleTextFormItem(label.text, required, text.value))
-    }
+    val text = remember { mutableStateOf(formState.getValue(this)) }
 
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -60,6 +54,7 @@ internal fun TextInputPrimitive.Compose(modifier: Modifier) {
             onValueChange = {
                 if (maxLength == null || it.length <= maxLength) {
                     text.value = it
+                    formState.setValue(this@Compose, it)
                 }
             },
             modifier = Modifier
