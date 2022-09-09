@@ -151,22 +151,22 @@ private fun List<OptionSelectPrimitive.OptionItem>.ComposeSelections(
         when (controlPosition) {
             LEADING -> Row(verticalAlignment = Alignment.CenterVertically) {
                 selectMode.Compose(isSelected, selectedColor, unselectedColor, accentColor) { updateSelection(it.value, !isSelected) }
-                it.content.Compose()
+                it.contentView(isSelected).Compose()
             }
             TRAILING -> Row(verticalAlignment = Alignment.CenterVertically) {
-                it.content.Compose()
+                it.contentView(isSelected).Compose()
                 selectMode.Compose(isSelected, selectedColor, unselectedColor, accentColor) { updateSelection(it.value, !isSelected) }
             }
             TOP -> Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 selectMode.Compose(isSelected, selectedColor, unselectedColor, accentColor) { updateSelection(it.value, !isSelected) }
-                it.content.Compose()
+                it.contentView(isSelected).Compose()
             }
             BOTTOM -> Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                it.content.Compose()
+                it.contentView(isSelected).Compose()
                 selectMode.Compose(isSelected, selectedColor, unselectedColor, accentColor) { updateSelection(it.value, !isSelected) }
             }
             HIDDEN -> Box(modifier = Modifier.clickable { updateSelection(it.value, !isSelected) }) {
-                it.content.Compose()
+                it.contentView(isSelected).Compose()
             }
         }
     }
@@ -216,15 +216,15 @@ private fun List<OptionSelectPrimitive.OptionItem>.ComposePicker(
     valueSelectionChanged: (Set<String>) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
+    val selectedValue = selectedValues.firstOrNull()
     Box(modifier = Modifier.clickable(onClick = { expanded = true })) {
         // 1. render the selected item as the collapsed state
         Row(modifier = modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             // we should always either have a selected item, or a placeholder, or this will just be a blank
             // box with a dropdown arrow
-            val selectedValue = selectedValues.firstOrNull()
             if (selectedValue != null) {
                 // if we have a selected value, we assume one of our options will match it, and compose it
-                this@ComposePicker.firstOrNull { it.value == selectedValue }?.content?.Compose()
+                this@ComposePicker.firstOrNull { it.value == selectedValue }?.contentView(true)?.Compose()
             } else {
                 // no selection, render a placeholder, if exists
                 placeholder?.Compose()
@@ -250,9 +250,16 @@ private fun List<OptionSelectPrimitive.OptionItem>.ComposePicker(
                     expanded = false
                     valueSelectionChanged(setOf(it.value))
                 }) {
-                    it.content.Compose()
+                    it.contentView(selectedValue == it.value).Compose()
                 }
             }
         }
     }
 }
+
+private fun OptionSelectPrimitive.OptionItem.contentView(isSelected: Boolean) =
+    if (isSelected) {
+        selectedContent ?: content
+    } else {
+        content
+    }
