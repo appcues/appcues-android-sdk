@@ -7,7 +7,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -55,7 +55,7 @@ internal fun TextInputPrimitive.Compose(modifier: Modifier) {
         label.Compose()
 
         // Several styling customization options for TextField noted here https://stackoverflow.com/a/68592613
-        OutlinedTextField(
+        TextField(
             value = text.value,
             onValueChange = {
                 if (maxLength == null || it.length <= maxLength) {
