@@ -1,12 +1,11 @@
 package com.appcues.ui.primitive
 
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.ProvideTextStyle
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -17,6 +16,7 @@ import com.appcues.data.model.ExperiencePrimitive.TextPrimitive
 import com.appcues.data.model.styling.ComponentColor
 import com.appcues.data.model.styling.ComponentShadow
 import com.appcues.data.model.styling.ComponentStyle
+import com.appcues.ui.extensions.getBoxAlignment
 import com.appcues.ui.extensions.getTextStyle
 import com.appcues.ui.theme.AppcuesPreviewPrimitive
 import java.util.UUID
@@ -28,15 +28,22 @@ internal fun ButtonPrimitive.Compose(modifier: Modifier) {
         color = Color.Transparent,
     ) {
         ProvideTextStyle(style.getTextStyle(LocalContext.current, isSystemInDarkTheme())) {
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
+            Box(
+                contentAlignment = content.style.getBoxAlignment(),
+                modifier = Modifier.styleButtonContentWidth(style),
             ) {
                 content.Compose()
             }
         }
     }
 }
+
+private fun Modifier.styleButtonContentWidth(buttonStyle: ComponentStyle) =
+    if (buttonStyle.width != null) {
+        this.fillMaxWidth()
+    } else {
+        Modifier
+    }
 
 @Composable
 @Preview(name = "button-border.json", group = "extra")
