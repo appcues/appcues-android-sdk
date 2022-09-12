@@ -81,7 +81,7 @@ internal fun Modifier.modalStyle(
     else Modifier
 )
 
-private fun Modifier.styleBackground(
+internal fun Modifier.styleBackground(
     style: ComponentStyle,
     isDark: Boolean,
     defaultColor: Color? = null
@@ -154,7 +154,7 @@ private fun Modifier.styleDefaultWidth(contentMode: ComponentContentMode) = this
     }
 )
 
-private fun Modifier.styleCorner(style: ComponentStyle) = this.then(
+internal fun Modifier.styleCorner(style: ComponentStyle) = this.then(
     when {
         style.cornerRadius ne 0.0 -> Modifier.clip(RoundedCornerShape(style.cornerRadius.dp))
         else -> Modifier
