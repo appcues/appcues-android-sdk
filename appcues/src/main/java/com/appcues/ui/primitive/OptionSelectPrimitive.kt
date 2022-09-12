@@ -20,6 +20,7 @@ import androidx.compose.material.RadioButton
 import androidx.compose.material.RadioButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -126,7 +127,7 @@ private fun List<OptionSelectPrimitive.OptionItem>.ComposeSelections(
     accentColor: Color?,
     valueSelectionChanged: (Set<String>) -> Unit,
 ) {
-    forEach {
+    forEach { option ->
 
         fun updateSelection(value: String, selected: Boolean) {
             when (selectMode) {
@@ -146,27 +147,32 @@ private fun List<OptionSelectPrimitive.OptionItem>.ComposeSelections(
             }
         }
 
-        val isSelected = selectedValues.contains(it.value)
+        val isSelected = selectedValues.contains(option.value)
+        val contentView by remember(isSelected) {
+            derivedStateOf {
+                option.selectedContent?.let { if (isSelected) it else option.content } ?: option.content
+            }
+        }
 
         when (controlPosition) {
             LEADING -> Row(verticalAlignment = Alignment.CenterVertically) {
-                selectMode.Compose(isSelected, selectedColor, unselectedColor, accentColor) { updateSelection(it.value, !isSelected) }
-                it.contentView(isSelected).Compose()
+                selectMode.Compose(isSelected, selectedColor, unselectedColor, accentColor) { updateSelection(option.value, !isSelected) }
+                contentView.Compose()
             }
             TRAILING -> Row(verticalAlignment = Alignment.CenterVertically) {
-                it.contentView(isSelected).Compose()
-                selectMode.Compose(isSelected, selectedColor, unselectedColor, accentColor) { updateSelection(it.value, !isSelected) }
+                contentView.Compose()
+                selectMode.Compose(isSelected, selectedColor, unselectedColor, accentColor) { updateSelection(option.value, !isSelected) }
             }
             TOP -> Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                selectMode.Compose(isSelected, selectedColor, unselectedColor, accentColor) { updateSelection(it.value, !isSelected) }
-                it.contentView(isSelected).Compose()
+                selectMode.Compose(isSelected, selectedColor, unselectedColor, accentColor) { updateSelection(option.value, !isSelected) }
+                contentView.Compose()
             }
             BOTTOM -> Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                it.contentView(isSelected).Compose()
-                selectMode.Compose(isSelected, selectedColor, unselectedColor, accentColor) { updateSelection(it.value, !isSelected) }
+                contentView.Compose()
+                selectMode.Compose(isSelected, selectedColor, unselectedColor, accentColor) { updateSelection(option.value, !isSelected) }
             }
-            HIDDEN -> Box(modifier = Modifier.clickable { updateSelection(it.value, !isSelected) }) {
-                it.contentView(isSelected).Compose()
+            HIDDEN -> Box(modifier = Modifier.clickable { updateSelection(option.value, !isSelected) }) {
+                contentView.Compose()
             }
         }
     }
@@ -224,7 +230,10 @@ private fun List<OptionSelectPrimitive.OptionItem>.ComposePicker(
             // box with a dropdown arrow
             if (selectedValue != null) {
                 // if we have a selected value, we assume one of our options will match it, and compose it
-                this@ComposePicker.firstOrNull { it.value == selectedValue }?.contentView(true)?.Compose()
+                this@ComposePicker.firstOrNull { it.value == selectedValue }?.let {
+                    // show selectedContent if available, since this is the selected item, else default content
+                    (it.selectedContent ?: it.content).Compose()
+                }
             } else {
                 // no selection, render a placeholder, if exists
                 placeholder?.Compose()
@@ -245,21 +254,20 @@ private fun List<OptionSelectPrimitive.OptionItem>.ComposePicker(
             onDismissRequest = { expanded = false },
             modifier = Modifier.background(Color.White)
         ) {
-            forEach {
+            forEach { optionItem ->
+                val isSelected = selectedValue == optionItem.value
+                val contentView by remember(isSelected) {
+                    derivedStateOf {
+                        optionItem.selectedContent?.let { if (isSelected) it else optionItem.content } ?: optionItem.content
+                    }
+                }
                 DropdownMenuItem(onClick = {
                     expanded = false
-                    valueSelectionChanged(setOf(it.value))
+                    valueSelectionChanged(setOf(optionItem.value))
                 }) {
-                    it.contentView(selectedValue == it.value).Compose()
+                    contentView.Compose()
                 }
             }
         }
     }
 }
-
-private fun OptionSelectPrimitive.OptionItem.contentView(isSelected: Boolean) =
-    if (isSelected) {
-        selectedContent ?: content
-    } else {
-        content
-    }
