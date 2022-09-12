@@ -80,7 +80,7 @@ internal fun OptionSelectPrimitive.Compose(modifier: Modifier) {
                 }
             }
             displayFormat == HORIZONTAL_LIST -> {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(verticalAlignment = controlPosition.getVerticalAlignment() ?: Alignment.CenterVertically) {
                     options.ComposeSelections(
                         selectedValues = selectedValues.value,
                         selectMode = selectMode,
@@ -94,7 +94,7 @@ internal fun OptionSelectPrimitive.Compose(modifier: Modifier) {
                 }
             }
             else -> { // VERTICAL_LIST case or a fallback (i.e. a PICKER but with multi-select, invalid)
-                Column(horizontalAlignment = Alignment.Start) {
+                Column(horizontalAlignment = controlPosition.getHorizontalAlignment() ?: Alignment.CenterHorizontally) {
                     options.ComposeSelections(
                         selectedValues = selectedValues.value,
                         selectMode = selectMode,
@@ -110,6 +110,20 @@ internal fun OptionSelectPrimitive.Compose(modifier: Modifier) {
         }
     }
 }
+
+private fun ComponentControlPosition.getVerticalAlignment() =
+    when (this) {
+        TOP -> Alignment.Top
+        BOTTOM -> Alignment.Bottom
+        else -> null
+    }
+
+private fun ComponentControlPosition.getHorizontalAlignment() =
+    when (this) {
+        LEADING -> Alignment.Start
+        TRAILING -> Alignment.End
+        else -> null
+    }
 
 @Composable
 private fun List<OptionSelectPrimitive.OptionItem>.ComposeSelections(

@@ -10,16 +10,19 @@ import com.appcues.logging.Logcues
 import com.appcues.ui.LocalImageLoader
 import com.appcues.ui.LocalLogcues
 import com.appcues.ui.primitive.Compose
+import com.appcues.ui.theme.AppcuesTheme
 
 @Composable
 fun ComposeContent(json: String, imageLoader: ImageLoader) {
     val response = MoshiConfiguration.moshi.adapter(PrimitiveResponse::class.java).fromJson(json)
     val primitive = response!!.mapPrimitive()
 
-    CompositionLocalProvider(
-        LocalImageLoader provides imageLoader,
-        LocalLogcues provides Logcues(LoggingLevel.DEBUG)
-    ) {
-        primitive.Compose()
+    AppcuesTheme {
+        CompositionLocalProvider(
+            LocalImageLoader provides imageLoader,
+            LocalLogcues provides Logcues(LoggingLevel.DEBUG)
+        ) {
+            primitive.Compose()
+        }
     }
 }

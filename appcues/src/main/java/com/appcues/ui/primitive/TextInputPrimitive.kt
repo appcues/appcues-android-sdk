@@ -2,7 +2,9 @@ package com.appcues.ui.primitive
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.LocalTextStyle
@@ -15,9 +17,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.isUnspecified
 import com.appcues.data.model.ExperiencePrimitive.TextInputPrimitive
 import com.appcues.data.model.ExperiencePrimitive.TextPrimitive
 import com.appcues.data.model.styling.ComponentColor
@@ -32,15 +36,38 @@ import com.appcues.ui.LocalExperienceStepFormStateDelegate
 import com.appcues.ui.extensions.applyStyle
 import com.appcues.ui.extensions.getColor
 import com.appcues.ui.extensions.getHorizontalAlignment
+import com.appcues.ui.extensions.getMargins
+import com.appcues.ui.extensions.getPaddings
+import com.appcues.ui.extensions.styleBackground
 import com.appcues.ui.extensions.styleBorder
+import com.appcues.ui.extensions.styleCorner
+import com.appcues.ui.extensions.styleShadow
 import com.appcues.ui.theme.AppcuesPreviewPrimitive
+import com.appcues.ui.utils.margin
 import java.util.UUID
+
+// constants used in determining the height of the text input box based on the text properties in the model
+
+// multiplier that provides the proper input line height based on the font size used in TextField
+private const val FONT_SIZE_HEIGHT_MULTIPLIER = 1.3f
+
+// multiplier that provides the proper input line height based on the line height used in TextField
+private const val LINE_HEIGHT_MULTIPLIER = 1.3f
+
+// default top and bottom padding for a TextField
+private const val TEXT_INPUT_PADDING = 16.0
 
 @Composable
 internal fun TextInputPrimitive.Compose(modifier: Modifier) {
 
     val formState = LocalExperienceStepFormStateDelegate.current
     val text = remember { mutableStateOf(formState.getValue(this)) }
+    val isDark = isSystemInDarkTheme()
+    val textStyle = LocalTextStyle.current.applyStyle(
+        style = textFieldStyle,
+        context = LocalContext.current,
+        isDark = isDark,
+    )
 
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -58,13 +85,15 @@ internal fun TextInputPrimitive.Compose(modifier: Modifier) {
                 }
             },
             modifier = Modifier
+                .margin(textFieldStyle.getMargins())
+                .styleShadow(textFieldStyle, isDark)
                 .fillMaxWidth()
-                .styleBorder(textFieldStyle, isSystemInDarkTheme()),
-            textStyle = LocalTextStyle.current.applyStyle(
-                style = textFieldStyle,
-                context = LocalContext.current,
-                isDark = isSystemInDarkTheme(),
-            ),
+                .styleInputBoxHeight(textStyle, numberOfLines)
+                .styleCorner(textFieldStyle)
+                .styleBorder(textFieldStyle, isDark)
+                .styleBackground(textFieldStyle, isDark)
+                .padding(textFieldStyle.getPaddings()),
+            textStyle = textStyle,
             shape = RoundedCornerShape(8.dp),
             maxLines = numberOfLines,
             singleLine = numberOfLines == 1,
@@ -77,13 +106,35 @@ internal fun TextInputPrimitive.Compose(modifier: Modifier) {
             colors = TextFieldDefaults.textFieldColors(
                 backgroundColor = Color.Transparent,
                 // the builder should always send this value, but default to the theme like the standard default behavior
-                cursorColor = cursorColor?.getColor(isSystemInDarkTheme()) ?: MaterialTheme.colors.primary,
+                cursorColor = cursorColor?.getColor(isDark) ?: MaterialTheme.colors.primary,
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
             ),
         )
     }
 }
+
+private fun Modifier.styleInputBoxHeight(textStyle: TextStyle, numberOfLines: Int) = this.then(
+    with(textStyle) {
+        // the first line is always based on the font size, not any additional line height
+        val firstLine: Float = fontSize.value * FONT_SIZE_HEIGHT_MULTIPLIER
+
+        // other lines are determined by line height, if exists, or by font size
+        val additionalLineHeight: Float = if (lineHeight.isUnspecified) {
+            firstLine
+        } else {
+            lineHeight.value * LINE_HEIGHT_MULTIPLIER
+        }
+
+        // the TextField includes 16dp padding at top and bottom for touch target
+        val padding = TEXT_INPUT_PADDING * 2
+
+        val height = (firstLine + (additionalLineHeight * (numberOfLines - 1)) + padding).dp
+
+        // using min height here so that additional padding in the data model can also be applied
+        Modifier.defaultMinSize(minHeight = height)
+    }
+)
 
 private fun mapKeyboardType(value: ComponentDataType): KeyboardType = when (value) {
     TEXT -> KeyboardType.Text
