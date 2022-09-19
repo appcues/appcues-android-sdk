@@ -53,12 +53,6 @@ import com.appcues.ui.extensions.styleBorder
 @Composable
 internal fun OptionSelectPrimitive.Compose(modifier: Modifier) {
     val formState = LocalExperienceStepFormStateDelegate.current
-    val selectedValues = remember { mutableStateOf(formState.getValue(this)) }
-
-    fun setSelectedValues(values: Set<String>) {
-        selectedValues.value = values
-        formState.setValue(this, values)
-    }
 
     Column(
         modifier = modifier,
@@ -71,39 +65,39 @@ internal fun OptionSelectPrimitive.Compose(modifier: Modifier) {
         when {
             selectMode == SINGLE && displayFormat == PICKER -> {
                 options.ComposePicker(
-                    selectedValues = selectedValues.value,
+                    selectedValues = formState.getValue(this@Compose).value,
                     modifier = Modifier.styleBorder(pickerStyle ?: ComponentStyle(), isSystemInDarkTheme()),
                     placeholder = placeholder,
                     accentColor = accentColor?.getColor(isSystemInDarkTheme()),
                 ) {
-                    setSelectedValues(it)
+                    formState.setValue(this@Compose, it)
                 }
             }
             displayFormat == HORIZONTAL_LIST -> {
                 Row(verticalAlignment = controlPosition.getVerticalAlignment() ?: Alignment.CenterVertically) {
                     options.ComposeSelections(
-                        selectedValues = selectedValues.value,
+                        selectedValues = formState.getValue(this@Compose).value,
                         selectMode = selectMode,
                         controlPosition = controlPosition,
                         selectedColor = selectedColor.getColor(isSystemInDarkTheme()),
                         unselectedColor = unselectedColor.getColor(isSystemInDarkTheme()),
                         accentColor = accentColor.getColor(isSystemInDarkTheme()),
                     ) {
-                        setSelectedValues(it)
+                        formState.setValue(this@Compose, it)
                     }
                 }
             }
             else -> { // VERTICAL_LIST case or a fallback (i.e. a PICKER but with multi-select, invalid)
                 Column(horizontalAlignment = controlPosition.getHorizontalAlignment() ?: Alignment.CenterHorizontally) {
                     options.ComposeSelections(
-                        selectedValues = selectedValues.value,
+                        selectedValues = formState.getValue(this@Compose).value,
                         selectMode = selectMode,
                         controlPosition = controlPosition,
                         selectedColor = selectedColor.getColor(isSystemInDarkTheme()),
                         unselectedColor = unselectedColor.getColor(isSystemInDarkTheme()),
                         accentColor = accentColor.getColor(isSystemInDarkTheme()),
                     ) {
-                        setSelectedValues(it)
+                        formState.setValue(this@Compose, it)
                     }
                 }
             }

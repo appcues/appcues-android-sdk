@@ -19,11 +19,11 @@ internal class ExperienceStepFormState {
     val isFormComplete = mutableStateOf(true)
 
     fun getValue(primitive: TextInputPrimitive) =
-        getItem(primitive).value
+        getItem(primitive).text
 
     fun setValue(primitive: TextInputPrimitive, value: String) {
         val item = getItem(primitive)
-        item.value = value
+        item.text.value = value
         updateFormItem(item)
     }
 
@@ -32,7 +32,7 @@ internal class ExperienceStepFormState {
 
     fun setValue(primitive: OptionSelectPrimitive, values: Set<String>) {
         val item = getItem(primitive)
-        item.values = values
+        item.values.value = values
         updateFormItem(item)
     }
 
@@ -42,7 +42,9 @@ internal class ExperienceStepFormState {
 
         // create new state tracking object
         item = with(primitive) {
-            TextInputFormItemState(itemIndex++, id, "textInput", label.text, required, defaultValue ?: "")
+            TextInputFormItemState(itemIndex++, id, "textInput", label.text, required).apply {
+                text.value = defaultValue ?: ""
+            }
         }
         updateFormItem(item)
         return item
@@ -54,7 +56,9 @@ internal class ExperienceStepFormState {
 
         // create new state tracking object
         item = with(primitive) {
-            OptionSelectFormItemState(itemIndex++, id, "optionSelect", label.text, required, defaultValue)
+            OptionSelectFormItemState(itemIndex++, id, "optionSelect", label.text, required).apply {
+                values.value = defaultValue
+            }
         }
         updateFormItem(item)
         return item
@@ -77,8 +81,8 @@ internal sealed class ExperienceStepFormItemState(
     val isComplete: Boolean
         get() {
             return when (this) {
-                is OptionSelectFormItemState -> !isRequired || values.isNotEmpty()
-                is TextInputFormItemState -> !isRequired || value.isNotBlank()
+                is OptionSelectFormItemState -> !isRequired || values.value.isNotEmpty()
+                is TextInputFormItemState -> !isRequired || text.value.isNotBlank()
             }
         }
 
@@ -88,8 +92,9 @@ internal sealed class ExperienceStepFormItemState(
         override val type: String,
         override val label: String,
         override val isRequired: Boolean,
-        var value: String,
-    ) : ExperienceStepFormItemState(index, id, type, label, isRequired)
+    ) : ExperienceStepFormItemState(index, id, type, label, isRequired) {
+        var text = mutableStateOf("")
+    }
 
     class OptionSelectFormItemState(
         override val index: Int,
@@ -97,6 +102,7 @@ internal sealed class ExperienceStepFormItemState(
         override val type: String,
         override val label: String,
         override val isRequired: Boolean,
-        var values: Set<String>
-    ) : ExperienceStepFormItemState(index, id, type, label, isRequired)
+    ) : ExperienceStepFormItemState(index, id, type, label, isRequired) {
+        var values = mutableStateOf(setOf<String>())
+    }
 }
