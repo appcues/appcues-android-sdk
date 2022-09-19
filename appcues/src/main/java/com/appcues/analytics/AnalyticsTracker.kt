@@ -29,13 +29,17 @@ internal class AnalyticsTracker(
         }
     }
 
-    fun identify(properties: Map<String, Any>? = null) {
+    fun identify(properties: Map<String, Any>? = null, interactive: Boolean = true) {
         if (!analyticsPolicy.canIdentify()) return
 
         activityBuilder.identify(properties).let {
             updateAnalyticsFlow(IDENTIFY, false, it)
 
-            analyticsQueueProcessor.flushThenSend(it)
+            if (interactive) {
+                analyticsQueueProcessor.flushThenSend(it)
+            } else {
+                analyticsQueueProcessor.queue(it)
+            }
         }
     }
 

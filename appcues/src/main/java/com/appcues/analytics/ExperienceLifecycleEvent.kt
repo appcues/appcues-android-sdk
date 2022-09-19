@@ -6,6 +6,8 @@ import com.appcues.statemachine.Error
 import com.appcues.ui.ExperienceStepFormItemState
 import com.appcues.ui.ExperienceStepFormItemState.OptionSelectFormItemState
 import com.appcues.ui.ExperienceStepFormItemState.TextInputFormItemState
+import com.appcues.ui.ExperienceStepFormState
+import com.appcues.util.toSlug
 
 internal sealed class ExperienceLifecycleEvent(
     open val experience: Experience,
@@ -115,11 +117,7 @@ internal sealed class ExperienceLifecycleEvent(
                     val step = experience.flatSteps[it]
                     hashMapOf(
                         "interactionType" to interactionType.analyticsName(),
-                        "interactionData" to hashMapOf(
-                            "formResponse" to step.formState.formItems.map { formItem ->
-                                formItem.analyticsProperties()
-                            }
-                        ),
+                        "interactionData" to step.formState.formattedAsFormResponse(),
                     )
                 }
             }
@@ -130,19 +128,26 @@ internal sealed class ExperienceLifecycleEvent(
         when (this) {
             FORM_SUBMITTED -> "Form Submitted"
         }
+}
 
-    private fun ExperienceStepFormItemState.analyticsProperties() =
+private fun ExperienceStepFormState.formattedAsFormResponse() = hashMapOf(
+    "formResponse" to formItems.map { formItem ->
         hashMapOf<String, Any>(
-            "fieldId" to id.toString(),
-            "fieldType" to type,
-            "fieldRequired" to isRequired,
-            "label" to label,
-            "value" to formattedValues()
+            "fieldId" to formItem.id.toString(),
+            "fieldType" to formItem.type,
+            "fieldRequired" to formItem.isRequired,
+            "label" to formItem.label,
+            "value" to formItem.formattedValues()
         )
+    }
+)
 
-    private fun ExperienceStepFormItemState.formattedValues() =
-        when (this) {
-            is TextInputFormItemState -> value
-            is OptionSelectFormItemState -> values.joinToString(",") // need actual CSV-ifying
-        }
+private fun ExperienceStepFormItemState.formattedValues() =
+    when (this) {
+        is TextInputFormItemState -> value
+        is OptionSelectFormItemState -> values.joinToString(",") // need actual CSV-ifying
+    }
+
+internal fun ExperienceStepFormState.formattedAsProfileUpdate() = formItems.associate {
+    "_appcuesForm_${it.label.toSlug()}" to it.formattedValues()
 }
