@@ -119,7 +119,7 @@ internal sealed class ExperienceLifecycleEvent(
                     val step = experience.flatSteps[it]
                     hashMapOf(
                         INTERACTION_TYPE_KEY to interactionType.analyticsName(),
-                        INTERACTION_DATA_KEY to when(interactionType) {
+                        INTERACTION_DATA_KEY to when (interactionType) {
                             FORM_SUBMITTED -> step.formState
                         },
                     )
