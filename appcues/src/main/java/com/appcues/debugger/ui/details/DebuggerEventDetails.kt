@@ -59,16 +59,11 @@ internal fun DebuggerEventDetails(debuggerEventItem: DebuggerEventItem?, onBackP
 
         details(debuggerEventItem)
 
-        if (debuggerEventItem.properties != null && debuggerEventItem.properties.isNotEmpty()) {
-            propertiesTitle()
-
-            properties(debuggerEventItem.properties)
-        }
-
-        if (debuggerEventItem.identityProperties != null && debuggerEventItem.identityProperties.isNotEmpty()) {
-            identityPropertiesTitle()
-
-            properties(debuggerEventItem.identityProperties)
+        debuggerEventItem.propertySections.forEach {
+            if (it.properties != null && it.properties.isNotEmpty()) {
+                propertiesTitle(it.title)
+                properties(it.properties)
+            }
         }
     }
 
@@ -137,10 +132,10 @@ private fun LazyListScope.details(event: DebuggerEventItem) {
     }
 }
 
-private fun LazyListScope.propertiesTitle() {
+private fun LazyListScope.propertiesTitle(title: String) {
     item {
         Text(
-            text = LocalContext.current.getString(R.string.appcues_debugger_event_details_properties_title),
+            text = title,
             modifier = Modifier.padding(start = 40.dp, top = 20.dp, bottom = 16.dp),
             fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold,
@@ -149,21 +144,9 @@ private fun LazyListScope.propertiesTitle() {
     }
 }
 
-private fun LazyListScope.identityPropertiesTitle() {
-    item {
-        Text(
-            text = LocalContext.current.getString(R.string.appcues_debugger_event_details_identity_auto_properties_title),
-            modifier = Modifier.padding(start = 40.dp, top = 20.dp, bottom = 16.dp),
-            fontSize = 14.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = AppcuesColors.HadfieldBlue,
-        )
-    }
-}
-
-private fun LazyListScope.properties(properties: List<Pair<String, Any>>) {
+private fun LazyListScope.properties(properties: List<Pair<String, Any?>>) {
     items(properties.toList()) { item ->
-        ListItem(key = item.first, value = item.second.toString())
+        ListItem(key = item.first, value = item.second?.toString() ?: "")
     }
 
     item {

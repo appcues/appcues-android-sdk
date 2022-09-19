@@ -7,11 +7,9 @@ internal data class DebuggerEventItem(
     val type: EventType,
     val timestamp: Long,
     val name: String,
-    val properties: List<Pair<String, Any>>?,
-    val identityProperties: List<Pair<String, Any>>?,
+    val propertySections: List<DebuggerEventItemPropertySection>,
     var showOnFab: Boolean = true,
 ) {
-
     // overriding equals and hashCode allows StateFlow to emit the
     // collection even if elements are the same. useful when we change property showOnFab to false
     // and try to emit the collection again
@@ -24,3 +22,8 @@ internal data class DebuggerEventItem(
 internal enum class EventType {
     EXPERIENCE, GROUP_UPDATE, USER_PROFILE, CUSTOM, SCREEN, SESSION
 }
+
+internal data class DebuggerEventItemPropertySection(
+    val title: String,
+    val properties: List<Pair<String, Any?>>?
+)
