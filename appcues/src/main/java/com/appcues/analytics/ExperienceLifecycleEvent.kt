@@ -144,8 +144,8 @@ private fun ExperienceStepFormState.formattedAsFormResponse() = hashMapOf(
 
 private fun ExperienceStepFormItemState.formattedValues() =
     when (this) {
-        is TextInputFormItemState -> value
-        is OptionSelectFormItemState -> values.joinToString(",") // need actual CSV-ifying
+        is TextInputFormItemState -> text.value
+        is OptionSelectFormItemState -> values.value.joinToString(",") // need actual CSV-ifying
     }
 
 internal fun ExperienceStepFormState.formattedAsProfileUpdate() = formItems.associate {

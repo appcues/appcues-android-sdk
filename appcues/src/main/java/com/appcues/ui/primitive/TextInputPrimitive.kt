@@ -12,8 +12,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -61,7 +59,6 @@ private const val TEXT_INPUT_PADDING = 16.0
 internal fun TextInputPrimitive.Compose(modifier: Modifier) {
 
     val formState = LocalExperienceStepFormStateDelegate.current
-    val text = remember { mutableStateOf(formState.getValue(this)) }
     val isDark = isSystemInDarkTheme()
     val textStyle = LocalTextStyle.current.applyStyle(
         style = textFieldStyle,
@@ -77,10 +74,9 @@ internal fun TextInputPrimitive.Compose(modifier: Modifier) {
 
         // Several styling customization options for TextField noted here https://stackoverflow.com/a/68592613
         TextField(
-            value = text.value,
+            value = formState.getValue(this@Compose).value,
             onValueChange = {
                 if (maxLength == null || it.length <= maxLength) {
-                    text.value = it
                     formState.setValue(this@Compose, it)
                 }
             },
