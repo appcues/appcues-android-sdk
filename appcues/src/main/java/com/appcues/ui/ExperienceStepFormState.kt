@@ -86,6 +86,13 @@ internal sealed class ExperienceStepFormItemState(
             }
         }
 
+    val value: String
+        get() =
+            when (this) {
+                is TextInputFormItemState -> text.value
+                is OptionSelectFormItemState -> values.value.joinToString(",") // need actual CSV-ifying
+            }
+
     class TextInputFormItemState(
         override val index: Int,
         override val id: UUID,
