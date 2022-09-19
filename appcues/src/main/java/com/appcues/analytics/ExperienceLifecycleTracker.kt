@@ -7,7 +7,10 @@ import com.appcues.analytics.ExperienceLifecycleEvent.ExperienceError
 import com.appcues.analytics.ExperienceLifecycleEvent.ExperienceStarted
 import com.appcues.analytics.ExperienceLifecycleEvent.StepCompleted
 import com.appcues.analytics.ExperienceLifecycleEvent.StepError
+import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction
+import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType.FORM_SUBMITTED
 import com.appcues.analytics.ExperienceLifecycleEvent.StepSeen
+import com.appcues.data.model.Experience
 import com.appcues.statemachine.Error
 import com.appcues.statemachine.State
 import com.appcues.statemachine.State.BeginningExperience
@@ -54,6 +57,7 @@ internal class ExperienceLifecycleTracker(
                         trackLifecycleEvent(StepSeen(it.experience, it.flatStepIndex))
                     }
                     is EndingStep -> {
+                        trackFormSubmission(it.experience, it.flatStepIndex)
                         trackLifecycleEvent(StepCompleted(it.experience, it.flatStepIndex))
                     }
                     is EndingExperience -> {
@@ -81,6 +85,20 @@ internal class ExperienceLifecycleTracker(
                     is Error.ExperienceAlreadyActive -> Unit
                 }
             }
+        }
+    }
+
+    private fun trackFormSubmission(experience: Experience, flatStepIndex: Int) {
+        val formState = experience.flatSteps[flatStepIndex].formState
+        if (formState.formItems.any()) {
+            // any validation of whether or not the form should be submitted, checking required fields,
+            // must occur before calling this function
+
+            // set user profile attributes to capture the form question/answer
+            analyticsTracker.identify(formState.formattedAsProfileUpdate())
+
+            // track the interaction event
+            trackLifecycleEvent(StepInteraction(experience, flatStepIndex, FORM_SUBMITTED))
         }
     }
 
