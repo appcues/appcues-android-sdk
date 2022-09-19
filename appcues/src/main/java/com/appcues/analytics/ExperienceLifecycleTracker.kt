@@ -95,7 +95,7 @@ internal class ExperienceLifecycleTracker(
             // must occur before calling this function
 
             // set user profile attributes to capture the form question/answer
-            analyticsTracker.identify(formState.formattedAsProfileUpdate())
+            analyticsTracker.identify(formState.formattedAsProfileUpdate(), interactive = false)
 
             // track the interaction event
             trackLifecycleEvent(StepInteraction(experience, flatStepIndex, FORM_SUBMITTED))
