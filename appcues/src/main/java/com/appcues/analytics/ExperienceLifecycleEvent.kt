@@ -1,5 +1,6 @@
 package com.appcues.analytics
 
+import com.appcues.analytics.ExperienceLifecycleEvent.Companion.FORM_RESPONSE_KEY
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType.FORM_SUBMITTED
 import com.appcues.data.model.Experience
 import com.appcues.statemachine.Error
@@ -13,6 +14,12 @@ internal sealed class ExperienceLifecycleEvent(
     open val experience: Experience,
     val event: AnalyticsEvent
 ) {
+    companion object {
+        const val INTERACTION_TYPE_KEY = "interactionType"
+        const val INTERACTION_DATA_KEY = "interactionData"
+        const val FORM_RESPONSE_KEY = "formResponse"
+        const val FORM_SUBMITTED_INTERACTION_TYPE = "Form Submitted"
+    }
 
     data class StepSeen(
         override val experience: Experience,
@@ -116,8 +123,8 @@ internal sealed class ExperienceLifecycleEvent(
                 flatStepIndex?.let {
                     val step = experience.flatSteps[it]
                     hashMapOf(
-                        "interactionType" to interactionType.analyticsName(),
-                        "interactionData" to step.formState.formattedAsFormResponse(),
+                        INTERACTION_TYPE_KEY to interactionType.analyticsName(),
+                        INTERACTION_DATA_KEY to step.formState.formattedAsFormResponse(),
                     )
                 }
             }
@@ -126,12 +133,12 @@ internal sealed class ExperienceLifecycleEvent(
 
     private fun StepInteraction.InteractionType.analyticsName() =
         when (this) {
-            FORM_SUBMITTED -> "Form Submitted"
+            FORM_SUBMITTED -> FORM_SUBMITTED_INTERACTION_TYPE
         }
 }
 
 private fun ExperienceStepFormState.formattedAsFormResponse() = hashMapOf(
-    "formResponse" to formItems.map { formItem ->
+    FORM_RESPONSE_KEY to formItems.map { formItem ->
         hashMapOf<String, Any>(
             "fieldId" to formItem.id.toString(),
             "fieldType" to formItem.type,

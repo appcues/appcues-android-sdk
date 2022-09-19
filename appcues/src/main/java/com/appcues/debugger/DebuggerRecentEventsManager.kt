@@ -8,10 +8,12 @@ import com.appcues.R
 import com.appcues.analytics.ActivityRequestBuilder
 import com.appcues.analytics.AnalyticsEvent
 import com.appcues.analytics.AutoPropertyDecorator
+import com.appcues.analytics.ExperienceLifecycleEvent
 import com.appcues.analytics.TrackingData
 import com.appcues.data.remote.request.ActivityRequest
 import com.appcues.data.remote.request.EventRequest
 import com.appcues.debugger.model.DebuggerEventItem
+import com.appcues.debugger.model.DebuggerEventItemPropertySection
 import com.appcues.debugger.model.EventType
 import com.appcues.debugger.ui.toEventTitle
 import com.appcues.debugger.ui.toEventType
@@ -65,8 +67,12 @@ internal class DebuggerRecentEventsManager(
                 // in case something changes in the future to avoid unwanted exceptions
                 timestamp = (request.profileUpdate?.get(AutoPropertyDecorator.UPDATED_AT_PROPERTY) as Long?) ?: Date().time,
                 name = request.userId,
-                properties = request.profileUpdate?.toSortedList(),
-                identityProperties = null
+                propertySections = listOf(
+                    DebuggerEventItemPropertySection(
+                        title = contextResources.getString(R.string.appcues_debugger_event_details_properties_title),
+                        properties = request.profileUpdate?.toSortedList(),
+                    )
+                )
             )
         )
 
@@ -79,10 +85,13 @@ internal class DebuggerRecentEventsManager(
                 id = lastEventId,
                 type = EventType.GROUP_UPDATE,
                 timestamp = Date().time,
-                name = request.groupId
-                    ?: contextResources.getString(R.string.appcues_debugger_event_type_group_update_title),
-                properties = request.groupUpdate?.toSortedList(),
-                identityProperties = null
+                name = request.groupId ?: contextResources.getString(R.string.appcues_debugger_event_type_group_update_title),
+                propertySections = listOf(
+                    DebuggerEventItemPropertySection(
+                        title = contextResources.getString(R.string.appcues_debugger_event_details_properties_title),
+                        properties = request.groupUpdate?.toSortedList(),
+                    )
+                )
             )
         )
         lastEventId++
@@ -102,13 +111,28 @@ internal class DebuggerRecentEventsManager(
                     type = type,
                     timestamp = event.timestamp.time,
                     name = displayName,
-                    properties = event.attributes
-                        .filterOutScreenProperties(type)
-                        .filterOutAutoProperties()
-                        .toSortedList(),
-                    identityProperties = event.attributes
-                        .getAutoProperties()
-                        .toSortedList()
+                    propertySections = listOf(
+                        DebuggerEventItemPropertySection(
+                            title = contextResources.getString(R.string.appcues_debugger_event_details_properties_title),
+                            properties = event.attributes
+                                .filterOutScreenProperties(type)
+                                .filterOutAutoProperties()
+                                .filterOutInteractionData()
+                                .toSortedList(),
+                        ),
+                        DebuggerEventItemPropertySection(
+                            title = contextResources.getString(R.string.appcues_debugger_event_details_form_response_title),
+                            properties = event.attributes
+                                .getFormResponse()
+                                .toSortedList(),
+                        ),
+                        DebuggerEventItemPropertySection(
+                            title = contextResources.getString(R.string.appcues_debugger_event_details_identity_auto_properties_title),
+                            properties = event.attributes
+                                .getAutoProperties()
+                                .toSortedList()
+                        )
+                    )
                 )
             )
 
@@ -133,9 +157,28 @@ internal class DebuggerRecentEventsManager(
         return filterNot { it.key == AutoPropertyDecorator.IDENTITY_PROPERTY }
     }
 
+    private fun Map<String, Any>.filterOutInteractionData(): Map<String, Any> {
+        return filterNot { it.key == ExperienceLifecycleEvent.INTERACTION_DATA_KEY }
+    }
+
     private fun Map<String, Any>.getAutoProperties(): Map<String, Any> {
         @Suppress("UNCHECKED_CAST")
         return (this[AutoPropertyDecorator.IDENTITY_PROPERTY] as Map<String, Any>?) ?: mapOf()
+    }
+
+    private fun Map<String, Any>.getFormResponse(): Map<String, Any?> {
+        @Suppress("UNCHECKED_CAST")
+        val interactionDataValue = this[ExperienceLifecycleEvent.INTERACTION_DATA_KEY] as? Map<String, Any>
+        interactionDataValue?.let { interactionData ->
+            @Suppress("UNCHECKED_CAST")
+            val formResponse = interactionData[ExperienceLifecycleEvent.FORM_RESPONSE_KEY] as? List<Map<String, Any>>
+            formResponse?.let { responseValue ->
+                return responseValue.associate { responseItem ->
+                    responseItem["label"] as String to responseItem["value"]
+                }
+            }
+        }
+        return mapOf()
     }
 
     private fun getEventDisplayName(
@@ -149,14 +192,14 @@ internal class DebuggerRecentEventsManager(
     // otherwise - use the given title for system events or the event name for custom events
         title ?: event.name
 
-    private fun Map<String, Any>.toSortedList(): List<Pair<String, Any>> = toList().let { list ->
-        arrayListOf<Pair<String, Any>>().apply {
+    private fun Map<String, Any?>.toSortedList(): List<Pair<String, Any?>> = toList().let { list ->
+        arrayListOf<Pair<String, Any?>>().apply {
             addAll(list.filter { it.first.startsWith(IDENTITY_PROPERTY_PREFIX).not() }.sortByPropertyName())
             addAll(list.filter { it.first.startsWith(IDENTITY_PROPERTY_PREFIX) }.sortByPropertyName())
         }
     }
 
-    private fun List<Pair<String, Any>>.sortByPropertyName(): List<Pair<String, Any>> = sortedBy { it.first }
+    private fun List<Pair<String, Any?>>.sortByPropertyName(): List<Pair<String, Any?>> = sortedBy { it.first }
 
     private fun ArrayList<DebuggerEventItem>.addFirst(element: DebuggerEventItem) {
         add(0, element)
