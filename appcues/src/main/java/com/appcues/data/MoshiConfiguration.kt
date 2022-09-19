@@ -1,6 +1,7 @@
 package com.appcues.data
 
 import com.appcues.data.remote.adapters.DateAdapter
+import com.appcues.data.remote.adapters.ExperienceStepFormStateAdapter
 import com.appcues.data.remote.adapters.StepContainerAdapter
 import com.appcues.data.remote.adapters.UUIDAdapter
 import com.appcues.data.remote.response.step.primitive.PrimitiveResponse
@@ -25,6 +26,7 @@ internal object MoshiConfiguration {
         .add(UUIDAdapter())
         .add(getPrimitiveFactory())
         .add(StepContainerAdapter())
+        .add(ExperienceStepFormStateAdapter())
         .add(KotlinJsonAdapterFactory())
         .build()
 

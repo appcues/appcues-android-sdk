@@ -17,6 +17,7 @@ import com.appcues.debugger.model.DebuggerEventItemPropertySection
 import com.appcues.debugger.model.EventType
 import com.appcues.debugger.ui.toEventTitle
 import com.appcues.debugger.ui.toEventType
+import com.appcues.ui.ExperienceStepFormState
 import com.appcues.util.ContextResources
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -167,18 +168,11 @@ internal class DebuggerRecentEventsManager(
     }
 
     private fun Map<String, Any>.getFormResponse(): Map<String, Any?> {
-        @Suppress("UNCHECKED_CAST")
-        val interactionDataValue = this[ExperienceLifecycleEvent.INTERACTION_DATA_KEY] as? Map<String, Any>
-        interactionDataValue?.let { interactionData ->
-            @Suppress("UNCHECKED_CAST")
-            val formResponse = interactionData[ExperienceLifecycleEvent.FORM_RESPONSE_KEY] as? List<Map<String, Any>>
-            formResponse?.let { responseValue ->
-                return responseValue.associate { responseItem ->
-                    responseItem["label"] as String to responseItem["value"]
-                }
+        return (this[ExperienceLifecycleEvent.INTERACTION_DATA_KEY] as? ExperienceStepFormState)?.let {
+            it.formItems.associate { itemState ->
+                itemState.label to itemState.value
             }
-        }
-        return mapOf()
+        } ?: mapOf()
     }
 
     private fun getEventDisplayName(
