@@ -31,7 +31,6 @@ internal class DebuggerRecentEventsManager(
 ) {
 
     companion object {
-
         private const val MAX_RECENT_EVENTS = 20
         private const val IDENTITY_PROPERTY_PREFIX = "_"
     }
@@ -148,33 +147,6 @@ internal class DebuggerRecentEventsManager(
         }
     }
 
-    private fun Map<String, Any>.filterOutScreenProperties(eventType: EventType): Map<String, Any> {
-        return if (eventType == EventType.SCREEN) {
-            filterNot { it.key == ActivityRequestBuilder.SCREEN_TITLE_ATTRIBUTE }
-        } else this
-    }
-
-    private fun Map<String, Any>.filterOutAutoProperties(): Map<String, Any> {
-        return filterNot { it.key == AutoPropertyDecorator.IDENTITY_PROPERTY }
-    }
-
-    private fun Map<String, Any>.filterOutInteractionData(): Map<String, Any> {
-        return filterNot { it.key == ExperienceLifecycleEvent.INTERACTION_DATA_KEY }
-    }
-
-    private fun Map<String, Any>.getAutoProperties(): Map<String, Any> {
-        @Suppress("UNCHECKED_CAST")
-        return (this[AutoPropertyDecorator.IDENTITY_PROPERTY] as Map<String, Any>?) ?: mapOf()
-    }
-
-    private fun Map<String, Any>.getFormResponse(): Map<String, Any?> {
-        return (this[ExperienceLifecycleEvent.INTERACTION_DATA_KEY] as? ExperienceStepFormState)?.let {
-            it.formItems.associate { itemState ->
-                itemState.label to itemState.value
-            }
-        } ?: mapOf()
-    }
-
     private fun getEventDisplayName(
         event: EventRequest,
         type: EventType,
@@ -192,8 +164,6 @@ internal class DebuggerRecentEventsManager(
             addAll(list.filter { it.first.startsWith(IDENTITY_PROPERTY_PREFIX) }.sortByPropertyName())
         }
     }
-
-    private fun List<Pair<String, Any?>>.sortByPropertyName(): List<Pair<String, Any?>> = sortedBy { it.first }
 
     private fun ArrayList<DebuggerEventItem>.addFirst(element: DebuggerEventItem) {
         add(0, element)
@@ -215,3 +185,32 @@ internal class DebuggerRecentEventsManager(
         _data.emit(list)
     }
 }
+
+private fun Map<String, Any>.filterOutScreenProperties(eventType: EventType): Map<String, Any> {
+    return if (eventType == EventType.SCREEN) {
+        filterNot { it.key == ActivityRequestBuilder.SCREEN_TITLE_ATTRIBUTE }
+    } else this
+}
+
+private fun Map<String, Any>.filterOutAutoProperties(): Map<String, Any> {
+    return filterNot { it.key == AutoPropertyDecorator.IDENTITY_PROPERTY }
+}
+
+private fun Map<String, Any>.getAutoProperties(): Map<String, Any> {
+    @Suppress("UNCHECKED_CAST")
+    return (this[AutoPropertyDecorator.IDENTITY_PROPERTY] as Map<String, Any>?) ?: mapOf()
+}
+
+private fun Map<String, Any>.filterOutInteractionData(): Map<String, Any> {
+    return filterNot { it.key == ExperienceLifecycleEvent.INTERACTION_DATA_KEY }
+}
+
+private fun Map<String, Any>.getFormResponse(): Map<String, Any?> {
+    return (this[ExperienceLifecycleEvent.INTERACTION_DATA_KEY] as? ExperienceStepFormState)?.let {
+        it.formItems.associate { itemState ->
+            itemState.label to itemState.value
+        }
+    } ?: mapOf()
+}
+
+private fun List<Pair<String, Any?>>.sortByPropertyName(): List<Pair<String, Any?>> = sortedBy { it.first }
