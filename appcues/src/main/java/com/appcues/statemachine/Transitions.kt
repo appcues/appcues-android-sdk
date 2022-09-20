@@ -71,7 +71,7 @@ internal interface Transitions {
                     // in different groups we want to wait for StartStep action from AppcuesViewModel
                     val response = CompletableDeferred<ResultOf<State, Error>>()
                     Transition(
-                        state = EndingStep(experience, flatStepIndex) {
+                        state = EndingStep(experience, flatStepIndex, true) {
                             coroutineScope.launch {
                                 response.complete(continuation())
                             }
@@ -81,7 +81,7 @@ internal interface Transitions {
                 } else {
                     // in same group we can continue to StartStep internally
                     Transition(
-                        state = EndingStep(experience, flatStepIndex, null),
+                        state = EndingStep(experience, flatStepIndex, true, null),
                         sideEffect = ContinuationEffect(StartStep(action.stepReference)),
                     )
                 }
@@ -101,7 +101,7 @@ internal interface Transitions {
             // this means the AppcuesActivity was destroyed externally (i.e. deep link) and we should
             // immediately transition to EndingExperience - not rely on the UI to do it for us (it's gone)
             Transition(
-                state = EndingStep(experience, flatStepIndex, null),
+                state = EndingStep(experience, flatStepIndex, action.markComplete, null),
                 sideEffect = ContinuationEffect(action)
             )
         } else {
@@ -112,7 +112,7 @@ internal interface Transitions {
             // then AppcuesViewModel will continue to EndExperience when appropriate
             val response = CompletableDeferred<ResultOf<State, Error>>()
             Transition(
-                state = EndingStep(experience, flatStepIndex) {
+                state = EndingStep(experience, flatStepIndex, action.markComplete) {
                     coroutineScope.launch {
                         response.complete(continuation())
                     }
@@ -145,7 +145,7 @@ internal interface Transitions {
     }
 
     fun EndingExperience.fromEndingExperienceToIdling(action: Reset): Transition {
-        return Transition(Idling, if (isExperienceCompleted()) ProcessActions(experience.completionActions) else null)
+        return Transition(Idling, if (isExperienceCompleted) ProcessActions(experience.completionActions) else null)
     }
 
     companion object : Transitions

@@ -19,16 +19,21 @@ internal sealed class State {
     data class EndingStep(
         val experience: Experience,
         val flatStepIndex: Int,
+        val markComplete: Boolean,
         // this works as a ContinuationSideEffect that AppcuesViewModel will
         // send to the state machine once it's done dismissing the current container
         // the presence of a non-null value is what tells the UI to dismiss the current container,
         // and it should be set to null if a dismiss is not requested (i.e. moving to next step in same container)
         val dismissAndContinue: (() -> Unit)?,
-    ) : State()
+    ) : State() {
+        val isStepCompleted
+            get() = markComplete || flatStepIndex == experience.flatSteps.count() - 1
+    }
 
     data class EndingExperience(val experience: Experience, val flatStepIndex: Int, val markComplete: Boolean) : State() {
         // this defines whether the experience was completed or dismissed
-        fun isExperienceCompleted() = markComplete || flatStepIndex == experience.flatSteps.count() - 1
+        val isExperienceCompleted
+            get() = markComplete || flatStepIndex == experience.flatSteps.count() - 1
     }
 
     data class Paused(val state: State) : State()
