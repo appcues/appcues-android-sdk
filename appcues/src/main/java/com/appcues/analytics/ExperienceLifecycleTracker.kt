@@ -57,11 +57,13 @@ internal class ExperienceLifecycleTracker(
                         trackLifecycleEvent(StepSeen(it.experience, it.flatStepIndex))
                     }
                     is EndingStep -> {
-                        trackFormSubmission(it.experience, it.flatStepIndex)
-                        trackLifecycleEvent(StepCompleted(it.experience, it.flatStepIndex))
+                        if (it.isStepCompleted) {
+                            trackFormSubmission(it.experience, it.flatStepIndex)
+                            trackLifecycleEvent(StepCompleted(it.experience, it.flatStepIndex))
+                        }
                     }
                     is EndingExperience -> {
-                        if (it.isExperienceCompleted()) {
+                        if (it.isExperienceCompleted) {
                             // if ending on the last step OR an action requested it be considered complete explicitly,
                             // track the experience_completed event
                             trackLifecycleEvent(ExperienceCompleted(it.experience))
