@@ -237,7 +237,7 @@ class StateMachineTest : AppcuesScopeTest {
     fun `Paused SHOULD transition back to previous state THEN to Idling WHEN action is EndExperience`() = runTest {
         // GIVEN
         val experience = mockExperience()
-        val pausedState = EndingStep(experience, 1, null)
+        val pausedState = EndingStep(experience, 1, false, null)
         val initialState = Paused(pausedState)
         val stateMachine = initMachine(initialState)
         val action = EndExperience(false)
@@ -348,7 +348,7 @@ class StateMachineTest : AppcuesScopeTest {
 
         // GIVEN
         val experience = mockExperience()
-        val initialState = EndingStep(experience, 1, null)
+        val initialState = EndingStep(experience, 1, true, null)
         val stateMachine = initMachine(initialState)
         val action = StartStep(StepIndex(1000))
 
@@ -517,7 +517,7 @@ class StateMachineTest : AppcuesScopeTest {
     fun `EndingStep SHOULD NOT transition WHEN action is something other than EndExperience, Start Step or Pause`() = runTest {
         // GIVEN
         val experience = mockExperience()
-        val initialState = EndingStep(experience, 0, null)
+        val initialState = EndingStep(experience, 0, false, null)
         val stateMachine = initMachine(initialState)
         val action = Reset
 
