@@ -21,6 +21,7 @@ import com.appcues.statemachine.State.Idling
 import com.appcues.statemachine.State.Paused
 import com.appcues.statemachine.State.RenderingStep
 import com.appcues.statemachine.StateMachine
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -39,7 +40,7 @@ internal class ExperienceLifecycleTracker(
     private val stateMachine: StateMachine by inject()
     private val storage: Storage by inject()
 
-    suspend fun start(): Unit = withContext(Dispatchers.IO) {
+    suspend fun start(dispatcher: CoroutineDispatcher = Dispatchers.IO): Unit = withContext(dispatcher) {
         launch { observeState() }
         launch { observeErrors() }
     }

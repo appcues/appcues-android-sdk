@@ -53,7 +53,7 @@ class AnalyticsTrackerTest {
     @Test
     fun `init SHOULD trigger experienceLifecycleTracker start`() {
         // then
-        coVerify { experienceLifecycleTracker.start() }
+        coVerify { experienceLifecycleTracker.start(any()) }
     }
 
     @Test
