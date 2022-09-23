@@ -58,6 +58,15 @@ private fun handleLinkIntent(intent: Intent?) {
 
 ## Verifying the Custom URL Scheme
 
-Test that the URL scheme handling is set up correctly by navigating to `appcues-APPCUES_APPLICATION_ID://debugger` in your browser on the device with the app installed.
+The Appcues debugger allows you to easily validate that the Appcues deeplink is properly configured.
+
+1. Launch the debugger in your app with a call to ``Appcues/debug()``.
+2. Expand the debugger by tapping the floating button.
+3. Tap the "Appcues Deeplink Configured" row to verify the status. If a checkmark appears, the Appcues deeplink is properly configured.
+
+### Troubleshooting
+
+- `Error 1`: AndroidManifest intent-filter scheme missing
+- `Error 2`: Appcues SDK not receiving links
 
 See the [Debug Guide](https://github.com/appcues/appcues-android-sdk/blob/main/docs/Debugging.md) for details on the functionality of the debugger.

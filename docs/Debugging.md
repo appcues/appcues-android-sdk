@@ -34,6 +34,10 @@ Tap the row to re-check the connection status.
 
 > If there is a connection error, long-press the row to copy the detailed error information.
 
+### Deeplink Configuration Status
+
+Tap to check status. Shows a checkmark if the Appcues deeplink is properly configured. See <doc:URLSchemeConfiguring> for information about error messages.
+
 ### Screen Tracking Status
 
 Shows a checkmark if a screen event has been observed since the debugger was launched. You may need to navigate to another screen in your app for the debugger to observe a screen event.
