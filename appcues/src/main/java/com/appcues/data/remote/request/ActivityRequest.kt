@@ -1,5 +1,6 @@
 package com.appcues.data.remote.request
 
+import com.appcues.data.MoshiConfiguration.SerializeNull
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 import java.util.UUID
@@ -16,6 +17,7 @@ internal data class ActivityRequest(
     @Json(name = "account_id")
     val accountId: String,
     @Json(name = "group_id")
+    @SerializeNull
     val groupId: String? = null,
     @Json(name = "group_update")
     val groupUpdate: Map<String, Any>? = null
