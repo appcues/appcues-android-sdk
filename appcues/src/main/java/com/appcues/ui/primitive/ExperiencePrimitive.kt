@@ -23,10 +23,10 @@ import com.appcues.data.model.ExperiencePrimitive.TextInputPrimitive
 import com.appcues.data.model.ExperiencePrimitive.TextPrimitive
 import com.appcues.data.model.ExperiencePrimitive.VerticalStackPrimitive
 import com.appcues.data.model.styling.ComponentStyle
-import com.appcues.ui.LocalAppcuesActionDelegate
-import com.appcues.ui.LocalAppcuesActions
-import com.appcues.ui.LocalImageLoader
-import com.appcues.ui.LocalLogcues
+import com.appcues.ui.composables.LocalAppcuesActionDelegate
+import com.appcues.ui.composables.LocalAppcuesActions
+import com.appcues.ui.composables.LocalImageLoader
+import com.appcues.ui.composables.LocalLogcues
 import com.appcues.ui.extensions.PrimitiveGestureProperties
 import com.appcues.ui.extensions.blurHashPlaceholder
 import com.appcues.ui.extensions.getBoxAlignment

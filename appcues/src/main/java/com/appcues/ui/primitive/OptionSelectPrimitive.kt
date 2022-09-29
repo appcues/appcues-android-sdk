@@ -45,7 +45,7 @@ import com.appcues.data.model.styling.ComponentSelectMode
 import com.appcues.data.model.styling.ComponentSelectMode.MULTIPLE
 import com.appcues.data.model.styling.ComponentSelectMode.SINGLE
 import com.appcues.data.model.styling.ComponentStyle
-import com.appcues.ui.LocalExperienceStepFormStateDelegate
+import com.appcues.ui.composables.LocalExperienceStepFormStateDelegate
 import com.appcues.ui.extensions.getColor
 import com.appcues.ui.extensions.getHorizontalAlignment
 import com.appcues.ui.extensions.styleBorder

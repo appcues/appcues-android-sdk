@@ -10,7 +10,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkOut
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.appcues.ui.rememberAppcuesContentVisibility
+import com.appcues.ui.composables.rememberAppcuesContentVisibility
 
 /**
  * AppcuesTraitAnimatedVisibility is used to animate traits based on internal state of Appcues SDK

@@ -4,7 +4,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -65,7 +64,7 @@ internal class SkippableTrait(
     override fun BoxScope.Backdrop() {
         Spacer(
             modifier = Modifier
-                .fillMaxSize()
+                .matchParentSize()
                 // add click listener but without any ripple effect, should this happen?
                 .pointerInput(Unit) {
                     detectTapGestures {

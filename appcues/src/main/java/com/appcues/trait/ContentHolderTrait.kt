@@ -2,7 +2,8 @@ package com.appcues.trait
 
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.Composable
-import com.appcues.ui.appcuesPaginationData
+import com.appcues.ui.composables.AppcuesPaginationData
+import com.appcues.ui.composables.appcuesPaginationData
 
 interface ContentHolderTrait : ExperienceTrait {
 

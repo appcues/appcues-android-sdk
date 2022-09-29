@@ -7,8 +7,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import coil.compose.AsyncImage
 import com.appcues.data.model.ExperiencePrimitive.ImagePrimitive
-import com.appcues.ui.LocalImageLoader
-import com.appcues.ui.LocalLogcues
+import com.appcues.ui.composables.LocalImageLoader
+import com.appcues.ui.composables.LocalLogcues
 import com.appcues.ui.extensions.blurHashPlaceholder
 import com.appcues.ui.extensions.getImageLoader
 import com.appcues.ui.extensions.getImageRequest

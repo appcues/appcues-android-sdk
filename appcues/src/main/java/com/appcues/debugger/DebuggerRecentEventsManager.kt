@@ -17,7 +17,7 @@ import com.appcues.debugger.model.DebuggerEventItemPropertySection
 import com.appcues.debugger.model.EventType
 import com.appcues.debugger.ui.toEventTitle
 import com.appcues.debugger.ui.toEventType
-import com.appcues.ui.ExperienceStepFormState
+import com.appcues.ui.utils.ExperienceStepFormState
 import com.appcues.util.ContextResources
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow

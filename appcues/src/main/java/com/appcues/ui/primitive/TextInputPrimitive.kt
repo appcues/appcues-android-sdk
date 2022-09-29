@@ -30,7 +30,7 @@ import com.appcues.data.model.styling.ComponentDataType.NAME
 import com.appcues.data.model.styling.ComponentDataType.NUMBER
 import com.appcues.data.model.styling.ComponentDataType.PHONE
 import com.appcues.data.model.styling.ComponentDataType.TEXT
-import com.appcues.ui.LocalExperienceStepFormStateDelegate
+import com.appcues.ui.composables.LocalExperienceStepFormStateDelegate
 import com.appcues.ui.extensions.applyStyle
 import com.appcues.ui.extensions.getColor
 import com.appcues.ui.extensions.getHorizontalAlignment
