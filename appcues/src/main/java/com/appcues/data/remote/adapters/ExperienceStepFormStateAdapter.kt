@@ -1,6 +1,6 @@
 package com.appcues.data.remote.adapters
 
-import com.appcues.ui.ExperienceStepFormState
+import com.appcues.ui.utils.ExperienceStepFormState
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.ToJson

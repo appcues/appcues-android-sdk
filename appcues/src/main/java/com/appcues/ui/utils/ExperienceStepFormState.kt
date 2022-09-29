@@ -1,10 +1,10 @@
-package com.appcues.ui
+package com.appcues.ui.utils
 
 import androidx.compose.runtime.mutableStateOf
 import com.appcues.data.model.ExperiencePrimitive.OptionSelectPrimitive
 import com.appcues.data.model.ExperiencePrimitive.TextInputPrimitive
-import com.appcues.ui.ExperienceStepFormItemState.OptionSelectFormItemState
-import com.appcues.ui.ExperienceStepFormItemState.TextInputFormItemState
+import com.appcues.ui.utils.ExperienceStepFormItemState.OptionSelectFormItemState
+import com.appcues.ui.utils.ExperienceStepFormItemState.TextInputFormItemState
 import java.util.UUID
 
 internal class ExperienceStepFormState {

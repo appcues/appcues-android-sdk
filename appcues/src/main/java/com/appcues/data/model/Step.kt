@@ -1,7 +1,7 @@
 package com.appcues.data.model
 
 import com.appcues.trait.StepDecoratingTrait
-import com.appcues.ui.ExperienceStepFormState
+import com.appcues.ui.utils.ExperienceStepFormState
 import java.util.UUID
 
 internal data class Step(

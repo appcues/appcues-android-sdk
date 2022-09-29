@@ -7,12 +7,12 @@ import com.appcues.data.MoshiConfiguration
 import com.appcues.data.mapper.step.mapPrimitive
 import com.appcues.data.remote.response.step.primitive.PrimitiveResponse
 import com.appcues.logging.Logcues
-import com.appcues.ui.ExperienceStepFormState
-import com.appcues.ui.LocalExperienceStepFormStateDelegate
-import com.appcues.ui.LocalImageLoader
-import com.appcues.ui.LocalLogcues
+import com.appcues.ui.composables.LocalExperienceStepFormStateDelegate
+import com.appcues.ui.composables.LocalImageLoader
+import com.appcues.ui.composables.LocalLogcues
 import com.appcues.ui.primitive.Compose
 import com.appcues.ui.theme.AppcuesTheme
+import com.appcues.ui.utils.ExperienceStepFormState
 
 @Composable
 fun ComposeContent(json: String, imageLoader: ImageLoader) {

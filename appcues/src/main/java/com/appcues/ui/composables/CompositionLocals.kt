@@ -1,17 +1,14 @@
-package com.appcues.ui
+package com.appcues.ui.composables
 
-import androidx.compose.animation.core.MutableTransitionState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.compositionLocalOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import coil.ImageLoader
 import com.appcues.action.ExperienceAction
 import com.appcues.data.model.Action
 import com.appcues.logging.Logcues
-import com.appcues.trait.AppcuesPaginationData
+import com.appcues.ui.AppcuesViewModel
+import com.appcues.ui.ShakeGestureListener
+import com.appcues.ui.utils.ExperienceStepFormState
 import java.util.UUID
 
 // used to register callback for all Actions triggered from primitives
@@ -33,7 +30,9 @@ internal val LocalAppcuesPaginationDelegate = compositionLocalOf { AppcuesPagina
 
 internal data class AppcuesPagination(val onPageChanged: (Int) -> Unit)
 
-internal val appcuesPaginationData = mutableStateOf(AppcuesPaginationData(1, 0, 0.0f))
+internal val LocalViewModel = staticCompositionLocalOf<AppcuesViewModel> { noLocalProvidedFor("AppcuesViewModel") }
+
+internal val LocalShakeGestureListener = staticCompositionLocalOf<ShakeGestureListener> { noLocalProvidedFor("ShakeGestureListener") }
 
 internal val LocalLogcues = staticCompositionLocalOf<Logcues> { noLocalProvidedFor("LocalLogcues") }
 
@@ -42,27 +41,3 @@ internal val LocalExperienceStepFormStateDelegate = compositionLocalOf { Experie
 private fun noLocalProvidedFor(name: String): Nothing {
     error("CompositionLocal $name not present")
 }
-
-/**
- * rememberAppcuesPaginationState is used by traits that wants to know updates about pagination data
- * returns a State of AppcuesPaginationData containing pageCount, currentPage index and scrollingOffset
- * that can be used to sync animations
- */
-@Composable
-internal fun rememberAppcuesPaginationState() = remember<State<AppcuesPaginationData>> { appcuesPaginationData }
-
-internal val isContentVisible = MutableTransitionState(false)
-
-@Composable
-internal fun LaunchOnHideAnimationCompleted(block: () -> Unit) {
-    with(remember { mutableStateOf(isContentVisible) }.value) {
-        // if hide animation is completed
-        if (isIdle && currentState.not()) {
-            block()
-        }
-    }
-}
-
-// we could make this public to give more flexibility in the future
-@Composable
-internal fun rememberAppcuesContentVisibility() = remember { isContentVisible }

@@ -12,10 +12,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onSizeChanged
-import com.appcues.trait.AppcuesPaginationData
 import com.appcues.trait.ContentHolderTrait
 import com.appcues.trait.ContentHolderTrait.ContainerPages
-import com.appcues.ui.LocalAppcuesPaginationDelegate
+import com.appcues.ui.composables.AppcuesPaginationData
+import com.appcues.ui.composables.LocalAppcuesPaginationDelegate
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
