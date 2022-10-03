@@ -74,27 +74,3 @@ class OptionSelectPrimitiveMapperTest {
         assertThat(optionSelectPrimitive.maxSelections).isEqualTo(2u)
     }
 }
-
-//    @Test
-//    fun `optionSelect SHOULD be complete WHEN selection mode is multi AND minSelections greater than option count AND all selected`() {
-//        // GIVEN
-//        val options = optionItems(3)
-//        val optionSelect = OptionSelectPrimitive(
-//            id = UUID.randomUUID(),
-//            label = label,
-//            minSelections = 7u, // invalid, 3 is the max it could be for 3 options
-//            selectMode = MULTIPLE,
-//            options = options,
-//        )
-//        val optionSelectFormItemState = OptionSelectFormItemState(0, optionSelect)
-//
-//        // WHEN
-//        optionSelectFormItemState.setValue(options[0].value)
-//        optionSelectFormItemState.setValue(options[1].value)
-//        optionSelectFormItemState.setValue(options[2].value)
-//
-//        // THEN
-//        assertThat(optionSelectFormItemState.isComplete).isTrue()
-//    }
-
-// fun `optionSelect SHOULD be complete WHEN selection mode is multi AND maxSelections less than minSelections and the min is selected`() {
