@@ -9,23 +9,38 @@ import com.appcues.data.model.styling.ComponentControlPosition
 import com.appcues.data.model.styling.ComponentDisplayFormat
 import com.appcues.data.model.styling.ComponentSelectMode
 import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.OptionSelectPrimitiveResponse
+import kotlin.math.max
+import kotlin.math.min
 
-internal fun OptionSelectPrimitiveResponse.mapOptionSelectPrimitive() = OptionSelectPrimitive(
-    id = id,
-    style = style.mapComponentStyle(),
-    label = label.mapTextPrimitive(),
-    selectMode = mapComponentSelectMode(selectMode),
-    options = options.map { OptionItem(it.value, it.content.mapPrimitive(), it.selectedContent?.mapPrimitive()) },
-    defaultValue = defaultValue ?: setOf(),
-    required = required ?: false,
-    controlPosition = mapComponentControlPosition(controlPosition),
-    displayFormat = mapComponentDisplayFormat(displayFormat),
-    pickerStyle = pickerStyle?.mapComponentStyle(),
-    placeholder = placeholder?.mapPrimitive(),
-    selectedColor = selectedColor?.mapComponentColor(),
-    unselectedColor = unselectedColor?.mapComponentColor(),
-    accentColor = accentColor?.mapComponentColor()
-)
+internal fun OptionSelectPrimitiveResponse.mapOptionSelectPrimitive(): OptionSelectPrimitive {
+    // JSON data has Int values, we require UInt for these in the domain model
+    val dataMin = (minSelections ?: 0).toUInt()
+    val dataMax = maxSelections?.let { max(0, it).toUInt() }
+
+    // the min cannot be more than the available options
+    val trueMinSelections = min(dataMin, options.count().toUInt())
+
+    // the max cannot be less than the min
+    val trueMaxSelections = dataMax?.let { max(trueMinSelections, it) }
+
+    return OptionSelectPrimitive(
+        id = id,
+        style = style.mapComponentStyle(),
+        label = label.mapTextPrimitive(),
+        selectMode = mapComponentSelectMode(selectMode),
+        options = options.map { OptionItem(it.value, it.content.mapPrimitive(), it.selectedContent?.mapPrimitive()) },
+        defaultValue = defaultValue ?: setOf(),
+        minSelections = trueMinSelections,
+        maxSelections = trueMaxSelections,
+        controlPosition = mapComponentControlPosition(controlPosition),
+        displayFormat = mapComponentDisplayFormat(displayFormat),
+        pickerStyle = pickerStyle?.mapComponentStyle(),
+        placeholder = placeholder?.mapPrimitive(),
+        selectedColor = selectedColor?.mapComponentColor(),
+        unselectedColor = unselectedColor?.mapComponentColor(),
+        accentColor = accentColor?.mapComponentColor()
+    )
+}
 
 private fun mapComponentSelectMode(value: String) = when (value) {
     "single" -> ComponentSelectMode.SINGLE

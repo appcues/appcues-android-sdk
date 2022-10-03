@@ -127,27 +127,9 @@ private fun List<OptionSelectPrimitive.OptionItem>.ComposeSelections(
     selectedColor: Color?,
     unselectedColor: Color?,
     accentColor: Color?,
-    valueSelectionChanged: (Set<String>) -> Unit,
+    itemSelected: (String) -> Unit,
 ) {
     forEach { option ->
-
-        fun updateSelection(value: String, selected: Boolean) {
-            when (selectMode) {
-                SINGLE -> {
-                    // in single select (radio), you cannot deselect an item
-                    // only select a new one.
-                    if (selected) {
-                        val set = mutableSetOf(value)
-                        valueSelectionChanged(set)
-                    }
-                }
-                MULTIPLE -> {
-                    val set = selectedValues.toMutableSet()
-                    if (selected) set.add(value) else set.remove(value)
-                    valueSelectionChanged(set)
-                }
-            }
-        }
 
         val isSelected = selectedValues.contains(option.value)
         val contentView by remember(isSelected) {
@@ -158,22 +140,22 @@ private fun List<OptionSelectPrimitive.OptionItem>.ComposeSelections(
 
         when (controlPosition) {
             LEADING -> Row(verticalAlignment = Alignment.CenterVertically) {
-                selectMode.Compose(isSelected, selectedColor, unselectedColor, accentColor) { updateSelection(option.value, !isSelected) }
+                selectMode.Compose(isSelected, selectedColor, unselectedColor, accentColor) { itemSelected(option.value) }
                 contentView.Compose()
             }
             TRAILING -> Row(verticalAlignment = Alignment.CenterVertically) {
                 contentView.Compose()
-                selectMode.Compose(isSelected, selectedColor, unselectedColor, accentColor) { updateSelection(option.value, !isSelected) }
+                selectMode.Compose(isSelected, selectedColor, unselectedColor, accentColor) { itemSelected(option.value) }
             }
             TOP -> Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                selectMode.Compose(isSelected, selectedColor, unselectedColor, accentColor) { updateSelection(option.value, !isSelected) }
+                selectMode.Compose(isSelected, selectedColor, unselectedColor, accentColor) { itemSelected(option.value) }
                 contentView.Compose()
             }
             BOTTOM -> Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 contentView.Compose()
-                selectMode.Compose(isSelected, selectedColor, unselectedColor, accentColor) { updateSelection(option.value, !isSelected) }
+                selectMode.Compose(isSelected, selectedColor, unselectedColor, accentColor) { itemSelected(option.value) }
             }
-            HIDDEN -> Box(modifier = Modifier.clickable { updateSelection(option.value, !isSelected) }) {
+            HIDDEN -> Box(modifier = Modifier.clickable { itemSelected(option.value) }) {
                 contentView.Compose()
             }
         }
@@ -221,7 +203,7 @@ private fun List<OptionSelectPrimitive.OptionItem>.ComposePicker(
     modifier: Modifier,
     placeholder: ExperiencePrimitive?,
     accentColor: Color?,
-    valueSelectionChanged: (Set<String>) -> Unit,
+    itemSelected: (String) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
     val selectedValue = selectedValues.firstOrNull()
@@ -265,7 +247,7 @@ private fun List<OptionSelectPrimitive.OptionItem>.ComposePicker(
                 }
                 DropdownMenuItem(onClick = {
                     expanded = false
-                    valueSelectionChanged(setOf(optionItem.value))
+                    itemSelected(optionItem.value)
                 }) {
                     contentView.Compose()
                 }
