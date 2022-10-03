@@ -133,25 +133,33 @@ internal sealed class ExperienceStepFormItemState(
 
         fun setValue(newValue: String) {
             when (primitive.selectMode) {
+                // simple case, update the one and only value
                 SINGLE -> values.value = setOf(newValue)
-                MULTIPLE -> {
-                    if (values.value.contains(newValue)) {
-                        values.value = values.value.filter { it != newValue }.toSet()
+                // more complex case, toggle item on/off in the set of selections
+                MULTIPLE -> setMultipleSelectValue(newValue)
+            }
+        }
+
+        private fun setMultipleSelectValue(newValue: String) {
+            if (values.value.contains(newValue)) {
+                // this is the case we are toggling something off - removing
+                values.value = values.value.filter { it != newValue }.toSet()
+            } else {
+                // toggling something on...
+                if (primitive.maxSelections != null) {
+                    if (values.value.count().toUInt() < primitive.maxSelections) {
+                        // it is OK to add, since we'll still be at or under the max
+                        val updated = values.value.toMutableSet()
+                        updated.add(newValue)
+                        values.value = updated
                     } else {
-                        if (primitive.maxSelections != null) {
-                            if (values.value.count().toUInt() < primitive.maxSelections) {
-                                val updated = values.value.toMutableSet()
-                                updated.add(newValue)
-                                values.value = updated
-                            } else {
-                                // Would be selecting more than the max, so no change
-                            }
-                        } else {
-                            val updated = values.value.toMutableSet()
-                            updated.add(newValue)
-                            values.value = updated
-                        }
+                        // Would be selecting more than the max, so no change
                     }
+                } else {
+                    // no max, so fine to add
+                    val updated = values.value.toMutableSet()
+                    updated.add(newValue)
+                    values.value = updated
                 }
             }
         }
