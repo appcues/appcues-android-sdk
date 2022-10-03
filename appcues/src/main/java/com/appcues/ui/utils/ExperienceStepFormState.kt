@@ -3,6 +3,8 @@ package com.appcues.ui.utils
 import androidx.compose.runtime.mutableStateOf
 import com.appcues.data.model.ExperiencePrimitive.OptionSelectPrimitive
 import com.appcues.data.model.ExperiencePrimitive.TextInputPrimitive
+import com.appcues.data.model.styling.ComponentSelectMode.MULTIPLE
+import com.appcues.data.model.styling.ComponentSelectMode.SINGLE
 import com.appcues.ui.utils.ExperienceStepFormItemState.OptionSelectFormItemState
 import com.appcues.ui.utils.ExperienceStepFormItemState.TextInputFormItemState
 import java.util.UUID
@@ -23,16 +25,16 @@ internal class ExperienceStepFormState {
 
     fun setValue(primitive: TextInputPrimitive, value: String) {
         val item = getItem(primitive)
-        item.text.value = value
+        item.setValue(value)
         updateFormItem(item)
     }
 
     fun getValue(primitive: OptionSelectPrimitive) =
         getItem(primitive).values
 
-    fun setValue(primitive: OptionSelectPrimitive, values: Set<String>) {
+    fun setValue(primitive: OptionSelectPrimitive, value: String) {
         val item = getItem(primitive)
-        item.values.value = values
+        item.setValue(value)
         updateFormItem(item)
     }
 
@@ -42,7 +44,7 @@ internal class ExperienceStepFormState {
 
         // create new state tracking object
         item = with(primitive) {
-            TextInputFormItemState(itemIndex++, id, "textInput", label.text, required).apply {
+            TextInputFormItemState(itemIndex++, this).apply {
                 text.value = defaultValue ?: ""
             }
         }
@@ -56,7 +58,11 @@ internal class ExperienceStepFormState {
 
         // create new state tracking object
         item = with(primitive) {
-            OptionSelectFormItemState(itemIndex++, id, "optionSelect", label.text, required).apply {
+            OptionSelectFormItemState(itemIndex++, this).apply {
+                // it is possible this sets a default value with a number of items
+                // greater than the max allowed, setting in invalid state.  This is allowed,
+                // but the user would need to unselect some to be able to make changes or
+                // get back to a valid state to continue.
                 values.value = defaultValue
             }
         }
@@ -81,8 +87,17 @@ internal sealed class ExperienceStepFormItemState(
     val isComplete: Boolean
         get() {
             return when (this) {
-                is OptionSelectFormItemState -> !isRequired || values.value.isNotEmpty()
                 is TextInputFormItemState -> !isRequired || text.value.isNotBlank()
+                is OptionSelectFormItemState -> {
+                    when (primitive.selectMode) {
+                        SINGLE -> !isRequired || values.value.isNotEmpty()
+                        MULTIPLE -> {
+                            if (values.value.count().toUInt() < primitive.minSelections) return false
+                            if (primitive.maxSelections != null && values.value.count().toUInt() > primitive.maxSelections) return false
+                            return true
+                        }
+                    }
+                }
             }
         }
 
@@ -95,21 +110,50 @@ internal sealed class ExperienceStepFormItemState(
 
     class TextInputFormItemState(
         override val index: Int,
-        override val id: UUID,
-        override val type: String,
-        override val label: String,
-        override val isRequired: Boolean,
-    ) : ExperienceStepFormItemState(index, id, type, label, isRequired) {
+        val primitive: TextInputPrimitive,
+    ) : ExperienceStepFormItemState(index, primitive.id, "textInput", primitive.label.text, primitive.required) {
         var text = mutableStateOf("")
+
+        fun setValue(newValue: String) {
+            text.value = newValue
+        }
     }
 
     class OptionSelectFormItemState(
         override val index: Int,
-        override val id: UUID,
-        override val type: String,
-        override val label: String,
-        override val isRequired: Boolean,
-    ) : ExperienceStepFormItemState(index, id, type, label, isRequired) {
+        val primitive: OptionSelectPrimitive,
+    ) : ExperienceStepFormItemState(
+        index = index,
+        id = primitive.id,
+        type = "optionSelect",
+        label = primitive.label.text,
+        isRequired = primitive.minSelections > 0u
+    ) {
         var values = mutableStateOf(setOf<String>())
+
+        fun setValue(newValue: String) {
+            when (primitive.selectMode) {
+                SINGLE -> values.value = setOf(newValue)
+                MULTIPLE -> {
+                    if (values.value.contains(newValue)) {
+                        values.value = values.value.filter { it != newValue }.toSet()
+                    } else {
+                        if (primitive.maxSelections != null) {
+                            if (values.value.count().toUInt() < primitive.maxSelections) {
+                                val updated = values.value.toMutableSet()
+                                updated.add(newValue)
+                                values.value = updated
+                            } else {
+                                // Would be selecting more than the max, so no change
+                            }
+                        } else {
+                            val updated = values.value.toMutableSet()
+                            updated.add(newValue)
+                            values.value = updated
+                        }
+                    }
+                }
+            }
+        }
     }
 }
