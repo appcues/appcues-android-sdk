@@ -4,10 +4,11 @@ import com.appcues.data.model.ExperiencePrimitive.OptionSelectPrimitive
 import com.appcues.data.model.ExperiencePrimitive.OptionSelectPrimitive.OptionItem
 import com.appcues.data.model.ExperiencePrimitive.TextInputPrimitive
 import com.appcues.data.model.ExperiencePrimitive.TextPrimitive
+import com.appcues.data.model.ExperienceStepFormItemState.OptionSelectFormItemState
+import com.appcues.data.model.ExperienceStepFormItemState.TextInputFormItemState
+import com.appcues.data.model.ExperienceStepFormState
 import com.appcues.data.model.styling.ComponentSelectMode.MULTIPLE
 import com.appcues.data.model.styling.ComponentSelectMode.SINGLE
-import com.appcues.ui.utils.ExperienceStepFormItemState.OptionSelectFormItemState
-import com.appcues.ui.utils.ExperienceStepFormItemState.TextInputFormItemState
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import java.util.UUID

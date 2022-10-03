@@ -5,10 +5,10 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import coil.ImageLoader
 import com.appcues.action.ExperienceAction
 import com.appcues.data.model.Action
+import com.appcues.data.model.ExperienceStepFormState
 import com.appcues.logging.Logcues
 import com.appcues.ui.AppcuesViewModel
 import com.appcues.ui.ShakeGestureListener
-import com.appcues.ui.utils.ExperienceStepFormState
 import java.util.UUID
 
 // used to register callback for all Actions triggered from primitives
