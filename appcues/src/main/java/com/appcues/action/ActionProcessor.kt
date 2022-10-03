@@ -28,9 +28,19 @@ internal class ActionProcessor(override val scope: Scope) : KoinScopeComponent {
 
     fun process(actions: List<ExperienceAction>) {
         appcuesCoroutineScope.launch {
-            actions.forEach {
+            transformQueue(actions).forEach {
                 actionQueue.send(it)
             }
+        }
+    }
+
+    private fun transformQueue(actions: List<ExperienceAction>) = actions.fold(actions) { currentQueue, action ->
+        val indexInCurrent = currentQueue.indexOfFirst { it == action }
+        val transformingAction = action as? ExperienceActionQueueTransforming
+        if (indexInCurrent != -1 && transformingAction != null) {
+            return transformingAction.transformQueue(currentQueue, indexInCurrent, appcues)
+        } else {
+            return@fold currentQueue
         }
     }
 }
