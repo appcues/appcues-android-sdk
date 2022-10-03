@@ -14,7 +14,7 @@ import java.util.UUID
 // used to register callback for all Actions triggered from primitives
 internal val LocalAppcuesActionDelegate = staticCompositionLocalOf { AppcuesActions {} }
 
-internal data class AppcuesActions(val onAction: (ExperienceAction) -> Unit)
+internal data class AppcuesActions(val onActions: (List<ExperienceAction>) -> Unit)
 
 internal val LocalAppcuesActions = staticCompositionLocalOf<Map<UUID, List<Action>>> { hashMapOf() }
 

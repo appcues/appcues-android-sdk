@@ -33,7 +33,6 @@ import com.appcues.util.ResultOf
 import com.google.common.truth.Truth.assertThat
 import io.mockk.Called
 import io.mockk.coVerify
-import io.mockk.coVerifySequence
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitAll
@@ -559,10 +558,8 @@ class StateMachineTest : AppcuesScopeTest {
         // THEN
         assertThat(result.successValue()).isEqualTo(Idling)
         assertThat(stateMachine.state).isEqualTo(Idling)
-        coVerifySequence {
-            experience.completionActions.forEach {
-                koinTestRule.scope.get<ActionProcessor>().process(it)
-            }
+        coVerify {
+            koinTestRule.scope.get<ActionProcessor>().process(experience.completionActions)
         }
     }
 

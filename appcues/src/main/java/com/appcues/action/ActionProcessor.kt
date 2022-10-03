@@ -26,9 +26,11 @@ internal class ActionProcessor(override val scope: Scope) : KoinScopeComponent {
         }
     }
 
-    fun process(action: ExperienceAction) {
+    fun process(actions: List<ExperienceAction>) {
         appcuesCoroutineScope.launch {
-            actionQueue.send(action)
+            actions.forEach {
+                actionQueue.send(it)
+            }
         }
     }
 }
