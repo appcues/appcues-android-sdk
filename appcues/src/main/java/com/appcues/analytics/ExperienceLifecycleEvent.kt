@@ -2,8 +2,8 @@ package com.appcues.analytics
 
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType.FORM_SUBMITTED
 import com.appcues.data.model.Experience
+import com.appcues.data.model.ExperienceStepFormState
 import com.appcues.statemachine.Error
-import com.appcues.ui.utils.ExperienceStepFormState
 import com.appcues.util.toSlug
 
 internal sealed class ExperienceLifecycleEvent(

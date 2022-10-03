@@ -12,7 +12,7 @@ import com.appcues.ui.composables.LocalImageLoader
 import com.appcues.ui.composables.LocalLogcues
 import com.appcues.ui.primitive.Compose
 import com.appcues.ui.theme.AppcuesTheme
-import com.appcues.ui.utils.ExperienceStepFormState
+import com.appcues.data.model.ExperienceStepFormState
 
 @Composable
 fun ComposeContent(json: String, imageLoader: ImageLoader) {

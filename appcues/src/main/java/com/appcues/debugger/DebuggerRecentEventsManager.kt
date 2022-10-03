@@ -10,6 +10,7 @@ import com.appcues.analytics.AnalyticsEvent
 import com.appcues.analytics.AutoPropertyDecorator
 import com.appcues.analytics.ExperienceLifecycleEvent
 import com.appcues.analytics.TrackingData
+import com.appcues.data.model.ExperienceStepFormState
 import com.appcues.data.remote.request.ActivityRequest
 import com.appcues.data.remote.request.EventRequest
 import com.appcues.debugger.model.DebuggerEventItem
@@ -17,7 +18,6 @@ import com.appcues.debugger.model.DebuggerEventItemPropertySection
 import com.appcues.debugger.model.EventType
 import com.appcues.debugger.ui.toEventTitle
 import com.appcues.debugger.ui.toEventType
-import com.appcues.ui.utils.ExperienceStepFormState
 import com.appcues.util.ContextResources
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
