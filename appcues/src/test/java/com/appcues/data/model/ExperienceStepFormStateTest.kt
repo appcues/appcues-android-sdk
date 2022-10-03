@@ -1,4 +1,4 @@
-package com.appcues.ui.utils
+package com.appcues.data.model
 
 import com.appcues.data.model.ExperiencePrimitive.OptionSelectPrimitive
 import com.appcues.data.model.ExperiencePrimitive.OptionSelectPrimitive.OptionItem
@@ -6,7 +6,6 @@ import com.appcues.data.model.ExperiencePrimitive.TextInputPrimitive
 import com.appcues.data.model.ExperiencePrimitive.TextPrimitive
 import com.appcues.data.model.ExperienceStepFormItemState.OptionSelectFormItemState
 import com.appcues.data.model.ExperienceStepFormItemState.TextInputFormItemState
-import com.appcues.data.model.ExperienceStepFormState
 import com.appcues.data.model.styling.ComponentSelectMode.MULTIPLE
 import com.appcues.data.model.styling.ComponentSelectMode.SINGLE
 import com.google.common.truth.Truth.assertThat
