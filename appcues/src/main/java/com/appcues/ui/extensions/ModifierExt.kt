@@ -210,7 +210,7 @@ internal fun Modifier.coloredShadow(
 }
 
 internal data class PrimitiveGestureProperties(
-    val onAction: (ExperienceAction) -> Unit,
+    val onActions: (List<ExperienceAction>) -> Unit,
     val actions: Map<UUID, List<Action>>,
     val interactionSource: MutableInteractionSource,
     val indication: Indication?,
@@ -232,13 +232,13 @@ private fun Modifier.actions(
                 indication = gestureProperties.indication,
                 enabled = gestureProperties.enabled,
                 role = gestureProperties.role,
-                onLongClick = toLongPressMotionOrNull(gestureProperties.onAction),
-                onClick = toTapMotionOrEmpty(gestureProperties.onAction),
+                onLongClick = toLongPressMotionOrNull(gestureProperties.onActions),
+                onClick = toTapMotionOrEmpty(gestureProperties.onActions),
             )
     }
 )
 
-private fun List<Action>.toTapMotionOrEmpty(onAction: (ExperienceAction) -> Unit): (() -> Unit) {
+private fun List<Action>.toTapMotionOrEmpty(onAction: (List<ExperienceAction>) -> Unit): (() -> Unit) {
     // filter only TAP motions
     return filter { it.on == Action.Motion.TAP }
         // take if there is any
@@ -247,10 +247,10 @@ private fun List<Action>.toTapMotionOrEmpty(onAction: (ExperienceAction) -> Unit
         ?.map { it.experienceAction }
         // return click block that executes onAction for every ExperienceAction
         // else returns empty click block (notnull property for combinedClickable)
-        ?.run { { forEach { onAction(it) } } } ?: { }
+        ?.run { { onAction(this) } } ?: { }
 }
 
-private fun List<Action>.toLongPressMotionOrNull(block: (ExperienceAction) -> Unit): (() -> Unit)? {
+private fun List<Action>.toLongPressMotionOrNull(block: (List<ExperienceAction>) -> Unit): (() -> Unit)? {
     // filter only LONG_PRESS motions
     return filter { it.on == Action.Motion.LONG_PRESS }
         // take if there is any
@@ -259,7 +259,7 @@ private fun List<Action>.toLongPressMotionOrNull(block: (ExperienceAction) -> Un
         ?.map { it.experienceAction }
         // return click block that executes onAction for every ExperienceAction
         // else returns null
-        ?.run { { forEach { block(it) } } }
+        ?.run { { block(this) } }
 }
 
 internal fun Modifier.imageAspectRatio(

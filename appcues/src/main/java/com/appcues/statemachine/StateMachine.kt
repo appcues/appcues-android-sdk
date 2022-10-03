@@ -112,7 +112,7 @@ internal class StateMachine(
                     sideEffect.completion.await()
                 }
                 is ProcessActions -> {
-                    sideEffect.actions.forEach { actionProcessor.process(it) }
+                    actionProcessor.process(sideEffect.actions)
                     Success(_state)
                 }
             }

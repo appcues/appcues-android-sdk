@@ -104,8 +104,8 @@ internal class AppcuesViewModel(
         }
     }
 
-    fun onAction(experienceAction: ExperienceAction) {
-        actionProcessor.process(experienceAction)
+    fun onActions(experienceActions: List<ExperienceAction>) {
+        actionProcessor.process(experienceActions)
     }
 
     fun onPageChanged(index: Int) {
