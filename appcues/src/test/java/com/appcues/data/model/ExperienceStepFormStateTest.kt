@@ -331,7 +331,8 @@ class ExperienceStepFormStateTest {
             options = options,
         )
         val textInput = TextInputPrimitive(id = UUID.randomUUID(), label = label, required = true)
-
+        formState.register(textInput)
+        formState.register(optionSelect)
         formState.setValue(optionSelect, options[0].value)
         formState.setValue(textInput, "text")
 
@@ -352,7 +353,8 @@ class ExperienceStepFormStateTest {
             options = options,
         )
         val textInput = TextInputPrimitive(id = UUID.randomUUID(), label = label, required = true)
-
+        formState.register(textInput)
+        formState.register(optionSelect)
         formState.setValue(optionSelect, options[0].value)
         formState.setValue(textInput, "text")
 
