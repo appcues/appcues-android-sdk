@@ -37,4 +37,26 @@ internal sealed class State {
     }
 
     data class Paused(val state: State) : State()
+
+    val currentExperience: Experience?
+        get() = when (this) {
+            is Idling -> null
+            is BeginningExperience -> this.experience
+            is BeginningStep -> this.experience
+            is EndingExperience -> this.experience
+            is EndingStep -> this.experience
+            is Paused -> this.state.currentExperience
+            is RenderingStep -> this.experience
+        }
+
+    val currentStepIndex: Int?
+        get() = when (this) {
+            is Idling -> null
+            is BeginningExperience -> null
+            is BeginningStep -> this.flatStepIndex
+            is EndingExperience -> this.flatStepIndex
+            is EndingStep -> this.flatStepIndex
+            is Paused -> this.state.currentStepIndex
+            is RenderingStep -> this.flatStepIndex
+        }
 }
