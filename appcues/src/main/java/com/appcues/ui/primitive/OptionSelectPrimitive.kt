@@ -52,7 +52,9 @@ import com.appcues.ui.extensions.styleBorder
 
 @Composable
 internal fun OptionSelectPrimitive.Compose(modifier: Modifier) {
-    val formState = LocalExperienceStepFormStateDelegate.current
+    val formState = LocalExperienceStepFormStateDelegate.current.apply {
+        register(this@Compose)
+    }
 
     Column(
         modifier = modifier,
@@ -65,7 +67,7 @@ internal fun OptionSelectPrimitive.Compose(modifier: Modifier) {
         when {
             selectMode == SINGLE && displayFormat == PICKER -> {
                 options.ComposePicker(
-                    selectedValues = formState.getValue(this@Compose).value,
+                    selectedValues = formState.getValue(this@Compose),
                     modifier = Modifier.styleBorder(pickerStyle ?: ComponentStyle(), isSystemInDarkTheme()),
                     placeholder = placeholder,
                     accentColor = accentColor?.getColor(isSystemInDarkTheme()),
@@ -76,7 +78,7 @@ internal fun OptionSelectPrimitive.Compose(modifier: Modifier) {
             displayFormat == HORIZONTAL_LIST -> {
                 Row(verticalAlignment = controlPosition.getVerticalAlignment() ?: Alignment.CenterVertically) {
                     options.ComposeSelections(
-                        selectedValues = formState.getValue(this@Compose).value,
+                        selectedValues = formState.getValue(this@Compose),
                         selectMode = selectMode,
                         controlPosition = controlPosition,
                         selectedColor = selectedColor.getColor(isSystemInDarkTheme()),
@@ -90,7 +92,7 @@ internal fun OptionSelectPrimitive.Compose(modifier: Modifier) {
             else -> { // VERTICAL_LIST case or a fallback (i.e. a PICKER but with multi-select, invalid)
                 Column(horizontalAlignment = controlPosition.getHorizontalAlignment() ?: Alignment.CenterHorizontally) {
                     options.ComposeSelections(
-                        selectedValues = formState.getValue(this@Compose).value,
+                        selectedValues = formState.getValue(this@Compose),
                         selectMode = selectMode,
                         controlPosition = controlPosition,
                         selectedColor = selectedColor.getColor(isSystemInDarkTheme()),

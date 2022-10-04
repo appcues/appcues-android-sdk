@@ -20,58 +20,52 @@ internal class ExperienceStepFormState {
     // this can be used by buttons needing to know if they are enabled or not based on required input
     val isFormComplete = mutableStateOf(true)
 
-    fun getValue(primitive: TextInputPrimitive) =
-        getItem(primitive).text
+    fun register(primitive: ExperiencePrimitive) {
+        if (_formItems.containsKey(primitive.id)) return // already registered - ok
 
-    fun setValue(primitive: TextInputPrimitive, value: String) {
-        val item = getItem(primitive)
-        item.setValue(value)
-        updateFormItem(item)
-    }
-
-    fun getValue(primitive: OptionSelectPrimitive) =
-        getItem(primitive).values
-
-    fun setValue(primitive: OptionSelectPrimitive, value: String) {
-        val item = getItem(primitive)
-        item.setValue(value)
-        updateFormItem(item)
-    }
-
-    private fun getItem(primitive: TextInputPrimitive): TextInputFormItemState {
-        var item = _formItems[primitive.id] as? TextInputFormItemState
-        if (item != null) return item
-
-        // create new state tracking object
-        item = with(primitive) {
-            TextInputFormItemState(itemIndex++, this).apply {
-                text.value = defaultValue ?: ""
+        when (primitive) {
+            is TextInputPrimitive -> TextInputFormItemState(itemIndex++, primitive).apply {
+                text.value = primitive.defaultValue ?: ""
             }
-        }
-        updateFormItem(item)
-        return item
-    }
-
-    private fun getItem(primitive: OptionSelectPrimitive): OptionSelectFormItemState {
-        var item = _formItems[primitive.id] as? OptionSelectFormItemState
-        if (item != null) return item
-
-        // create new state tracking object
-        item = with(primitive) {
-            OptionSelectFormItemState(itemIndex++, this).apply {
+            is OptionSelectPrimitive -> OptionSelectFormItemState(itemIndex++, primitive).apply {
                 // it is possible this sets a default value with a number of items
                 // greater than the max allowed, setting in invalid state.  This is allowed,
                 // but the user would need to unselect some to be able to make changes or
                 // get back to a valid state to continue.
-                values.value = defaultValue
+                values.value = primitive.defaultValue
             }
+            else -> null
+        }?.let { itemState ->
+            // store in local registry
+            _formItems[primitive.id] = itemState
+            // update validation state
+            isFormComplete.value = !_formItems.values.any { !it.isComplete }
         }
-        updateFormItem(item)
-        return item
     }
 
-    private fun updateFormItem(item: ExperienceStepFormItemState) {
-        _formItems[item.id] = item
+    fun getValue(primitive: TextInputPrimitive): String {
+        val item = _formItems[primitive.id] as? TextInputFormItemState
+        return item?.text?.value ?: ""
+    }
+
+    fun setValue(primitive: TextInputPrimitive, value: String) {
+        val item = _formItems[primitive.id] as? TextInputFormItemState
+        item?.setValue(value)
+        checkValidation()
+    }
+
+    fun getValue(primitive: OptionSelectPrimitive): Set<String> {
+        val item = _formItems[primitive.id] as? OptionSelectFormItemState
+        return item?.values?.value ?: setOf()
+    }
+
+    fun setValue(primitive: OptionSelectPrimitive, value: String) {
+        val item = _formItems[primitive.id] as? OptionSelectFormItemState
+        item?.setValue(value)
+        checkValidation()
+    }
+
+    private fun checkValidation() {
         isFormComplete.value = !_formItems.values.any { !it.isComplete }
     }
 }

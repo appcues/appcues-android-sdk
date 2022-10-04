@@ -58,7 +58,10 @@ private const val TEXT_INPUT_PADDING = 16.0
 @Composable
 internal fun TextInputPrimitive.Compose(modifier: Modifier) {
 
-    val formState = LocalExperienceStepFormStateDelegate.current
+    val formState = LocalExperienceStepFormStateDelegate.current.apply {
+        register(this@Compose)
+    }
+
     val isDark = isSystemInDarkTheme()
     val textStyle = LocalTextStyle.current.applyStyle(
         style = textFieldStyle,
@@ -74,7 +77,7 @@ internal fun TextInputPrimitive.Compose(modifier: Modifier) {
 
         // Several styling customization options for TextField noted here https://stackoverflow.com/a/68592613
         TextField(
-            value = formState.getValue(this@Compose).value,
+            value = formState.getValue(this@Compose),
             onValueChange = {
                 if (maxLength == null || it.length <= maxLength) {
                     formState.setValue(this@Compose, it)
