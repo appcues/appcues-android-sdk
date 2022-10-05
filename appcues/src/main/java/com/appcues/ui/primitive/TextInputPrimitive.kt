@@ -1,5 +1,6 @@
 package com.appcues.ui.primitive
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.defaultMinSize
@@ -30,6 +31,7 @@ import com.appcues.data.model.styling.ComponentDataType.NAME
 import com.appcues.data.model.styling.ComponentDataType.NUMBER
 import com.appcues.data.model.styling.ComponentDataType.PHONE
 import com.appcues.data.model.styling.ComponentDataType.TEXT
+import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.ui.composables.LocalExperienceStepFormStateDelegate
 import com.appcues.ui.extensions.applyStyle
 import com.appcues.ui.extensions.getColor
@@ -43,6 +45,7 @@ import com.appcues.ui.extensions.styleShadow
 import com.appcues.ui.theme.AppcuesPreviewPrimitive
 import com.appcues.ui.utils.margin
 import java.util.UUID
+import kotlin.math.max
 
 // constants used in determining the height of the text input box based on the text properties in the model
 
@@ -61,7 +64,8 @@ internal fun TextInputPrimitive.Compose(modifier: Modifier) {
     val formState = LocalExperienceStepFormStateDelegate.current.apply {
         register(this@Compose)
     }
-
+    val showError = formState.shouldShowError(this)
+    val errorTint = if (showError) errorLabel?.style?.foregroundColor else null
     val isDark = isSystemInDarkTheme()
     val textStyle = LocalTextStyle.current.applyStyle(
         style = textFieldStyle,
@@ -73,7 +77,8 @@ internal fun TextInputPrimitive.Compose(modifier: Modifier) {
         modifier = modifier.fillMaxWidth(),
         horizontalAlignment = style.getHorizontalAlignment(),
     ) {
-        label.Compose()
+
+        label.checkErrorStyle(showError, errorLabel).Compose()
 
         // Several styling customization options for TextField noted here https://stackoverflow.com/a/68592613
         TextField(
@@ -89,7 +94,7 @@ internal fun TextInputPrimitive.Compose(modifier: Modifier) {
                 .fillMaxWidth()
                 .styleInputBoxHeight(textStyle, numberOfLines)
                 .styleCorner(textFieldStyle)
-                .styleBorder(textFieldStyle, isDark)
+                .styleTintedBorder(errorTint, textFieldStyle, isDark)
                 .styleBackground(textFieldStyle, isDark)
                 .padding(textFieldStyle.getPaddings()),
             textStyle = textStyle,
@@ -110,8 +115,27 @@ internal fun TextInputPrimitive.Compose(modifier: Modifier) {
                 unfocusedIndicatorColor = Color.Transparent,
             ),
         )
+
+        if (showError) {
+            errorLabel?.Compose()
+        }
     }
 }
+
+// wrapper that will apply an error tint color, if applicable
+// otherwise, just fall back to the normal styleBorder modifier
+private fun Modifier.styleTintedBorder(
+    tintColor: ComponentColor?,
+    style: ComponentStyle,
+    isDark: Boolean
+) = this.then(
+    if (tintColor != null) {
+        val borderWidth = max(style.borderWidth ?: 0.0, 1.0).dp
+        Modifier.border(borderWidth, tintColor.getColor(isDark), RoundedCornerShape(style.cornerRadius.dp))
+    } else {
+        Modifier.styleBorder(style, isDark)
+    }
+)
 
 private fun Modifier.styleInputBoxHeight(textStyle: TextStyle, numberOfLines: Int) = this.then(
     with(textStyle) {
