@@ -55,6 +55,8 @@ internal fun OptionSelectPrimitive.Compose(modifier: Modifier) {
     val formState = LocalExperienceStepFormStateDelegate.current.apply {
         register(this@Compose)
     }
+    val showError = formState.shouldShowError(this)
+    val errorTint = if (showError) errorLabel?.style?.foregroundColor?.getColor(isSystemInDarkTheme()) else null
 
     Column(
         modifier = modifier,
@@ -62,7 +64,7 @@ internal fun OptionSelectPrimitive.Compose(modifier: Modifier) {
     ) {
 
         // the form item label / question
-        label.Compose()
+        label.checkErrorStyle(showError, errorLabel).Compose()
 
         when {
             selectMode == SINGLE && displayFormat == PICKER -> {
@@ -81,9 +83,8 @@ internal fun OptionSelectPrimitive.Compose(modifier: Modifier) {
                         selectedValues = formState.getValue(this@Compose),
                         selectMode = selectMode,
                         controlPosition = controlPosition,
-                        selectedColor = selectedColor.getColor(isSystemInDarkTheme()),
-                        unselectedColor = unselectedColor.getColor(isSystemInDarkTheme()),
-                        accentColor = accentColor.getColor(isSystemInDarkTheme()),
+                        optionSelectPrimitive = this@Compose,
+                        errorTint = errorTint,
                     ) {
                         formState.setValue(this@Compose, it)
                     }
@@ -95,14 +96,17 @@ internal fun OptionSelectPrimitive.Compose(modifier: Modifier) {
                         selectedValues = formState.getValue(this@Compose),
                         selectMode = selectMode,
                         controlPosition = controlPosition,
-                        selectedColor = selectedColor.getColor(isSystemInDarkTheme()),
-                        unselectedColor = unselectedColor.getColor(isSystemInDarkTheme()),
-                        accentColor = accentColor.getColor(isSystemInDarkTheme()),
+                        optionSelectPrimitive = this@Compose,
+                        errorTint = errorTint,
                     ) {
                         formState.setValue(this@Compose, it)
                     }
                 }
             }
+        }
+
+        if (showError) {
+            errorLabel?.Compose()
         }
     }
 }
@@ -126,9 +130,8 @@ private fun List<OptionSelectPrimitive.OptionItem>.ComposeSelections(
     selectedValues: Set<String>,
     selectMode: ComponentSelectMode,
     controlPosition: ComponentControlPosition,
-    selectedColor: Color?,
-    unselectedColor: Color?,
-    accentColor: Color?,
+    optionSelectPrimitive: OptionSelectPrimitive,
+    errorTint: Color?,
     itemSelected: (String) -> Unit,
 ) {
     forEach { option ->
@@ -142,20 +145,20 @@ private fun List<OptionSelectPrimitive.OptionItem>.ComposeSelections(
 
         when (controlPosition) {
             LEADING -> Row(verticalAlignment = Alignment.CenterVertically) {
-                selectMode.Compose(isSelected, selectedColor, unselectedColor, accentColor) { itemSelected(option.value) }
+                selectMode.Compose(isSelected, optionSelectPrimitive, errorTint) { itemSelected(option.value) }
                 contentView.Compose()
             }
             TRAILING -> Row(verticalAlignment = Alignment.CenterVertically) {
                 contentView.Compose()
-                selectMode.Compose(isSelected, selectedColor, unselectedColor, accentColor) { itemSelected(option.value) }
+                selectMode.Compose(isSelected, optionSelectPrimitive, errorTint) { itemSelected(option.value) }
             }
             TOP -> Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                selectMode.Compose(isSelected, selectedColor, unselectedColor, accentColor) { itemSelected(option.value) }
+                selectMode.Compose(isSelected, optionSelectPrimitive, errorTint) { itemSelected(option.value) }
                 contentView.Compose()
             }
             BOTTOM -> Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 contentView.Compose()
-                selectMode.Compose(isSelected, selectedColor, unselectedColor, accentColor) { itemSelected(option.value) }
+                selectMode.Compose(isSelected, optionSelectPrimitive, errorTint) { itemSelected(option.value) }
             }
             HIDDEN -> Box(modifier = Modifier.clickable { itemSelected(option.value) }) {
                 contentView.Compose()
@@ -167,11 +170,14 @@ private fun List<OptionSelectPrimitive.OptionItem>.ComposeSelections(
 @Composable
 private fun ComponentSelectMode.Compose(
     selected: Boolean,
-    selectedColor: Color?,
-    unselectedColor: Color?,
-    accentColor: Color?,
+    optionSelectPrimitive: OptionSelectPrimitive,
+    errorTint: Color?,
     selectionToggled: () -> Unit,
 ) {
+    val selectedColor = optionSelectPrimitive.selectedColor.getColor(isSystemInDarkTheme())
+    val unselectedColor = optionSelectPrimitive.unselectedColor.getColor(isSystemInDarkTheme())
+    val accentColor = optionSelectPrimitive.accentColor.getColor(isSystemInDarkTheme())
+
     when (this) {
         SINGLE -> {
             RadioButton(
@@ -180,7 +186,7 @@ private fun ComponentSelectMode.Compose(
                 colors = RadioButtonDefaults.colors(
                     // the builder should always send these values, but default to the theme like the standard default behavior
                     selectedColor = selectedColor ?: MaterialTheme.colors.secondary,
-                    unselectedColor = unselectedColor ?: MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
+                    unselectedColor = errorTint ?: unselectedColor ?: MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
                 )
             )
         }
@@ -190,8 +196,8 @@ private fun ComponentSelectMode.Compose(
                 onCheckedChange = { selectionToggled() },
                 colors = CheckboxDefaults.colors(
                     // the builder should always send these values, but default to the theme like the standard default behavior
-                    checkedColor = selectedColor ?: MaterialTheme.colors.secondary,
-                    uncheckedColor = unselectedColor ?: MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
+                    checkedColor =  selectedColor ?: MaterialTheme.colors.secondary,
+                    uncheckedColor = errorTint ?: unselectedColor ?: MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
                     checkmarkColor = accentColor ?: MaterialTheme.colors.surface,
                 )
             )
