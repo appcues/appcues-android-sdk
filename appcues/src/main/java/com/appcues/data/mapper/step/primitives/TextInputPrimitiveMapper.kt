@@ -10,6 +10,7 @@ internal fun TextInputPrimitiveResponse.mapTextInputPrimitive() = TextInputPrimi
     id = id,
     style = style.mapComponentStyle(),
     label = label.mapTextPrimitive(),
+    errorLabel = errorLabel?.mapTextPrimitive(),
     placeholder = placeholder?.mapTextPrimitive(),
     defaultValue = defaultValue,
     required = required ?: false,
