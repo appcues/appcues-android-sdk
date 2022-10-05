@@ -34,6 +34,7 @@ import com.appcues.data.model.styling.ComponentDataType.TEXT
 import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.ui.composables.LocalExperienceStepFormStateDelegate
 import com.appcues.ui.extensions.applyStyle
+import com.appcues.ui.extensions.checkErrorStyle
 import com.appcues.ui.extensions.getColor
 import com.appcues.ui.extensions.getHorizontalAlignment
 import com.appcues.ui.extensions.getMargins
