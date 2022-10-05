@@ -26,7 +26,7 @@ platform :android do
       commits_count: 5,
       pretty: "- [%as] %s"
     )
-    changelog_message = "Version #{sample_version}\n\nLatest commits on #{ENV["CIRCLE_BRANCH"]}:\n" + git_log
+    changelog_message = truncate("Version #{sample_version}\n\nLatest commits on #{ENV["CIRCLE_BRANCH"]}:\n" + git_log, 500) # Google play API limit
     
     # metadata dir is how What's New text gets communicated 
     # https://docs.fastlane.tools/actions/supply/#changelogs-whats-new
@@ -44,4 +44,8 @@ platform :android do
       rollout: '1'
     )    
   end
+end
+
+def truncate(string, max)
+  string.length > max ? "#{string[0...max]}" : string
 end
