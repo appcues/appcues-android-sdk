@@ -27,6 +27,7 @@ platform :android do
       pretty: "- [%as] %s"
     )
     changelog_message = "Version #{sample_version}\n\nLatest commits on #{ENV["CIRCLE_BRANCH"]}:\n" + git_log
+    truncated_changelog = changelog_message.truncate(500) # Google play API limit
     
     # metadata dir is how What's New text gets communicated 
     # https://docs.fastlane.tools/actions/supply/#changelogs-whats-new
@@ -35,7 +36,7 @@ platform :android do
     version_changelog = metadata_dir + "/#{ENV["CIRCLE_BUILD_NUM"]}.txt"
     sh("mkdir", "-p", metadata_dir)
     sh("echo 'Version #{sample_version}' > #{default_changelog}")
-    sh("echo '#{changelog_message}' > #{version_changelog}")
+    sh("echo '#{truncated_changelog}' > #{version_changelog}")
 
     upload_to_play_store(
       track: 'internal', 
