@@ -18,7 +18,10 @@ internal class ExperienceStepFormState {
         get() = _formItems.values.sortedBy { it.index }
 
     // this can be used by buttons needing to know if they are enabled or not based on required input
-    val isFormComplete = mutableStateOf(true)
+    val isFormComplete: Boolean
+        get() = !_formItems.values.any { !it.isComplete }
+
+    val shouldShowErrors = mutableStateOf(false)
 
     fun register(primitive: ExperiencePrimitive) {
         if (_formItems.containsKey(primitive.id)) return // already registered - ok
@@ -38,10 +41,11 @@ internal class ExperienceStepFormState {
         }?.let { itemState ->
             // store in local registry
             _formItems[primitive.id] = itemState
-            // update validation state
-            isFormComplete.value = !_formItems.values.any { !it.isComplete }
         }
     }
+
+    fun shouldShowError(primitive: ExperiencePrimitive): Boolean =
+        shouldShowErrors.value && !(_formItems[primitive.id]?.isComplete ?: false)
 
     fun getValue(primitive: TextInputPrimitive): String {
         val item = _formItems[primitive.id] as? TextInputFormItemState
@@ -51,7 +55,6 @@ internal class ExperienceStepFormState {
     fun setValue(primitive: TextInputPrimitive, value: String) {
         val item = _formItems[primitive.id] as? TextInputFormItemState
         item?.setValue(value)
-        checkValidation()
     }
 
     fun getValue(primitive: OptionSelectPrimitive): Set<String> {
@@ -62,11 +65,6 @@ internal class ExperienceStepFormState {
     fun setValue(primitive: OptionSelectPrimitive, value: String) {
         val item = _formItems[primitive.id] as? OptionSelectFormItemState
         item?.setValue(value)
-        checkValidation()
-    }
-
-    private fun checkValidation() {
-        isFormComplete.value = !_formItems.values.any { !it.isComplete }
     }
 }
 

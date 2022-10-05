@@ -68,7 +68,7 @@ internal class SubmitFormActionTest : AppcuesScopeTest {
         action.execute(appcues)
 
         // THEN
-        assertThat(formState.isFormComplete.value).isTrue()
+        assertThat(formState.isFormComplete).isTrue()
         verify { analyticsTracker.identify(formState.formattedAsProfileUpdate(), interactive = false) }
         verify { analyticsTracker.track(analyticEvent.name, analyticEvent.properties, interactive = false, isInternal = true) }
     }
@@ -101,7 +101,7 @@ internal class SubmitFormActionTest : AppcuesScopeTest {
         action.execute(appcues)
 
         // THEN
-        assertThat(formState.isFormComplete.value).isFalse()
+        assertThat(formState.isFormComplete).isFalse()
         verify { analyticsTracker.identify(formState.formattedAsProfileUpdate(), interactive = false) }
         verify { analyticsTracker.track(analyticEvent.name, analyticEvent.properties, interactive = false, isInternal = true) }
     }
