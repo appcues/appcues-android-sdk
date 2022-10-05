@@ -155,7 +155,7 @@ class ExperienceStepFormStateTest {
         optionSelectFormItemState.setValue(options[2].value) // "3,0,2"
 
         // THEN
-        assertThat(optionSelectFormItemState.value).isEqualTo("3,0,2")
+        assertThat(optionSelectFormItemState.value).isEqualTo("3\n0\n2")
     }
 
     @Test
@@ -222,7 +222,7 @@ class ExperienceStepFormStateTest {
 
         // THEN
         assertThat(optionSelectFormItemState.values.value.count()).isEqualTo(3)
-        assertThat(optionSelectFormItemState.value).isEqualTo("4,1,0")
+        assertThat(optionSelectFormItemState.value).isEqualTo("4\n1\n0")
     }
 
     @Test
