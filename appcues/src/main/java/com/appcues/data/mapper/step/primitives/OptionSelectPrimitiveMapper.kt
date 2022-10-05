@@ -27,6 +27,7 @@ internal fun OptionSelectPrimitiveResponse.mapOptionSelectPrimitive(): OptionSel
         id = id,
         style = style.mapComponentStyle(),
         label = label.mapTextPrimitive(),
+        errorLabel = errorLabel?.mapTextPrimitive(),
         selectMode = mapComponentSelectMode(selectMode),
         options = options.map { OptionItem(it.value, it.content.mapPrimitive(), it.selectedContent?.mapPrimitive()) },
         defaultValue = defaultValue ?: setOf(),

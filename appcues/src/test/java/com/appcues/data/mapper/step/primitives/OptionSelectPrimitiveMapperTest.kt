@@ -16,6 +16,7 @@ class OptionSelectPrimitiveMapperTest {
             id = UUID.randomUUID(),
             style = null,
             label = textPrimitiveResponse,
+            errorLabel = null,
             selectMode = "multi",
             options = listOf(
                 OptionItem("0", TextPrimitiveResponse(UUID.randomUUID(), null, "0")),
@@ -49,6 +50,7 @@ class OptionSelectPrimitiveMapperTest {
             id = UUID.randomUUID(),
             style = null,
             label = textPrimitiveResponse,
+            errorLabel = null,
             selectMode = "multi",
             options = listOf(
                 OptionItem("0", TextPrimitiveResponse(UUID.randomUUID(), null, "0")),
