@@ -99,7 +99,7 @@ internal sealed class ExperienceStepFormItemState(
         get() =
             when (this) {
                 is TextInputFormItemState -> text.value
-                is OptionSelectFormItemState -> values.value.joinToString(",") // need actual CSV-ifying
+                is OptionSelectFormItemState -> values.value.joinToString("\n")
             }
 
     class TextInputFormItemState(
