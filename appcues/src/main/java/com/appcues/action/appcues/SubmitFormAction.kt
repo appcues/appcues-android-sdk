@@ -35,7 +35,8 @@ internal class SubmitFormAction(
         if (experience != null && stepIndex != null) {
             val formState = experience.flatSteps[stepIndex].formState
 
-            if (!formState.isFormComplete.value) {
+            if (!formState.isFormComplete) {
+                formState.shouldShowErrors.value = true
                 // remove this action and all subsequent
                 return queue.toMutableList().dropLast(queue.count() - index)
             }

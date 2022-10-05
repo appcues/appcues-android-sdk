@@ -19,7 +19,7 @@ class ExperienceStepFormStateTest {
     @Test
     fun `form state SHOULD be valid by default`() {
         val formState = ExperienceStepFormState()
-        assertThat(formState.isFormComplete.value).isTrue()
+        assertThat(formState.isFormComplete).isTrue()
     }
 
     @Test
@@ -337,7 +337,7 @@ class ExperienceStepFormStateTest {
         formState.setValue(textInput, "text")
 
         // THEN
-        assertThat(formState.isFormComplete.value).isTrue()
+        assertThat(formState.isFormComplete).isTrue()
     }
 
     @Test
@@ -359,7 +359,7 @@ class ExperienceStepFormStateTest {
         formState.setValue(textInput, "text")
 
         // THEN
-        assertThat(formState.isFormComplete.value).isFalse()
+        assertThat(formState.isFormComplete).isFalse()
     }
 
     private fun optionItems(count: Int) = (0..count).map {
