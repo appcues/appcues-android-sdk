@@ -46,6 +46,7 @@ import com.appcues.data.model.styling.ComponentSelectMode.MULTIPLE
 import com.appcues.data.model.styling.ComponentSelectMode.SINGLE
 import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.ui.composables.LocalExperienceStepFormStateDelegate
+import com.appcues.ui.extensions.checkErrorStyle
 import com.appcues.ui.extensions.getColor
 import com.appcues.ui.extensions.getHorizontalAlignment
 import com.appcues.ui.extensions.styleBorder
@@ -196,7 +197,7 @@ private fun ComponentSelectMode.Compose(
                 onCheckedChange = { selectionToggled() },
                 colors = CheckboxDefaults.colors(
                     // the builder should always send these values, but default to the theme like the standard default behavior
-                    checkedColor =  selectedColor ?: MaterialTheme.colors.secondary,
+                    checkedColor = selectedColor ?: MaterialTheme.colors.secondary,
                     uncheckedColor = errorTint ?: unselectedColor ?: MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
                     checkmarkColor = accentColor ?: MaterialTheme.colors.surface,
                 )
