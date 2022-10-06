@@ -19,16 +19,15 @@ import androidx.compose.ui.unit.dp
 import com.appcues.AppcuesCoroutineScope
 import com.appcues.R
 import com.appcues.data.model.AppcuesConfigMap
-import com.appcues.statemachine.Action.EndExperience
-import com.appcues.statemachine.StateMachine
 import com.appcues.trait.BackdropDecoratingTrait
 import com.appcues.trait.ContainerDecoratingTrait
 import com.appcues.trait.ContainerDecoratingTrait.ContainerDecoratingType
+import com.appcues.ui.ExperienceRenderer
 import kotlinx.coroutines.launch
 
 internal class SkippableTrait(
     override val config: AppcuesConfigMap,
-    private val stateMachine: StateMachine,
+    private val experienceRenderer: ExperienceRenderer,
     private val appcuesCoroutineScope: AppcuesCoroutineScope,
 ) : ContainerDecoratingTrait, BackdropDecoratingTrait {
 
@@ -49,7 +48,7 @@ internal class SkippableTrait(
                 .size(30.dp, 30.dp),
             onClick = {
                 appcuesCoroutineScope.launch {
-                    stateMachine.handleAction(EndExperience(false))
+                    experienceRenderer.dismissCurrentExperience(markComplete = false, destroyed = false)
                 }
             }
         ) {
@@ -69,7 +68,7 @@ internal class SkippableTrait(
                 .pointerInput(Unit) {
                     detectTapGestures {
                         appcuesCoroutineScope.launch {
-                            stateMachine.handleAction(EndExperience(false))
+                            experienceRenderer.dismissCurrentExperience(markComplete = false, destroyed = false)
                         }
                     }
                 },

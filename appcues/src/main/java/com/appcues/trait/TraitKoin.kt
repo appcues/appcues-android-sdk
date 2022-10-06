@@ -35,7 +35,7 @@ internal object TraitKoin : KoinScopePlugin {
         factory { params ->
             SkippableTrait(
                 config = params.getOrNull(),
-                stateMachine = get(),
+                experienceRenderer = get(),
                 appcuesCoroutineScope = get(),
             )
         }

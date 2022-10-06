@@ -2,8 +2,7 @@ package com.appcues.action.appcues
 
 import com.appcues.AppcuesScopeTest
 import com.appcues.rules.KoinScopeRule
-import com.appcues.statemachine.Action.EndExperience
-import com.appcues.statemachine.StateMachine
+import com.appcues.ui.ExperienceRenderer
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coVerify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -24,28 +23,28 @@ internal class CloseActionTest : AppcuesScopeTest {
     }
 
     @Test
-    fun `close SHOULD trigger StateMachine EndExperience action`() = runTest {
+    fun `close SHOULD call ExperienceRenderer to dismiss current experience`() = runTest {
         // GIVEN
-        val stateMachine: StateMachine = get()
-        val action = CloseAction(mapOf(), stateMachine)
+        val experienceRenderer: ExperienceRenderer = get()
+        val action = CloseAction(mapOf(), experienceRenderer)
 
         // WHEN
         action.execute(get())
 
         // THEN
-        coVerify { stateMachine.handleAction(EndExperience(destroyed = false, markComplete = false)) }
+        coVerify { experienceRenderer.dismissCurrentExperience(markComplete = false, destroyed = false) }
     }
 
     @Test
-    fun `close SHOULD trigger StateMachine EndExperience action with markComplete true WHEN config is true`() = runTest {
+    fun `close SHOULD call ExperienceRenderer to dismiss current experience with markComplete true WHEN config is true`() = runTest {
         // GIVEN
-        val stateMachine: StateMachine = get()
-        val action = CloseAction(mapOf("markComplete" to true), stateMachine)
+        val experienceRenderer: ExperienceRenderer = get()
+        val action = CloseAction(mapOf("markComplete" to true), experienceRenderer)
 
         // WHEN
         action.execute(get())
 
         // THEN
-        coVerify { stateMachine.handleAction(EndExperience(destroyed = false, markComplete = true)) }
+        coVerify { experienceRenderer.dismissCurrentExperience(markComplete = true, destroyed = false) }
     }
 }

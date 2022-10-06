@@ -6,7 +6,6 @@ import com.appcues.AppcuesCoroutineScope
 import com.appcues.action.ActionProcessor
 import com.appcues.action.ExperienceAction
 import com.appcues.data.model.StepContainer
-import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.Pause
 import com.appcues.statemachine.Action.Resume
 import com.appcues.statemachine.Action.StartStep
@@ -84,7 +83,7 @@ internal class AppcuesViewModel(
             // from an external source (ex deep link) and we should end the experience
             if (state is Rendering) {
                 appcuesCoroutineScope.launch {
-                    stateMachine.handleAction(EndExperience(true))
+                    experienceRenderer.dismissCurrentExperience(markComplete = false, destroyed = true)
                 }
             }
         }
@@ -125,7 +124,7 @@ internal class AppcuesViewModel(
             // if current state IS Rendering then we process the action
             if (state is Rendering) {
                 appcuesCoroutineScope.launch {
-                    stateMachine.handleAction(EndExperience(false))
+                    experienceRenderer.dismissCurrentExperience(markComplete = false, destroyed = false)
                 }
             }
         }

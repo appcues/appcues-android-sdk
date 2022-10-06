@@ -7,9 +7,12 @@ import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperiencePriority.NORMAL
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.StartExperience
+import com.appcues.statemachine.Error
+import com.appcues.statemachine.State
 import com.appcues.statemachine.State.Idling
 import com.appcues.statemachine.State.Paused
 import com.appcues.statemachine.StateMachine
+import com.appcues.util.ResultOf
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
 
@@ -36,7 +39,7 @@ internal class ExperienceRenderer(
         // has opened another activity on top of a previous Experience that is no longer visible.
         val isPaused = stateMachine.state is Paused
         if (priorityOverride || isPaused) {
-            return stateMachine.handleAction(EndExperience(false)).run {
+            return dismissCurrentExperience(markComplete = false, destroyed = false).run {
                 when (this) {
                     is Success -> show(experience) // re-invoke show on the new experience now after dismiss
                     is Failure -> false // dismiss failed - can't continue
@@ -91,4 +94,7 @@ internal class ExperienceRenderer(
     fun stop() {
         stateMachine.stop()
     }
+
+    suspend fun dismissCurrentExperience(markComplete: Boolean, destroyed: Boolean): ResultOf<State, Error> =
+        stateMachine.handleAction(EndExperience(markComplete || stateMachine.state.isOnLastStep, destroyed))
 }

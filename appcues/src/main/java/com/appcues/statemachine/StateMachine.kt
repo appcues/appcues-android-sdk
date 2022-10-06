@@ -197,7 +197,7 @@ internal class StateMachine(
             // we are sitting on the last step if we get here - check if this is a continue with offset 1 (default continue)
             if (action.stepReference is StepOffset && action.stepReference.offset == 1) {
                 // for a continue -> next, on the last step, treat this the same as a close
-                val endExperience = EndExperience(destroyed = false)
+                val endExperience = EndExperience(markComplete = true, destroyed = false)
                 return state.fromRenderingStepToEndingExperience(endExperience, appcuesCoroutineScope) {
                     handleActionInternal(endExperience)
                 }
@@ -212,7 +212,7 @@ internal class StateMachine(
 
     fun stop() {
         appcuesCoroutineScope.launch {
-            handleAction(EndExperience(destroyed = true))
+            handleAction(EndExperience(markComplete = state.isOnLastStep, destroyed = true))
         }
     }
 }
