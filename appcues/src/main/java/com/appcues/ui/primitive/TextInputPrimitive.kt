@@ -13,6 +13,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -74,12 +75,17 @@ internal fun TextInputPrimitive.Compose(modifier: Modifier) {
         isDark = isDark,
     )
 
+    // this avoids recalculating the label style unless the showError state changes
+    val updatedLabel = remember(showError) {
+        label.checkErrorStyle(showError, errorLabel)
+    }
+
     Column(
         modifier = modifier.fillMaxWidth(),
         horizontalAlignment = style.getHorizontalAlignment(),
     ) {
 
-        label.checkErrorStyle(showError, errorLabel).Compose()
+        updatedLabel.Compose()
 
         // Several styling customization options for TextField noted here https://stackoverflow.com/a/68592613
         TextField(
