@@ -55,7 +55,7 @@ internal class ExperienceLifecycleTracker(
                         trackLifecycleEvent(StepSeen(it.experience, it.flatStepIndex))
                     }
                     is EndingStep -> {
-                        if (it.isStepCompleted) {
+                        if (it.markComplete) {
                             trackLifecycleEvent(StepCompleted(it.experience, it.flatStepIndex))
                         }
                     }
