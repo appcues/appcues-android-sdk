@@ -25,10 +25,7 @@ internal sealed class State {
         // the presence of a non-null value is what tells the UI to dismiss the current container,
         // and it should be set to null if a dismiss is not requested (i.e. moving to next step in same container)
         val dismissAndContinue: (() -> Unit)?,
-    ) : State() {
-        val isStepCompleted
-            get() = markComplete || flatStepIndex == experience.flatSteps.count() - 1
-    }
+    ) : State()
 
     data class EndingExperience(val experience: Experience, val flatStepIndex: Int, val markComplete: Boolean) : State() {
         // this defines whether the experience was completed or dismissed

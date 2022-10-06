@@ -71,7 +71,7 @@ internal interface Transitions {
                     // in different groups we want to wait for StartStep action from AppcuesViewModel
                     val response = CompletableDeferred<ResultOf<State, Error>>()
                     Transition(
-                        state = EndingStep(experience, flatStepIndex, true) {
+                        state = EndingStep(experience, flatStepIndex, nextStepIndex > flatStepIndex) {
                             coroutineScope.launch {
                                 response.complete(continuation())
                             }
@@ -81,7 +81,7 @@ internal interface Transitions {
                 } else {
                     // in same group we can continue to StartStep internally
                     Transition(
-                        state = EndingStep(experience, flatStepIndex, true, null),
+                        state = EndingStep(experience, flatStepIndex, nextStepIndex > flatStepIndex, null),
                         sideEffect = ContinuationEffect(StartStep(action.stepReference)),
                     )
                 }
