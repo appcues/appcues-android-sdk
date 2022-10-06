@@ -88,11 +88,11 @@ class ExperienceLifecycleTrackerTest : KoinTest {
     }
 
     @Test
-    fun `RenderingStep SHOULD track step_completed WHEN action is EndExperience markComplete=false on last step`() = runTest {
+    fun `RenderingStep SHOULD track step_completed WHEN action is EndExperience markComplete=true on last step`() = runTest {
         // GIVEN
         val experience = mockExperience()
         val initialState = RenderingStep(experience, 3, false)
-        val action = EndExperience(destroyed = false, markComplete = false)
+        val action = EndExperience(destroyed = false, markComplete = true)
         val scope = initScope(initialState)
         val stateMachine: StateMachine = scope.get()
         val analyticsTracker: AnalyticsTracker = scope.get()

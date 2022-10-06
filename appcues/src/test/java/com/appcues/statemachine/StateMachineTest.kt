@@ -239,7 +239,7 @@ class StateMachineTest : AppcuesScopeTest {
         val pausedState = EndingStep(experience, 1, false, null)
         val initialState = Paused(pausedState)
         val stateMachine = initMachine(initialState)
-        val action = EndExperience(false)
+        val action = EndExperience(markComplete = false, destroyed = false)
         val targetState = Idling
 
         // WHEN

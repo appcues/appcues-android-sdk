@@ -27,11 +27,7 @@ internal sealed class State {
         val dismissAndContinue: (() -> Unit)?,
     ) : State()
 
-    data class EndingExperience(val experience: Experience, val flatStepIndex: Int, val markComplete: Boolean) : State() {
-        // this defines whether the experience was completed or dismissed
-        val isExperienceCompleted
-            get() = markComplete || flatStepIndex == experience.flatSteps.count() - 1
-    }
+    data class EndingExperience(val experience: Experience, val flatStepIndex: Int, val markComplete: Boolean) : State()
 
     data class Paused(val state: State) : State()
 
@@ -55,5 +51,18 @@ internal sealed class State {
             is EndingStep -> this.flatStepIndex
             is Paused -> this.state.currentStepIndex
             is RenderingStep -> this.flatStepIndex
+        }
+
+    val isOnLastStep: Boolean
+        get() {
+            val currentStepIndex = currentStepIndex
+            val stepCount = currentExperience?.flatSteps?.count()
+
+            return if (currentStepIndex != null && stepCount != null) {
+                // force it to mark complete (the last step and the experience) if on the last step
+                currentStepIndex == stepCount - 1
+            } else {
+                false
+            }
         }
 }

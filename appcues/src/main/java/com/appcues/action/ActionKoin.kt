@@ -19,7 +19,7 @@ internal object ActionKoin : KoinScopePlugin {
         factory { params ->
             CloseAction(
                 config = params.getOrNull(),
-                stateMachine = get(),
+                experienceRenderer = get(),
             )
         }
 

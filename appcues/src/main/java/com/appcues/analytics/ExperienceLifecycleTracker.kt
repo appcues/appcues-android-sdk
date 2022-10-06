@@ -60,7 +60,7 @@ internal class ExperienceLifecycleTracker(
                         }
                     }
                     is EndingExperience -> {
-                        if (it.isExperienceCompleted) {
+                        if (it.markComplete) {
                             // if ending on the last step OR an action requested it be considered complete explicitly,
                             // track the experience_completed event
                             trackLifecycleEvent(ExperienceCompleted(it.experience))

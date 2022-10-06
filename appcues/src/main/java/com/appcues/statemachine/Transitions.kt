@@ -145,7 +145,7 @@ internal interface Transitions {
     }
 
     fun EndingExperience.fromEndingExperienceToIdling(action: Reset): Transition {
-        return Transition(Idling, if (isExperienceCompleted) ProcessActions(experience.completionActions) else null)
+        return Transition(Idling, if (markComplete) ProcessActions(experience.completionActions) else null)
     }
 
     companion object : Transitions
