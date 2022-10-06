@@ -1,12 +1,12 @@
 package com.appcues.data.remote.response.step.primitive
 
-import com.appcues.data.model.ExperiencePrimitive.OptionSelectPrimitive.OptionItem
 import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.Type.BLOCK
 import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.Type.BOX
 import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.Type.BUTTON
 import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.Type.EMBED
 import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.Type.IMAGE
 import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.Type.OPTION_SELECT
+import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.Type.SPACER
 import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.Type.STACK
 import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.Type.TEXT
 import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.Type.TEXT_INPUT
@@ -18,6 +18,7 @@ import java.util.UUID
 internal sealed class PrimitiveResponse(
     val type: Type,
 ) {
+
     enum class Type(val jsonName: String) {
         STACK("stack"),
         BOX("box"),
@@ -25,6 +26,7 @@ internal sealed class PrimitiveResponse(
         TEXT("text"),
         IMAGE("image"),
         EMBED("embed"),
+        SPACER("spacer"),
         TEXT_INPUT("textInput"),
         OPTION_SELECT("optionSelect"),
         BLOCK("block"),
@@ -78,6 +80,11 @@ internal sealed class PrimitiveResponse(
         val embed: String,
         val intrinsicSize: StyleSizeResponse? = null,
     ) : PrimitiveResponse(EMBED)
+
+    internal data class SpacerPrimitiveResponse(
+        val id: UUID,
+        val style: StyleResponse? = null,
+    ) : PrimitiveResponse(SPACER)
 
     internal data class OptionSelectPrimitiveResponse(
         val id: UUID,

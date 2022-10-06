@@ -4,6 +4,7 @@ import com.appcues.data.mapper.LeveledTraitResponse
 import com.appcues.data.mapper.action.ActionsMapper
 import com.appcues.data.mapper.mergeActions
 import com.appcues.data.mapper.mergeTraits
+import com.appcues.data.mapper.step.primitives.mapPrimitive
 import com.appcues.data.mapper.trait.TraitsMapper
 import com.appcues.data.model.Step
 import com.appcues.data.remote.response.action.ActionResponse

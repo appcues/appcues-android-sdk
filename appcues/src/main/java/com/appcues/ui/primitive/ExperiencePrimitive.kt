@@ -19,6 +19,7 @@ import com.appcues.data.model.ExperiencePrimitive.EmbedHtmlPrimitive
 import com.appcues.data.model.ExperiencePrimitive.HorizontalStackPrimitive
 import com.appcues.data.model.ExperiencePrimitive.ImagePrimitive
 import com.appcues.data.model.ExperiencePrimitive.OptionSelectPrimitive
+import com.appcues.data.model.ExperiencePrimitive.SpacerPrimitive
 import com.appcues.data.model.ExperiencePrimitive.TextInputPrimitive
 import com.appcues.data.model.ExperiencePrimitive.TextPrimitive
 import com.appcues.data.model.ExperiencePrimitive.VerticalStackPrimitive
@@ -69,6 +70,7 @@ internal fun ExperiencePrimitive.Compose(matchParentBox: BoxScope? = null) {
                 is VerticalStackPrimitive -> Compose(modifier)
                 is TextInputPrimitive -> Compose(modifier)
                 is OptionSelectPrimitive -> Compose(modifier)
+                is SpacerPrimitive -> Compose(modifier)
             }
         }
     }
@@ -89,6 +91,7 @@ private fun ExperiencePrimitive.getRole(): Role {
         is TextPrimitive -> Role.Button
         is TextInputPrimitive -> Role.Button
         is OptionSelectPrimitive -> Role.Button
+        is SpacerPrimitive -> Role.Image
     }
 }
 

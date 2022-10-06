@@ -1,7 +1,6 @@
 package com.appcues.data.mapper.step.primitives
 
 import com.appcues.data.mapper.AppcuesMappingException
-import com.appcues.data.mapper.step.mapPrimitive
 import com.appcues.data.mapper.styling.mapComponentStyle
 import com.appcues.data.model.ExperiencePrimitive.HorizontalStackPrimitive
 import com.appcues.data.model.ExperiencePrimitive.VerticalStackPrimitive
