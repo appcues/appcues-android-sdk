@@ -13,8 +13,10 @@ import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import com.appcues.data.model.ExperiencePrimitive
 import com.appcues.data.model.ExperiencePrimitive.ButtonPrimitive
 import com.appcues.data.model.ExperiencePrimitive.HorizontalStackPrimitive
+import com.appcues.data.model.ExperiencePrimitive.SpacerPrimitive
 import com.appcues.data.model.ExperiencePrimitive.TextPrimitive
 import com.appcues.data.model.styling.ComponentColor
 import com.appcues.data.model.styling.ComponentDistribution
@@ -38,7 +40,7 @@ internal fun HorizontalStackPrimitive.Compose(modifier: Modifier) {
     ) {
         ProvideTextStyle(style.getTextStyle(LocalContext.current, isSystemInDarkTheme())) {
             items.forEach {
-                ItemBox(distribution = distribution, style = it.style, parentVerticalAlignment = verticalAlignment) {
+                ItemBox(distribution = distribution, primitive = it, parentVerticalAlignment = verticalAlignment) {
                     it.Compose()
                 }
             }
@@ -49,15 +51,22 @@ internal fun HorizontalStackPrimitive.Compose(modifier: Modifier) {
 @Composable
 private fun RowScope.ItemBox(
     distribution: ComponentDistribution,
-    style: ComponentStyle,
+    primitive: ExperiencePrimitive,
     parentVerticalAlignment: Alignment.Vertical,
     content: @Composable BoxScope.() -> Unit
 ) {
     Box(
         modifier = Modifier
-            .align(style.getVerticalAlignment(parentVerticalAlignment))
-            .then(if (distribution == ComponentDistribution.EQUAL) Modifier.weight(1f) else Modifier),
-        contentAlignment = style.getBoxAlignment(),
+            .align(primitive.style.getVerticalAlignment(parentVerticalAlignment))
+            .then(
+                if (distribution == ComponentDistribution.EQUAL ||
+                    // for when its a spacer with no width defined,
+                    // we will also fill available space
+                    (primitive is SpacerPrimitive && primitive.style.width == null)
+                ) Modifier.weight(1f)
+                else Modifier
+            ),
+        contentAlignment = primitive.style.getBoxAlignment(),
         content = content
     )
 }

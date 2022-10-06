@@ -64,6 +64,11 @@ internal sealed class ExperiencePrimitive(
         val items: List<ExperiencePrimitive>,
     ) : ExperiencePrimitive(id, style)
 
+    data class SpacerPrimitive(
+        override val id: UUID,
+        override val style: ComponentStyle = ComponentStyle(),
+    ) : ExperiencePrimitive(id, style)
+
     data class EmbedHtmlPrimitive(
         override val id: UUID,
         override val style: ComponentStyle = ComponentStyle(),
@@ -102,6 +107,7 @@ internal sealed class ExperiencePrimitive(
         val unselectedColor: ComponentColor? = null,
         val accentColor: ComponentColor? = null,
     ) : ExperiencePrimitive(id, style) {
+
         data class OptionItem(
             val value: String,
             val content: ExperiencePrimitive,

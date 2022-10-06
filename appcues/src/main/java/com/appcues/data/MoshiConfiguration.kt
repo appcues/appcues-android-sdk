@@ -11,6 +11,7 @@ import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.ButtonP
 import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.EmbedPrimitiveResponse
 import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.ImagePrimitiveResponse
 import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.OptionSelectPrimitiveResponse
+import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.SpacerPrimitiveResponse
 import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.StackPrimitiveResponse
 import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.TextInputPrimitiveResponse
 import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.TextPrimitiveResponse
@@ -32,7 +33,9 @@ internal object MoshiConfiguration {
     @Retention(RUNTIME)
     @JsonQualifier
     annotation class SerializeNull {
+
         companion object {
+
             val JSON_ADAPTER_FACTORY = object : Factory {
                 override fun create(type: Type, annotations: Set<Annotation?>, moshi: Moshi): JsonAdapter<*>? {
                     val nextAnnotations = Types.nextAnnotations(
@@ -74,5 +77,6 @@ internal object MoshiConfiguration {
             .withSubtype(TextInputPrimitiveResponse::class.java, PrimitiveResponse.Type.TEXT_INPUT.jsonName)
             .withSubtype(TextPrimitiveResponse::class.java, PrimitiveResponse.Type.TEXT.jsonName)
             .withSubtype(BlockPrimitiveResponse::class.java, PrimitiveResponse.Type.BLOCK.jsonName)
+            .withSubtype(SpacerPrimitiveResponse::class.java, PrimitiveResponse.Type.SPACER.jsonName)
     }
 }
