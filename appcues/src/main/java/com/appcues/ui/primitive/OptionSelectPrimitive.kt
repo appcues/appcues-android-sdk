@@ -59,13 +59,18 @@ internal fun OptionSelectPrimitive.Compose(modifier: Modifier) {
     val showError = formState.shouldShowError(this)
     val errorTint = if (showError) errorLabel?.style?.foregroundColor?.getColor(isSystemInDarkTheme()) else null
 
+    // this avoids recalculating the label style unless the showError state changes
+    val updatedLabel = remember(showError) {
+        label.checkErrorStyle(showError, errorLabel)
+    }
+
     Column(
         modifier = modifier,
         horizontalAlignment = style.getHorizontalAlignment(),
     ) {
 
         // the form item label / question
-        label.checkErrorStyle(showError, errorLabel).Compose()
+        updatedLabel.Compose()
 
         when {
             selectMode == SINGLE && displayFormat == PICKER -> {
