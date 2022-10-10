@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.ProvideTextStyle
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -17,6 +18,8 @@ import com.appcues.data.model.styling.ComponentColor
 import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.data.model.styling.ComponentStyle.ComponentHorizontalAlignment.LEADING
 import com.appcues.data.model.styling.ComponentStyle.ComponentHorizontalAlignment.TRAILING
+import com.appcues.ui.composables.LocalStackScope
+import com.appcues.ui.composables.StackScope
 import com.appcues.ui.extensions.getHorizontalAlignment
 import com.appcues.ui.extensions.getTextStyle
 import com.appcues.ui.theme.AppcuesPreviewPrimitive
@@ -29,8 +32,12 @@ internal fun VerticalStackPrimitive.Compose(modifier: Modifier) {
         horizontalAlignment = style.getHorizontalAlignment(),
         verticalArrangement = Arrangement.spacedBy(spacing.dp, Alignment.CenterVertically)
     ) {
-        ProvideTextStyle(style.getTextStyle(LocalContext.current, isSystemInDarkTheme())) {
-            items.forEach { it.Compose() }
+        CompositionLocalProvider(LocalStackScope provides StackScope.COLUMN) {
+            ProvideTextStyle(style.getTextStyle(LocalContext.current, isSystemInDarkTheme())) {
+                items.forEach {
+                    it.Compose()
+                }
+            }
         }
     }
 }
