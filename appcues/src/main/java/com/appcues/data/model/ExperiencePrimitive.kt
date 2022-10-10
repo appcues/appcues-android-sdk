@@ -66,8 +66,9 @@ internal sealed class ExperiencePrimitive(
 
     data class SpacerPrimitive(
         override val id: UUID,
-        override val style: ComponentStyle = ComponentStyle(),
-    ) : ExperiencePrimitive(id, style)
+        val spacing: Double = 0.0,
+        // Spacer ignores all style properties
+    ) : ExperiencePrimitive(id, ComponentStyle())
 
     data class EmbedHtmlPrimitive(
         override val id: UUID,

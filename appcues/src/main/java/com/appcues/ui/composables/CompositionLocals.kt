@@ -9,6 +9,7 @@ import com.appcues.data.model.ExperienceStepFormState
 import com.appcues.logging.Logcues
 import com.appcues.ui.AppcuesViewModel
 import com.appcues.ui.ShakeGestureListener
+import com.appcues.ui.composables.StackScope.COLUMN
 import java.util.UUID
 
 // used to register callback for all Actions triggered from primitives
@@ -37,6 +38,12 @@ internal val LocalShakeGestureListener = staticCompositionLocalOf<ShakeGestureLi
 internal val LocalLogcues = staticCompositionLocalOf<Logcues> { noLocalProvidedFor("LocalLogcues") }
 
 internal val LocalExperienceStepFormStateDelegate = compositionLocalOf { ExperienceStepFormState() }
+
+internal val LocalStackScope = compositionLocalOf { COLUMN }
+
+internal enum class StackScope {
+    ROW, COLUMN
+}
 
 private fun noLocalProvidedFor(name: String): Nothing {
     error("CompositionLocal $name not present")

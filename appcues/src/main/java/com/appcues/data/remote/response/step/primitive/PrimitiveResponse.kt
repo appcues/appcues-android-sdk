@@ -83,7 +83,7 @@ internal sealed class PrimitiveResponse(
 
     internal data class SpacerPrimitiveResponse(
         val id: UUID,
-        val style: StyleResponse? = null,
+        val spacing: Double = 0.0,
     ) : PrimitiveResponse(SPACER)
 
     internal data class OptionSelectPrimitiveResponse(
