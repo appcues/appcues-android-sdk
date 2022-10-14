@@ -24,12 +24,14 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.appcues.action.ExperienceAction
+import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType.BUTTON_LONG_PRESSED
+import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType.BUTTON_TAPPED
 import com.appcues.data.model.Action
 import com.appcues.data.model.ExperiencePrimitive
 import com.appcues.data.model.styling.ComponentContentMode
 import com.appcues.data.model.styling.ComponentSize
 import com.appcues.data.model.styling.ComponentStyle
+import com.appcues.ui.composables.AppcuesActionsDelegate
 import com.appcues.ui.utils.AppcuesAspectRatioModifier
 import com.appcues.ui.utils.margin
 import com.appcues.util.eq
@@ -51,7 +53,7 @@ internal fun Modifier.outerPrimitiveStyle(
             .margin(style.getMargins())
             .styleShadow(style, isDark)
             .styleSize(style, matchParentBox)
-            .actions(id, gestureProperties)
+            .actions(id, gestureProperties, component.textDescription)
             .styleCorner(style)
             .styleBorder(style, isDark)
             .styleBackground(style, isDark, defaultBackgroundColor)
@@ -210,7 +212,7 @@ internal fun Modifier.coloredShadow(
 }
 
 internal data class PrimitiveGestureProperties(
-    val onActions: (List<ExperienceAction>) -> Unit,
+    val actionsDelegate: AppcuesActionsDelegate,
     val actions: Map<UUID, List<Action>>,
     val interactionSource: MutableInteractionSource,
     val indication: Indication?,
@@ -221,7 +223,8 @@ internal data class PrimitiveGestureProperties(
 @OptIn(ExperimentalFoundationApi::class)
 private fun Modifier.actions(
     id: UUID,
-    gestureProperties: PrimitiveGestureProperties
+    gestureProperties: PrimitiveGestureProperties,
+    viewDescription: String?,
 ) = this.then(
     // check to see if the list is not null first, to ensure that we have at least one action before setting
     // the combinedClickable Modifier
@@ -232,13 +235,16 @@ private fun Modifier.actions(
                 indication = gestureProperties.indication,
                 enabled = gestureProperties.enabled,
                 role = gestureProperties.role,
-                onLongClick = toLongPressMotionOrNull(gestureProperties.onActions),
-                onClick = toTapMotionOrEmpty(gestureProperties.onActions),
+                onLongClick = toLongPressMotionOrNull(gestureProperties.actionsDelegate, viewDescription),
+                onClick = toTapMotionOrEmpty(gestureProperties.actionsDelegate, viewDescription),
             )
     }
 )
 
-private fun List<Action>.toTapMotionOrEmpty(onAction: (List<ExperienceAction>) -> Unit): (() -> Unit) {
+private fun List<Action>.toTapMotionOrEmpty(
+    actionsDelegate: AppcuesActionsDelegate,
+    viewDescription: String?
+): (() -> Unit) {
     // filter only TAP motions
     return filter { it.on == Action.Motion.TAP }
         // take if there is any
@@ -247,10 +253,21 @@ private fun List<Action>.toTapMotionOrEmpty(onAction: (List<ExperienceAction>) -
         ?.map { it.experienceAction }
         // return click block that executes onAction for every ExperienceAction
         // else returns empty click block (notnull property for combinedClickable)
-        ?.run { { onAction(this) } } ?: { }
+        ?.run {
+            {
+                actionsDelegate.onActions(
+                    actions = this,
+                    interactionType = BUTTON_TAPPED,
+                    viewDescription = viewDescription
+                )
+            }
+        } ?: { }
 }
 
-private fun List<Action>.toLongPressMotionOrNull(block: (List<ExperienceAction>) -> Unit): (() -> Unit)? {
+private fun List<Action>.toLongPressMotionOrNull(
+    actionsDelegate: AppcuesActionsDelegate,
+    viewDescription: String?
+): (() -> Unit)? {
     // filter only LONG_PRESS motions
     return filter { it.on == Action.Motion.LONG_PRESS }
         // take if there is any
@@ -259,7 +276,15 @@ private fun List<Action>.toLongPressMotionOrNull(block: (List<ExperienceAction>)
         ?.map { it.experienceAction }
         // return click block that executes onAction for every ExperienceAction
         // else returns null
-        ?.run { { block(this) } }
+        ?.run {
+            {
+                actionsDelegate.onActions(
+                    actions = this,
+                    interactionType = BUTTON_LONG_PRESSED,
+                    viewDescription = viewDescription
+                )
+            }
+        }
 }
 
 internal fun Modifier.imageAspectRatio(

@@ -4,6 +4,7 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.staticCompositionLocalOf
 import coil.ImageLoader
 import com.appcues.action.ExperienceAction
+import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType
 import com.appcues.data.model.Action
 import com.appcues.data.model.ExperienceStepFormState
 import com.appcues.logging.Logcues
@@ -13,9 +14,18 @@ import com.appcues.ui.composables.StackScope.COLUMN
 import java.util.UUID
 
 // used to register callback for all Actions triggered from primitives
-internal val LocalAppcuesActionDelegate = staticCompositionLocalOf { AppcuesActions {} }
+internal val LocalAppcuesActionDelegate = staticCompositionLocalOf<AppcuesActionsDelegate> {
+    noLocalProvidedFor("LocalAppcuesActionDelegate")
+}
 
-internal data class AppcuesActions(val onActions: (List<ExperienceAction>) -> Unit)
+// class to make it easier to understand the bridge between the
+// LocalAppcuesActionDelegate and the AppcuesViewModel
+internal class AppcuesActionsDelegate(private val viewModel: AppcuesViewModel) {
+
+    fun onActions(actions: List<ExperienceAction>, interactionType: InteractionType, viewDescription: String?) {
+        viewModel.onActions(actions, interactionType, viewDescription)
+    }
+}
 
 internal val LocalAppcuesActions = staticCompositionLocalOf<Map<UUID, List<Action>>> { hashMapOf() }
 

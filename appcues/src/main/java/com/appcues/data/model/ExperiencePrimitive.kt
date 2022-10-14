@@ -21,17 +21,29 @@ internal sealed class ExperiencePrimitive(
     open val style: ComponentStyle,
 ) {
 
+    abstract val textDescription: String?
+
+    protected fun List<ExperiencePrimitive>.joinTextDescriptions(): String {
+        return mapNotNull { it.textDescription }.joinToString(separator = " ")
+    }
+
     data class TextPrimitive(
         override val id: UUID,
         override val style: ComponentStyle = ComponentStyle(),
         val text: String,
-    ) : ExperiencePrimitive(id, style)
+    ) : ExperiencePrimitive(id, style) {
+
+        override val textDescription: String = text
+    }
 
     data class ButtonPrimitive(
         override val id: UUID,
         override val style: ComponentStyle = ComponentStyle(),
         val content: ExperiencePrimitive,
-    ) : ExperiencePrimitive(id, style)
+    ) : ExperiencePrimitive(id, style) {
+
+        override val textDescription: String? = content.textDescription
+    }
 
     data class ImagePrimitive(
         override val id: UUID,
@@ -41,14 +53,20 @@ internal sealed class ExperiencePrimitive(
         val intrinsicSize: ComponentSize?,
         val contentMode: ComponentContentMode = FIT,
         val blurHash: String? = null,
-    ) : ExperiencePrimitive(id, style)
+    ) : ExperiencePrimitive(id, style) {
+
+        override val textDescription: String? = accessibilityLabel
+    }
 
     data class VerticalStackPrimitive(
         override val id: UUID,
         override val style: ComponentStyle = ComponentStyle(),
         val items: List<ExperiencePrimitive>,
         val spacing: Double = 0.0,
-    ) : ExperiencePrimitive(id, style)
+    ) : ExperiencePrimitive(id, style) {
+
+        override val textDescription: String = items.joinTextDescriptions()
+    }
 
     data class HorizontalStackPrimitive(
         override val id: UUID,
@@ -56,26 +74,38 @@ internal sealed class ExperiencePrimitive(
         val items: List<ExperiencePrimitive>,
         val spacing: Double = 0.0,
         val distribution: ComponentDistribution = CENTER,
-    ) : ExperiencePrimitive(id, style)
+    ) : ExperiencePrimitive(id, style) {
+
+        override val textDescription: String = items.joinTextDescriptions()
+    }
 
     data class BoxPrimitive(
         override val id: UUID,
         override val style: ComponentStyle = ComponentStyle(),
         val items: List<ExperiencePrimitive>,
-    ) : ExperiencePrimitive(id, style)
+    ) : ExperiencePrimitive(id, style) {
+
+        override val textDescription: String = items.joinTextDescriptions()
+    }
 
     data class SpacerPrimitive(
         override val id: UUID,
         val spacing: Double = 0.0,
         // Spacer ignores all style properties
-    ) : ExperiencePrimitive(id, ComponentStyle())
+    ) : ExperiencePrimitive(id, ComponentStyle()) {
+
+        override val textDescription: String? = null
+    }
 
     data class EmbedHtmlPrimitive(
         override val id: UUID,
         override val style: ComponentStyle = ComponentStyle(),
         val embed: String,
         val intrinsicSize: ComponentSize?,
-    ) : ExperiencePrimitive(id, style)
+    ) : ExperiencePrimitive(id, style) {
+
+        override val textDescription: String? = null
+    }
 
     data class TextInputPrimitive(
         override val id: UUID,
@@ -90,7 +120,10 @@ internal sealed class ExperiencePrimitive(
         val dataType: ComponentDataType = TEXT,
         val textFieldStyle: ComponentStyle = ComponentStyle(),
         val cursorColor: ComponentColor? = null,
-    ) : ExperiencePrimitive(id, style)
+    ) : ExperiencePrimitive(id, style) {
+
+        override val textDescription: String = label.textDescription
+    }
 
     data class OptionSelectPrimitive(
         override val id: UUID,
@@ -116,5 +149,7 @@ internal sealed class ExperiencePrimitive(
             val content: ExperiencePrimitive,
             val selectedContent: ExperiencePrimitive? = null,
         )
+
+        override val textDescription: String = label.textDescription
     }
 }

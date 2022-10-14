@@ -1,5 +1,7 @@
 package com.appcues.analytics
 
+import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType.BUTTON_LONG_PRESSED
+import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType.BUTTON_TAPPED
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType.FORM_SUBMITTED
 import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperienceStepFormState
@@ -10,10 +12,14 @@ internal sealed class ExperienceLifecycleEvent(
     open val experience: Experience,
     val event: AnalyticsEvent
 ) {
+
     companion object {
+
         const val INTERACTION_TYPE_KEY = "interactionType"
         const val INTERACTION_DATA_KEY = "interactionData"
         const val FORM_SUBMITTED_INTERACTION_TYPE = "Form Submitted"
+        const val BUTTON_TAPPED_INTERACTION_TYPE = "Button Tapped"
+        const val BUTTON_LONG_PRESSED_INTERACTION_TYPE = "Button Long Pressed"
     }
 
     data class StepSeen(
@@ -25,9 +31,11 @@ internal sealed class ExperienceLifecycleEvent(
         override val experience: Experience,
         val stepIndex: Int,
         val interactionType: InteractionType,
+        val interactionProperties: HashMap<String, Any> = hashMapOf()
     ) : ExperienceLifecycleEvent(experience, AnalyticsEvent.ExperienceStepInteraction) {
+
         enum class InteractionType {
-            FORM_SUBMITTED
+            FORM_SUBMITTED, BUTTON_TAPPED, BUTTON_LONG_PRESSED
         }
     }
 
@@ -121,6 +129,8 @@ internal sealed class ExperienceLifecycleEvent(
                         INTERACTION_TYPE_KEY to interactionType.analyticsName(),
                         INTERACTION_DATA_KEY to when (interactionType) {
                             FORM_SUBMITTED -> step.formState
+                            BUTTON_TAPPED -> interactionProperties
+                            BUTTON_LONG_PRESSED -> interactionProperties
                         },
                     )
                 }
@@ -131,6 +141,8 @@ internal sealed class ExperienceLifecycleEvent(
     private fun StepInteraction.InteractionType.analyticsName() =
         when (this) {
             FORM_SUBMITTED -> FORM_SUBMITTED_INTERACTION_TYPE
+            BUTTON_TAPPED -> BUTTON_TAPPED_INTERACTION_TYPE
+            BUTTON_LONG_PRESSED -> BUTTON_LONG_PRESSED_INTERACTION_TYPE
         }
 }
 

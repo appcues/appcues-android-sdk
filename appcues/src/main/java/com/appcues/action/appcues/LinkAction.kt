@@ -3,6 +3,7 @@ package com.appcues.action.appcues
 import android.net.Uri
 import com.appcues.Appcues
 import com.appcues.action.ExperienceAction
+import com.appcues.action.MetadataSettingsAction
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.getConfig
 import com.appcues.data.model.getConfigOrDefault
@@ -11,7 +12,7 @@ import com.appcues.util.LinkOpener
 internal class LinkAction(
     override val config: AppcuesConfigMap,
     private val linkOpener: LinkOpener,
-) : ExperienceAction {
+) : ExperienceAction, MetadataSettingsAction {
 
     companion object {
 
@@ -25,6 +26,10 @@ internal class LinkAction(
 
     private val url: String? = config.getConfig("url")
     private val openExternally = config.getConfigOrDefault("openExternally", false)
+
+    override val category = "link"
+
+    override val destination: String = url ?: String()
 
     override suspend fun execute(appcues: Appcues) {
         // start web activity if url is not null
