@@ -5,9 +5,13 @@ import java.util.UUID
 
 internal sealed class StepReference {
 
+    abstract val destination: String
+
     abstract fun getIndex(experience: Experience, currentStepIndex: Int): Int?
 
     data class StepId(val id: UUID) : StepReference() {
+
+        override val destination = id.toString()
 
         override fun getIndex(experience: Experience, currentStepIndex: Int): Int? {
             return experience.flatSteps.indexOfFirst { step -> step.id == id }.let {
@@ -19,6 +23,8 @@ internal sealed class StepReference {
 
     data class StepIndex(val index: Int) : StepReference() {
 
+        override val destination = "#$index"
+
         override fun getIndex(experience: Experience, currentStepIndex: Int): Int? {
             // just return index
             return validateStepIndexOrNull(experience, index)
@@ -26,6 +32,8 @@ internal sealed class StepReference {
     }
 
     data class StepGroupPageIndex(val index: Int) : StepReference() {
+
+        override val destination = "#$index"
 
         override fun getIndex(experience: Experience, currentStepIndex: Int): Int? {
             // finds the group this step belongs to
@@ -38,6 +46,8 @@ internal sealed class StepReference {
     }
 
     data class StepOffset(val offset: Int) : StepReference() {
+
+        override val destination = if (offset > 0) "+$offset" else "$offset"
 
         override fun getIndex(experience: Experience, currentStepIndex: Int): Int? {
             // apply offset to current step index

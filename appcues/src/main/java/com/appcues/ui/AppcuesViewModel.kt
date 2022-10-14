@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.appcues.AppcuesCoroutineScope
 import com.appcues.action.ActionProcessor
 import com.appcues.action.ExperienceAction
+import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType
 import com.appcues.data.model.StepContainer
 import com.appcues.statemachine.Action.Pause
 import com.appcues.statemachine.Action.Resume
@@ -103,8 +104,8 @@ internal class AppcuesViewModel(
         }
     }
 
-    fun onActions(experienceActions: List<ExperienceAction>) {
-        actionProcessor.process(experienceActions)
+    fun onActions(actions: List<ExperienceAction>, interactionType: InteractionType, viewDescription: String?) {
+        actionProcessor.process(actions, interactionType, viewDescription)
     }
 
     fun onPageChanged(index: Int) {

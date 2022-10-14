@@ -2,6 +2,7 @@ package com.appcues.action.appcues
 
 import com.appcues.Appcues
 import com.appcues.action.ExperienceAction
+import com.appcues.action.MetadataSettingsAction
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.getConfig
 import com.appcues.data.model.getConfigInt
@@ -13,9 +14,10 @@ import java.util.UUID
 internal class ContinueAction(
     override val config: AppcuesConfigMap,
     private val stateMachine: StateMachine
-) : ExperienceAction {
+) : ExperienceAction, MetadataSettingsAction {
 
     companion object {
+
         const val TYPE = "@appcues/continue"
     }
 
@@ -25,21 +27,17 @@ internal class ContinueAction(
 
     private val id = config.getConfig<String>("stepID")
 
-    override suspend fun execute(appcues: Appcues) {
-        when {
+    private val stepReference: StepReference
+        get() = when {
             index != null -> StepReference.StepIndex(index)
             id != null -> StepReference.StepId(UUID.fromString(id))
             else -> StepReference.StepOffset(offset)
-        }.also {
-            // NOTE: there is a bug in kotlin that required this function to be revised slightly when upgrading from kotlin 1.6.0 to 1.6.21 to make the
-            // suspend call to the state machine NOT be a tail call inside of a let, chained off the when statement - updated to an 'also' here.
-            //
-            // I don't understand the inner details, but hopefully fixed in 1.7.0 upcoming.  Without this change, an exception is thrown like
-            // "ClassCastException: class CoroutineSingletons cannot be cast to class ResultOf"
-            // Capturing this here in case any other similar issue pops up in the future.
-            //
-            // https://youtrack.jetbrains.com/issue/KT-51818/ClassCastException-class-CoroutineSingletons-cannot-be-cast-to-c#focus=Comments-27-6035324.0-0
-            stateMachine.handleAction(StartStep(it))
         }
+    override val category: String = "internal"
+
+    override val destination: String = stepReference.destination
+
+    override suspend fun execute(appcues: Appcues) {
+        stateMachine.handleAction(StartStep(stepReference))
     }
 }

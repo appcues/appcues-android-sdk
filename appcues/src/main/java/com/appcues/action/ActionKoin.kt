@@ -4,6 +4,7 @@ import com.appcues.action.appcues.CloseAction
 import com.appcues.action.appcues.ContinueAction
 import com.appcues.action.appcues.LaunchExperienceAction
 import com.appcues.action.appcues.LinkAction
+import com.appcues.action.appcues.StepInteractionAction
 import com.appcues.action.appcues.SubmitFormAction
 import com.appcues.action.appcues.TrackEventAction
 import com.appcues.action.appcues.UpdateProfileAction
@@ -59,6 +60,15 @@ internal object ActionKoin : KoinScopePlugin {
         factory { params ->
             SubmitFormAction(
                 config = params.getOrNull(),
+                analyticsTracker = get(),
+                stateMachine = get(),
+            )
+        }
+
+        factory { params ->
+            StepInteractionAction(
+                config = params.getOrNull(),
+                interaction = params.get(),
                 analyticsTracker = get(),
                 stateMachine = get(),
             )
