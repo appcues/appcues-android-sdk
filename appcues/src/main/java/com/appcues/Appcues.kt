@@ -4,17 +4,11 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import androidx.annotation.VisibleForTesting
-import com.appcues.AnalyticType.EVENT
-import com.appcues.AnalyticType.GROUP
-import com.appcues.AnalyticType.IDENTIFY
-import com.appcues.AnalyticType.SCREEN
 import com.appcues.action.ActionRegistry
 import com.appcues.action.ExperienceAction
-import com.appcues.analytics.ActivityRequestBuilder
 import com.appcues.analytics.ActivityScreenTracking
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.analytics.TrackingData
-import com.appcues.data.remote.request.EventRequest
 import com.appcues.debugger.AppcuesDebuggerManager
 import com.appcues.di.AppcuesKoinContext
 import com.appcues.logging.Logcues
@@ -69,6 +63,7 @@ class Appcues internal constructor(koinScope: Scope) {
     private val deepLinkHandler by koinScope.inject<DeepLinkHandler>()
     private val debuggerManager by koinScope.inject<AppcuesDebuggerManager>()
     private val appcuesCoroutineScope by koinScope.inject<AppcuesCoroutineScope>()
+    private val analyticsPublisher by koinScope.inject<AnalyticsPublisher>()
 
     /**
      * Set the listener to be notified about the display of Experience content.
@@ -277,21 +272,6 @@ class Appcues internal constructor(koinScope: Scope) {
     // observe and re-broadcast tracking data as desired.
     @VisibleForTesting
     internal fun publishTracking(data: TrackingData) {
-
-        fun EventRequest.screenTitle(): String? =
-            attributes[ActivityRequestBuilder.SCREEN_TITLE_ATTRIBUTE] as? String
-
-        analyticsListener?.let { listener ->
-            when (data.type) {
-                EVENT -> data.request.events?.forEach {
-                    listener.trackedAnalytic(EVENT, it.name, it.attributes, data.isInternal)
-                }
-                IDENTIFY -> listener.trackedAnalytic(IDENTIFY, storage.userId, data.request.profileUpdate, data.isInternal)
-                GROUP -> listener.trackedAnalytic(GROUP, storage.groupId, data.request.groupUpdate, data.isInternal)
-                SCREEN -> data.request.events?.forEach {
-                    listener.trackedAnalytic(SCREEN, it.screenTitle(), it.attributes, data.isInternal)
-                }
-            }
-        }
+        analyticsPublisher.publish(analyticsListener, data)
     }
 }
