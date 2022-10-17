@@ -264,6 +264,7 @@ class StateMachineTest : AppcuesScopeTest {
             type = "mobile",
             publishedAt = 1652895835000,
             completionActions = arrayListOf(),
+            experiment = null,
         )
         val initialState = Idling
         val stateMachine = initMachine(initialState)

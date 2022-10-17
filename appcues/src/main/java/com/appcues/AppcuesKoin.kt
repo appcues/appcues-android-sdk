@@ -30,14 +30,7 @@ internal object AppcuesKoin : KoinScopePlugin {
         }
         scoped { AppcuesDebuggerManager(context = get(), koinScope = this) }
         scoped { ContextResources(context = get()) }
-        scoped {
-            ExperienceRenderer(
-                repository = get(),
-                stateMachine = get(),
-                sessionMonitor = get(),
-                config = get(),
-            )
-        }
+        scoped { ExperienceRenderer(scope = get()) }
         scoped {
             AppcuesRepository(
                 appcuesRemoteSource = get(),
