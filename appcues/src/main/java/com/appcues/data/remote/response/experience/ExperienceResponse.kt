@@ -3,6 +3,7 @@ package com.appcues.data.remote.response.experience
 import com.appcues.data.remote.response.action.ActionResponse
 import com.appcues.data.remote.response.step.StepContainerResponse
 import com.appcues.data.remote.response.trait.TraitResponse
+import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 import java.util.UUID
 
@@ -19,4 +20,6 @@ internal data class ExperienceResponse(
     val publishedAt: Long?,
     val nextContentId: String?,
     val redirectUrl: String?,
+    @Json(name = "experiment_id")
+    val experimentId: String?
 )

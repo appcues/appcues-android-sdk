@@ -11,6 +11,7 @@ internal data class Experience(
     val priority: ExperiencePriority,
     val type: String?,
     val publishedAt: Long?,
+    val experiment: Experiment?,
     val completionActions: List<ExperienceAction>,
 ) {
 

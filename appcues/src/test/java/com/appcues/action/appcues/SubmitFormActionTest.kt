@@ -252,6 +252,7 @@ internal class SubmitFormActionTest : AppcuesScopeTest {
         priority = NORMAL,
         type = "mobile",
         publishedAt = Date().time,
-        completionActions = listOf()
+        completionActions = listOf(),
+        experiment = null,
     )
 }

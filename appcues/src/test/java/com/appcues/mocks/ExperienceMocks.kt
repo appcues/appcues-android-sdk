@@ -49,6 +49,7 @@ internal fun mockExperience(onPresent: (() -> Unit)? = null) =
         published = true,
         priority = NORMAL,
         publishedAt = 1652895835000,
+        experiment = null,
         completionActions = arrayListOf(LaunchExperienceAction("1234"), TrackEventAction(hashMapOf()))
     )
 

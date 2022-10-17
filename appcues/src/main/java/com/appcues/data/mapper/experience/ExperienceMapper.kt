@@ -12,7 +12,11 @@ import com.appcues.data.mapper.trait.TraitsMapper
 import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperiencePriority
 import com.appcues.data.model.ExperiencePriority.NORMAL
+import com.appcues.data.model.Experiment
+import com.appcues.data.model.Experiment.ExperimentGroup.CONTROL
+import com.appcues.data.model.Experiment.ExperimentGroup.EXPOSED
 import com.appcues.data.model.StepContainer
+import com.appcues.data.remote.response.ExperimentResponse
 import com.appcues.data.remote.response.action.ActionResponse
 import com.appcues.data.remote.response.experience.ExperienceResponse
 import com.appcues.data.remote.response.step.StepContainerResponse
@@ -35,8 +39,11 @@ internal class ExperienceMapper(
     private val scope: Scope,
     private val context: Context,
 ) {
-
-    fun map(from: ExperienceResponse, priority: ExperiencePriority = NORMAL): Experience {
+    fun map(
+        from: ExperienceResponse,
+        priority: ExperiencePriority = NORMAL,
+        experiments: Map<String, ExperimentResponse> = emptyMap()
+    ): Experience {
         val experienceTraits = from.traits.map { it to EXPERIENCE }
         return Experience(
             id = from.id,
@@ -46,6 +53,7 @@ internal class ExperienceMapper(
             priority = priority,
             type = from.type,
             publishedAt = from.publishedAt,
+            experiment = experiments.getExperiment(from.experimentId),
             completionActions = arrayListOf<ExperienceAction>().apply {
                 from.redirectUrl?.let { add(LinkAction(it, scope.get())) }
                 from.nextContentId?.let { add(LaunchExperienceAction(it)) }
@@ -82,4 +90,17 @@ internal class ExperienceMapper(
     private fun List<ExperienceTrait>.getExperiencePresentingTraitOrDefault(): PresentingTrait {
         return filterIsInstance<PresentingTrait>().firstOrNull() ?: DefaultPresentingTrait(null, scope, context)
     }
+
+    private fun Map<String, ExperimentResponse>.getExperiment(experimentId: String?) =
+        experimentId?.let { id ->
+            this[id]?.let { experimentResponse ->
+                when (experimentResponse.group) {
+                    "control" -> CONTROL
+                    "exposed" -> EXPOSED
+                    else -> null
+                }?.let { group ->
+                    Experiment(id, group)
+                }
+            }
+        }
 }

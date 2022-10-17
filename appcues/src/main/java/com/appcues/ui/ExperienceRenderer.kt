@@ -2,9 +2,12 @@ package com.appcues.ui
 
 import com.appcues.AppcuesConfig
 import com.appcues.SessionMonitor
+import com.appcues.analytics.AnalyticsEvent
+import com.appcues.analytics.AnalyticsTracker
 import com.appcues.data.AppcuesRepository
 import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperiencePriority.NORMAL
+import com.appcues.data.model.Experiment.ExperimentGroup.CONTROL
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.StartExperience
 import com.appcues.statemachine.Error
@@ -15,18 +18,42 @@ import com.appcues.statemachine.StateMachine
 import com.appcues.util.ResultOf
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
+import org.koin.core.component.KoinScopeComponent
+import org.koin.core.component.inject
+import org.koin.core.scope.Scope
 
 internal class ExperienceRenderer(
-    private val repository: AppcuesRepository,
-    private val stateMachine: StateMachine,
-    private val sessionMonitor: SessionMonitor,
-    private val config: AppcuesConfig,
-) {
+    override val scope: Scope,
+) : KoinScopeComponent {
+
+    // lazy prop inject here to avoid circular dependency with AnalyticsTracker
+    // AnalyticsTracker > AnalyticsQueueProcessor > ExperienceRenderer(this) > AnalyticsTracker
+    private val repository by inject<AppcuesRepository>()
+    private val stateMachine by inject<StateMachine>()
+    private val sessionMonitor by inject<SessionMonitor>()
+    private val config by inject<AppcuesConfig>()
+    private val analyticsTracker by inject<AnalyticsTracker>()
 
     suspend fun show(experience: Experience): Boolean {
         val canShow = config.interceptor?.canDisplayExperience(experience.id) ?: true
 
         if (!canShow) return false
+
+        if (experience.experiment != null) {
+            // send analytics
+            analyticsTracker.track(
+                event = AnalyticsEvent.ExperimentEntered,
+                properties = mapOf(
+                    "experimentId" to experience.experiment.id,
+                    "group" to experience.experiment.group.analyticsName
+                ),
+                interactive = false)
+
+            // if this user is in the control group, it should not show
+            if (experience.experiment.group == CONTROL) {
+                return false
+            }
+        }
 
         // "event_trigger" or "forced" experience priority is NORMAL, "screen_view" is low -
         // if an experience is currently showing and the new experience coming in is normal priority

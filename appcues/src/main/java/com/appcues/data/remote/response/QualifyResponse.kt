@@ -8,6 +8,8 @@ import com.squareup.moshi.JsonClass
 internal data class QualifyResponse(
     val experiences: List<ExperienceResponse>,
 
+    val experiments: Map<String, ExperimentResponse>,
+
     @Json(name = "performed_qualification")
     val performedQualification: Boolean,
 

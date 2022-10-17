@@ -148,7 +148,7 @@ internal class AppcuesRepository(
 
             qualifyResult.doIfSuccess { response ->
                 val priority: ExperiencePriority = if (response.qualificationReason == "screen_view") LOW else NORMAL
-                experiences += response.experiences.map { experienceMapper.map(it, priority) }
+                experiences += response.experiences.map { experienceMapper.map(it, priority, response.experiments) }
             }
 
             qualifyResult.doIfFailure {
