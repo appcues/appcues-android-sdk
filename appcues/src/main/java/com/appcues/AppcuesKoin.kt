@@ -48,5 +48,10 @@ internal object AppcuesKoin : KoinScopePlugin {
             )
         }
         scoped { LinkOpener(get()) }
+        scoped {
+            AnalyticsPublisher(
+                storage = get()
+            )
+        }
     }
 }

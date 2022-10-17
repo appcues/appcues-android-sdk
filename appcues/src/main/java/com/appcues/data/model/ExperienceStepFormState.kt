@@ -10,6 +10,7 @@ import com.appcues.data.model.styling.ComponentSelectMode.SINGLE
 import java.util.UUID
 
 internal class ExperienceStepFormState {
+
     private var _formItems: HashMap<UUID, ExperienceStepFormItemState> = hashMapOf()
 
     private var itemIndex = 0
@@ -104,6 +105,7 @@ internal sealed class ExperienceStepFormItemState(
         override val index: Int,
         val primitive: TextInputPrimitive,
     ) : ExperienceStepFormItemState(index, primitive.id, "textInput", primitive.label.text, primitive.required) {
+
         var text = mutableStateOf("")
 
         fun setValue(newValue: String) {
@@ -121,6 +123,7 @@ internal sealed class ExperienceStepFormItemState(
         label = primitive.label.text,
         isRequired = primitive.minSelections > 0u
     ) {
+
         var values = mutableStateOf(setOf<String>())
 
         fun setValue(newValue: String) {
