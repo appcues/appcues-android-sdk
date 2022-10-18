@@ -67,6 +67,10 @@ internal class ExperienceStepFormState {
         val item = _formItems[primitive.id] as? OptionSelectFormItemState
         item?.setValue(value)
     }
+
+    fun toHashMap(): HashMap<String, Any> {
+        return hashMapOf("formResponse" to formItems.map { it.toHashMap() })
+    }
 }
 
 internal sealed class ExperienceStepFormItemState(
@@ -100,6 +104,16 @@ internal sealed class ExperienceStepFormItemState(
                 is TextInputFormItemState -> text.value
                 is OptionSelectFormItemState -> values.value.joinToString("\n")
             }
+
+    fun toHashMap(): HashMap<String, Any> {
+        return hashMapOf(
+            "fieldId" to id,
+            "fieldType" to type,
+            "fieldRequired" to isRequired,
+            "label" to label,
+            "value" to value,
+        )
+    }
 
     class TextInputFormItemState(
         override val index: Int,
