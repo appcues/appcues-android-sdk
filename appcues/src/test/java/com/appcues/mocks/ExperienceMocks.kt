@@ -5,6 +5,7 @@ import com.appcues.action.appcues.TrackEventAction
 import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperiencePrimitive.TextPrimitive
 import com.appcues.data.model.ExperiencePriority.NORMAL
+import com.appcues.data.model.Experiment
 import com.appcues.data.model.Step
 import com.appcues.data.model.StepContainer
 import com.appcues.trait.PresentingTrait
@@ -63,4 +64,28 @@ internal fun mockStep(id: UUID) =
         stepDecoratingTraits = listOf(),
         actions = mapOf(),
         type = "modal"
+    )
+
+internal fun mockExperienceExperiment(experiment: Experiment) =
+    Experience(
+        id = UUID.fromString("d84c9d01-aa27-4cbb-b832-ee03720e04fc"),
+        name = "Mock Experience with Experiment",
+        type = "mobile",
+        stepContainers = listOf(
+            StepContainer(
+                steps = listOf(
+                    mockStep(UUID.fromString("01d8a05a-3a55-4ecc-872d-d140cd628902")),
+                ),
+                presentingTrait = mockPresentingTrait(),
+                contentHolderTrait = mockk(relaxed = true),
+                contentWrappingTrait = mockk(relaxed = true),
+                backdropDecoratingTraits = listOf(),
+                containerDecoratingTraits = listOf(),
+            )
+        ),
+        published = true,
+        priority = NORMAL,
+        publishedAt = 1652895835000,
+        experiment = experiment,
+        completionActions = emptyList()
     )
