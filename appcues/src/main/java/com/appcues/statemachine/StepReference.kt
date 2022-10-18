@@ -31,9 +31,9 @@ internal sealed class StepReference {
         }
     }
 
-    data class StepGroupPageIndex(val index: Int) : StepReference() {
+    data class StepGroupPageIndex(val index: Int, val flatStepIndex: Int) : StepReference() {
 
-        override val destination = "#$index"
+        override val destination = "#$flatStepIndex"
 
         override fun getIndex(experience: Experience, currentStepIndex: Int): Int? {
             // finds the group this step belongs to

@@ -10,7 +10,7 @@ import com.appcues.statemachine.StateMachine
 
 internal class StepInteractionAction(
     override val config: AppcuesConfigMap,
-    private val interaction: StepInteractionData,
+    val interaction: StepInteractionData,
     private val analyticsTracker: AnalyticsTracker,
     private val stateMachine: StateMachine,
 ) : ExperienceAction {

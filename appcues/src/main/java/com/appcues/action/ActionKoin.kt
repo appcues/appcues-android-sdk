@@ -15,7 +15,8 @@ internal object ActionKoin : KoinScopePlugin {
 
     override fun ScopeDSL.install() {
         scoped { ActionRegistry(scope = get()) }
-        scoped { ActionProcessor(scope = get()) }
+        scoped { ActionProcessor(scope = get(), actionQueue = get()) }
+        scoped<ActionQueue> { DefaultActionQueue(coroutineScope = get()) }
 
         factory { params ->
             CloseAction(

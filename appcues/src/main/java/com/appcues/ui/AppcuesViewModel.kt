@@ -32,8 +32,14 @@ internal class AppcuesViewModel(
 
     sealed class UIState {
         object Idle : UIState()
-        data class Rendering(val experienceId: UUID, val stepContainer: StepContainer, val position: Int, val isPreview: Boolean) :
-            UIState()
+
+        data class Rendering(
+            val experienceId: UUID,
+            val stepContainer: StepContainer,
+            val position: Int,
+            val flatStepIndex: Int,
+            val isPreview: Boolean
+        ) : UIState()
 
         data class Dismissing(val continueAction: () -> Unit) : UIState()
     }
@@ -99,7 +105,7 @@ internal class AppcuesViewModel(
             // if both are valid ids we return Rendering else null
             if (containerId != null && stepIndexInContainer != null) {
                 // returns rendering state
-                Rendering(id, stepContainers[containerId], stepIndexInContainer, published.not())
+                Rendering(id, stepContainers[containerId], stepIndexInContainer, flatStepIndex, published.not())
             } else null
         }
     }
@@ -114,7 +120,7 @@ internal class AppcuesViewModel(
             // then we report new position to state machine
             if (state is Rendering && state.position != index) {
                 appcuesCoroutineScope.launch {
-                    stateMachine.handleAction(StartStep(StepGroupPageIndex(index)))
+                    stateMachine.handleAction(StartStep(StepGroupPageIndex(index, state.flatStepIndex)))
                 }
             }
         }
