@@ -2,19 +2,10 @@ package com.appcues
 
 import android.app.Activity
 import android.content.Intent
-import com.appcues.AnalyticType.EVENT
-import com.appcues.AnalyticType.GROUP
-import com.appcues.AnalyticType.IDENTIFY
-import com.appcues.AnalyticType.SCREEN
 import com.appcues.action.ActionRegistry
 import com.appcues.action.ExperienceAction
-import com.appcues.analytics.ActivityRequestBuilder
 import com.appcues.analytics.ActivityScreenTracking
-import com.appcues.analytics.AnalyticsEvent
 import com.appcues.analytics.AnalyticsTracker
-import com.appcues.analytics.TrackingData
-import com.appcues.data.remote.request.ActivityRequest
-import com.appcues.data.remote.request.EventRequest
 import com.appcues.debugger.AppcuesDebuggerManager
 import com.appcues.rules.KoinScopeRule
 import com.appcues.rules.MainDispatcherRule
@@ -337,110 +328,5 @@ internal class AppcuesTest : AppcuesScopeTest {
 
         // THEN
         verify { tracker.track(name, null) }
-    }
-
-    @Test
-    fun `analyticsListener SHOULD track event WHEN event TrackingData is published`() {
-        // GIVEN
-        val attributes = hashMapOf<String, Any>("prop" to 42)
-        val activity = ActivityRequest(
-            accountId = "123",
-            userId = "userId",
-            events = listOf(EventRequest("event1", attributes = attributes))
-        )
-        val data = TrackingData(EVENT, false, activity)
-        val listener = mockk<AnalyticsListener>(relaxed = true)
-        appcues.analyticsListener = listener
-
-        // WHEN
-        appcues.publishTracking(data)
-
-        // THEN
-        verify { listener.trackedAnalytic(EVENT, "event1", attributes, false) }
-    }
-
-    @Test
-    fun `analyticsListener SHOULD track screen WHEN screen TrackingData is published`() {
-        // GIVEN
-        val attributes = hashMapOf<String, Any>(ActivityRequestBuilder.SCREEN_TITLE_ATTRIBUTE to "screen1")
-        val activity = ActivityRequest(
-            accountId = "123",
-            userId = "userId",
-            events = listOf(EventRequest(AnalyticsEvent.ScreenView.eventName, attributes = attributes))
-        )
-        val data = TrackingData(SCREEN, false, activity)
-        val listener = mockk<AnalyticsListener>(relaxed = true)
-        appcues.analyticsListener = listener
-
-        // WHEN
-        appcues.publishTracking(data)
-
-        // THEN
-        verify { listener.trackedAnalytic(SCREEN, "screen1", attributes, false) }
-    }
-
-    @Test
-    fun `analyticsListener SHOULD track identify WHEN identify TrackingData is published`() {
-        // GIVEN
-        val storage: Storage = get()
-        storage.userId = "userId"
-        val attributes = hashMapOf<String, Any>("prop" to 42)
-        val activity = ActivityRequest(
-            accountId = "123",
-            userId = storage.userId,
-            profileUpdate = attributes
-        )
-        val data = TrackingData(IDENTIFY, false, activity)
-        val listener = mockk<AnalyticsListener>(relaxed = true)
-        appcues.analyticsListener = listener
-
-        // WHEN
-        appcues.publishTracking(data)
-
-        // THEN
-        verify { listener.trackedAnalytic(IDENTIFY, "userId", attributes, false) }
-    }
-
-    @Test
-    fun `analyticsListener SHOULD track group WHEN group TrackingData is published`() {
-        // GIVEN
-        val storage: Storage = get()
-        storage.groupId = "groupId"
-        val attributes = hashMapOf<String, Any>("prop" to 42)
-        val activity = ActivityRequest(
-            accountId = "123",
-            userId = "userId",
-            groupId = storage.groupId,
-            groupUpdate = attributes
-        )
-        val data = TrackingData(GROUP, false, activity)
-        val listener = mockk<AnalyticsListener>(relaxed = true)
-        appcues.analyticsListener = listener
-
-        // WHEN
-        appcues.publishTracking(data)
-
-        // THEN
-        verify { listener.trackedAnalytic(GROUP, "groupId", attributes, false) }
-    }
-
-    @Test
-    fun `analyticsListener SHOULD track internal event WHEN event TrackingData is published AND isInternal equals true`() {
-        // GIVEN
-        val attributes = hashMapOf<String, Any>("prop" to 42)
-        val activity = ActivityRequest(
-            accountId = "123",
-            userId = "userId",
-            events = listOf(EventRequest("event1", attributes = attributes))
-        )
-        val data = TrackingData(EVENT, true, activity)
-        val listener = mockk<AnalyticsListener>(relaxed = true)
-        appcues.analyticsListener = listener
-
-        // WHEN
-        appcues.publishTracking(data)
-
-        // THEN
-        verify { listener.trackedAnalytic(EVENT, "event1", attributes, true) }
     }
 }

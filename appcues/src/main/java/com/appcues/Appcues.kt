@@ -3,12 +3,10 @@ package com.appcues
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import androidx.annotation.VisibleForTesting
 import com.appcues.action.ActionRegistry
 import com.appcues.action.ExperienceAction
 import com.appcues.analytics.ActivityScreenTracking
 import com.appcues.analytics.AnalyticsTracker
-import com.appcues.analytics.TrackingData
 import com.appcues.debugger.AppcuesDebuggerManager
 import com.appcues.di.AppcuesKoinContext
 import com.appcues.logging.Logcues
@@ -44,6 +42,7 @@ fun Appcues(
 class Appcues internal constructor(koinScope: Scope) {
 
     companion object {
+
         /**
          * The current version of Appcues SDK.
          */
@@ -87,7 +86,7 @@ class Appcues internal constructor(koinScope: Scope) {
 
         appcuesCoroutineScope.launch {
             analyticsTracker.analyticsFlow.collect {
-                publishTracking(it)
+                analyticsPublisher.publish(analyticsListener, it)
             }
         }
     }
@@ -266,12 +265,5 @@ class Appcues internal constructor(koinScope: Scope) {
         }
 
         analyticsTracker.identify(properties)
-    }
-
-    // if a listener is attached, this will publish tracked analytics so that a host application would be able to
-    // observe and re-broadcast tracking data as desired.
-    @VisibleForTesting
-    internal fun publishTracking(data: TrackingData) {
-        analyticsPublisher.publish(analyticsListener, data)
     }
 }

@@ -6,6 +6,7 @@ import com.appcues.AnalyticType.IDENTIFY
 import com.appcues.AnalyticType.SCREEN
 import com.appcues.analytics.ActivityRequestBuilder
 import com.appcues.analytics.TrackingData
+import com.appcues.data.model.ExperienceStepFormState
 import com.appcues.data.remote.request.EventRequest
 import java.util.Date
 
@@ -39,6 +40,7 @@ internal class AnalyticsPublisher(
             val value = it.value
             if (key is String && value != null) {
                 sanitizedMap[key] = when (value) {
+                    is ExperienceStepFormState -> value.toHashMap().sanitize()
                     // convert Date types to Double value
                     is Date -> value.time.toDouble()
                     is Map<*, *> -> value.sanitize()
@@ -56,6 +58,7 @@ internal class AnalyticsPublisher(
         filterNotNull().forEach {
             sanitizedList.add(
                 when (it) {
+                    is ExperienceStepFormState -> it.toHashMap().sanitize()
                     // convert Date types to Double value
                     is Date -> it.time.toDouble()
                     is Map<*, *> -> it.sanitize()
