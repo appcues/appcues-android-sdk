@@ -13,8 +13,6 @@ import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperiencePriority
 import com.appcues.data.model.ExperiencePriority.NORMAL
 import com.appcues.data.model.Experiment
-import com.appcues.data.model.Experiment.ExperimentGroup.CONTROL
-import com.appcues.data.model.Experiment.ExperimentGroup.EXPOSED
 import com.appcues.data.model.StepContainer
 import com.appcues.data.remote.response.ExperimentResponse
 import com.appcues.data.remote.response.action.ActionResponse
@@ -94,13 +92,7 @@ internal class ExperienceMapper(
     private fun Map<String, ExperimentResponse>.getExperiment(experimentId: String?) =
         experimentId?.let { id ->
             this[id]?.let { experimentResponse ->
-                when (experimentResponse.group) {
-                    "control" -> CONTROL
-                    "exposed" -> EXPOSED
-                    else -> null
-                }?.let { group ->
-                    Experiment(id, group)
-                }
+                Experiment(id, experimentResponse.group)
             }
         }
 }

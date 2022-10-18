@@ -7,7 +7,6 @@ import com.appcues.analytics.AnalyticsTracker
 import com.appcues.data.AppcuesRepository
 import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperiencePriority.NORMAL
-import com.appcues.data.model.Experiment.ExperimentGroup.CONTROL
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.StartExperience
 import com.appcues.statemachine.Error
@@ -43,13 +42,13 @@ internal class ExperienceRenderer(
                 event = AnalyticsEvent.ExperimentEntered,
                 properties = mapOf(
                     "experimentId" to experience.experiment.id,
-                    "group" to experience.experiment.group.analyticsName
+                    "group" to experience.experiment.group
                 ),
                 interactive = false
             )
 
             // if this user is in the control group, it should not show
-            canShow = experience.experiment.group != CONTROL
+            canShow = experience.experiment.group != "control"
         }
 
         if (!canShow) return false
