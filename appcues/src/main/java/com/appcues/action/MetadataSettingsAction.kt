@@ -10,7 +10,7 @@ package com.appcues.action
  *       primitive, meaning all other MetadataSettingsActions in the list
  *       of actions will be ignored.
  */
-interface MetadataSettingsAction {
+internal interface MetadataSettingsAction {
 
     val category: String
     val destination: String
