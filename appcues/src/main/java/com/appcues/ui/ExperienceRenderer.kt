@@ -35,11 +35,9 @@ internal class ExperienceRenderer(
     private val analyticsTracker by inject<AnalyticsTracker>()
 
     suspend fun show(experience: Experience): Boolean {
-        val canShow = config.interceptor?.canDisplayExperience(experience.id) ?: true
+        var canShow = config.interceptor?.canDisplayExperience(experience.id) ?: true
 
-        if (!canShow) return false
-
-        if (experience.experiment != null) {
+        if (canShow && experience.experiment != null) {
             // send analytics
             analyticsTracker.track(
                 event = AnalyticsEvent.ExperimentEntered,
@@ -51,10 +49,10 @@ internal class ExperienceRenderer(
             )
 
             // if this user is in the control group, it should not show
-            if (experience.experiment.group == CONTROL) {
-                return false
-            }
+            canShow = experience.experiment.group != CONTROL
         }
+
+        if (!canShow) return false
 
         // "event_trigger" or "forced" experience priority is NORMAL, "screen_view" is low -
         // if an experience is currently showing and the new experience coming in is normal priority
