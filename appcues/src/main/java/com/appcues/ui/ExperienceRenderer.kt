@@ -47,7 +47,8 @@ internal class ExperienceRenderer(
                     "experimentId" to experience.experiment.id,
                     "group" to experience.experiment.group.analyticsName
                 ),
-                interactive = false)
+                interactive = false
+            )
 
             // if this user is in the control group, it should not show
             if (experience.experiment.group == CONTROL) {

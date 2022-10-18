@@ -1,13 +1,26 @@
 package com.appcues.ui
 
+import com.appcues.AppcuesConfig
+import com.appcues.analytics.AnalyticsEvent
+import com.appcues.analytics.AnalyticsTracker
+import com.appcues.data.model.Experiment
+import com.appcues.data.model.Experiment.ExperimentGroup.CONTROL
+import com.appcues.data.model.Experiment.ExperimentGroup.EXPOSED
 import com.appcues.mocks.mockExperience
+import com.appcues.mocks.mockExperienceExperiment
 import com.appcues.statemachine.Action.EndExperience
-import com.appcues.statemachine.State
+import com.appcues.statemachine.Action.StartExperience
+import com.appcues.statemachine.State.Idling
 import com.appcues.statemachine.State.RenderingStep
 import com.appcues.statemachine.StateMachine
+import com.appcues.util.ResultOf.Success
+import com.google.common.truth.Truth.assertThat
+import io.mockk.Called
+import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -30,8 +43,11 @@ class ExperienceRendererTest {
     @Test
     fun `dismissCurrentExperience SHOULD mark complete WHEN current state is on last step`() = runTest {
         // GIVEN
-        val scope = initScope(RenderingStep(mockExperience(), 3, false))
-        val stateMachine: StateMachine = scope.get()
+        val state = RenderingStep(mockExperience(), 3, false)
+        val stateMachine = mockk<StateMachine>(relaxed = true) {
+            every { this@mockk.state } answers { state }
+        }
+        val scope = initScope(stateMachine)
         val experienceRenderer = ExperienceRenderer(scope)
 
         // WHEN
@@ -44,8 +60,11 @@ class ExperienceRendererTest {
     @Test
     fun `dismissCurrentExperience SHOULD NOT mark complete WHEN current state is not on last step`() = runTest {
         // GIVEN
-        val scope = initScope(RenderingStep(mockExperience(), 2, false))
-        val stateMachine: StateMachine = scope.get()
+        val state = RenderingStep(mockExperience(), 2, false)
+        val stateMachine = mockk<StateMachine>(relaxed = true) {
+            every { this@mockk.state } answers { state }
+        }
+        val scope = initScope(stateMachine)
         val experienceRenderer = ExperienceRenderer(scope)
 
         // WHEN
@@ -55,7 +74,93 @@ class ExperienceRendererTest {
         coVerify { stateMachine.handleAction(EndExperience(markComplete = false, destroyed = false)) }
     }
 
-    private fun initScope(state: State): Scope {
+    @Test
+    fun `show SHOULD NOT show experience WHEN an experiment is active AND group is control`() = runTest {
+        // GIVEN
+        val experiment = Experiment("experiment1", CONTROL)
+        val experience = mockExperienceExperiment(experiment)
+        val stateMachine = mockk<StateMachine>(relaxed = true) {
+            every { this@mockk.state } answers { Idling }
+            coEvery { this@mockk.handleAction(any()) } answers { Success(Idling) }
+        }
+        val scope = initScope(stateMachine)
+        val analyticsTracker: AnalyticsTracker = scope.get()
+        val experienceRenderer = ExperienceRenderer(scope)
+
+        // WHEN
+        val showResult = experienceRenderer.show(experience)
+
+        // THEN
+        assertThat(showResult).isFalse()
+        coVerify { stateMachine.handleAction(StartExperience(experience)) wasNot Called }
+    }
+
+    @Test
+    fun `show SHOULD show experience WHEN an experiment is active AND group is exposed`() = runTest {
+        // GIVEN
+        val experiment = Experiment("experiment1", EXPOSED)
+        val experience = mockExperienceExperiment(experiment)
+        val stateMachine = mockk<StateMachine>(relaxed = true) {
+            every { this@mockk.state } answers { Idling }
+            coEvery { this@mockk.handleAction(any()) } answers { Success(Idling) }
+        }
+        val scope = initScope(stateMachine)
+        val analyticsTracker: AnalyticsTracker = scope.get()
+        val experienceRenderer = ExperienceRenderer(scope)
+
+        // WHEN
+        val showResult = experienceRenderer.show(experience)
+
+        // THEN
+        assertThat(showResult).isTrue()
+        coVerify { stateMachine.handleAction(StartExperience(experience)) }
+    }
+
+    @Test
+    fun `show SHOULD track experiment_entered with group=control WHEN an experiment is active AND group is control`() = runTest {
+        // GIVEN
+        val experiment = Experiment("experiment1", CONTROL)
+        val experience = mockExperienceExperiment(experiment)
+        val stateMachine = mockk<StateMachine>(relaxed = true) {
+            every { this@mockk.state } answers { Idling }
+            coEvery { this@mockk.handleAction(any()) } answers { Success(Idling) }
+        }
+        val scope = initScope(stateMachine)
+        val analyticsTracker: AnalyticsTracker = scope.get()
+        val experienceRenderer = ExperienceRenderer(scope)
+
+        // WHEN
+        experienceRenderer.show(experience)
+
+        // THEN
+        verify {
+            analyticsTracker.track(AnalyticsEvent.ExperimentEntered, mapOf("experimentId" to "experiment1", "group" to "control"), false)
+        }
+    }
+
+    @Test
+    fun `show SHOULD track experiment_entered with group=exposed WHEN an experiment is active AND group is exposed`() = runTest {
+        // GIVEN
+        val experiment = Experiment("experiment1", EXPOSED)
+        val experience = mockExperienceExperiment(experiment)
+        val stateMachine = mockk<StateMachine>(relaxed = true) {
+            every { this@mockk.state } answers { Idling }
+            coEvery { this@mockk.handleAction(any()) } answers { Success(Idling) }
+        }
+        val scope = initScope(stateMachine)
+        val analyticsTracker: AnalyticsTracker = scope.get()
+        val experienceRenderer = ExperienceRenderer(scope)
+
+        // WHEN
+        experienceRenderer.show(experience)
+
+        // THEN
+        verify {
+            analyticsTracker.track(AnalyticsEvent.ExperimentEntered, mapOf("experimentId" to "experiment1", "group" to "exposed"), false)
+        }
+    }
+
+    private fun initScope(stateMachine: StateMachine): Scope {
         // close any existing instance
         KoinPlatformTools.defaultContext().getOrNull()?.close()
         val scopeId = UUID.randomUUID().toString()
@@ -64,11 +169,9 @@ class ExperienceRendererTest {
             modules(
                 module {
                     scope(named(scopeId)) {
-                        scoped {
-                            mockk<StateMachine>(relaxed = true) {
-                                every { this@mockk.state } answers { state }
-                            }
-                        }
+                        scoped { stateMachine }
+                        scoped { AppcuesConfig("abc", "123") }
+                        scoped { mockk<AnalyticsTracker>(relaxed = true) }
                     }
                 }
             )
