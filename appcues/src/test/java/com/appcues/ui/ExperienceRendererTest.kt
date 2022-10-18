@@ -4,8 +4,6 @@ import com.appcues.AppcuesConfig
 import com.appcues.analytics.AnalyticsEvent
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.data.model.Experiment
-import com.appcues.data.model.Experiment.ExperimentGroup.CONTROL
-import com.appcues.data.model.Experiment.ExperimentGroup.EXPOSED
 import com.appcues.mocks.mockExperience
 import com.appcues.mocks.mockExperienceExperiment
 import com.appcues.statemachine.Action.EndExperience
@@ -77,7 +75,7 @@ class ExperienceRendererTest {
     @Test
     fun `show SHOULD NOT show experience WHEN an experiment is active AND group is control`() = runTest {
         // GIVEN
-        val experiment = Experiment("experiment1", CONTROL)
+        val experiment = Experiment("experiment1", "control")
         val experience = mockExperienceExperiment(experiment)
         val stateMachine = mockk<StateMachine>(relaxed = true) {
             every { this@mockk.state } answers { Idling }
@@ -98,7 +96,7 @@ class ExperienceRendererTest {
     @Test
     fun `show SHOULD show experience WHEN an experiment is active AND group is exposed`() = runTest {
         // GIVEN
-        val experiment = Experiment("experiment1", EXPOSED)
+        val experiment = Experiment("experiment1", "exposed")
         val experience = mockExperienceExperiment(experiment)
         val stateMachine = mockk<StateMachine>(relaxed = true) {
             every { this@mockk.state } answers { Idling }
@@ -119,7 +117,7 @@ class ExperienceRendererTest {
     @Test
     fun `show SHOULD track experiment_entered with group=control WHEN an experiment is active AND group is control`() = runTest {
         // GIVEN
-        val experiment = Experiment("experiment1", CONTROL)
+        val experiment = Experiment("experiment1", "control")
         val experience = mockExperienceExperiment(experiment)
         val stateMachine = mockk<StateMachine>(relaxed = true) {
             every { this@mockk.state } answers { Idling }
@@ -141,7 +139,7 @@ class ExperienceRendererTest {
     @Test
     fun `show SHOULD track experiment_entered with group=exposed WHEN an experiment is active AND group is exposed`() = runTest {
         // GIVEN
-        val experiment = Experiment("experiment1", EXPOSED)
+        val experiment = Experiment("experiment1", "exposed")
         val experience = mockExperienceExperiment(experiment)
         val stateMachine = mockk<StateMachine>(relaxed = true) {
             every { this@mockk.state } answers { Idling }
