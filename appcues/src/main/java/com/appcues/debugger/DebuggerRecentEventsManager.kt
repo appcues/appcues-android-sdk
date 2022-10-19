@@ -31,6 +31,7 @@ internal class DebuggerRecentEventsManager(
 ) {
 
     companion object {
+
         private const val MAX_RECENT_EVENTS = 20
         private const val IDENTITY_PROPERTY_PREFIX = "_"
     }
@@ -127,6 +128,12 @@ internal class DebuggerRecentEventsManager(
                                 .toSortedList(),
                         ),
                         DebuggerEventItemPropertySection(
+                            title = contextResources.getString(R.string.appcues_debugger_event_details_interaction_data),
+                            properties = event.attributes
+                                .getInteractionData()
+                                .toSortedList(),
+                        ),
+                        DebuggerEventItemPropertySection(
                             title = contextResources.getString(R.string.appcues_debugger_event_details_identity_auto_properties_title),
                             properties = event.attributes
                                 .getAutoProperties()
@@ -211,6 +218,14 @@ private fun Map<String, Any>.getFormResponse(): Map<String, Any?> {
             itemState.label to itemState.value
         }
     } ?: mapOf()
+}
+
+private fun Map<String, Any>.getInteractionData(): Map<String, Any?> {
+    this[ExperienceLifecycleEvent.INTERACTION_DATA_KEY].let {
+        if (it is ExperienceStepFormState || it == null) return mapOf()
+
+        return it as Map<String, Any>
+    }
 }
 
 private fun List<Pair<String, Any?>>.sortByPropertyName(): List<Pair<String, Any?>> = sortedBy { it.first }

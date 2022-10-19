@@ -67,6 +67,7 @@
     <string name="appcues_debugger_event_details_title">Event details</string>
     <string name="appcues_debugger_event_details_properties_title">Properties</string>
     <string name="appcues_debugger_event_details_form_response_title">Interaction data: form response</string>
+    <string name="appcues_debugger_event_details_interaction_data">Interaction data</string>
     <string name="appcues_debugger_event_details_identity_auto_properties_title">Identity auto-properties</string>
     <string name="appcues_debugger_event_details_type_title">Type</string>
     <string name="appcues_debugger_event_details_name_title">Name</string>

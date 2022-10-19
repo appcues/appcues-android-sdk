@@ -1,16 +1,23 @@
 package com.appcues.action
 
 import com.appcues.Appcues
+import com.appcues.AppcuesConfig
 import com.appcues.AppcuesCoroutineScope
 import com.appcues.action.appcues.StepInteractionAction
-import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction
+import com.appcues.analytics.AnalyticsTracker
+import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType.BUTTON_TAPPED
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.logging.Logcues
+import com.appcues.mocks.mockExperience
 import com.appcues.rules.MainDispatcherRule
+import com.appcues.statemachine.State
+import com.appcues.statemachine.State.RenderingStep
+import com.appcues.statemachine.StateMachine
 import com.google.common.truth.Truth.assertThat
 import io.mockk.mockk
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.runBlocking
+import io.mockk.slot
+import io.mockk.verify
+import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Rule
 import org.junit.Test
@@ -36,8 +43,10 @@ class ActionProcessorTest : KoinTest {
     @Test
     fun `process SHOULD transform queue WHEN it contains a transformation action`() {
         // GIVEN
-        val scope = initScope()
-        val actionProcessor = ActionProcessor(scope, scope.get())
+        val experience = mockExperience()
+        val initialState = RenderingStep(experience, 0, true)
+        val scope = initScope(initialState)
+        val actionProcessor = ActionProcessor(scope)
         val action1 = TestAction(false)
         val action2 = TestAction(false)
         val action3 = TestAction(true)
@@ -54,11 +63,14 @@ class ActionProcessorTest : KoinTest {
     }
 
     @Test
-    fun `process(1,2,3) SHOULD send stepInteraction analytics based on last of type MetadataSettingsAction`() = runBlocking {
+    fun `process(1,2,3) SHOULD send stepInteraction analytics based on last of type MetadataSettingsAction`() = runTest {
+
         // GIVEN
-        val scope = initScope()
-        val actionQueue = TestActionQueue()
-        val actionProcessor = ActionProcessor(scope, actionQueue)
+        val experience = mockExperience()
+        val initialState = RenderingStep(experience, 0, true)
+        val scope = initScope(initialState)
+        val actionProcessor = scope.get<ActionProcessor>()
+        val analyticsTracker: AnalyticsTracker = scope.get()
 
         val action1 = TestAction(false)
         val stepAction1 = TestStepInteractionAction("test", "a")
@@ -72,42 +84,46 @@ class ActionProcessorTest : KoinTest {
         // WHEN
         actionProcessor.process(
             listOf(action1, stepAction1, action2, stepAction2, action3, action4, stepAction3, action5),
-            StepInteraction.InteractionType.BUTTON_TAPPED,
+            BUTTON_TAPPED,
             "Button 1"
         )
 
         // THEN
-        assertThat(actionQueue.listQueue).hasSize(9)
-        assertThat(actionQueue.listQueue.first()).isInstanceOf(StepInteractionAction::class.java)
-        with(actionQueue.listQueue.first() as StepInteractionAction) {
-            assertThat(interaction.properties["destination"]).isEqualTo("c")
-            assertThat(interaction.properties["category"]).isEqualTo("test")
-            assertThat(interaction.properties["text"]).isEqualTo("Button 1")
+        val properties = slot<Map<String, Any>>()
+        verify { analyticsTracker.track("appcues:v2:step_interaction", capture(properties), false, true) }
+        with(properties.captured["interactionData"] as Map<*, *>) {
+            assertThat(this["destination"]).isEqualTo("c")
+            assertThat(this["text"]).isEqualTo("Button 1")
+            assertThat(this["category"]).isEqualTo("test")
         }
     }
 
     // Helpers
-    private fun initScope(): Scope {
+    private fun initScope(initState: State): Scope {
         // close any existing instance
         KoinPlatformTools.defaultContext().getOrNull()?.close()
         val scopeId = UUID.randomUUID().toString()
         return startKoin {
-            koin.getOrCreateScope(scopeId = scopeId, qualifier = named(scopeId))
+            val scope = koin.getOrCreateScope(scopeId = scopeId, qualifier = named(scopeId))
             modules(
                 module {
                     scope(named(scopeId)) {
+                        scoped { scope }
                         scoped { mockk<Logcues>(relaxed = true) }
                         scoped { mockk<Appcues>(relaxed = true) }
-                        scoped<ActionQueue> { DefaultActionQueue(get()) }
+                        scoped { AppcuesConfig("00000", "123") }
                         scoped { AppcuesCoroutineScope(get()) }
+                        scoped { mockk<AnalyticsTracker>(relaxed = true) }
+                        scoped { ActionProcessor(get()) }
                         scoped { params ->
                             StepInteractionAction(
                                 config = params.getOrNull(),
                                 interaction = params.get(),
-                                analyticsTracker = mockk(relaxed = true),
-                                stateMachine = mockk(relaxed = true),
+                                analyticsTracker = get(),
+                                stateMachine = get(),
                             )
                         }
+                        scoped { StateMachine(get(), get(), get(), initState) }
                     }
                 }
             )
@@ -146,18 +162,6 @@ class ActionProcessorTest : KoinTest {
 
         override suspend fun execute(appcues: Appcues) {
             // do nothing
-        }
-    }
-
-    private class TestActionQueue : ActionQueue {
-
-        val listQueue = arrayListOf<ExperienceAction>()
-
-        override val queue: Channel<ExperienceAction>
-            get() = Channel(Channel.UNLIMITED)
-
-        override fun enqueue(actions: List<ExperienceAction>) {
-            listQueue.addAll(actions)
         }
     }
 }
