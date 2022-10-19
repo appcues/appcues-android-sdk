@@ -7,6 +7,7 @@ import com.appcues.analytics.AnalyticsTracker
 import com.appcues.data.AppcuesRepository
 import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperiencePriority.NORMAL
+import com.appcues.data.model.Experiment
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.StartExperience
 import com.appcues.statemachine.Error
@@ -36,19 +37,12 @@ internal class ExperienceRenderer(
     suspend fun show(experience: Experience): Boolean {
         var canShow = config.interceptor?.canDisplayExperience(experience.id) ?: true
 
-        if (canShow && experience.experiment != null) {
-            // send analytics
-            analyticsTracker.track(
-                event = AnalyticsEvent.ExperimentEntered,
-                properties = mapOf(
-                    "experimentId" to experience.experiment.id,
-                    "group" to experience.experiment.group
-                ),
-                interactive = false
-            )
-
-            // if this user is in the control group, it should not show
-            canShow = experience.experiment.group != "control"
+        // if there is an active experiment, and we should not show this experience (control group), then
+        // track the analytics for experiment_entered, but ensure we exit early. This should be checked before
+        // we dismiss any current experience below.
+        if (experience.experiment != null && !experience.experiment.shouldExecute()) {
+            experience.experiment.track(analyticsTracker)
+            canShow = false
         }
 
         if (!canShow) return false
@@ -71,6 +65,9 @@ internal class ExperienceRenderer(
                 }
             }
         }
+
+        // track an experiment_entered analytic, if exists, since we know it is not in the control group at this point
+        experience.experiment?.track(analyticsTracker)
 
         return stateMachine.handleAction(StartExperience(experience)).run {
             when (this) {
@@ -122,4 +119,19 @@ internal class ExperienceRenderer(
 
     suspend fun dismissCurrentExperience(markComplete: Boolean, destroyed: Boolean): ResultOf<State, Error> =
         stateMachine.handleAction(EndExperience(markComplete || stateMachine.state.isOnLastStep, destroyed))
+
+    private fun Experiment.shouldExecute() =
+        group != "control"
+
+    private fun Experiment.track(analyticsTracker: AnalyticsTracker) {
+        // send analytics
+        analyticsTracker.track(
+            event = AnalyticsEvent.ExperimentEntered,
+            properties = mapOf(
+                "experimentId" to id,
+                "group" to group
+            ),
+            interactive = false
+        )
+    }
 }
