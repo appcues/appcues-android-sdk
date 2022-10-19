@@ -7,8 +7,10 @@ import com.appcues.data.remote.response.experience.ExperienceResponse
 import okhttp3.RequestBody
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.Header
 import retrofit2.http.POST
 import retrofit2.http.Path
+import java.util.UUID
 
 internal interface AppcuesService {
 
@@ -23,6 +25,7 @@ internal interface AppcuesService {
     suspend fun qualify(
         @Path("account") account: String,
         @Path("user") user: String,
+        @Header("appcues-request-id") requestId: UUID,
         @Body activity: RequestBody
     ): QualifyResponse
 

@@ -14,6 +14,7 @@ import com.squareup.moshi.JsonDataException
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.HttpException
+import java.util.UUID
 
 internal class RetrofitAppcuesRemoteSource(
     private val appcuesService: AppcuesService,
@@ -48,11 +49,12 @@ internal class RetrofitAppcuesRemoteSource(
             )
         }
 
-    override suspend fun qualify(userId: String, activityJson: String): ResultOf<QualifyResponse, RemoteError> =
+    override suspend fun qualify(userId: String, requestId: UUID, activityJson: String): ResultOf<QualifyResponse, RemoteError> =
         request {
             appcuesService.qualify(
                 account = accountId,
                 user = userId,
+                requestId = requestId,
                 activity = activityJson.toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
             )
         }

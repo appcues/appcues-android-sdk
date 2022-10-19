@@ -50,7 +50,7 @@ internal class ExperienceLifecycleTracker(
                         if (it.isFirst) {
                             // update this value for auto-properties
                             storage.lastContentShownAt = Date()
-                            trackLifecycleEvent(ExperienceStarted(it.experience))
+                            trackLifecycleEvent(ExperienceStarted(it.experience), SdkMetrics.trackRender(it.experience.requestId))
                         }
                         trackLifecycleEvent(StepSeen(it.experience, it.flatStepIndex))
                     }
@@ -87,8 +87,10 @@ internal class ExperienceLifecycleTracker(
         }
     }
 
-    private fun trackLifecycleEvent(event: ExperienceLifecycleEvent) {
-        analyticsTracker.track(event.name, event.properties, interactive = false, isInternal = true)
+    private fun trackLifecycleEvent(event: ExperienceLifecycleEvent, additionalProperties: Map<String, Any> = emptyMap()) {
+        val properties = event.properties.toMutableMap()
+        properties.putAll(additionalProperties)
+        analyticsTracker.track(event.name, properties, interactive = false, isInternal = true)
     }
 
     private fun State.shouldTrack(): Boolean =

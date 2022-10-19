@@ -224,6 +224,7 @@ private fun Map<String, Any>.getInteractionData(): Map<String, Any?> {
     this[ExperienceLifecycleEvent.INTERACTION_DATA_KEY].let {
         if (it is ExperienceStepFormState || it == null) return mapOf()
 
+        @Suppress("UNCHECKED_CAST")
         return it as Map<String, Any>
     }
 }

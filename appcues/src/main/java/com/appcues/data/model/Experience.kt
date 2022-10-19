@@ -13,6 +13,7 @@ internal data class Experience(
     val publishedAt: Long?,
     val experiment: Experiment?,
     val completionActions: List<ExperienceAction>,
+    val requestId: UUID? = null,
 ) {
 
     // a unique identifier for this instance of the Experience, for comparison purposes, in the
