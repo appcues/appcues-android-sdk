@@ -144,11 +144,11 @@ internal class AppcuesRepository(
         if (isCurrent) {
             // if we are processing the current item (last item in queue) - then use the /qualify
             // endpoint and optionally get back qualified experiences to render
-            val qualifyResult = appcuesRemoteSource.qualify(activity.userId, activity.data)
+            val qualifyResult = appcuesRemoteSource.qualify(activity.userId, activity.requestId, activity.data)
 
             qualifyResult.doIfSuccess { response ->
                 val priority: ExperiencePriority = if (response.qualificationReason == "screen_view") LOW else NORMAL
-                experiences += response.experiences.map { experienceMapper.map(it, priority, response.experiments) }
+                experiences += response.experiences.map { experienceMapper.map(it, priority, response.experiments, activity.requestId) }
             }
 
             qualifyResult.doIfFailure {

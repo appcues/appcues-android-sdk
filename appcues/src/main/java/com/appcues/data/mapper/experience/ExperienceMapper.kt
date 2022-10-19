@@ -41,6 +41,7 @@ internal class ExperienceMapper(
         from: ExperienceResponse,
         priority: ExperiencePriority = NORMAL,
         experiments: List<ExperimentResponse>? = null,
+        requestId: UUID? = null,
     ): Experience {
         val experienceTraits = from.traits.map { it to EXPERIENCE }
         return Experience(
@@ -55,7 +56,8 @@ internal class ExperienceMapper(
             completionActions = arrayListOf<ExperienceAction>().apply {
                 from.redirectUrl?.let { add(LinkAction(it, scope.get())) }
                 from.nextContentId?.let { add(LaunchExperienceAction(it)) }
-            }
+            },
+            requestId = requestId,
         )
     }
 

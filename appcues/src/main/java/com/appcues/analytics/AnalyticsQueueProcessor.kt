@@ -7,6 +7,7 @@ import com.appcues.data.remote.request.ActivityRequest
 import com.appcues.data.remote.request.EventRequest
 import com.appcues.ui.ExperienceRenderer
 import kotlinx.coroutines.launch
+import java.util.Date
 import java.util.Timer
 import java.util.TimerTask
 import kotlin.concurrent.schedule
@@ -49,7 +50,7 @@ internal class AnalyticsQueueProcessor(
             analyticsQueueScheduler.cancel()
             // add new activity to pending activities and try to send all as a merged activity request
             pendingActivity.add(activity)
-            flushPendingActivity()
+            flushPendingActivity(activity.timestamp)
         }
     }
 
@@ -59,7 +60,7 @@ internal class AnalyticsQueueProcessor(
             // send all pending activities as a merged activity request
             flushPendingActivity()
             // then send another one for our newer activity
-            send(activity)
+            send(activity, activity.timestamp)
         }
     }
 
@@ -71,10 +72,10 @@ internal class AnalyticsQueueProcessor(
         }
     }
 
-    private fun flushPendingActivity() {
+    private fun flushPendingActivity(time: Date? = null) {
         pendingActivity.merge()
             .let {
-                if (it != null) send(it)
+                if (it != null) send(it, time)
             }.also {
                 pendingActivity.clear()
             }
@@ -98,7 +99,8 @@ internal class AnalyticsQueueProcessor(
         return activity.copy(events = events, profileUpdate = profileUpdate)
     }
 
-    private fun send(activity: ActivityRequest) {
+    private fun send(activity: ActivityRequest, time: Date?) {
+        SdkMetrics.tracked(activity.requestId, time)
         appcuesCoroutineScope.launch {
             // this will respond with qualified experiences, if applicable
             repository.trackActivity(activity).also {

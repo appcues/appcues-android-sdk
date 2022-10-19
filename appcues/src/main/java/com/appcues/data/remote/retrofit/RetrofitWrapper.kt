@@ -1,10 +1,13 @@
 package com.appcues.data.remote.retrofit
 
 import com.appcues.BuildConfig
+import com.appcues.analytics.SdkMetrics
 import com.appcues.data.MoshiConfiguration
 import okhttp3.HttpUrl
 import okhttp3.Interceptor
+import okhttp3.Interceptor.Chain
 import okhttp3.OkHttpClient
+import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
@@ -32,6 +35,7 @@ internal class RetrofitWrapper(
                 it.addInterceptor(getHttpLoggingInterceptor())
             }
         }
+            .addInterceptor(MetricsInterceptor())
             .readTimeout(READ_TIMEOUT_SECONDS, SECONDS)
             .build()
 
@@ -46,5 +50,21 @@ internal class RetrofitWrapper(
         return HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
+    }
+}
+
+internal class MetricsInterceptor: Interceptor {
+
+    override fun intercept(chain: Chain): Response {
+        val request = chain.request()
+        val requestId = request.header("appcues-request-id")
+        val requestBuilder = request
+            .newBuilder()
+            .method(request.method, request.body)
+            .removeHeader("appcues-request-id")
+        SdkMetrics.requested(requestId)
+        val response = chain.proceed(requestBuilder.build())
+        SdkMetrics.responded(requestId)
+        return response
     }
 }
