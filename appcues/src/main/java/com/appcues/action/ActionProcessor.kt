@@ -5,6 +5,7 @@ import com.appcues.AppcuesCoroutineScope
 import com.appcues.action.appcues.StepInteractionAction
 import com.appcues.action.appcues.StepInteractionAction.StepInteractionData
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
@@ -13,25 +14,26 @@ import org.koin.core.scope.Scope
 
 // Responsible for queueing up any ExperienceActions to run in sequential order,
 // to allow for things like closing current experience + launching a new experience, for example.
-internal class ActionProcessor(
-    override val scope: Scope,
-    private val actionQueue: ActionQueue
-) : KoinScopeComponent {
+internal class ActionProcessor(override val scope: Scope) : KoinScopeComponent {
 
     // lazy initialization injection to avoid circular dependency
     private val appcues: Appcues by inject()
     private val appcuesCoroutineScope: AppcuesCoroutineScope by inject()
 
+    private val actionQueue = Channel<ExperienceAction>(Channel.UNLIMITED)
+
     init {
         appcuesCoroutineScope.launch {
-            for (action in actionQueue.queue) {
+            for (action in actionQueue) {
                 action.execute(appcues)
             }
         }
     }
 
     fun process(actions: List<ExperienceAction>) {
-        transformQueue(actions).send()
+        appcuesCoroutineScope.launch {
+            transformQueue(actions).send()
+        }
     }
 
     // second process with extra parameters is used by the viewModel to communicate
@@ -49,7 +51,7 @@ internal class ActionProcessor(
     }
 
     private fun List<ExperienceAction>.send() {
-        actionQueue.enqueue(this)
+        appcuesCoroutineScope.launch { forEach { actionQueue.send(it) } }
     }
 
     private fun transformQueue(actions: List<ExperienceAction>) = actions.fold(actions) { currentQueue, action ->
