@@ -120,6 +120,7 @@ internal sealed class ExperiencePrimitive(
         val dataType: ComponentDataType = TEXT,
         val textFieldStyle: ComponentStyle = ComponentStyle(),
         val cursorColor: ComponentColor? = null,
+        val attributeName: String? = null,
     ) : ExperiencePrimitive(id, style) {
 
         override val textDescription: String = label.textDescription
@@ -142,6 +143,7 @@ internal sealed class ExperiencePrimitive(
         val selectedColor: ComponentColor? = null,
         val unselectedColor: ComponentColor? = null,
         val accentColor: ComponentColor? = null,
+        val attributeName: String? = null,
     ) : ExperiencePrimitive(id, style) {
 
         data class OptionItem(

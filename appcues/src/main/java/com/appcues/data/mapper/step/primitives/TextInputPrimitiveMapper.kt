@@ -19,6 +19,7 @@ internal fun TextInputPrimitiveResponse.mapTextInputPrimitive() = TextInputPrimi
     dataType = mapComponentDataType(dataType),
     textFieldStyle = textFieldStyle.mapComponentStyle(),
     cursorColor = cursorColor?.mapComponentColor(),
+    attributeName = attributeName,
 )
 
 private fun mapComponentDataType(value: String?) = when (value) {

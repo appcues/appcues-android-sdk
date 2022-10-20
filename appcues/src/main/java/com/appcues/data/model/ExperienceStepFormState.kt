@@ -75,10 +75,11 @@ internal class ExperienceStepFormState {
 
 internal sealed class ExperienceStepFormItemState(
     open val index: Int,
-    open val id: UUID,
-    open val type: String,
-    open val label: String,
-    open val isRequired: Boolean,
+    val id: UUID,
+    val type: String,
+    val label: String,
+    val isRequired: Boolean,
+    val attributeName: String?,
 ) {
 
     val isComplete: Boolean
@@ -118,7 +119,14 @@ internal sealed class ExperienceStepFormItemState(
     class TextInputFormItemState(
         override val index: Int,
         val primitive: TextInputPrimitive,
-    ) : ExperienceStepFormItemState(index, primitive.id, "textInput", primitive.label.text, primitive.required) {
+    ) : ExperienceStepFormItemState(
+        index = index,
+        id = primitive.id,
+        type = "textInput",
+        label = primitive.label.text,
+        isRequired = primitive.required,
+        attributeName = primitive.attributeName
+    ) {
 
         var text = mutableStateOf("")
 
@@ -135,7 +143,8 @@ internal sealed class ExperienceStepFormItemState(
         id = primitive.id,
         type = "optionSelect",
         label = primitive.label.text,
-        isRequired = primitive.minSelections > 0u
+        isRequired = primitive.minSelections > 0u,
+        attributeName = primitive.attributeName,
     ) {
 
         var values = mutableStateOf(setOf<String>())

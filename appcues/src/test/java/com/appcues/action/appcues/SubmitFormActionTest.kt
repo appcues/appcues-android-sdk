@@ -73,6 +73,37 @@ internal class SubmitFormActionTest : AppcuesScopeTest {
         verify { analyticsTracker.track(analyticEvent.name, analyticEvent.properties, interactive = false, isInternal = true) }
     }
 
+    @Test
+    fun `submit-form SHOULD track custom profile attribute WHEN attributeName is set`() = runTest {
+        // GIVEN
+        val textInput = TextInputPrimitive(
+            id = UUID.randomUUID(),
+            label = TextPrimitive(id = UUID.randomUUID(), text = "label"),
+            required = true,
+            attributeName = "myCustomAttribute"
+        )
+        val formState = formState(textInput)
+        val experience = experience(formState)
+        val state: State = mockk(relaxed = true) {
+            every { this@mockk.currentExperience } answers { experience }
+            every { this@mockk.currentStepIndex } answers { 0 }
+        }
+        val stateMachine: StateMachine = mockk(relaxed = true) {
+            every { this@mockk.state } answers { state }
+        }
+        val analyticsTracker: AnalyticsTracker = mockk(relaxed = true)
+        val appcues: Appcues = mockk(relaxed = true)
+        val action = SubmitFormAction(emptyMap(), stateMachine, analyticsTracker)
+        val analyticEvent = StepInteraction(experience, 0, FORM_SUBMITTED)
+
+        // WHEN
+        formState.setValue(textInput, "text")
+        action.execute(appcues)
+
+        // THEN
+        verify { analyticsTracker.identify(mapOf("_appcuesForm_label" to "text", "myCustomAttribute" to "text"), interactive = false) }
+    }
+
     // seems an odd test here, validating that it submits on invalid input - but this is confirming the
     // analytics behavior on execute - which is independent of the form validation that happens during
     // the transformQueue call.  transformQueue is tested later.  It would only be expected to get to
