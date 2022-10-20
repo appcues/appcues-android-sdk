@@ -45,6 +45,7 @@ internal data class SdkMetrics(
                 val respondedAt = item?.respondedAt
                 val renderStartAt = item?.renderStartAt
 
+                @Suppress("ComplexCondition")
                 if (trackedAt != null && requestedAt != null && respondedAt != null && renderStartAt != null) {
                     val renderedAt = Date()
 

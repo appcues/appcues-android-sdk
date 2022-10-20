@@ -53,7 +53,7 @@ internal class RetrofitWrapper(
     }
 }
 
-internal class MetricsInterceptor: Interceptor {
+internal class MetricsInterceptor : Interceptor {
 
     override fun intercept(chain: Chain): Response {
         val request = chain.request()
