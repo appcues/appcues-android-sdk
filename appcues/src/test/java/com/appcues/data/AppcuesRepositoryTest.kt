@@ -109,7 +109,7 @@ class AppcuesRepositoryTest {
             experiences = listOf(mockk(), mockk()),
             performedQualification = true,
             qualificationReason = "screen_view",
-            experiments = emptyMap(),
+            experiments = null,
         )
         coEvery { appcuesRemoteSource.qualify(any(), any()) } returns Success(qualifyResponse)
         val mappedExperience = mockk<Experience>()
@@ -247,7 +247,7 @@ class AppcuesRepositoryTest {
             experiences = listOf(mockk(), mockk()),
             performedQualification = true,
             qualificationReason = "screen_view",
-            experiments = emptyMap(),
+            experiments = null,
         )
         coEvery { appcuesRemoteSource.qualify(any(), any()) } returns Success(qualifyResponse)
         val mappedExperience = mockk<Experience>()
@@ -268,7 +268,7 @@ class AppcuesRepositoryTest {
             experiences = listOf(mockk(), mockk()),
             performedQualification = true,
             qualificationReason = "event_trigger",
-            experiments = emptyMap(),
+            experiments = null,
         )
         coEvery { appcuesRemoteSource.qualify(any(), any()) } returns Success(qualifyResponse)
         val mappedExperience = mockk<Experience>()

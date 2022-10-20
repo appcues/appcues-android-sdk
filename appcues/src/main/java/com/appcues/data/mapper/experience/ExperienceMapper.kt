@@ -40,7 +40,7 @@ internal class ExperienceMapper(
     fun map(
         from: ExperienceResponse,
         priority: ExperiencePriority = NORMAL,
-        experiments: Map<String, ExperimentResponse> = emptyMap()
+        experiments: List<ExperimentResponse>? = null,
     ): Experience {
         val experienceTraits = from.traits.map { it to EXPERIENCE }
         return Experience(
@@ -51,7 +51,7 @@ internal class ExperienceMapper(
             priority = priority,
             type = from.type,
             publishedAt = from.publishedAt,
-            experiment = experiments.getExperiment(from.experimentId),
+            experiment = experiments?.getExperiment(from.experimentId),
             completionActions = arrayListOf<ExperienceAction>().apply {
                 from.redirectUrl?.let { add(LinkAction(it, scope.get())) }
                 from.nextContentId?.let { add(LaunchExperienceAction(it)) }
@@ -89,10 +89,10 @@ internal class ExperienceMapper(
         return filterIsInstance<PresentingTrait>().firstOrNull() ?: DefaultPresentingTrait(null, scope, context)
     }
 
-    private fun Map<String, ExperimentResponse>.getExperiment(experimentId: String?) =
+    private fun List<ExperimentResponse>.getExperiment(experimentId: String?) =
         experimentId?.let { id ->
-            this[id]?.let { experimentResponse ->
-                Experiment(id, experimentResponse.group)
+            this.firstOrNull { it.experimentId == id }?.let { experimentResponse ->
+                Experiment(experimentResponse.experimentId, experimentResponse.group)
             }
         }
 }
