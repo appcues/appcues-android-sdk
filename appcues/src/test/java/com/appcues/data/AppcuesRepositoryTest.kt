@@ -111,16 +111,16 @@ class AppcuesRepositoryTest {
             qualificationReason = "screen_view",
             experiments = null,
         )
-        coEvery { appcuesRemoteSource.qualify(any(), any()) } returns Success(qualifyResponse)
+        coEvery { appcuesRemoteSource.qualify(any(), request.requestId, any()) } returns Success(qualifyResponse)
         val mappedExperience = mockk<Experience>()
-        coEvery { experienceMapper.map(any(), any()) } returns mappedExperience
+        coEvery { experienceMapper.map(any(), any(), null, request.requestId) } returns mappedExperience
 
         // WHEN
         val result = repository.trackActivity(request)
 
         // THEN
         coVerify { appcuesLocalSource.saveActivity(any()) }
-        coVerify { appcuesRemoteSource.qualify("userId", any()) }
+        coVerify { appcuesRemoteSource.qualify("userId", request.requestId, any()) }
         assertThat(result.count()).isEqualTo(2)
         assertThat(result.first()).isEqualTo(mappedExperience)
         coVerify { appcuesLocalSource.removeActivity(any()) }
@@ -144,7 +144,7 @@ class AppcuesRepositoryTest {
     fun `trackActivity SHOULD retain cache item WHEN the qualify request fails with a NetworkError`() = runTest {
         // GIVEN
         val request = ActivityRequest(accountId = "123", userId = "userId")
-        coEvery { appcuesRemoteSource.qualify(any(), any()) } returns Failure(NetworkError())
+        coEvery { appcuesRemoteSource.qualify(any(), request.requestId, any()) } returns Failure(NetworkError())
 
         // WHEN
         repository.trackActivity(request)
@@ -158,7 +158,7 @@ class AppcuesRepositoryTest {
     fun `trackActivity SHOULD NOT retain cache item WHEN the qualify request fails with an HTTPError`() = runTest {
         // GIVEN
         val request = ActivityRequest(accountId = "123", userId = "userId")
-        coEvery { appcuesRemoteSource.qualify(any(), any()) } returns Failure(HttpError())
+        coEvery { appcuesRemoteSource.qualify(any(), request.requestId, any()) } returns Failure(HttpError())
 
         // WHEN
         repository.trackActivity(request)
@@ -249,15 +249,15 @@ class AppcuesRepositoryTest {
             qualificationReason = "screen_view",
             experiments = null,
         )
-        coEvery { appcuesRemoteSource.qualify(any(), any()) } returns Success(qualifyResponse)
+        coEvery { appcuesRemoteSource.qualify(any(), request.requestId, any()) } returns Success(qualifyResponse)
         val mappedExperience = mockk<Experience>()
-        coEvery { experienceMapper.map(any(), any()) } returns mappedExperience
+        coEvery { experienceMapper.map(any(), any(), null, request.requestId) } returns mappedExperience
 
         // WHEN
         repository.trackActivity(request)
 
         // THEN
-        coVerify { experienceMapper.map(any(), LOW) }
+        coVerify { experienceMapper.map(any(), LOW, null, request.requestId) }
     }
 
     @Test
@@ -270,15 +270,15 @@ class AppcuesRepositoryTest {
             qualificationReason = "event_trigger",
             experiments = null,
         )
-        coEvery { appcuesRemoteSource.qualify(any(), any()) } returns Success(qualifyResponse)
+        coEvery { appcuesRemoteSource.qualify(any(), request.requestId, any()) } returns Success(qualifyResponse)
         val mappedExperience = mockk<Experience>()
-        coEvery { experienceMapper.map(any(), any()) } returns mappedExperience
+        coEvery { experienceMapper.map(any(), any(), null, request.requestId) } returns mappedExperience
 
         // WHEN
         repository.trackActivity(request)
 
         // THEN
-        coVerify { experienceMapper.map(any(), NORMAL) }
+        coVerify { experienceMapper.map(any(), NORMAL, null, request.requestId) }
     }
 
     // test items already in processing don't get included again
