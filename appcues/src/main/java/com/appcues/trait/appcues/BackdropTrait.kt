@@ -17,6 +17,7 @@ import com.appcues.data.model.getConfigColor
 import com.appcues.data.model.styling.ComponentColor
 import com.appcues.trait.AppcuesTraitAnimatedVisibility
 import com.appcues.trait.BackdropDecoratingTrait
+import com.appcues.ui.composables.rememberAppcuesBackdropVisibility
 import com.appcues.ui.extensions.getColor
 
 internal class BackdropTrait(
@@ -33,6 +34,7 @@ internal class BackdropTrait(
     @Composable
     override fun BoxScope.Backdrop() {
         AppcuesTraitAnimatedVisibility(
+            visibleState = rememberAppcuesBackdropVisibility(),
             enter = enterTransition(),
             exit = exitTransition(),
         ) {

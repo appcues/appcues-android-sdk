@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.trait.AppcuesTraitAnimatedVisibility
+import com.appcues.ui.composables.rememberAppcuesContentVisibility
 import com.appcues.ui.extensions.getPaddings
 import com.appcues.ui.extensions.modalStyle
 import com.appcues.ui.utils.AppcuesWindowInfo
@@ -59,6 +60,7 @@ internal fun BottomSheetModal(
             contentAlignment = Alignment.BottomCenter
         ) {
             AppcuesTraitAnimatedVisibility(
+                visibleState = rememberAppcuesContentVisibility(),
                 enter = enterAnimation.value,
                 exit = exitAnimation.value,
             ) {

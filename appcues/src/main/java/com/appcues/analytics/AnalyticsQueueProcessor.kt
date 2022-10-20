@@ -105,7 +105,13 @@ internal class AnalyticsQueueProcessor(
             // this will respond with qualified experiences, if applicable
             repository.trackActivity(activity).also {
                 // we will try to show an experience from this list
-                experienceRenderer.show(it)
+                if (it.isNotEmpty()) {
+                    experienceRenderer.show(it)
+                } else {
+                    // we know we are not rendering any experiences, so no metrics needed
+                    // can proactively clear this request out
+                    SdkMetrics.remove(activity.requestId)
+                }
             }
         }
     }

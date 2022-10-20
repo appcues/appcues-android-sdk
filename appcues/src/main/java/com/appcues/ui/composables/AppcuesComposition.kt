@@ -67,6 +67,13 @@ private fun MainSurface(
                 value?.let { ComposeLastRenderingState(it) }
             }
 
+            LaunchOnShowAnimationCompleted {
+                val currentState = state.value
+                if (currentState is Rendering) {
+                    currentState.presentationComplete.invoke()
+                }
+            }
+
             // will run when transition from visible to gone is completed
             LaunchOnHideAnimationCompleted {
                 // if state is dismissing then finish activity

@@ -22,10 +22,12 @@ internal fun rememberLastRenderingState(state: State<UIState>) = remember { muta
             if (uiState is Rendering) {
                 // if UIState is rendering then we set new value and show content
                 isContentVisible.targetState = true
+                isBackdropVisible.targetState = true
                 uiState
             } else {
                 // else we keep the same value and hide content to trigger dismissing animation
                 isContentVisible.targetState = false
+                isBackdropVisible.targetState = false
                 value
             }
         }
@@ -57,6 +59,8 @@ internal fun rememberAppcuesPaginationState() = remember<State<AppcuesPagination
 
 internal val isContentVisible = MutableTransitionState(false)
 
+internal val isBackdropVisible = MutableTransitionState(false)
+
 @Composable
 internal fun LaunchOnHideAnimationCompleted(block: () -> Unit) {
     with(remember { mutableStateOf(isContentVisible) }.value) {
@@ -67,9 +71,22 @@ internal fun LaunchOnHideAnimationCompleted(block: () -> Unit) {
     }
 }
 
+@Composable
+internal fun LaunchOnShowAnimationCompleted(block: () -> Unit) {
+    with(remember { mutableStateOf(isContentVisible) }.value) {
+        // if show animation is completed
+        if (isIdle && currentState) {
+            block()
+        }
+    }
+}
+
 // we could make this public to give more flexibility in the future
 @Composable
 internal fun rememberAppcuesContentVisibility() = remember { isContentVisible }
+
+@Composable
+internal fun rememberAppcuesBackdropVisibility() = remember { isBackdropVisible }
 
 @Composable
 internal fun rememberSystemMarginsState(): State<PaddingValues> {
