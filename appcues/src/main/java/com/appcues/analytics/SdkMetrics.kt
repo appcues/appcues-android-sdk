@@ -7,6 +7,7 @@ internal data class SdkMetrics(
     private var trackedAt: Date? = null,
     private var requestedAt: Date? = null,
     private var respondedAt: Date? = null,
+    private var renderStartAt: Date? = null,
 ) {
     companion object {
         private val metrics = hashMapOf<UUID, SdkMetrics>()
@@ -27,6 +28,10 @@ internal data class SdkMetrics(
             id?.let { metrics[UUID.fromString(it)]?.respondedAt = time }
         }
 
+        fun renderStart(id: UUID?, time: Date = Date()) {
+            id?.let { metrics[it]?.renderStartAt = time }
+        }
+
         fun remove(id: UUID) {
             metrics.remove(id)
         }
@@ -38,21 +43,24 @@ internal data class SdkMetrics(
                 val trackedAt = item?.trackedAt
                 val requestedAt = item?.requestedAt
                 val respondedAt = item?.respondedAt
+                val renderStartAt = item?.renderStartAt
 
-                if (trackedAt != null && requestedAt != null && respondedAt != null) {
+                if (trackedAt != null && requestedAt != null && respondedAt != null && renderStartAt != null) {
                     val renderedAt = Date()
 
-                    val timeTotal = (renderedAt.time - trackedAt.time).toInt()
-                    val timeAfterResponse = (renderedAt.time - respondedAt.time).toInt()
-                    val timeNetwork = (respondedAt.time - requestedAt.time).toInt()
                     val timeBeforeRequest = (requestedAt.time - trackedAt.time).toInt()
+                    val timeNetwork = (respondedAt.time - requestedAt.time).toInt()
+                    val timeProcessingResponse = (renderStartAt.time - respondedAt.time).toInt()
+                    val timePresenting = (renderedAt.time - renderStartAt.time).toInt()
+                    val timeTotal = (renderedAt.time - trackedAt.time).toInt()
 
                     remove(it)
 
                     properties["_sdkMetrics"] = mapOf(
                         "timeBeforeRequest" to timeBeforeRequest,
                         "timeNetwork" to timeNetwork,
-                        "timeAfterResponse" to timeAfterResponse,
+                        "timeProcessingResponse" to timeProcessingResponse,
+                        "timePresenting" to timePresenting,
                         "timeTotal" to timeTotal,
                     )
                 }

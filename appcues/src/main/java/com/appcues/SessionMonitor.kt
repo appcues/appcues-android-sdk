@@ -5,6 +5,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.appcues.analytics.AnalyticsEvent
 import com.appcues.analytics.AnalyticsTracker
+import com.appcues.analytics.SdkMetrics
 import com.appcues.logging.Logcues
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
@@ -82,5 +83,8 @@ internal class SessionMonitor(
 
         // ensure any pending in-memory analytics get processed asap
         analyticsTracker.flushPendingActivity()
+
+        // clear out any pending metrics upon backgrounding
+        SdkMetrics.clear()
     }
 }

@@ -6,6 +6,7 @@ import com.appcues.AppcuesCoroutineScope
 import com.appcues.action.ActionProcessor
 import com.appcues.action.ExperienceAction
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType
+import com.appcues.analytics.SdkMetrics
 import com.appcues.data.model.StepContainer
 import com.appcues.statemachine.Action.Pause
 import com.appcues.statemachine.Action.Resume
@@ -38,7 +39,8 @@ internal class AppcuesViewModel(
             val stepContainer: StepContainer,
             val position: Int,
             val flatStepIndex: Int,
-            val isPreview: Boolean
+            val isPreview: Boolean,
+            val presentationComplete: (() -> Unit),
         ) : UIState()
 
         data class Dismissing(val continueAction: () -> Unit) : UIState()
@@ -63,9 +65,9 @@ internal class AppcuesViewModel(
                 when (result) {
                     is BeginningStep -> {
                         result.toRenderingState()?.let {
+                            SdkMetrics.renderStart(result.experience.requestId)
                             _uiState.value = it
                         }
-                        result.presentationComplete.invoke()
                     }
                     is EndingStep -> {
                         // dismiss will trigger exit animations and finish activity
@@ -105,7 +107,7 @@ internal class AppcuesViewModel(
             // if both are valid ids we return Rendering else null
             if (containerId != null && stepIndexInContainer != null) {
                 // returns rendering state
-                Rendering(id, stepContainers[containerId], stepIndexInContainer, flatStepIndex, published.not())
+                Rendering(id, stepContainers[containerId], stepIndexInContainer, flatStepIndex, published.not(), presentationComplete)
             } else null
         }
     }
