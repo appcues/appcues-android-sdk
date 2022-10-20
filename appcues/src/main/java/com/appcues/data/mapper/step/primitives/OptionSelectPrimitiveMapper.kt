@@ -38,7 +38,8 @@ internal fun OptionSelectPrimitiveResponse.mapOptionSelectPrimitive(): OptionSel
         placeholder = placeholder?.mapPrimitive(),
         selectedColor = selectedColor?.mapComponentColor(),
         unselectedColor = unselectedColor?.mapComponentColor(),
-        accentColor = accentColor?.mapComponentColor()
+        accentColor = accentColor?.mapComponentColor(),
+        attributeName = attributeName,
     )
 }
 

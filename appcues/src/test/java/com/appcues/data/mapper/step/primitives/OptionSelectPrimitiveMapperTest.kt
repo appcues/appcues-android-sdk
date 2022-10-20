@@ -33,6 +33,7 @@ class OptionSelectPrimitiveMapperTest {
             selectedColor = null,
             unselectedColor = null,
             accentColor = null,
+            attributeName = null,
         )
 
         // WHEN
@@ -67,6 +68,7 @@ class OptionSelectPrimitiveMapperTest {
             selectedColor = null,
             unselectedColor = null,
             accentColor = null,
+            attributeName = null,
         )
 
         // WHEN

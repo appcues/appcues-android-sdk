@@ -146,6 +146,16 @@ internal sealed class ExperienceLifecycleEvent(
         }
 }
 
-internal fun ExperienceStepFormState.formattedAsProfileUpdate() = formItems.associate {
-    "_appcuesForm_${it.label.toSlug()}" to it.value
+internal fun ExperienceStepFormState.formattedAsProfileUpdate(): Map<String, Any> {
+    val profileUpdate = hashMapOf<String, Any>()
+
+    formItems.forEach {
+        profileUpdate["_appcuesForm_${it.label.toSlug()}"] = it.value
+
+        if (it.attributeName != null) {
+            profileUpdate[it.attributeName] = it.value
+        }
+    }
+
+    return profileUpdate
 }
