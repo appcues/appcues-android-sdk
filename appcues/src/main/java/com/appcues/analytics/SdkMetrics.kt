@@ -10,6 +10,9 @@ internal data class SdkMetrics(
     private var renderStartAt: Date? = null,
 ) {
     companion object {
+
+        const val METRICS_PROPERTY = "_sdkMetrics"
+
         private val metrics = hashMapOf<UUID, SdkMetrics>()
 
         fun clear() {
@@ -57,7 +60,7 @@ internal data class SdkMetrics(
 
                     remove(it)
 
-                    properties["_sdkMetrics"] = mapOf(
+                    properties[METRICS_PROPERTY] = mapOf(
                         "timeBeforeRequest" to timeBeforeRequest,
                         "timeNetwork" to timeNetwork,
                         "timeProcessingResponse" to timeProcessingResponse,

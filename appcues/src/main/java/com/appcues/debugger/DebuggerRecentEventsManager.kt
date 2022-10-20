@@ -9,6 +9,7 @@ import com.appcues.analytics.ActivityRequestBuilder
 import com.appcues.analytics.AnalyticsEvent
 import com.appcues.analytics.AutoPropertyDecorator
 import com.appcues.analytics.ExperienceLifecycleEvent
+import com.appcues.analytics.SdkMetrics
 import com.appcues.analytics.TrackingData
 import com.appcues.data.model.ExperienceStepFormState
 import com.appcues.data.remote.request.ActivityRequest
@@ -118,6 +119,7 @@ internal class DebuggerRecentEventsManager(
                             properties = event.attributes
                                 .filterOutScreenProperties(type)
                                 .filterOutAutoProperties()
+                                .filterOutMetricsProperties()
                                 .filterOutInteractionData()
                                 .toSortedList(),
                         ),
@@ -137,6 +139,12 @@ internal class DebuggerRecentEventsManager(
                             title = contextResources.getString(R.string.appcues_debugger_event_details_identity_auto_properties_title),
                             properties = event.attributes
                                 .getAutoProperties()
+                                .toSortedList()
+                        ),
+                        DebuggerEventItemPropertySection(
+                            title = contextResources.getString(R.string.appcues_debugger_event_details_sdk_metrics_properties_title),
+                            properties = event.attributes
+                                .getMetricsProperties()
                                 .toSortedList()
                         )
                     )
@@ -203,9 +211,18 @@ private fun Map<String, Any>.filterOutAutoProperties(): Map<String, Any> {
     return filterNot { it.key == AutoPropertyDecorator.IDENTITY_PROPERTY }
 }
 
+private fun Map<String, Any>.filterOutMetricsProperties(): Map<String, Any> {
+    return filterNot { it.key == SdkMetrics.METRICS_PROPERTY }
+}
+
 private fun Map<String, Any>.getAutoProperties(): Map<String, Any> {
     @Suppress("UNCHECKED_CAST")
     return (this[AutoPropertyDecorator.IDENTITY_PROPERTY] as Map<String, Any>?) ?: mapOf()
+}
+
+private fun Map<String, Any>.getMetricsProperties(): Map<String, Any> {
+    @Suppress("UNCHECKED_CAST")
+    return (this[SdkMetrics.METRICS_PROPERTY] as Map<String, Any>?) ?: mapOf()
 }
 
 private fun Map<String, Any>.filterOutInteractionData(): Map<String, Any> {
