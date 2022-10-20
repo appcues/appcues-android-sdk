@@ -23,7 +23,6 @@ internal class AutoPropertyDecorator(
 ) {
 
     companion object {
-
         const val IDENTITY_PROPERTY = "_identity"
         const val UPDATED_AT_PROPERTY = "_updatedAt"
     }
