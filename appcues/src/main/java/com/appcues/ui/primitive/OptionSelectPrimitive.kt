@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import com.appcues.R
 import com.appcues.data.model.ExperiencePrimitive
 import com.appcues.data.model.ExperiencePrimitive.OptionSelectPrimitive
+import com.appcues.data.model.ExperienceStepFormState
 import com.appcues.data.model.styling.ComponentControlPosition
 import com.appcues.data.model.styling.ComponentControlPosition.BOTTOM
 import com.appcues.data.model.styling.ComponentControlPosition.HIDDEN
@@ -63,7 +64,6 @@ internal fun OptionSelectPrimitive.Compose(modifier: Modifier) {
         register(this@Compose)
     }
     val showError = formState.shouldShowError(this)
-    val errorTint = if (showError) errorLabel?.style?.foregroundColor?.getColor(isSystemInDarkTheme()) else null
 
     // this avoids recalculating the label style unless the showError state changes
     val updatedLabel = remember(showError) {
@@ -78,54 +78,64 @@ internal fun OptionSelectPrimitive.Compose(modifier: Modifier) {
         // the form item label / question
         updatedLabel.Compose()
 
-        when {
-            selectMode == SINGLE && displayFormat == PICKER -> {
-                options.ComposePicker(
-                    selectedValues = formState.getValue(this@Compose),
-                    modifier = Modifier.styleBorder(pickerStyle ?: ComponentStyle(), isSystemInDarkTheme()),
-                    placeholder = placeholder,
-                    accentColor = accentColor?.getColor(isSystemInDarkTheme()),
-                ) {
-                    formState.setValue(this@Compose, it)
-                }
-            }
-            selectMode == SINGLE && displayFormat == NPS -> {
-                options.ComposeNPS(
-                    selectedValues = formState.getValue(this@Compose)
-                ) {
-                    formState.setValue(this@Compose, it)
-                }
-            }
-            displayFormat == HORIZONTAL_LIST -> {
-                Row(verticalAlignment = controlPosition.getVerticalAlignment() ?: Alignment.CenterVertically) {
-                    options.ComposeSelections(
-                        selectedValues = formState.getValue(this@Compose),
-                        selectMode = selectMode,
-                        controlPosition = controlPosition,
-                        optionSelectPrimitive = this@Compose,
-                        errorTint = errorTint,
-                    ) {
-                        formState.setValue(this@Compose, it)
-                    }
-                }
-            }
-            else -> { // VERTICAL_LIST case or a fallback (i.e. a PICKER but with multi-select, invalid)
-                Column(horizontalAlignment = controlPosition.getHorizontalAlignment() ?: Alignment.CenterHorizontally) {
-                    options.ComposeSelections(
-                        selectedValues = formState.getValue(this@Compose),
-                        selectMode = selectMode,
-                        controlPosition = controlPosition,
-                        optionSelectPrimitive = this@Compose,
-                        errorTint = errorTint,
-                    ) {
-                        formState.setValue(this@Compose, it)
-                    }
-                }
-            }
-        }
+        ComposeOptions(formState, showError)
 
         if (showError) {
             errorLabel?.Compose()
+        }
+    }
+}
+
+@Composable
+private fun OptionSelectPrimitive.ComposeOptions(
+    formState: ExperienceStepFormState,
+    showError: Boolean,
+) {
+    val errorTint = if (showError) errorLabel?.style?.foregroundColor?.getColor(isSystemInDarkTheme()) else null
+
+    when {
+        selectMode == SINGLE && displayFormat == PICKER -> {
+            options.ComposePicker(
+                selectedValues = formState.getValue(this@ComposeOptions),
+                modifier = Modifier.styleBorder(pickerStyle ?: ComponentStyle(), isSystemInDarkTheme()),
+                placeholder = placeholder,
+                accentColor = accentColor?.getColor(isSystemInDarkTheme()),
+            ) {
+                formState.setValue(this@ComposeOptions, it)
+            }
+        }
+        selectMode == SINGLE && displayFormat == NPS -> {
+            options.ComposeNPS(
+                selectedValues = formState.getValue(this@ComposeOptions)
+            ) {
+                formState.setValue(this@ComposeOptions, it)
+            }
+        }
+        displayFormat == HORIZONTAL_LIST -> {
+            Row(verticalAlignment = controlPosition.getVerticalAlignment() ?: Alignment.CenterVertically) {
+                options.ComposeSelections(
+                    selectedValues = formState.getValue(this@ComposeOptions),
+                    selectMode = selectMode,
+                    controlPosition = controlPosition,
+                    optionSelectPrimitive = this@ComposeOptions,
+                    errorTint = errorTint,
+                ) {
+                    formState.setValue(this@ComposeOptions, it)
+                }
+            }
+        }
+        else -> { // VERTICAL_LIST case or a fallback (i.e. a PICKER but with multi-select, invalid)
+            Column(horizontalAlignment = controlPosition.getHorizontalAlignment() ?: Alignment.CenterHorizontally) {
+                options.ComposeSelections(
+                    selectedValues = formState.getValue(this@ComposeOptions),
+                    selectMode = selectMode,
+                    controlPosition = controlPosition,
+                    optionSelectPrimitive = this@ComposeOptions,
+                    errorTint = errorTint,
+                ) {
+                    formState.setValue(this@ComposeOptions, it)
+                }
+            }
         }
     }
 }

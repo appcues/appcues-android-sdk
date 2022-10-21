@@ -39,7 +39,7 @@ import com.appcues.ui.extensions.toImageAsyncContentScale
 import com.appcues.ui.utils.rememberBlurHashDecoded
 
 @Composable
-internal fun ExperiencePrimitive.Compose(matchParentBox: BoxScope? = null,) {
+internal fun ExperiencePrimitive.Compose(matchParentBox: BoxScope? = null) {
     Box(
         modifier = Modifier.outerPrimitiveStyle(
             component = this,
