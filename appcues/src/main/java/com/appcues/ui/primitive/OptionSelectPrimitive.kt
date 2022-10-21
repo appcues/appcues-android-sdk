@@ -2,7 +2,9 @@ package com.appcues.ui.primitive
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -40,6 +42,7 @@ import com.appcues.data.model.styling.ComponentControlPosition.LEADING
 import com.appcues.data.model.styling.ComponentControlPosition.TOP
 import com.appcues.data.model.styling.ComponentControlPosition.TRAILING
 import com.appcues.data.model.styling.ComponentDisplayFormat.HORIZONTAL_LIST
+import com.appcues.data.model.styling.ComponentDisplayFormat.NPS
 import com.appcues.data.model.styling.ComponentDisplayFormat.PICKER
 import com.appcues.data.model.styling.ComponentSelectMode
 import com.appcues.data.model.styling.ComponentSelectMode.MULTIPLE
@@ -50,6 +53,9 @@ import com.appcues.ui.extensions.checkErrorStyle
 import com.appcues.ui.extensions.getColor
 import com.appcues.ui.extensions.getHorizontalAlignment
 import com.appcues.ui.extensions.styleBorder
+
+// the spacing between items horizontally and vertically in NPS layout
+private const val NPS_ITEM_SPACING = 10.0
 
 @Composable
 internal fun OptionSelectPrimitive.Compose(modifier: Modifier) {
@@ -79,6 +85,13 @@ internal fun OptionSelectPrimitive.Compose(modifier: Modifier) {
                     modifier = Modifier.styleBorder(pickerStyle ?: ComponentStyle(), isSystemInDarkTheme()),
                     placeholder = placeholder,
                     accentColor = accentColor?.getColor(isSystemInDarkTheme()),
+                ) {
+                    formState.setValue(this@Compose, it)
+                }
+            }
+            selectMode == SINGLE && displayFormat == NPS -> {
+                options.ComposeNPS(
+                    selectedValues = formState.getValue(this@Compose)
                 ) {
                     formState.setValue(this@Compose, it)
                 }
@@ -265,6 +278,42 @@ private fun List<OptionSelectPrimitive.OptionItem>.ComposePicker(
                 }) {
                     contentView.Compose()
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun List<OptionSelectPrimitive.OptionItem>.ComposeNPS(
+    selectedValues: Set<String>,
+    itemSelected: (String) -> Unit,
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(NPS_ITEM_SPACING.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        // (count + 1) / 2 --> will always give the midpoint rounded up if necessary
+        // normally this is 6 items in a row, in an 11 item NPS. 0-5 on first row, 6-10 on second row
+        this@ComposeNPS.chunked((this@ComposeNPS.count() + 1) / 2).forEach {
+            it.ComposeNPSRow(selectedValues = selectedValues, itemSelected = itemSelected)
+        }
+    }
+}
+
+@Composable
+private fun List<OptionSelectPrimitive.OptionItem>.ComposeNPSRow(
+    selectedValues: Set<String>,
+    itemSelected: (String) -> Unit,
+) {
+    Row(horizontalArrangement = Arrangement.spacedBy(NPS_ITEM_SPACING.dp)) {
+        this@ComposeNPSRow.forEach {
+            val selected = selectedValues.contains(it.value)
+            val content = if (selected) it.selectedContent ?: it.content else it.content
+            Box(modifier = Modifier.clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {
+                itemSelected(it.value)
+            }) {
+                content.Compose()
             }
         }
     }

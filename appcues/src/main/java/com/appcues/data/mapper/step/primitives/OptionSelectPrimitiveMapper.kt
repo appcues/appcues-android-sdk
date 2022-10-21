@@ -62,5 +62,6 @@ private fun mapComponentDisplayFormat(value: String?) = when (value) {
     "verticalList" -> ComponentDisplayFormat.VERTICAL_LIST
     "horizontalList" -> ComponentDisplayFormat.HORIZONTAL_LIST
     "picker" -> ComponentDisplayFormat.PICKER
+    "nps" -> ComponentDisplayFormat.NPS
     else -> ComponentDisplayFormat.VERTICAL_LIST
 }
