@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -54,9 +53,6 @@ import com.appcues.ui.extensions.checkErrorStyle
 import com.appcues.ui.extensions.getColor
 import com.appcues.ui.extensions.getHorizontalAlignment
 import com.appcues.ui.extensions.styleBorder
-
-// the spacing between items horizontally and vertically in NPS layout
-private const val NPS_ITEM_SPACING = 10.0
 
 @Composable
 internal fun OptionSelectPrimitive.Compose(modifier: Modifier) {
@@ -300,7 +296,6 @@ private fun List<OptionSelectPrimitive.OptionItem>.ComposeNPS(
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(NPS_ITEM_SPACING.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         // (count + 1) / 2 --> will always give the midpoint rounded up if necessary
@@ -316,7 +311,7 @@ private fun List<OptionSelectPrimitive.OptionItem>.ComposeNPSRow(
     selectedValues: Set<String>,
     itemSelected: (String) -> Unit,
 ) {
-    Row(horizontalArrangement = Arrangement.spacedBy(NPS_ITEM_SPACING.dp)) {
+    Row {
         this@ComposeNPSRow.forEach {
             val selected = selectedValues.contains(it.value)
             val content = if (selected) it.selectedContent ?: it.content else it.content
