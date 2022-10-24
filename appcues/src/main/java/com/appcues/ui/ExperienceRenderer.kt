@@ -128,7 +128,7 @@ internal class ExperienceRenderer(
         analyticsTracker.track(
             event = AnalyticsEvent.ExperimentEntered,
             properties = mapOf(
-                "experimentId" to id,
+                "experimentId" to id.toString().lowercase(),
                 "group" to group
             ),
             interactive = false

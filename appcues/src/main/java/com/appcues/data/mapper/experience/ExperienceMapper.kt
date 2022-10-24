@@ -52,7 +52,7 @@ internal class ExperienceMapper(
             priority = priority,
             type = from.type,
             publishedAt = from.publishedAt,
-            experiment = experiments?.getExperiment(from.experimentId),
+            experiment = experiments?.getExperiment(from.id),
             completionActions = arrayListOf<ExperienceAction>().apply {
                 from.redirectUrl?.let { add(LinkAction(it, scope.get())) }
                 from.nextContentId?.let { add(LaunchExperienceAction(it)) }
@@ -91,10 +91,8 @@ internal class ExperienceMapper(
         return filterIsInstance<PresentingTrait>().firstOrNull() ?: DefaultPresentingTrait(null, scope, context)
     }
 
-    private fun List<ExperimentResponse>.getExperiment(experimentId: String?) =
-        experimentId?.let { id ->
-            this.firstOrNull { it.experimentId == id }?.let { experimentResponse ->
-                Experiment(experimentResponse.experimentId, experimentResponse.group)
-            }
+    private fun List<ExperimentResponse>.getExperiment(experienceId: UUID) =
+        this.firstOrNull { it.experienceId == experienceId }?.let { experimentResponse ->
+            Experiment(experimentResponse.experimentId, experimentResponse.group)
         }
 }

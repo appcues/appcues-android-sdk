@@ -29,7 +29,6 @@ internal val contentModalOneStubs = ExperienceResponse(
     actions = null,
     nextContentId = null,
     redirectUrl = null,
-    experimentId = null,
     traits = arrayListOf(),
     steps = arrayListOf(
         StepContainerResponse(

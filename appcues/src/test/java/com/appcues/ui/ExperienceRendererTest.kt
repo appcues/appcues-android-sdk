@@ -75,14 +75,13 @@ class ExperienceRendererTest {
     @Test
     fun `show SHOULD NOT show experience WHEN an experiment is active AND group is control`() = runTest {
         // GIVEN
-        val experiment = Experiment("experiment1", "control")
+        val experiment = Experiment(UUID.fromString("06f9bf87-1921-4919-be55-429b278bf578"), "control")
         val experience = mockExperienceExperiment(experiment)
         val stateMachine = mockk<StateMachine>(relaxed = true) {
             every { this@mockk.state } answers { Idling }
             coEvery { this@mockk.handleAction(any()) } answers { Success(Idling) }
         }
         val scope = initScope(stateMachine)
-        val analyticsTracker: AnalyticsTracker = scope.get()
         val experienceRenderer = ExperienceRenderer(scope)
 
         // WHEN
@@ -96,7 +95,7 @@ class ExperienceRendererTest {
     @Test
     fun `show SHOULD show experience WHEN an experiment is active AND group is exposed`() = runTest {
         // GIVEN
-        val experiment = Experiment("experiment1", "exposed")
+        val experiment = Experiment(UUID.fromString("06f9bf87-1921-4919-be55-429b278bf578"), "exposed")
         val experience = mockExperienceExperiment(experiment)
         val stateMachine = mockk<StateMachine>(relaxed = true) {
             every { this@mockk.state } answers { Idling }
@@ -117,7 +116,7 @@ class ExperienceRendererTest {
     @Test
     fun `show SHOULD track experiment_entered with group=control WHEN an experiment is active AND group is control`() = runTest {
         // GIVEN
-        val experiment = Experiment("experiment1", "control")
+        val experiment = Experiment(UUID.fromString("06f9bf87-1921-4919-be55-429b278bf578"), "control")
         val experience = mockExperienceExperiment(experiment)
         val stateMachine = mockk<StateMachine>(relaxed = true) {
             every { this@mockk.state } answers { Idling }
@@ -132,14 +131,18 @@ class ExperienceRendererTest {
 
         // THEN
         verify {
-            analyticsTracker.track(AnalyticsEvent.ExperimentEntered, mapOf("experimentId" to "experiment1", "group" to "control"), false)
+            analyticsTracker.track(
+                AnalyticsEvent.ExperimentEntered,
+                mapOf("experimentId" to "06f9bf87-1921-4919-be55-429b278bf578", "group" to "control"),
+                false
+            )
         }
     }
 
     @Test
     fun `show SHOULD track experiment_entered with group=exposed WHEN an experiment is active AND group is exposed`() = runTest {
         // GIVEN
-        val experiment = Experiment("experiment1", "exposed")
+        val experiment = Experiment(UUID.fromString("06f9bf87-1921-4919-be55-429b278bf578"), "exposed")
         val experience = mockExperienceExperiment(experiment)
         val stateMachine = mockk<StateMachine>(relaxed = true) {
             every { this@mockk.state } answers { Idling }
@@ -154,7 +157,10 @@ class ExperienceRendererTest {
 
         // THEN
         verify {
-            analyticsTracker.track(AnalyticsEvent.ExperimentEntered, mapOf("experimentId" to "experiment1", "group" to "exposed"), false)
+            analyticsTracker.track(
+                AnalyticsEvent.ExperimentEntered,
+                mapOf("experimentId" to "06f9bf87-1921-4919-be55-429b278bf578", "group" to "exposed"),
+                false)
         }
     }
 
