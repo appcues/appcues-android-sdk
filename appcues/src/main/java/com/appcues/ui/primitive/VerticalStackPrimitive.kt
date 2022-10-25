@@ -19,7 +19,7 @@ import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.data.model.styling.ComponentStyle.ComponentHorizontalAlignment.LEADING
 import com.appcues.data.model.styling.ComponentStyle.ComponentHorizontalAlignment.TRAILING
 import com.appcues.ui.composables.LocalStackScope
-import com.appcues.ui.composables.StackScope
+import com.appcues.ui.composables.StackScope.ColumnStackScope
 import com.appcues.ui.extensions.getHorizontalAlignment
 import com.appcues.ui.extensions.getTextStyle
 import com.appcues.ui.theme.AppcuesPreviewPrimitive
@@ -32,7 +32,7 @@ internal fun VerticalStackPrimitive.Compose(modifier: Modifier) {
         horizontalAlignment = style.getHorizontalAlignment(),
         verticalArrangement = Arrangement.spacedBy(spacing.dp, Alignment.CenterVertically)
     ) {
-        CompositionLocalProvider(LocalStackScope provides StackScope.COLUMN) {
+        CompositionLocalProvider(LocalStackScope provides ColumnStackScope(style.width, items.size)) {
             ProvideTextStyle(style.getTextStyle(LocalContext.current, isSystemInDarkTheme())) {
                 items.forEach {
                     it.Compose()

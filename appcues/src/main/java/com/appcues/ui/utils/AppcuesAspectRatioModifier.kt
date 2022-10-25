@@ -8,23 +8,39 @@ import androidx.compose.ui.layout.MeasureResult
 import androidx.compose.ui.layout.MeasureScope
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.isSatisfiedBy
 import com.appcues.data.model.styling.ComponentContentMode
+import com.appcues.data.model.styling.ComponentContentMode.FILL
+import com.appcues.data.model.styling.ComponentContentMode.FIT
+import com.appcues.ui.composables.StackScope
+import com.appcues.ui.composables.StackScope.ColumnStackScope
+import com.appcues.ui.composables.StackScope.RowStackScope
 import kotlin.math.roundToInt
 
 /**
  * This is an adaptation of the standard Compose AspectRatioModifier, but with logic updates to handle
  * the matchHeightConstraintsFirst dynamically, based on (1) the contentMode (fit vs fill) and (2) the aspect
  * ratio of the view being fit within.
-*/
+ */
 
 internal class AppcuesAspectRatioModifier(
-    private val aspectRatio: Float,
+    private val originalAspectRatio: Float,
     private val contentMode: ComponentContentMode,
+    private val stackScope: StackScope,
+    private val widthPixels: Float?,
+    private val heightPixels: Float?,
 ) : LayoutModifier {
+
     init {
-        require(aspectRatio > 0) { "aspectRatio $aspectRatio must be > 0" }
+        require(originalAspectRatio > 0) { "aspectRatio $originalAspectRatio must be > 0" }
     }
+
+    // takes the originalAspectRadio but it can later change based on width/height of the content
+    private var aspectRatio: Float = originalAspectRatio
+
+    // calculates parent view aspectRatio based on provided width and height
+    private val parentAspectRatio: Float? = if (isPositiveFloat(widthPixels) && isPositiveFloat(heightPixels)) {
+        widthPixels / heightPixels
+    } else null
 
     override fun MeasureScope.measure(
         measurable: Measurable,
@@ -78,88 +94,72 @@ internal class AppcuesAspectRatioModifier(
         measurable.maxIntrinsicHeight(width)
     }
 
-    // Suppressing these, as this method is taken from the Compose source and adapted slightly to add the
-    // logic based on contentMode.  Attempting to rewrite this differently would be a more confusing exercise at this point.
-    @Suppress("ComplexMethod", "ReturnCount")
     private fun Constraints.findSize(): IntSize {
+        // finds the container aspect ratio based on provided width/height
+        // if exists or defaults to limits by max container values
+        val containerAspectRatio = (widthPixels ?: this.maxWidth.toFloat()) / (heightPixels ?: this.maxHeight.toFloat())
 
-        val containerAspectRatio = this.maxWidth.toDouble() / this.maxHeight.toDouble()
-        val matchHeightConstraintsFirst =
-            (contentMode == ComponentContentMode.FIT && containerAspectRatio > aspectRatio) ||
-                (contentMode == ComponentContentMode.FILL && containerAspectRatio < aspectRatio)
-
-        if (!matchHeightConstraintsFirst) {
-            tryMaxWidth().also { if (it != IntSize.Zero) return it }
-            tryMaxHeight().also { if (it != IntSize.Zero) return it }
-            tryMinWidth().also { if (it != IntSize.Zero) return it }
-            tryMinHeight().also { if (it != IntSize.Zero) return it }
-            tryMaxWidth(enforceConstraints = false).also { if (it != IntSize.Zero) return it }
-            tryMaxHeight(enforceConstraints = false).also { if (it != IntSize.Zero) return it }
-            tryMinWidth(enforceConstraints = false).also { if (it != IntSize.Zero) return it }
-            tryMinHeight(enforceConstraints = false).also { if (it != IntSize.Zero) return it }
+        // gets the size based on rules of matching first height or width. Also
+        // takes into consideration if its a valid size when enforcing constraints or not
+        val size = if (shouldMatchHeightFirst(containerAspectRatio, widthPixels, parentAspectRatio)) {
+            tryMatchHeightFirst(aspectRatio, widthPixels, true) ?: tryMatchHeightFirst(aspectRatio, widthPixels, false)
         } else {
-            tryMaxHeight().also { if (it != IntSize.Zero) return it }
-            tryMaxWidth().also { if (it != IntSize.Zero) return it }
-            tryMinHeight().also { if (it != IntSize.Zero) return it }
-            tryMinWidth().also { if (it != IntSize.Zero) return it }
-            tryMaxHeight(enforceConstraints = false).also { if (it != IntSize.Zero) return it }
-            tryMaxWidth(enforceConstraints = false).also { if (it != IntSize.Zero) return it }
-            tryMinHeight(enforceConstraints = false).also { if (it != IntSize.Zero) return it }
-            tryMinWidth(enforceConstraints = false).also { if (it != IntSize.Zero) return it }
+            tryMatchWidthFirst(aspectRatio, widthPixels, true) ?: tryMatchWidthFirst(aspectRatio, widthPixels, false)
         }
-        return IntSize.Zero
+
+        return size ?: IntSize.Zero
     }
 
-    private fun Constraints.tryMaxWidth(enforceConstraints: Boolean = true): IntSize {
-        val maxWidth = this.maxWidth
-        if (maxWidth != Constraints.Infinity) {
-            val height = (maxWidth / aspectRatio).roundToInt()
-            if (height > 0) {
-                val size = IntSize(maxWidth, height)
-                if (!enforceConstraints || isSatisfiedBy(size)) {
-                    return size
+    private fun Constraints.shouldMatchHeightFirst(
+        containerAspectRatio: Float,
+        widthPixels: Float?,
+        parentAspectRatio: Float?
+    ) = when (contentMode) {
+        FILL -> shouldMatchHeightFirstFill(widthPixels, containerAspectRatio)
+        FIT -> shouldMatchHeightFirstFit(containerAspectRatio, parentAspectRatio, widthPixels)
+    }
+
+    private fun Constraints.shouldMatchHeightFirstFill(
+        widthPixels: Float?,
+        containerAspectRatio: Float
+    ): Boolean {
+        when (stackScope) {
+            is ColumnStackScope -> {}
+            is RowStackScope -> {
+                if (stackScope.greaterHeight.value > 0) {
+                    aspectRatio = if (widthPixels != null) {
+                        widthPixels.toFloat() / stackScope.greaterHeight.value
+                    } else {
+                        this.maxWidth.toFloat() / stackScope.greaterHeight.value
+                    }
                 }
             }
         }
-        return IntSize.Zero
+
+        return containerAspectRatio < aspectRatio
     }
 
-    private fun Constraints.tryMaxHeight(enforceConstraints: Boolean = true): IntSize {
-        val maxHeight = this.maxHeight
-        if (maxHeight != Constraints.Infinity) {
-            val width = (maxHeight * aspectRatio).roundToInt()
-            if (width > 0) {
-                val size = IntSize(width, maxHeight)
-                if (!enforceConstraints || isSatisfiedBy(size)) {
-                    return size
-                }
-            }
+    @Suppress("unused")
+    private fun Constraints.shouldMatchHeightFirstFit(
+        containerAspectRatio: Float,
+        parentAspectRatio: Float?,
+        widthPixels: Float?
+    ) = when (stackScope) {
+        is ColumnStackScope -> {
+            containerAspectRatio > aspectRatio
         }
-        return IntSize.Zero
-    }
+        is RowStackScope -> {
 
-    private fun Constraints.tryMinWidth(enforceConstraints: Boolean = true): IntSize {
-        val minWidth = this.minWidth
-        val height = (minWidth / aspectRatio).roundToInt()
-        if (height > 0) {
-            val size = IntSize(minWidth, height)
-            if (!enforceConstraints || isSatisfiedBy(size)) {
-                return size
+            if (parentAspectRatio != null) {
+                aspectRatio = parentAspectRatio
             }
-        }
-        return IntSize.Zero
-    }
 
-    private fun Constraints.tryMinHeight(enforceConstraints: Boolean = true): IntSize {
-        val minHeight = this.minHeight
-        val width = (minHeight * aspectRatio).roundToInt()
-        if (width > 0) {
-            val size = IntSize(width, minHeight)
-            if (!enforceConstraints || isSatisfiedBy(size)) {
-                return size
+            when {
+                isPositiveFloat(widthPixels) -> false
+                isPositiveFloat(heightPixels) -> containerAspectRatio > aspectRatio
+                else -> containerAspectRatio < aspectRatio
             }
         }
-        return IntSize.Zero
     }
 
     override fun equals(other: Any?): Boolean {
