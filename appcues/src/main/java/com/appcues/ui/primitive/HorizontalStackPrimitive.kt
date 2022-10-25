@@ -25,7 +25,7 @@ import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.data.model.styling.ComponentStyle.ComponentHorizontalAlignment
 import com.appcues.data.model.styling.ComponentStyle.ComponentVerticalAlignment
 import com.appcues.ui.composables.LocalStackScope
-import com.appcues.ui.composables.StackScope
+import com.appcues.ui.composables.StackScope.RowStackScope
 import com.appcues.ui.extensions.getTextStyle
 import com.appcues.ui.extensions.getVerticalAlignment
 import com.appcues.ui.theme.AppcuesPreviewPrimitive
@@ -42,7 +42,7 @@ internal fun HorizontalStackPrimitive.Compose(modifier: Modifier) {
         horizontalArrangement = distribution.toHorizontalArrangement(spacing),
         verticalAlignment = verticalAlignment
     ) {
-        CompositionLocalProvider(LocalStackScope provides StackScope.ROW) {
+        CompositionLocalProvider(LocalStackScope provides RowStackScope(style.height, items.size)) {
             ProvideTextStyle(style.getTextStyle(LocalContext.current, isSystemInDarkTheme())) {
                 items.forEach {
                     ItemBox(distribution = distribution, primitive = it, parentVerticalAlignment = verticalAlignment) {

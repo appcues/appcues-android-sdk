@@ -38,7 +38,7 @@ internal fun AppcuesComposition(
             LocalViewModel provides viewModel,
             LocalShakeGestureListener provides shakeGestureListener,
             LocalLogcues provides logcues,
-            LocalAppcuesActionDelegate provides AppcuesActionsDelegate(viewModel),
+            LocalAppcuesActionDelegate provides DefaultAppcuesActionsDelegate(viewModel),
             LocalAppcuesPaginationDelegate provides AppcuesPagination { viewModel.onPageChanged(it) },
         ) {
             MainSurface(

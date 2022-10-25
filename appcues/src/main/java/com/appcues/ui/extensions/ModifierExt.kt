@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -22,16 +23,19 @@ import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType.BUTTON_LONG_PRESSED
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType.BUTTON_TAPPED
 import com.appcues.data.model.Action
 import com.appcues.data.model.ExperiencePrimitive
+import com.appcues.data.model.ExperiencePrimitive.ImagePrimitive
 import com.appcues.data.model.styling.ComponentContentMode
 import com.appcues.data.model.styling.ComponentSize
 import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.ui.composables.AppcuesActionsDelegate
+import com.appcues.ui.composables.StackScope
 import com.appcues.ui.utils.AppcuesAspectRatioModifier
 import com.appcues.ui.utils.margin
 import com.appcues.util.eq
@@ -66,9 +70,12 @@ internal fun Modifier.outerPrimitiveStyle(
  * eg. ButtonPrimitive, ImagePrimitive
  */
 internal fun Modifier.innerPrimitiveStyle(component: ExperiencePrimitive) = this.then(
-    with(component) {
-        Modifier.padding(style.getPaddings())
-    }
+    when (component) {
+        // image primitive needs to be clipped to bound to avoid
+        // content drawing overflow (side-by-side primitives)
+        is ImagePrimitive -> Modifier.clipToBounds()
+        else -> Modifier
+    }.padding(component.style.getPaddings())
 )
 
 internal fun Modifier.modalStyle(
@@ -289,17 +296,45 @@ private fun List<Action>.toLongPressMotionOrNull(
 
 internal fun Modifier.imageAspectRatio(
     intrinsicSize: ComponentSize?,
-    contentMode: ComponentContentMode = ComponentContentMode.FILL,
+    stackScope: StackScope,
+    style: ComponentStyle,
+    density: Density,
+    contentMode: ComponentContentMode = ComponentContentMode.FILL
 ) = this.then(
     // apply aspectRatio only when intrinsicSize is not null or any values is bigger than 0
     if (intrinsicSize != null && (intrinsicSize.width > 0 && intrinsicSize.height > 0)) {
         Modifier.appcuesAspectRatio(
             ratio = intrinsicSize.width.toFloat() / intrinsicSize.height.toFloat(),
-            contentMode = contentMode
+            contentMode = contentMode,
+            stackScope = stackScope,
+            // when we have size we should subtract the padding to know image's true size
+            widthPixels = style.getImageWidthPixels(density),
+            heightPixels = style.getImageHeightPixels(density),
         )
     } else Modifier
 )
 
-internal fun Modifier.appcuesAspectRatio(ratio: Float, contentMode: ComponentContentMode) = this.then(
-    AppcuesAspectRatioModifier(ratio, contentMode)
-)
+private fun ComponentStyle.getImageWidthPixels(density: Density) = with(density) {
+    width?.let { (it - paddingLeading - paddingTrailing).dp.toPx() }
+}
+
+private fun ComponentStyle.getImageHeightPixels(density: Density) = with(density) {
+    height?.let { (it - paddingTop - paddingBottom).dp.toPx() }
+}
+
+internal fun Modifier.appcuesAspectRatio(
+    ratio: Float,
+    contentMode: ComponentContentMode,
+    stackScope: StackScope,
+    widthPixels: Float?,
+    heightPixels: Float?,
+) =
+    this.then(
+        AppcuesAspectRatioModifier(
+            originalAspectRatio = ratio,
+            contentMode = contentMode,
+            stackScope = stackScope,
+            widthPixels = widthPixels,
+            heightPixels = heightPixels,
+        )
+    )
