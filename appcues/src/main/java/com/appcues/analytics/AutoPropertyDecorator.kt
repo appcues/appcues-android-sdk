@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 import java.util.Date
 
 internal class AutoPropertyDecorator(
-    config: AppcuesConfig,
+    private val config: AppcuesConfig,
     appcuesCoroutineScope: AppcuesCoroutineScope,
     private val contextResources: ContextResources,
     private val storage: Storage,
@@ -73,6 +73,13 @@ internal class AutoPropertyDecorator(
             // add userAgent if exists (userAgent is a mutable property loaded asynchronously) and can be null
             userAgent?.let { put("_userAgent", it) }
             putAll(sessionProperties)
+            config.additionalAutoProperties.forEach {
+                // additional props cannot overwrite values for existing internal prop keys
+                // putIfAbsent exists, but only on API 24+
+                if (containsKey(it.key).not()) {
+                    put(it.key, it.value)
+                }
+            }
         }
 
     init {

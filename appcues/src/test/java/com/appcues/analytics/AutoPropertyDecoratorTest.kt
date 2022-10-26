@@ -210,4 +210,33 @@ class AutoPropertyDecoratorTest {
             assertThat(profileUpdate!!["_test"]).isEqualTo("Test")
         }
     }
+
+    @Test
+    fun `decorateTrack SHOULD include additional properties from config`() {
+        // given
+        val config: AppcuesConfig = mockk<AppcuesConfig>(relaxed = true).apply {
+            every { applicationId } returns "applicationId"
+            every { additionalAutoProperties } returns mapOf("_myProp" to 100, "_sdkName" to "test-sdk")
+        }
+        autoPropertyDecorator = AutoPropertyDecorator(
+            config = config,
+            appcuesCoroutineScope = AppcuesCoroutineScope(mockk()),
+            contextResources = contextResources,
+            storage = storage,
+            sessionMonitor = sessionMonitor,
+            sessionRandomizer = sessionRandomizer,
+        )
+        val event = EventRequest(
+            name = AnalyticsEvent.SessionStarted.eventName,
+        )
+
+        // when
+        val decoratedEvent = autoPropertyDecorator.decorateTrack(event)
+
+        // then
+        with(decoratedEvent.attributes["_identity"] as Map<*, *>) {
+            assertThat(get("_myProp") as Int).isEqualTo(100)
+            assertThat(get("_sdkName") as String).isNotEqualTo("test-sdk")
+        }
+    }
 }
