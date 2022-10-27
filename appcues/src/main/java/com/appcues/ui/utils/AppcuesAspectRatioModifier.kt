@@ -18,8 +18,12 @@ import kotlin.math.roundToInt
 
 /**
  * This is an adaptation of the standard Compose AspectRatioModifier, but with logic updates to handle
- * the matchHeightConstraintsFirst dynamically, based on (1) the contentMode (fit vs fill) and (2) the aspect
- * ratio of the view being fit within.
+ * the matchHeightConstraintsFirst dynamically, based on:
+ *
+ * (1) the contentMode (fit vs fill)
+ * (2) the aspect ratio of the image and styling width and height
+ * (3) the stackScope (row vs column) and the height of the row for side-by-side content
+ *
  */
 
 internal class AppcuesAspectRatioModifier(
@@ -101,7 +105,7 @@ internal class AppcuesAspectRatioModifier(
 
         // gets the size based on rules of matching first height or width. Also
         // takes into consideration if its a valid size when enforcing constraints or not
-        val size = if (shouldMatchHeightFirst(containerAspectRatio, widthPixels, parentAspectRatio)) {
+        val size = if (shouldMatchHeightFirst(containerAspectRatio)) {
             tryMatchHeightFirst(aspectRatio, widthPixels, true) ?: tryMatchHeightFirst(aspectRatio, widthPixels, false)
         } else {
             tryMatchWidthFirst(aspectRatio, widthPixels, true) ?: tryMatchWidthFirst(aspectRatio, widthPixels, false)
@@ -112,25 +116,28 @@ internal class AppcuesAspectRatioModifier(
 
     private fun Constraints.shouldMatchHeightFirst(
         containerAspectRatio: Float,
-        widthPixels: Float?,
-        parentAspectRatio: Float?
     ) = when (contentMode) {
-        FILL -> shouldMatchHeightFirstFill(widthPixels, containerAspectRatio)
-        FIT -> shouldMatchHeightFirstFit(containerAspectRatio, parentAspectRatio, widthPixels)
+        FILL -> shouldMatchHeightFirstFill(containerAspectRatio)
+        FIT -> shouldMatchHeightFirstFit(containerAspectRatio)
     }
 
     private fun Constraints.shouldMatchHeightFirstFill(
-        widthPixels: Float?,
         containerAspectRatio: Float
     ): Boolean {
         when (stackScope) {
             is ColumnStackScope -> {}
             is RowStackScope -> {
-                if (stackScope.greaterHeight.value > 0) {
-                    aspectRatio = if (widthPixels != null) {
-                        widthPixels.toFloat() / stackScope.greaterHeight.value
-                    } else {
-                        this.maxWidth.toFloat() / stackScope.greaterHeight.value
+                val rowHeight = stackScope.greaterSize.value
+                if (rowHeight != null) {
+                    // we change the aspectRatio coming from the image when:
+                    aspectRatio = when {
+                        // both width and height are set in style
+                        isPositiveFloat(widthPixels) && isPositiveFloat(heightPixels) -> widthPixels / heightPixels
+                        // width is set in style and rowHeight has a valid value
+                        isPositiveFloat(widthPixels) && rowHeight > 0 -> widthPixels.toFloat() / rowHeight
+                        // rowHeight has a valid value
+                        isPositiveFloat(rowHeight) -> this.maxWidth.toFloat() / rowHeight
+                        else -> aspectRatio
                     }
                 }
             }
@@ -139,11 +146,8 @@ internal class AppcuesAspectRatioModifier(
         return containerAspectRatio < aspectRatio
     }
 
-    @Suppress("unused")
-    private fun Constraints.shouldMatchHeightFirstFit(
+    private fun shouldMatchHeightFirstFit(
         containerAspectRatio: Float,
-        parentAspectRatio: Float?,
-        widthPixels: Float?
     ) = when (stackScope) {
         is ColumnStackScope -> {
             containerAspectRatio > aspectRatio

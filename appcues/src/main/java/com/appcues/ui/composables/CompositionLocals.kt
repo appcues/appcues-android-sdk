@@ -61,16 +61,25 @@ internal val LocalStackScope = compositionLocalOf<StackScope> { ColumnStackScope
 internal sealed class StackScope(private val childrenCount: Int) {
 
     private var childrenSizes = hashMapOf<UUID, Int>()
-    private val _greaterHeight = mutableStateOf(0)
-    val greaterHeight: State<Int> = _greaterHeight
+    private val _greaterSize = mutableStateOf<Float?>(null)
+    val greaterSize: State<Float?> = _greaterSize
 
     fun updateChildSize(id: UUID, size: Int) {
+        // if there is only one child we don't collect size
+        if (childrenCount <= 1) {
+            // negative value means no size will be set
+            _greaterSize.value = -1.0f
+            return
+        }
+
+        // collect size once per each child
         if (!childrenSizes.containsKey(id)) {
             childrenSizes[id] = size
         }
 
+        // when all children have reported its size, update the greaterSize value
         if (childrenSizes.size == childrenCount) {
-            _greaterHeight.value = childrenSizes.maxOf { it.value }
+            _greaterSize.value = childrenSizes.maxOf { it.value.toFloat() }
         }
     }
 

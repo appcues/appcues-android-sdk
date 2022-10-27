@@ -16,10 +16,8 @@ internal fun SpacerPrimitive.Compose(modifier: Modifier) {
     // use spacing to set width or height based on LocalStackScope
     if (spacing > 0) {
         val sizeModifier = when (LocalStackScope.current) {
-            is ColumnStackScope -> Modifier
-                .width(spacing.dp)
-            is RowStackScope -> Modifier
-                .height(spacing.dp)
+            is ColumnStackScope -> Modifier.height(spacing.dp)
+            is RowStackScope -> Modifier.width(spacing.dp)
         }
 
         Spacer(
