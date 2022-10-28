@@ -7,19 +7,34 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.LayoutDirection.Ltr
+import androidx.compose.ui.unit.LayoutDirection.Rtl
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.isUnspecified
 import com.appcues.data.model.ExperiencePrimitive.TextInputPrimitive
@@ -60,6 +75,7 @@ private const val LINE_HEIGHT_MULTIPLIER = 1.3f
 // default top and bottom padding for a TextField
 private const val TEXT_INPUT_PADDING = 16.0
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 internal fun TextInputPrimitive.Compose(modifier: Modifier) {
 
@@ -84,6 +100,11 @@ internal fun TextInputPrimitive.Compose(modifier: Modifier) {
         modifier = modifier.fillMaxWidth(),
         horizontalAlignment = style.getHorizontalAlignment(),
     ) {
+        val focusManager = LocalFocusManager.current
+        val keyboardController = LocalSoftwareKeyboardController.current
+        val layoutDirection = LocalLayoutDirection.current
+        val lastItemId = rememberUpdatedState(newValue = formState.lastTextInputItem)
+        val isLastInputItem = derivedStateOf { lastItemId.value?.let { it.id == id } ?: false }
 
         updatedLabel.Compose()
 
@@ -113,14 +134,9 @@ internal fun TextInputPrimitive.Compose(modifier: Modifier) {
                     it.Compose()
                 }
             },
-            keyboardOptions = KeyboardOptions(keyboardType = mapKeyboardType(dataType)),
-            colors = TextFieldDefaults.textFieldColors(
-                backgroundColor = Color.Transparent,
-                // the builder should always send this value, but default to the theme like the standard default behavior
-                cursorColor = cursorColor?.getColor(isDark) ?: MaterialTheme.colors.primary,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-            ),
+            keyboardOptions = getKeyboardOptions(isLastInputItem),
+            keyboardActions = getKeyboardActions(layoutDirection, focusManager, keyboardController),
+            colors = getColors(isDark),
         )
 
         if (showError) {
@@ -128,6 +144,50 @@ internal fun TextInputPrimitive.Compose(modifier: Modifier) {
         }
     }
 }
+
+@Composable
+private fun TextInputPrimitive.getColors(isDark: Boolean) =
+    TextFieldDefaults.textFieldColors(
+        backgroundColor = Color.Transparent,
+        // the builder should always send this value, but default to the theme like the standard default behavior
+        cursorColor = cursorColor?.getColor(isDark) ?: MaterialTheme.colors.primary,
+        focusedIndicatorColor = Color.Transparent,
+        unfocusedIndicatorColor = Color.Transparent,
+    )
+
+@Composable
+private fun TextInputPrimitive.getKeyboardOptions(isLastInputItem: State<Boolean>) =
+    KeyboardOptions(
+        keyboardType = mapKeyboardType(dataType),
+        imeAction = if (isLastInputItem.value) ImeAction.Done else ImeAction.Next,
+    )
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+private fun getKeyboardActions(
+    layoutDirection: LayoutDirection,
+    focusManager: FocusManager,
+    keyboardController: SoftwareKeyboardController?
+) = KeyboardActions(
+    onNext = {
+        val movedSideways = when (layoutDirection) {
+            // if layout direction is left to right we try to move to the right
+            Ltr -> focusManager.moveFocus(FocusDirection.Right)
+            // if layout direction is right to left we try to move to the left
+            Rtl -> focusManager.moveFocus(FocusDirection.Left)
+        }
+
+        // move focus to next element below
+        if (!movedSideways) focusManager.moveFocus(FocusDirection.Down)
+    },
+    onDone = {
+        // closes keyboard
+        keyboardController?.hide()
+        // clear focus // with talkback on this takes the cursor of the textField
+        // while its still highlighted
+        focusManager.clearFocus()
+    }
+)
 
 // wrapper that will apply an error tint color, if applicable
 // otherwise, just fall back to the normal styleBorder modifier
