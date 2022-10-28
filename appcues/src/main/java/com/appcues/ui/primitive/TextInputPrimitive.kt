@@ -104,7 +104,7 @@ internal fun TextInputPrimitive.Compose(modifier: Modifier) {
         val keyboardController = LocalSoftwareKeyboardController.current
         val layoutDirection = LocalLayoutDirection.current
         val lastItemId = rememberUpdatedState(newValue = formState.lastTextFocusableItem)
-        val isLastInputItem = derivedStateOf { lastItemId.value?.let { it.id == id } ?: false }
+        val isLastInputItem = remember { derivedStateOf { lastItemId.value?.let { it.id == id } ?: false } }
 
         updatedLabel.Compose()
 
