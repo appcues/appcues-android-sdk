@@ -3,22 +3,21 @@ package com.appcues.ui.primitive
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.LocalTextStyle
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import com.appcues.data.model.ExperiencePrimitive.TextPrimitive
 import com.appcues.data.model.styling.ComponentColor
 import com.appcues.data.model.styling.ComponentStyle.ComponentHorizontalAlignment.TRAILING
+import com.appcues.ui.composables.ResponsiveText
 import com.appcues.ui.extensions.applyStyle
 import com.appcues.ui.theme.AppcuesPreviewPrimitive
 import java.util.UUID
 
 @Composable
 internal fun TextPrimitive.Compose(modifier: Modifier) {
-    Text(
+    ResponsiveText(
         modifier = modifier,
         text = text,
         style = LocalTextStyle.current.applyStyle(
@@ -26,7 +25,6 @@ internal fun TextPrimitive.Compose(modifier: Modifier) {
             context = LocalContext.current,
             isDark = isSystemInDarkTheme(),
         ),
-        overflow = TextOverflow.Ellipsis, // Not Working https://issuetracker.google.com/issues/168720622
     )
 }
 
