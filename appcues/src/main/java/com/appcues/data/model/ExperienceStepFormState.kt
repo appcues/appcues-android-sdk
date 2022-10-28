@@ -18,6 +18,9 @@ internal class ExperienceStepFormState {
     val formItems: Collection<ExperienceStepFormItemState>
         get() = _formItems.values.sortedBy { it.index }
 
+    val lastTextInputItem: ExperienceStepFormItemState?
+        get() = _formItems.values.lastOrNull { it.isTextFocusable }
+
     // this can be used by buttons needing to know if they are enabled or not based on required input
     val isFormComplete: Boolean
         get() = !_formItems.values.any { !it.isComplete }
@@ -82,6 +85,17 @@ internal sealed class ExperienceStepFormItemState(
     val attributeName: String?,
 ) {
 
+    companion object {
+
+        private const val ITEM_TYPE_TEXT_INPUT = "textInput"
+        private const val ITEM_TYPE_OPTION_SELECT = "optionSelect"
+    }
+
+    val isTextFocusable: Boolean
+        get() {
+            return type == ITEM_TYPE_TEXT_INPUT
+        }
+
     val isComplete: Boolean
         get() {
             return when (this) {
@@ -122,7 +136,7 @@ internal sealed class ExperienceStepFormItemState(
     ) : ExperienceStepFormItemState(
         index = index,
         id = primitive.id,
-        type = "textInput",
+        type = ITEM_TYPE_TEXT_INPUT,
         label = primitive.label.text,
         isRequired = primitive.required,
         attributeName = primitive.attributeName
@@ -141,7 +155,7 @@ internal sealed class ExperienceStepFormItemState(
     ) : ExperienceStepFormItemState(
         index = index,
         id = primitive.id,
-        type = "optionSelect",
+        type = ITEM_TYPE_OPTION_SELECT,
         label = primitive.label.text,
         isRequired = primitive.minSelections > 0u,
         attributeName = primitive.attributeName,
