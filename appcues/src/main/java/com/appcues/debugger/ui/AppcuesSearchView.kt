@@ -59,7 +59,7 @@ internal fun AppcuesSearchView(
     onInput: (String) -> Unit
 ) {
     val firstComposition = remember { mutableStateOf(true) }
-    val cornerDp = derivedStateOf { height / 2 }
+    val cornerDp = remember { derivedStateOf { height / 2 } }
     val focusRequester = remember { FocusRequester() }
     val isFocusOn = remember { mutableStateOf(false) }
     val border = animateColorAsState(targetValue = if (isFocusOn.value) AppcuesColors.SharkbaitOhAh else AppcuesColors.SharkbaitOhAh50)
