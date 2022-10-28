@@ -58,22 +58,28 @@ internal fun DebuggerFontDetails(
 ) {
 
     val filter = remember { mutableStateOf(String()) }
-    val appSpecificFontsFiltered = derivedStateOf {
-        if (filter.value.isNotEmpty()) {
-            appSpecificFonts.filter { it.name.lowercase().contains(filter.value) }
-        } else appSpecificFonts
+    val appSpecificFontsFiltered = remember {
+        derivedStateOf {
+            if (filter.value.isNotEmpty()) {
+                appSpecificFonts.filter { it.name.lowercase().contains(filter.value) }
+            } else appSpecificFonts
+        }
     }
 
-    val systemFontsFiltered = derivedStateOf {
-        if (filter.value.isNotEmpty()) {
-            systemFonts.filter { it.name.lowercase().contains(filter.value) }
-        } else systemFonts
+    val systemFontsFiltered = remember {
+        derivedStateOf {
+            if (filter.value.isNotEmpty()) {
+                systemFonts.filter { it.name.lowercase().contains(filter.value) }
+            } else systemFonts
+        }
     }
 
-    val allFontsFiltered = derivedStateOf {
-        if (filter.value.isNotEmpty()) {
-            allFonts.filter { it.name.lowercase().contains(filter.value) }
-        } else allFonts
+    val allFontsFiltered = remember {
+        derivedStateOf {
+            if (filter.value.isNotEmpty()) {
+                allFonts.filter { it.name.lowercase().contains(filter.value) }
+            } else allFonts
+        }
     }
 
     val lazyListState = rememberLazyListState()

@@ -95,5 +95,5 @@ internal fun rememberSystemMarginsState(): State<PaddingValues> {
     val bottomMargin = rememberUpdatedState(newValue = with(density) { LocalContext.current.getNavigationBarHeight().toDp() })
     // will calculate status bar height and navigation bar height and return it in PaddingValues
     // this is derived state to handle possible changes to values in top and bottom margin
-    return derivedStateOf { PaddingValues(top = topMargin.value, bottom = bottomMargin.value) }
+    return remember { derivedStateOf { PaddingValues(top = topMargin.value, bottom = bottomMargin.value) } }
 }
