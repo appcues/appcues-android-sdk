@@ -3,28 +3,55 @@ package com.appcues.ui.primitive
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.LocalTextStyle
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import com.appcues.data.model.ExperiencePrimitive.TextPrimitive
 import com.appcues.data.model.styling.ComponentColor
 import com.appcues.data.model.styling.ComponentStyle.ComponentHorizontalAlignment.TRAILING
-import com.appcues.ui.composables.ResponsiveText
 import com.appcues.ui.extensions.applyStyle
 import com.appcues.ui.theme.AppcuesPreviewPrimitive
 import java.util.UUID
 
+private const val TEXT_SCALE_REDUCTION_INTERVAL = 0.9f
+
 @Composable
 internal fun TextPrimitive.Compose(modifier: Modifier) {
-    ResponsiveText(
-        modifier = modifier,
+    val style = LocalTextStyle.current.applyStyle(
+        style = style,
+        context = LocalContext.current,
+        isDark = isSystemInDarkTheme(),
+    )
+    var resizedStyle by remember { mutableStateOf(style) }
+    var readyToDraw by remember { mutableStateOf(false) }
+
+    Text(
+        modifier = modifier.clipToBounds().drawWithContent { if (readyToDraw) drawContent() },
         text = text,
-        style = LocalTextStyle.current.applyStyle(
-            style = style,
-            context = LocalContext.current,
-            isDark = isSystemInDarkTheme(),
-        ),
+        style = resizedStyle,
+        overflow = TextOverflow.Ellipsis,
+        onTextLayout = { textLayoutResult ->
+            // this will attempt to auto scale down single line / char text, handling cases
+            // like emoji that are sized too large to fit in side by side layouts
+            if (textLayoutResult.lineCount == 1) {
+                if (textLayoutResult.isLineEllipsized(0)) {
+                    resizedStyle = resizedStyle.copy(fontSize = resizedStyle.fontSize * TEXT_SCALE_REDUCTION_INTERVAL)
+                } else {
+                    readyToDraw = true
+                }
+            } else {
+                readyToDraw = true
+            }
+        },
     )
 }
 
