@@ -10,11 +10,9 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.appcues.data.model.styling.ComponentStyle
-import com.appcues.ui.extensions.coloredShadow
-import com.appcues.ui.extensions.styleBorder
+import com.appcues.ui.extensions.styleCorner
 import com.appcues.ui.extensions.styleShadow
 import com.appcues.ui.utils.AppcuesWindowInfo
 import com.appcues.ui.utils.AppcuesWindowInfo.DeviceType.MOBILE
@@ -33,42 +31,32 @@ internal fun dialogExitTransition(): ExitTransition {
     return fadeOut(tween(durationMillis = 100))
 }
 
-internal fun Modifier.dialogModifier(style: ComponentStyle?, isDark: Boolean) =
-    then(Modifier.styleShadow(style, isDark))
-        .then(
-            if (style?.cornerRadius != null && style.cornerRadius ne 0.0)
-                Modifier
-                    .clip(RoundedCornerShape(style.cornerRadius.dp))
-                    .styleBorder(style, isDark)
-            else
-                Modifier
-        )
+internal fun Modifier.dialogModifier(style: ComponentStyle, isDark: Boolean) =
+    then(
+        Modifier
+            .styleShadow(style, isDark)
+            .styleCorner(style)
+    )
 
-internal fun Modifier.sheetModifier(windowInfo: AppcuesWindowInfo, style: ComponentStyle?) = then(
+internal fun Modifier.sheetModifier(windowInfo: AppcuesWindowInfo, isDark: Boolean, style: ComponentStyle) = then(
     when (windowInfo.deviceType) {
-        MOBILE -> if (windowInfo.orientation == PORTRAIT && style?.cornerRadius != null && style.cornerRadius ne 0.0)
+        MOBILE -> if (windowInfo.orientation == PORTRAIT && style.cornerRadius ne 0.0)
             Modifier.clip(RoundedCornerShape(topStart = style.cornerRadius.dp, topEnd = style.cornerRadius.dp))
         else
             Modifier
         TABLET ->
             Modifier
-                .coloredShadow(
-                    color = Color(color = 0xEE777777),
-                    radius = 12.dp
-                )
-                .clip(RoundedCornerShape(12.dp))
+                .styleShadow(style, isDark)
+                .styleCorner(style)
     }
 )
 
-internal fun Modifier.fullModifier(windowInfo: AppcuesWindowInfo) = then(
+internal fun Modifier.fullModifier(windowInfo: AppcuesWindowInfo, isDark: Boolean, style: ComponentStyle) = then(
     when (windowInfo.deviceType) {
         MOBILE -> Modifier
         TABLET ->
             Modifier
-                .coloredShadow(
-                    color = Color(color = 0xEE777777),
-                    radius = 12.dp
-                )
-                .clip(RoundedCornerShape(12.dp))
+                .styleShadow(style, isDark)
+                .styleCorner(style)
     }
 )

@@ -53,6 +53,7 @@ internal fun FullScreenModal(
         val fullHeight = heightDerivedOf(windowInfo)
         val enterAnimation = enterTransitionDerivedOf(windowInfo)
         val exitAnimation = exitTransitionDerivedOf(windowInfo)
+        val isDark = isSystemInDarkTheme()
 
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -69,11 +70,7 @@ internal fun FullScreenModal(
                         .fillMaxWidth(fullWidth.value)
                         .fillMaxHeight(fullHeight.value)
                         // default modal style modifiers
-                        .modalStyle(
-                            style = style,
-                            isDark = isSystemInDarkTheme(),
-                            modifier = Modifier.fullModifier(windowInfo),
-                        ),
+                        .modalStyle(style, isDark) { Modifier.fullModifier(windowInfo, isDark, it) },
                     content = { content(true, style?.getPaddings()) },
                 )
             }
