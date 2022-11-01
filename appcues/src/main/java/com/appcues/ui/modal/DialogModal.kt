@@ -57,11 +57,7 @@ internal fun DialogModal(
                 // container padding based on screen size
                 .padding(horizontal = dialogHorizontalMargin, vertical = dialogVerticalMargin)
                 // default modal style modifiers
-                .modalStyle(
-                    style = style,
-                    isDark = isDark,
-                    modifier = Modifier.dialogModifier(style, isDark),
-                ),
+                .modalStyle(style, isDark) { Modifier.dialogModifier(it, isDark) },
             content = { content(false, style?.getPaddings()) },
         )
     }

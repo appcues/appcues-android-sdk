@@ -50,6 +50,7 @@ internal fun ExpandedBottomSheetModal(
         val height = heightDerivedOf(windowInfo)
         val enterAnimation = enterTransitionDerivedOf(windowInfo)
         val exitAnimation = exitTransitionDerivedOf(windowInfo)
+        val isDark = isSystemInDarkTheme()
 
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -66,11 +67,7 @@ internal fun ExpandedBottomSheetModal(
                         .fillMaxWidth(width.value)
                         .fillMaxHeight(height.value)
                         // default modal style modifiers
-                        .modalStyle(
-                            style = style,
-                            isDark = isSystemInDarkTheme(),
-                            modifier = Modifier.sheetModifier(windowInfo, style),
-                        ),
+                        .modalStyle(style, isDark) { Modifier.sheetModifier(windowInfo, isDark, it) },
                     content = { content(true, style?.getPaddings()) },
                 )
             }

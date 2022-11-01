@@ -49,7 +49,6 @@ internal fun Modifier.outerPrimitiveStyle(
     component: ExperiencePrimitive,
     gestureProperties: PrimitiveGestureProperties,
     isDark: Boolean,
-    defaultBackgroundColor: Color? = null,
     matchParentBox: BoxScope? = null,
 ) = this.then(
     with(component) {
@@ -59,8 +58,8 @@ internal fun Modifier.outerPrimitiveStyle(
             .styleSize(style, matchParentBox)
             .actions(id, gestureProperties, component.textDescription)
             .styleCorner(style)
+            .styleBackground(style, isDark)
             .styleBorder(style, isDark)
-            .styleBackground(style, isDark, defaultBackgroundColor)
     }
 )
 
@@ -81,31 +80,29 @@ internal fun Modifier.innerPrimitiveStyle(component: ExperiencePrimitive) = this
 internal fun Modifier.modalStyle(
     style: ComponentStyle?,
     isDark: Boolean,
-    modifier: Modifier = Modifier,
+    modalModifier: (ComponentStyle) -> Modifier,
 ) = this.then(
     if (style != null) Modifier
         .padding(style.getMargins())
-        .then(modifier)
+        .then(modalModifier(style))
         .styleBackground(style, isDark)
+        .styleBorder(style, isDark)
     else Modifier
 )
 
 internal fun Modifier.styleBackground(
     style: ComponentStyle,
     isDark: Boolean,
-    defaultColor: Color? = null
 ) = this.then(
     Modifier
-        .styleBackgroundColor(style, isDark, defaultColor)
+        .styleBackgroundColor(style, isDark)
         .styleBackgroundGradient(style, isDark)
 )
 
-private fun Modifier.styleBackgroundColor(style: ComponentStyle, isDark: Boolean, defaultColor: Color? = null) = this.then(
-    when {
-        style.backgroundColor != null -> Modifier.background(style.backgroundColor.getColor(isDark))
-        defaultColor != null -> Modifier.background(defaultColor)
-        else -> Modifier
-    }
+private fun Modifier.styleBackgroundColor(style: ComponentStyle, isDark: Boolean) = this.then(
+    if (style.backgroundColor != null)
+        Modifier.background(style.backgroundColor.getColor(isDark))
+    else Modifier
 )
 
 private fun Modifier.styleBackgroundGradient(style: ComponentStyle, isDark: Boolean) = this.then(
@@ -121,6 +118,7 @@ internal fun Modifier.styleBorder(
     if (style.borderWidth != null && style.borderWidth ne 0.0 && style.borderColor != null) {
         Modifier
             .border(style.borderWidth.dp, style.borderColor.getColor(isDark), RoundedCornerShape(style.cornerRadius.dp))
+            .padding(style.borderWidth.dp)
     } else {
         Modifier
     }
@@ -315,11 +313,15 @@ internal fun Modifier.imageAspectRatio(
 )
 
 private fun ComponentStyle.getImageWidthPixels(density: Density) = with(density) {
-    width?.let { (it - paddingLeading - paddingTrailing).dp.toPx() }
+    // get true image width by subtracting current width with existing
+    // padding (leading and trialing) and borderWidth times 2 (as it applies on both sides)
+    width?.let { (it - (paddingLeading + paddingTrailing + (borderWidth ?: 0.0) * 2)).dp.toPx() }
 }
 
 private fun ComponentStyle.getImageHeightPixels(density: Density) = with(density) {
-    height?.let { (it - paddingTop - paddingBottom).dp.toPx() }
+    // get true image height by subtracting current height with existing
+    // padding (top and bottom) and borderWidth times 2 (as it applies on both sides)
+    height?.let { (it - (paddingTop + paddingBottom + (borderWidth ?: 0.0) * 2)).dp.toPx() }
 }
 
 internal fun Modifier.appcuesAspectRatio(
