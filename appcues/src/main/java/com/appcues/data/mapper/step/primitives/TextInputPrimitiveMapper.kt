@@ -29,5 +29,6 @@ private fun mapComponentDataType(value: String?) = when (value) {
     "phone" -> ComponentDataType.PHONE
     "name" -> ComponentDataType.NAME
     "address" -> ComponentDataType.ADDRESS
+    "url" -> ComponentDataType.URL
     else -> ComponentDataType.TEXT
 }

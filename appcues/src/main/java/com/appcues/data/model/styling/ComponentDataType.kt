@@ -7,4 +7,5 @@ internal enum class ComponentDataType {
     PHONE,
     NAME,
     ADDRESS,
+    URL,
 }
