@@ -47,6 +47,7 @@ import com.appcues.data.model.styling.ComponentDataType.NAME
 import com.appcues.data.model.styling.ComponentDataType.NUMBER
 import com.appcues.data.model.styling.ComponentDataType.PHONE
 import com.appcues.data.model.styling.ComponentDataType.TEXT
+import com.appcues.data.model.styling.ComponentDataType.URL
 import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.ui.composables.LocalExperienceStepFormStateDelegate
 import com.appcues.ui.extensions.applyStyle
@@ -233,6 +234,7 @@ private fun mapKeyboardType(value: ComponentDataType): KeyboardType = when (valu
     PHONE -> KeyboardType.Phone
     NAME -> KeyboardType.Text
     ADDRESS -> KeyboardType.Text
+    URL -> KeyboardType.Uri
 }
 
 private val textPrimitive = TextPrimitive(
