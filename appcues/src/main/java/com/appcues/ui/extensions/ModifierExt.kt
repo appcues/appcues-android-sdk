@@ -314,7 +314,7 @@ internal fun Modifier.imageAspectRatio(
 
 private fun ComponentStyle.getImageWidthPixels(density: Density) = with(density) {
     // get true image width by subtracting current width with existing
-    // padding (leading and trialing) and borderWidth times 2 (as it applies on both sides)
+    // padding (leading and trailing) and borderWidth times 2 (as it applies on both sides)
     width?.let { (it - (paddingLeading + paddingTrailing + (borderWidth ?: 0.0) * 2)).dp.toPx() }
 }
 
