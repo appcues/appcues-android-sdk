@@ -5,13 +5,9 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
 import androidx.compose.ui.platform.LocalDensity
 import com.appcues.logging.Logcues
 import com.appcues.trait.ContentHolderTrait.ContainerPages
@@ -21,14 +17,12 @@ import com.appcues.ui.AppcuesViewModel.UIState.Dismissing
 import com.appcues.ui.AppcuesViewModel.UIState.Rendering
 import com.appcues.ui.ShakeGestureListener
 import com.appcues.ui.theme.AppcuesTheme
-import com.appcues.ui.utils.margin
 
 @Composable
 internal fun AppcuesComposition(
     viewModel: AppcuesViewModel,
     shakeGestureListener: ShakeGestureListener,
     logcues: Logcues,
-    applySystemMargins: Boolean,
     onCompositionDismissed: () -> Unit,
 ) {
     // ensure to change some colors to match appropriate design for custom primitive blocks
@@ -42,7 +36,6 @@ internal fun AppcuesComposition(
             LocalAppcuesPaginationDelegate provides AppcuesPagination { viewModel.onPageChanged(it) },
         ) {
             MainSurface(
-                applySystemMargins = rememberUpdatedState(applySystemMargins),
                 onCompositionDismissed = onCompositionDismissed
             )
         }
@@ -50,14 +43,8 @@ internal fun AppcuesComposition(
 }
 
 @Composable
-private fun MainSurface(
-    applySystemMargins: State<Boolean>,
-    onCompositionDismissed: () -> Unit,
-) {
-    Box(
-        modifier = Modifier.applySystemMargins(applySystemMargins),
-        contentAlignment = Alignment.Center,
-    ) {
+private fun MainSurface(onCompositionDismissed: () -> Unit) {
+    Box(contentAlignment = Alignment.Center) {
         val viewModel = LocalViewModel.current
         // collect all UIState
         viewModel.uiState.collectAsState().let { state ->
@@ -83,14 +70,6 @@ private fun MainSurface(
             }
         }
     }
-}
-
-private fun Modifier.applySystemMargins(shouldApply: State<Boolean>): Modifier = composed {
-    then(
-        if (shouldApply.value) {
-            Modifier.margin(rememberSystemMarginsState().value)
-        } else Modifier
-    )
 }
 
 @Composable

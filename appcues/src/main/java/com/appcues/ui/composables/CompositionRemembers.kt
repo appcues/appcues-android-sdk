@@ -1,19 +1,12 @@
 package com.appcues.ui.composables
 
 import androidx.compose.animation.core.MutableTransitionState
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import com.appcues.ui.AppcuesViewModel.UIState
 import com.appcues.ui.AppcuesViewModel.UIState.Rendering
-import com.appcues.util.getNavigationBarHeight
-import com.appcues.util.getStatusBarHeight
 
 @Composable
 internal fun rememberLastRenderingState(state: State<UIState>) = remember { mutableStateOf<Rendering?>(null) }
@@ -87,13 +80,3 @@ internal fun rememberAppcuesContentVisibility() = remember { isContentVisible }
 
 @Composable
 internal fun rememberAppcuesBackdropVisibility() = remember { isBackdropVisible }
-
-@Composable
-internal fun rememberSystemMarginsState(): State<PaddingValues> {
-    val density = LocalDensity.current
-    val topMargin = rememberUpdatedState(newValue = with(density) { LocalContext.current.getStatusBarHeight().toDp() })
-    val bottomMargin = rememberUpdatedState(newValue = with(density) { LocalContext.current.getNavigationBarHeight().toDp() })
-    // will calculate status bar height and navigation bar height and return it in PaddingValues
-    // this is derived state to handle possible changes to values in top and bottom margin
-    return remember { derivedStateOf { PaddingValues(top = topMargin.value, bottom = bottomMargin.value) } }
-}

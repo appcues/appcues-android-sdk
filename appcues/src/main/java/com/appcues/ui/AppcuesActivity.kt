@@ -3,10 +3,10 @@ package com.appcues.ui
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
+import com.appcues.databinding.AppcuesActivityLayoutBinding
 import com.appcues.di.AppcuesKoinContext
 import com.appcues.logging.Logcues
 import com.appcues.ui.composables.AppcuesComposition
@@ -29,6 +29,8 @@ internal class AppcuesActivity : AppCompatActivity() {
             }
     }
 
+    private val binding by lazy { AppcuesActivityLayoutBinding.inflate(layoutInflater) }
+
     private val scope: Scope by lazy { AppcuesKoinContext.koin.getScope(intent.getStringExtra(EXTRA_SCOPE_ID)!!) }
 
     private val viewModel: AppcuesViewModel by viewModels { AppcuesViewModelFactory(scope) }
@@ -41,13 +43,13 @@ internal class AppcuesActivity : AppCompatActivity() {
         // remove enter animation from this activity
         overridePendingTransition(0, 0)
         super.onCreate(savedInstanceState)
+        setContentView(binding.root)
 
-        setContent {
+        binding.appcuesActivityComposeView.setContent {
             AppcuesComposition(
                 viewModel = viewModel,
                 shakeGestureListener = shakeGestureListener,
                 logcues = logcues,
-                applySystemMargins = true,
                 onCompositionDismissed = ::finish
             )
         }
