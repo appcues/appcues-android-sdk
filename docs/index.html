@@ -6,10 +6,18 @@
     <link href="images/logo-icon.svg" rel="icon" type="image/svg">
     <script>var pathToRoot = "";</script>
     <script>const storage = localStorage.getItem("dokka-dark-mode")
-const savedDarkMode = storage ? JSON.parse(storage) : false
-if(savedDarkMode === true){
-    document.getElementsByTagName("html")[0].classList.add("theme-dark")
-}</script>
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
 <script type="text/javascript" src="scripts/sourceset_dependencies.js" async="async"></script>
 <link href="styles/style.css" rel="Stylesheet">
 <link href="styles/jetbrains-mono.css" rel="Stylesheet">
@@ -21,6 +29,7 @@ if(savedDarkMode === true){
 <script type="text/javascript" src="scripts/platform-content-handler.js" async="async"></script>
 <script type="text/javascript" src="scripts/main.js" defer="defer"></script>
 <script type="text/javascript" src="scripts/prism.js" async="async"></script>
+<script type="text/javascript" src="scripts/symbol-parameters-wrapper_deferred.js" defer="defer"></script>
 </head>
 <body>
 <div class="navigation-wrapper" id="navigation-wrapper">
@@ -83,6 +92,34 @@ if(savedDarkMode === true){
           <div class=""><span class="inline-flex">
               <div><a href="appcues/com.appcues.trait/index.html">com.appcues.trait</a></div>
 <span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2076252586%2FPackages%2F1172753313"></span>
+                <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+              </span></span></div>
+          <div class="pull-right"></div>
+        </div>
+        <div></div>
+      </div>
+    </div>
+<a data-name="489700456%2FPackages%2F1172753313" anchor-label="com.appcues.ui.composables" id="489700456%2FPackages%2F1172753313" data-filterable-set=":appcues:dokkaHtml/release"></a>
+    <div class="table-row" data-filterable-current=":appcues:dokkaHtml/release" data-filterable-set=":appcues:dokkaHtml/release">
+      <div>
+        <div class="main-subrow ">
+          <div class=""><span class="inline-flex">
+              <div><a href="appcues/com.appcues.ui.composables/index.html">com.appcues.ui.composables</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="489700456%2FPackages%2F1172753313"></span>
+                <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+              </span></span></div>
+          <div class="pull-right"></div>
+        </div>
+        <div></div>
+      </div>
+    </div>
+<a data-name="800523454%2FPackages%2F1172753313" anchor-label="com.appcues.util" id="800523454%2FPackages%2F1172753313" data-filterable-set=":appcues:dokkaHtml/release"></a>
+    <div class="table-row" data-filterable-current=":appcues:dokkaHtml/release" data-filterable-set=":appcues:dokkaHtml/release">
+      <div>
+        <div class="main-subrow ">
+          <div class=""><span class="inline-flex">
+              <div><a href="appcues/com.appcues.util/index.html">com.appcues.util</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="800523454%2FPackages%2F1172753313"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
           <div class="pull-right"></div>

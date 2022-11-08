@@ -6,10 +6,18 @@
     <link href="../../images/logo-icon.svg" rel="icon" type="image/svg">
     <script>var pathToRoot = "../../";</script>
     <script>const storage = localStorage.getItem("dokka-dark-mode")
-const savedDarkMode = storage ? JSON.parse(storage) : false
-if(savedDarkMode === true){
-    document.getElementsByTagName("html")[0].classList.add("theme-dark")
-}</script>
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
 <script type="text/javascript" src="../../scripts/sourceset_dependencies.js" async="async"></script>
 <link href="../../styles/style.css" rel="Stylesheet">
 <link href="../../styles/jetbrains-mono.css" rel="Stylesheet">
@@ -21,6 +29,7 @@ if(savedDarkMode === true){
 <script type="text/javascript" src="../../scripts/platform-content-handler.js" async="async"></script>
 <script type="text/javascript" src="../../scripts/main.js" defer="defer"></script>
 <script type="text/javascript" src="../../scripts/prism.js" async="async"></script>
+<script type="text/javascript" src="../../scripts/symbol-parameters-wrapper_deferred.js" defer="defer"></script>
 </head>
 <body>
 <div class="navigation-wrapper" id="navigation-wrapper">
@@ -43,9 +52,9 @@ if(savedDarkMode === true){
     </div>
     <div id="main">
 <div class="main-content" id="content" pageIds="appcues::com.appcues.action////PointingToDeclaration//1172753313">
-  <div class="breadcrumbs"><a href="../../index.html">appcues</a><span class="delimiter">/</span><a href="index.html">com.appcues.action</a></div>
+  <div class="breadcrumbs"><a href="../../index.html">appcues</a><span class="delimiter">/</span><span class="current">com.appcues.action</span></div>
   <div class="cover ">
-    <h1 class="cover"><span><span>Package</span></span> <span>com.</span><wbr></wbr><span>appcues.</span><wbr></wbr><span>action</span></h1>
+    <h1 class="cover"><span><span>Package-level</span></span> <span><span>declarations</span></span></h1>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Types">Types</button></div>
@@ -61,7 +70,22 @@ if(savedDarkMode === true){
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":appcues:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-experience-action/index.html">ExperienceAction</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">A type that describes an action that can be triggered from an Experience.</p></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":appcues:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-experience-action/index.html">ExperienceAction</a></div><div class="brief "><p class="paragraph">A type that describes an action that can be triggered from an Experience.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="326367945%2FClasslikes%2F1172753313" anchor-label="ExperienceActionQueueTransforming" id="326367945%2FClasslikes%2F1172753313" data-filterable-set=":appcues:dokkaHtml/release"></a>
+        <div class="table-row" data-filterable-current=":appcues:dokkaHtml/release" data-filterable-set=":appcues:dokkaHtml/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-experience-action-queue-transforming/index.html"><span>Experience</span><wbr></wbr><span>Action</span><wbr></wbr><span>Queue</span><wbr></wbr><span><span>Transforming</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="326367945%2FClasslikes%2F1172753313"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":appcues:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-experience-action-queue-transforming/index.html">ExperienceActionQueueTransforming</a> : <a href="-experience-action/index.html">ExperienceAction</a></div><div class="brief "><p class="paragraph">An <code class="lang-kotlin">ExperienceAction</code> that performs modifications of the action queue executed following an interaction in an experience.</p></div></div></div>
               </div>
             </div>
           </div>
