@@ -1,12 +1,16 @@
 package com.appcues.ui.primitive
 
 import android.annotation.SuppressLint
+import android.view.View
+import android.view.ViewGroup
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import com.appcues.data.model.ExperiencePrimitive.EmbedHtmlPrimitive
+import com.appcues.ui.composables.LocalChromeClient
 import com.appcues.ui.composables.LocalStackScope
 import com.appcues.ui.extensions.imageAspectRatio
+import com.google.accompanist.web.AccompanistWebChromeClient
 import com.google.accompanist.web.WebView
 import com.google.accompanist.web.rememberWebViewStateWithHTMLData
 
@@ -14,6 +18,7 @@ import com.google.accompanist.web.rememberWebViewStateWithHTMLData
 @Composable
 internal fun EmbedHtmlPrimitive.Compose(modifier: Modifier) {
     val stackScope = LocalStackScope.current
+    val chromeClient = LocalChromeClient.current
     val webViewState = rememberWebViewStateWithHTMLData(
         data = """
         <head>
@@ -40,6 +45,37 @@ internal fun EmbedHtmlPrimitive.Compose(modifier: Modifier) {
                 javaScriptEnabled = true
                 mediaPlaybackRequiresUserGesture = false
             }
-        }
+        },
+        chromeClient = chromeClient
     )
+}
+
+// this is used by the WebView in the Embed component above, to support expand to fullscreen video
+internal class EmbedChromeClient(private val container: ViewGroup) : AccompanistWebChromeClient() {
+    private var customView: View? = null
+    private var customCallback: CustomViewCallback? = null
+
+    override fun onShowCustomView(view: View?, callback: CustomViewCallback?) {
+        // if a view already exists then immediately terminate the new one
+        if (customView != null) {
+            customCallback?.onCustomViewHidden()
+            return
+        }
+        customView = view
+        customCallback = callback
+        container.addView(view)
+        container.visibility = View.VISIBLE
+    }
+
+    override fun onHideCustomView() {
+        if (customView == null) {
+            return
+        }
+        customView?.visibility = View.GONE
+        container.visibility = View.GONE
+        container.removeView(customView)
+        customCallback?.onCustomViewHidden()
+        customView = null
+        customCallback = null
+    }
 }

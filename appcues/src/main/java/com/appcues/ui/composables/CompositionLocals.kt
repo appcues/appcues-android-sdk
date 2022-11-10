@@ -13,6 +13,7 @@ import com.appcues.logging.Logcues
 import com.appcues.ui.AppcuesViewModel
 import com.appcues.ui.ShakeGestureListener
 import com.appcues.ui.composables.StackScope.ColumnStackScope
+import com.google.accompanist.web.AccompanistWebChromeClient
 import java.util.UUID
 
 // used to register callback for all Actions triggered from primitives
@@ -57,6 +58,8 @@ internal val LocalLogcues = staticCompositionLocalOf<Logcues> { noLocalProvidedF
 internal val LocalExperienceStepFormStateDelegate = compositionLocalOf { ExperienceStepFormState() }
 
 internal val LocalStackScope = compositionLocalOf<StackScope> { ColumnStackScope(null, 0) }
+
+internal val LocalChromeClient = compositionLocalOf { AccompanistWebChromeClient() }
 
 internal sealed class StackScope(private val childrenCount: Int) {
 

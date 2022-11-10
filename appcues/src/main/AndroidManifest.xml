@@ -11,6 +11,7 @@
             android:name=".ui.AppcuesActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize"
+            android:configChanges="orientation|screenSize|screenLayout"
             android:theme="@style/Appcues.AppcuesActivityTheme" />
     </application>
 

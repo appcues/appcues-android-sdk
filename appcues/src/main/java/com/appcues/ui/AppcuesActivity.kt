@@ -10,6 +10,7 @@ import com.appcues.databinding.AppcuesActivityLayoutBinding
 import com.appcues.di.AppcuesKoinContext
 import com.appcues.logging.Logcues
 import com.appcues.ui.composables.AppcuesComposition
+import com.appcues.ui.primitive.EmbedChromeClient
 import org.koin.core.scope.Scope
 
 internal class AppcuesActivity : AppCompatActivity() {
@@ -50,6 +51,7 @@ internal class AppcuesActivity : AppCompatActivity() {
                 viewModel = viewModel,
                 shakeGestureListener = shakeGestureListener,
                 logcues = logcues,
+                chromeClient = EmbedChromeClient(binding.appcuesCustomViewContainer),
                 onCompositionDismissed = ::finish
             )
         }
