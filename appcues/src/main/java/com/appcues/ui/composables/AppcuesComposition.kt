@@ -17,12 +17,14 @@ import com.appcues.ui.AppcuesViewModel.UIState.Dismissing
 import com.appcues.ui.AppcuesViewModel.UIState.Rendering
 import com.appcues.ui.ShakeGestureListener
 import com.appcues.ui.theme.AppcuesTheme
+import com.google.accompanist.web.AccompanistWebChromeClient
 
 @Composable
 internal fun AppcuesComposition(
     viewModel: AppcuesViewModel,
     shakeGestureListener: ShakeGestureListener,
     logcues: Logcues,
+    chromeClient: AccompanistWebChromeClient,
     onCompositionDismissed: () -> Unit,
 ) {
     // ensure to change some colors to match appropriate design for custom primitive blocks
@@ -32,6 +34,7 @@ internal fun AppcuesComposition(
             LocalViewModel provides viewModel,
             LocalShakeGestureListener provides shakeGestureListener,
             LocalLogcues provides logcues,
+            LocalChromeClient provides chromeClient,
             LocalAppcuesActionDelegate provides DefaultAppcuesActionsDelegate(viewModel),
             LocalAppcuesPaginationDelegate provides AppcuesPagination { viewModel.onPageChanged(it) },
         ) {
