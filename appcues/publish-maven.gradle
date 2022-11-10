@@ -81,8 +81,8 @@ afterEvaluate {
                 from components.debug
 
                 groupId = appcuesProperties.getProperty("GROUP_ID")
-                artifactId = appcuesProperties.getProperty("ARTIFACT_ID") + "-debug"
-                version = versionName
+                artifactId = appcuesProperties.getProperty("ARTIFACT_ID")
+                version = versionName + "-debug"
             }
         }
         repositories {
