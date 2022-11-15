@@ -64,7 +64,7 @@ Initializing the SDK requires you to provide two values: `APPCUES_ACCOUNT_ID` an
 
 #### Supporting Debugging and Experience Previewing
 
-Supporting debugging and experience previewing is not required for the Appcues Android SDK to function, but it is necessary for the optimal Appcues builder experience. Refer to the [Debug Guide](https://github.com/appcues/appcues-android-sdk/blob/main/docs/Debugging.md) for details.
+During installation, follow the steps outlined in [Configuring the Appcues URL Scheme](https://github.com/appcues/appcues-android-sdk/blob/main/docs/URLSchemeConfiguring.md). This is necessary for the optimal Appcues builder experience, to support debugging and experience preview. Refer to the [Debug Guide](https://github.com/appcues/appcues-android-sdk/blob/main/docs/Debugging.md) for details about using the Appcues debugger.
 
 ### Identifying Users
 
