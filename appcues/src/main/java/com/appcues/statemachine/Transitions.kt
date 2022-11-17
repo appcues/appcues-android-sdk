@@ -2,6 +2,7 @@
 
 package com.appcues.statemachine
 
+import com.appcues.data.model.Action.Trigger.NAVIGATE
 import com.appcues.data.model.Experience
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.RenderStep
@@ -64,7 +65,7 @@ internal interface Transitions {
                     completion.complete(continuation())
                 }
             },
-            sideEffect = PresentContainerEffect(experience, 0, completion)
+            sideEffect = PresentContainerEffect(experience, 0, completion, emptyList())
         )
     }
 
@@ -181,6 +182,8 @@ private fun transitionsToBeginningStep(
 ) = if (experience.areStepsFromDifferentGroup(currentStepIndex, nextStepIndex)) {
     // given that steps are from different container, we now get step container index to present
     experience.groupLookup[nextStepIndex]?.let { stepContainerIndex ->
+        val stepGroup = experience.stepContainers[stepContainerIndex]
+        val actions = stepGroup.actions[stepGroup.id]?.filter { it.on == NAVIGATE }?.map { it.experienceAction } ?: emptyList()
         val completion: CompletableDeferred<ResultOf<State, Error>> = CompletableDeferred()
         Transition(
             state = BeginningStep(experience, nextStepIndex, false) {
@@ -188,7 +191,7 @@ private fun transitionsToBeginningStep(
                     completion.complete(continuation())
                 }
             },
-            sideEffect = PresentContainerEffect(experience, stepContainerIndex, completion)
+            sideEffect = PresentContainerEffect(experience, stepContainerIndex, completion, actions)
         )
     } ?: run {
         // this should never happen at this point. but better to safe guard anyways
