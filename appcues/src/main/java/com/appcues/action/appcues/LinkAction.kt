@@ -43,7 +43,7 @@ internal class LinkAction(
                 } else {
                     // this will handle any in-app deep link scheme URLs OR any web urls that were
                     // requested to open into the external browser application
-                    linkOpener.startNewIntent(uri)
+                    appcues.navigationHandler?.navigateTo(uri) ?: linkOpener.startNewIntent(uri)
                 }
             }
         }
