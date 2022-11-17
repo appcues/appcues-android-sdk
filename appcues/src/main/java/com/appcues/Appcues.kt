@@ -79,6 +79,11 @@ class Appcues internal constructor(koinScope: Scope) {
      */
     var interceptor: AppcuesInterceptor? by config::interceptor
 
+    /**
+     * Sets the handler to use for link navigation.
+     */
+    var navigationHandler: NavigationHandler? by config::navigationHandler
+
     init {
         sessionMonitor.start()
 
