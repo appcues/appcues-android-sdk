@@ -251,7 +251,7 @@ private fun List<Action>.toTapMotionOrEmpty(
     viewDescription: String?
 ): (() -> Unit) {
     // filter only TAP motions
-    return filter { it.on == Action.Motion.TAP }
+    return filter { it.on == Action.Trigger.TAP }
         // take if there is any
         .takeIf { it.isNotEmpty() }
         // map to ExperienceAction
@@ -274,7 +274,7 @@ private fun List<Action>.toLongPressMotionOrNull(
     viewDescription: String?
 ): (() -> Unit)? {
     // filter only LONG_PRESS motions
-    return filter { it.on == Action.Motion.LONG_PRESS }
+    return filter { it.on == Action.Trigger.LONG_PRESS }
         // take if there is any
         .takeIf { it.isNotEmpty() }
         // map to ExperienceAction
