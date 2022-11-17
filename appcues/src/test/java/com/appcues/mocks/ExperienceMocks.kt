@@ -25,6 +25,7 @@ internal fun mockExperience(onPresent: (() -> Unit)? = null) =
         type = "mobile",
         stepContainers = listOf(
             StepContainer(
+                id = UUID.fromString("e062bd81-b736-44c4-abba-633dfff966aa"),
                 steps = listOf(
                     mockStep(UUID.fromString("01d8a05a-3a55-4ecc-872d-d140cd628902")),
                     mockStep(UUID.fromString("945e9689-8707-4196-8aa5-7c00c479bdab")),
@@ -35,8 +36,10 @@ internal fun mockExperience(onPresent: (() -> Unit)? = null) =
                 contentWrappingTrait = mockk(relaxed = true),
                 backdropDecoratingTraits = listOf(),
                 containerDecoratingTraits = listOf(),
+                actions = emptyMap(),
             ),
             StepContainer(
+                id = UUID.fromString("373578ad-6371-4aa9-8645-79bffa2bc1a9"),
                 steps = listOf(
                     mockStep(UUID.fromString("0f6cda9d-17f0-4c0d-b8e7-e4fb94a128d9")),
                 ),
@@ -45,6 +48,7 @@ internal fun mockExperience(onPresent: (() -> Unit)? = null) =
                 contentWrappingTrait = mockk(relaxed = true),
                 backdropDecoratingTraits = listOf(),
                 containerDecoratingTraits = listOf(),
+                actions = emptyMap(),
             )
         ),
         published = true,
@@ -73,6 +77,7 @@ internal fun mockExperienceExperiment(experiment: Experiment) =
         type = "mobile",
         stepContainers = listOf(
             StepContainer(
+                id = UUID.fromString("60b49c12-c49b-47ac-8ed3-ba4e9a55e694"),
                 steps = listOf(
                     mockStep(UUID.fromString("01d8a05a-3a55-4ecc-872d-d140cd628902")),
                 ),
@@ -81,6 +86,7 @@ internal fun mockExperienceExperiment(experiment: Experiment) =
                 contentWrappingTrait = mockk(relaxed = true),
                 backdropDecoratingTraits = listOf(),
                 containerDecoratingTraits = listOf(),
+                actions = emptyMap(),
             )
         ),
         published = true,
