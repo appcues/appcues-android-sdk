@@ -262,6 +262,7 @@ internal class SubmitFormActionTest : AppcuesScopeTest {
         name = "form test",
         stepContainers = listOf(
             StepContainer(
+                id = UUID.randomUUID(),
                 steps = listOf(
                     Step(
                         id = UUID.randomUUID(),
@@ -278,6 +279,7 @@ internal class SubmitFormActionTest : AppcuesScopeTest {
                 presentingTrait = mockk(relaxed = true),
                 contentHolderTrait = mockk(relaxed = true),
                 contentWrappingTrait = mockk(relaxed = true),
+                actions = emptyMap(),
             )
         ),
         published = true,
