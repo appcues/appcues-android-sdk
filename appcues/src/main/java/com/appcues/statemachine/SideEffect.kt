@@ -11,6 +11,7 @@ internal sealed class SideEffect {
         val experience: Experience,
         val containerIndex: Int,
         val completion: CompletableDeferred<ResultOf<State, Error>>,
+        val actions: List<ExperienceAction>,
     ) : SideEffect()
 
     data class ReportErrorEffect(val error: Error) : SideEffect()

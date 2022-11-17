@@ -102,6 +102,10 @@ internal class StateMachine(
                     Failure(sideEffect.error)
                 }
                 is PresentContainerEffect -> {
+                    // first, process any pre-step actions that need to be handled before the container is presented.
+                    // for example - navigating to another screen in the app
+                    actionProcessor.process(sideEffect.actions)
+
                     // kick off UI
                     sideEffect.experience.stepContainers[sideEffect.containerIndex].presentingTrait.present()
 

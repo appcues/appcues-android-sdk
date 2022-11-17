@@ -31,8 +31,9 @@ internal class ActionsMapper(
         return actionRegistry[type]?.let {
             Action(
                 on = when (on) {
-                    "tap" -> Action.Motion.TAP
-                    "longPress" -> Action.Motion.LONG_PRESS
+                    "tap" -> Action.Trigger.TAP
+                    "longPress" -> Action.Trigger.LONG_PRESS
+                    "navigate" -> Action.Trigger.NAVIGATE
                     else -> throw AppcuesMappingException("on property $on is unknown")
                 },
                 experienceAction = it.invoke(config)
