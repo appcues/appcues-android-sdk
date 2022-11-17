@@ -41,7 +41,7 @@ class ActionProcessorTest : KoinTest {
     }
 
     @Test
-    fun `process SHOULD transform queue WHEN it contains a transformation action`() {
+    fun `process SHOULD transform queue WHEN it contains a transformation action`() = runTest {
         // GIVEN
         val experience = mockExperience()
         val initialState = RenderingStep(experience, 0, true)

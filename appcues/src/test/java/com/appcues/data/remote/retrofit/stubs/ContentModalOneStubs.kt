@@ -26,7 +26,6 @@ internal val contentModalOneStubs = ExperienceResponse(
     publishedAt = 1643221968554,
     name = "POC Modal One",
     theme = null,
-    actions = null,
     nextContentId = null,
     redirectUrl = null,
     traits = arrayListOf(),

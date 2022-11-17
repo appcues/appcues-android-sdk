@@ -1,10 +1,14 @@
 package com.appcues.action.appcues
 
 import android.net.Uri
+import com.appcues.Appcues
 import com.appcues.AppcuesScopeTest
+import com.appcues.NavigationHandler
 import com.appcues.rules.KoinScopeRule
 import com.appcues.util.LinkOpener
 import com.google.common.truth.Truth.assertThat
+import io.mockk.Called
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -44,17 +48,39 @@ internal class LinkActionTest : AppcuesScopeTest {
     }
 
     @Test
-    fun `link SHOULD call LinkOpener startNewIntent for external web link`() = runTest {
+    fun `link SHOULD call LinkOpener startNewIntent for external web link WHEN no navigationHandler is set`() = runTest {
         // GIVEN
         val uri: Uri = Uri.parse("https://test/path")
         val linkOpener: LinkOpener = get()
         val action = LinkAction(mapOf("url" to uri.toString(), "openExternally" to true), linkOpener)
+        val appcues = mockk<Appcues>(relaxed = true) {
+            every { this@mockk.navigationHandler } returns null
+        }
 
         // WHEN
-        action.execute(get())
+        action.execute(appcues)
 
         // THEN
         verify { linkOpener.startNewIntent(uri) }
+    }
+
+    @Test
+    fun `link SHOULD call navigationHandler navigate for external web link WHEN navigationHandler is set`() = runTest {
+        // GIVEN
+        val uri: Uri = Uri.parse("https://test/path")
+        val linkOpener: LinkOpener = get()
+        val action = LinkAction(mapOf("url" to uri.toString(), "openExternally" to true), linkOpener)
+        val navigationHandler = mockk<NavigationHandler>(relaxed = true)
+        val appcues = mockk<Appcues>(relaxed = true) {
+            every { this@mockk.navigationHandler } returns navigationHandler
+        }
+
+        // WHEN
+        action.execute(appcues)
+
+        // THEN
+        coVerify { navigationHandler.navigateTo(uri) }
+        verify { linkOpener wasNot Called }
     }
 
     @Test
@@ -72,16 +98,38 @@ internal class LinkActionTest : AppcuesScopeTest {
     }
 
     @Test
-    fun `link SHOULD call LinkOpener startNewIntent for app scheme link`() = runTest {
+    fun `link SHOULD call LinkOpener startNewIntent for app scheme link WHEN no navigationHandler is set`() = runTest {
         // GIVEN
         val uri: Uri = Uri.parse("myapp://test/path")
         val linkOpener: LinkOpener = get()
         val action = LinkAction(mapOf("url" to uri.toString()), linkOpener)
+        val appcues = mockk<Appcues>(relaxed = true) {
+            every { this@mockk.navigationHandler } returns null
+        }
 
         // WHEN
-        action.execute(get())
+        action.execute(appcues)
 
         // THEN
         verify { linkOpener.startNewIntent(uri) }
+    }
+
+    @Test
+    fun `link SHOULD call navigationHandler navigate for app scheme link WHEN navigationHandler is set`() = runTest {
+        // GIVEN
+        val uri: Uri = Uri.parse("myapp://test/path")
+        val linkOpener: LinkOpener = get()
+        val action = LinkAction(mapOf("url" to uri.toString()), linkOpener)
+        val navigationHandler = mockk<NavigationHandler>(relaxed = true)
+        val appcues = mockk<Appcues>(relaxed = true) {
+            every { this@mockk.navigationHandler } returns navigationHandler
+        }
+
+        // WHEN
+        action.execute(appcues)
+
+        // THEN
+        coVerify { navigationHandler.navigateTo(uri) }
+        verify { linkOpener wasNot Called }
     }
 }
