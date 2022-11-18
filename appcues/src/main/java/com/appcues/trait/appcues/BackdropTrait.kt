@@ -32,7 +32,7 @@ internal class BackdropTrait(
     private val backgroundColor = config.getConfigColor("backgroundColor")
 
     @Composable
-    override fun BoxScope.Backdrop() {
+    override fun BoxScope.BackdropDecorate(content: @Composable BoxScope.() -> Unit) {
         AppcuesTraitAnimatedVisibility(
             visibleState = rememberAppcuesBackdropVisibility(),
             enter = enterTransition(),
@@ -45,6 +45,8 @@ internal class BackdropTrait(
                     .background(backgroundColor, isSystemInDarkTheme())
             )
         }
+
+        content()
     }
 
     private fun Modifier.background(color: ComponentColor?, isDark: Boolean) = this.then(

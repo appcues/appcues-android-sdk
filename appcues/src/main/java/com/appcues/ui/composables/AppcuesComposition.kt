@@ -10,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalDensity
 import com.appcues.logging.Logcues
+import com.appcues.trait.BackdropDecoratingTrait
 import com.appcues.trait.ContentHolderTrait.ContainerPages
 import com.appcues.trait.StepDecoratingPadding
 import com.appcues.ui.AppcuesViewModel
@@ -91,9 +92,8 @@ private fun BoxScope.ComposeLastRenderingState(state: Rendering) {
 
     with(state.stepContainer) {
         // apply backdrop traits
-        backdropDecoratingTraits.forEach {
-            with(it) { Backdrop() }
-        }
+        ApplyBackgroundDecoratingTraits(list = backdropDecoratingTraits.toMutableList())
+
         // create wrapper
         contentWrappingTrait.WrapContent { hasFixedHeight, contentPadding ->
             Box(contentAlignment = Alignment.TopCenter) {
@@ -131,5 +131,14 @@ private fun BoxScope.ComposeLastRenderingState(state: Rendering) {
                 ApplyOverlayContainerTraits(this)
             }
         }
+    }
+}
+
+@Composable
+private fun BoxScope.ApplyBackgroundDecoratingTraits(list: List<BackdropDecoratingTrait>) {
+    // get last trait if its not null compose it and drop last calling it again recursively
+    val item = list.lastOrNull()
+    if (item != null) {
+        with(item) { BackdropDecorate { ApplyBackgroundDecoratingTraits(list.dropLast(1)) } }
     }
 }

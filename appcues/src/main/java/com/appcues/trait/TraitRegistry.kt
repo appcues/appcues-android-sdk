@@ -5,6 +5,7 @@ import com.appcues.logging.Logcues
 import com.appcues.trait.appcues.BackdropTrait
 import com.appcues.trait.appcues.BackgroundContentTrait
 import com.appcues.trait.appcues.CarouselTrait
+import com.appcues.trait.appcues.KeyholeTrait
 import com.appcues.trait.appcues.ModalTrait
 import com.appcues.trait.appcues.PagingDotsTrait
 import com.appcues.trait.appcues.SkippableTrait
@@ -26,6 +27,7 @@ internal class TraitRegistry(
 
     init {
         register(BackdropTrait.TYPE) { config, _ -> get<BackdropTrait> { parametersOf(config) } }
+        register(KeyholeTrait.TYPE) { config, _ -> get<KeyholeTrait> { parametersOf(config) } }
         register(ModalTrait.TYPE) { config, _ -> get<ModalTrait> { parametersOf(config) } }
         register(SkippableTrait.TYPE) { config, _ -> get<SkippableTrait> { parametersOf(config) } }
         register(CarouselTrait.TYPE) { config, _ -> get<CarouselTrait> { parametersOf(config) } }
