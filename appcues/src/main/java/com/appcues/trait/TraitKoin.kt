@@ -10,6 +10,7 @@ import com.appcues.trait.appcues.PagingDotsTrait
 import com.appcues.trait.appcues.SkippableTrait
 import com.appcues.trait.appcues.StepAnimationTrait
 import com.appcues.trait.appcues.StickyContentTrait
+import com.appcues.trait.appcues.TooltipTrait
 import org.koin.dsl.ScopeDSL
 
 internal object TraitKoin : KoinScopePlugin {
@@ -71,6 +72,13 @@ internal object TraitKoin : KoinScopePlugin {
         factory { params ->
             StickyContentTrait(
                 config = params.getOrNull(),
+            )
+        }
+
+        factory { params ->
+            TooltipTrait(
+                config = params.getOrNull(),
+                scope = get(),
             )
         }
 

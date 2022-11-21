@@ -11,6 +11,7 @@ import com.appcues.trait.appcues.PagingDotsTrait
 import com.appcues.trait.appcues.SkippableTrait
 import com.appcues.trait.appcues.StepAnimationTrait
 import com.appcues.trait.appcues.StickyContentTrait
+import com.appcues.trait.appcues.TooltipTrait
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.get
 import org.koin.core.parameter.parametersOf
@@ -36,6 +37,7 @@ internal class TraitRegistry(
         register(PagingDotsTrait.TYPE) { config, _ -> get<PagingDotsTrait> { parametersOf(config) } }
         register(StickyContentTrait.TYPE) { config, _ -> get<StickyContentTrait> { parametersOf(config) } }
         register(BackgroundContentTrait.TYPE) { config, level -> get<BackgroundContentTrait> { parametersOf(config, level) } }
+        register(TooltipTrait.TYPE) { config, _ -> get<TooltipTrait> { parametersOf(config) } }
     }
 
     operator fun get(key: String): TraitFactoryBlock? {
