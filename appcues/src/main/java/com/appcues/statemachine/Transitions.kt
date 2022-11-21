@@ -2,6 +2,7 @@
 
 package com.appcues.statemachine
 
+import com.appcues.action.ExperienceAction
 import com.appcues.data.model.Action.Trigger.NAVIGATE
 import com.appcues.data.model.Experience
 import com.appcues.statemachine.Action.EndExperience
@@ -182,8 +183,7 @@ private fun transitionsToBeginningStep(
 ) = if (experience.areStepsFromDifferentGroup(currentStepIndex, nextStepIndex)) {
     // given that steps are from different container, we now get step container index to present
     experience.groupLookup[nextStepIndex]?.let { stepContainerIndex ->
-        val stepGroup = experience.stepContainers[stepContainerIndex]
-        val actions = stepGroup.actions[stepGroup.id]?.filter { it.on == NAVIGATE }?.map { it.experienceAction } ?: emptyList()
+        val actions = experience.getNavigationActions(stepContainerIndex)
         val completion: CompletableDeferred<ResultOf<State, Error>> = CompletableDeferred()
         Transition(
             state = BeginningStep(experience, nextStepIndex, false) {
@@ -209,6 +209,13 @@ private fun transitionsToBeginningStep(
         },
         sideEffect = AwaitEffect(completion)
     )
+}
+
+// Gets any actions defined on the step group container for the "navigate" trigger. These are the
+// actions that should be executed before presenting this group's container.
+private fun Experience.getNavigationActions(stepContainerIndex: Int): List<ExperienceAction> {
+    val stepGroup = stepContainers[stepContainerIndex]
+    return stepGroup.actions[stepGroup.id]?.filter { it.on == NAVIGATE }?.map { it.experienceAction } ?: emptyList()
 }
 
 private fun Experience.areStepsFromDifferentGroup(stepIndexOne: Int, stepIndexTwo: Int): Boolean {
