@@ -1,6 +1,5 @@
 package com.appcues.data.mapper.experience
 
-import android.content.Context
 import com.appcues.action.ExperienceAction
 import com.appcues.action.appcues.LaunchExperienceAction
 import com.appcues.action.appcues.LinkAction
@@ -27,7 +26,6 @@ import com.appcues.trait.ExperienceTraitLevel.EXPERIENCE
 import com.appcues.trait.ExperienceTraitLevel.GROUP
 import com.appcues.trait.PresentingTrait
 import com.appcues.trait.appcues.DefaultContentHolderTrait
-import com.appcues.trait.appcues.DefaultPresentingTrait
 import org.koin.core.scope.Scope
 import java.util.UUID
 
@@ -35,8 +33,8 @@ internal class ExperienceMapper(
     private val stepMapper: StepMapper,
     private val traitsMapper: TraitsMapper,
     private val scope: Scope,
-    private val context: Context,
 ) {
+
     fun map(
         from: ExperienceResponse,
         priority: ExperiencePriority = NORMAL,
@@ -74,7 +72,7 @@ internal class ExperienceMapper(
         // also merge all necessary traits for each step
         StepContainer(
             steps = stepContainerResponse.children.map { step -> stepMapper.map(step, mergedTraits, mergedActions) },
-            presentingTrait = mappedTraits.getExperiencePresentingTraitOrDefault(),
+            presentingTrait = mappedTraits.getExperiencePresentingTraitOrThrow(),
             contentHolderTrait = mappedTraits.getContainerCreatingTraitOrDefault(),
             // what should we do if no content wrapping trait is found?
             contentWrappingTrait = mappedTraits.filterIsInstance<ContentWrappingTrait>().first(),
@@ -87,9 +85,11 @@ internal class ExperienceMapper(
         return filterIsInstance<ContentHolderTrait>().firstOrNull() ?: DefaultContentHolderTrait(null)
     }
 
-    private fun List<ExperienceTrait>.getExperiencePresentingTraitOrDefault(): PresentingTrait {
-        return filterIsInstance<PresentingTrait>().firstOrNull() ?: DefaultPresentingTrait(null, scope, context)
+    private fun List<ExperienceTrait>.getExperiencePresentingTraitOrThrow(): PresentingTrait {
+        return filterIsInstance<PresentingTrait>().firstOrNull() ?: throw AppcuesPresentingTraitNotFound()
     }
+
+    private class AppcuesPresentingTraitNotFound : Exception("Presenting capability trait required")
 
     private fun List<ExperimentResponse>.getExperiment(experienceId: UUID) =
         this.firstOrNull { it.experienceId == experienceId }?.let { experimentResponse ->
