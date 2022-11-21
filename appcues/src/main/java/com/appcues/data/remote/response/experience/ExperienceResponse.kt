@@ -10,7 +10,6 @@ internal data class ExperienceResponse(
     val id: UUID,
     val name: String,
     val theme: String?,
-    // val actions: Map<UUID, List<ActionResponse>>?, // not currently using concept of Experience level actions
     val traits: List<TraitResponse>,
     val steps: List<StepContainerResponse>,
     val state: String?,
