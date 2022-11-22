@@ -1,3 +1,3 @@
 package com.appcues.trait
 
-class AppcuesTraitException(message: String) : Exception("AppcuesTraitException: $message")
+class AppcuesTraitException(message: String) : Exception(message)

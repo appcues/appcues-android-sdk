@@ -160,7 +160,7 @@ class StateMachineTest : AppcuesScopeTest {
         assertThat(stateMachine.state).isEqualTo(targetState)
         assertThat(result.failureReason()).isInstanceOf(ExperienceError::class.java)
         with(result.failureReason() as ExperienceError) {
-            assertThat(message).isEqualTo("AppcuesTraitException: test trait exception")
+            assertThat(message).isEqualTo("test trait exception")
         }
     }
 
