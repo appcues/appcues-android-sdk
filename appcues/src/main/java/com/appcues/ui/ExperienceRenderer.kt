@@ -18,6 +18,7 @@ import com.appcues.statemachine.StateMachine
 import com.appcues.util.ResultOf
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
+import com.appcues.util.appcuesFormatted
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
@@ -128,8 +129,11 @@ internal class ExperienceRenderer(
         analyticsTracker.track(
             event = AnalyticsEvent.ExperimentEntered,
             properties = mapOf(
-                "experimentId" to id.toString().lowercase(),
-                "group" to group
+                "experimentId" to id.appcuesFormatted(),
+                "experimentGroup" to group,
+                "experimentExperienceId" to experienceId.appcuesFormatted(),
+                "experimentGoalId" to goalId,
+                "experimentContentType" to contentType,
             ),
             interactive = false
         )

@@ -93,6 +93,12 @@ internal class ExperienceMapper(
 
     private fun List<ExperimentResponse>.getExperiment(experienceId: UUID) =
         this.firstOrNull { it.experienceId == experienceId }?.let { experimentResponse ->
-            Experiment(experimentResponse.experimentId, experimentResponse.group)
+            Experiment(
+                id = experimentResponse.experimentId,
+                group = experimentResponse.group,
+                experienceId = experimentResponse.experienceId,
+                goalId = experimentResponse.goalId,
+                contentType = experimentResponse.contentType
+            )
         }
 }
