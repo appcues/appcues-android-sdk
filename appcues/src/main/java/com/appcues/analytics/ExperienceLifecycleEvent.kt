@@ -6,6 +6,7 @@ import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.Interactio
 import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperienceStepFormState
 import com.appcues.statemachine.Error
+import com.appcues.util.appcuesFormatted
 import com.appcues.util.toSlug
 
 internal sealed class ExperienceLifecycleEvent(
@@ -77,7 +78,7 @@ internal sealed class ExperienceLifecycleEvent(
 
     val properties: Map<String, Any>
         get() = hashMapOf<String, Any?>(
-            "experienceId" to experience.id.toString().lowercase(),
+            "experienceId" to experience.id.appcuesFormatted(),
             "experienceName" to experience.name,
             "experienceType" to experience.type,
             "version" to experience.publishedAt,
@@ -88,7 +89,7 @@ internal sealed class ExperienceLifecycleEvent(
         ).apply {
             flatStepIndex?.let {
                 val step = experience.flatSteps[it]
-                this["stepId"] = step.id.toString()
+                this["stepId"] = step.id.appcuesFormatted()
                 // this is required by SDK debugger to know which step and group is currently showing
                 this["stepIndex"] = "${experience.groupLookup[it] ?: 0},${experience.stepIndexLookup[it] ?: 0}"
                 this["stepType"] = step.type
@@ -98,7 +99,7 @@ internal sealed class ExperienceLifecycleEvent(
             }
             error?.let {
                 this["message"] = it.message
-                this["errorId"] = it.id.toString()
+                this["errorId"] = it.id.appcuesFormatted()
             }
         }.filterValues { it != null }.mapValues { it.value as Any }
 
