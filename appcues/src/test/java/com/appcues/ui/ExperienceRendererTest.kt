@@ -75,7 +75,13 @@ class ExperienceRendererTest {
     @Test
     fun `show SHOULD NOT show experience WHEN an experiment is active AND group is control`() = runTest {
         // GIVEN
-        val experiment = Experiment(UUID.fromString("06f9bf87-1921-4919-be55-429b278bf578"), "control")
+        val experiment = Experiment(
+            id = UUID.fromString("06f9bf87-1921-4919-be55-429b278bf578"),
+            group = "control",
+            experienceId = UUID.fromString("d84c9d01-aa27-4cbb-b832-ee03720e04fc"),
+            goalId = "my-goal",
+            contentType = "my-content-type"
+        )
         val experience = mockExperienceExperiment(experiment)
         val stateMachine = mockk<StateMachine>(relaxed = true) {
             every { this@mockk.state } answers { Idling }
@@ -95,7 +101,13 @@ class ExperienceRendererTest {
     @Test
     fun `show SHOULD show experience WHEN an experiment is active AND group is exposed`() = runTest {
         // GIVEN
-        val experiment = Experiment(UUID.fromString("06f9bf87-1921-4919-be55-429b278bf578"), "exposed")
+        val experiment = Experiment(
+            id = UUID.fromString("06f9bf87-1921-4919-be55-429b278bf578"),
+            group = "exposed",
+            experienceId = UUID.fromString("d84c9d01-aa27-4cbb-b832-ee03720e04fc"),
+            goalId = "my-goal",
+            contentType = "my-content-type"
+        )
         val experience = mockExperienceExperiment(experiment)
         val stateMachine = mockk<StateMachine>(relaxed = true) {
             every { this@mockk.state } answers { Idling }
@@ -116,7 +128,13 @@ class ExperienceRendererTest {
     @Test
     fun `show SHOULD track experiment_entered with group=control WHEN an experiment is active AND group is control`() = runTest {
         // GIVEN
-        val experiment = Experiment(UUID.fromString("06f9bf87-1921-4919-be55-429b278bf578"), "control")
+        val experiment = Experiment(
+            id = UUID.fromString("06f9bf87-1921-4919-be55-429b278bf578"),
+            group = "control",
+            experienceId = UUID.fromString("d84c9d01-aa27-4cbb-b832-ee03720e04fc"),
+            goalId = "my-goal",
+            contentType = "my-content-type"
+        )
         val experience = mockExperienceExperiment(experiment)
         val stateMachine = mockk<StateMachine>(relaxed = true) {
             every { this@mockk.state } answers { Idling }
@@ -133,7 +151,13 @@ class ExperienceRendererTest {
         verify {
             analyticsTracker.track(
                 AnalyticsEvent.ExperimentEntered,
-                mapOf("experimentId" to "06f9bf87-1921-4919-be55-429b278bf578", "group" to "control"),
+                mapOf(
+                    "experimentId" to "06f9bf87-1921-4919-be55-429b278bf578",
+                    "experimentGroup" to "control",
+                    "experimentExperienceId" to "d84c9d01-aa27-4cbb-b832-ee03720e04fc",
+                    "experimentGoalId" to "my-goal",
+                    "experimentContentType" to "my-content-type",
+                ),
                 false
             )
         }
@@ -142,7 +166,13 @@ class ExperienceRendererTest {
     @Test
     fun `show SHOULD track experiment_entered with group=exposed WHEN an experiment is active AND group is exposed`() = runTest {
         // GIVEN
-        val experiment = Experiment(UUID.fromString("06f9bf87-1921-4919-be55-429b278bf578"), "exposed")
+        val experiment = Experiment(
+            id = UUID.fromString("06f9bf87-1921-4919-be55-429b278bf578"),
+            group = "exposed",
+            experienceId = UUID.fromString("d84c9d01-aa27-4cbb-b832-ee03720e04fc"),
+            goalId = "my-goal",
+            contentType = "my-content-type"
+        )
         val experience = mockExperienceExperiment(experiment)
         val stateMachine = mockk<StateMachine>(relaxed = true) {
             every { this@mockk.state } answers { Idling }
@@ -159,7 +189,13 @@ class ExperienceRendererTest {
         verify {
             analyticsTracker.track(
                 AnalyticsEvent.ExperimentEntered,
-                mapOf("experimentId" to "06f9bf87-1921-4919-be55-429b278bf578", "group" to "exposed"),
+                mapOf(
+                    "experimentId" to "06f9bf87-1921-4919-be55-429b278bf578",
+                    "experimentGroup" to "exposed",
+                    "experimentExperienceId" to "d84c9d01-aa27-4cbb-b832-ee03720e04fc",
+                    "experimentGoalId" to "my-goal",
+                    "experimentContentType" to "my-content-type",
+                ),
                 false)
         }
     }

@@ -11,4 +11,8 @@ internal data class ExperimentResponse(
     val experimentId: UUID,
     @Json(name = "experience_id")
     val experienceId: UUID,
+    @Json(name = "goal_id")
+    val goalId: String,
+    @Json(name = "content_type")
+    val contentType: String,
 )
