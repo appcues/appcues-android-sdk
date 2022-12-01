@@ -11,11 +11,13 @@ import com.appcues.data.model.ExperiencePriority.NORMAL
 import com.appcues.data.remote.AppcuesRemoteSource
 import com.appcues.data.remote.RemoteError.NetworkError
 import com.appcues.data.remote.request.ActivityRequest
+import com.appcues.data.remote.response.experience.ExperienceResponse
 import com.appcues.logging.Logcues
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
 import com.appcues.util.doIfFailure
 import com.appcues.util.doIfSuccess
+import com.squareup.moshi.JsonDataException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -148,13 +150,21 @@ internal class AppcuesRepository(
 
             qualifyResult.doIfSuccess { response ->
                 val priority: ExperiencePriority = if (response.qualificationReason == "screen_view") LOW else NORMAL
-                experiences += response.experiences.map { experienceMapper.map(it, priority, response.experiments, activity.requestId) }
+                experiences += response.experiences.filterIsInstance<ExperienceResponse>().map {
+                    experienceMapper.map(it, priority, response.experiments, activity.requestId)
+                }
             }
 
             qualifyResult.doIfFailure {
                 logcues.info("qualify request failed, reason: $it")
                 when (it) {
-                    is NetworkError -> successful = false
+                    is NetworkError -> {
+                        when (it.throwable) {
+                            // don't retry on JSON parse failures, server responded, it was just unexpected structure
+                            is JsonDataException -> Unit
+                            else -> successful = false
+                        }
+                    }
                     else -> Unit
                 }
             }

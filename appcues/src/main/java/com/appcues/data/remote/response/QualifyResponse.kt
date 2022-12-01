@@ -1,12 +1,12 @@
 package com.appcues.data.remote.response
 
-import com.appcues.data.remote.response.experience.ExperienceResponse
+import com.appcues.data.remote.response.experience.LossyExperienceResponse
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
 internal data class QualifyResponse(
-    val experiences: List<ExperienceResponse>,
+    val experiences: List<LossyExperienceResponse>,
 
     val experiments: List<ExperimentResponse>?,
 
