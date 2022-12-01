@@ -270,13 +270,14 @@ internal class SubmitFormActionTest : AppcuesScopeTest {
                         actions = emptyMap(),
                         type = "modal",
                         formState = formState,
+                        backdropDecoratingTraits = mockk(relaxed = true),
+                        containerDecoratingTraits = mockk(relaxed = true),
+                        metadataSettingTraits = mockk(relaxed = true)
                     )
                 ),
                 presentingTrait = mockk(relaxed = true),
                 contentHolderTrait = mockk(relaxed = true),
                 contentWrappingTrait = mockk(relaxed = true),
-                backdropDecoratingTraits = mockk(relaxed = true),
-                containerDecoratingTraits = mockk(relaxed = true)
             )
         ),
         published = true,
