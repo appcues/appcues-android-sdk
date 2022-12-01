@@ -106,7 +106,7 @@ class AppcuesRepositoryTest {
         // GIVEN
         val request = ActivityRequest(accountId = "123", userId = "userId")
         val qualifyResponse = QualifyResponse(
-            experiences = listOf(mockk(), mockk()),
+            experiences = listOf(mockk<ExperienceResponse>(), mockk<ExperienceResponse>()),
             performedQualification = true,
             qualificationReason = "screen_view",
             experiments = null,
@@ -244,7 +244,7 @@ class AppcuesRepositoryTest {
         // GIVEN
         val request = ActivityRequest(accountId = "123", userId = "userId")
         val qualifyResponse = QualifyResponse(
-            experiences = listOf(mockk(), mockk()),
+            experiences = listOf(mockk<ExperienceResponse>(), mockk<ExperienceResponse>()),
             performedQualification = true,
             qualificationReason = "screen_view",
             experiments = null,
@@ -265,7 +265,7 @@ class AppcuesRepositoryTest {
         // GIVEN
         val request = ActivityRequest(accountId = "123", userId = "userId")
         val qualifyResponse = QualifyResponse(
-            experiences = listOf(mockk(), mockk()),
+            experiences = listOf(mockk<ExperienceResponse>(), mockk<ExperienceResponse>()),
             performedQualification = true,
             qualificationReason = "event_trigger",
             experiments = null,
