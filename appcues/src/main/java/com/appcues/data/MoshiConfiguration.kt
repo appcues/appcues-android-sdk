@@ -2,7 +2,7 @@ package com.appcues.data
 
 import com.appcues.data.remote.adapters.DateAdapter
 import com.appcues.data.remote.adapters.ExperienceStepFormStateAdapter
-import com.appcues.data.remote.adapters.LossyExperienceResponseAdapter
+import com.appcues.data.remote.adapters.LossyExperienceResponseAdapterFactory
 import com.appcues.data.remote.adapters.StepContainerAdapter
 import com.appcues.data.remote.adapters.UUIDAdapter
 import com.appcues.data.remote.response.step.primitive.PrimitiveResponse
@@ -56,7 +56,7 @@ internal object MoshiConfiguration {
         .add(SerializeNull.JSON_ADAPTER_FACTORY)
         .add(StepContainerAdapter())
         .add(ExperienceStepFormStateAdapter())
-        .add(LossyExperienceResponseAdapter())
+        .add(LossyExperienceResponseAdapterFactory())
         .addLast(KotlinJsonAdapterFactory())
         .build()
 
