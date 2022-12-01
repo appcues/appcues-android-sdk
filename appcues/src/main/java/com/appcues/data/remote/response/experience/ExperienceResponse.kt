@@ -30,6 +30,4 @@ internal data class FailedExperienceResponse(
     var error: String? = null
 ) : LossyExperienceResponse()
 
-internal object UnknownExperienceResponse : LossyExperienceResponse()
-
 internal sealed class LossyExperienceResponse
