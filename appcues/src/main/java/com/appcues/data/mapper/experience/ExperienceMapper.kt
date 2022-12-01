@@ -17,8 +17,6 @@ import com.appcues.data.remote.response.ExperimentResponse
 import com.appcues.data.remote.response.action.ActionResponse
 import com.appcues.data.remote.response.experience.ExperienceResponse
 import com.appcues.data.remote.response.step.StepContainerResponse
-import com.appcues.trait.BackdropDecoratingTrait
-import com.appcues.trait.ContainerDecoratingTrait
 import com.appcues.trait.ContentHolderTrait
 import com.appcues.trait.ContentWrappingTrait
 import com.appcues.trait.ExperienceTrait
@@ -76,8 +74,6 @@ internal class ExperienceMapper(
             contentHolderTrait = mappedTraits.getContainerCreatingTraitOrDefault(),
             // what should we do if no content wrapping trait is found?
             contentWrappingTrait = mappedTraits.filterIsInstance<ContentWrappingTrait>().first(),
-            backdropDecoratingTraits = mappedTraits.filterIsInstance<BackdropDecoratingTrait>(),
-            containerDecoratingTraits = mappedTraits.filterIsInstance<ContainerDecoratingTrait>(),
         )
     }
 
