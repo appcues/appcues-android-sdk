@@ -4,6 +4,11 @@ import com.appcues.data.remote.response.experience.ExperienceResponse
 import com.appcues.data.remote.response.experience.FailedExperienceResponse
 import com.appcues.data.remote.response.experience.LossyExperienceResponse
 import com.appcues.data.remote.response.experience.UnknownExperienceResponse
+import com.appcues.util.ResultOf
+import com.appcues.util.ResultOf.Failure
+import com.appcues.util.ResultOf.Success
+import com.appcues.util.doIfFailure
+import com.appcues.util.doIfSuccess
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonDataException
@@ -21,22 +26,35 @@ internal class LossyExperienceResponseAdapter {
         delegate: JsonAdapter<ExperienceResponse>,
         failureDelegate: JsonAdapter<FailedExperienceResponse>
     ): LossyExperienceResponse {
+        // this is the item we are decoding, expected to be a well formed Experience response
         val value = reader.readJsonValue()
-        try {
-            // 1. try to decode the ExperienceResponse as normal - success case
-            delegate.fromJsonValue(value)?.let { return it }
-        } catch (exception: JsonDataException) {
-            try {
-                // 2. try to decode a minimal response for failures that provides enough context to report flow issues,
-                //    passing through the error message from the initial failed deserialization
-                failureDelegate.fromJsonValue(value)?.let { return it.apply { error = exception.message } }
-            } catch (exception: JsonDataException) {
-                // 3. fallback - completely unknown value in the JSON we cannot parse
-                return UnknownExperienceResponse
+
+        // 1. try to decode the ExperienceResponse as normal - success case
+        val experienceDecodingResult = decode(value, delegate)
+        experienceDecodingResult.doIfSuccess {
+            return it
+        }
+
+        // 2. try to decode a minimal response for failures that provides enough context to report flow issues (experience id),
+        //    passing through the error message from the initial failed deserialization
+        experienceDecodingResult.doIfFailure { error ->
+            decode(value, failureDelegate).doIfSuccess {
+                return it.apply { this.error = error }
             }
         }
-        // 4. not expected to be reached, but would occur if a fromJsonValue call above succeeded, but produced a null value
+
+        // 3. fallback - completely unknown value in the JSON we cannot parse
         return UnknownExperienceResponse
+    }
+
+    private fun <T : Any> decode(value: Any?, adapter: JsonAdapter<T>): ResultOf<T, String?> {
+        var error: String? = null
+        try {
+            adapter.fromJsonValue(value)?.let { return Success(it) }
+        } catch (exception: JsonDataException) {
+            error = exception.message
+        }
+        return Failure(error)
     }
 
     @ToJson
