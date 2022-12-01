@@ -19,4 +19,17 @@ internal data class ExperienceResponse(
     val publishedAt: Long?,
     val nextContentId: String?,
     val redirectUrl: String?,
-)
+) : LossyExperienceResponse()
+
+@JsonClass(generateAdapter = true)
+internal data class FailedExperienceResponse(
+    val id: UUID,
+    val name: String?,
+    val type: String?,
+    val publishedAt: Long?,
+    var error: String? = null
+) : LossyExperienceResponse()
+
+internal object UnknownExperienceResponse : LossyExperienceResponse()
+
+internal sealed class LossyExperienceResponse
