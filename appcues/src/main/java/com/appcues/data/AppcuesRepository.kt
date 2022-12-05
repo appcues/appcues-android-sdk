@@ -11,7 +11,6 @@ import com.appcues.data.model.ExperiencePriority.NORMAL
 import com.appcues.data.remote.AppcuesRemoteSource
 import com.appcues.data.remote.RemoteError.NetworkError
 import com.appcues.data.remote.request.ActivityRequest
-import com.appcues.data.remote.response.experience.ExperienceResponse
 import com.appcues.logging.Logcues
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
@@ -150,8 +149,8 @@ internal class AppcuesRepository(
 
             qualifyResult.doIfSuccess { response ->
                 val priority: ExperiencePriority = if (response.qualificationReason == "screen_view") LOW else NORMAL
-                experiences += response.experiences.filterIsInstance<ExperienceResponse>().map {
-                    experienceMapper.map(it, priority, response.experiments, activity.requestId)
+                experiences += response.experiences.map {
+                    experienceMapper.mapDecoded(it, priority, response.experiments, activity.requestId)
                 }
             }
 
