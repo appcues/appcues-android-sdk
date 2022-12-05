@@ -59,7 +59,7 @@ class LossyExperienceResponseAdapterFactory : JsonAdapter.Factory {
                 //    passing through the error message from the initial failed deserialization
                 experienceDecodingResult.doIfFailure { error ->
                     decode(value, failureDelegate).doIfSuccess {
-                        experiences.add(it.apply { this.error = error })
+                        experiences.add(it.apply { this.error = "Error parsing Experience JSON data: $error" })
                     }
                 }
             }

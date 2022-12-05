@@ -89,7 +89,7 @@ class AppcuesServiceTest {
                 // from Moshi with "type" as the key for the PrimitiveResponse deserialization - it's saying that it cannot find that
                 // key. Ideally it would give the actual JSON path like the others below, but I'm not sure if this is possible for this
                 // special case.
-                assertThat(this.error).isEqualTo("Missing label for type")
+                assertThat(this.error).isEqualTo("Error parsing Experience JSON data: Missing label for type")
             }
 
             with(experiences[1] as ExperienceResponse) {
@@ -102,7 +102,8 @@ class AppcuesServiceTest {
 
             with(experiences[3] as FailedExperienceResponse) {
                 assertThat(this.id.appcuesFormatted()).isEqualTo("6f0db437-1d1e-4d74-af4d-9cb1257b5d46")
-                assertThat(this.error).isEqualTo("Non-null value 'type' was null at \$.steps[0].children[0].type")
+                assertThat(this.error)
+                    .isEqualTo("Error parsing Experience JSON data: Non-null value 'type' was null at \$.steps[0].children[0].type")
             }
 
             with(experiences[4] as ExperienceResponse) {
@@ -112,7 +113,8 @@ class AppcuesServiceTest {
             with(experiences[5] as FailedExperienceResponse) {
                 assertThat(this.id.appcuesFormatted()).isEqualTo("c9c11671-f418-451e-9b4a-33d54ed5299f")
                 assertThat(this.error)
-                    .isEqualTo("Expected STRING but was true, a java.lang.Boolean, at path \$.steps[0].children[0].content.id")
+                    .isEqualTo("Error parsing Experience JSON data: Expected STRING but was true, a java.lang.Boolean," +
+                        " at path \$.steps[0].children[0].content.id")
             }
         }
     }
