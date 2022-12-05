@@ -41,14 +41,14 @@ internal class StepContainerAdapter {
                     traits = stepOrContainer.traits,
                     actions = stepOrContainer.actions,
                 )
-            stepOrContainer.children != null ->
+            stepOrContainer.children != null && stepOrContainer.children.isNotEmpty() ->
                 StepContainerResponse(
                     id = stepOrContainer.id,
                     children = stepOrContainer.children,
                     traits = stepOrContainer.traits,
                     actions = stepOrContainer.actions
                 )
-            else -> throw JsonDataException("invalid step container response, must have either content or children")
+            else -> throw JsonDataException("invalid step container response, must have either content or non-zero children")
         }
     }
 
