@@ -279,6 +279,33 @@ class StateMachineTest : AppcuesScopeTest {
     }
 
     @Test
+    fun `Idling SHOULD NOT transition WHEN action is StartExperience with error`() = runTest {
+        // GIVEN
+        val experience = Experience(
+            id = UUID.randomUUID(),
+            name = "Failed Experience",
+            stepContainers = listOf(),
+            published = true,
+            priority = NORMAL,
+            type = "mobile",
+            publishedAt = 1652895835000,
+            completionActions = arrayListOf(),
+            experiment = null,
+            error = "Failed decode"
+        )
+        val initialState = Idling
+        val stateMachine = initMachine(initialState)
+        val action = StartExperience(experience)
+
+        // WHEN
+        val result = stateMachine.handleAction(action)
+
+        // THEN
+        assertThat(stateMachine.state).isEqualTo(initialState)
+        assertThat((result.failureReason() as ExperienceError).message).isEqualTo("Failed decode")
+    }
+
+    @Test
     fun `RenderingStep SHOULD NOT transition WHEN action is StartExperience`() = runTest {
         // GIVEN
         val experience = mockExperience()
