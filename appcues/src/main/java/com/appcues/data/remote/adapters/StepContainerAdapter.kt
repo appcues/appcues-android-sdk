@@ -18,7 +18,7 @@ internal data class StepOrContainerResponse(
     val content: PrimitiveResponse?,
     val traits: List<TraitResponse>,
     val actions: Map<UUID, List<ActionResponse>>,
-    val type: String?,
+    val type: String,
 )
 
 internal class StepContainerAdapter {

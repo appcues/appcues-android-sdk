@@ -11,6 +11,7 @@
   "steps": [
     {
       "id": "6c2b7488-309c-432f-b62e-9f8539b46c9d",
+      "type": "group",
       "actions": {},
       "traits": [
         {

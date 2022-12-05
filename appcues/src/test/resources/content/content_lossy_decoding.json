@@ -1,0 +1,173 @@
+{
+  "checklists": [],
+  "contents": [],
+  "experiences": [
+    {
+      "id": "7bba162e-9846-449c-98c7-6891adc882ea",
+      "name": "missing type on content block",
+      "type": "mobile",
+      "traits": [],
+      "steps": [
+        {
+          "id": "19bc7372-ce17-437e-83b6-45ec9999c8cf",
+          "type": "group",
+          "actions": {},
+          "traits": [],
+          "children": [
+            {
+              "id": "d4d44dc3-160b-42df-b0f8-ac3bc178e12a",
+              "type": "modal",
+              "content": {
+                "id": "e61d6b61-ef92-46c4-9450-9c043cc80e39"
+              },
+              "traits": [],
+              "actions": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "05e78601-d7d8-449f-a074-fe3ae1144366",
+      "name": "valid 1",
+      "type": "mobile",
+      "traits": [],
+      "steps": [
+        {
+          "id": "f7edb07c-5f96-4440-9b70-3bdd0b7675b0",
+          "type": "group",
+          "actions": {},
+          "traits": [],
+          "children": [
+            {
+              "id": "68bb5cc4-99b4-4f5c-a787-930ba921fc05",
+              "type": "modal",
+              "content": {
+                "type": "spacer",
+                "id": "1f9d1c11-525f-4f1c-afc1-d91b97c6a7d4"
+              },
+              "traits": [],
+              "actions": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "unknown": true
+    },
+    {
+      "id": "c77a4ba2-2259-47b6-b380-76dac48f1c25",
+      "name": "valid 2",
+      "type": "mobile",
+      "traits": [],
+      "steps": [
+        {
+          "id": "fdfbc590-a00f-4319-aeb5-af23460b0f71",
+          "type": "group",
+          "actions": {},
+          "traits": [],
+          "children": [
+            {
+              "id": "e793d69b-c89f-40a1-80b0-9146adb4ada8",
+              "type": "modal",
+              "content": {
+                "type": "spacer",
+                "id": "e2306fdd-0f95-4dc5-b5b1-75582cf79a84"
+              },
+              "traits": [],
+              "actions": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "unknown": true
+    },
+    {
+      "id": "6f0db437-1d1e-4d74-af4d-9cb1257b5d46",
+      "name": "step type null",
+      "type": "mobile",
+      "traits": [],
+      "steps": [
+        {
+          "id": "7dce0c8c-590e-43bc-9856-4baa77566ac1",
+          "type": "group",
+          "actions": {},
+          "traits": [],
+          "children": [
+            {
+              "id": "4e3d103b-0bbb-4449-8766-d0006a1d22e1",
+              "type": null,
+              "content": {
+                "type": "spacer",
+                "id": "856fd2f6-cb18-4ade-b834-4b0fcef27915"
+              },
+              "actions": {},
+              "traits": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "092faf58-f52d-457d-88c5-172d128d2c25",
+      "name": "valid 3",
+      "type": "mobile",
+      "traits": [],
+      "steps": [
+        {
+          "id": "56629029-9478-4db3-90fa-d8bcdf247ed4",
+          "type": "group",
+          "actions": {},
+          "traits": [],
+          "children": [
+            {
+              "id": "047ca98a-0511-4030-b028-765f4344e5d1",
+              "type": "modal",
+              "content": {
+                "type": "spacer",
+                "id": "70a54b3c-7a4d-449a-8d0c-91a0203eafba"
+              },
+              "traits": [],
+              "actions": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c9c11671-f418-451e-9b4a-33d54ed5299f",
+      "name": "primitive id wrong type - boolean instead of UUID",
+      "type": "mobile",
+      "traits": [],
+      "steps": [
+        {
+          "id": "4e82600a-fe5e-4072-8dd8-3833d8780b7e",
+          "type": "group",
+          "actions": {},
+          "traits": [],
+          "children": [
+            {
+              "id": "ffe47297-4855-436d-87fa-e521ed211f32",
+              "type": "modal",
+              "content": {
+                "type": "spacer",
+                "id": true
+              },
+              "traits": [],
+              "actions": {}
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "performed_qualification": true,
+  "profile": {
+    "_ABGroup": 1
+  },
+  "qualification_reason": "screen_view",
+  "request_id": "814EF333-6C88-4354-985B-9B5FE930F8DB"
+}
