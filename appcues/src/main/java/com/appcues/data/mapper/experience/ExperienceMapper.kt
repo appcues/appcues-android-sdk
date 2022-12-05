@@ -16,6 +16,8 @@ import com.appcues.data.model.StepContainer
 import com.appcues.data.remote.response.ExperimentResponse
 import com.appcues.data.remote.response.action.ActionResponse
 import com.appcues.data.remote.response.experience.ExperienceResponse
+import com.appcues.data.remote.response.experience.FailedExperienceResponse
+import com.appcues.data.remote.response.experience.LossyExperienceResponse
 import com.appcues.data.remote.response.step.StepContainerResponse
 import com.appcues.trait.ContentHolderTrait
 import com.appcues.trait.ContentWrappingTrait
@@ -32,7 +34,44 @@ internal class ExperienceMapper(
     private val traitsMapper: TraitsMapper,
     private val scope: Scope,
 ) {
+    // this version is used to map all decoded response objects, which may represent real Experiences
+    // or failed responses with minimal info for error reporting
+    fun mapDecoded(
+        from: LossyExperienceResponse,
+        priority: ExperiencePriority = NORMAL,
+        experiments: List<ExperimentResponse>? = null,
+        requestId: UUID? = null,
+    ): Experience {
+        return when (from) {
+            is ExperienceResponse -> map(from, priority, experiments, requestId)
+            is FailedExperienceResponse -> mapFailed(from, priority, experiments, requestId)
+        }
+    }
 
+    // this version makes a synthetic Experience from the failure data, with just enough info
+    // to report the flow issue about deserialization in the `error` field, for troubleshooting
+    private fun mapFailed(
+        from: FailedExperienceResponse,
+        priority: ExperiencePriority = NORMAL,
+        experiments: List<ExperimentResponse>? = null,
+        requestId: UUID? = null,
+    ): Experience {
+        return Experience(
+            id = from.id,
+            name = from.name ?: "",
+            stepContainers = emptyList(),
+            published = true,
+            priority = priority,
+            type = from.type ?: "",
+            publishedAt = from.publishedAt,
+            experiment = experiments?.getExperiment(from.id),
+            completionActions = emptyList(),
+            requestId = requestId,
+            error = from.error
+        )
+    }
+
+    // this version maps the normal successful ExperienceResponse
     fun map(
         from: ExperienceResponse,
         priority: ExperiencePriority = NORMAL,

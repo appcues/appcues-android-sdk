@@ -113,7 +113,7 @@ class AppcuesRepositoryTest {
         )
         coEvery { appcuesRemoteSource.qualify(any(), request.requestId, any()) } returns Success(qualifyResponse)
         val mappedExperience = mockk<Experience>()
-        coEvery { experienceMapper.map(any(), any(), null, request.requestId) } returns mappedExperience
+        coEvery { experienceMapper.mapDecoded(any(), any(), null, request.requestId) } returns mappedExperience
 
         // WHEN
         val result = repository.trackActivity(request)
@@ -251,13 +251,13 @@ class AppcuesRepositoryTest {
         )
         coEvery { appcuesRemoteSource.qualify(any(), request.requestId, any()) } returns Success(qualifyResponse)
         val mappedExperience = mockk<Experience>()
-        coEvery { experienceMapper.map(any(), any(), null, request.requestId) } returns mappedExperience
+        coEvery { experienceMapper.mapDecoded(any(), any(), null, request.requestId) } returns mappedExperience
 
         // WHEN
         repository.trackActivity(request)
 
         // THEN
-        coVerify { experienceMapper.map(any(), LOW, null, request.requestId) }
+        coVerify { experienceMapper.mapDecoded(any(), LOW, null, request.requestId) }
     }
 
     @Test
@@ -272,13 +272,13 @@ class AppcuesRepositoryTest {
         )
         coEvery { appcuesRemoteSource.qualify(any(), request.requestId, any()) } returns Success(qualifyResponse)
         val mappedExperience = mockk<Experience>()
-        coEvery { experienceMapper.map(any(), any(), null, request.requestId) } returns mappedExperience
+        coEvery { experienceMapper.mapDecoded(any(), any(), null, request.requestId) } returns mappedExperience
 
         // WHEN
         repository.trackActivity(request)
 
         // THEN
-        coVerify { experienceMapper.map(any(), NORMAL, null, request.requestId) }
+        coVerify { experienceMapper.mapDecoded(any(), NORMAL, null, request.requestId) }
     }
 
     // test items already in processing don't get included again

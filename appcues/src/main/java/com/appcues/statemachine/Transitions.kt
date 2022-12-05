@@ -32,11 +32,12 @@ import kotlin.contracts.contract
 internal interface Transitions {
 
     fun Idling.fromIdlingToBeginningExperience(action: StartExperience): Transition {
-        return if (action.experience.stepContainers.isNotEmpty()) {
-            Transition(BeginningExperience(action.experience), ContinuationEffect(StartStep(StepIndex(0))))
-        } else {
-            // empty experience error
+        return if (!action.experience.error.isNullOrEmpty()) {
+            Transition(null, ReportErrorEffect(ExperienceError(action.experience, action.experience.error)))
+        } else if (action.experience.stepContainers.isEmpty()) {
             Transition(null, ReportErrorEffect(ExperienceError(action.experience, "Experience has 0 steps")))
+        } else {
+            Transition(BeginningExperience(action.experience), ContinuationEffect(StartStep(StepIndex(0))))
         }
     }
 
