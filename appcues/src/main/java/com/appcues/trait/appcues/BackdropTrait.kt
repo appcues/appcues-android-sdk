@@ -3,6 +3,11 @@ package com.appcues.trait.appcues
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.EaseIn
+import androidx.compose.animation.core.EaseInOut
+import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.TweenSpec
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -23,6 +28,11 @@ import com.appcues.data.model.styling.ComponentColor
 import com.appcues.trait.AppcuesTraitAnimatedVisibility
 import com.appcues.trait.BackdropDecoratingTrait
 import com.appcues.trait.MetadataSettingTrait
+import com.appcues.trait.appcues.StepAnimationTrait.StepAnimationEasing
+import com.appcues.trait.appcues.StepAnimationTrait.StepAnimationEasing.EASE_IN
+import com.appcues.trait.appcues.StepAnimationTrait.StepAnimationEasing.EASE_IN_OUT
+import com.appcues.trait.appcues.StepAnimationTrait.StepAnimationEasing.EASE_OUT
+import com.appcues.trait.appcues.StepAnimationTrait.StepAnimationEasing.LINEAR
 import com.appcues.ui.composables.LocalAppcuesStepMetadata
 import com.appcues.ui.composables.rememberAppcuesBackdropVisibility
 import com.appcues.ui.extensions.getColor
@@ -36,6 +46,8 @@ internal class BackdropTrait(
         const val TYPE = "@appcues/backdrop"
 
         const val METADATA_BACKGROUND_COLOR = "backgroundColor"
+
+        private const val DEFAULT_ANIMATION = 300
     }
 
     override fun produceMetadata(): Map<String, Any?> {
@@ -55,12 +67,26 @@ internal class BackdropTrait(
             (metadata.actual[METADATA_BACKGROUND_COLOR] as ComponentColor?).getColor(isDark) ?: Color.Transparent
         }
 
+        val duration = remember(metadata) {
+            (metadata.actual[StepAnimationTrait.METADATA_ANIMATION_DURATION] as Int?) ?: DEFAULT_ANIMATION
+        }
+
+        val animation = remember<TweenSpec<Color>>(metadata) {
+            when ((metadata.actual[StepAnimationTrait.METADATA_ANIMATION_EASING] as StepAnimationEasing?)) {
+                LINEAR -> tween(durationMillis = duration, easing = LinearEasing)
+                EASE_IN -> tween(durationMillis = duration, easing = EaseIn)
+                EASE_OUT -> tween(durationMillis = duration, easing = EaseOut)
+                EASE_IN_OUT -> tween(durationMillis = duration, easing = EaseInOut)
+                null -> tween(durationMillis = duration, easing = LinearEasing)
+            }
+        }
+
         // whenever metadata changes, set this to false
         val animateToActual = remember(metadata) { mutableStateOf(false) }
 
         val color = animateColorAsState(
             targetValue = if (animateToActual.value) actualColor else previousColor,
-            animationSpec = tween(durationMillis = 400)
+            animationSpec = animation
         ).value
 
         AppcuesTraitAnimatedVisibility(

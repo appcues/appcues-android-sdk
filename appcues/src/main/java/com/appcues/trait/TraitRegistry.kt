@@ -9,6 +9,7 @@ import com.appcues.trait.appcues.KeyholeTrait
 import com.appcues.trait.appcues.ModalTrait
 import com.appcues.trait.appcues.PagingDotsTrait
 import com.appcues.trait.appcues.SkippableTrait
+import com.appcues.trait.appcues.StepAnimationTrait
 import com.appcues.trait.appcues.StickyContentTrait
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.get
@@ -26,6 +27,7 @@ internal class TraitRegistry(
     private val actions: MutableMap<String, TraitFactoryBlock> = hashMapOf()
 
     init {
+        register(StepAnimationTrait.TYPE) { config, _ -> get<StepAnimationTrait> { parametersOf(config) } }
         register(BackdropTrait.TYPE) { config, _ -> get<BackdropTrait> { parametersOf(config) } }
         register(KeyholeTrait.TYPE) { config, _ -> get<KeyholeTrait> { parametersOf(config) } }
         register(ModalTrait.TYPE) { config, _ -> get<ModalTrait> { parametersOf(config) } }

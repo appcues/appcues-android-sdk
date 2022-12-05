@@ -8,6 +8,7 @@ import com.appcues.trait.appcues.KeyholeTrait
 import com.appcues.trait.appcues.ModalTrait
 import com.appcues.trait.appcues.PagingDotsTrait
 import com.appcues.trait.appcues.SkippableTrait
+import com.appcues.trait.appcues.StepAnimationTrait
 import com.appcues.trait.appcues.StickyContentTrait
 import org.koin.dsl.ScopeDSL
 
@@ -23,6 +24,12 @@ internal object TraitKoin : KoinScopePlugin {
 
         factory { params ->
             BackdropTrait(
+                config = params.getOrNull(),
+            )
+        }
+
+        factory { params ->
+            StepAnimationTrait(
                 config = params.getOrNull(),
             )
         }
