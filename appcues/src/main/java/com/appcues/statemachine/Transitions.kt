@@ -47,6 +47,17 @@ internal interface Transitions {
         continuation: suspend () -> ResultOf<State, Error>
     ): Transition {
         val completion: CompletableDeferred<ResultOf<State, Error>> = CompletableDeferred()
+
+        // This is a safeguard against trying to load a step container that has zero steps.
+        // We already guard against loading an experience with zero steps (groups) in the BeginningExperience
+        // transition above. However, if a group exists, but has zero steps within - it will get here and
+        // fail, so that we don't launch an AppcuesActivity and then have no content to render
+        experience.stepContainers.firstOrNull()?.let {
+            if (it.steps.isEmpty()) {
+                return stepNotFoundErrorTransition(experience, 0, 0)
+            }
+        }
+
         return Transition(
             state = BeginningStep(experience, 0, true) {
                 coroutineScope.launch {
@@ -205,5 +216,14 @@ private fun errorTransition(experience: Experience, currentStepIndex: Int, messa
     return Transition(
         state = null,
         sideEffect = ReportErrorEffect(StepError(experience, currentStepIndex, message))
+    )
+}
+
+private fun stepNotFoundErrorTransition(experience: Experience, groupIndex: Int, stepIndex: Int): Transition {
+    return Transition(
+        state = Idling,
+        sideEffect = ReportErrorEffect(
+            error = StepError(experience, 0, "step group $groupIndex doesn't contain a child step at index $stepIndex")
+        )
     )
 }
