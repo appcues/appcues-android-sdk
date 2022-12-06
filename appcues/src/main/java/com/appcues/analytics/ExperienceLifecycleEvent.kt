@@ -88,11 +88,12 @@ internal sealed class ExperienceLifecycleEvent(
             // "localeId" to "", -- add locale values to analytics for localized experiences
         ).apply {
             flatStepIndex?.let {
-                val step = experience.flatSteps[it]
-                this["stepId"] = step.id.appcuesFormatted()
-                // this is required by SDK debugger to know which step and group is currently showing
-                this["stepIndex"] = "${experience.groupLookup[it] ?: 0},${experience.stepIndexLookup[it] ?: 0}"
-                this["stepType"] = step.type
+                experience.flatSteps.getOrNull(it)?.let { step ->
+                    this["stepId"] = step.id.appcuesFormatted()
+                    // this is required by SDK debugger to know which step and group is currently showing
+                    this["stepIndex"] = "${experience.groupLookup[it] ?: 0},${experience.stepIndexLookup[it] ?: 0}"
+                    this["stepType"] = step.type
+                }
             }
             customProperties?.let {
                 putAll(it)
