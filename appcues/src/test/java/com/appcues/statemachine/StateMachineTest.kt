@@ -3,9 +3,12 @@ package com.appcues.statemachine
 import com.appcues.AppcuesCoroutineScope
 import com.appcues.AppcuesScopeTest
 import com.appcues.action.ActionProcessor
+import com.appcues.action.ExperienceAction
+import com.appcues.data.model.Action.Trigger.NAVIGATE
 import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperiencePriority.NORMAL
 import com.appcues.mocks.mockExperience
+import com.appcues.mocks.mockExperienceNavigateActions
 import com.appcues.rules.KoinScopeRule
 import com.appcues.rules.MainDispatcherRule
 import com.appcues.statemachine.Action.EndExperience
@@ -29,10 +32,13 @@ import com.appcues.statemachine.State.RenderingStep
 import com.appcues.statemachine.StepReference.StepId
 import com.appcues.statemachine.StepReference.StepIndex
 import com.appcues.statemachine.StepReference.StepOffset
+import com.appcues.trait.PresentingTrait
 import com.appcues.util.ResultOf
 import com.google.common.truth.Truth.assertThat
 import io.mockk.Called
 import io.mockk.coVerify
+import io.mockk.coVerifyOrder
+import io.mockk.mockk
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitAll
@@ -248,6 +254,38 @@ class StateMachineTest : AppcuesScopeTest {
         // THEN
         assertThat(result.successValue()).isEqualTo(targetState)
         assertThat(stateMachine.state).isEqualTo(targetState)
+    }
+
+    @Test
+    fun `StartStep SHOULD execute navigation actions sequentially WHEN moving to a new group`() = runTest {
+        // Test that an experience with "navigate" actions on a group at index > 0 has those actions executed and
+        // completed prior to presenting the container for the next group
+
+        // GIVEN
+        val experienceAction1 = mockk<ExperienceAction>(relaxed = true)
+        val experienceAction2 = mockk<ExperienceAction>(relaxed = true)
+        val presentingTrait = mockk<PresentingTrait>(relaxed = true)
+        val navigationActions = listOf(
+            com.appcues.data.model.Action(NAVIGATE, experienceAction1),
+            com.appcues.data.model.Action(NAVIGATE, experienceAction2),
+        )
+        val experience = mockExperienceNavigateActions(navigationActions, presentingTrait)
+        val initialState = RenderingStep(experience, 0, true)
+        val stateMachine = initMachine(initialState)
+        val action = StartStep(StepOffset(1))
+        val targetState = RenderingStep(experience, 1, false)
+        val actionProcessor: ActionProcessor = get()
+
+        // WHEN
+        val result = stateMachine.handleAction(action)
+
+        // THEN
+        assertThat(result.successValue()).isEqualTo(targetState)
+        assertThat(stateMachine.state).isEqualTo(targetState)
+        coVerifyOrder {
+            actionProcessor.process(listOf(experienceAction1, experienceAction2))
+            presentingTrait.present()
+        }
     }
 
     // Error Transitions

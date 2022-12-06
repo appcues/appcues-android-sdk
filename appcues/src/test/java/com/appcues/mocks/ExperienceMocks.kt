@@ -2,6 +2,7 @@ package com.appcues.mocks
 
 import com.appcues.action.appcues.LaunchExperienceAction
 import com.appcues.action.appcues.TrackEventAction
+import com.appcues.data.model.Action
 import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperiencePrimitive.TextPrimitive
 import com.appcues.data.model.ExperiencePriority.NORMAL
@@ -93,5 +94,46 @@ internal fun mockExperienceExperiment(experiment: Experiment) =
         priority = NORMAL,
         publishedAt = 1652895835000,
         experiment = experiment,
+        completionActions = emptyList()
+    )
+
+// An experience with two step containers, each with one step. The given list of actions are applied to the
+// second step container, to test pre-step navigation actions. The given PresentingTrait is applied to both
+// step containers, to verify the order of actions prior to presentation.
+internal fun mockExperienceNavigateActions(actions: List<Action>, presentingTrait: PresentingTrait) =
+    Experience(
+        id = UUID.fromString("d84c9d01-aa27-4cbb-b832-ee03720e04fc"),
+        name = "Mock Experience with Experiment",
+        type = "mobile",
+        stepContainers = listOf(
+            StepContainer(
+                id = UUID.fromString("60b49c12-c49b-47ac-8ed3-ba4e9a55e694"),
+                steps = listOf(
+                    mockStep(UUID.fromString("01d8a05a-3a55-4ecc-872d-d140cd628902")),
+                ),
+                presentingTrait = presentingTrait,
+                contentHolderTrait = mockk(relaxed = true),
+                contentWrappingTrait = mockk(relaxed = true),
+                backdropDecoratingTraits = listOf(),
+                containerDecoratingTraits = listOf(),
+                actions = emptyMap(),
+            ),
+            StepContainer(
+                id = UUID.fromString("71614c07-3f37-4f04-a853-f55424160321"),
+                steps = listOf(
+                    mockStep(UUID.fromString("c4b1c500-6939-4bb1-95ff-451bd6472cda")),
+                ),
+                presentingTrait = presentingTrait,
+                contentHolderTrait = mockk(relaxed = true),
+                contentWrappingTrait = mockk(relaxed = true),
+                backdropDecoratingTraits = listOf(),
+                containerDecoratingTraits = listOf(),
+                actions = mapOf(UUID.fromString("71614c07-3f37-4f04-a853-f55424160321") to actions),
+            )
+        ),
+        published = true,
+        priority = NORMAL,
+        publishedAt = 1652895835000,
+        experiment = null,
         completionActions = emptyList()
     )
