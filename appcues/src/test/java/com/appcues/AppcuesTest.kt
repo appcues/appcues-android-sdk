@@ -6,6 +6,7 @@ import com.appcues.action.ActionRegistry
 import com.appcues.action.ExperienceAction
 import com.appcues.analytics.ActivityScreenTracking
 import com.appcues.analytics.AnalyticsTracker
+import com.appcues.data.model.ExperienceTrigger
 import com.appcues.debugger.AppcuesDebuggerManager
 import com.appcues.rules.KoinScopeRule
 import com.appcues.rules.MainDispatcherRule
@@ -204,7 +205,7 @@ internal class AppcuesTest : AppcuesScopeTest {
         appcues.show(experienceId)
 
         // THEN
-        coVerify { experienceRenderer.show(experienceId) }
+        coVerify { experienceRenderer.show(experienceId, ExperienceTrigger.ShowCall) }
     }
 
     @Test

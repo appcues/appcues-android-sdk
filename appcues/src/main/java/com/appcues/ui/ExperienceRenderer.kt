@@ -7,6 +7,7 @@ import com.appcues.analytics.AnalyticsTracker
 import com.appcues.data.AppcuesRepository
 import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperiencePriority.NORMAL
+import com.appcues.data.model.ExperienceTrigger
 import com.appcues.data.model.Experiment
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.StartExperience
@@ -96,10 +97,10 @@ internal class ExperienceRenderer(
         return success
     }
 
-    suspend fun show(experienceId: String): Boolean {
+    suspend fun show(experienceId: String, trigger: ExperienceTrigger): Boolean {
         if (!sessionMonitor.checkSession("cannot show Experience $experienceId")) return false
 
-        repository.getExperienceContent(experienceId)?.let {
+        repository.getExperienceContent(experienceId, trigger)?.let {
             return show(it)
         }
 

@@ -5,6 +5,7 @@ package com.appcues.statemachine
 import com.appcues.action.ExperienceAction
 import com.appcues.data.model.Action.Trigger.NAVIGATE
 import com.appcues.data.model.Experience
+import com.appcues.data.model.ExperienceTrigger.Qualification
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.RenderStep
 import com.appcues.statemachine.Action.Reset
@@ -60,13 +61,19 @@ internal interface Transitions {
             }
         }
 
+        // for pre-step navigation actions - only allow these to execute if this experience is being launched for some
+        // other reason than qualification (i.e. deep links, preview, manual show). For any qualified experience, the initial
+        // starting state of the experience is determined solely by flow settings determining the trigger
+        // (i.e. trigger on certain screen).
+        val actions = if (experience.trigger is Qualification) emptyList() else experience.getNavigationActions(0)
+
         return Transition(
             state = BeginningStep(experience, 0, true) {
                 coroutineScope.launch {
                     completion.complete(continuation())
                 }
             },
-            sideEffect = PresentContainerEffect(experience, 0, completion, emptyList())
+            sideEffect = PresentContainerEffect(experience, 0, completion, actions)
         )
     }
 
