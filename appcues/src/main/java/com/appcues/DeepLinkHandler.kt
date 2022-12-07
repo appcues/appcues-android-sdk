@@ -3,6 +3,7 @@ package com.appcues
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
+import com.appcues.data.model.ExperienceTrigger
 import com.appcues.debugger.AppcuesDebuggerManager
 import com.appcues.ui.ExperienceRenderer
 import kotlinx.coroutines.launch
@@ -35,7 +36,7 @@ internal class DeepLinkHandler(
                 }
                 segments.count() == 2 && segments[0] == "experience_content" -> {
                     appcuesCoroutineScope.launch {
-                        experienceRenderer.show(segments[1])
+                        experienceRenderer.show(segments[1], ExperienceTrigger.DeepLink)
                     }
                     handled = true
                 }

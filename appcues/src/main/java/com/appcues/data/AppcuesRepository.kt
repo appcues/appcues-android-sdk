@@ -8,6 +8,7 @@ import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperiencePriority
 import com.appcues.data.model.ExperiencePriority.LOW
 import com.appcues.data.model.ExperiencePriority.NORMAL
+import com.appcues.data.model.ExperienceTrigger
 import com.appcues.data.remote.AppcuesRemoteSource
 import com.appcues.data.remote.RemoteError.NetworkError
 import com.appcues.data.remote.request.ActivityRequest
@@ -35,10 +36,10 @@ internal class AppcuesRepository(
     private val processingActivity: HashSet<UUID> = hashSetOf()
     private val mutex = Mutex()
 
-    suspend fun getExperienceContent(experienceId: String): Experience? = withContext(Dispatchers.IO) {
+    suspend fun getExperienceContent(experienceId: String, trigger: ExperienceTrigger): Experience? = withContext(Dispatchers.IO) {
         appcuesRemoteSource.getExperienceContent(experienceId).let {
             when (it) {
-                is Success -> experienceMapper.map(it.value)
+                is Success -> experienceMapper.map(it.value, trigger)
                 is Failure -> {
                     logcues.info("Experience content request failed, reason: ${it.reason}")
                     null
@@ -50,7 +51,7 @@ internal class AppcuesRepository(
     suspend fun getExperiencePreview(experienceId: String): Experience? = withContext(Dispatchers.IO) {
         appcuesRemoteSource.getExperiencePreview(experienceId).let {
             when (it) {
-                is Success -> experienceMapper.map(it.value)
+                is Success -> experienceMapper.map(it.value, ExperienceTrigger.Preview)
                 is Failure -> {
                     logcues.info("Experience preview request failed, reason: ${it.reason}")
                     null
@@ -149,8 +150,9 @@ internal class AppcuesRepository(
 
             qualifyResult.doIfSuccess { response ->
                 val priority: ExperiencePriority = if (response.qualificationReason == "screen_view") LOW else NORMAL
+                val trigger = ExperienceTrigger.Qualification(response.qualificationReason)
                 experiences += response.experiences.map {
-                    experienceMapper.mapDecoded(it, priority, response.experiments, activity.requestId)
+                    experienceMapper.mapDecoded(it, trigger, priority, response.experiments, activity.requestId)
                 }
             }
 
