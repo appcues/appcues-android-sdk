@@ -7,6 +7,7 @@ import com.appcues.action.ActionRegistry
 import com.appcues.action.ExperienceAction
 import com.appcues.analytics.ActivityScreenTracking
 import com.appcues.analytics.AnalyticsTracker
+import com.appcues.data.model.ExperienceTrigger
 import com.appcues.debugger.AppcuesDebuggerManager
 import com.appcues.di.AppcuesKoinContext
 import com.appcues.logging.Logcues
@@ -179,7 +180,7 @@ class Appcues internal constructor(koinScope: Scope) {
      * @return True if experience content was able to be shown, false if not.
      */
     suspend fun show(experienceId: String): Boolean {
-        return experienceRenderer.show(experienceId)
+        return experienceRenderer.show(experienceId, ExperienceTrigger.ShowCall)
     }
 
     /**

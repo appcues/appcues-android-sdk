@@ -13,6 +13,7 @@ internal data class Experience(
     val publishedAt: Long?,
     val experiment: Experiment?,
     val completionActions: List<ExperienceAction>,
+    val trigger: ExperienceTrigger,
     val requestId: UUID? = null,
     val error: String? = null,
 ) {

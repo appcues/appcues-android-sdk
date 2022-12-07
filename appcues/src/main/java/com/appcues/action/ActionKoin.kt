@@ -47,6 +47,8 @@ internal object ActionKoin : KoinScopePlugin {
         factory { params ->
             LaunchExperienceAction(
                 config = params.getOrNull(),
+                stateMachine = get(),
+                experienceRenderer = get(),
             )
         }
 

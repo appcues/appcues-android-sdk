@@ -7,6 +7,7 @@ import com.appcues.data.mapper.experience.ExperienceMapper
 import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperiencePriority.LOW
 import com.appcues.data.model.ExperiencePriority.NORMAL
+import com.appcues.data.model.ExperienceTrigger
 import com.appcues.data.remote.AppcuesRemoteSource
 import com.appcues.data.remote.RemoteError.HttpError
 import com.appcues.data.remote.RemoteError.NetworkError
@@ -61,9 +62,9 @@ class AppcuesRepositoryTest {
         val experienceResponse = mockk<ExperienceResponse>()
         coEvery { appcuesRemoteSource.getExperienceContent("1234") } returns Success(experienceResponse)
         val mappedExperience = mockk<Experience>()
-        coEvery { experienceMapper.map(experienceResponse) } returns mappedExperience
+        coEvery { experienceMapper.map(experienceResponse, ExperienceTrigger.ShowCall) } returns mappedExperience
         // WHEN
-        val result = repository.getExperienceContent("1234")
+        val result = repository.getExperienceContent("1234", ExperienceTrigger.ShowCall)
         // THEN
         assertThat(result).isEqualTo(mappedExperience)
     }
@@ -73,7 +74,7 @@ class AppcuesRepositoryTest {
         // GIVEN
         coEvery { appcuesRemoteSource.getExperienceContent("1234") } returns Failure(HttpError())
         // WHEN
-        val result = repository.getExperienceContent("1234")
+        val result = repository.getExperienceContent("1234", ExperienceTrigger.ShowCall)
         // THEN
         assertThat(result).isNull()
     }
@@ -84,7 +85,7 @@ class AppcuesRepositoryTest {
         val experienceResponse = mockk<ExperienceResponse>()
         coEvery { appcuesRemoteSource.getExperiencePreview("1234") } returns Success(experienceResponse)
         val mappedExperience = mockk<Experience>()
-        coEvery { experienceMapper.map(experienceResponse) } returns mappedExperience
+        coEvery { experienceMapper.map(experienceResponse, ExperienceTrigger.Preview) } returns mappedExperience
         // WHEN
         val result = repository.getExperiencePreview("1234")
         // THEN
@@ -113,7 +114,9 @@ class AppcuesRepositoryTest {
         )
         coEvery { appcuesRemoteSource.qualify(any(), request.requestId, any()) } returns Success(qualifyResponse)
         val mappedExperience = mockk<Experience>()
-        coEvery { experienceMapper.mapDecoded(any(), any(), null, request.requestId) } returns mappedExperience
+        coEvery {
+            experienceMapper.mapDecoded(any(), ExperienceTrigger.Qualification("screen_view"), any(), null, request.requestId)
+        } returns mappedExperience
 
         // WHEN
         val result = repository.trackActivity(request)
@@ -251,13 +254,15 @@ class AppcuesRepositoryTest {
         )
         coEvery { appcuesRemoteSource.qualify(any(), request.requestId, any()) } returns Success(qualifyResponse)
         val mappedExperience = mockk<Experience>()
-        coEvery { experienceMapper.mapDecoded(any(), any(), null, request.requestId) } returns mappedExperience
+        coEvery {
+            experienceMapper.mapDecoded(any(), ExperienceTrigger.Qualification("screen_view"), any(), null, request.requestId)
+        } returns mappedExperience
 
         // WHEN
         repository.trackActivity(request)
 
         // THEN
-        coVerify { experienceMapper.mapDecoded(any(), LOW, null, request.requestId) }
+        coVerify { experienceMapper.mapDecoded(any(), ExperienceTrigger.Qualification("screen_view"), LOW, null, request.requestId) }
     }
 
     @Test
@@ -272,13 +277,15 @@ class AppcuesRepositoryTest {
         )
         coEvery { appcuesRemoteSource.qualify(any(), request.requestId, any()) } returns Success(qualifyResponse)
         val mappedExperience = mockk<Experience>()
-        coEvery { experienceMapper.mapDecoded(any(), any(), null, request.requestId) } returns mappedExperience
+        coEvery {
+            experienceMapper.mapDecoded(any(), ExperienceTrigger.Qualification("event_trigger"), any(), null, request.requestId)
+        } returns mappedExperience
 
         // WHEN
         repository.trackActivity(request)
 
         // THEN
-        coVerify { experienceMapper.mapDecoded(any(), NORMAL, null, request.requestId) }
+        coVerify { experienceMapper.mapDecoded(any(), ExperienceTrigger.Qualification("event_trigger"), NORMAL, null, request.requestId) }
     }
 
     // test items already in processing don't get included again
