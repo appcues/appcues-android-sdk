@@ -1,11 +1,11 @@
 package com.appcues.mocks
 
-import com.appcues.action.appcues.LaunchExperienceAction
 import com.appcues.action.appcues.TrackEventAction
 import com.appcues.data.model.Action
 import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperiencePrimitive.TextPrimitive
 import com.appcues.data.model.ExperiencePriority.NORMAL
+import com.appcues.data.model.ExperienceTrigger
 import com.appcues.data.model.Experiment
 import com.appcues.data.model.Step
 import com.appcues.data.model.StepContainer
@@ -52,7 +52,8 @@ internal fun mockExperience(onPresent: (() -> Unit)? = null) =
         priority = NORMAL,
         publishedAt = 1652895835000,
         experiment = null,
-        completionActions = arrayListOf(LaunchExperienceAction("1234"), TrackEventAction(hashMapOf()))
+        completionActions = arrayListOf(TrackEventAction(hashMapOf())),
+        trigger = ExperienceTrigger.ShowCall,
     )
 
 internal fun mockStep(id: UUID) =
@@ -91,13 +92,14 @@ internal fun mockExperienceExperiment(experiment: Experiment) =
         priority = NORMAL,
         publishedAt = 1652895835000,
         experiment = experiment,
-        completionActions = emptyList()
+        completionActions = emptyList(),
+        trigger = ExperienceTrigger.ShowCall,
     )
 
-// An experience with two step containers, each with one step. The given list of actions are applied to the
-// second step container, to test pre-step navigation actions. The given PresentingTrait is applied to both
+// An experience with two step containers, each with one step. The given list of actions are applied to both
+// step containers, to test pre-step navigation actions. The given PresentingTrait is applied to both
 // step containers, to verify the order of actions prior to presentation.
-internal fun mockExperienceNavigateActions(actions: List<Action>, presentingTrait: PresentingTrait) =
+internal fun mockExperienceNavigateActions(actions: List<Action>, presentingTrait: PresentingTrait, trigger: ExperienceTrigger) =
     Experience(
         id = UUID.fromString("d84c9d01-aa27-4cbb-b832-ee03720e04fc"),
         name = "Mock Experience with Experiment",
@@ -111,7 +113,7 @@ internal fun mockExperienceNavigateActions(actions: List<Action>, presentingTrai
                 presentingTrait = presentingTrait,
                 contentHolderTrait = mockk(relaxed = true),
                 contentWrappingTrait = mockk(relaxed = true),
-                actions = emptyMap(),
+                actions = mapOf(UUID.fromString("60b49c12-c49b-47ac-8ed3-ba4e9a55e694") to actions),
             ),
             StepContainer(
                 id = UUID.fromString("71614c07-3f37-4f04-a853-f55424160321"),
@@ -128,5 +130,6 @@ internal fun mockExperienceNavigateActions(actions: List<Action>, presentingTrai
         priority = NORMAL,
         publishedAt = 1652895835000,
         experiment = null,
-        completionActions = emptyList()
+        completionActions = emptyList(),
+        trigger = trigger,
     )

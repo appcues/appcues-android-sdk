@@ -7,6 +7,8 @@ import com.appcues.action.ExperienceAction
 import com.appcues.data.model.Action.Trigger.NAVIGATE
 import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperiencePriority.NORMAL
+import com.appcues.data.model.ExperienceTrigger
+import com.appcues.data.model.ExperienceTrigger.Qualification
 import com.appcues.mocks.mockExperience
 import com.appcues.mocks.mockExperienceNavigateActions
 import com.appcues.rules.KoinScopeRule
@@ -40,6 +42,7 @@ import io.mockk.Called
 import io.mockk.coVerify
 import io.mockk.coVerifyOrder
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitAll
@@ -281,7 +284,7 @@ class StateMachineTest : AppcuesScopeTest {
 
     @Test
     fun `StartStep SHOULD execute navigation actions sequentially WHEN moving to a new group`() = runTest {
-        // Test that an experience with "navigate" actions on a group at index > 0 has those actions executed and
+        // Test that a qualified experience with "navigate" actions on a group at index > 0 has those actions executed and
         // completed prior to presenting the container for the next group
 
         // GIVEN
@@ -292,7 +295,7 @@ class StateMachineTest : AppcuesScopeTest {
             com.appcues.data.model.Action(NAVIGATE, experienceAction1),
             com.appcues.data.model.Action(NAVIGATE, experienceAction2),
         )
-        val experience = mockExperienceNavigateActions(navigationActions, presentingTrait)
+        val experience = mockExperienceNavigateActions(navigationActions, presentingTrait, Qualification("screen_view"))
         val initialState = RenderingStep(experience, 0, true)
         val stateMachine = initMachine(initialState)
         val action = StartStep(StepOffset(1))
@@ -305,6 +308,70 @@ class StateMachineTest : AppcuesScopeTest {
         // THEN
         assertThat(result.successValue()).isEqualTo(targetState)
         assertThat(stateMachine.state).isEqualTo(targetState)
+        coVerifyOrder {
+            actionProcessor.process(listOf(experienceAction1, experienceAction2))
+            presentingTrait.present()
+        }
+    }
+
+    @Test
+    fun `StartExperience SHOULD NOT execute navigation actions WHEN trigger is Qualification`() = runTest {
+        // Test that a qualified experience with "navigate" actions on a group at index 0 has those actions ignored
+        // when presenting the first step - since flow settings for qualify determine its location
+
+        // GIVEN
+        val experienceAction1 = mockk<ExperienceAction>(relaxed = true)
+        val experienceAction2 = mockk<ExperienceAction>(relaxed = true)
+        val presentingTrait = mockk<PresentingTrait>(relaxed = true)
+        val navigationActions = listOf(
+            com.appcues.data.model.Action(NAVIGATE, experienceAction1),
+            com.appcues.data.model.Action(NAVIGATE, experienceAction2),
+        )
+        val experience = mockExperienceNavigateActions(navigationActions, presentingTrait, Qualification("screen_view"))
+        val initialState = Idling
+        val stateMachine = initMachine(initialState)
+        val action = StartExperience(experience)
+        val targetState = RenderingStep(experience, 0, true)
+        val actionProcessor: ActionProcessor = get()
+
+        // WHEN
+        val result = stateMachine.handleAction(action)
+
+        // THEN
+        assertThat(result.successValue()).isEqualTo(targetState)
+        assertThat(stateMachine.state).isEqualTo(targetState)
+        coVerify(exactly = 0) { actionProcessor.process(listOf(experienceAction1, experienceAction2)) }
+        coVerify { presentingTrait.present() }
+    }
+
+    @Test
+    fun `StartExperience SHOULD execute navigation actions WHEN trigger is NOT Qualification`() = runTest {
+        // Test that a manually triggered experience with "navigate" actions on a group at index 0 has those actions executed
+        // when presenting the first step
+
+        // GIVEN
+        val experienceAction1 = mockk<ExperienceAction>(relaxed = true)
+        val experienceAction2 = mockk<ExperienceAction>(relaxed = true)
+        val presentingTrait = mockk<PresentingTrait>(relaxed = true)
+        val navigationActions = listOf(
+            com.appcues.data.model.Action(NAVIGATE, experienceAction1),
+            com.appcues.data.model.Action(NAVIGATE, experienceAction2),
+        )
+        val experience = mockExperienceNavigateActions(navigationActions, presentingTrait, ExperienceTrigger.Preview)
+        val initialState = Idling
+        val stateMachine = initMachine(initialState)
+        val action = StartExperience(experience)
+        val targetState = RenderingStep(experience, 0, true)
+        val actionProcessor: ActionProcessor = get()
+
+        // WHEN
+        val result = stateMachine.handleAction(action)
+
+        // THEN
+        assertThat(result.successValue()).isEqualTo(targetState)
+        assertThat(stateMachine.state).isEqualTo(targetState)
+        verify { experienceAction1 wasNot Called }
+        verify { experienceAction2 wasNot Called }
         coVerifyOrder {
             actionProcessor.process(listOf(experienceAction1, experienceAction2))
             presentingTrait.present()
@@ -326,6 +393,7 @@ class StateMachineTest : AppcuesScopeTest {
             publishedAt = 1652895835000,
             completionActions = arrayListOf(),
             experiment = null,
+            trigger = ExperienceTrigger.ShowCall,
         )
         val initialState = Idling
         val stateMachine = initMachine(initialState)
@@ -352,7 +420,8 @@ class StateMachineTest : AppcuesScopeTest {
             publishedAt = 1652895835000,
             completionActions = arrayListOf(),
             experiment = null,
-            error = "Failed decode"
+            error = "Failed decode",
+            trigger = ExperienceTrigger.ShowCall,
         )
         val initialState = Idling
         val stateMachine = initMachine(initialState)

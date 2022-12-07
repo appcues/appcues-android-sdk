@@ -11,6 +11,7 @@ import com.appcues.data.mapper.trait.TraitsMapper
 import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperiencePriority
 import com.appcues.data.model.ExperiencePriority.NORMAL
+import com.appcues.data.model.ExperienceTrigger
 import com.appcues.data.model.Experiment
 import com.appcues.data.model.StepContainer
 import com.appcues.data.remote.response.ExperimentResponse
@@ -38,13 +39,14 @@ internal class ExperienceMapper(
     // or failed responses with minimal info for error reporting
     fun mapDecoded(
         from: LossyExperienceResponse,
+        trigger: ExperienceTrigger,
         priority: ExperiencePriority = NORMAL,
         experiments: List<ExperimentResponse>? = null,
         requestId: UUID? = null,
     ): Experience {
         return when (from) {
-            is ExperienceResponse -> map(from, priority, experiments, requestId)
-            is FailedExperienceResponse -> mapFailed(from, priority, experiments, requestId)
+            is ExperienceResponse -> map(from, trigger, priority, experiments, requestId)
+            is FailedExperienceResponse -> mapFailed(from, trigger, priority, experiments, requestId)
         }
     }
 
@@ -52,6 +54,7 @@ internal class ExperienceMapper(
     // to report the flow issue about deserialization in the `error` field, for troubleshooting
     private fun mapFailed(
         from: FailedExperienceResponse,
+        trigger: ExperienceTrigger,
         priority: ExperiencePriority = NORMAL,
         experiments: List<ExperimentResponse>? = null,
         requestId: UUID? = null,
@@ -66,14 +69,16 @@ internal class ExperienceMapper(
             publishedAt = from.publishedAt,
             experiment = experiments?.getExperiment(from.id),
             completionActions = emptyList(),
+            trigger = trigger,
             requestId = requestId,
-            error = from.error
+            error = from.error,
         )
     }
 
     // this version maps the normal successful ExperienceResponse
     fun map(
         from: ExperienceResponse,
+        trigger: ExperienceTrigger,
         priority: ExperiencePriority = NORMAL,
         experiments: List<ExperimentResponse>? = null,
         requestId: UUID? = null,
@@ -89,9 +94,22 @@ internal class ExperienceMapper(
             publishedAt = from.publishedAt,
             experiment = experiments?.getExperiment(from.id),
             completionActions = arrayListOf<ExperienceAction>().apply {
-                from.redirectUrl?.let { add(LinkAction(it, scope.get())) }
-                from.nextContentId?.let { add(LaunchExperienceAction(it)) }
+                from.redirectUrl?.let {
+                    add(LinkAction(
+                        redirectUrl = it,
+                        linkOpener = scope.get()
+                    ))
+                }
+                from.nextContentId?.let {
+                    add(LaunchExperienceAction(
+                        completedExperienceId = from.id.toString(),
+                        launchExperienceId = it,
+                        stateMachine = scope.get(),
+                        experienceRenderer = scope.get(),
+                    ))
+                }
             },
+            trigger = trigger,
             requestId = requestId,
         )
     }
