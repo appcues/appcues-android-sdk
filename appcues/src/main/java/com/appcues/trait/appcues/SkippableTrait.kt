@@ -60,7 +60,7 @@ internal class SkippableTrait(
     }
 
     @Composable
-    override fun BoxScope.Backdrop() {
+    override fun BoxScope.BackdropDecorate(content: @Composable BoxScope.() -> Unit) {
         Spacer(
             modifier = Modifier
                 .matchParentSize()
@@ -73,5 +73,7 @@ internal class SkippableTrait(
                     }
                 },
         )
+
+        content()
     }
 }

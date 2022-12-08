@@ -16,7 +16,6 @@ internal object DataMapperKoin : KoinScopePlugin {
                 traitsMapper = get(),
                 actionsMapper = get(),
                 scope = get(),
-                context = get(),
             )
         }
 

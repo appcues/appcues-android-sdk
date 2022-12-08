@@ -4,9 +4,11 @@ import com.appcues.di.KoinScopePlugin
 import com.appcues.trait.appcues.BackdropTrait
 import com.appcues.trait.appcues.BackgroundContentTrait
 import com.appcues.trait.appcues.CarouselTrait
+import com.appcues.trait.appcues.KeyholeTrait
 import com.appcues.trait.appcues.ModalTrait
 import com.appcues.trait.appcues.PagingDotsTrait
 import com.appcues.trait.appcues.SkippableTrait
+import com.appcues.trait.appcues.StepAnimationTrait
 import com.appcues.trait.appcues.StickyContentTrait
 import org.koin.dsl.ScopeDSL
 
@@ -27,8 +29,22 @@ internal object TraitKoin : KoinScopePlugin {
         }
 
         factory { params ->
+            StepAnimationTrait(
+                config = params.getOrNull(),
+            )
+        }
+
+        factory { params ->
+            KeyholeTrait(
+                config = params.getOrNull(),
+            )
+        }
+
+        factory { params ->
             ModalTrait(
                 config = params.getOrNull(),
+                scope = get(),
+                context = get(),
             )
         }
 

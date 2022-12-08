@@ -12,6 +12,7 @@ import com.appcues.statemachine.Action.Resume
 import com.appcues.statemachine.Action.StartExperience
 import com.appcues.statemachine.Action.StartStep
 import com.appcues.statemachine.Error.ExperienceAlreadyActive
+import com.appcues.statemachine.Error.ExperienceError
 import com.appcues.statemachine.SideEffect.AwaitEffect
 import com.appcues.statemachine.SideEffect.ContinuationEffect
 import com.appcues.statemachine.SideEffect.PresentContainerEffect
@@ -29,6 +30,7 @@ import com.appcues.statemachine.Transition.EmptyTransition
 import com.appcues.statemachine.Transition.ErrorLoggingTransition
 import com.appcues.statemachine.Transitions.Companion.fromRenderingStepToEndingExperience
 import com.appcues.statemachine.Transitions.Companion.fromRenderingStepToEndingStep
+import com.appcues.trait.AppcuesTraitException
 import com.appcues.util.ResultOf
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
@@ -106,11 +108,25 @@ internal class StateMachine(
                     // for example - navigating to another screen in the app
                     actionProcessor.process(sideEffect.actions)
 
-                    // kick off UI
-                    sideEffect.experience.stepContainers[sideEffect.containerIndex].presentingTrait.present()
+                    try {
+                        // kick off UI
+                        sideEffect.experience.stepContainers[sideEffect.containerIndex].presentingTrait.present()
+                        // wait on the RenderingStep state to flow in from the UI, return that result
+                        sideEffect.completion.await()
+                    } catch (exception: AppcuesTraitException) {
+                        // force state machine to move to idling when we get this exception
+                        _state = Idling
 
-                    // wait on the RenderingStep state to flow in from the UI, return that result
-                    sideEffect.completion.await()
+                        // return failure and report to errorFlow
+                        Failure(
+                            ExperienceError(
+                                experience = sideEffect.experience,
+                                message = exception.message ?: "Presenting trait failed to present for index ${sideEffect.containerIndex}"
+                            ).also {
+                                _errorFlow.emit(it)
+                            }
+                        )
+                    }
                 }
                 is AwaitEffect -> {
                     sideEffect.completion.await()
