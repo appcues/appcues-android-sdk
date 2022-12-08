@@ -113,8 +113,6 @@ internal fun mockExperienceNavigateActions(actions: List<Action>, presentingTrai
                 presentingTrait = presentingTrait,
                 contentHolderTrait = mockk(relaxed = true),
                 contentWrappingTrait = mockk(relaxed = true),
-                backdropDecoratingTraits = listOf(),
-                containerDecoratingTraits = listOf(),
                 actions = mapOf(UUID.fromString("60b49c12-c49b-47ac-8ed3-ba4e9a55e694") to actions),
             ),
             StepContainer(
@@ -125,8 +123,6 @@ internal fun mockExperienceNavigateActions(actions: List<Action>, presentingTrai
                 presentingTrait = presentingTrait,
                 contentHolderTrait = mockk(relaxed = true),
                 contentWrappingTrait = mockk(relaxed = true),
-                backdropDecoratingTraits = listOf(),
-                containerDecoratingTraits = listOf(),
                 actions = mapOf(UUID.fromString("71614c07-3f37-4f04-a853-f55424160321") to actions),
             )
         ),
