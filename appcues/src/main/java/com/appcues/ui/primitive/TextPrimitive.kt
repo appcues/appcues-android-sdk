@@ -31,8 +31,9 @@ internal fun TextPrimitive.Compose(modifier: Modifier) {
         context = LocalContext.current,
         isDark = isSystemInDarkTheme(),
     )
-    var resizedStyle by remember { mutableStateOf(style) }
-    var readyToDraw by remember { mutableStateOf(false) }
+
+    var resizedStyle by remember(style) { mutableStateOf(style) }
+    var readyToDraw by remember(style) { mutableStateOf(false) }
 
     Text(
         modifier = modifier.clipToBounds().drawWithContent { if (readyToDraw) drawContent() },
