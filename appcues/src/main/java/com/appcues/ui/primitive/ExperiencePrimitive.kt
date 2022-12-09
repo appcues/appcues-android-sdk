@@ -44,8 +44,10 @@ import com.appcues.ui.extensions.toImageAsyncContentScale
 import com.appcues.ui.utils.rememberBlurHashDecoded
 import java.util.UUID
 
+// the given `modifier` is chained onto the end of the new composable, allowing a capability to apply
+// additional behaviors to those specified in the primitive configuration.
 @Composable
-internal fun ExperiencePrimitive.Compose(matchParentBox: BoxScope? = null) {
+internal fun ExperiencePrimitive.Compose(matchParentBox: BoxScope? = null, modifier: Modifier = Modifier) {
     val stackScope = LocalStackScope.current
     Box(
         modifier = Modifier
@@ -62,24 +64,25 @@ internal fun ExperiencePrimitive.Compose(matchParentBox: BoxScope? = null) {
                 isDark = isSystemInDarkTheme(),
                 matchParentBox = matchParentBox,
             )
-            .updateStackScope(stackScope, id),
+            .updateStackScope(stackScope, id)
+            .then(modifier),
         contentAlignment = Alignment.Center
     ) {
         BackgroundImage(style)
 
         with(this@Compose) {
-            val modifier = Modifier.innerPrimitiveStyle(this)
+            val innerModifier = Modifier.innerPrimitiveStyle(this)
             when (this) {
-                is BoxPrimitive -> Compose(modifier)
-                is ButtonPrimitive -> Compose(modifier)
-                is EmbedHtmlPrimitive -> Compose(modifier)
-                is HorizontalStackPrimitive -> Compose(modifier)
-                is ImagePrimitive -> Compose(modifier, matchParentBox)
-                is TextPrimitive -> Compose(modifier)
-                is VerticalStackPrimitive -> Compose(modifier)
-                is TextInputPrimitive -> Compose(modifier)
-                is OptionSelectPrimitive -> Compose(modifier)
-                is SpacerPrimitive -> Compose(modifier)
+                is BoxPrimitive -> Compose(innerModifier)
+                is ButtonPrimitive -> Compose(innerModifier)
+                is EmbedHtmlPrimitive -> Compose(innerModifier)
+                is HorizontalStackPrimitive -> Compose(innerModifier)
+                is ImagePrimitive -> Compose(innerModifier, matchParentBox)
+                is TextPrimitive -> Compose(innerModifier)
+                is VerticalStackPrimitive -> Compose(innerModifier)
+                is TextInputPrimitive -> Compose(innerModifier)
+                is OptionSelectPrimitive -> Compose(innerModifier)
+                is SpacerPrimitive -> Compose(innerModifier)
             }
         }
     }

@@ -185,8 +185,8 @@ private fun List<OptionSelectPrimitive.OptionItem>.ComposeSelections(
                 contentView.Compose()
                 selectMode.Compose(isSelected, optionSelectPrimitive, errorTint) { itemSelected(option.value) }
             }
-            HIDDEN -> Box(modifier = Modifier.clickable { itemSelected(option.value) }) {
-                contentView.Compose()
+            HIDDEN -> {
+                contentView.Compose(modifier = Modifier.clickable { itemSelected(option.value) })
             }
         }
     }
