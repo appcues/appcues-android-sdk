@@ -1,0 +1,41 @@
+{
+  "id": "05e78601-d7d8-449f-a074-fe3ae1144366",
+  "name": "duplicate experience trait",
+  "type": "mobile",
+  "traits": [
+    {
+      "type": "experience-trait"
+    },
+    {
+      "type": "experience-trait"
+    }
+  ],
+  "steps": [
+    {
+      "id": "f7edb07c-5f96-4440-9b70-3bdd0b7675b0",
+      "type": "group",
+      "actions": {},
+      "traits": [
+        {
+          "type": "group-trait"
+        }
+      ],
+      "children": [
+        {
+          "id": "68bb5cc4-99b4-4f5c-a787-930ba921fc05",
+          "type": "modal",
+          "content": {
+            "type": "spacer",
+            "id": "1f9d1c11-525f-4f1c-afc1-d91b97c6a7d4"
+          },
+          "traits": [
+            {
+              "type": "step-trait"
+            }
+          ],
+          "actions": {}
+        }
+      ]
+    }
+  ]
+}
