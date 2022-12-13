@@ -16,6 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.ClipOp
 import androidx.compose.ui.graphics.Path
@@ -34,7 +35,6 @@ import com.appcues.trait.appcues.StepAnimationTrait.StepAnimationEasing.EASE_IN
 import com.appcues.trait.appcues.StepAnimationTrait.StepAnimationEasing.EASE_IN_OUT
 import com.appcues.trait.appcues.StepAnimationTrait.StepAnimationEasing.EASE_OUT
 import com.appcues.trait.appcues.StepAnimationTrait.StepAnimationEasing.LINEAR
-import com.appcues.trait.appcues.TargetElementTrait.TargetRect
 import com.appcues.ui.composables.LocalAppcuesStepMetadata
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -55,7 +55,7 @@ internal class BackdropKeyholeTrait(
         RECTANGLE, CIRCLE
     }
 
-    private val emptyRect = TargetRect(0, 0, 0, 0)
+    private val emptyRect = Rect(0f, 0f, 0f, 0f)
 
     private val shape = when (config.getConfig<String>("shape")) {
         "circle" -> CIRCLE
@@ -69,7 +69,7 @@ internal class BackdropKeyholeTrait(
         val metadata = LocalAppcuesStepMetadata.current
 
         val actualRect = remember(metadata) {
-            (metadata.actual[TargetElementTrait.METADATA_TARGET_RECT] as TargetRect?) ?: emptyRect
+            (metadata.actual[TargetElementTrait.METADATA_TARGET_RECT] as Rect?) ?: emptyRect
         }
 
         val duration = remember(metadata) {
@@ -86,26 +86,25 @@ internal class BackdropKeyholeTrait(
             }
         }
 
-        val circleSize = getRectEncompassesRadius(actualRect.width.toFloat(), actualRect.height.toFloat()) * 2
+        val circleSize = getRectEncompassesRadius(actualRect.width, actualRect.height) * 2
         val circleEncompassXOffset = (circleSize - actualRect.width) / 2
         val circleEncompassYOffset = (circleSize - actualRect.height) / 2
         val xPosition = animateFloatAsState(
-            if (shape == RECTANGLE) actualRect.x.toFloat() else actualRect.x.toFloat() - circleEncompassXOffset,
+            targetValue = if (shape == RECTANGLE) actualRect.top else actualRect.top - circleEncompassXOffset,
             animationSpec = animation
         )
         val yPosition = animateFloatAsState(
-            if (shape == RECTANGLE) actualRect.y.toFloat() else actualRect.y.toFloat() - circleEncompassYOffset,
+            targetValue = if (shape == RECTANGLE) actualRect.left else actualRect.left - circleEncompassYOffset,
             animationSpec = animation
         )
-        val width = animateFloatAsState(if (shape == RECTANGLE) actualRect.width.toFloat() else circleSize, animationSpec = animation)
-        val height = animateFloatAsState(if (shape == RECTANGLE) actualRect.height.toFloat() else circleSize, animationSpec = animation)
-        val cornerRadius =
-            animateFloatAsState(getCornerRadius(actualRect.width.toFloat(), actualRect.height.toFloat()), animationSpec = animation)
+        val width = animateFloatAsState(if (shape == RECTANGLE) actualRect.width else circleSize, animationSpec = animation)
+        val height = animateFloatAsState(if (shape == RECTANGLE) actualRect.height else circleSize, animationSpec = animation)
+        val cornerRadius = animateFloatAsState(getCornerRadius(actualRect.width, actualRect.height), animationSpec = animation)
 
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                // set background color
+                // draw the desired shape as a clipPath
                 .drawWithContent {
                     clipPath(
                         path = Path().apply {
@@ -131,8 +130,7 @@ internal class BackdropKeyholeTrait(
             RECTANGLE -> rectCornerRadius.toFloat()
             CIRCLE -> {
                 getRectEncompassesRadius(width, height).let {
-                    // finds the diameter and divide 4 to figure out
-                    // the circle corner radius
+                    // finds the diameter and divide 4 to figure out the circle corner radius
                     ((it * Math.PI) / CORNER_RADIUS_CIRCLE_PIECES).toFloat()
                 }
             }

@@ -1,9 +1,11 @@
 package com.appcues.trait.appcues
 
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.getConfigInt
 import com.appcues.trait.MetadataSettingTrait
-import com.appcues.trait.appcues.TargetElementTrait.TargetRect
 
 internal class TargetRectangleTrait(
     override val config: AppcuesConfigMap,
@@ -15,11 +17,15 @@ internal class TargetRectangleTrait(
     }
 
     override fun produceMetadata(): Map<String, Any?> {
-        val rect = TargetRect(
-            x = config.getConfigInt("x") ?: 0,
-            y = config.getConfigInt("y") ?: 0,
-            width = config.getConfigInt("width") ?: 0,
-            height = config.getConfigInt("height") ?: 0
+        val rect = Rect(
+            Offset(
+                x = config.getConfigInt("x")?.toFloat() ?: 0f,
+                y = config.getConfigInt("y")?.toFloat() ?: 0f
+            ),
+            Size(
+                width = config.getConfigInt("width")?.toFloat() ?: 0f,
+                height = config.getConfigInt("height")?.toFloat() ?: 0f
+            )
         )
 
         return hashMapOf(TargetElementTrait.METADATA_TARGET_RECT to rect)
