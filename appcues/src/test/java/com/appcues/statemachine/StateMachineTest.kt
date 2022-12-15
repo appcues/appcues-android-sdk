@@ -34,6 +34,7 @@ import com.appcues.statemachine.State.RenderingStep
 import com.appcues.statemachine.StepReference.StepId
 import com.appcues.statemachine.StepReference.StepIndex
 import com.appcues.statemachine.StepReference.StepOffset
+import com.appcues.trait.AppcuesTraitException
 import com.appcues.trait.PresentingTrait
 import com.appcues.util.ResultOf
 import com.google.common.truth.Truth.assertThat
@@ -148,6 +149,28 @@ class StateMachineTest : AppcuesScopeTest {
         assertThat(result.successValue()).isEqualTo(targetState)
         assertThat(presented).isTrue() // new container
         assertThat(stateMachine.state).isEqualTo(targetState)
+    }
+
+    @Test
+    fun `Idling SHOULD transition to Idling WHEN action is StartExperience AND present throws`() = runTest {
+        // this happens when a presenting trait fails to present and throws AppcuesTraitException instead
+
+        // GIVEN
+        val experience = mockExperience { throw AppcuesTraitException("test trait exception") }
+        val initialState = Idling
+        val targetState = Idling
+        val stateMachine = initMachine(initialState)
+        val action = StartExperience(experience)
+
+        // WHEN
+        val result = stateMachine.handleAction(action)
+
+        // THEN
+        assertThat(stateMachine.state).isEqualTo(targetState)
+        assertThat(result.failureReason()).isInstanceOf(ExperienceError::class.java)
+        with(result.failureReason() as ExperienceError) {
+            assertThat(message).isEqualTo("test trait exception")
+        }
     }
 
     @Test

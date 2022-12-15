@@ -6,5 +6,5 @@ import androidx.compose.runtime.Composable
 interface BackdropDecoratingTrait : ExperienceTrait {
 
     @Composable
-    fun BoxScope.Backdrop()
+    fun BoxScope.BackdropDecorate(content: @Composable BoxScope.() -> Unit)
 }

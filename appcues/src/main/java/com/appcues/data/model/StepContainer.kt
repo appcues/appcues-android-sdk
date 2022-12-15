@@ -1,7 +1,5 @@
 package com.appcues.data.model
 
-import com.appcues.trait.BackdropDecoratingTrait
-import com.appcues.trait.ContainerDecoratingTrait
 import com.appcues.trait.ContentHolderTrait
 import com.appcues.trait.ContentWrappingTrait
 import com.appcues.trait.PresentingTrait
@@ -14,6 +12,4 @@ internal data class StepContainer(
     val presentingTrait: PresentingTrait,
     val contentHolderTrait: ContentHolderTrait,
     val contentWrappingTrait: ContentWrappingTrait,
-    val backdropDecoratingTraits: List<BackdropDecoratingTrait>,
-    val containerDecoratingTraits: List<ContainerDecoratingTrait>,
 )
