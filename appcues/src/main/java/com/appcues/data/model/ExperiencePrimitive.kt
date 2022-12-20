@@ -144,6 +144,7 @@ internal sealed class ExperiencePrimitive(
         val unselectedColor: ComponentColor? = null,
         val accentColor: ComponentColor? = null,
         val attributeName: String? = null,
+        val leadingFill: Boolean = false,
     ) : ExperiencePrimitive(id, style) {
 
         data class OptionItem(

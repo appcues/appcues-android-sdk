@@ -104,6 +104,7 @@ internal sealed class PrimitiveResponse(
         val unselectedColor: StyleColorResponse?,
         val accentColor: StyleColorResponse?,
         val attributeName: String?,
+        val leadingFill: Boolean?
     ) : PrimitiveResponse(OPTION_SELECT) {
 
         data class OptionItem(

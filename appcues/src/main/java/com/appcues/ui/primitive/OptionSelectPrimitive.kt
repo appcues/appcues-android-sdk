@@ -115,6 +115,7 @@ private fun OptionSelectPrimitive.ComposeOptions(
                     controlPosition = controlPosition,
                     optionSelectPrimitive = this@ComposeOptions,
                     errorTint = errorTint,
+                    leadingFill = leadingFill,
                 ) {
                     formState.setValue(this@ComposeOptions, it)
                 }
@@ -128,6 +129,7 @@ private fun OptionSelectPrimitive.ComposeOptions(
                     controlPosition = controlPosition,
                     optionSelectPrimitive = this@ComposeOptions,
                     errorTint = errorTint,
+                    leadingFill = leadingFill,
                 ) {
                     formState.setValue(this@ComposeOptions, it)
                 }
@@ -157,14 +159,27 @@ private fun List<OptionSelectPrimitive.OptionItem>.ComposeSelections(
     controlPosition: ComponentControlPosition,
     optionSelectPrimitive: OptionSelectPrimitive,
     errorTint: Color?,
+    leadingFill: Boolean,
     itemSelected: (String) -> Unit,
 ) {
+    // allow a leading fill only if requested, and in single select mode, and something is selected, and no checkbox or radio
+    // i.e. the ratings use case
+    var leadingFillOverride = leadingFill && selectMode == SINGLE && selectedValues.any() && controlPosition == HIDDEN
+
     forEach { option ->
 
         val isSelected = selectedValues.contains(option.value)
-        val contentView by remember(isSelected) {
+
+        if (isSelected) {
+            // no more leading fill after this item
+            leadingFillOverride = false
+        }
+
+        val styleSelected = isSelected || leadingFillOverride
+
+        val contentView by remember(styleSelected) {
             derivedStateOf {
-                option.selectedContent?.let { if (isSelected) it else option.content } ?: option.content
+                option.selectedContent?.let { if (styleSelected) it else option.content } ?: option.content
             }
         }
 
