@@ -13,6 +13,7 @@ import com.appcues.trait.appcues.StepAnimationTrait
 import com.appcues.trait.appcues.StickyContentTrait
 import com.appcues.trait.appcues.TargetElementTrait
 import com.appcues.trait.appcues.TargetRectangleTrait
+import com.appcues.trait.appcues.TooltipTrait
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.get
 import org.koin.core.parameter.parametersOf
@@ -35,6 +36,7 @@ internal class TraitRegistry(
         register(BackdropTrait.TYPE) { config, _ -> get<BackdropTrait> { parametersOf(config) } }
         register(BackdropKeyholeTrait.TYPE) { config, _ -> get<BackdropKeyholeTrait> { parametersOf(config) } }
         register(ModalTrait.TYPE) { config, _ -> get<ModalTrait> { parametersOf(config) } }
+        register(TooltipTrait.TYPE) { config, _ -> get<TooltipTrait> { parametersOf(config) } }
         register(SkippableTrait.TYPE) { config, _ -> get<SkippableTrait> { parametersOf(config) } }
         register(CarouselTrait.TYPE) { config, _ -> get<CarouselTrait> { parametersOf(config) } }
         register(PagingDotsTrait.TYPE) { config, _ -> get<PagingDotsTrait> { parametersOf(config) } }
