@@ -12,11 +12,11 @@ import com.appcues.trait.appcues.StepAnimationTrait
 import com.appcues.trait.appcues.StickyContentTrait
 import com.appcues.trait.appcues.TargetElementTrait
 import com.appcues.trait.appcues.TargetRectangleTrait
+import com.appcues.trait.appcues.TooltipTrait
 import org.koin.dsl.ScopeDSL
 
 internal object TraitKoin : KoinScopePlugin {
 
-    @Suppress("LongMethod")
     override fun ScopeDSL.install() {
         scoped {
             TraitRegistry(
@@ -60,6 +60,13 @@ internal object TraitKoin : KoinScopePlugin {
                 config = params.getOrNull(),
                 scope = get(),
                 context = get(),
+            )
+        }
+
+        factory { params ->
+            TooltipTrait(
+                config = params.getOrNull(),
+                scope = get(),
             )
         }
 

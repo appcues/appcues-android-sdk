@@ -46,8 +46,6 @@ internal class BackdropTrait(
         const val TYPE = "@appcues/backdrop"
 
         const val METADATA_BACKGROUND_COLOR = "backgroundColor"
-
-        private const val DEFAULT_ANIMATION = 300
     }
 
     override fun produceMetadata(): Map<String, Any?> {
@@ -68,7 +66,7 @@ internal class BackdropTrait(
         }
 
         val duration = remember(metadata) {
-            (metadata.actual[StepAnimationTrait.METADATA_ANIMATION_DURATION] as Int?) ?: DEFAULT_ANIMATION
+            (metadata.actual[StepAnimationTrait.METADATA_ANIMATION_DURATION] as Int?) ?: StepAnimationTrait.DEFAULT_ANIMATION
         }
 
         val animation = remember<TweenSpec<Color>>(metadata) {
@@ -77,7 +75,8 @@ internal class BackdropTrait(
                 EASE_IN -> tween(durationMillis = duration, easing = EaseIn)
                 EASE_OUT -> tween(durationMillis = duration, easing = EaseOut)
                 EASE_IN_OUT -> tween(durationMillis = duration, easing = EaseInOut)
-                null -> tween(durationMillis = duration, easing = LinearEasing)
+                // animation with no duration is the easiest way to not use animation here
+                null -> tween(durationMillis = 0, easing = LinearEasing)
             }
         }
 

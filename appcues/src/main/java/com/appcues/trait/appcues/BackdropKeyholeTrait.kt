@@ -35,6 +35,7 @@ import com.appcues.trait.appcues.StepAnimationTrait.StepAnimationEasing.EASE_IN
 import com.appcues.trait.appcues.StepAnimationTrait.StepAnimationEasing.EASE_IN_OUT
 import com.appcues.trait.appcues.StepAnimationTrait.StepAnimationEasing.EASE_OUT
 import com.appcues.trait.appcues.StepAnimationTrait.StepAnimationEasing.LINEAR
+import com.appcues.ui.composables.AppcuesStepMetadata
 import com.appcues.ui.composables.LocalAppcuesStepMetadata
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -46,9 +47,6 @@ internal class BackdropKeyholeTrait(
     companion object {
 
         const val TYPE = "@appcues/backdrop-keyhole"
-
-        private const val DEFAULT_ANIMATION = 300
-        private const val CORNER_RADIUS_CIRCLE_PIECES = 8
     }
 
     private enum class ConfigShape {
@@ -61,40 +59,28 @@ internal class BackdropKeyholeTrait(
         "circle" -> CIRCLE
         else -> RECTANGLE
     }
+
     private val rectCornerRadius = config.getConfigInt("cornerRadius") ?: 0
+
+    private val spreadRadius = config.getConfigInt("spreadRadius") ?: 0
 
     @Composable
     override fun BoxScope.BackdropDecorate(content: @Composable BoxScope.() -> Unit) {
         val density = LocalDensity.current
         val metadata = LocalAppcuesStepMetadata.current
 
-        val actualRect = remember(metadata) {
-            (metadata.actual[TargetElementTrait.METADATA_TARGET_RECT] as Rect?) ?: emptyRect
-        }
-
-        val duration = remember(metadata) {
-            (metadata.actual[StepAnimationTrait.METADATA_ANIMATION_DURATION] as Int?) ?: DEFAULT_ANIMATION
-        }
-
-        val animation = remember<TweenSpec<Float>>(metadata) {
-            when ((metadata.actual[StepAnimationTrait.METADATA_ANIMATION_EASING] as StepAnimationEasing?)) {
-                LINEAR -> tween(durationMillis = duration, easing = LinearEasing)
-                EASE_IN -> tween(durationMillis = duration, easing = EaseIn)
-                EASE_OUT -> tween(durationMillis = duration, easing = EaseOut)
-                EASE_IN_OUT -> tween(durationMillis = duration, easing = EaseInOut)
-                null -> tween(durationMillis = duration, easing = LinearEasing)
-            }
-        }
+        val actualRect = rememberMetadataRect(metadata)
+        val animation = rememberMetadataAnimation(metadata)
 
         val circleSize = getRectEncompassesRadius(actualRect.width, actualRect.height) * 2
         val circleEncompassXOffset = (circleSize - actualRect.width) / 2
         val circleEncompassYOffset = (circleSize - actualRect.height) / 2
         val xPosition = animateFloatAsState(
-            targetValue = if (shape == RECTANGLE) actualRect.top else actualRect.top - circleEncompassXOffset,
+            targetValue = if (shape == RECTANGLE) actualRect.left else actualRect.left - circleEncompassXOffset,
             animationSpec = animation
         )
         val yPosition = animateFloatAsState(
-            targetValue = if (shape == RECTANGLE) actualRect.left else actualRect.left - circleEncompassYOffset,
+            targetValue = if (shape == RECTANGLE) actualRect.top else actualRect.top - circleEncompassYOffset,
             animationSpec = animation
         )
         val width = animateFloatAsState(if (shape == RECTANGLE) actualRect.width else circleSize, animationSpec = animation)
@@ -106,13 +92,15 @@ internal class BackdropKeyholeTrait(
                 .fillMaxSize()
                 // draw the desired shape as a clipPath
                 .drawWithContent {
+                    val size = with(density) { Size(width.value.dp.toPx(), height.value.dp.toPx()) }
+                    val position = with(density) { Offset(xPosition.value.dp.toPx(), yPosition.value.dp.toPx()) }
                     clipPath(
                         path = Path().apply {
                             addOutline(
                                 RoundedCornerShape(cornerRadius.value.dp)
-                                    .createOutline(Size(width.value, height.value), layoutDirection, density)
+                                    .createOutline(size, layoutDirection, density)
                             )
-                            translate(Offset(x = xPosition.value, y = yPosition.value))
+                            translate(position)
                         },
                         clipOp = ClipOp.Difference,
                     ) {
@@ -125,13 +113,43 @@ internal class BackdropKeyholeTrait(
         }
     }
 
+    @Composable
+    private fun rememberMetadataRect(metadata: AppcuesStepMetadata): Rect {
+        val actualRect = remember(metadata) {
+            var rect = (metadata.actual[TargetElementTrait.METADATA_TARGET_RECT] as Rect?) ?: emptyRect
+            if (spreadRadius != 0) {
+                rect = Rect(
+                    offset = Offset(rect.topLeft.x - spreadRadius, rect.topLeft.y - spreadRadius),
+                    size = Size(width = rect.width + (spreadRadius * 2), height = rect.height + (spreadRadius * 2))
+                )
+            }
+            rect
+        }
+        return actualRect
+    }
+
+    @Composable
+    private fun rememberMetadataAnimation(metadata: AppcuesStepMetadata): TweenSpec<Float> {
+        val animation = remember<TweenSpec<Float>>(metadata) {
+            val duration = (metadata.actual[StepAnimationTrait.METADATA_ANIMATION_DURATION] as Int?) ?: StepAnimationTrait.DEFAULT_ANIMATION
+            when ((metadata.actual[StepAnimationTrait.METADATA_ANIMATION_EASING] as StepAnimationEasing?)) {
+                LINEAR -> tween(durationMillis = duration, easing = LinearEasing)
+                EASE_IN -> tween(durationMillis = duration, easing = EaseIn)
+                EASE_OUT -> tween(durationMillis = duration, easing = EaseOut)
+                EASE_IN_OUT -> tween(durationMillis = duration, easing = EaseInOut)
+                // animation with no duration is the easiest way to not use animation here
+                null -> tween(durationMillis = 0, easing = LinearEasing)
+            }
+        }
+        return animation
+    }
+
     private fun getCornerRadius(width: Float, height: Float): Float {
         return when (shape) {
             RECTANGLE -> rectCornerRadius.toFloat()
             CIRCLE -> {
                 getRectEncompassesRadius(width, height).let {
-                    // finds the diameter and divide 4 to figure out the circle corner radius
-                    ((it * Math.PI) / CORNER_RADIUS_CIRCLE_PIECES).toFloat()
+                    ((it * Math.PI) / 2).toFloat()
                 }
             }
         }

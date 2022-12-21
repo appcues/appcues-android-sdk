@@ -19,6 +19,7 @@ internal class StepAnimationTrait(
 
         const val METADATA_ANIMATION_DURATION = "animationDuration"
         const val METADATA_ANIMATION_EASING = "animationEasing"
+        const val DEFAULT_ANIMATION = 300
     }
 
     override fun produceMetadata(): Map<String, Any?> {
