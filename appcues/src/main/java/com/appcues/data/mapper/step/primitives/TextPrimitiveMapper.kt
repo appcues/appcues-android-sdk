@@ -8,4 +8,5 @@ internal fun TextPrimitiveResponse.mapTextPrimitive() = TextPrimitive(
     id = id,
     text = text,
     style = style.mapComponentStyle(),
+    localizable = localizable ?: true,
 )

@@ -1,5 +1,6 @@
 package com.appcues.ui.composables
 
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.mutableStateOf
@@ -100,3 +101,12 @@ data class AppcuesStepMetadata(
 private fun noLocalProvidedFor(name: String): Nothing {
     error("CompositionLocal $name not present")
 }
+
+internal val LocalCompositionTranslation = compositionLocalOf<CompositionTranslation?> { null }
+
+internal data class CompositionTranslation(
+    var sourceLanguageTag: String?,
+    var targetLanguageTag: String?,
+    val translateBlock: (suspend (String, String?, String?) -> String),
+    var translateComposition: MutableState<Boolean>
+)

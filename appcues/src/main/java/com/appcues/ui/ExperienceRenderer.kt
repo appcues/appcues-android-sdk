@@ -16,6 +16,7 @@ import com.appcues.statemachine.State
 import com.appcues.statemachine.State.Idling
 import com.appcues.statemachine.State.Paused
 import com.appcues.statemachine.StateMachine
+import com.appcues.util.LanguageTranslator
 import com.appcues.util.ResultOf
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
@@ -35,6 +36,7 @@ internal class ExperienceRenderer(
     private val sessionMonitor by inject<SessionMonitor>()
     private val config by inject<AppcuesConfig>()
     private val analyticsTracker by inject<AnalyticsTracker>()
+    private val languageTranslator by inject<LanguageTranslator>()
 
     suspend fun show(experience: Experience): Boolean {
         var canShow = config.interceptor?.canDisplayExperience(experience.id) ?: true
@@ -68,10 +70,12 @@ internal class ExperienceRenderer(
             }
         }
 
-        // track an experiment_entered analytic, if exists, since we know it is not in the control group at this point
-        experience.experiment?.track(analyticsTracker)
+        val experienceToRender = languageTranslator.translate(experience)
 
-        return stateMachine.handleAction(StartExperience(experience)).run {
+        // track an experiment_entered analytic, if exists, since we know it is not in the control group at this point
+        experienceToRender.experiment?.track(analyticsTracker)
+
+        return stateMachine.handleAction(StartExperience(experienceToRender)).run {
             when (this) {
                 is Success -> true
                 is Failure -> false

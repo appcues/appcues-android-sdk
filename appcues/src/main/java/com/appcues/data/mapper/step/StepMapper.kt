@@ -12,6 +12,7 @@ import com.appcues.trait.ContainerDecoratingTrait
 import com.appcues.trait.ExperienceTraitLevel.STEP
 import com.appcues.trait.MetadataSettingTrait
 import com.appcues.trait.StepDecoratingTrait
+import com.appcues.trait.appcues.LocalizationTrait
 
 internal class StepMapper(
     private val traitsMapper: TraitsMapper,
@@ -36,6 +37,7 @@ internal class StepMapper(
             metadataSettingTraits = mappedTraits.filterIsInstance<MetadataSettingTrait>(),
             actions = actionsMapper.map(from.actions),
             type = from.type,
+            localizationTrait = mappedTraits.filterIsInstance<LocalizationTrait>().firstOrNull(),
         )
     }
 }

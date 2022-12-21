@@ -26,6 +26,7 @@ import com.appcues.trait.ExperienceTraitLevel.EXPERIENCE
 import com.appcues.trait.ExperienceTraitLevel.GROUP
 import com.appcues.trait.PresentingTrait
 import com.appcues.trait.appcues.DefaultContentHolderTrait
+import com.appcues.trait.appcues.LocalizationTrait
 import org.koin.core.scope.Scope
 import java.util.UUID
 
@@ -84,6 +85,7 @@ internal class ExperienceMapper(
         requestId: UUID? = null,
     ): Experience {
         val experienceTraits = from.traits.map { it to EXPERIENCE }
+        val mappedExperienceTraits = traitsMapper.map(experienceTraits)
         return Experience(
             id = from.id,
             name = from.name,
@@ -111,6 +113,7 @@ internal class ExperienceMapper(
             },
             trigger = trigger,
             requestId = requestId,
+            localizationTrait = mappedExperienceTraits.filterIsInstance<LocalizationTrait>().firstOrNull()
         )
     }
 
@@ -131,6 +134,7 @@ internal class ExperienceMapper(
             contentHolderTrait = mappedTraits.getContainerCreatingTraitOrDefault(),
             // what should we do if no content wrapping trait is found?
             contentWrappingTrait = mappedTraits.filterIsInstance<ContentWrappingTrait>().first(),
+            localizationTrait = mappedTraits.filterIsInstance<LocalizationTrait>().firstOrNull(),
         )
     }
 

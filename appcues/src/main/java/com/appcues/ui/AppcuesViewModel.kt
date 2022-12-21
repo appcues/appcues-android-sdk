@@ -98,7 +98,7 @@ internal class AppcuesViewModel(
         }
     }
 
-    private fun BeginningStep.toRenderingState(): Rendering? {
+    private suspend fun BeginningStep.toRenderingState(): Rendering? {
         return with(experience) {
             // find the container index
             val containerId = groupLookup[flatStepIndex]
@@ -106,6 +106,9 @@ internal class AppcuesViewModel(
             val stepIndexInContainer = stepIndexLookup[flatStepIndex]
             // if both are valid ids we return Rendering else null
             if (containerId != null && stepIndexInContainer != null) {
+                val step = stepContainers[containerId].steps[stepIndexInContainer]
+                // translate content here...??
+                step.content
                 // returns rendering state
                 Rendering(id, stepContainers[containerId], stepIndexInContainer, flatStepIndex, published.not(), presentationComplete)
             } else null

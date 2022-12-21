@@ -29,6 +29,7 @@ internal fun AppcuesComposition(
     shakeGestureListener: ShakeGestureListener,
     logcues: Logcues,
     chromeClient: AccompanistWebChromeClient,
+    translation: CompositionTranslation,
     onCompositionDismissed: () -> Unit,
 ) {
     // ensure to change some colors to match appropriate design for custom primitive blocks
@@ -39,6 +40,7 @@ internal fun AppcuesComposition(
             LocalShakeGestureListener provides shakeGestureListener,
             LocalLogcues provides logcues,
             LocalChromeClient provides chromeClient,
+            LocalCompositionTranslation provides translation,
             LocalAppcuesActionDelegate provides DefaultAppcuesActionsDelegate(viewModel),
             LocalAppcuesPaginationDelegate provides AppcuesPagination { viewModel.onPageChanged(it) },
         ) {

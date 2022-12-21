@@ -4,6 +4,7 @@ import com.appcues.trait.BackdropDecoratingTrait
 import com.appcues.trait.ContainerDecoratingTrait
 import com.appcues.trait.MetadataSettingTrait
 import com.appcues.trait.StepDecoratingTrait
+import com.appcues.trait.appcues.LocalizationTrait
 import java.util.UUID
 
 internal data class Step(
@@ -16,4 +17,5 @@ internal data class Step(
     val actions: Map<UUID, List<Action>>,
     val type: String?,
     val formState: ExperienceStepFormState = ExperienceStepFormState(),
+    val localizationTrait: LocalizationTrait? = null,
 )

@@ -5,6 +5,7 @@ import com.appcues.trait.appcues.BackdropKeyholeTrait
 import com.appcues.trait.appcues.BackdropTrait
 import com.appcues.trait.appcues.BackgroundContentTrait
 import com.appcues.trait.appcues.CarouselTrait
+import com.appcues.trait.appcues.LocalizationTrait
 import com.appcues.trait.appcues.ModalTrait
 import com.appcues.trait.appcues.PagingDotsTrait
 import com.appcues.trait.appcues.SkippableTrait
@@ -93,6 +94,12 @@ internal object TraitKoin : KoinScopePlugin {
             BackgroundContentTrait(
                 config = params.getOrNull(),
                 level = params.get(),
+            )
+        }
+
+        factory { params ->
+            LocalizationTrait(
+                config = params.getOrNull(),
             )
         }
     }

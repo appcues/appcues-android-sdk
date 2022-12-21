@@ -56,6 +56,7 @@ internal sealed class PrimitiveResponse(
         val id: UUID,
         val style: StyleResponse? = null,
         val text: String,
+        val localizable: Boolean? = null,
     ) : PrimitiveResponse(TEXT)
 
     internal data class ButtonPrimitiveResponse(

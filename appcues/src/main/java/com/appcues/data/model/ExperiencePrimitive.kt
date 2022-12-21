@@ -31,6 +31,7 @@ internal sealed class ExperiencePrimitive(
         override val id: UUID,
         override val style: ComponentStyle = ComponentStyle(),
         val text: String,
+        val localizable: Boolean = true,
     ) : ExperiencePrimitive(id, style) {
 
         override val textDescription: String = text

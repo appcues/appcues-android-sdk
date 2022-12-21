@@ -7,6 +7,7 @@ import com.appcues.logging.Logcues
 import com.appcues.statemachine.StateMachine
 import com.appcues.ui.ExperienceRenderer
 import com.appcues.util.ContextResources
+import com.appcues.util.LanguageTranslator
 import com.appcues.util.LinkOpener
 import org.koin.dsl.ScopeDSL
 
@@ -46,5 +47,6 @@ internal object AppcuesKoin : KoinScopePlugin {
                 storage = get()
             )
         }
+        factory { LanguageTranslator(contextResources = get()) }
     }
 }

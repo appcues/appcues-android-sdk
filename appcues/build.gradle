@@ -67,6 +67,10 @@ android {
 }
 
 dependencies {
+    // Hackcues
+    implementation 'com.google.mlkit:translate:17.0.1'
+    implementation 'com.google.mlkit:language-id:17.0.4'
+
     // Androidx
     implementation "androidx.core:core-ktx:1.9.0"
     implementation 'androidx.activity:activity-compose:1.6.1'

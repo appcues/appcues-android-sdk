@@ -6,6 +6,7 @@ import com.appcues.trait.appcues.BackdropKeyholeTrait
 import com.appcues.trait.appcues.BackdropTrait
 import com.appcues.trait.appcues.BackgroundContentTrait
 import com.appcues.trait.appcues.CarouselTrait
+import com.appcues.trait.appcues.LocalizationTrait
 import com.appcues.trait.appcues.ModalTrait
 import com.appcues.trait.appcues.PagingDotsTrait
 import com.appcues.trait.appcues.SkippableTrait
@@ -40,6 +41,7 @@ internal class TraitRegistry(
         register(PagingDotsTrait.TYPE) { config, _ -> get<PagingDotsTrait> { parametersOf(config) } }
         register(StickyContentTrait.TYPE) { config, _ -> get<StickyContentTrait> { parametersOf(config) } }
         register(BackgroundContentTrait.TYPE) { config, level -> get<BackgroundContentTrait> { parametersOf(config, level) } }
+        register(LocalizationTrait.TYPE) { config, _ -> get<LocalizationTrait> { parametersOf(config) } }
     }
 
     operator fun get(key: String): TraitFactoryBlock? {

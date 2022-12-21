@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -18,6 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.appcues.data.model.ExperiencePrimitive.TextPrimitive
 import com.appcues.data.model.styling.ComponentColor
 import com.appcues.data.model.styling.ComponentStyle.ComponentHorizontalAlignment.TRAILING
+import com.appcues.ui.composables.LocalCompositionTranslation
 import com.appcues.ui.extensions.applyStyle
 import com.appcues.ui.theme.AppcuesPreviewPrimitive
 import java.util.UUID
@@ -35,9 +37,22 @@ internal fun TextPrimitive.Compose(modifier: Modifier) {
     var resizedStyle by remember(style) { mutableStateOf(style) }
     var readyToDraw by remember(style) { mutableStateOf(false) }
 
+    val translation = LocalCompositionTranslation.current
+    val textToRender = remember { mutableStateOf(text) }
+
+    LaunchedEffect(translation?.translateComposition?.value) {
+        translation?.let {
+            textToRender.value = if (it.translateComposition.value) {
+                 it.translateBlock(text, it.sourceLanguageTag, it.targetLanguageTag)
+            } else {
+                text
+            }
+        }
+    }
+
     Text(
         modifier = modifier.clipToBounds().drawWithContent { if (readyToDraw) drawContent() },
-        text = text,
+        text = textToRender.value,
         style = resizedStyle,
         overflow = TextOverflow.Ellipsis,
         onTextLayout = { textLayoutResult ->

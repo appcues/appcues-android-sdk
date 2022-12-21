@@ -1,6 +1,7 @@
 package com.appcues.data.model
 
 import com.appcues.action.ExperienceAction
+import com.appcues.trait.appcues.LocalizationTrait
 import java.util.UUID
 
 internal data class Experience(
@@ -16,6 +17,7 @@ internal data class Experience(
     val trigger: ExperienceTrigger,
     val requestId: UUID? = null,
     val error: String? = null,
+    val localizationTrait: LocalizationTrait? = null,
 ) {
 
     // a unique identifier for this instance of the Experience, for comparison purposes, in the
