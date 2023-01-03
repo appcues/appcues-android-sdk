@@ -164,12 +164,12 @@ internal fun ComponentStyle.getVerticalAlignment(default: Alignment.Vertical): A
     }
 }
 
-internal fun ComponentStyle.getHorizontalAlignment(): Alignment.Horizontal {
+internal fun ComponentStyle.getHorizontalAlignment(default: Alignment.Horizontal): Alignment.Horizontal {
     return when (horizontalAlignment) {
         ComponentHorizontalAlignment.LEADING -> Alignment.Start
         ComponentHorizontalAlignment.CENTER -> Alignment.CenterHorizontally
         ComponentHorizontalAlignment.TRAILING -> Alignment.End
-        null -> Alignment.CenterHorizontally
+        null -> default
     }
 }
 
