@@ -18,6 +18,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
@@ -99,7 +100,7 @@ internal fun TextInputPrimitive.Compose(modifier: Modifier) {
 
     Column(
         modifier = modifier.fillMaxWidth(),
-        horizontalAlignment = style.getHorizontalAlignment(),
+        horizontalAlignment = style.getHorizontalAlignment(Alignment.CenterHorizontally),
     ) {
         val focusManager = LocalFocusManager.current
         val keyboardController = LocalSoftwareKeyboardController.current
@@ -107,7 +108,9 @@ internal fun TextInputPrimitive.Compose(modifier: Modifier) {
         val lastItemId = rememberUpdatedState(newValue = formState.lastTextFocusableItem)
         val isLastInputItem = remember { derivedStateOf { lastItemId.value?.let { it.id == id } ?: false } }
 
-        updatedLabel.Compose()
+        Column(modifier = modifier.fillMaxWidth(), horizontalAlignment = updatedLabel.style.getHorizontalAlignment(Alignment.Start)) {
+            updatedLabel.Compose()
+        }
 
         // Several styling customization options for TextField noted here https://stackoverflow.com/a/68592613
         TextField(
@@ -130,18 +133,16 @@ internal fun TextInputPrimitive.Compose(modifier: Modifier) {
             shape = RoundedCornerShape(8.dp),
             maxLines = numberOfLines,
             singleLine = numberOfLines == 1,
-            placeholder = placeholder?.let {
-                {
-                    it.Compose()
-                }
-            },
+            placeholder = placeholder?.let { { it.Compose() } },
             keyboardOptions = getKeyboardOptions(isLastInputItem),
             keyboardActions = getKeyboardActions(layoutDirection, focusManager, keyboardController),
             colors = getColors(isDark),
         )
 
-        if (showError) {
-            errorLabel?.Compose()
+        if (showError && errorLabel != null) {
+            Column(modifier = modifier.fillMaxWidth(), horizontalAlignment = errorLabel.style.getHorizontalAlignment(Alignment.Start)) {
+                errorLabel.Compose()
+            }
         }
     }
 }

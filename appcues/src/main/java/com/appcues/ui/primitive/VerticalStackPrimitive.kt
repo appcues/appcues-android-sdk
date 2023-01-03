@@ -29,7 +29,7 @@ import java.util.UUID
 internal fun VerticalStackPrimitive.Compose(modifier: Modifier) {
     Column(
         modifier = modifier,
-        horizontalAlignment = style.getHorizontalAlignment(),
+        horizontalAlignment = style.getHorizontalAlignment(Alignment.CenterHorizontally),
         verticalArrangement = Arrangement.spacedBy(spacing.dp, Alignment.CenterVertically)
     ) {
         CompositionLocalProvider(LocalStackScope provides ColumnStackScope(style.width, items.size)) {
