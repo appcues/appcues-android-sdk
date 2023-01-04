@@ -6,6 +6,10 @@ $dokka.location:com.appcues.action/ExperienceAction/config/#/PointingToDeclarati
 $dokka.location:com.appcues.action/ExperienceAction/execute/#com.appcues.Appcues/PointingToDeclaration/appcues/com.appcues.action/-experience-action/execute.html
 $dokka.location:com.appcues.action/ExperienceActionQueueTransforming///PointingToDeclaration/appcues/com.appcues.action/-experience-action-queue-transforming/index.html
 $dokka.location:com.appcues.action/ExperienceActionQueueTransforming/transformQueue/#kotlin.collections.List[com.appcues.action.ExperienceAction]#kotlin.Int#com.appcues.Appcues/PointingToDeclaration/appcues/com.appcues.action/-experience-action-queue-transforming/transform-queue.html
+$dokka.location:com.appcues.data.remote.adapters////PointingToDeclaration/appcues/com.appcues.data.remote.adapters/index.html
+$dokka.location:com.appcues.data.remote.adapters/LossyExperienceResponseAdapterFactory///PointingToDeclaration/appcues/com.appcues.data.remote.adapters/-lossy-experience-response-adapter-factory/index.html
+$dokka.location:com.appcues.data.remote.adapters/LossyExperienceResponseAdapterFactory/LossyExperienceResponseAdapterFactory/#/PointingToDeclaration/appcues/com.appcues.data.remote.adapters/-lossy-experience-response-adapter-factory/-lossy-experience-response-adapter-factory.html
+$dokka.location:com.appcues.data.remote.adapters/LossyExperienceResponseAdapterFactory/create/#java.lang.reflect.Type#kotlin.collections.MutableSet[kotlin.Annotation]#com.squareup.moshi.Moshi/PointingToDeclaration/appcues/com.appcues.data.remote.adapters/-lossy-experience-response-adapter-factory/create.html
 $dokka.location:com.appcues.trait////PointingToDeclaration/appcues/com.appcues.trait/index.html
 $dokka.location:com.appcues.trait//AppcuesTraitAnimatedVisibility/#androidx.compose.animation.core.MutableTransitionState[kotlin.Boolean]#androidx.compose.ui.Modifier#androidx.compose.animation.EnterTransition#androidx.compose.animation.ExitTransition#kotlin.Function1[androidx.compose.animation.AnimatedVisibilityScope,kotlin.Unit]/PointingToDeclaration/appcues/com.appcues.trait/-appcues-trait-animated-visibility.html
 $dokka.location:com.appcues.trait//alignStepOverlay/androidx.compose.ui.Modifier#androidx.compose.foundation.layout.BoxScope#androidx.compose.ui.Alignment#com.appcues.trait.StepDecoratingPadding/PointingToDeclaration/appcues/com.appcues.trait/align-step-overlay.html
@@ -61,6 +65,7 @@ $dokka.location:com.appcues.ui.composables/AppcuesPaginationData/currentPage/#/P
 $dokka.location:com.appcues.ui.composables/AppcuesPaginationData/pageCount/#/PointingToDeclaration/appcues/com.appcues.ui.composables/-appcues-pagination-data/page-count.html
 $dokka.location:com.appcues.ui.composables/AppcuesPaginationData/scrollOffset/#/PointingToDeclaration/appcues/com.appcues.ui.composables/-appcues-pagination-data/scroll-offset.html
 $dokka.location:com.appcues.util////PointingToDeclaration/appcues/com.appcues.util/index.html
+$dokka.location:com.appcues.util//appcuesFormatted/java.util.UUID#/PointingToDeclaration/appcues/com.appcues.util/appcues-formatted.html
 $dokka.location:com.appcues.util//toSlug/kotlin.String#/PointingToDeclaration/appcues/com.appcues.util/to-slug.html
 $dokka.location:com.appcues////PointingToDeclaration/appcues/com.appcues/index.html
 $dokka.location:com.appcues//Appcues/#android.content.Context#kotlin.String#kotlin.String#kotlin.Function1[com.appcues.AppcuesConfig,kotlin.Unit]?/PointingToDeclaration/appcues/com.appcues/-appcues.html
@@ -83,6 +88,7 @@ $dokka.location:com.appcues/Appcues/experienceListener/#/PointingToDeclaration/
 $dokka.location:com.appcues/Appcues/group/#kotlin.String?#kotlin.collections.Map[kotlin.String,kotlin.Any]?/PointingToDeclaration/appcues/com.appcues/-appcues/group.html
 $dokka.location:com.appcues/Appcues/identify/#kotlin.String#kotlin.collections.Map[kotlin.String,kotlin.Any]?/PointingToDeclaration/appcues/com.appcues/-appcues/identify.html
 $dokka.location:com.appcues/Appcues/interceptor/#/PointingToDeclaration/appcues/com.appcues/-appcues/interceptor.html
+$dokka.location:com.appcues/Appcues/navigationHandler/#/PointingToDeclaration/appcues/com.appcues/-appcues/navigation-handler.html
 $dokka.location:com.appcues/Appcues/onNewIntent/#android.app.Activity#android.content.Intent?/PointingToDeclaration/appcues/com.appcues/-appcues/on-new-intent.html
 $dokka.location:com.appcues/Appcues/registerAction/#kotlin.String#kotlin.Function1[kotlin.collections.Map[kotlin.String,kotlin.Any]?,com.appcues.action.ExperienceAction]/PointingToDeclaration/appcues/com.appcues/-appcues/register-action.html
 $dokka.location:com.appcues/Appcues/registerTrait/#kotlin.String#kotlin.Function2[kotlin.collections.Map[kotlin.String,kotlin.Any]?,com.appcues.trait.ExperienceTraitLevel,com.appcues.trait.ExperienceTrait]/PointingToDeclaration/appcues/com.appcues/-appcues/register-trait.html
@@ -103,6 +109,7 @@ $dokka.location:com.appcues/AppcuesConfig/apiBasePath/#/PointingToDeclaration/a
 $dokka.location:com.appcues/AppcuesConfig/experienceListener/#/PointingToDeclaration/appcues/com.appcues/-appcues-config/experience-listener.html
 $dokka.location:com.appcues/AppcuesConfig/interceptor/#/PointingToDeclaration/appcues/com.appcues/-appcues-config/interceptor.html
 $dokka.location:com.appcues/AppcuesConfig/loggingLevel/#/PointingToDeclaration/appcues/com.appcues/-appcues-config/logging-level.html
+$dokka.location:com.appcues/AppcuesConfig/navigationHandler/#/PointingToDeclaration/appcues/com.appcues/-appcues-config/navigation-handler.html
 $dokka.location:com.appcues/AppcuesConfig/sessionTimeout/#/PointingToDeclaration/appcues/com.appcues/-appcues-config/session-timeout.html
 $dokka.location:com.appcues/AppcuesInterceptor///PointingToDeclaration/appcues/com.appcues/-appcues-interceptor/index.html
 $dokka.location:com.appcues/AppcuesInterceptor/canDisplayExperience/#java.util.UUID/PointingToDeclaration/appcues/com.appcues/-appcues-interceptor/can-display-experience.html
@@ -115,8 +122,11 @@ $dokka.location:com.appcues/LoggingLevel.NONE///PointingToDeclaration/{"org.jetb
 $dokka.location:com.appcues/LoggingLevel///PointingToDeclaration/appcues/com.appcues/-logging-level/index.html
 $dokka.location:com.appcues/LoggingLevel/valueOf/#kotlin.String/PointingToDeclaration/appcues/com.appcues/-logging-level/value-of.html
 $dokka.location:com.appcues/LoggingLevel/values/#/PointingToDeclaration/appcues/com.appcues/-logging-level/values.html
+$dokka.location:com.appcues/NavigationHandler///PointingToDeclaration/appcues/com.appcues/-navigation-handler/index.html
+$dokka.location:com.appcues/NavigationHandler/navigateTo/#android.net.Uri/PointingToDeclaration/appcues/com.appcues/-navigation-handler/navigate-to.html
 com.appcues
 com.appcues.action
+com.appcues.data.remote.adapters
 com.appcues.trait
 com.appcues.ui.composables
 com.appcues.util
