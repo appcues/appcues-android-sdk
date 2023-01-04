@@ -67,17 +67,23 @@ internal fun OptionSelectPrimitive.Compose(modifier: Modifier) {
     }
 
     Column(
-        modifier = modifier,
-        horizontalAlignment = style.getHorizontalAlignment(),
+        modifier = modifier.fillMaxWidth(),
+        horizontalAlignment = style.getHorizontalAlignment(Alignment.CenterHorizontally),
     ) {
 
         // the form item label / question
-        updatedLabel.Compose()
+        Column(modifier = modifier.fillMaxWidth(), horizontalAlignment = updatedLabel.style.getHorizontalAlignment(Alignment.Start)) {
+            updatedLabel.Compose()
+        }
 
-        ComposeOptions(formState, showError)
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            ComposeOptions(formState, showError)
+        }
 
-        if (showError) {
-            errorLabel?.Compose()
+        if (showError && errorLabel != null) {
+            Column(modifier = modifier.fillMaxWidth(), horizontalAlignment = errorLabel.style.getHorizontalAlignment(Alignment.Start)) {
+                errorLabel.Compose()
+            }
         }
     }
 }
