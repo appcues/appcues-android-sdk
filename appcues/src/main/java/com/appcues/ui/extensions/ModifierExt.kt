@@ -91,12 +91,14 @@ internal fun Modifier.modalStyle(
 )
 
 internal fun Modifier.styleBackground(
-    style: ComponentStyle,
+    style: ComponentStyle?,
     isDark: Boolean,
 ) = this.then(
-    Modifier
-        .styleBackgroundColor(style, isDark)
-        .styleBackgroundGradient(style, isDark)
+    if (style != null) {
+        Modifier
+            .styleBackgroundColor(style, isDark)
+            .styleBackgroundGradient(style, isDark)
+    } else Modifier
 )
 
 private fun Modifier.styleBackgroundColor(style: ComponentStyle, isDark: Boolean) = this.then(
