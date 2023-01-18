@@ -1,7 +1,9 @@
 package com.appcues.ui.modal
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
@@ -16,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.trait.AppcuesTraitAnimatedVisibility
 import com.appcues.ui.composables.rememberAppcuesContentVisibility
+import com.appcues.ui.extensions.getBoxAlignment
 import com.appcues.ui.extensions.getPaddings
 import com.appcues.ui.extensions.modalStyle
 import com.appcues.ui.utils.AppcuesWindowInfo
@@ -50,16 +53,19 @@ internal fun DialogModal(
         enter = dialogEnterTransition(),
         exit = dialogExitTransition(),
     ) {
-        Surface(
-            modifier = Modifier
-                .sizeIn(maxWidth = maxWidth.value, maxHeight = maxHeight.value)
-                .fillMaxWidth()
-                // container padding based on screen size
-                .padding(horizontal = dialogHorizontalMargin, vertical = dialogVerticalMargin)
-                // default modal style modifiers
-                .modalStyle(style, isDark) { Modifier.dialogModifier(it, isDark) },
-            content = { content(false, style?.getPaddings()) },
-        )
+        Box(modifier = Modifier.fillMaxSize()) {
+            Surface(
+                modifier = Modifier
+                    .align(style.getBoxAlignment())
+                    .sizeIn(maxWidth = maxWidth.value, maxHeight = maxHeight.value)
+                    .fillMaxWidth()
+                    // container padding based on screen size
+                    .padding(horizontal = dialogHorizontalMargin, vertical = dialogVerticalMargin)
+                    // default modal style modifiers
+                    .modalStyle(style, isDark) { Modifier.dialogModifier(it, isDark) },
+                content = { content(false, style?.getPaddings()) },
+            )
+        }
     }
 }
 
