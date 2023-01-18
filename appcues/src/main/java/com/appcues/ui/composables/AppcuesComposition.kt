@@ -112,6 +112,7 @@ private fun BoxScope.ComposeLastRenderingState(state: Rendering) {
             // apply backdrop traits
             ApplyBackgroundDecoratingTraits(backdropDecoratingTraits.value)
 
+            // TODO contentPadding + stepDecoratingPadding into one? to fix tooltip padding issue
             // create wrapper
             contentWrappingTrait.WrapContent { hasFixedHeight, contentPadding ->
                 Box(contentAlignment = Alignment.TopCenter) {
