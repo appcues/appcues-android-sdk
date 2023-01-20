@@ -4,7 +4,8 @@
     <string name="appcues_skippable_trait_dismiss">dismiss</string>
 
     <!-- Debugger Fab -->
-    <string name="appcues_debugger_fab_on_click_label">Appcues debugger details</string>
+    <string name="appcues_debugger_fab_on_debugger_click_label">Appcues debugger details</string>
+    <string name="appcues_debugger_fab_on_screen_capture_click_label">Appcues screen capture</string>
     <string name="appcues_debugger_fab_image_content_description">Appcues floating action button</string>
     <string name="appcues_debugger_fab_dismiss_image_content_description">Appcues floating action button dismissing area</string>
 

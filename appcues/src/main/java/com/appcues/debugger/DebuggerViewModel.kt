@@ -4,6 +4,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.appcues.analytics.AnalyticsTracker
+import com.appcues.debugger.DebugMode.Debugger
+import com.appcues.debugger.DebugMode.ScreenCapture
 import com.appcues.debugger.DebuggerViewModel.UIState.Creating
 import com.appcues.debugger.DebuggerViewModel.UIState.Dismissed
 import com.appcues.debugger.DebuggerViewModel.UIState.Dismissing
@@ -38,9 +40,9 @@ internal class DebuggerViewModel(
 
     sealed class UIState {
         object Creating : UIState()
-        object Idle : UIState()
+        data class Idle(val mode: DebugMode) : UIState()
         data class Dragging(val dragAmount: Offset) : UIState()
-        data class Expanded(val deepLinkPath: String? = null) : UIState()
+        data class Expanded(val mode: DebugMode) : UIState()
         object Dismissing : UIState()
         object Dismissed : UIState()
     }
@@ -74,7 +76,7 @@ internal class DebuggerViewModel(
     val allFonts: List<DebuggerFontItem>
         get() = debuggerFontManager.getAllFonts()
 
-    private var deepLinkPath: String? = null
+    lateinit var mode: DebugMode
 
     init {
         with(viewModelScope) {
@@ -107,36 +109,59 @@ internal class DebuggerViewModel(
         }
     }
 
-    fun onStart(deepLinkPath: String?) {
-        if (deepLinkPath.isNullOrEmpty()) {
-            // if no path is given, and currently expanded, go back to idle
-            if (_uiState.value is Expanded) {
-                _uiState.value = Idle
-            }
-            return
-        } else {
-            // the deep link might be from the debugger checking that the configuration is correct
-            // pass along to allow it to check
-            viewModelScope.launch {
-                debuggerStatusManager.checkDeepLinkValidation(deepLinkPath)
-            }
-        }
+    fun onStart(mode: DebugMode, reset: Boolean) {
+        this.mode = mode
 
-        when (_uiState.value) {
-            // if still in initial start of debugger - save the path for onRender to use
-            Creating -> this.deepLinkPath = deepLinkPath
-            // if currently idle and a new link comes in - expand to that link
-            Idle -> _uiState.value = Expanded(deepLinkPath)
-            // currently open - reset to the new path
-            is Expanded -> _uiState.value = Expanded(deepLinkPath)
-            // otherwise, no valid link action available
-            else -> Unit
+        when (mode) {
+            is Debugger -> {
+                val deepLinkPath = mode.deepLinkPath
+                if (deepLinkPath.isNullOrEmpty()) {
+                    // if no path is given, and currently expanded, go back to Idle
+                    if (_uiState.value is Expanded ||
+                        // OR if showing FAB but the mode changed, reset to new Idle mode
+                        (_uiState.value is Idle && reset)) {
+                        _uiState.value = Idle(mode)
+                    }
+                    return
+                } else {
+                    // the deep link might be from the debugger checking that the configuration is correct
+                    // pass along to allow it to check
+                    viewModelScope.launch {
+                        debuggerStatusManager.checkDeepLinkValidation(deepLinkPath)
+                    }
+                }
+
+                when (_uiState.value) {
+                    // if currently idle and a new link comes in - expand to that link
+                    is Idle -> _uiState.value = Expanded(mode)
+                    // currently open - reset to the new path
+                    is Expanded -> _uiState.value = Expanded(mode)
+                    // otherwise, no valid link action available
+                    else -> Unit
+                }
+            }
+            is ScreenCapture -> {
+                // if in debugger mode, expanded, go to new Idle state
+                if (_uiState.value is Expanded ||
+                    // OR if in Idle (FAB) mode but mode changed, reset to new Idle mode
+                    (_uiState.value is Idle && reset)) {
+                    _uiState.value = Idle(mode)
+                }
+            }
         }
     }
 
     fun onRender() {
-        // if we had a deep link from initial startup, process it now
-        _uiState.value = if (deepLinkPath.isNullOrEmpty()) Idle else Expanded(deepLinkPath)
+        when (val currentMode = mode) {
+            is Debugger -> {
+                val deepLinkPath = currentMode.deepLinkPath
+                // if we had a deep link from initial startup, process it now
+                _uiState.value = if (deepLinkPath.isNullOrEmpty()) Idle(currentMode) else Expanded(currentMode)
+            }
+            is ScreenCapture -> {
+                _uiState.value = Idle(currentMode)
+            }
+        }
     }
 
     fun onDismissAnimationCompleted() {
@@ -151,7 +176,7 @@ internal class DebuggerViewModel(
     }
 
     fun onDragEnd() {
-        _uiState.value = Idle
+        _uiState.value = Idle(mode)
     }
 
     fun onDismiss() {
@@ -159,22 +184,29 @@ internal class DebuggerViewModel(
     }
 
     fun onFabClick() {
-        if (_uiState.value == Idle) {
-            _uiState.value = Expanded()
-        } else if (_uiState.value is Expanded) {
-            _uiState.value = Idle
+        when (val state = _uiState.value) {
+            is Idle -> {
+                when (state.mode) {
+                    is Debugger -> _uiState.value = Expanded(state.mode)
+                    is ScreenCapture -> Unit
+                }
+            }
+            is Expanded -> {
+                _uiState.value = Idle(mode)
+            }
+            else -> Unit
         }
     }
 
     fun onBackPress() {
         if (_uiState.value is Expanded) {
-            _uiState.value = Idle
+            _uiState.value = Idle(mode)
         }
     }
 
     fun onBackdropClick() {
         if (_uiState.value is Expanded) {
-            _uiState.value = Idle
+            _uiState.value = Idle(mode)
         }
     }
 
@@ -203,6 +235,6 @@ internal class DebuggerViewModel(
 
     fun onDetailDismiss() {
         // reset the view state to remove any deep link path
-        _uiState.value = Expanded()
+        _uiState.value = Expanded(Debugger(null))
     }
 }
