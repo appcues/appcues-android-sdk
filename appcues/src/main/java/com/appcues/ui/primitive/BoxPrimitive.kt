@@ -10,6 +10,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.appcues.data.model.ExperiencePrimitive.BoxPrimitive
 import com.appcues.data.model.ExperiencePrimitive.ButtonPrimitive
 import com.appcues.data.model.ExperiencePrimitive.TextPrimitive
+import com.appcues.data.model.ExperiencePrimitive.TextSpanPrimitive
 import com.appcues.data.model.styling.ComponentColor
 import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.data.model.styling.ComponentStyle.ComponentHorizontalAlignment
@@ -35,6 +36,7 @@ private val items = arrayListOf(
     TextPrimitive(
         id = UUID.randomUUID(),
         text = "\uD83D\uDC4B Welcome!",
+        spans = arrayListOf(TextSpanPrimitive("\uD83D\uDC4B Welcome!"))
     ),
     ButtonPrimitive(
         id = UUID.randomUUID(),
@@ -44,6 +46,15 @@ private val items = arrayListOf(
             style = ComponentStyle(
                 fontSize = 17.0,
                 foregroundColor = ComponentColor(light = 0xFFFFFFFF, dark = 0xFFFFFFFF)
+            ),
+            spans = arrayListOf(
+                TextSpanPrimitive(
+                    text = "Button 1",
+                    style = ComponentStyle(
+                        fontSize = 17.0,
+                        foregroundColor = ComponentColor(light = 0xFFFFFFFF, dark = 0xFFFFFFFF)
+                    )
+                )
             )
         ),
         style = ComponentStyle(
@@ -61,6 +72,7 @@ private val items = arrayListOf(
     TextPrimitive(
         id = UUID.randomUUID(),
         text = "BYE! \uD83E\uDD96",
+        spans = arrayListOf(TextSpanPrimitive("BYE! \uD83E\uDD96"))
     )
 )
 

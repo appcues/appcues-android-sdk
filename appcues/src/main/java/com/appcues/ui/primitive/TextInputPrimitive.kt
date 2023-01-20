@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.isUnspecified
 import com.appcues.data.model.ExperiencePrimitive.TextInputPrimitive
 import com.appcues.data.model.ExperiencePrimitive.TextPrimitive
+import com.appcues.data.model.ExperiencePrimitive.TextSpanPrimitive
 import com.appcues.data.model.styling.ComponentColor
 import com.appcues.data.model.styling.ComponentDataType
 import com.appcues.data.model.styling.ComponentDataType.ADDRESS
@@ -241,6 +242,9 @@ private fun mapKeyboardType(value: ComponentDataType): KeyboardType = when (valu
 private val textPrimitive = TextPrimitive(
     id = UUID.randomUUID(),
     text = "Enter a value",
+    spans = arrayListOf(
+        TextSpanPrimitive("Enter a value")
+    )
 )
 
 private val textInputPrimitive = TextInputPrimitive(

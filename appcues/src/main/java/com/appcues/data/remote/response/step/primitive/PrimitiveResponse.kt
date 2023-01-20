@@ -55,8 +55,14 @@ internal sealed class PrimitiveResponse(
     internal data class TextPrimitiveResponse(
         val id: UUID,
         val style: StyleResponse? = null,
-        val text: String,
+        val text: String? = null,
+        val spans: List<TextSpanResponse>? = arrayListOf(),
     ) : PrimitiveResponse(TEXT)
+
+    internal data class TextSpanResponse(
+        val text: String,
+        val style: StyleResponse? = null,
+    )
 
     internal data class ButtonPrimitiveResponse(
         val id: UUID,
