@@ -16,9 +16,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import com.appcues.data.model.ExperiencePrimitive.TextPrimitive
+import com.appcues.data.model.ExperiencePrimitive.TextSpanPrimitive
 import com.appcues.data.model.styling.ComponentColor
 import com.appcues.data.model.styling.ComponentStyle.ComponentHorizontalAlignment.TRAILING
 import com.appcues.ui.extensions.applyStyle
+import com.appcues.ui.extensions.toAnnotatedString
 import com.appcues.ui.theme.AppcuesPreviewPrimitive
 import java.util.UUID
 
@@ -26,18 +28,18 @@ private const val TEXT_SCALE_REDUCTION_INTERVAL = 0.9f
 
 @Composable
 internal fun TextPrimitive.Compose(modifier: Modifier) {
-    val style = LocalTextStyle.current.applyStyle(
-        style = style,
-        context = LocalContext.current,
-        isDark = isSystemInDarkTheme(),
-    )
+    val isDark = isSystemInDarkTheme()
+    val context = LocalContext.current
+    val style = LocalTextStyle.current.applyStyle(style, context, isDark)
 
     var resizedStyle by remember(style) { mutableStateOf(style) }
     var readyToDraw by remember(style) { mutableStateOf(false) }
 
     Text(
-        modifier = modifier.clipToBounds().drawWithContent { if (readyToDraw) drawContent() },
-        text = text,
+        modifier = modifier
+            .clipToBounds()
+            .drawWithContent { if (readyToDraw) drawContent() },
+        text = spans.toAnnotatedString(context, isDark),
         style = resizedStyle,
         overflow = TextOverflow.Ellipsis,
         onTextLayout = { textLayoutResult ->
@@ -59,6 +61,9 @@ internal fun TextPrimitive.Compose(modifier: Modifier) {
 private val textPrimitive = TextPrimitive(
     id = UUID.randomUUID(),
     text = "\uD83D\uDC4B Welcome! If you’re looking for Appcues’\nbrand guidelines, you’ve come to the right place.",
+    spans = arrayListOf(
+        TextSpanPrimitive("\uD83D\uDC4B Welcome! If you’re looking for Appcues’\nbrand guidelines, you’ve come to the right place.")
+    )
 )
 
 @Composable
