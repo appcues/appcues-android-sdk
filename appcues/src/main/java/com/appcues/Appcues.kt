@@ -9,6 +9,7 @@ import com.appcues.analytics.ActivityScreenTracking
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.data.model.ExperienceTrigger
 import com.appcues.debugger.AppcuesDebuggerManager
+import com.appcues.debugger.DebugMode.Debugger
 import com.appcues.di.AppcuesKoinContext
 import com.appcues.logging.Logcues
 import com.appcues.trait.ExperienceTrait
@@ -225,7 +226,7 @@ class Appcues internal constructor(koinScope: Scope) {
      * @param activity The Activity to launch the debugger over.
      */
     fun debug(activity: Activity) {
-        debuggerManager.start(activity)
+        debuggerManager.start(activity, Debugger(null))
     }
 
     /**

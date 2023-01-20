@@ -39,6 +39,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.appcues.debugger.DebugMode.Debugger
 import com.appcues.debugger.DebuggerViewModel
 import com.appcues.debugger.model.DebuggerEventItem
 import com.appcues.ui.theme.AppcuesColors
@@ -74,7 +75,9 @@ internal fun BoxScope.DebuggerFloatingActionEvents(
                 .offset { eventsProperties.positionOffset },
             contentAlignment = Alignment.TopEnd
         ) {
-            val shouldDisplayEvents = debuggerState.isDragging.targetState.not() && debuggerState.isExpanded.targetState.not()
+            val shouldDisplayEvents = debuggerState.debugMode.value is Debugger &&
+                debuggerState.isDragging.targetState.not() &&
+                debuggerState.isExpanded.targetState.not()
 
             val events = if (shouldDisplayEvents)
                 debuggerViewModel.events.collectAsState().value.take(MAX_FAB_EVENTS)

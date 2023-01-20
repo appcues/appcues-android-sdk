@@ -20,6 +20,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Lifecycle.Event
 import androidx.lifecycle.Lifecycle.Event.ON_ANY
 import androidx.lifecycle.LifecycleEventObserver
+import com.appcues.debugger.DebugMode.Debugger
 import com.appcues.debugger.DebuggerViewModel
 import com.appcues.debugger.DebuggerViewModel.UIState.Creating
 import com.appcues.debugger.DebuggerViewModel.UIState.Dismissed
@@ -34,7 +35,9 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun DebuggerComposition(viewModel: DebuggerViewModel, onDismiss: () -> Unit) {
     val density = LocalDensity.current
-    val debuggerState by remember { mutableStateOf(MutableDebuggerState(density, viewModel.uiState.value == Creating)) }
+    val debuggerState by remember {
+        mutableStateOf(MutableDebuggerState(viewModel.mode, density, viewModel.uiState.value == Creating))
+    }
 
     // listening for lifecycle changes to update isPaused properly
     LocalLifecycleOwner.current.lifecycle.observeAsState().let {
@@ -103,7 +106,10 @@ private fun LaunchedUIStateEffect(
                 Creating -> {
                     debuggerState.isVisible.targetState = true
                 }
-                Idle -> {
+                is Idle -> {
+                    // this controls FAB styling and behavior
+                    debuggerState.debugMode.value = state.mode
+
                     // lets only animate to idle when we come form isExpanded
                     if (debuggerState.isExpanded.targetState) {
                         animateFabToIdle(debuggerState)
@@ -123,7 +129,15 @@ private fun LaunchedUIStateEffect(
                     debuggerState.dragFabOffsets(state.dragAmount)
                 }
                 is Expanded -> {
-                    debuggerState.deepLinkPath.value = state.deepLinkPath
+                    // this controls FAB styling and behavior
+                    debuggerState.debugMode.value = state.mode
+
+                    val deepLinkPath = when (state.mode) {
+                        // currently, we'd only get into Expanded state in Debugger mode
+                        is Debugger -> state.mode.deepLinkPath
+                        else -> null
+                    }
+                    debuggerState.deepLinkPath.value = deepLinkPath
                     animateFabToExpanded(debuggerState)
                     debuggerState.isExpanded.targetState = true
                 }

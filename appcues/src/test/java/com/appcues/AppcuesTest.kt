@@ -8,6 +8,7 @@ import com.appcues.analytics.ActivityScreenTracking
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.data.model.ExperienceTrigger
 import com.appcues.debugger.AppcuesDebuggerManager
+import com.appcues.debugger.DebugMode.Debugger
 import com.appcues.rules.KoinScopeRule
 import com.appcues.rules.MainDispatcherRule
 import com.appcues.trait.ExperienceTrait
@@ -218,7 +219,7 @@ internal class AppcuesTest : AppcuesScopeTest {
         appcues.debug(activity)
 
         // THEN
-        verify { debuggerManager.start(activity) }
+        verify { debuggerManager.start(activity, Debugger(null)) }
     }
 
     @Test
