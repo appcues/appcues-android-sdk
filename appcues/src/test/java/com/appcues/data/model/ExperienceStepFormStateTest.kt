@@ -14,7 +14,7 @@ import java.util.UUID
 
 class ExperienceStepFormStateTest {
 
-    private val label = TextPrimitive(id = UUID.randomUUID(), text = "label")
+    private val label = TextPrimitive(id = UUID.randomUUID(), text = "label", spans = listOf())
 
     @Test
     fun `form state SHOULD be valid by default`() {
@@ -363,6 +363,6 @@ class ExperienceStepFormStateTest {
     }
 
     private fun optionItems(count: Int) = (0..count).map {
-        OptionItem("$it", TextPrimitive(UUID.randomUUID(), text = "$it"))
+        OptionItem("$it", TextPrimitive(UUID.randomUUID(), text = "$it", spans = listOf()))
     }
 }
