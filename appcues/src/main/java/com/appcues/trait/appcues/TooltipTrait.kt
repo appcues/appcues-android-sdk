@@ -22,6 +22,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Matrix
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathOperation
 import androidx.compose.ui.graphics.addOutline
@@ -230,9 +231,9 @@ internal class TooltipTrait(
             val maxPointerOffset = with(density) { size.width.toPx() - base }
             // TODO change so this value changes based on how much offset is needed for the pointer to point at target element
             val pointerOffsetX = if (offsetX < minPointerOffset) {
-                -baseCenter
+                (offsetX - minPointerOffset).coerceAtLeast(-baseCenter)
             } else if (offsetX > maxPointerOffset) {
-                baseCenter
+                (offsetX - maxPointerOffset).coerceAtMost(baseCenter)
             } else 0f
 
             val offsetXAnimated = animateFloatAsState(
