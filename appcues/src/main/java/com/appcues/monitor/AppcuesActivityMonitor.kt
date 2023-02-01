@@ -3,23 +3,44 @@ package com.appcues.monitor
 import android.app.Activity
 import android.app.Application
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import com.appcues.ui.AppcuesActivity
 import java.lang.ref.WeakReference
 
 internal object AppcuesActivityMonitor : Application.ActivityLifecycleCallbacks {
 
-    private var activityWeakReference: WeakReference<Activity>? = null
+    interface ActivityMonitorListener {
 
-    val activity: Activity?
+        fun onActivityChanged(activity: AppCompatActivity)
+    }
+
+    private var activityWeakReference: WeakReference<AppCompatActivity>? = null
+
+    val activity: AppCompatActivity?
         get() = activityWeakReference?.get()
+
+    private val activityMonitorListener: HashSet<ActivityMonitorListener> = hashSetOf()
+
+    fun subscribe(listener: ActivityMonitorListener) {
+        activityMonitorListener.add(listener)
+    }
+
+    fun unsubscribe(listener: ActivityMonitorListener) {
+        activityMonitorListener.remove(listener)
+    }
 
     fun initialize(application: Application) = apply {
         application.registerActivityLifecycleCallbacks(this)
     }
 
     override fun onActivityResumed(activity: Activity) {
-        if (activity !is AppcuesActivity) {
-            this.activityWeakReference = WeakReference(activity)
+        if (activity !is AppcuesActivity && activity is AppCompatActivity) {
+            if (this.activity != activity) {
+                this.activityWeakReference = WeakReference(activity)
+
+                // notifies all subscribers that activity has changed
+                activityMonitorListener.forEach { it.onActivityChanged(activity) }
+            }
         }
     }
 

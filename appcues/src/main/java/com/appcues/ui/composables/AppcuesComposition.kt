@@ -2,6 +2,8 @@ package com.appcues.ui.composables
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -9,6 +11,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalDensity
 import com.appcues.logging.Logcues
 import com.appcues.trait.BackdropDecoratingTrait
@@ -159,8 +164,16 @@ private fun BoxScope.ComposeLastRenderingState(state: Rendering) {
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun BoxScope.ApplyBackgroundDecoratingTraits(list: List<BackdropDecoratingTrait>) {
+    // adds a layer behind all Backdrop decorating traits to prevent touch events to
+    Spacer(
+        modifier = Modifier
+            .fillMaxSize()
+            .pointerInteropFilter { false }
+    )
+
     // get last trait if its not null compose it and drop last calling it again recursively
     val item = list.lastOrNull()
     if (item != null) {

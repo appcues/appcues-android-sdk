@@ -38,7 +38,6 @@ internal class StepMapper(
         return Step(
             id = from.id,
             content = responseContent.mapPrimitive(),
-            // TODO only one of each type, eg: @appcues/backdrop @appcues/skippable etc
             stepDecoratingTraits = mappedTraits.filterIsInstance(StepDecoratingTrait::class.java),
             backdropDecoratingTraits = mappedTraits.filterIsInstance<BackdropDecoratingTrait>(),
             containerDecoratingTraits = mappedTraits.filterIsInstance<ContainerDecoratingTrait>(),
