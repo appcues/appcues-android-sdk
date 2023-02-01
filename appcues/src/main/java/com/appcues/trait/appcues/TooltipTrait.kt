@@ -1,7 +1,13 @@
 package com.appcues.trait.appcues
 
+import androidx.compose.animation.core.EaseIn
+import androidx.compose.animation.core.EaseInOut
+import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.FiniteAnimationSpec
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.TweenSpec
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
@@ -12,8 +18,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSizeIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.GenericShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -22,17 +28,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Matrix
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.PathOperation
-import androidx.compose.ui.graphics.addOutline
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.coerceIn
 import androidx.compose.ui.unit.dp
@@ -44,9 +44,19 @@ import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.trait.AppcuesTraitAnimatedVisibility
 import com.appcues.trait.ContentWrappingTrait
 import com.appcues.trait.PresentingTrait
-import com.appcues.trait.appcues.TooltipTrait.PointerPosition.BOTTOM
-import com.appcues.trait.appcues.TooltipTrait.PointerPosition.NONE
-import com.appcues.trait.appcues.TooltipTrait.PointerPosition.TOP
+import com.appcues.trait.appcues.StepAnimationTrait.StepAnimationEasing
+import com.appcues.trait.appcues.StepAnimationTrait.StepAnimationEasing.EASE_IN
+import com.appcues.trait.appcues.StepAnimationTrait.StepAnimationEasing.EASE_IN_OUT
+import com.appcues.trait.appcues.StepAnimationTrait.StepAnimationEasing.EASE_OUT
+import com.appcues.trait.appcues.StepAnimationTrait.StepAnimationEasing.LINEAR
+import com.appcues.trait.appcues.TargetRectangleTrait.TargetRectangleInfo
+import com.appcues.trait.appcues.TooltipPointerPosition.BOTTOM
+import com.appcues.trait.appcues.TooltipPointerPosition.BOTTOM_END
+import com.appcues.trait.appcues.TooltipPointerPosition.BOTTOM_START
+import com.appcues.trait.appcues.TooltipPointerPosition.NONE
+import com.appcues.trait.appcues.TooltipPointerPosition.TOP
+import com.appcues.trait.appcues.TooltipPointerPosition.TOP_END
+import com.appcues.trait.appcues.TooltipPointerPosition.TOP_START
 import com.appcues.ui.AppcuesOverlayViewManager
 import com.appcues.ui.composables.AppcuesStepMetadata
 import com.appcues.ui.composables.LocalAppcuesStepMetadata
@@ -74,54 +84,44 @@ internal class TooltipTrait(
         private val SCREEN_VERTICAL_PADDING = 24.dp
         private val MAX_WIDTH_DP = 350.dp
         private val MAX_HEIGHT_DP = 200.dp
+        private const val POINTER_BASE_DEFAULT = 12.0
+        private const val POINTER_LENGTH_DEFAULT = 8.0
     }
-
-    private enum class PointerPosition {
-        TOP, BOTTOM, NONE
-    }
-
-    private data class PointerSettings(
-        val hidePointer: Boolean,
-        val pointerPosition: PointerPosition,
-        val pointerBase: Double,
-        val pointerLength: Double
-    ) {
-
-        val pointerOffsetX = mutableStateOf(0.dp)
-    }
-
-    private val tooltipStyleSize = 20.dp
 
     private val style = config.getConfigStyle("style")
 
-    private val preferredPosition = config.getConfigOrDefault("preferredPosition", "center")
-    private val hidePointer = config.getConfigOrDefault("hidePointer", false)
-    private val pointerBase = config.getConfigOrDefault("pointerBase", 12.0)
-    private val pointerLength = config.getConfigOrDefault("pointerLength", 8.0)
-    private val distanceFromTarget = config.getConfigOrDefault("distanceFromTarget", 0.0)
+    private val pointerBaseDp = config.getConfigOrDefault("pointerBase", POINTER_BASE_DEFAULT).dp
+    private val pointerLengthDp = config.getConfigOrDefault("pointerLength", POINTER_LENGTH_DEFAULT).dp
+    // implementation remaining properties
+    // private val preferredPosition = config.getConfigOrDefault("preferredPosition", "center")
+    // private val hidePointer = config.getConfigOrDefault("hidePointer", false)
 
     override fun present() {
-        AppcuesOverlayViewManager(scope = scope).addView()
+        AppcuesOverlayViewManager(scope = scope).start()
     }
 
     @Composable
     override fun WrapContent(content: @Composable (hasFixedHeight: Boolean, contentPadding: PaddingValues?) -> Unit) {
-        val metadata = LocalAppcuesStepMetadata.current
         val density = LocalDensity.current
-        val layoutDirection = LocalLayoutDirection.current
+        val metadata = LocalAppcuesStepMetadata.current
 
         val windowInfo = rememberAppcuesWindowInfo()
-        val targetRect = remember(metadata) { (metadata.actual[TargetElementTrait.METADATA_TARGET_RECT] as Rect?) }
-        val pointerSettings = rememberPointerSettings(metadata, windowInfo, targetRect)
-        val tooltipSizeDp = remember { mutableStateOf(DpSize(0.dp, 0.dp)) }
-        // TODO change: remember? derivedState?
-        val tooltipPath = tooltipPath(
-            pointerSettings,
-            tooltipSizeDp.value,
-            style,
-            layoutDirection,
-            density,
-        )
+        val targetRect = rememberMetadataRect(metadata)
+
+        val floatAnimation = rememberMetadataFloatAnimation(metadata)
+        val dpAnimation = rememberMetadataDpAnimation(metadata)
+
+        val containerDimens = remember { mutableStateOf<TooltipContainerDimens?>(null) }
+
+        val tooltipSettings =
+            remember(targetRect, containerDimens.value) {
+                getTooltipSettings(
+                    density,
+                    getPointerPosition(windowInfo, targetRect),
+                    pointerBaseDp,
+                    pointerLengthDp,
+                )
+            }
 
         Box(
             modifier = Modifier
@@ -134,17 +134,18 @@ internal class TooltipTrait(
                 exit = dialogExitTransition(),
             ) {
                 // positions both the tip and modal of the tooltip on the screen
-                Column(modifier = Modifier.positionTooltip(targetRect, tooltipSizeDp.value, pointerSettings, windowInfo)) {
+                Column(modifier = Modifier.positionTooltip(targetRect, containerDimens.value, tooltipSettings, windowInfo, dpAnimation)) {
+                    val tooltipPath = tooltipPath(tooltipSettings, containerDimens.value, style, floatAnimation)
                     Box(
                         modifier = Modifier
                             .requiredSizeIn(maxWidth = MAX_WIDTH_DP, maxHeight = MAX_HEIGHT_DP)
                             .tooltipSize(style)
-                            .onSizeChanged { with(density) { tooltipSizeDp.value = DpSize(it.width.toDp(), it.height.toDp()) } }
+                            .onTooltipSizeChanged(density, containerDimens)
                             .styleShadowPath(style, tooltipPath, isSystemInDarkTheme())
                             .clipToPath(tooltipPath)
                             .styleBackground(style, isSystemInDarkTheme())
                             .styleBorderPath(style, tooltipPath, isSystemInDarkTheme())
-                            .tooltipPointerPadding(pointerSettings)
+                            .tooltipPointerPadding(tooltipSettings)
                     ) {
                         content(false, PaddingValues(0.dp))
                     }
@@ -153,119 +154,18 @@ internal class TooltipTrait(
         }
     }
 
-    @Composable
-    private fun rememberPointerSettings(
-        metadata: AppcuesStepMetadata,
-        windowInfo: AppcuesWindowInfo,
-        targetRect: Rect?
-    ): PointerSettings {
-        return remember(metadata) {
-            val pointerPosition = when {
-                targetRect == null -> NONE
-                targetRect.center.y.dp < windowInfo.heightDp / 2 -> TOP
-                else -> BOTTOM
+    private fun Modifier.onTooltipSizeChanged(density: Density, containerDimens: MutableState<TooltipContainerDimens?>) = then(
+        Modifier.onSizeChanged {
+            with(density) {
+                containerDimens.value = TooltipContainerDimens(
+                    widthDp = it.width.toDp(),
+                    heightDp = it.height.toDp(),
+                    widthPx = it.width.toFloat(),
+                    heightPx = it.height.toFloat()
+                )
             }
-
-            PointerSettings(
-                hidePointer = false,
-                pointerPosition = pointerPosition,
-                pointerBase = pointerBase,
-                pointerLength = pointerLength
-            )
         }
-    }
-
-    @Composable
-    private fun tooltipPath(
-        pointerSettings: PointerSettings,
-        size: DpSize,
-        style: ComponentStyle?,
-        layoutDirection: LayoutDirection,
-        density: Density
-    ): Path {
-        val containerSizePx = with(density) { Size(size.width.toPx(), size.height.toPx()) }
-        val pointerSizePx = with(density) {
-            Size(width = pointerSettings.pointerBase.dp.toPx(), height = pointerSettings.pointerLength.dp.toPx())
-        }
-
-        val containerOffsetPx = Offset(0f, if (pointerSettings.pointerPosition == TOP) pointerSizePx.height else 0f)
-        val containerSizeWithPointer = containerSizePx.copy(height = containerSizePx.height - pointerSizePx.height)
-        val cornerRadiusPx = with(density) { style?.cornerRadius?.dp?.toPx() ?: 0f }
-
-        return Path().apply {
-            val rect = Path().apply {
-                if (style != null) {
-                    addPath(
-                        Path().apply {
-                            addOutline(
-                                RoundedCornerShape(style.cornerRadius.dp).createOutline(
-                                    containerSizeWithPointer,
-                                    layoutDirection,
-                                    density
-                                )
-                            )
-                        },
-                        containerOffsetPx
-                    )
-                } else {
-                    addRect(Rect(containerOffsetPx, containerSizeWithPointer))
-                }
-            }
-
-            val base = pointerSizePx.width
-            val baseCenter = base / 2
-            val topSizePointer = animateFloatAsState(
-                targetValue = when (pointerSettings.pointerPosition) {
-                    TOP -> -pointerSizePx.height
-                    else -> 0f
-                }
-            )
-            val bottomSizePointer = animateFloatAsState(
-                targetValue = when (pointerSettings.pointerPosition) {
-                    BOTTOM -> cornerRadiusPx + pointerSizePx.height
-                    else -> 0f
-                }
-            )
-            val offsetX = with(density) { (size.width.toPx() / 2) - baseCenter + pointerSettings.pointerOffsetX.value.toPx() }
-            val minPointerOffset = 0f
-            val maxPointerOffset = with(density) { size.width.toPx() - base }
-            // TODO change so this value changes based on how much offset is needed for the pointer to point at target element
-            val pointerOffsetX = if (offsetX < minPointerOffset) {
-                (offsetX - minPointerOffset).coerceAtLeast(-baseCenter)
-            } else if (offsetX > maxPointerOffset) {
-                (offsetX - maxPointerOffset).coerceAtMost(baseCenter)
-            } else 0f
-
-            val offsetXAnimated = animateFloatAsState(
-                targetValue = offsetX.coerceAtLeast(minPointerOffset).coerceAtMost(maxPointerOffset)
-            )
-            val offsetY = animateFloatAsState(
-                targetValue = if (pointerSettings.pointerPosition == BOTTOM)
-                    containerSizeWithPointer.height - cornerRadiusPx else -topSizePointer.value
-            )
-            val pointer = Path().apply {
-                reset()
-
-                if (pointerSettings.pointerPosition == TOP) {
-                    lineTo(x = base / 2 + pointerOffsetX, y = topSizePointer.value)
-                }
-                lineTo(x = base, y = 0f)
-                lineTo(x = base, y = cornerRadiusPx)
-
-                if (pointerSettings.pointerPosition == BOTTOM) {
-                    lineTo(x = base / 2 + pointerOffsetX, y = bottomSizePointer.value)
-                }
-                lineTo(x = 0f, y = cornerRadiusPx)
-                lineTo(x = 0f, y = 0f)
-
-                close()
-
-                translate(Offset(offsetXAnimated.value, offsetY.value))
-            }
-
-            op(pointer, rect, PathOperation.Union)
-        }
-    }
+    )
 
     private fun Modifier.clipToPath(path: Path) = then(
         Modifier.clip(GenericShape { _, _ -> addPath(path) })
@@ -287,48 +187,56 @@ internal class TooltipTrait(
 
     private fun Modifier.positionTooltip(
         targetRect: Rect?,
-        tooltipSizeDp: DpSize,
-        pointerSettings: PointerSettings,
-        windowInfo: AppcuesWindowInfo
+        containerDimens: TooltipContainerDimens?,
+        pointerSettings: TooltipSettings,
+        windowInfo: AppcuesWindowInfo,
+        animationSpec: FiniteAnimationSpec<Dp>,
     ): Modifier = composed {
+        // skip this until we have containerDimens defined
+        if (containerDimens == null) return@composed Modifier
 
         val tooltipPaddingTop = animateDpAsState(
             targetValue = when (pointerSettings.pointerPosition) {
-                TOP -> max((targetRect?.bottom?.dp ?: 0.dp) - SCREEN_VERTICAL_PADDING, 0.dp)
-                BOTTOM -> max((targetRect?.top?.dp ?: 0.dp) - tooltipSizeDp.height - tooltipStyleSize - SCREEN_VERTICAL_PADDING, 0.dp)
-                NONE -> windowInfo.heightDp - tooltipSizeDp.height - SCREEN_VERTICAL_PADDING
-            }
+                TOP, TOP_START, TOP_END -> max((targetRect?.bottom?.dp ?: 0.dp) - SCREEN_VERTICAL_PADDING, 0.dp)
+                BOTTOM, BOTTOM_START, BOTTOM_END -> max(
+                    (targetRect?.top?.dp ?: 0.dp) - containerDimens.heightDp - SCREEN_VERTICAL_PADDING, 0.dp
+                )
+                NONE -> windowInfo.heightDp - containerDimens.heightDp - SCREEN_VERTICAL_PADDING
+            },
+            animationSpec = animationSpec
         )
 
         val toolTipPaddingStart = animateDpAsState(
             targetValue = if (targetRect != null) {
                 val paddingStartMin = 0.dp
-                val paddingStartMax = windowInfo.widthDp - (SCREEN_HORIZONTAL_PADDING * 2) - tooltipSizeDp.width
-                val paddingStartOnTarget = targetRect.center.x.dp - SCREEN_HORIZONTAL_PADDING - (tooltipSizeDp.width / 2)
+                val paddingStartMax = windowInfo.widthDp - (SCREEN_HORIZONTAL_PADDING * 2) - containerDimens.widthDp
+                val paddingStartOnTarget = targetRect.center.x.dp - SCREEN_HORIZONTAL_PADDING - (containerDimens.widthDp / 2)
 
                 if (paddingStartOnTarget < 0.dp) {
                     pointerSettings.pointerOffsetX.value = paddingStartOnTarget
                 } else if (paddingStartOnTarget > paddingStartMax) {
                     pointerSettings.pointerOffsetX.value = paddingStartOnTarget - paddingStartMax
                 }
+
                 // target value is between min and max
                 paddingStartOnTarget.coerceIn(paddingStartMin, paddingStartMax)
             } else {
                 // When no targetRect is found we align the tooltip at bottomCenter of the screen
-                val paddingStartCentered = (windowInfo.widthDp - tooltipSizeDp.width - (SCREEN_HORIZONTAL_PADDING * 2)) / 2
+                val paddingStartCentered = (windowInfo.widthDp - containerDimens.widthDp - (SCREEN_HORIZONTAL_PADDING * 2)) / 2
                 // Min value
                 paddingStartCentered.coerceAtLeast(0.dp)
-            }
+            },
+            animationSpec = animationSpec
         )
 
         then(Modifier.padding(start = toolTipPaddingStart.value, top = tooltipPaddingTop.value))
     }
 
-    private fun Modifier.tooltipPointerPadding(pointerSettings: PointerSettings): Modifier {
+    private fun Modifier.tooltipPointerPadding(pointerSettings: TooltipSettings): Modifier {
         return then(
             when (pointerSettings.pointerPosition) {
-                TOP -> Modifier.padding(top = pointerSettings.pointerLength.dp)
-                BOTTOM -> Modifier
+                TOP, TOP_START, TOP_END -> Modifier.padding(top = pointerSettings.pointerLengthDp)
+                BOTTOM, BOTTOM_START, BOTTOM_END -> Modifier.padding(bottom = pointerSettings.pointerLengthDp)
                 NONE -> Modifier
             }
         )
@@ -350,4 +258,57 @@ internal class TooltipTrait(
     private fun Modifier.tooltipSize(style: ComponentStyle?): Modifier = then(
         Modifier.size(width = style?.width?.dp ?: Dp.Unspecified, height = style?.height?.dp ?: Dp.Unspecified)
     )
+
+    @Composable
+    private fun rememberMetadataFloatAnimation(metadata: AppcuesStepMetadata): TweenSpec<Float> {
+        return remember(metadata) {
+            val duration = (metadata.actual[StepAnimationTrait.METADATA_ANIMATION_DURATION] as Int?) ?: StepAnimationTrait.DEFAULT_ANIMATION
+            when ((metadata.actual[StepAnimationTrait.METADATA_ANIMATION_EASING] as StepAnimationEasing?)) {
+                LINEAR -> tween(durationMillis = duration, easing = LinearEasing)
+                EASE_IN -> tween(durationMillis = duration, easing = EaseIn)
+                EASE_OUT -> tween(durationMillis = duration, easing = EaseOut)
+                EASE_IN_OUT -> tween(durationMillis = duration, easing = EaseInOut)
+                // animation with no duration is the easiest way to not use animation here
+                null -> tween(durationMillis = 0, easing = LinearEasing)
+            }
+        }
+    }
+
+    @Composable
+    private fun rememberMetadataDpAnimation(metadata: AppcuesStepMetadata): FiniteAnimationSpec<Dp> {
+        return remember(metadata) {
+            val duration = (metadata.actual[StepAnimationTrait.METADATA_ANIMATION_DURATION] as Int?) ?: StepAnimationTrait.DEFAULT_ANIMATION
+            when ((metadata.actual[StepAnimationTrait.METADATA_ANIMATION_EASING] as StepAnimationEasing?)) {
+                LINEAR -> tween(durationMillis = duration, easing = LinearEasing)
+                EASE_IN -> tween(durationMillis = duration, easing = EaseIn)
+                EASE_OUT -> tween(durationMillis = duration, easing = EaseOut)
+                EASE_IN_OUT -> tween(durationMillis = duration, easing = EaseInOut)
+                // animation with no duration is the easiest way to not use animation here
+                null -> tween(durationMillis = 0, easing = LinearEasing)
+            }
+        }
+    }
+
+    @Composable
+    private fun rememberMetadataRect(metadata: AppcuesStepMetadata): Rect? {
+        val windowInfo = rememberAppcuesWindowInfo()
+        return remember(metadata) {
+            val rectInfo = (metadata.actual[TargetRectangleTrait.TARGET_RECTANGLE_METADATA] as TargetRectangleInfo?)
+            val screenWidth = windowInfo.widthDp.value
+            val screenHeight = windowInfo.heightDp.value
+
+            if (rectInfo == null) return@remember null
+
+            Rect(
+                offset = Offset(
+                    x = (screenWidth * rectInfo.relativeX).toFloat() + rectInfo.x,
+                    y = (screenHeight * rectInfo.relativeY).toFloat() + rectInfo.y,
+                ),
+                size = Size(
+                    width = (screenWidth * rectInfo.relativeWidth).toFloat() + rectInfo.width,
+                    height = (screenHeight * rectInfo.relativeHeight).toFloat() + rectInfo.height,
+                )
+            )
+        }
+    }
 }

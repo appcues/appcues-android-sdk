@@ -23,6 +23,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.appcues.data.model.AppcuesConfigMap
@@ -97,6 +98,8 @@ internal class BackdropKeyholeTrait(
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                // adds a graphic layer to ensure that any BlendModes will work as expected
+                .graphicsLayer(alpha = 0.99F)
                 .drawWithContent {
                     drawContent()
 
