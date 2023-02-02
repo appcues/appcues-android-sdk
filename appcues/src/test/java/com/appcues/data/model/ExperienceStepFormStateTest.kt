@@ -4,6 +4,7 @@ import com.appcues.data.model.ExperiencePrimitive.OptionSelectPrimitive
 import com.appcues.data.model.ExperiencePrimitive.OptionSelectPrimitive.OptionItem
 import com.appcues.data.model.ExperiencePrimitive.TextInputPrimitive
 import com.appcues.data.model.ExperiencePrimitive.TextPrimitive
+import com.appcues.data.model.ExperiencePrimitive.TextSpanPrimitive
 import com.appcues.data.model.ExperienceStepFormItemState.OptionSelectFormItemState
 import com.appcues.data.model.ExperienceStepFormItemState.TextInputFormItemState
 import com.appcues.data.model.styling.ComponentSelectMode.MULTIPLE
@@ -14,7 +15,7 @@ import java.util.UUID
 
 class ExperienceStepFormStateTest {
 
-    private val label = TextPrimitive(id = UUID.randomUUID(), text = "label", spans = listOf())
+    private val label = TextPrimitive(id = UUID.randomUUID(), spans = listOf(TextSpanPrimitive("label")))
 
     @Test
     fun `form state SHOULD be valid by default`() {
@@ -363,6 +364,6 @@ class ExperienceStepFormStateTest {
     }
 
     private fun optionItems(count: Int) = (0..count).map {
-        OptionItem("$it", TextPrimitive(UUID.randomUUID(), text = "$it", spans = listOf()))
+        OptionItem("$it", TextPrimitive(UUID.randomUUID(), spans = listOf(TextSpanPrimitive("$it"))))
     }
 }

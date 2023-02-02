@@ -54,7 +54,6 @@ internal fun PreviewButtonBorder() {
             id = UUID.randomUUID(),
             content = TextPrimitive(
                 id = UUID.randomUUID(),
-                text = "My Fancy Button",
                 style = ComponentStyle(
                     foregroundColor = ComponentColor(light = 0xFF5C5CFF, dark = 0xFF5C5CFF)
                 ),
@@ -96,14 +95,12 @@ internal fun PreviewButtonComplexContents() {
                 items = arrayListOf(
                     TextPrimitive(
                         id = UUID.randomUUID(),
-                        text = "\uD83E\uDDEA",
                         spans = arrayListOf(
                             TextSpanPrimitive("\uD83E\uDDEA")
                         )
                     ),
                     TextPrimitive(
                         id = UUID.randomUUID(),
-                        text = "My Fancy Button",
                         spans = arrayListOf(
                             TextSpanPrimitive("My Fancy Button")
                         )
@@ -132,7 +129,6 @@ internal fun PreviewButtonDefault() {
             id = UUID.randomUUID(),
             content = TextPrimitive(
                 id = UUID.randomUUID(),
-                text = "My Button",
                 spans = arrayListOf(
                     TextSpanPrimitive("My Button")
                 )
@@ -149,7 +145,6 @@ internal fun PreviewButtonGeneral() {
             id = UUID.randomUUID(),
             content = TextPrimitive(
                 id = UUID.randomUUID(),
-                text = "Button 1",
                 style = ComponentStyle(
                     fontSize = 17.0,
                     foregroundColor = ComponentColor(light = 0xFFFFFFFF, dark = 0xFFFFFFFF)

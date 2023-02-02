@@ -127,7 +127,7 @@ internal sealed class ExperienceStepFormItemState(
         index = index,
         id = primitive.id,
         type = "textInput",
-        label = primitive.label.text,
+        label = primitive.label.textDescription,
         isRequired = primitive.required,
         attributeName = primitive.attributeName,
         isTextFocusable = true,
@@ -147,7 +147,7 @@ internal sealed class ExperienceStepFormItemState(
         index = index,
         id = primitive.id,
         type = "optionSelect",
-        label = primitive.label.text,
+        label = primitive.label.textDescription,
         isRequired = primitive.minSelections > 0u,
         attributeName = primitive.attributeName,
     ) {

@@ -60,7 +60,6 @@ internal fun TextPrimitive.Compose(modifier: Modifier) {
 
 private val textPrimitive = TextPrimitive(
     id = UUID.randomUUID(),
-    text = "\uD83D\uDC4B Welcome! If you’re looking for Appcues’\nbrand guidelines, you’ve come to the right place.",
     spans = arrayListOf(
         TextSpanPrimitive("\uD83D\uDC4B Welcome! If you’re looking for Appcues’\nbrand guidelines, you’ve come to the right place.")
     )
