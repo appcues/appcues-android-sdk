@@ -50,6 +50,7 @@ internal sealed class PrimitiveResponse(
         val items: List<PrimitiveResponse>,
         val distribution: String? = null,
         val spacing: Double = 0.0,
+        val sticky: String? = null,
     ) : PrimitiveResponse(STACK)
 
     internal data class TextPrimitiveResponse(
