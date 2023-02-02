@@ -107,7 +107,10 @@ private fun BoxScope.ComposeLastRenderingState(state: Rendering) {
                         currentPage = state.position,
                         composePage = { index ->
                             with(steps[index]) {
-                                CompositionLocalProvider(LocalAppcuesActions provides actions) {
+                                CompositionLocalProvider(
+                                    LocalAppcuesActions provides actions,
+                                    LocalExperienceStepFormStateDelegate provides formState
+                                ) {
                                     // used to get the padding values from step decorating trait and apply to the Column
                                     val density = LocalDensity.current
                                     val stepDecoratingPadding = remember(this) { StepDecoratingPadding(density) }
@@ -117,6 +120,8 @@ private fun BoxScope.ComposeLastRenderingState(state: Rendering) {
                                     ComposeStepContent(index, hasFixedHeight, contentPadding, stepDecoratingPadding)
 
                                     ApplyOverlayStepTraits(this@Box, stepDecoratingPadding)
+
+                                    ComposeStickyContent(this@Box, stepDecoratingPadding)
                                 }
                             }
                         }

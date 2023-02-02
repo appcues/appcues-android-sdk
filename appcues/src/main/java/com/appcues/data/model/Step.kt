@@ -10,4 +10,6 @@ internal data class Step(
     val actions: Map<UUID, List<Action>>,
     val type: String?,
     val formState: ExperienceStepFormState = ExperienceStepFormState(),
+    val topStickyContent: ExperiencePrimitive? = null,
+    val bottomStickyContent: ExperiencePrimitive? = null,
 )
