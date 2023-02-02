@@ -96,7 +96,6 @@ private fun ComponentStyle.getBoxAlignment(): Alignment {
 private val items = arrayListOf(
     TextPrimitive(
         id = UUID.randomUUID(),
-        text = "\uD83D\uDC4B Welcome!",
         style = ComponentStyle(
             verticalAlignment = ComponentVerticalAlignment.BOTTOM,
             horizontalAlignment = ComponentHorizontalAlignment.LEADING,
@@ -115,7 +114,6 @@ private val items = arrayListOf(
         id = UUID.randomUUID(),
         content = TextPrimitive(
             id = UUID.randomUUID(),
-            text = "Button 1",
             style = ComponentStyle(
                 fontSize = 17.0,
                 foregroundColor = ComponentColor(light = 0xFFFFFFFF, dark = 0xFFFFFFFF)
@@ -144,7 +142,6 @@ private val items = arrayListOf(
     ),
     TextPrimitive(
         id = UUID.randomUUID(),
-        text = "BYE! \uD83E\uDD96",
         style = ComponentStyle(
             verticalAlignment = ComponentVerticalAlignment.TOP,
             horizontalAlignment = ComponentHorizontalAlignment.TRAILING,

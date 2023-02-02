@@ -241,7 +241,6 @@ private fun mapKeyboardType(value: ComponentDataType): KeyboardType = when (valu
 
 private val textPrimitive = TextPrimitive(
     id = UUID.randomUUID(),
-    text = "Enter a value",
     spans = arrayListOf(
         TextSpanPrimitive("Enter a value")
     )

@@ -35,14 +35,12 @@ internal fun BoxPrimitive.Compose(modifier: Modifier) {
 private val items = arrayListOf(
     TextPrimitive(
         id = UUID.randomUUID(),
-        text = "\uD83D\uDC4B Welcome!",
         spans = arrayListOf(TextSpanPrimitive("\uD83D\uDC4B Welcome!"))
     ),
     ButtonPrimitive(
         id = UUID.randomUUID(),
         content = TextPrimitive(
             id = UUID.randomUUID(),
-            text = "Button 1",
             style = ComponentStyle(
                 fontSize = 17.0,
                 foregroundColor = ComponentColor(light = 0xFFFFFFFF, dark = 0xFFFFFFFF)
@@ -71,7 +69,6 @@ private val items = arrayListOf(
     ),
     TextPrimitive(
         id = UUID.randomUUID(),
-        text = "BYE! \uD83E\uDD96",
         spans = arrayListOf(TextSpanPrimitive("BYE! \uD83E\uDD96"))
     )
 )

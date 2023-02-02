@@ -30,11 +30,10 @@ internal sealed class ExperiencePrimitive(
     data class TextPrimitive(
         override val id: UUID,
         override val style: ComponentStyle = ComponentStyle(),
-        val text: String,
         val spans: List<TextSpanPrimitive>,
     ) : ExperiencePrimitive(id, style) {
 
-        override val textDescription: String = text
+        override val textDescription: String = spans.joinToString(separator = String()) { it.text }
     }
 
     data class TextSpanPrimitive(

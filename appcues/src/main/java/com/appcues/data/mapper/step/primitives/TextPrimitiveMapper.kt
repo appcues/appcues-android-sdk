@@ -13,7 +13,7 @@ internal fun TextPrimitiveResponse.mapTextPrimitive(): TextPrimitive {
     val processedSpans = when {
         // when text is not null and spans is null or empty we use the raw text as a single span item
         text != null && spans.isNullOrEmpty() -> text.toTextSpanPrimitiveList(style)
-        // else when span is not null we nao to Primitive
+        // else when span is not null we map to Primitive
         spans != null -> spans.toTextSpanPrimitive()
         // else an empty list
         else -> arrayListOf()
@@ -27,7 +27,6 @@ internal fun TextPrimitiveResponse.mapTextPrimitive(): TextPrimitive {
     return TextPrimitive(
         id = id,
         style = style.mapComponentStyle(),
-        text = processedSpans.joinToString { it.text },
         spans = processedSpans
     )
 }
