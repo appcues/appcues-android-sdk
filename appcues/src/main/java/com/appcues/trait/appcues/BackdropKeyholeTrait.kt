@@ -35,8 +35,12 @@ import com.appcues.trait.appcues.StepAnimationTrait.StepAnimationEasing.EASE_IN
 import com.appcues.trait.appcues.StepAnimationTrait.StepAnimationEasing.EASE_IN_OUT
 import com.appcues.trait.appcues.StepAnimationTrait.StepAnimationEasing.EASE_OUT
 import com.appcues.trait.appcues.StepAnimationTrait.StepAnimationEasing.LINEAR
+import com.appcues.trait.appcues.TargetRectangleTrait.Companion.TARGET_RECTANGLE_METADATA
+import com.appcues.trait.appcues.TargetRectangleTrait.TargetRectangleInfo
 import com.appcues.ui.composables.AppcuesStepMetadata
 import com.appcues.ui.composables.LocalAppcuesStepMetadata
+import com.appcues.ui.utils.rememberAppcuesWindowInfo
+import kotlin.math.max
 import kotlin.math.pow
 import kotlin.math.sqrt
 
@@ -53,16 +57,18 @@ internal class BackdropKeyholeTrait(
         RECTANGLE, CIRCLE
     }
 
-    private val emptyRect = Rect(0f, 0f, 0f, 0f)
+    override val priority: Int = BackdropDecoratingTrait.BACKDROP_KEYHOLE_PRIORITY
 
     private val shape = when (config.getConfig<String>("shape")) {
         "circle" -> CIRCLE
         else -> RECTANGLE
     }
 
-    private val rectCornerRadius = config.getConfigInt("cornerRadius") ?: 0
+    private val configCornerRadius = config.getConfigInt("cornerRadius") ?: 0
 
     private val spreadRadius = config.getConfigInt("spreadRadius") ?: 0
+
+    private val blurRadius = config.getConfigInt("blurRadius") ?: 0
 
     @Composable
     override fun BoxScope.BackdropDecorate(content: @Composable BoxScope.() -> Unit) {
@@ -70,9 +76,11 @@ internal class BackdropKeyholeTrait(
         val metadata = LocalAppcuesStepMetadata.current
 
         val actualRect = rememberMetadataRect(metadata)
+        //        val actualBackground = rememberBackgroundColor(metadata)
         val animation = rememberMetadataAnimation(metadata)
 
-        val circleSize = getRectEncompassesRadius(actualRect.width, actualRect.height) * 2
+        val rectEncompassRadius = getRectEncompassesRadius(actualRect.width, actualRect.height)
+        val circleSize = (rectEncompassRadius + blurRadius) * 2
         val circleEncompassXOffset = (circleSize - actualRect.width) / 2
         val circleEncompassYOffset = (circleSize - actualRect.height) / 2
         val xPosition = animateFloatAsState(
@@ -85,7 +93,8 @@ internal class BackdropKeyholeTrait(
         )
         val width = animateFloatAsState(if (shape == RECTANGLE) actualRect.width else circleSize, animationSpec = animation)
         val height = animateFloatAsState(if (shape == RECTANGLE) actualRect.height else circleSize, animationSpec = animation)
-        val cornerRadius = animateFloatAsState(getCornerRadius(actualRect.width, actualRect.height), animationSpec = animation)
+        val cornerRadius =
+            animateFloatAsState(getCornerRadius(actualRect.width, actualRect.height, blurRadius.toFloat()), animationSpec = animation)
 
         Box(
             modifier = Modifier
@@ -106,6 +115,20 @@ internal class BackdropKeyholeTrait(
                     ) {
                         this@drawWithContent.drawContent()
                     }
+
+                    //                    if (shape == CIRCLE && blurRadius > 0) {
+                    //                        // TODO work on blurRadius .
+                    //                        drawOval(
+                    //                            brush = Brush.radialGradient(
+                    //                                center = Offset(position.x + size.width / 2, position.y + size.height / 2),
+                    //                                radius = size.width / 2,
+                    //                                colors = listOf(Color(0x00000000), actualBackground),
+                    //                                tileMode = TileMode.Decal
+                    //                            ),
+                    //                            topLeft = position,
+                    //                            size = size
+                    //                        )
+                    //                    }
                 }
 
         ) {
@@ -115,18 +138,36 @@ internal class BackdropKeyholeTrait(
 
     @Composable
     private fun rememberMetadataRect(metadata: AppcuesStepMetadata): Rect {
-        val actualRect = remember(metadata) {
-            var rect = (metadata.actual[TargetElementTrait.METADATA_TARGET_RECT] as Rect?) ?: emptyRect
-            if (spreadRadius != 0) {
-                rect = Rect(
-                    offset = Offset(rect.topLeft.x - spreadRadius, rect.topLeft.y - spreadRadius),
-                    size = Size(width = rect.width + (spreadRadius * 2), height = rect.height + (spreadRadius * 2))
+        val windowInfo = rememberAppcuesWindowInfo()
+        return remember(metadata) {
+            val rectInfo = (metadata.actual[TARGET_RECTANGLE_METADATA] as TargetRectangleInfo?) ?: TargetRectangleInfo()
+            val screenWidth = windowInfo.widthDp.value
+            val screenHeight = windowInfo.heightDp.value
+
+            Rect(
+                offset = Offset(
+                    x = (screenWidth * rectInfo.relativeX).toFloat() + rectInfo.x - spreadRadius,
+                    y = (screenHeight * rectInfo.relativeY).toFloat() + rectInfo.y - spreadRadius,
+                ),
+                size = Size(
+                    width = (screenWidth * rectInfo.relativeWidth).toFloat() + rectInfo.width + (spreadRadius * 2),
+                    height = (screenHeight * rectInfo.relativeHeight).toFloat() + rectInfo.height + (spreadRadius * 2),
                 )
-            }
-            rect
+            )
         }
-        return actualRect
     }
+
+    //    @Composable
+    //    private fun rememberBackgroundColor(metadata: AppcuesStepMetadata): Color {
+    //        val isDark = isSystemInDarkTheme()
+    //
+    //        val componentColor = (metadata.actual[BackdropTrait.METADATA_BACKGROUND_COLOR] as ComponentColor?)
+    //
+    //        return animateColorAsState(
+    //            targetValue = componentColor.getColor(isDark) ?: Color.Transparent,
+    //            animationSpec = tween(2000)
+    //        ).value
+    //    }
 
     @Composable
     private fun rememberMetadataAnimation(metadata: AppcuesStepMetadata): TweenSpec<Float> {
@@ -144,18 +185,18 @@ internal class BackdropKeyholeTrait(
         return animation
     }
 
-    private fun getCornerRadius(width: Float, height: Float): Float {
+    private fun getCornerRadius(width: Float, height: Float, blurRadius: Float): Float {
         return when (shape) {
-            RECTANGLE -> rectCornerRadius.toFloat()
+            RECTANGLE -> configCornerRadius.toFloat()
             CIRCLE -> {
-                getRectEncompassesRadius(width, height).let {
-                    ((it * Math.PI) / 2).toFloat()
-                }
+                (getRectEncompassesRadius(width, height) + blurRadius)
+                    // calculate Radius that encompasses the rect
+                    .let { ((it * Math.PI) / 2).toFloat() }
             }
         }
     }
 
     private fun getRectEncompassesRadius(width: Float, height: Float): Float {
-        return sqrt(width.pow(2) + height.pow(2)) / 2
+        return max((sqrt(width.pow(2) + height.pow(2)) / 2), 0f)
     }
 }
