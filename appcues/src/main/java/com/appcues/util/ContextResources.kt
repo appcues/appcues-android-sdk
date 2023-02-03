@@ -1,9 +1,11 @@
 package com.appcues.util
 
 import android.content.Context
+import android.content.res.Configuration
 import android.os.Build
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
+import android.util.DisplayMetrics
 import android.webkit.WebView
 import androidx.annotation.StringRes
 import kotlinx.coroutines.Dispatchers
@@ -14,6 +16,12 @@ import java.util.Locale
 // supposed to be tied to android context, this is helpful to keep
 // any class clean of Android references, which makes it easier to unit test later
 internal class ContextResources(private val context: Context) {
+
+    val displayMetrics: DisplayMetrics
+        get() = context.resources.displayMetrics
+
+    val orientation: String
+        get() = if (context.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) "landscape" else "portrait"
 
     fun getString(@StringRes id: Int): String {
         return context.getString(id)

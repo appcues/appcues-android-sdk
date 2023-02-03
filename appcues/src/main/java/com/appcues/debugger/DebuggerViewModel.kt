@@ -1,8 +1,10 @@
 package com.appcues.debugger
 
+import android.app.Activity
 import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.appcues.AppcuesConfig
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.debugger.DebugMode.Debugger
 import com.appcues.debugger.DebugMode.ScreenCapture
@@ -17,6 +19,13 @@ import com.appcues.debugger.model.DebuggerFontItem
 import com.appcues.debugger.model.DebuggerStatusItem
 import com.appcues.debugger.model.EventType
 import com.appcues.debugger.model.TapActionType
+import com.appcues.debugger.screencapture.Capture
+import com.appcues.debugger.screencapture.asCaptureView
+import com.appcues.debugger.screencapture.generateCaptureMetadata
+import com.appcues.debugger.screencapture.prettyPrint
+import com.appcues.debugger.screencapture.screenCaptureDisplayName
+import com.appcues.monitor.AppcuesActivityMonitor
+import com.appcues.util.ContextResources
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,6 +34,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
+import java.util.Date
 
 internal class DebuggerViewModel(
     override val scope: Scope,
@@ -37,6 +47,10 @@ internal class DebuggerViewModel(
     private val debuggerRecentEventsManager by inject<DebuggerRecentEventsManager>()
 
     private val debuggerFontManager by inject<DebuggerFontManager>()
+
+    private val contextResources by inject<ContextResources>()
+
+    private val config by inject<AppcuesConfig>()
 
     sealed class UIState {
         object Creating : UIState()
@@ -188,7 +202,7 @@ internal class DebuggerViewModel(
             is Idle -> {
                 when (state.mode) {
                     is Debugger -> _uiState.value = Expanded(state.mode)
-                    is ScreenCapture -> Unit
+                    is ScreenCapture -> AppcuesActivityMonitor.activity?.captureScreen(config, contextResources)
                 }
             }
             is Expanded -> {
@@ -236,5 +250,28 @@ internal class DebuggerViewModel(
     fun onDetailDismiss() {
         // reset the view state to remove any deep link path
         _uiState.value = Expanded(Debugger(null))
+    }
+}
+
+private fun Activity.captureScreen(
+    config: AppcuesConfig,
+    contextResources: ContextResources,
+) {
+    val timestamp = Date()
+    val view = window.decorView.rootView
+    val displayName = view.screenCaptureDisplayName(timestamp)
+    val layout = view.asCaptureView()
+    layout?.let {
+        val capture = Capture(
+            appId = config.applicationId,
+            displayName = displayName,
+            screenshotImageUrl = null,
+            layout = layout,
+            metadata = contextResources.generateCaptureMetadata(),
+            timestamp = timestamp,
+        )
+
+        // TESTING!!
+        capture.prettyPrint()
     }
 }
