@@ -101,11 +101,7 @@ private fun BoxScope.ComposeLastRenderingState(state: Rendering) {
         val previousStepMetaData = remember { mutableStateOf(AppcuesStepMetadata()) }
         val stepMetadata = remember(metadataSettingTraits.value) {
 
-            val actual = hashMapOf<String, Any?>().apply {
-                metadataSettingTraits.value.forEach {
-                    putAll(it.produceMetadata())
-                }
-            }
+            val actual = hashMapOf<String, Any?>().apply { metadataSettingTraits.value.forEach { putAll(it.produceMetadata()) } }
 
             mutableStateOf(AppcuesStepMetadata(previous = previousStepMetaData.value.actual, actual = actual)).also {
                 previousStepMetaData.value = it.value

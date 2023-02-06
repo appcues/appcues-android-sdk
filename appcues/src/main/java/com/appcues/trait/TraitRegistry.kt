@@ -10,7 +10,6 @@ import com.appcues.trait.appcues.ModalTrait
 import com.appcues.trait.appcues.PagingDotsTrait
 import com.appcues.trait.appcues.SkippableTrait
 import com.appcues.trait.appcues.StepAnimationTrait
-import com.appcues.trait.appcues.StickyContentTrait
 import com.appcues.trait.appcues.TargetElementTrait
 import com.appcues.trait.appcues.TargetRectangleTrait
 import com.appcues.trait.appcues.TooltipTrait
