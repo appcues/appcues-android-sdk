@@ -57,8 +57,6 @@ internal class BackdropKeyholeTrait(
         RECTANGLE, CIRCLE
     }
 
-    override val priority: Int = BackdropDecoratingTrait.BACKDROP_KEYHOLE_PRIORITY
-
     private val shape = when (config.getConfig<String>("shape")) {
         "circle" -> CIRCLE
         else -> RECTANGLE

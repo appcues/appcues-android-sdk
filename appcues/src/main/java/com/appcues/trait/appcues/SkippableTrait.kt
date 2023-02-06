@@ -36,8 +36,6 @@ internal class SkippableTrait(
         const val TYPE = "@appcues/skippable"
     }
 
-    override val priority: Int = BackdropDecoratingTrait.BACKDROP_SKIPPABLE_PRIORITY
-
     override val containerComposeOrder = ContainerDecoratingType.OVERLAY
 
     @Composable

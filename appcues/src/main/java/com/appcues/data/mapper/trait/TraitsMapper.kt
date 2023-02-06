@@ -1,9 +1,9 @@
 package com.appcues.data.mapper.trait
 
 import com.appcues.data.mapper.LeveledTraitResponse
-import com.appcues.trait.BackdropDecoratingTrait
 import com.appcues.trait.ExperienceTrait
 import com.appcues.trait.TraitRegistry
+import com.appcues.trait.appcues.BackdropKeyholeTrait
 
 internal class TraitsMapper(
     private val traitRegistry: TraitRegistry
@@ -17,10 +17,8 @@ internal class TraitsMapper(
                 }
             }
 
-            // sort BackdropDecoratingTrait items so that the one with greater priority is at the bottom of the list
-            // during composition ApplyBackgroundDecoratingTraits applies traits in reversed order. this way the trait
-            // with greater is applied first (useful for enforcing order between backdrop and keyhole trait)
-            sortBy { if (it is BackdropDecoratingTrait) it.priority else -1 }
+            // ensure BackdropKeyholeTrait is applied first
+            sortBy { it is BackdropKeyholeTrait }
         }
     }
 }
