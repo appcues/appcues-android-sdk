@@ -90,6 +90,13 @@ internal sealed class StackScope(private val childrenCount: Int) {
     class ColumnStackScope(val width: Double?, childrenCount: Int) : StackScope(childrenCount)
 }
 
+val LocalAppcuesStepMetadata = compositionLocalOf<AppcuesStepMetadata> { noLocalProvidedFor("LocalAppcuesStepMetadata") }
+
+data class AppcuesStepMetadata(
+    val previous: Map<String, Any?> = hashMapOf(),
+    val actual: Map<String, Any?> = hashMapOf()
+)
+
 private fun noLocalProvidedFor(name: String): Nothing {
     error("CompositionLocal $name not present")
 }

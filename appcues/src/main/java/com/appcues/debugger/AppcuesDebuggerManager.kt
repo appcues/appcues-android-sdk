@@ -35,6 +35,7 @@ internal class AppcuesDebuggerManager(context: Context, private val koinScope: S
     private val application = context.applicationContext as Application
 
     private var debuggerViewModel: DebuggerViewModel? = null
+    private var mode: DebugMode? = null
 
     private lateinit var currentActivity: Activity
 
@@ -44,14 +45,16 @@ internal class AppcuesDebuggerManager(context: Context, private val koinScope: S
         }
     }
 
-    fun start(activity: Activity, deepLinkPath: String? = null) = activity.runOnUiThread {
+    fun start(activity: Activity, mode: DebugMode) = activity.runOnUiThread {
+        val changingMode = this.mode != mode
         this.currentActivity = activity
+        this.mode = mode
         coroutineScope.coroutineContext.cancelChildren()
         // it is possible to re-enter start without a stop (deepLinks) - in which case we continue to
         // use the VM we already have - else, make new one here
         val viewModel = debuggerViewModel ?: DebuggerViewModel(koinScope)
         debuggerViewModel = viewModel // and save reference
-        viewModel.onStart(deepLinkPath)
+        viewModel.onStart(mode, changingMode)
         coroutineScope.launch {
             viewModel.uiState.collect { state -> onBackPressCallback.isEnabled = state is Expanded }
         }
