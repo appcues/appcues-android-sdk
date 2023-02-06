@@ -48,8 +48,6 @@ internal class BackdropTrait(
         const val METADATA_BACKGROUND_COLOR = "backgroundColor"
     }
 
-    override val priority: Int = BackdropDecoratingTrait.BACKDROP_BACKGROUND_PRIORITY
-
     override fun produceMetadata(): Map<String, Any?> {
         return hashMapOf(METADATA_BACKGROUND_COLOR to config.getConfigColor("backgroundColor"))
     }
