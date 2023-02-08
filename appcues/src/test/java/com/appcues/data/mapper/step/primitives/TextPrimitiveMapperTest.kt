@@ -54,4 +54,31 @@ class TextPrimitiveMapperTest {
         textPrimitiveResponse.mapTextPrimitive()
         // Then text will capture exception
     }
+
+    @Test
+    fun `text primitive mapping SHOULD be valid when text is empty instead of null`() {
+        // GIVEN
+        val textPrimitiveResponse = TextPrimitiveResponse(UUID.randomUUID(), null, "")
+
+        // WHEN
+        val textPrimitive = textPrimitiveResponse.mapTextPrimitive()
+
+        // THEN
+        assertThat(textPrimitive.spans).hasSize(1)
+        assertThat(textPrimitive.spans[0].text).isEmpty()
+        assertThat(textPrimitive.textDescription).isEmpty()
+    }
+
+    @Test
+    fun `text primitive mapping SHOULD be valid when spans is an empty list instead of null`() {
+        // GIVEN
+        val textPrimitiveResponse = TextPrimitiveResponse(UUID.randomUUID(), null, null, spans = arrayListOf())
+
+        // WHEN
+        val textPrimitive = textPrimitiveResponse.mapTextPrimitive()
+
+        // THEN
+        assertThat(textPrimitive.spans).hasSize(0)
+        assertThat(textPrimitive.textDescription).isEmpty()
+    }
 }

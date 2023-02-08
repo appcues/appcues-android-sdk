@@ -9,25 +9,14 @@ import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.TextSpa
 import com.appcues.data.remote.response.styling.StyleResponse
 
 internal fun TextPrimitiveResponse.mapTextPrimitive(): TextPrimitive {
-
-    val processedSpans = when {
-        // when text is not null and spans is null or empty we use the raw text as a single span item
-        text != null && spans.isNullOrEmpty() -> text.toTextSpanPrimitiveList(style)
-        // else when span is not null we map to Primitive
-        spans != null -> spans.toTextSpanPrimitive()
-        // else an empty list
-        else -> arrayListOf()
-    }
-
-    // check if this TextPrimitive is valid (contains text in form of spans)
-    if (processedSpans.isEmpty()) {
-        throw AppcuesMappingException("text($id) has no text or spans defined.")
-    }
-
     return TextPrimitive(
         id = id,
         style = style.mapComponentStyle(),
-        spans = processedSpans
+        spans = when {
+            spans != null -> spans.toTextSpanPrimitive()
+            text != null -> text.toTextSpanPrimitiveList(style)
+            else -> throw AppcuesMappingException("text($id) has no text or spans defined.")
+        }
     )
 }
 
