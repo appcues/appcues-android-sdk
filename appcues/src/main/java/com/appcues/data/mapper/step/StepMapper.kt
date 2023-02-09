@@ -43,10 +43,14 @@ internal class StepMapper(
     }
 }
 
-// if one or more sticky content items exist, wrap them in a vertical stack that will then be applied as overlay content
+// if a single sticky item, return as-is
+// if multiple sticky items, wrap them in a vertical stack
 private fun List<PrimitiveResponse>.toWrappedStickyContent(): ExperiencePrimitive? {
-    if (isEmpty()) return null
-    return VerticalStackPrimitive(UUID.randomUUID(), items = this.map { it.mapPrimitive() })
+    return when {
+        this.count() == 1 -> this.first().mapPrimitive()
+        this.count() > 1 -> VerticalStackPrimitive(UUID.randomUUID(), items = this.map { it.mapPrimitive() })
+        else -> null
+    }
 }
 
 // This function recursively walks through the content and extracts any items that were meant to be sticky content - pinned

@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.Composable
 import com.appcues.data.mapper.LeveledTraitResponse
 import com.appcues.data.mapper.trait.TraitsMapper
+import com.appcues.data.model.ExperiencePrimitive.HorizontalStackPrimitive
 import com.appcues.data.model.ExperiencePrimitive.VerticalStackPrimitive
 import com.appcues.data.remote.response.step.StepResponse
 import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.BoxPrimitiveResponse
@@ -42,13 +43,15 @@ class StepMapperTest {
         with(step) {
             assertThat(topStickyContent).isNotNull()
             assertThat(bottomStickyContent).isNotNull()
+            // this one is vstack since it had multiple items that get combined
             assertThat(topStickyContent).isInstanceOf(VerticalStackPrimitive::class.java)
-            assertThat(bottomStickyContent).isInstanceOf(VerticalStackPrimitive::class.java)
+            // this one is hstack since it was a single item pulled out directly
+            assertThat(bottomStickyContent).isInstanceOf(HorizontalStackPrimitive::class.java)
             val topStack = topStickyContent as VerticalStackPrimitive
-            val bottomStack = bottomStickyContent as VerticalStackPrimitive
+            val bottomStack = bottomStickyContent as HorizontalStackPrimitive
             assertThat(topStack.items[0].id).isEqualTo(topItem1)
             assertThat(topStack.items[1].id).isEqualTo(topItem2)
-            assertThat(bottomStack.items[0].id).isEqualTo(bottomItem1)
+            assertThat(bottomStack.id).isEqualTo(bottomItem1)
         }
     }
 
