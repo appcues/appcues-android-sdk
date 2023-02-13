@@ -12,7 +12,10 @@ import com.appcues.data.remote.response.step.StepResponse
 import com.appcues.data.remote.response.step.primitive.PrimitiveResponse
 import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.BoxPrimitiveResponse
 import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.StackPrimitiveResponse
+import com.appcues.trait.BackdropDecoratingTrait
+import com.appcues.trait.ContainerDecoratingTrait
 import com.appcues.trait.ExperienceTraitLevel.STEP
+import com.appcues.trait.MetadataSettingTrait
 import com.appcues.trait.StepDecoratingTrait
 import java.util.UUID
 
@@ -26,6 +29,7 @@ internal class StepMapper(
     ): Step {
         val stepTraits = from.traits.map { it to STEP }
         val mergedTraits = stepTraits.mergeTraits(stepContainerTraits)
+        val mappedTraits = traitsMapper.map(mergedTraits)
 
         val topStickyItems = mutableListOf<PrimitiveResponse>()
         val bottomStickyItems = mutableListOf<PrimitiveResponse>()
@@ -34,7 +38,11 @@ internal class StepMapper(
         return Step(
             id = from.id,
             content = responseContent.mapPrimitive(),
-            stepDecoratingTraits = traitsMapper.map(mergedTraits).filterIsInstance(StepDecoratingTrait::class.java),
+            // TODO only one of each type, eg: @appcues/backdrop @appcues/skippable etc
+            stepDecoratingTraits = mappedTraits.filterIsInstance(StepDecoratingTrait::class.java),
+            backdropDecoratingTraits = mappedTraits.filterIsInstance<BackdropDecoratingTrait>(),
+            containerDecoratingTraits = mappedTraits.filterIsInstance<ContainerDecoratingTrait>(),
+            metadataSettingTraits = mappedTraits.filterIsInstance<MetadataSettingTrait>(),
             actions = actionsMapper.map(from.actions),
             type = from.type,
             topStickyContent = topStickyItems.toWrappedStickyContent(),

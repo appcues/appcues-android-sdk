@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,6 +40,9 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.appcues.R
 import com.appcues.R.drawable
+import com.appcues.debugger.DebugMode
+import com.appcues.debugger.DebugMode.Debugger
+import com.appcues.debugger.DebugMode.ScreenCapture
 import com.appcues.debugger.DebuggerViewModel
 import com.appcues.ui.theme.AppcuesColors
 
@@ -53,6 +57,9 @@ internal fun BoxScope.DebuggerFloatingActionButton(
     debuggerViewModel: DebuggerViewModel,
 ) {
     val resizeBy = resizeAnimatedState(debuggerState)
+
+    val iconResId = remember(debuggerState.debugMode) { derivedStateOf { debuggerState.debugMode.value.fabIconResourceId() } }
+    val clickLabelResId = remember(debuggerState.debugMode) { derivedStateOf { debuggerState.debugMode.value.fabClickLabelResourceId() } }
 
     // only draw if IntOffset is not null
     debuggerState.getFabPositionAsIntOffset()?.let { offset ->
@@ -86,7 +93,7 @@ internal fun BoxScope.DebuggerFloatingActionButton(
                         shape = RoundedCornerShape(percent = 100)
                     )
                     .clickableAndDraggable(
-                        onClickLabel = LocalContext.current.getString(R.string.appcues_debugger_fab_on_click_label),
+                        onClickLabel = LocalContext.current.getString(clickLabelResId.value),
                         onDragEnd = { debuggerViewModel.onDragEnd() },
                         onDrag = { debuggerViewModel.onDragging(it) },
                         onClick = { debuggerViewModel.onFabClick() }
@@ -102,7 +109,7 @@ internal fun BoxScope.DebuggerFloatingActionButton(
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
-                    painter = painterResource(id = drawable.appcues_ic_white_logo),
+                    painter = painterResource(id = iconResId.value),
                     tint = Color.White,
                     contentDescription = LocalContext.current.getString(R.string.appcues_debugger_fab_image_content_description)
                 )
@@ -168,3 +175,15 @@ private fun Modifier.clickableAndDraggable(
             }
     }
 )
+
+private fun DebugMode.fabIconResourceId() =
+    when (this) {
+        is Debugger -> drawable.appcues_ic_white_logo
+        is ScreenCapture -> drawable.appcues_ic_capture_screen
+    }
+
+private fun DebugMode.fabClickLabelResourceId() =
+    when (this) {
+        is Debugger -> R.string.appcues_debugger_fab_on_debugger_click_label
+        is ScreenCapture -> R.string.appcues_debugger_fab_on_screen_capture_click_label
+    }
