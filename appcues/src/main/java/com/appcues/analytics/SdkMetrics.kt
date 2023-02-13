@@ -2,6 +2,7 @@ package com.appcues.analytics
 
 import java.util.Date
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 
 internal data class SdkMetrics(
     private var trackedAt: Date? = null,
@@ -13,7 +14,7 @@ internal data class SdkMetrics(
 
         const val METRICS_PROPERTY = "_sdkMetrics"
 
-        private val metrics = hashMapOf<UUID, SdkMetrics>()
+        private val metrics = ConcurrentHashMap<UUID, SdkMetrics>()
 
         fun clear() {
             metrics.clear()
