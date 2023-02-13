@@ -101,11 +101,7 @@ private fun BoxScope.ComposeLastRenderingState(state: Rendering) {
         val previousStepMetaData = remember { mutableStateOf(AppcuesStepMetadata()) }
         val stepMetadata = remember(metadataSettingTraits.value) {
 
-            val actual = hashMapOf<String, Any?>().apply {
-                metadataSettingTraits.value.forEach {
-                    putAll(it.produceMetadata())
-                }
-            }
+            val actual = hashMapOf<String, Any?>().apply { metadataSettingTraits.value.forEach { putAll(it.produceMetadata()) } }
 
             mutableStateOf(AppcuesStepMetadata(previous = previousStepMetaData.value.actual, actual = actual)).also {
                 previousStepMetaData.value = it.value
@@ -129,7 +125,10 @@ private fun BoxScope.ComposeLastRenderingState(state: Rendering) {
                             currentPage = state.position,
                             composePage = { index ->
                                 with(steps[index]) {
-                                    CompositionLocalProvider(LocalAppcuesActions provides actions) {
+                                    CompositionLocalProvider(
+                                        LocalAppcuesActions provides actions,
+                                        LocalExperienceStepFormStateDelegate provides formState
+                                    ) {
                                         // used to get the padding values from step decorating trait and apply to the Column
                                         val density = LocalDensity.current
                                         val stepDecoratingPadding = remember(this) { StepDecoratingPadding(density) }
@@ -139,6 +138,8 @@ private fun BoxScope.ComposeLastRenderingState(state: Rendering) {
                                         ComposeStepContent(index, hasFixedHeight, contentPadding, stepDecoratingPadding)
 
                                         ApplyOverlayStepTraits(this@Box, stepDecoratingPadding)
+
+                                        ComposeStickyContent(this@Box, stepDecoratingPadding)
                                     }
                                 }
                             }

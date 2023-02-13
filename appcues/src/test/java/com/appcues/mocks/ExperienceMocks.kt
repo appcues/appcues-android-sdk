@@ -61,7 +61,7 @@ internal fun mockStep(id: UUID) =
         id = id,
         content = TextPrimitive(
             id = UUID.fromString("df3bbe3e-8bdb-417a-b644-5e23862786b2"),
-            text = ""
+            spans = listOf()
         ),
         stepDecoratingTraits = listOf(),
         actions = mapOf(),

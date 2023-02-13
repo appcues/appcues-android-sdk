@@ -49,6 +49,9 @@ afterEvaluate {
                 artifactId = appcuesProperties.getProperty("ARTIFACT_ID")
                 version = versionName
 
+                artifact sourcesJar
+                artifact javadocJar
+
                 pom {
                     name = appcuesProperties.getProperty("NAME")
                     description = appcuesProperties.getProperty("DESCRIPTION")

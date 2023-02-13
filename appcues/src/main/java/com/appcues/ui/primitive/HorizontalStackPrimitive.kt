@@ -19,6 +19,7 @@ import com.appcues.data.model.ExperiencePrimitive.ButtonPrimitive
 import com.appcues.data.model.ExperiencePrimitive.HorizontalStackPrimitive
 import com.appcues.data.model.ExperiencePrimitive.SpacerPrimitive
 import com.appcues.data.model.ExperiencePrimitive.TextPrimitive
+import com.appcues.data.model.ExperiencePrimitive.TextSpanPrimitive
 import com.appcues.data.model.styling.ComponentColor
 import com.appcues.data.model.styling.ComponentDistribution
 import com.appcues.data.model.styling.ComponentStyle
@@ -95,20 +96,36 @@ private fun ComponentStyle.getBoxAlignment(): Alignment {
 private val items = arrayListOf(
     TextPrimitive(
         id = UUID.randomUUID(),
-        text = "\uD83D\uDC4B Welcome!",
         style = ComponentStyle(
             verticalAlignment = ComponentVerticalAlignment.BOTTOM,
             horizontalAlignment = ComponentHorizontalAlignment.LEADING,
+        ),
+        spans = arrayListOf(
+            TextSpanPrimitive(
+                text = "\uD83D\uDC4B Welcome!",
+                style = ComponentStyle(
+                    verticalAlignment = ComponentVerticalAlignment.BOTTOM,
+                    horizontalAlignment = ComponentHorizontalAlignment.LEADING,
+                )
+            )
         )
     ),
     ButtonPrimitive(
         id = UUID.randomUUID(),
         content = TextPrimitive(
             id = UUID.randomUUID(),
-            text = "Button 1",
             style = ComponentStyle(
                 fontSize = 17.0,
                 foregroundColor = ComponentColor(light = 0xFFFFFFFF, dark = 0xFFFFFFFF)
+            ),
+            spans = arrayListOf(
+                TextSpanPrimitive(
+                    text = "Button 1",
+                    style = ComponentStyle(
+                        fontSize = 17.0,
+                        foregroundColor = ComponentColor(light = 0xFFFFFFFF, dark = 0xFFFFFFFF)
+                    )
+                )
             )
         ),
         style = ComponentStyle(
@@ -125,10 +142,18 @@ private val items = arrayListOf(
     ),
     TextPrimitive(
         id = UUID.randomUUID(),
-        text = "BYE! \uD83E\uDD96",
         style = ComponentStyle(
             verticalAlignment = ComponentVerticalAlignment.TOP,
             horizontalAlignment = ComponentHorizontalAlignment.TRAILING,
+        ),
+        spans = arrayListOf(
+            TextSpanPrimitive(
+                text = "BYE! \uD83E\uDD96",
+                style = ComponentStyle(
+                    verticalAlignment = ComponentVerticalAlignment.TOP,
+                    horizontalAlignment = ComponentHorizontalAlignment.TRAILING,
+                )
+            )
         )
     )
 )

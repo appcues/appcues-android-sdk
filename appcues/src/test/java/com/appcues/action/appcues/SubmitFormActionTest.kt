@@ -12,6 +12,7 @@ import com.appcues.data.model.ExperiencePrimitive.OptionSelectPrimitive
 import com.appcues.data.model.ExperiencePrimitive.OptionSelectPrimitive.OptionItem
 import com.appcues.data.model.ExperiencePrimitive.TextInputPrimitive
 import com.appcues.data.model.ExperiencePrimitive.TextPrimitive
+import com.appcues.data.model.ExperiencePrimitive.TextSpanPrimitive
 import com.appcues.data.model.ExperiencePriority.NORMAL
 import com.appcues.data.model.ExperienceStepFormState
 import com.appcues.data.model.ExperienceTrigger
@@ -79,7 +80,7 @@ internal class SubmitFormActionTest : AppcuesScopeTest {
         // GIVEN
         val textInput = TextInputPrimitive(
             id = UUID.randomUUID(),
-            label = TextPrimitive(id = UUID.randomUUID(), text = "label"),
+            label = TextPrimitive(id = UUID.randomUUID(), spans = listOf(TextSpanPrimitive("label"))),
             required = true,
             attributeName = "myCustomAttribute"
         )
@@ -240,17 +241,17 @@ internal class SubmitFormActionTest : AppcuesScopeTest {
     private fun optionSelect(count: Int = 3, minSelections: Int = 1) =
         OptionSelectPrimitive(
             id = UUID.randomUUID(),
-            label = TextPrimitive(id = UUID.randomUUID(), text = "select an option"),
+            label = TextPrimitive(id = UUID.randomUUID(), spans = listOf(TextSpanPrimitive("select an option"))),
             minSelections = minSelections.toUInt(),
             selectMode = MULTIPLE,
             options = (0..count).map {
-                OptionItem("$it", TextPrimitive(UUID.randomUUID(), text = "$it"))
+                OptionItem("$it", TextPrimitive(UUID.randomUUID(), spans = listOf(TextSpanPrimitive("$it"))))
             }
         )
 
     private fun textInput() = TextInputPrimitive(
         id = UUID.randomUUID(),
-        label = TextPrimitive(id = UUID.randomUUID(), text = "label"),
+        label = TextPrimitive(id = UUID.randomUUID(), spans = listOf(TextSpanPrimitive("label"))),
         required = true
     )
 
