@@ -5,6 +5,7 @@ plugins {
     id 'org.jetbrains.dokka'
 }
 
+apply from: 'artifacts-android.gradle'
 apply from: 'publish-maven.gradle'
 apply from: 'copy-dependencies.gradle'
 apply from: 'codecov.gradle'
