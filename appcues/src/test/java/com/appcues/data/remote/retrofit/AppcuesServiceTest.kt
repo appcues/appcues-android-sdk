@@ -5,13 +5,16 @@ import com.appcues.data.remote.response.experience.FailedExperienceResponse
 import com.appcues.data.remote.retrofit.stubs.contentModalOneStubs
 import com.appcues.util.appcuesFormatted
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runTest
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
+import org.junit.Assert
 import org.junit.Test
 import java.util.UUID
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class AppcuesServiceTest {
 
     private val mockWebServer = MockWebServer()
@@ -25,7 +28,7 @@ class AppcuesServiceTest {
     }
 
     @Test
-    fun `content SHOULD fetch Experience correctly from specific path`() {
+    fun `content SHOULD fetch Experience correctly from specific path`() = runTest {
         // Given
         mockWebServer.dispatchResponses(
             responses = hashMapOf(
@@ -33,14 +36,13 @@ class AppcuesServiceTest {
             )
         )
         // When
-        val result = runBlocking {
-            api.experienceContent(
-                account = "1234",
-                user = "TestUser",
-                experienceId = "5678",
-                authorization = null,
-            )
-        }
+        val result = api.experienceContent(
+            account = "1234",
+            user = "TestUser",
+            experienceId = "5678",
+            authorization = null,
+        )
+
         // Then
         with(result) {
             assertThat(this).isEqualTo(contentModalOneStubs)
@@ -48,7 +50,7 @@ class AppcuesServiceTest {
     }
 
     @Test
-    fun `qualify SHOULD lossy decode Experiences from specific path`() {
+    fun `qualify SHOULD lossy decode Experiences from specific path`() = runTest {
         // Given
         mockWebServer.dispatchResponses(
             responses = hashMapOf(
@@ -57,15 +59,13 @@ class AppcuesServiceTest {
         )
 
         // When
-        val result = runBlocking {
-            api.qualify(
-                account = "1234",
-                user = "TestUser",
-                authorization = null,
-                requestId = UUID.randomUUID(),
-                activity = "".toRequestBody(),
-            )
-        }
+        val result = api.qualify(
+            account = "1234",
+            user = "TestUser",
+            authorization = null,
+            requestId = UUID.randomUUID(),
+            activity = "".toRequestBody(),
+        )
 
         // Then
         //
@@ -120,6 +120,47 @@ class AppcuesServiceTest {
                             " at path \$.steps[0].children[0].content.id"
                     )
             }
+        }
+    }
+
+    @Test
+    fun `qualify SHOULD include Authorization header WHEN user signature provided`() = runTest {
+        // Given
+        val auth = "Bearer abc"
+        mockWebServer.confirmAuth(auth, "content/empty_qualification.json")
+
+        // When
+        try {
+            api.qualify(
+                account = "1234",
+                user = "TestUser",
+                authorization = auth,
+                requestId = UUID.randomUUID(),
+                activity = "".toRequestBody(),
+            )
+        } catch (exception: Exception) {
+            // Then
+            Assert.fail(exception.message)
+        }
+    }
+
+    @Test
+    fun `qualify SHOULD NOT include Authorization header WHEN no user signature provided`() = runTest {
+        // Given
+        mockWebServer.confirmAuth(null, "content/empty_qualification.json")
+
+        // When
+        try {
+            api.qualify(
+                account = "1234",
+                user = "TestUser",
+                authorization = null,
+                requestId = UUID.randomUUID(),
+                activity = "".toRequestBody(),
+            )
+        } catch (exception: Exception) {
+            // Then
+            Assert.fail(exception.message)
         }
     }
 }

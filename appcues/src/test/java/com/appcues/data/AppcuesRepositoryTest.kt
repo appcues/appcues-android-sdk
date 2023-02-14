@@ -23,6 +23,7 @@ import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import io.mockk.slot
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -289,6 +290,24 @@ class AppcuesRepositoryTest {
 
         // THEN
         coVerify { experienceMapper.mapDecoded(any(), ExperienceTrigger.Qualification("event_trigger"), NORMAL, null, request.requestId) }
+    }
+
+    @Test
+    fun `trackActivity SHOULD include user signature in ActivityStorage WHEN the ActivityRequest has a user signature`() = runTest {
+        // GIVEN
+        val request = ActivityRequest(accountId = "123", userId = "userId", userSignature = "user-signature")
+        val cacheItem = ActivityStorage(UUID.randomUUID(), "123", "userId", "data1", "user-signature-cache")
+        coEvery { appcuesLocalSource.getAllActivity() } returns listOf(cacheItem)
+
+        // WHEN
+        repository.trackActivity(request)
+
+        // THEN
+        val activityStorageSlot = slot<ActivityStorage>()
+        coVerify { appcuesLocalSource.saveActivity(capture(activityStorageSlot)) }
+        assertThat(activityStorageSlot.captured.userSignature).isEqualTo("user-signature")
+        coVerify { appcuesRemoteSource.qualify("userId", "user-signature", request.requestId, any()) }
+        coVerify { appcuesRemoteSource.postActivity("userId", "user-signature-cache", any()) }
     }
 
     // test items already in processing don't get included again

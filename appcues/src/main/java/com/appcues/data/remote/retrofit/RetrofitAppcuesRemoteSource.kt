@@ -38,11 +38,11 @@ internal class RetrofitAppcuesRemoteSource(
         // preview _can_ be personalized, so attempt to use the user info, if a valid session exists
         if (sessionMonitor.isActive) {
             request {
-                appcuesService.experiencePreview(accountId, storage.userId, experienceId)
+                appcuesService.experiencePreview(accountId, storage.userId, experienceId, userSignature?.let { "Bearer $it" })
             }
         } else {
             request {
-                appcuesService.experiencePreview(accountId, experienceId, userSignature?.let { "Bearer $it" })
+                appcuesService.experiencePreview(accountId, experienceId)
             }
         }
 
