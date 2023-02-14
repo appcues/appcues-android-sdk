@@ -148,6 +148,7 @@ class Appcues internal constructor(koinScope: Scope) {
     fun reset() {
         sessionMonitor.reset()
         storage.userId = ""
+        storage.userSignature = null
         storage.isAnonymous = true
         storage.groupId = null
     }
@@ -259,9 +260,11 @@ class Appcues internal constructor(koinScope: Scope) {
             return
         }
 
+        val mutableProperties = properties?.toMutableMap()
         val userChanged = storage.userId != userId
         storage.userId = userId
         storage.isAnonymous = isAnonymous
+        storage.userSignature = mutableProperties?.remove("appcues:user_id_signature") as? String
         if (userChanged) {
             // when the identified user changes from last known value, we must start a new session
             sessionMonitor.start()
@@ -270,6 +273,6 @@ class Appcues internal constructor(koinScope: Scope) {
             storage.groupId = null
         }
 
-        analyticsTracker.identify(properties)
+        analyticsTracker.identify(mutableProperties)
     }
 }

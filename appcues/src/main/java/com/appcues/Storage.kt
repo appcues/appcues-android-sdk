@@ -16,7 +16,8 @@ internal class Storage(
         UserId("appcues.userId"),
         GroupId("appcues.groupId"),
         IsAnonymous("appcues.isAnonymous"),
-        LastContentShownAt("appcues.lastContentShownAt")
+        LastContentShownAt("appcues.lastContentShownAt"),
+        UserSignature("appcues.userSignature"),
     }
 
     private val sharedPreferences: SharedPreferences = allowReads {
@@ -49,6 +50,10 @@ internal class Storage(
             null -> sharedPreferences.edit().remove(Constants.LastContentShownAt.rawVal).apply()
             else -> sharedPreferences.edit().putLong(Constants.LastContentShownAt.rawVal, value.time).apply()
         }
+
+    var userSignature: String?
+        get() = allowReads { sharedPreferences.getString(Constants.UserSignature.rawVal, null) }
+        set(value) = sharedPreferences.edit().putString(Constants.UserSignature.rawVal, value).apply()
 
     init {
         if (deviceId.isEmpty()) {

@@ -24,4 +24,6 @@ internal data class ActivityRequest(
     val groupUpdate: Map<String, Any>? = null,
     @Json(ignore = true)
     val timestamp: Date = Date(),
+    @Transient
+    val userSignature: String? = null,
 )
