@@ -38,6 +38,7 @@ class AppcuesServiceTest {
                 account = "1234",
                 user = "TestUser",
                 experienceId = "5678",
+                authorization = null,
             )
         }
         // Then
@@ -60,6 +61,7 @@ class AppcuesServiceTest {
             api.qualify(
                 account = "1234",
                 user = "TestUser",
+                authorization = null,
                 requestId = UUID.randomUUID(),
                 activity = "".toRequestBody(),
             )
@@ -113,8 +115,10 @@ class AppcuesServiceTest {
             with(experiences[5] as FailedExperienceResponse) {
                 assertThat(this.id.appcuesFormatted()).isEqualTo("c9c11671-f418-451e-9b4a-33d54ed5299f")
                 assertThat(this.error)
-                    .isEqualTo("Error parsing Experience JSON data: Expected STRING but was true, a java.lang.Boolean," +
-                        " at path \$.steps[0].children[0].content.id")
+                    .isEqualTo(
+                        "Error parsing Experience JSON data: Expected STRING but was true, a java.lang.Boolean," +
+                            " at path \$.steps[0].children[0].content.id"
+                    )
             }
         }
     }
