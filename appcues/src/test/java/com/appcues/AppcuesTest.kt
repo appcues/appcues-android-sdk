@@ -79,6 +79,34 @@ internal class AppcuesTest : AppcuesScopeTest {
     }
 
     @Test
+    fun `identify SHOULD update Storage WHEN user signature provided`() {
+        // GIVEN
+        val userId = "default-0000"
+        val properties = mapOf<String, Any>("appcues:user_id_signature" to "user-signature")
+        val storage: Storage = get()
+
+        // WHEN
+        appcues.identify(userId, properties)
+
+        // THEN
+        assertThat(storage.userSignature).isEqualTo("user-signature")
+    }
+
+    @Test
+    fun `identify SHOULD set user signature to null in Storage WHEN no user signature provided`() {
+        // GIVEN
+        val userId = "default-0000"
+        val properties = mapOf<String, Any>("foo" to 123)
+        val storage: Storage = get()
+
+        // WHEN
+        appcues.identify(userId, properties)
+
+        // THEN
+        assertThat(storage.userSignature).isNull()
+    }
+
+    @Test
     fun `track event SHOULD call AnalyticsTracker track function`() {
         // GIVEN
         val eventName = "test_event"
@@ -158,6 +186,21 @@ internal class AppcuesTest : AppcuesScopeTest {
             sessionMonitor.reset()
             storage.userId = ""
         }
+    }
+
+    @Test
+    fun `reset SHOULD clear user signature`() {
+        // GIVEN
+        val userId = "default-0000"
+        val properties = mapOf<String, Any>("appcues:user_id_signature" to "user-signature")
+        val storage: Storage = get()
+
+        // WHEN
+        appcues.identify(userId, properties)
+        appcues.reset()
+
+        // THEN
+        verify { storage setProperty Storage::userSignature.name value null }
     }
 
     @Test

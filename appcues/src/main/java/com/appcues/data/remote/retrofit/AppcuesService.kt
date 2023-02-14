@@ -51,7 +51,6 @@ internal interface AppcuesService {
     suspend fun experiencePreview(
         @Path("account") account: String,
         @Path("experienceId") experienceId: String,
-        @Header("Authorization") authorization: String?,
     ): ExperienceResponse
 
     @GET("healthz")

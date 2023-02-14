@@ -33,6 +33,24 @@ internal fun MockWebServer.dispatchResponses(responses: HashMap<String, String>)
     }
 }
 
+internal fun MockWebServer.confirmAuth(expected: String?, fileName: String) {
+    dispatcher = object : Dispatcher() {
+
+        override fun dispatch(request: RecordedRequest): MockResponse {
+            val authorization = request.headers["Authorization"]
+            // confirms that either the given signature is empty and thus no auth header, OR
+            // the signature is not empty and matches
+            if (authorization == expected) {
+                return MockResponse()
+                    .setResponseCode(200)
+                    .setBody(readJsonFromResource(fileName))
+            }
+
+            return MockResponse().setResponseCode(404)
+        }
+    }
+}
+
 private fun MockWebServer.readJsonFromResource(fileName: String): String {
     val inputStream = javaClass.classLoader?.getResourceAsStream(fileName)
 

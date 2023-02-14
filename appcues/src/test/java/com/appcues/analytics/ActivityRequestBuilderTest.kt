@@ -23,6 +23,7 @@ class ActivityRequestBuilderTest {
     private val storage: Storage = mockk<Storage>(relaxed = true).apply {
         every { userId } returns "userId"
         every { groupId } returns "groupId"
+        every { userSignature } returns "user-signature"
     }
 
     private val autoPropertyDecorator: AutoPropertyDecorator = mockk<AutoPropertyDecorator>().apply {
@@ -50,6 +51,7 @@ class ActivityRequestBuilderTest {
             assertThat(accountId).isEqualTo("accountId")
             assertThat(profileUpdate).hasSize(1)
             assertThat(profileUpdate).containsEntry("_test", "test")
+            assertThat(userSignature).isEqualTo("user-signature")
         }
     }
 
@@ -65,6 +67,7 @@ class ActivityRequestBuilderTest {
             assertThat(accountId).isEqualTo("accountId")
             assertThat(groupUpdate).hasSize(1)
             assertThat(groupUpdate).containsEntry("_test", "test")
+            assertThat(userSignature).isEqualTo("user-signature")
         }
     }
 
@@ -98,6 +101,7 @@ class ActivityRequestBuilderTest {
             assertThat(profileUpdate).hasSize(1)
             assertThat(profileUpdate).containsEntry("auto", "properties")
             assertThat(events).hasSize(1)
+            assertThat(userSignature).isEqualTo("user-signature")
         }
     }
 
@@ -133,6 +137,7 @@ class ActivityRequestBuilderTest {
             assertThat(profileUpdate).hasSize(1)
             assertThat(profileUpdate).containsEntry("auto", "properties")
             assertThat(events).hasSize(1)
+            assertThat(userSignature).isEqualTo("user-signature")
         }
     }
 }
