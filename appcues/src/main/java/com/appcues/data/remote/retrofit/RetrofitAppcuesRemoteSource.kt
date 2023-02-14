@@ -23,12 +23,18 @@ internal class RetrofitAppcuesRemoteSource(
     private val sessionMonitor: SessionMonitor,
 ) : AppcuesRemoteSource {
 
-    override suspend fun getExperienceContent(experienceId: String): ResultOf<ExperienceResponse, RemoteError> =
+    override suspend fun getExperienceContent(
+        experienceId: String,
+        userSignature: String?,
+    ): ResultOf<ExperienceResponse, RemoteError> =
         request {
-            appcuesService.experienceContent(accountId, storage.userId, experienceId)
+            appcuesService.experienceContent(accountId, storage.userId, experienceId, userSignature?.let { "Bearer $it" })
         }
 
-    override suspend fun getExperiencePreview(experienceId: String): ResultOf<ExperienceResponse, RemoteError> =
+    override suspend fun getExperiencePreview(
+        experienceId: String,
+        userSignature: String?,
+    ): ResultOf<ExperienceResponse, RemoteError> =
         // preview _can_ be personalized, so attempt to use the user info, if a valid session exists
         if (sessionMonitor.isActive) {
             request {
@@ -36,25 +42,36 @@ internal class RetrofitAppcuesRemoteSource(
             }
         } else {
             request {
-                appcuesService.experiencePreview(accountId, experienceId)
+                appcuesService.experiencePreview(accountId, experienceId, userSignature?.let { "Bearer $it" })
             }
         }
 
-    override suspend fun postActivity(userId: String, activityJson: String): ResultOf<ActivityResponse, RemoteError> =
+    override suspend fun postActivity(
+        userId: String,
+        userSignature: String?,
+        activityJson: String,
+    ): ResultOf<ActivityResponse, RemoteError> =
         request {
             appcuesService.activity(
                 account = accountId,
                 user = userId,
+                authorization = userSignature?.let { "Bearer $it" },
                 activity = activityJson.toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
             )
         }
 
-    override suspend fun qualify(userId: String, requestId: UUID, activityJson: String): ResultOf<QualifyResponse, RemoteError> =
+    override suspend fun qualify(
+        userId: String,
+        userSignature: String?,
+        requestId: UUID,
+        activityJson: String,
+    ): ResultOf<QualifyResponse, RemoteError> =
         request {
             appcuesService.qualify(
                 account = accountId,
                 user = userId,
                 requestId = requestId,
+                authorization = userSignature?.let { "Bearer $it" },
                 activity = activityJson.toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
             )
         }

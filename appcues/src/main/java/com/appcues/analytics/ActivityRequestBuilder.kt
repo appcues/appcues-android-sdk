@@ -22,7 +22,8 @@ internal class ActivityRequestBuilder(
             userId = storage.userId,
             accountId = config.accountId,
             groupId = storage.groupId,
-            profileUpdate = properties?.toMutableMap()
+            profileUpdate = properties?.toMutableMap(),
+            userSignature = storage.userSignature,
         )
     )
 
@@ -30,7 +31,8 @@ internal class ActivityRequestBuilder(
         userId = storage.userId,
         accountId = config.accountId,
         groupId = storage.groupId,
-        groupUpdate = properties // no auto-properties on group calls
+        groupUpdate = properties, // no auto-properties on group calls
+        userSignature = storage.userSignature,
     )
 
     fun track(name: String, properties: Map<String, Any>? = null): ActivityRequest {
@@ -45,7 +47,8 @@ internal class ActivityRequestBuilder(
             profileUpdate = decorator.autoProperties.toMutableMap(),
             accountId = config.accountId,
             groupId = storage.groupId,
-            events = listOf(trackEvent)
+            events = listOf(trackEvent),
+            userSignature = storage.userSignature,
         )
     }
 
@@ -66,7 +69,8 @@ internal class ActivityRequestBuilder(
             profileUpdate = decorator.autoProperties.toMutableMap(),
             accountId = config.accountId,
             groupId = storage.groupId,
-            events = listOf(screenEvent)
+            events = listOf(screenEvent),
+            userSignature = storage.userSignature,
         )
     }
 }

@@ -37,7 +37,8 @@ internal object AppcuesKoin : KoinScopePlugin {
                 appcuesLocalSource = get(),
                 experienceMapper = get(),
                 config = get(),
-                logcues = get()
+                logcues = get(),
+                storage = get(),
             )
         }
         scoped { LinkOpener(get()) }

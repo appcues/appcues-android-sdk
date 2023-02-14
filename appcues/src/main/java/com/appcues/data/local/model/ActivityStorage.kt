@@ -11,5 +11,6 @@ internal data class ActivityStorage(
     val accountId: String,
     val userId: String,
     val data: String,
+    val userSignature: String?,
     val created: Date = Date(),
 )
