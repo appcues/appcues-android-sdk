@@ -106,6 +106,9 @@ class Appcues internal constructor(koinScope: Scope) {
     /**
      * Identify the user and determine if they should see Appcues content.
      *
+     * To authenticate requests for this user, provide the Base64 encoded signature
+     * for this user as a `String` value for key "appcues:user_id_signature", in the `properties` provided.
+     *
      * @param userId Unique value identifying the user.
      * @param properties Optional properties that provide additional context about the user.
      */
