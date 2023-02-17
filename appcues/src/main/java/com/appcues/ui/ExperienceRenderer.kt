@@ -120,7 +120,7 @@ internal class ExperienceRenderer(
     }
 
     suspend fun dismissCurrentExperience(markComplete: Boolean, destroyed: Boolean): ResultOf<State, Error> =
-        stateMachine.handleAction(EndExperience(markComplete || stateMachine.state.isOnLastStep, destroyed))
+        stateMachine.handleAction(EndExperience(markComplete, destroyed))
 
     private fun Experiment.shouldExecute() =
         group != "control"
