@@ -39,7 +39,7 @@ class ExperienceRendererTest {
     }
 
     @Test
-    fun `dismissCurrentExperience SHOULD mark complete WHEN current state is on last step`() = runTest {
+    fun `dismissCurrentExperience SHOULD NOT mark complete WHEN current state is on last step`() = runTest {
         // GIVEN
         val state = RenderingStep(mockExperience(), 3, false)
         val stateMachine = mockk<StateMachine>(relaxed = true) {
@@ -52,7 +52,7 @@ class ExperienceRendererTest {
         experienceRenderer.dismissCurrentExperience(markComplete = false, destroyed = false)
 
         // THEN
-        coVerify { stateMachine.handleAction(EndExperience(markComplete = true, destroyed = false)) }
+        coVerify { stateMachine.handleAction(EndExperience(markComplete = false, destroyed = false)) }
     }
 
     @Test

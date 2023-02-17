@@ -743,6 +743,28 @@ class StateMachineTest : AppcuesScopeTest {
         assertThat(stateMachine.state).isEqualTo(Idling)
     }
 
+    @Test
+    fun `stop SHOULD NOT mark complete WHEN on last step of experience`() = runTest {
+        // GIVEN
+        val experience = mockExperience()
+        val completion: CompletableDeferred<Boolean> = CompletableDeferred()
+        val stateMachine = initMachine(
+            state = RenderingStep(experience, 3, false),
+            onStateChange = {
+                if (it is EndingExperience) {
+                    completion.complete(it.markComplete)
+                }
+            },
+            onError = null
+        )
+
+        // WHEN
+        stateMachine.stop()
+
+        // THEN
+        assertThat(completion.await(1.seconds)).isFalse()
+    }
+
     // Helpers
     private suspend fun initMachine(
         state: State,

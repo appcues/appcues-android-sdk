@@ -216,7 +216,7 @@ internal class StateMachine(
 
     fun stop() {
         appcuesCoroutineScope.launch {
-            handleAction(EndExperience(markComplete = state.isOnLastStep, destroyed = true))
+            handleAction(EndExperience(markComplete = false, destroyed = true))
         }
     }
 }

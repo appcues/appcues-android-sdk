@@ -52,17 +52,4 @@ internal sealed class State {
             is Paused -> this.state.currentStepIndex
             is RenderingStep -> this.flatStepIndex
         }
-
-    val isOnLastStep: Boolean
-        get() {
-            val currentStepIndex = currentStepIndex
-            val stepCount = currentExperience?.flatSteps?.count()
-
-            return if (currentStepIndex != null && stepCount != null) {
-                // force it to mark complete (the last step and the experience) if on the last step
-                currentStepIndex == stepCount - 1
-            } else {
-                false
-            }
-        }
 }
