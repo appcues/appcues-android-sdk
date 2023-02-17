@@ -17,7 +17,7 @@ parameters:
 orbs:
   slack: circleci/slack@4.5.1
   android: circleci/android@2.0.3
-  aws-s3: circleci/aws-s3@3.0
+  aws-s3: circleci/aws-s3@3.0.0
   jq: circleci/jq@2.2.0
   codecov: codecov/codecov@3.1.1
 
