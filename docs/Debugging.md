@@ -62,6 +62,6 @@ If an experience fails to show, the debugger will note it with "Content Omitted"
 
 The Recent Events section of the debugger shows the list of all events that have passed through the Appcues SDK, with the most recent events at the top of the list. The list of events can be filtered by type by selecting the Filter icon in the header row and selecting an event type.
 
-Session and Experience events are automatically tracked by the SDK. Screen (`appcues.screen(title, properties)` or `appcues.trackScreens()`), Custom (`appcues.track(name, properties)`), User Profile (`appcues.identify(userId, properties)` or `appcues.anonymous(properties)`), and Group (`appcues.group(groupId,properties)`) events are tracked by your app calling the Appcues SDK.
+Session and Experience events are automatically tracked by the SDK. Screen (`appcues.screen(title, properties)` or `appcues.trackScreens()`), Custom (`appcues.track(name, properties)`), User Profile (`appcues.identify(userId, properties)` or `appcues.anonymous()`), and Group (`appcues.group(groupId,properties)`) events are tracked by your app calling the Appcues SDK.
 
 Tap an event row to see the details of that event including all the properties associated with it.
