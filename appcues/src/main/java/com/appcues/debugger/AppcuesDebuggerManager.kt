@@ -41,7 +41,7 @@ internal class AppcuesDebuggerManager(context: Context, private val koinScope: S
 
     private val onBackPressCallback = object : OnBackPressedCallback(false) {
         override fun handleOnBackPressed() {
-            debuggerViewModel?.onBackPress()
+            debuggerViewModel?.closeExpandedView()
         }
     }
 

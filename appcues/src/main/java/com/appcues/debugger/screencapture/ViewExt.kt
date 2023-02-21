@@ -1,5 +1,7 @@
 package com.appcues.debugger.screencapture
 
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.Rect
 import android.text.format.DateFormat
 import android.view.View
@@ -11,7 +13,7 @@ import com.appcues.ui.ElementSelector
 import java.util.Date
 
 internal fun View.screenCaptureDisplayName(timestamp: Date): String {
-    var name = ""
+    var name: String
     val activity = AppcuesActivityMonitor.activity
     if (activity != null) {
         name = activity.javaClass.simpleName
@@ -75,3 +77,11 @@ internal fun View.asCaptureView(): Capture.View? {
         children = children,
     )
 }
+
+internal fun View.screenshot() =
+    if (this.width > 0 && this.height > 0) {
+        val bitmap = Bitmap.createBitmap(this.width, this.height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        this.draw(canvas)
+        bitmap
+    } else null

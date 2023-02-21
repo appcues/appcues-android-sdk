@@ -13,10 +13,11 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.appcues.debugger.DebugMode
+import com.appcues.debugger.screencapture.Capture
 import kotlin.math.roundToInt
 
 internal class MutableDebuggerState(
-    private val mode: DebugMode,
+    mode: DebugMode,
     private val density: Density,
     private val isCreating: Boolean,
     val fabSize: Dp = 56.dp
@@ -34,6 +35,7 @@ internal class MutableDebuggerState(
     val isVisible = MutableTransitionState(isCreating.not())
     val isDragging = MutableTransitionState(false)
     val isExpanded = MutableTransitionState(false)
+    val screenCapture = mutableStateOf<Capture?>(null)
     val isPaused = mutableStateOf(value = false)
 
     val fabXOffset = mutableStateOf(value = -1f)

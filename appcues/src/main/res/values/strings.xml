@@ -83,4 +83,11 @@
     <string name="appcues_debugger_font_details_clean_filter">Clear</string>
     <string name="appcues_debugger_font_details_hint">"Search…"</string>
 
+    <!-- Screen Capture Dialog -->
+    <string name="appcues_screen_capture_dismiss">dismiss</string>
+    <string name="appcues_screen_capture_title">Send screen capture</string>
+    <string name="appcues_screen_capture_image_description">screenshot</string>
+    <string name="appcues_screen_capture_text_input_label">Name</string>
+    <string name="appcues_screen_capture_cancel">Retry</string>
+    <string name="appcues_screen_capture_ok">Send to builder</string>
 </resources>

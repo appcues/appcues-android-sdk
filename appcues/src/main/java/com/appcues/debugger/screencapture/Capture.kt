@@ -1,5 +1,6 @@
 package com.appcues.debugger.screencapture
 
+import android.graphics.Bitmap
 import android.os.Build.VERSION
 import android.util.Log
 import com.appcues.BuildConfig
@@ -7,6 +8,7 @@ import com.appcues.R
 import com.appcues.data.MoshiConfiguration
 import com.appcues.ui.ElementSelector
 import com.appcues.util.ContextResources
+import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 import java.util.Date
 import java.util.UUID
@@ -21,6 +23,11 @@ internal data class Capture(
     val metadata: Metadata,
     val timestamp: Date,
 ) {
+    // this is a lateinit var instead of a constructor arg so we can ignore it in JSON
+    // serialization and a default value is not needed for the Moshi generated adapter
+    @Json(ignore = true)
+    lateinit var screenshot: Bitmap
+
     @JsonClass(generateAdapter = true)
     internal data class View(
         val id: UUID = UUID.randomUUID(),
