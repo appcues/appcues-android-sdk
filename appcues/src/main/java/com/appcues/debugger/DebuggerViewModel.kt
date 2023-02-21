@@ -1,17 +1,18 @@
 package com.appcues.debugger
 
 import android.app.Activity
+import android.view.View
 import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.appcues.AppcuesConfig
+import com.appcues.R
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.debugger.DebugMode.Debugger
 import com.appcues.debugger.DebugMode.ScreenCapture
 import com.appcues.debugger.DebuggerViewModel.UIState.Creating
 import com.appcues.debugger.DebuggerViewModel.UIState.Dismissed
 import com.appcues.debugger.DebuggerViewModel.UIState.Dismissing
-import com.appcues.debugger.DebuggerViewModel.UIState.Dragging
 import com.appcues.debugger.DebuggerViewModel.UIState.Expanded
 import com.appcues.debugger.DebuggerViewModel.UIState.Idle
 import com.appcues.debugger.model.DebuggerEventItem
@@ -24,6 +25,7 @@ import com.appcues.debugger.screencapture.asCaptureView
 import com.appcues.debugger.screencapture.generateCaptureMetadata
 import com.appcues.debugger.screencapture.prettyPrint
 import com.appcues.debugger.screencapture.screenCaptureDisplayName
+import com.appcues.debugger.screencapture.screenshot
 import com.appcues.monitor.AppcuesActivityMonitor
 import com.appcues.util.ContextResources
 import kotlinx.coroutines.cancel
@@ -185,25 +187,14 @@ internal class DebuggerViewModel(
         }
     }
 
-    fun onDragging(dragAmount: Offset) {
-        _uiState.value = Dragging(dragAmount)
-    }
-
-    fun onDragEnd() {
-        _uiState.value = Idle(mode)
-    }
-
-    fun onDismiss() {
-        _uiState.value = Dismissing
+    fun transition(state: UIState) {
+        _uiState.value = state
     }
 
     fun onFabClick() {
         when (val state = _uiState.value) {
             is Idle -> {
-                when (state.mode) {
-                    is Debugger -> _uiState.value = Expanded(state.mode)
-                    is ScreenCapture -> AppcuesActivityMonitor.activity?.captureScreen(config, contextResources)
-                }
+                _uiState.value = Expanded(state.mode)
             }
             is Expanded -> {
                 _uiState.value = Idle(mode)
@@ -212,16 +203,19 @@ internal class DebuggerViewModel(
         }
     }
 
-    fun onBackPress() {
+    fun closeExpandedView() {
         if (_uiState.value is Expanded) {
             _uiState.value = Idle(mode)
         }
     }
 
-    fun onBackdropClick() {
-        if (_uiState.value is Expanded) {
-            _uiState.value = Idle(mode)
-        }
+    fun onScreenCaptureConfirm(capture: Capture) {
+        _uiState.value = Idle(ScreenCapture)
+
+        // upcoming work to execute API calls starts here
+
+        // TESTING!!
+        capture.prettyPrint()
     }
 
     fun onStatusTapAction(tapActionType: TapActionType) {
@@ -247,31 +241,42 @@ internal class DebuggerViewModel(
         return toMutableList().onEach { it.showOnFab = false }
     }
 
-    fun onDetailDismiss() {
-        // reset the view state to remove any deep link path
-        _uiState.value = Expanded(Debugger(null))
-    }
+    fun captureScreen(): Capture? =
+        AppcuesActivityMonitor.activity?.captureScreen(config, contextResources)
 }
 
 private fun Activity.captureScreen(
     config: AppcuesConfig,
     contextResources: ContextResources,
-) {
-    val timestamp = Date()
-    val view = window.decorView.rootView
-    val displayName = view.screenCaptureDisplayName(timestamp)
-    val layout = view.asCaptureView()
-    layout?.let {
-        val capture = Capture(
-            appId = config.applicationId,
-            displayName = displayName,
-            screenshotImageUrl = null,
-            layout = layout,
-            metadata = contextResources.generateCaptureMetadata(),
-            timestamp = timestamp,
-        )
+): Capture? =
+    window.decorView.rootView.let {
+        // hide the debugger view for screen capture, if present
+        val debuggerView = it.findViewById<View>(R.id.appcues_debugger_view)
+        debuggerView?.let { view ->
+            view.visibility = View.GONE
+        }
 
-        // TESTING!!
-        capture.prettyPrint()
+        val timestamp = Date()
+        val displayName = it.screenCaptureDisplayName(timestamp)
+        val screenshot = it.screenshot()
+        val layout = it.asCaptureView()
+        val capture = if (screenshot != null && layout != null) {
+            Capture(
+                appId = config.applicationId,
+                displayName = displayName,
+                screenshotImageUrl = null,
+                layout = layout,
+                metadata = contextResources.generateCaptureMetadata(),
+                timestamp = timestamp,
+            ).apply {
+                this.screenshot = screenshot
+            }
+        } else null
+
+        // restore debugger view visibility, if present
+        debuggerView?.let { view ->
+            view.visibility = View.VISIBLE
+        }
+
+        capture
     }
-}

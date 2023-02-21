@@ -44,6 +44,8 @@ import com.appcues.debugger.DebugMode
 import com.appcues.debugger.DebugMode.Debugger
 import com.appcues.debugger.DebugMode.ScreenCapture
 import com.appcues.debugger.DebuggerViewModel
+import com.appcues.debugger.DebuggerViewModel.UIState.Dragging
+import com.appcues.debugger.DebuggerViewModel.UIState.Idle
 import com.appcues.ui.theme.AppcuesColors
 
 private const val FAB_DRAGGING_SIZE_MULTIPLIER = 1.1f
@@ -94,8 +96,8 @@ internal fun BoxScope.DebuggerFloatingActionButton(
                     )
                     .clickableAndDraggable(
                         onClickLabel = LocalContext.current.getString(clickLabelResId.value),
-                        onDragEnd = { debuggerViewModel.onDragEnd() },
-                        onDrag = { debuggerViewModel.onDragging(it) },
+                        onDragEnd = { debuggerViewModel.transition(Idle(debuggerViewModel.mode)) },
+                        onDrag = { debuggerViewModel.transition(Dragging(it)) },
                         onClick = { debuggerViewModel.onFabClick() }
                     )
                     .size(size = debuggerState.fabSize.times(resizeBy.value))
