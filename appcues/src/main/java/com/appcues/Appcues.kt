@@ -141,7 +141,7 @@ class Appcues internal constructor(koinScope: Scope) {
         // use the device ID as the default anonymous user ID, unless an override for generating
         // anonymous user IDs is supplied in the config builder
         val anonymousId = config.anonymousIdFactory?.invoke() ?: storage.deviceId
-        identify(true, anonymousId, properties)
+        identify(true, "anon:$anonymousId", properties)
     }
 
     /**

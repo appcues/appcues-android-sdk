@@ -215,7 +215,7 @@ internal class AppcuesTest : AppcuesScopeTest {
         appcues.anonymous(properties)
 
         // THEN
-        assertThat(storage.userId).isEqualTo(storage.deviceId)
+        assertThat(storage.userId).isEqualTo("anon:${storage.deviceId}")
         assertThat(storage.isAnonymous).isTrue()
         // called once at startup automatically, which is ignored, then again for the new valid user/session
         verify(exactly = 2) { sessionMonitor.start() }
@@ -235,7 +235,7 @@ internal class AppcuesTest : AppcuesScopeTest {
 
         // THEN
         assertThat(storage.userId).isNotEqualTo(storage.deviceId)
-        assertThat(storage.userId).isEqualTo(configUserId)
+        assertThat(storage.userId).isEqualTo("anon:$configUserId")
     }
 
     @Test
