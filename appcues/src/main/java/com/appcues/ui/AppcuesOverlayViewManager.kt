@@ -1,8 +1,9 @@
 package com.appcues.ui
 
+import android.app.Activity
 import android.view.ViewGroup
+import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ComposeView
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -32,7 +33,7 @@ class AppcuesOverlayViewManager(private val scope: Scope) : DefaultLifecycleObse
         }
     }
 
-    override fun onActivityChanged(activity: AppCompatActivity) {
+    override fun onActivityChanged(activity: Activity) {
         activity.addView()
     }
 
@@ -66,10 +67,10 @@ class AppcuesOverlayViewManager(private val scope: Scope) : DefaultLifecycleObse
         viewModel?.onFinish()
     }
 
-    private fun AppCompatActivity?.addView() {
+    private fun Activity?.addView() {
         if (this == null) return
 
-        onBackPressedDispatcher.addCallback(handleBackPress)
+        tryRegisterOnBackDispatcher()
 
         val parentView = getParentView()
         parentView.findViewTreeLifecycleOwner()?.lifecycle?.addObserver(this@AppcuesOverlayViewManager)
@@ -103,7 +104,7 @@ class AppcuesOverlayViewManager(private val scope: Scope) : DefaultLifecycleObse
         }
     }
 
-    private fun AppCompatActivity?.removeView() {
+    private fun Activity?.removeView() {
         handleBackPress.remove()
 
         if (this == null) return
@@ -118,8 +119,18 @@ class AppcuesOverlayViewManager(private val scope: Scope) : DefaultLifecycleObse
         }
     }
 
-    private fun AppCompatActivity.getParentView(): ViewGroup {
+    private fun Activity.getParentView(): ViewGroup {
         // if there is any difference in API levels we can handle it here
         return window.decorView.rootView as ViewGroup
+    }
+
+    private fun Activity?.tryRegisterOnBackDispatcher() {
+        // add onBackPressedDispatcher to handle internally native android back press when debugger is expanded
+        if (this is ComponentActivity) {
+            handleBackPress.remove()
+
+            // attach to the new activity
+            onBackPressedDispatcher.addCallback(handleBackPress)
+        }
     }
 }

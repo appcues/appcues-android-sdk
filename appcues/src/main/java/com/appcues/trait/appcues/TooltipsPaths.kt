@@ -114,7 +114,7 @@ private fun getTooltipPointerPath(
 
     // mapping all values to px
     val cornerRadius = with(density) { style?.cornerRadius?.dp?.toPx() ?: 0f }
-    val pointerOffset = with(density) { pointerSettings.pointerOffsetX.value.toPx() } ?: 0f
+    val pointerOffset = with(density) { pointerSettings.pointerOffsetX.value.toPx() }
     val offsetX = (containerDimens.widthPx / 2) - pointerSettings.pointerBaseCenterPx + pointerOffset
 
     // boundaries for the tooltip
