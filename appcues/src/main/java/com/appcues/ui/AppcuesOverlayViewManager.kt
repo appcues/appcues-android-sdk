@@ -10,6 +10,7 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import com.appcues.R
+import com.appcues.databinding.AppcuesOverlayLayoutBinding
 import com.appcues.logging.Logcues
 import com.appcues.monitor.AppcuesActivityMonitor
 import com.appcues.monitor.AppcuesActivityMonitor.ActivityMonitorListener
@@ -77,11 +78,16 @@ class AppcuesOverlayViewManager(private val scope: Scope) : DefaultLifecycleObse
         // if view is not there
         if (parentView.findViewById<ComposeView>(R.id.appcues_overlay_layout) == null) {
             // then we add
-            val binding = com.appcues.databinding.AppcuesOverlayLayoutBinding.inflate(layoutInflater)
+            val binding = AppcuesOverlayLayoutBinding.inflate(layoutInflater)
             if (viewModel == null) viewModel = AppcuesViewModel(scope)
             shakeGestureListener = ShakeGestureListener(this)
 
-            parentView.addView(binding.root)
+            // ensures it always comes before appcues_debugger_view
+            parentView.findViewById<ViewGroup>(R.id.appcues_debugger_view)?.let {
+                parentView.addView(binding.root, parentView.indexOfChild(it))
+            } ?: run {
+                parentView.addView(binding.root)
+            }
 
             binding.root.layoutParams =
                 android.widget.FrameLayout.LayoutParams(
