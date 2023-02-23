@@ -35,10 +35,11 @@ internal enum class TooltipPointerPosition {
 internal data class TooltipSettings(
     val hidePointer: Boolean,
     val pointerPosition: TooltipPointerPosition,
+    val distance: Dp,
     val pointerBaseDp: Dp,
     val pointerLengthDp: Dp,
     val pointerBasePx: Float,
-    val pointerLengthPx: Float,
+    val pointerLengthPx: Float
 ) {
 
     val pointerBaseCenterPx = pointerBasePx / 2
@@ -55,12 +56,14 @@ internal data class TooltipContainerDimens(
 internal fun getTooltipSettings(
     density: Density,
     position: TooltipPointerPosition,
+    distance: Dp,
     pointerBaseDp: Dp,
     pointerLengthDp: Dp,
 ): TooltipSettings {
     return TooltipSettings(
         hidePointer = false,
         pointerPosition = position,
+        distance = distance,
         pointerBaseDp = pointerBaseDp,
         pointerLengthDp = pointerLengthDp,
         pointerBasePx = with(density) { pointerBaseDp.toPx() },

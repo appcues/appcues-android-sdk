@@ -4,11 +4,6 @@ import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.AnimationSpec
-import androidx.compose.animation.core.EaseIn
-import androidx.compose.animation.core.EaseInOut
-import androidx.compose.animation.core.EaseOut
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.TweenSpec
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -30,11 +25,7 @@ import com.appcues.data.model.styling.ComponentColor
 import com.appcues.trait.AppcuesTraitAnimatedVisibility
 import com.appcues.trait.BackdropDecoratingTrait
 import com.appcues.trait.MetadataSettingTrait
-import com.appcues.trait.appcues.StepAnimationTrait.StepAnimationEasing
-import com.appcues.trait.appcues.StepAnimationTrait.StepAnimationEasing.EASE_IN
-import com.appcues.trait.appcues.StepAnimationTrait.StepAnimationEasing.EASE_IN_OUT
-import com.appcues.trait.appcues.StepAnimationTrait.StepAnimationEasing.EASE_OUT
-import com.appcues.trait.appcues.StepAnimationTrait.StepAnimationEasing.LINEAR
+import com.appcues.trait.extensions.rememberColorStepAnimation
 import com.appcues.ui.composables.AppcuesStepMetadata
 import com.appcues.ui.composables.LocalAppcuesStepMetadata
 import com.appcues.ui.composables.rememberAppcuesBackdropVisibility
@@ -58,7 +49,7 @@ internal class BackdropTrait(
     @Composable
     override fun BoxScope.BackdropDecorate(content: @Composable BoxScope.() -> Unit) {
         val metadata = LocalAppcuesStepMetadata.current
-        val animation = rememberMetadataColorAnimation(metadata = metadata)
+        val animation = rememberColorStepAnimation(metadata)
         val color = rememberBackgroundColor(metadata = metadata, animationSpec = animation)
 
         AppcuesTraitAnimatedVisibility(
@@ -92,15 +83,8 @@ internal class BackdropTrait(
 
     @Composable
     private fun rememberBackgroundColor(metadata: AppcuesStepMetadata, animationSpec: AnimationSpec<Color>): State<Color> {
-        val isDark = isSystemInDarkTheme()
-
-        val previousColor = remember(metadata) {
-            (metadata.previous[METADATA_BACKGROUND_COLOR] as ComponentColor?).getColor(isDark) ?: Color.Transparent
-        }
-
-        val actualColor = remember(metadata) {
-            (metadata.actual[METADATA_BACKGROUND_COLOR] as ComponentColor?).getColor(isDark) ?: Color.Transparent
-        }
+        val previousColor = rememberPreviousBackgroundColor(metadata)
+        val actualColor = rememberActualBackgroundColor(metadata)
 
         // whenever metadata changes, set this to false
         val animateToActual = remember(metadata) { mutableStateOf(false) }
@@ -115,17 +99,18 @@ internal class BackdropTrait(
     }
 
     @Composable
-    private fun rememberMetadataColorAnimation(metadata: AppcuesStepMetadata): TweenSpec<Color> {
+    private fun rememberPreviousBackgroundColor(metadata: AppcuesStepMetadata): Color {
+        val isDark = isSystemInDarkTheme()
         return remember(metadata) {
-            val duration = (metadata.actual[StepAnimationTrait.METADATA_ANIMATION_DURATION] as Int?) ?: StepAnimationTrait.DEFAULT_ANIMATION
-            when ((metadata.actual[StepAnimationTrait.METADATA_ANIMATION_EASING] as StepAnimationEasing?)) {
-                LINEAR -> tween(durationMillis = duration, easing = LinearEasing)
-                EASE_IN -> tween(durationMillis = duration, easing = EaseIn)
-                EASE_OUT -> tween(durationMillis = duration, easing = EaseOut)
-                EASE_IN_OUT -> tween(durationMillis = duration, easing = EaseInOut)
-                // animation with no duration is the easiest way to not use animation here
-                null -> tween(durationMillis = 0, easing = LinearEasing)
-            }
+            (metadata.previous[METADATA_BACKGROUND_COLOR] as ComponentColor?).getColor(isDark) ?: Color.Transparent
+        }
+    }
+
+    @Composable
+    private fun rememberActualBackgroundColor(metadata: AppcuesStepMetadata): Color {
+        val isDark = isSystemInDarkTheme()
+        return remember(metadata) {
+            (metadata.actual[METADATA_BACKGROUND_COLOR] as ComponentColor?).getColor(isDark) ?: Color.Transparent
         }
     }
 }

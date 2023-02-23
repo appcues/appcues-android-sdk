@@ -1,13 +1,7 @@
 package com.appcues.trait.appcues
 
-import androidx.compose.animation.core.EaseIn
-import androidx.compose.animation.core.EaseInOut
-import androidx.compose.animation.core.EaseOut
 import androidx.compose.animation.core.FiniteAnimationSpec
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.TweenSpec
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
@@ -25,9 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
@@ -44,12 +36,6 @@ import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.trait.AppcuesTraitAnimatedVisibility
 import com.appcues.trait.ContentWrappingTrait
 import com.appcues.trait.PresentingTrait
-import com.appcues.trait.appcues.StepAnimationTrait.StepAnimationEasing
-import com.appcues.trait.appcues.StepAnimationTrait.StepAnimationEasing.EASE_IN
-import com.appcues.trait.appcues.StepAnimationTrait.StepAnimationEasing.EASE_IN_OUT
-import com.appcues.trait.appcues.StepAnimationTrait.StepAnimationEasing.EASE_OUT
-import com.appcues.trait.appcues.StepAnimationTrait.StepAnimationEasing.LINEAR
-import com.appcues.trait.appcues.TargetRectangleTrait.TargetRectangleInfo
 import com.appcues.trait.appcues.TooltipPointerPosition.BOTTOM
 import com.appcues.trait.appcues.TooltipPointerPosition.BOTTOM_END
 import com.appcues.trait.appcues.TooltipPointerPosition.BOTTOM_START
@@ -57,8 +43,12 @@ import com.appcues.trait.appcues.TooltipPointerPosition.NONE
 import com.appcues.trait.appcues.TooltipPointerPosition.TOP
 import com.appcues.trait.appcues.TooltipPointerPosition.TOP_END
 import com.appcues.trait.appcues.TooltipPointerPosition.TOP_START
+import com.appcues.trait.extensions.getContentDistance
+import com.appcues.trait.extensions.getRect
+import com.appcues.trait.extensions.rememberDpStepAnimation
+import com.appcues.trait.extensions.rememberFloatStepAnimation
+import com.appcues.trait.extensions.rememberTargetRectangleInfo
 import com.appcues.ui.AppcuesOverlayViewManager
-import com.appcues.ui.composables.AppcuesStepMetadata
 import com.appcues.ui.composables.LocalAppcuesStepMetadata
 import com.appcues.ui.composables.rememberAppcuesContentVisibility
 import com.appcues.ui.extensions.coloredShadowPath
@@ -106,20 +96,23 @@ internal class TooltipTrait(
         val metadata = LocalAppcuesStepMetadata.current
 
         val windowInfo = rememberAppcuesWindowInfo()
-        val targetRect = rememberMetadataRect(metadata)
+        val targetRectInfo = rememberTargetRectangleInfo(metadata)
+        val targetRect = targetRectInfo.getRect(windowInfo = windowInfo)
+        val distance = targetRectInfo.getContentDistance()
 
-        val floatAnimation = rememberMetadataFloatAnimation(metadata)
-        val dpAnimation = rememberMetadataDpAnimation(metadata)
+        val floatAnimation = rememberFloatStepAnimation(metadata)
+        val dpAnimation = rememberDpStepAnimation(metadata)
 
         val containerDimens = remember { mutableStateOf<TooltipContainerDimens?>(null) }
 
         val tooltipSettings =
             remember(targetRect, containerDimens.value) {
                 getTooltipSettings(
-                    density,
-                    getPointerPosition(windowInfo, targetRect),
-                    pointerBaseDp,
-                    pointerLengthDp,
+                    density = density,
+                    position = getPointerPosition(windowInfo, targetRect),
+                    distance = distance,
+                    pointerBaseDp = pointerBaseDp,
+                    pointerLengthDp = pointerLengthDp
                 )
             }
 
@@ -197,9 +190,9 @@ internal class TooltipTrait(
 
         val tooltipPaddingTop = animateDpAsState(
             targetValue = when (pointerSettings.pointerPosition) {
-                TOP, TOP_START, TOP_END -> max((targetRect?.bottom?.dp ?: 0.dp) - SCREEN_VERTICAL_PADDING, 0.dp)
+                TOP, TOP_START, TOP_END -> max((targetRect?.bottom?.dp ?: 0.dp) - SCREEN_VERTICAL_PADDING + pointerSettings.distance, 0.dp)
                 BOTTOM, BOTTOM_START, BOTTOM_END -> max(
-                    (targetRect?.top?.dp ?: 0.dp) - containerDimens.heightDp - SCREEN_VERTICAL_PADDING, 0.dp
+                    (targetRect?.top?.dp ?: 0.dp) - containerDimens.heightDp - SCREEN_VERTICAL_PADDING - pointerSettings.distance, 0.dp
                 )
                 NONE -> windowInfo.heightDp - containerDimens.heightDp - SCREEN_VERTICAL_PADDING
             },
@@ -258,57 +251,4 @@ internal class TooltipTrait(
     private fun Modifier.tooltipSize(style: ComponentStyle?): Modifier = then(
         Modifier.size(width = style?.width?.dp ?: Dp.Unspecified, height = style?.height?.dp ?: Dp.Unspecified)
     )
-
-    @Composable
-    private fun rememberMetadataFloatAnimation(metadata: AppcuesStepMetadata): TweenSpec<Float> {
-        return remember(metadata) {
-            val duration = (metadata.actual[StepAnimationTrait.METADATA_ANIMATION_DURATION] as Int?) ?: StepAnimationTrait.DEFAULT_ANIMATION
-            when ((metadata.actual[StepAnimationTrait.METADATA_ANIMATION_EASING] as StepAnimationEasing?)) {
-                LINEAR -> tween(durationMillis = duration, easing = LinearEasing)
-                EASE_IN -> tween(durationMillis = duration, easing = EaseIn)
-                EASE_OUT -> tween(durationMillis = duration, easing = EaseOut)
-                EASE_IN_OUT -> tween(durationMillis = duration, easing = EaseInOut)
-                // animation with no duration is the easiest way to not use animation here
-                null -> tween(durationMillis = 0, easing = LinearEasing)
-            }
-        }
-    }
-
-    @Composable
-    private fun rememberMetadataDpAnimation(metadata: AppcuesStepMetadata): FiniteAnimationSpec<Dp> {
-        return remember(metadata) {
-            val duration = (metadata.actual[StepAnimationTrait.METADATA_ANIMATION_DURATION] as Int?) ?: StepAnimationTrait.DEFAULT_ANIMATION
-            when ((metadata.actual[StepAnimationTrait.METADATA_ANIMATION_EASING] as StepAnimationEasing?)) {
-                LINEAR -> tween(durationMillis = duration, easing = LinearEasing)
-                EASE_IN -> tween(durationMillis = duration, easing = EaseIn)
-                EASE_OUT -> tween(durationMillis = duration, easing = EaseOut)
-                EASE_IN_OUT -> tween(durationMillis = duration, easing = EaseInOut)
-                // animation with no duration is the easiest way to not use animation here
-                null -> tween(durationMillis = 0, easing = LinearEasing)
-            }
-        }
-    }
-
-    @Composable
-    private fun rememberMetadataRect(metadata: AppcuesStepMetadata): Rect? {
-        val windowInfo = rememberAppcuesWindowInfo()
-        return remember(metadata) {
-            val rectInfo = (metadata.actual[TargetRectangleTrait.TARGET_RECTANGLE_METADATA] as TargetRectangleInfo?)
-            val screenWidth = windowInfo.widthDp.value
-            val screenHeight = windowInfo.heightDp.value
-
-            if (rectInfo == null) return@remember null
-
-            Rect(
-                offset = Offset(
-                    x = (screenWidth * rectInfo.relativeX).toFloat() + rectInfo.x,
-                    y = (screenHeight * rectInfo.relativeY).toFloat() + rectInfo.y,
-                ),
-                size = Size(
-                    width = (screenWidth * rectInfo.relativeWidth).toFloat() + rectInfo.width,
-                    height = (screenHeight * rectInfo.relativeHeight).toFloat() + rectInfo.height,
-                )
-            )
-        }
-    }
 }
