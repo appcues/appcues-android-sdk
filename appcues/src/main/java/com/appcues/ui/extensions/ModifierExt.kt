@@ -20,6 +20,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.semantics.Role
@@ -91,12 +92,14 @@ internal fun Modifier.modalStyle(
 )
 
 internal fun Modifier.styleBackground(
-    style: ComponentStyle,
+    style: ComponentStyle?,
     isDark: Boolean,
 ) = this.then(
-    Modifier
-        .styleBackgroundColor(style, isDark)
-        .styleBackgroundGradient(style, isDark)
+    if (style != null) {
+        Modifier
+            .styleBackgroundColor(style, isDark)
+            .styleBackgroundGradient(style, isDark)
+    } else Modifier
 )
 
 private fun Modifier.styleBackgroundColor(style: ComponentStyle, isDark: Boolean) = this.then(
@@ -112,10 +115,10 @@ private fun Modifier.styleBackgroundGradient(style: ComponentStyle, isDark: Bool
 )
 
 internal fun Modifier.styleBorder(
-    style: ComponentStyle,
+    style: ComponentStyle?,
     isDark: Boolean
 ) = this.then(
-    if (style.borderWidth != null && style.borderWidth ne 0.0 && style.borderColor != null) {
+    if (style?.borderWidth != null && style.borderWidth ne 0.0 && style.borderColor != null) {
         Modifier
             .border(style.borderWidth.dp, style.borderColor.getColor(isDark), RoundedCornerShape(style.cornerRadius.dp))
             .padding(style.borderWidth.dp)
@@ -170,7 +173,7 @@ internal fun Modifier.styleCorner(style: ComponentStyle) = this.then(
 
 internal fun Modifier.styleShadow(style: ComponentStyle?, isDark: Boolean): Modifier {
     return this.then(
-        if (style?.shadow != null) Modifier.coloredShadow(
+        if (style?.shadow != null) Modifier.coloredShadowRect(
             color = style.shadow.color.getColor(isDark),
             radius = style.shadow.radius.dp,
             cornerRadius = style.cornerRadius.dp,
@@ -181,7 +184,7 @@ internal fun Modifier.styleShadow(style: ComponentStyle?, isDark: Boolean): Modi
     )
 }
 
-internal fun Modifier.coloredShadow(
+internal fun Modifier.coloredShadowRect(
     color: Color,
     radius: Dp = 0.dp,
     cornerRadius: Dp = 0.dp,
@@ -213,6 +216,33 @@ internal fun Modifier.coloredShadow(
             cornerRadius.toPx(),
             paint
         )
+    }
+}
+
+internal fun Modifier.coloredShadowPath(
+    color: Color,
+    path: Path,
+    radius: Dp = 0.dp,
+    offsetX: Dp = 0.dp,
+    offsetY: Dp = 0.dp
+) = drawBehind {
+
+    val shadowColor = color.toArgb()
+    val transparent = color.copy(alpha = 0.0f).toArgb()
+
+    drawIntoCanvas {
+        val paint = Paint()
+        val frameworkPaint = paint.asFrameworkPaint()
+        frameworkPaint.color = transparent
+
+        frameworkPaint.setShadowLayer(
+            radius.toPx(),
+            offsetX.toPx(),
+            offsetY.toPx(),
+            shadowColor
+        )
+
+        it.drawPath(path, paint)
     }
 }
 
