@@ -26,7 +26,7 @@ internal class TargetRectangleTrait(
         val height: Float = 0f,
         val relativeWidth: Double = 0.0,
         val relativeHeight: Double = 0.0,
-        val distance: Double = 0.0,
+        val contentDistance: Double = 0.0,
         val prefPosition: ContentPreferredPosition? = null
     )
 
@@ -44,7 +44,7 @@ internal class TargetRectangleTrait(
             height = config.getConfigInt("height")?.toFloat() ?: 0f,
             relativeWidth = config.getConfig("relativeWidth") ?: 0.0,
             relativeHeight = config.getConfig("relativeHeight") ?: 0.0,
-            distance = config.getConfigOrDefault("contentDistanceFromTarget", 0.0),
+            contentDistance = config.getConfigOrDefault("contentDistanceFromTarget", 0.0),
             prefPosition = config.getConfig<String>("contentPreferredPosition").toPosition()
         )
 

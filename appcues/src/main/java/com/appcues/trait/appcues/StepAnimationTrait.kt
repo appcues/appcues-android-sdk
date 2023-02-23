@@ -17,20 +17,27 @@ internal class StepAnimationTrait(
 
         const val TYPE = "@appcues/step-transition-animation"
 
-        const val METADATA_ANIMATION_DURATION = "animationDuration"
-        const val METADATA_ANIMATION_EASING = "animationEasing"
-        const val DEFAULT_ANIMATION = 300
+        const val STEP_TRANSITION_ANIMATION_METADATA = "stepTransitionAnimation"
+        const val DEFAULT_ANIMATION_DURATION = 300
     }
 
-    override fun produceMetadata(): Map<String, Any?> {
-        return hashMapOf(
-            METADATA_ANIMATION_DURATION to config.getConfigInt("duration"),
-            METADATA_ANIMATION_EASING to config.getConfig<String>("easing").toEasing()
-        )
-    }
+    data class StepTransitionAnimationInfo(
+        val duration: Int,
+        val easing: StepAnimationEasing,
+    )
 
     enum class StepAnimationEasing {
         LINEAR, EASE_IN, EASE_OUT, EASE_IN_OUT
+    }
+
+    private val duration = config.getConfigInt("duration") ?: DEFAULT_ANIMATION_DURATION
+    private val easing = config.getConfig<String>("easing").toEasing()
+
+    override fun produceMetadata(): Map<String, Any?> {
+        return StepTransitionAnimationInfo(
+            duration = duration,
+            easing = easing,
+        ).let { hashMapOf(STEP_TRANSITION_ANIMATION_METADATA to it) }
     }
 
     private fun String?.toEasing(): StepAnimationEasing {
