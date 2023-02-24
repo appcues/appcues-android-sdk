@@ -8,10 +8,10 @@ import com.appcues.data.mapper.trait.TraitsMapper
 import com.appcues.data.model.ExperiencePrimitive
 import com.appcues.data.model.ExperiencePrimitive.VerticalStackPrimitive
 import com.appcues.data.model.Step
-import com.appcues.data.remote.response.step.StepResponse
-import com.appcues.data.remote.response.step.primitive.PrimitiveResponse
-import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.BoxPrimitiveResponse
-import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.StackPrimitiveResponse
+import com.appcues.data.remote.appcues.response.step.StepResponse
+import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse
+import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.BoxPrimitiveResponse
+import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.StackPrimitiveResponse
 import com.appcues.trait.BackdropDecoratingTrait
 import com.appcues.trait.ContainerDecoratingTrait
 import com.appcues.trait.ExperienceTraitLevel.STEP

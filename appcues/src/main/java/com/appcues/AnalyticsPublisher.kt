@@ -7,7 +7,7 @@ import com.appcues.AnalyticType.SCREEN
 import com.appcues.analytics.ActivityRequestBuilder
 import com.appcues.analytics.TrackingData
 import com.appcues.data.model.ExperienceStepFormState
-import com.appcues.data.remote.request.EventRequest
+import com.appcues.data.remote.appcues.request.EventRequest
 import java.util.Date
 
 internal class AnalyticsPublisher(

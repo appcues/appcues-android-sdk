@@ -3,8 +3,8 @@ package com.appcues.analytics
 import androidx.annotation.VisibleForTesting
 import com.appcues.AppcuesCoroutineScope
 import com.appcues.data.AppcuesRepository
-import com.appcues.data.remote.request.ActivityRequest
-import com.appcues.data.remote.request.EventRequest
+import com.appcues.data.remote.appcues.request.ActivityRequest
+import com.appcues.data.remote.appcues.request.EventRequest
 import com.appcues.ui.ExperienceRenderer
 import kotlinx.coroutines.launch
 import java.util.Date

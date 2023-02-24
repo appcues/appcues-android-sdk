@@ -14,11 +14,11 @@ import com.appcues.data.model.ExperiencePriority.NORMAL
 import com.appcues.data.model.ExperienceTrigger
 import com.appcues.data.model.Experiment
 import com.appcues.data.model.StepContainer
-import com.appcues.data.remote.response.ExperimentResponse
-import com.appcues.data.remote.response.experience.ExperienceResponse
-import com.appcues.data.remote.response.experience.FailedExperienceResponse
-import com.appcues.data.remote.response.experience.LossyExperienceResponse
-import com.appcues.data.remote.response.step.StepContainerResponse
+import com.appcues.data.remote.appcues.response.ExperimentResponse
+import com.appcues.data.remote.appcues.response.experience.ExperienceResponse
+import com.appcues.data.remote.appcues.response.experience.FailedExperienceResponse
+import com.appcues.data.remote.appcues.response.experience.LossyExperienceResponse
+import com.appcues.data.remote.appcues.response.step.StepContainerResponse
 import com.appcues.trait.ContentHolderTrait
 import com.appcues.trait.ContentWrappingTrait
 import com.appcues.trait.ExperienceTrait

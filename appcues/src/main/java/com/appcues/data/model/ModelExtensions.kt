@@ -6,9 +6,9 @@ import com.appcues.data.mapper.styling.mapComponentColor
 import com.appcues.data.mapper.styling.mapComponentStyle
 import com.appcues.data.model.styling.ComponentColor
 import com.appcues.data.model.styling.ComponentStyle
-import com.appcues.data.remote.response.step.primitive.PrimitiveResponse
-import com.appcues.data.remote.response.styling.StyleColorResponse
-import com.appcues.data.remote.response.styling.StyleResponse
+import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse
+import com.appcues.data.remote.appcues.response.styling.StyleColorResponse
+import com.appcues.data.remote.appcues.response.styling.StyleResponse
 
 internal typealias AppcuesConfigMap = Map<String, Any>?
 

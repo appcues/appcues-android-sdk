@@ -1,7 +1,9 @@
 package com.appcues.data.remote.retrofit
 
-import com.appcues.data.remote.response.experience.ExperienceResponse
-import com.appcues.data.remote.response.experience.FailedExperienceResponse
+import com.appcues.data.remote.RetrofitWrapper
+import com.appcues.data.remote.appcues.AppcuesService
+import com.appcues.data.remote.appcues.response.experience.ExperienceResponse
+import com.appcues.data.remote.appcues.response.experience.FailedExperienceResponse
 import com.appcues.data.remote.retrofit.stubs.contentModalOneStubs
 import com.appcues.util.appcuesFormatted
 import com.google.common.truth.Truth.assertThat

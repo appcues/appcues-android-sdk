@@ -4,7 +4,7 @@ import com.appcues.data.mapper.styling.mapComponentContentMode
 import com.appcues.data.mapper.styling.mapComponentSize
 import com.appcues.data.mapper.styling.mapComponentStyle
 import com.appcues.data.model.ExperiencePrimitive.ImagePrimitive
-import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.ImagePrimitiveResponse
+import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.ImagePrimitiveResponse
 
 internal fun ImagePrimitiveResponse.mapImagePrimitive() = ImagePrimitive(
     id = id,

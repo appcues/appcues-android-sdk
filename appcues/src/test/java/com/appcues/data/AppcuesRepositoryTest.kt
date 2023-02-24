@@ -9,12 +9,12 @@ import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperiencePriority.LOW
 import com.appcues.data.model.ExperiencePriority.NORMAL
 import com.appcues.data.model.ExperienceTrigger
-import com.appcues.data.remote.AppcuesRemoteSource
 import com.appcues.data.remote.RemoteError.HttpError
 import com.appcues.data.remote.RemoteError.NetworkError
-import com.appcues.data.remote.request.ActivityRequest
-import com.appcues.data.remote.response.QualifyResponse
-import com.appcues.data.remote.response.experience.ExperienceResponse
+import com.appcues.data.remote.appcues.AppcuesRemoteSource
+import com.appcues.data.remote.appcues.request.ActivityRequest
+import com.appcues.data.remote.appcues.response.QualifyResponse
+import com.appcues.data.remote.appcues.response.experience.ExperienceResponse
 import com.appcues.logging.Logcues
 import com.appcues.rules.MainDispatcherRule
 import com.appcues.util.ResultOf.Failure

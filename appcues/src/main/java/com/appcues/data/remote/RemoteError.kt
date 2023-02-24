@@ -1,6 +1,6 @@
 package com.appcues.data.remote
 
-import com.appcues.data.remote.response.ErrorResponse
+import com.appcues.data.remote.appcues.response.ErrorResponse
 
 internal sealed class RemoteError {
     data class HttpError(val code: Int? = null, val error: ErrorResponse? = null) : RemoteError()

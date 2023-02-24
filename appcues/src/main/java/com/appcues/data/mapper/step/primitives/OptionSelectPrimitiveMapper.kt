@@ -7,7 +7,7 @@ import com.appcues.data.model.ExperiencePrimitive.OptionSelectPrimitive.OptionIt
 import com.appcues.data.model.styling.ComponentControlPosition
 import com.appcues.data.model.styling.ComponentDisplayFormat
 import com.appcues.data.model.styling.ComponentSelectMode
-import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.OptionSelectPrimitiveResponse
+import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.OptionSelectPrimitiveResponse
 import kotlin.math.max
 import kotlin.math.min
 
