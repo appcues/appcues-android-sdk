@@ -3,7 +3,8 @@ package com.appcues.data.remote.retrofit
 import com.appcues.AppcuesConfig
 import com.appcues.SessionMonitor
 import com.appcues.Storage
-import com.appcues.data.remote.AppcuesRemoteSource
+import com.appcues.data.remote.appcues.AppcuesRemoteSource
+import com.appcues.data.remote.appcues.AppcuesService
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk

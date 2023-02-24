@@ -1,8 +1,8 @@
 package com.appcues.data.mapper.step.primitives
 
 import com.appcues.data.mapper.AppcuesMappingException
-import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.TextPrimitiveResponse
-import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.TextSpanResponse
+import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.TextPrimitiveResponse
+import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.TextSpanResponse
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import java.util.UUID

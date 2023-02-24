@@ -12,8 +12,8 @@ import com.appcues.analytics.ExperienceLifecycleEvent
 import com.appcues.analytics.SdkMetrics
 import com.appcues.analytics.TrackingData
 import com.appcues.data.model.ExperienceStepFormState
-import com.appcues.data.remote.request.ActivityRequest
-import com.appcues.data.remote.request.EventRequest
+import com.appcues.data.remote.appcues.request.ActivityRequest
+import com.appcues.data.remote.appcues.request.EventRequest
 import com.appcues.debugger.model.DebuggerEventItem
 import com.appcues.debugger.model.DebuggerEventItemPropertySection
 import com.appcues.debugger.model.EventType

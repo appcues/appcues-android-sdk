@@ -5,10 +5,10 @@ import com.appcues.AnalyticType.GROUP
 import com.appcues.AnalyticType.IDENTIFY
 import com.appcues.AnalyticType.SCREEN
 import com.appcues.analytics.ActivityRequestBuilder
-import com.appcues.analytics.AnalyticsEvent
+import com.appcues.analytics.AnalyticsEvent.ScreenView
 import com.appcues.analytics.TrackingData
-import com.appcues.data.remote.request.ActivityRequest
-import com.appcues.data.remote.request.EventRequest
+import com.appcues.data.remote.appcues.request.ActivityRequest
+import com.appcues.data.remote.appcues.request.EventRequest
 import com.appcues.rules.KoinScopeRule
 import com.appcues.rules.MainDispatcherRule
 import com.google.common.truth.Truth.assertThat
@@ -110,7 +110,7 @@ internal class AnalyticsPublisherTest : AppcuesScopeTest {
         val activity = ActivityRequest(
             accountId = "123",
             userId = "userId",
-            events = listOf(EventRequest(AnalyticsEvent.ScreenView.eventName, attributes = attributes))
+            events = listOf(EventRequest(ScreenView.eventName, attributes = attributes))
         )
         val data = TrackingData(SCREEN, false, activity)
         val listener = mockk<AnalyticsListener>(relaxed = true)

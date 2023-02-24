@@ -1,6 +1,6 @@
 package com.appcues.data.mapper.trait
 
-import com.appcues.data.remote.response.trait.TraitResponse
+import com.appcues.data.remote.appcues.response.trait.TraitResponse
 import com.appcues.trait.ExperienceTrait
 import com.appcues.trait.ExperienceTraitLevel
 import com.appcues.trait.TraitFactoryBlock

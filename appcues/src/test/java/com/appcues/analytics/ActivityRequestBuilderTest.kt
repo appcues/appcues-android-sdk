@@ -2,8 +2,8 @@ package com.appcues.analytics
 
 import com.appcues.AppcuesConfig
 import com.appcues.Storage
-import com.appcues.data.remote.request.ActivityRequest
-import com.appcues.data.remote.request.EventRequest
+import com.appcues.data.remote.appcues.request.ActivityRequest
+import com.appcues.data.remote.appcues.request.EventRequest
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk

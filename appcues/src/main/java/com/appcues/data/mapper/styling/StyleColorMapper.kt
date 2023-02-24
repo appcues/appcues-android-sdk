@@ -1,7 +1,7 @@
 package com.appcues.data.mapper.styling
 
 import com.appcues.data.model.styling.ComponentColor
-import com.appcues.data.remote.response.styling.StyleColorResponse
+import com.appcues.data.remote.appcues.response.styling.StyleColorResponse
 
 internal fun StyleColorResponse.mapComponentColor(): ComponentColor {
     val light = normalizeToArgbLong(light)

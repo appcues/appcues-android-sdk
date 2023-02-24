@@ -4,9 +4,9 @@ import com.appcues.data.mapper.AppcuesMappingException
 import com.appcues.data.mapper.styling.mapComponentStyle
 import com.appcues.data.model.ExperiencePrimitive.TextPrimitive
 import com.appcues.data.model.ExperiencePrimitive.TextSpanPrimitive
-import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.TextPrimitiveResponse
-import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.TextSpanResponse
-import com.appcues.data.remote.response.styling.StyleResponse
+import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.TextPrimitiveResponse
+import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.TextSpanResponse
+import com.appcues.data.remote.appcues.response.styling.StyleResponse
 
 internal fun TextPrimitiveResponse.mapTextPrimitive(): TextPrimitive {
     return TextPrimitive(

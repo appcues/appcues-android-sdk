@@ -1,11 +1,16 @@
 package com.appcues.data.remote
 
 import com.appcues.AppcuesConfig
-import com.appcues.data.remote.retrofit.AppcuesService
-import com.appcues.data.remote.retrofit.CustomerApiService
-import com.appcues.data.remote.retrofit.ImageUploadService
-import com.appcues.data.remote.retrofit.RetrofitWrapper
-import com.appcues.data.remote.retrofit.SdkSettingsService
+import com.appcues.data.remote.appcues.AppcuesRemoteSource
+import com.appcues.data.remote.appcues.AppcuesService
+import com.appcues.data.remote.appcues.MetricsInterceptor
+import com.appcues.data.remote.customerapi.CustomerApiHostInterceptor
+import com.appcues.data.remote.customerapi.CustomerApiRemoteSource
+import com.appcues.data.remote.customerapi.CustomerApiService
+import com.appcues.data.remote.imageupload.ImageUploadRemoteSource
+import com.appcues.data.remote.imageupload.ImageUploadService
+import com.appcues.data.remote.sdksettings.SdkSettingsRemoteSource
+import com.appcues.data.remote.sdksettings.SdkSettingsService
 import com.appcues.di.KoinScopePlugin
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.koin.dsl.ScopeDSL

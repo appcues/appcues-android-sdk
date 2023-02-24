@@ -7,8 +7,8 @@ import com.appcues.BuildConfig
 import com.appcues.R
 import com.appcues.SessionMonitor
 import com.appcues.Storage
-import com.appcues.data.remote.request.ActivityRequest
-import com.appcues.data.remote.request.EventRequest
+import com.appcues.data.remote.appcues.request.ActivityRequest
+import com.appcues.data.remote.appcues.request.EventRequest
 import com.appcues.util.ContextResources
 import kotlinx.coroutines.launch
 import java.util.Date

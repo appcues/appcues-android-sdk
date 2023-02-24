@@ -8,7 +8,7 @@ import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.Interactio
 import com.appcues.data.MoshiConfiguration
 import com.appcues.data.mapper.step.primitives.mapPrimitive
 import com.appcues.data.model.ExperienceStepFormState
-import com.appcues.data.remote.response.step.primitive.PrimitiveResponse
+import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse
 import com.appcues.logging.Logcues
 import com.appcues.ui.composables.AppcuesActionsDelegate
 import com.appcues.ui.composables.LocalAppcuesActionDelegate

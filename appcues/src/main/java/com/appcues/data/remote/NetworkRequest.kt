@@ -1,7 +1,7 @@
 package com.appcues.data.remote
 
 import com.appcues.data.MoshiConfiguration
-import com.appcues.data.remote.response.ErrorResponse
+import com.appcues.data.remote.appcues.response.ErrorResponse
 import com.appcues.util.ResultOf
 import com.squareup.moshi.JsonDataException
 import retrofit2.HttpException

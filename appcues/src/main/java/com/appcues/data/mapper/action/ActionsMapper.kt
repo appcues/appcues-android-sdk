@@ -3,7 +3,7 @@ package com.appcues.data.mapper.action
 import com.appcues.action.ActionRegistry
 import com.appcues.data.mapper.AppcuesMappingException
 import com.appcues.data.model.Action
-import com.appcues.data.remote.response.action.ActionResponse
+import com.appcues.data.remote.appcues.response.action.ActionResponse
 import java.util.UUID
 
 internal class ActionsMapper(
