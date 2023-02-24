@@ -6,7 +6,7 @@ import com.appcues.util.ResultOf
 import com.squareup.moshi.JsonDataException
 import retrofit2.HttpException
 
-object NetworkRequest {
+internal object NetworkRequest {
     internal suspend fun <Success> execute(apiCall: suspend () -> Success): ResultOf<Success, RemoteError> =
         try {
             ResultOf.Success(apiCall.invoke())
