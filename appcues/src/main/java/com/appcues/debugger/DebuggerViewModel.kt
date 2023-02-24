@@ -1,12 +1,8 @@
 package com.appcues.debugger
 
-import android.app.Activity
-import android.view.View
 import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.appcues.AppcuesConfig
-import com.appcues.R
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.debugger.DebugMode.Debugger
 import com.appcues.debugger.DebugMode.ScreenCapture
@@ -21,13 +17,10 @@ import com.appcues.debugger.model.DebuggerStatusItem
 import com.appcues.debugger.model.EventType
 import com.appcues.debugger.model.TapActionType
 import com.appcues.debugger.screencapture.Capture
-import com.appcues.debugger.screencapture.asCaptureView
-import com.appcues.debugger.screencapture.generateCaptureMetadata
+import com.appcues.debugger.screencapture.ScreenCaptureProcessor
 import com.appcues.debugger.screencapture.prettyPrint
-import com.appcues.debugger.screencapture.screenCaptureDisplayName
-import com.appcues.debugger.screencapture.screenshot
-import com.appcues.monitor.AppcuesActivityMonitor
-import com.appcues.util.ContextResources
+import com.appcues.util.doIfFailure
+import com.appcues.util.doIfSuccess
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -36,7 +29,6 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
-import java.util.Date
 
 internal class DebuggerViewModel(
     override val scope: Scope,
@@ -50,9 +42,7 @@ internal class DebuggerViewModel(
 
     private val debuggerFontManager by inject<DebuggerFontManager>()
 
-    private val contextResources by inject<ContextResources>()
-
-    private val config by inject<AppcuesConfig>()
+    private val screenCaptureProcessor by inject<ScreenCaptureProcessor>()
 
     sealed class UIState {
         object Creating : UIState()
@@ -209,13 +199,26 @@ internal class DebuggerViewModel(
         }
     }
 
+    fun captureScreen() =
+        screenCaptureProcessor.captureScreen()
+
     fun onScreenCaptureConfirm(capture: Capture) {
         _uiState.value = Idle(ScreenCapture)
 
-        // upcoming work to execute API calls starts here
+        viewModelScope.launch {
+            val result = screenCaptureProcessor.save(capture)
 
-        // TESTING!!
-        capture.prettyPrint()
+            result.doIfSuccess {
+                // show success toast
+
+                // TESTING!!
+                it.prettyPrint()
+            }
+
+            result.doIfFailure {
+                // show failure toast
+            }
+        }
     }
 
     fun onStatusTapAction(tapActionType: TapActionType) {
@@ -240,43 +243,4 @@ internal class DebuggerViewModel(
     private fun List<DebuggerEventItem>.hideEventsForFab(): List<DebuggerEventItem> {
         return toMutableList().onEach { it.showOnFab = false }
     }
-
-    fun captureScreen(): Capture? =
-        AppcuesActivityMonitor.activity?.captureScreen(config, contextResources)
 }
-
-private fun Activity.captureScreen(
-    config: AppcuesConfig,
-    contextResources: ContextResources,
-): Capture? =
-    window.decorView.rootView.let {
-        // hide the debugger view for screen capture, if present
-        val debuggerView = it.findViewById<View>(R.id.appcues_debugger_view)
-        debuggerView?.let { view ->
-            view.visibility = View.GONE
-        }
-
-        val timestamp = Date()
-        val displayName = it.screenCaptureDisplayName(timestamp)
-        val screenshot = it.screenshot()
-        val layout = it.asCaptureView()
-        val capture = if (screenshot != null && layout != null) {
-            Capture(
-                appId = config.applicationId,
-                displayName = displayName,
-                screenshotImageUrl = null,
-                layout = layout,
-                metadata = contextResources.generateCaptureMetadata(),
-                timestamp = timestamp,
-            ).apply {
-                this.screenshot = screenshot
-            }
-        } else null
-
-        // restore debugger view visibility, if present
-        debuggerView?.let { view ->
-            view.visibility = View.VISIBLE
-        }
-
-        capture
-    }
