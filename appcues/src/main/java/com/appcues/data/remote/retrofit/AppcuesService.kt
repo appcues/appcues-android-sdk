@@ -13,7 +13,6 @@ import retrofit2.http.Path
 import java.util.UUID
 
 internal interface AppcuesService {
-
     @POST("v1/accounts/{account}/users/{user}/activity")
     suspend fun activity(
         @Path("account") account: String,
