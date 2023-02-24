@@ -1,6 +1,7 @@
 package com.appcues.data
 
 import com.appcues.AppcuesConfig
+import com.appcues.Storage
 import com.appcues.data.local.AppcuesLocalSource
 import com.appcues.data.local.model.ActivityStorage
 import com.appcues.data.mapper.experience.ExperienceMapper
@@ -22,6 +23,7 @@ import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import io.mockk.slot
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -40,6 +42,7 @@ class AppcuesRepositoryTest {
     private val appcuesLocalSource: AppcuesLocalSource = mockk(relaxed = true)
     private val experienceMapper: ExperienceMapper = mockk()
     private val logcues: Logcues = mockk(relaxed = true)
+    private val storage: Storage = mockk(relaxed = true)
 
     private lateinit var config: AppcuesConfig
     private lateinit var repository: AppcuesRepository
@@ -53,6 +56,7 @@ class AppcuesRepositoryTest {
             experienceMapper = experienceMapper,
             config = config,
             logcues = logcues,
+            storage = storage,
         )
     }
 
@@ -60,7 +64,7 @@ class AppcuesRepositoryTest {
     fun `getExperienceContent SHOULD get from appcuesRemoteSource AND map from experienceMapper`() = runTest {
         // GIVEN
         val experienceResponse = mockk<ExperienceResponse>()
-        coEvery { appcuesRemoteSource.getExperienceContent("1234") } returns Success(experienceResponse)
+        coEvery { appcuesRemoteSource.getExperienceContent("1234", any()) } returns Success(experienceResponse)
         val mappedExperience = mockk<Experience>()
         coEvery { experienceMapper.map(experienceResponse, ExperienceTrigger.ShowCall) } returns mappedExperience
         // WHEN
@@ -72,7 +76,7 @@ class AppcuesRepositoryTest {
     @Test
     fun `getExperienceContent SHOULD return null WHEN appcuesRemoteSource fails`() = runTest {
         // GIVEN
-        coEvery { appcuesRemoteSource.getExperienceContent("1234") } returns Failure(HttpError())
+        coEvery { appcuesRemoteSource.getExperienceContent("1234", any()) } returns Failure(HttpError())
         // WHEN
         val result = repository.getExperienceContent("1234", ExperienceTrigger.ShowCall)
         // THEN
@@ -83,7 +87,7 @@ class AppcuesRepositoryTest {
     fun `getExperiencePreview SHOULD get from appcuesRemoteSource AND map from experienceMapper`() = runTest {
         // GIVEN
         val experienceResponse = mockk<ExperienceResponse>()
-        coEvery { appcuesRemoteSource.getExperiencePreview("1234") } returns Success(experienceResponse)
+        coEvery { appcuesRemoteSource.getExperiencePreview("1234", any()) } returns Success(experienceResponse)
         val mappedExperience = mockk<Experience>()
         coEvery { experienceMapper.map(experienceResponse, ExperienceTrigger.Preview) } returns mappedExperience
         // WHEN
@@ -95,7 +99,7 @@ class AppcuesRepositoryTest {
     @Test
     fun `getExperiencePreview SHOULD return null WHEN appcuesRemoteSource fails`() = runTest {
         // GIVEN
-        coEvery { appcuesRemoteSource.getExperiencePreview("1234") } returns Failure(HttpError())
+        coEvery { appcuesRemoteSource.getExperiencePreview("1234", any()) } returns Failure(HttpError())
         // WHEN
         val result = repository.getExperiencePreview("1234")
         // THEN
@@ -112,7 +116,7 @@ class AppcuesRepositoryTest {
             qualificationReason = "screen_view",
             experiments = null,
         )
-        coEvery { appcuesRemoteSource.qualify(any(), request.requestId, any()) } returns Success(qualifyResponse)
+        coEvery { appcuesRemoteSource.qualify(any(), any(), request.requestId, any()) } returns Success(qualifyResponse)
         val mappedExperience = mockk<Experience>()
         coEvery {
             experienceMapper.mapDecoded(any(), ExperienceTrigger.Qualification("screen_view"), any(), null, request.requestId)
@@ -123,31 +127,31 @@ class AppcuesRepositoryTest {
 
         // THEN
         coVerify { appcuesLocalSource.saveActivity(any()) }
-        coVerify { appcuesRemoteSource.qualify("userId", request.requestId, any()) }
+        coVerify { appcuesRemoteSource.qualify("userId", any(), request.requestId, any()) }
         assertThat(result.count()).isEqualTo(2)
         assertThat(result.first()).isEqualTo(mappedExperience)
         coVerify { appcuesLocalSource.removeActivity(any()) }
     }
 
     @Test
-    fun `trackActivity SHOULD call trackActivity on cache item WHEN the next request is sent`() = runTest {
+    fun `trackActivity SHOULD call postActivity on cache item WHEN the next request is sent`() = runTest {
         // GIVEN
         val request = ActivityRequest(accountId = "123", userId = "userId")
-        val activityStorage = ActivityStorage(UUID.randomUUID(), "123", "userId", "data")
+        val activityStorage = ActivityStorage(UUID.randomUUID(), "123", "userId", "data", null)
         coEvery { appcuesLocalSource.getAllActivity() } returns listOf(activityStorage)
 
         // WHEN
         repository.trackActivity(request)
 
         // THEN
-        coVerify { appcuesRemoteSource.postActivity("userId", "data") }
+        coVerify { appcuesRemoteSource.postActivity("userId", null, "data") }
     }
 
     @Test
     fun `trackActivity SHOULD retain cache item WHEN the qualify request fails with a NetworkError`() = runTest {
         // GIVEN
         val request = ActivityRequest(accountId = "123", userId = "userId")
-        coEvery { appcuesRemoteSource.qualify(any(), request.requestId, any()) } returns Failure(NetworkError())
+        coEvery { appcuesRemoteSource.qualify(any(), any(), request.requestId, any()) } returns Failure(NetworkError())
 
         // WHEN
         repository.trackActivity(request)
@@ -161,7 +165,7 @@ class AppcuesRepositoryTest {
     fun `trackActivity SHOULD NOT retain cache item WHEN the qualify request fails with an HTTPError`() = runTest {
         // GIVEN
         val request = ActivityRequest(accountId = "123", userId = "userId")
-        coEvery { appcuesRemoteSource.qualify(any(), request.requestId, any()) } returns Failure(HttpError())
+        coEvery { appcuesRemoteSource.qualify(any(), any(), request.requestId, any()) } returns Failure(HttpError())
 
         // WHEN
         repository.trackActivity(request)
@@ -175,9 +179,9 @@ class AppcuesRepositoryTest {
     fun `trackActivity SHOULD retain a cache item WHEN the retry fails with a NetworkError`() = runTest {
         // GIVEN
         val request = ActivityRequest(accountId = "123", userId = "userId")
-        val activityStorage = ActivityStorage(UUID.randomUUID(), "123", "userId", "data")
+        val activityStorage = ActivityStorage(UUID.randomUUID(), "123", "userId", "data", null)
         coEvery { appcuesLocalSource.getAllActivity() } returns listOf(activityStorage)
-        coEvery { appcuesRemoteSource.postActivity("userId", "data") } returns Failure(NetworkError())
+        coEvery { appcuesRemoteSource.postActivity("userId", null, "data") } returns Failure(NetworkError())
 
         // WHEN
         repository.trackActivity(request)
@@ -190,9 +194,9 @@ class AppcuesRepositoryTest {
     fun `trackActivity SHOULD NOT retain a cache item WHEN the retry fails with an HTTPError`() = runTest {
         // GIVEN
         val request = ActivityRequest(accountId = "123", userId = "userId")
-        val activityStorage = ActivityStorage(UUID.randomUUID(), "123", "userId", "data")
+        val activityStorage = ActivityStorage(UUID.randomUUID(), "123", "userId", "data", null)
         coEvery { appcuesLocalSource.getAllActivity() } returns listOf(activityStorage)
-        coEvery { appcuesRemoteSource.postActivity("userId", "data") } returns Failure(HttpError())
+        coEvery { appcuesRemoteSource.postActivity("userId", null, "data") } returns Failure(HttpError())
 
         // WHEN
         repository.trackActivity(request)
@@ -205,9 +209,9 @@ class AppcuesRepositoryTest {
     fun `trackActivity SHOULD remove cache item WHEN the total storage size is at capacity`() = runTest {
         // GIVEN
         val request: ActivityRequest = mockk(relaxed = true)
-        val activityStorage1 = ActivityStorage(UUID.randomUUID(), "123", "userId", "data1")
-        val activityStorage2 = ActivityStorage(UUID.randomUUID(), "123", "userId", "data2")
-        val activityStorage3 = ActivityStorage(UUID.randomUUID(), "123", "userId", "data3")
+        val activityStorage1 = ActivityStorage(UUID.randomUUID(), "123", "userId", "data1", null)
+        val activityStorage2 = ActivityStorage(UUID.randomUUID(), "123", "userId", "data2", null)
+        val activityStorage3 = ActivityStorage(UUID.randomUUID(), "123", "userId", "data3", null)
         coEvery { appcuesLocalSource.getAllActivity() } returns listOf(activityStorage1, activityStorage2, activityStorage3)
         config.activityStorageMaxSize = 2
 
@@ -215,9 +219,9 @@ class AppcuesRepositoryTest {
         repository.trackActivity(request)
 
         // THEN
-        coVerify(exactly = 0) { appcuesRemoteSource.postActivity("userId", "data1") } // expired item
-        coVerify(exactly = 1) { appcuesRemoteSource.postActivity("userId", "data2") }
-        coVerify(exactly = 1) { appcuesRemoteSource.postActivity("userId", "data3") }
+        coVerify(exactly = 0) { appcuesRemoteSource.postActivity("userId", null, "data1") } // expired item
+        coVerify(exactly = 1) { appcuesRemoteSource.postActivity("userId", null, "data2") }
+        coVerify(exactly = 1) { appcuesRemoteSource.postActivity("userId", null, "data3") }
         coVerify(exactly = 4) { appcuesLocalSource.removeActivity(any()) } // all 3 in cache, plus current item removed
     }
 
@@ -226,9 +230,9 @@ class AppcuesRepositoryTest {
         // GIVEN
         val request: ActivityRequest = mockk(relaxed = true)
         val fiveSecAgo = Date().apply { time -= 5000 }
-        val activityStorage1 = ActivityStorage(UUID.randomUUID(), "123", "userId", "data1", created = fiveSecAgo)
-        val activityStorage2 = ActivityStorage(UUID.randomUUID(), "123", "userId", "data2")
-        val activityStorage3 = ActivityStorage(UUID.randomUUID(), "123", "userId", "data3")
+        val activityStorage1 = ActivityStorage(UUID.randomUUID(), "123", "userId", "data1", null, created = fiveSecAgo)
+        val activityStorage2 = ActivityStorage(UUID.randomUUID(), "123", "userId", "data2", null)
+        val activityStorage3 = ActivityStorage(UUID.randomUUID(), "123", "userId", "data3", null)
         coEvery { appcuesLocalSource.getAllActivity() } returns listOf(activityStorage1, activityStorage2, activityStorage3)
         config.activityStorageMaxAge = 3
 
@@ -236,9 +240,9 @@ class AppcuesRepositoryTest {
         repository.trackActivity(request)
 
         // THEN
-        coVerify(exactly = 0) { appcuesRemoteSource.postActivity("userId", "data1") } // expired item
-        coVerify(exactly = 1) { appcuesRemoteSource.postActivity("userId", "data2") }
-        coVerify(exactly = 1) { appcuesRemoteSource.postActivity("userId", "data3") }
+        coVerify(exactly = 0) { appcuesRemoteSource.postActivity("userId", null, "data1") } // expired item
+        coVerify(exactly = 1) { appcuesRemoteSource.postActivity("userId", null, "data2") }
+        coVerify(exactly = 1) { appcuesRemoteSource.postActivity("userId", null, "data3") }
         coVerify(exactly = 4) { appcuesLocalSource.removeActivity(any()) } // all 3 in cache, plus current item removed
     }
 
@@ -252,7 +256,7 @@ class AppcuesRepositoryTest {
             qualificationReason = "screen_view",
             experiments = null,
         )
-        coEvery { appcuesRemoteSource.qualify(any(), request.requestId, any()) } returns Success(qualifyResponse)
+        coEvery { appcuesRemoteSource.qualify(any(), any(), request.requestId, any()) } returns Success(qualifyResponse)
         val mappedExperience = mockk<Experience>()
         coEvery {
             experienceMapper.mapDecoded(any(), ExperienceTrigger.Qualification("screen_view"), any(), null, request.requestId)
@@ -275,7 +279,7 @@ class AppcuesRepositoryTest {
             qualificationReason = "event_trigger",
             experiments = null,
         )
-        coEvery { appcuesRemoteSource.qualify(any(), request.requestId, any()) } returns Success(qualifyResponse)
+        coEvery { appcuesRemoteSource.qualify(any(), any(), request.requestId, any()) } returns Success(qualifyResponse)
         val mappedExperience = mockk<Experience>()
         coEvery {
             experienceMapper.mapDecoded(any(), ExperienceTrigger.Qualification("event_trigger"), any(), null, request.requestId)
@@ -286,6 +290,24 @@ class AppcuesRepositoryTest {
 
         // THEN
         coVerify { experienceMapper.mapDecoded(any(), ExperienceTrigger.Qualification("event_trigger"), NORMAL, null, request.requestId) }
+    }
+
+    @Test
+    fun `trackActivity SHOULD include user signature in ActivityStorage WHEN the ActivityRequest has a user signature`() = runTest {
+        // GIVEN
+        val request = ActivityRequest(accountId = "123", userId = "userId", userSignature = "user-signature")
+        val cacheItem = ActivityStorage(UUID.randomUUID(), "123", "userId", "data1", "user-signature-cache")
+        coEvery { appcuesLocalSource.getAllActivity() } returns listOf(cacheItem)
+
+        // WHEN
+        repository.trackActivity(request)
+
+        // THEN
+        val activityStorageSlot = slot<ActivityStorage>()
+        coVerify { appcuesLocalSource.saveActivity(capture(activityStorageSlot)) }
+        assertThat(activityStorageSlot.captured.userSignature).isEqualTo("user-signature")
+        coVerify { appcuesRemoteSource.qualify("userId", "user-signature", request.requestId, any()) }
+        coVerify { appcuesRemoteSource.postActivity("userId", "user-signature-cache", any()) }
     }
 
     // test items already in processing don't get included again

@@ -108,6 +108,9 @@ class Appcues internal constructor(koinScope: Scope) {
     /**
      * Identify the user and determine if they should see Appcues content.
      *
+     * To authenticate requests for this user, provide the Base64 encoded signature
+     * for this user as a `String` value for key "appcues:user_id_signature", in the `properties` provided.
+     *
      * @param userId Unique value identifying the user.
      * @param properties Optional properties that provide additional context about the user.
      */
@@ -138,7 +141,7 @@ class Appcues internal constructor(koinScope: Scope) {
         // use the device ID as the default anonymous user ID, unless an override for generating
         // anonymous user IDs is supplied in the config builder
         val anonymousId = config.anonymousIdFactory?.invoke() ?: storage.deviceId
-        identify(true, anonymousId, null)
+        identify(true, "anon:$anonymousId", null)
     }
 
     /**
@@ -158,6 +161,7 @@ class Appcues internal constructor(koinScope: Scope) {
     fun reset() {
         sessionMonitor.reset()
         storage.userId = ""
+        storage.userSignature = null
         storage.isAnonymous = true
         storage.groupId = null
     }
@@ -269,9 +273,11 @@ class Appcues internal constructor(koinScope: Scope) {
             return
         }
 
+        val mutableProperties = properties?.toMutableMap()
         val userChanged = storage.userId != userId
         storage.userId = userId
         storage.isAnonymous = isAnonymous
+        storage.userSignature = mutableProperties?.remove("appcues:user_id_signature") as? String
         if (userChanged) {
             // when the identified user changes from last known value, we must start a new session
             sessionMonitor.start()
@@ -280,6 +286,6 @@ class Appcues internal constructor(koinScope: Scope) {
             storage.groupId = null
         }
 
-        analyticsTracker.identify(properties)
+        analyticsTracker.identify(mutableProperties)
     }
 }

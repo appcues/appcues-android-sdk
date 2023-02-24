@@ -18,6 +18,7 @@ internal interface AppcuesService {
     suspend fun activity(
         @Path("account") account: String,
         @Path("user") user: String,
+        @Header("Authorization") authorization: String?,
         @Body activity: RequestBody
     ): ActivityResponse
 
@@ -25,6 +26,7 @@ internal interface AppcuesService {
     suspend fun qualify(
         @Path("account") account: String,
         @Path("user") user: String,
+        @Header("Authorization") authorization: String?,
         @Header("appcues-request-id") requestId: UUID,
         @Body activity: RequestBody
     ): QualifyResponse
@@ -34,6 +36,7 @@ internal interface AppcuesService {
         @Path("account") account: String,
         @Path("user") user: String,
         @Path("experienceId") experienceId: String,
+        @Header("Authorization") authorization: String?,
     ): ExperienceResponse
 
     @GET("v1/accounts/{account}/users/{user}/experience_preview/{experienceId}")
@@ -41,6 +44,7 @@ internal interface AppcuesService {
         @Path("account") account: String,
         @Path("user") user: String,
         @Path("experienceId") experienceId: String,
+        @Header("Authorization") authorization: String?,
     ): ExperienceResponse
 
     @GET("v1/accounts/{account}/experience_preview/{experienceId}")

@@ -80,6 +80,34 @@ internal class AppcuesTest : AppcuesScopeTest {
     }
 
     @Test
+    fun `identify SHOULD update Storage WHEN user signature provided`() {
+        // GIVEN
+        val userId = "default-0000"
+        val properties = mapOf<String, Any>("appcues:user_id_signature" to "user-signature")
+        val storage: Storage = get()
+
+        // WHEN
+        appcues.identify(userId, properties)
+
+        // THEN
+        assertThat(storage.userSignature).isEqualTo("user-signature")
+    }
+
+    @Test
+    fun `identify SHOULD set user signature to null in Storage WHEN no user signature provided`() {
+        // GIVEN
+        val userId = "default-0000"
+        val properties = mapOf<String, Any>("foo" to 123)
+        val storage: Storage = get()
+
+        // WHEN
+        appcues.identify(userId, properties)
+
+        // THEN
+        assertThat(storage.userSignature).isNull()
+    }
+
+    @Test
     fun `track event SHOULD call AnalyticsTracker track function`() {
         // GIVEN
         val eventName = "test_event"
@@ -162,6 +190,21 @@ internal class AppcuesTest : AppcuesScopeTest {
     }
 
     @Test
+    fun `reset SHOULD clear user signature`() {
+        // GIVEN
+        val userId = "default-0000"
+        val properties = mapOf<String, Any>("appcues:user_id_signature" to "user-signature")
+        val storage: Storage = get()
+
+        // WHEN
+        appcues.identify(userId, properties)
+        appcues.reset()
+
+        // THEN
+        verify { storage setProperty Storage::userSignature.name value null }
+    }
+
+    @Test
     fun `anonymous SHOULD set Storage userId equal to the deviceId AND identify AND start a session`() {
         // GIVEN
         val storage: Storage = get()
@@ -172,7 +215,7 @@ internal class AppcuesTest : AppcuesScopeTest {
         appcues.anonymous()
 
         // THEN
-        assertThat(storage.userId).isEqualTo(storage.deviceId)
+        assertThat(storage.userId).isEqualTo("anon:${storage.deviceId}")
         assertThat(storage.isAnonymous).isTrue()
         // called once at startup automatically, which is ignored, then again for the new valid user/session
         verify(exactly = 2) { sessionMonitor.start() }
@@ -192,7 +235,7 @@ internal class AppcuesTest : AppcuesScopeTest {
 
         // THEN
         assertThat(storage.userId).isNotEqualTo(storage.deviceId)
-        assertThat(storage.userId).isEqualTo(configUserId)
+        assertThat(storage.userId).isEqualTo("anon:$configUserId")
     }
 
     @Test

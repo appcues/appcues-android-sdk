@@ -11,6 +11,7 @@ import kotlinx.coroutines.test.runTest
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
+import org.junit.Assert
 import org.junit.Test
 import java.util.UUID
 
@@ -37,7 +38,7 @@ class AppcuesServiceTest {
         mockWebServer.mockExperienceContent(accountId, userId, experienceId, mock)
 
         // When
-        val result = api.experienceContent(accountId, userId, experienceId)
+        val result = api.experienceContent(accountId, userId, experienceId, null)
 
         // Then
         with(result) {
@@ -54,7 +55,7 @@ class AppcuesServiceTest {
         mockWebServer.mockQualify(accountId, userId, mock)
 
         // When
-        val result = api.qualify(accountId, userId, UUID.randomUUID(), "".toRequestBody())
+        val result = api.qualify(accountId, userId, null, UUID.randomUUID(), "".toRequestBody())
 
         // Then
         //
@@ -113,6 +114,47 @@ class AppcuesServiceTest {
     }
 
     @Test
+    fun `qualify SHOULD include Authorization header WHEN user signature provided`() = runTest {
+        // Given
+        val auth = "Bearer abc"
+        mockWebServer.confirmAuth(auth, "content/empty_qualification.json")
+
+        // When
+        try {
+            api.qualify(
+                account = "1234",
+                user = "TestUser",
+                authorization = auth,
+                requestId = UUID.randomUUID(),
+                activity = "".toRequestBody(),
+            )
+        } catch (exception: Exception) {
+            // Then
+            Assert.fail(exception.message)
+        }
+    }
+
+    @Test
+    fun `qualify SHOULD NOT include Authorization header WHEN no user signature provided`() = runTest {
+        // Given
+        mockWebServer.confirmAuth(null, "content/empty_qualification.json")
+
+        // When
+        try {
+            api.qualify(
+                account = "1234",
+                user = "TestUser",
+                authorization = null,
+                requestId = UUID.randomUUID(),
+                activity = "".toRequestBody(),
+            )
+        } catch (exception: Exception) {
+            // Then
+            Assert.fail(exception.message)
+        }
+    }
+
+    @Test
     fun `trait decoding SHOULD fail WHEN multiple traits of same type declared at step level`() = runTest {
         // Given
         var error: String? = null
@@ -124,7 +166,7 @@ class AppcuesServiceTest {
 
         // When
         try {
-            api.experienceContent(accountId, userId, experienceId)
+            api.experienceContent(accountId, userId, experienceId, null)
         } catch (exception: JsonDataException) {
             error = exception.message
         }
@@ -147,7 +189,7 @@ class AppcuesServiceTest {
 
         // When
         try {
-            api.experienceContent(accountId, userId, experienceId)
+            api.experienceContent(accountId, userId, experienceId, null)
         } catch (exception: JsonDataException) {
             error = exception.message
         }
@@ -170,7 +212,7 @@ class AppcuesServiceTest {
 
         // When
         try {
-            api.experienceContent(accountId, userId, experienceId)
+            api.experienceContent(accountId, userId, experienceId, null)
         } catch (exception: JsonDataException) {
             error = exception.message
         }

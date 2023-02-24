@@ -1,6 +1,7 @@
 package com.appcues.data
 
 import com.appcues.AppcuesConfig
+import com.appcues.Storage
 import com.appcues.data.local.AppcuesLocalSource
 import com.appcues.data.local.model.ActivityStorage
 import com.appcues.data.mapper.experience.ExperienceMapper
@@ -32,12 +33,13 @@ internal class AppcuesRepository(
     private val experienceMapper: ExperienceMapper,
     private val config: AppcuesConfig,
     private val logcues: Logcues,
+    private val storage: Storage,
 ) {
     private val processingActivity: HashSet<UUID> = hashSetOf()
     private val mutex = Mutex()
 
     suspend fun getExperienceContent(experienceId: String, trigger: ExperienceTrigger): Experience? = withContext(Dispatchers.IO) {
-        appcuesRemoteSource.getExperienceContent(experienceId).let {
+        appcuesRemoteSource.getExperienceContent(experienceId, storage.userSignature).let {
             when (it) {
                 is Success -> experienceMapper.map(it.value, trigger)
                 is Failure -> {
@@ -49,7 +51,7 @@ internal class AppcuesRepository(
     }
 
     suspend fun getExperiencePreview(experienceId: String): Experience? = withContext(Dispatchers.IO) {
-        appcuesRemoteSource.getExperiencePreview(experienceId).let {
+        appcuesRemoteSource.getExperiencePreview(experienceId, storage.userSignature).let {
             when (it) {
                 is Success -> experienceMapper.map(it.value, ExperienceTrigger.Preview)
                 is Failure -> {
@@ -63,10 +65,11 @@ internal class AppcuesRepository(
     suspend fun trackActivity(activity: ActivityRequest): List<Experience> = withContext(Dispatchers.IO) {
 
         val activityStorage = ActivityStorage(
-            activity.requestId,
-            activity.accountId,
-            activity.userId,
-            MoshiConfiguration.moshi.adapter(ActivityRequest::class.java).toJson(activity)
+            requestId = activity.requestId,
+            accountId = activity.accountId,
+            userId = activity.userId,
+            data = MoshiConfiguration.moshi.adapter(ActivityRequest::class.java).toJson(activity),
+            userSignature = activity.userSignature,
         )
         val itemsToFlush = mutableListOf<ActivityStorage>()
 
@@ -146,7 +149,7 @@ internal class AppcuesRepository(
         if (isCurrent) {
             // if we are processing the current item (last item in queue) - then use the /qualify
             // endpoint and optionally get back qualified experiences to render
-            val qualifyResult = appcuesRemoteSource.qualify(activity.userId, activity.requestId, activity.data)
+            val qualifyResult = appcuesRemoteSource.qualify(activity.userId, activity.userSignature, activity.requestId, activity.data)
 
             qualifyResult.doIfSuccess { response ->
                 val priority: ExperiencePriority = if (response.qualificationReason == "screen_view") LOW else NORMAL
@@ -172,7 +175,7 @@ internal class AppcuesRepository(
         } else {
             // if we are processing non current items (retries) - then use the /activity
             // endpoint, which will never returned qualified content, only ingest analytics
-            val activityResult = appcuesRemoteSource.postActivity(activity.userId, activity.data)
+            val activityResult = appcuesRemoteSource.postActivity(activity.userId, activity.userSignature, activity.data)
 
             activityResult.doIfFailure {
                 logcues.info("activity request failed, reason: $it")
