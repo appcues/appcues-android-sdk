@@ -16,11 +16,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.toRect
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -38,6 +35,7 @@ import com.appcues.trait.appcues.SkippableTrait.ButtonAppearance.Default
 import com.appcues.trait.appcues.SkippableTrait.ButtonAppearance.Hidden
 import com.appcues.trait.appcues.SkippableTrait.ButtonAppearance.Minimal
 import com.appcues.ui.ExperienceRenderer
+import com.appcues.ui.extensions.xShapePath
 import kotlinx.coroutines.launch
 
 internal class SkippableTrait(
@@ -142,32 +140,5 @@ internal class SkippableTrait(
                     }
             }
         )
-    }
-
-    /**
-     * Defines a path to draw the X by drawing two lines crossing from edge to edge.
-     */
-    private fun DrawScope.xShapePath(color: Color, deflateDp: Dp = 0.dp): Path {
-        return Path()
-            .apply {
-                val strokeWidth = 2.dp.toPx()
-                val deflate = deflateDp.toPx()
-                val sizeRect = size
-                    .toRect()
-                    .deflate(deflate)
-
-                drawLine(
-                    color = color,
-                    start = sizeRect.topLeft,
-                    end = sizeRect.bottomRight,
-                    strokeWidth = strokeWidth,
-                )
-                drawLine(
-                    color = color,
-                    start = sizeRect.bottomLeft,
-                    end = sizeRect.topRight,
-                    strokeWidth = strokeWidth,
-                )
-            }
     }
 }

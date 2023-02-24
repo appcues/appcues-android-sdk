@@ -31,16 +31,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.toRect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -48,6 +44,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.appcues.R.string
 import com.appcues.debugger.DebuggerViewModel
 import com.appcues.debugger.screencapture.Capture
+import com.appcues.ui.extensions.xShapePath
 import com.appcues.ui.theme.AppcuesColors
 
 @Composable
@@ -126,29 +123,27 @@ private fun CaptureContents(debuggerViewModel: DebuggerViewModel, capture: Captu
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 backgroundColor = Color.Transparent,
                 focusedBorderColor = AppcuesColors.CaptureTextInputBorder,
-                focusedLabelColor = AppcuesColors.ShadyNeonBlue,
+                focusedLabelColor = AppcuesColors.Blurple,
                 unfocusedBorderColor = AppcuesColors.CaptureTextInputBorder,
-                unfocusedLabelColor = AppcuesColors.ShadyNeonBlue,
+                unfocusedLabelColor = AppcuesColors.Blurple,
             )
         )
         Row {
             CaptureButton(
-                text = stringResource(id = string.appcues_screen_capture_cancel),
-                textColor = AppcuesColors.ShadyNeonBlue,
                 modifier = Modifier
                     .height(40.dp)
                     .background(AppcuesColors.DebuggerBackground)
-                    .border(1.dp, AppcuesColors.ShadyNeonBlue, RoundedCornerShape(6.dp))
-                    .clickable { debuggerViewModel.closeExpandedView() }
+                    .border(1.dp, AppcuesColors.Blurple, RoundedCornerShape(6.dp))
+                    .clickable { debuggerViewModel.closeExpandedView() },
+                text = stringResource(id = string.appcues_screen_capture_cancel),
+                textColor = AppcuesColors.Blurple,
             )
             Spacer(modifier = Modifier.weight(1.0f))
             CaptureButton(
-                text = stringResource(id = string.appcues_screen_capture_ok),
-                textColor = Color.White,
                 modifier = Modifier
                     .height(40.dp)
                     .background(
-                        Brush.horizontalGradient(listOf(AppcuesColors.ShadyNeonBlue, AppcuesColors.CaptureButtonGradientEnd)),
+                        Brush.horizontalGradient(listOf(AppcuesColors.Blurple, AppcuesColors.CaptureButtonGradientEnd)),
                         RoundedCornerShape(6.dp)
                     )
                     .conditionalClickable(
@@ -156,7 +151,9 @@ private fun CaptureContents(debuggerViewModel: DebuggerViewModel, capture: Captu
                         onClick = {
                             debuggerViewModel.onScreenCaptureConfirm(capture.copy(displayName = text.value))
                         }
-                    )
+                    ),
+                text = stringResource(id = string.appcues_screen_capture_ok),
+                textColor = Color.White,
             )
         }
     }
@@ -165,9 +162,7 @@ private fun CaptureContents(debuggerViewModel: DebuggerViewModel, capture: Captu
 private fun Modifier.conditionalClickable(enabled: Boolean, onClick: () -> Unit) = composed {
     this.then(
         if (enabled) {
-            Modifier.clickable {
-                onClick()
-            }
+            Modifier.clickable(onClick = onClick)
         } else {
             Modifier.alpha(ContentAlpha.disabled)
         }
@@ -175,7 +170,11 @@ private fun Modifier.conditionalClickable(enabled: Boolean, onClick: () -> Unit)
 }
 
 @Composable
-private fun CaptureButton(text: String, textColor: Color, modifier: Modifier) {
+private fun CaptureButton(
+    modifier: Modifier = Modifier,
+    text: String,
+    textColor: Color,
+) {
     Surface(
         modifier = modifier,
         color = Color.Transparent,
@@ -190,31 +189,4 @@ private fun CaptureButton(text: String, textColor: Color, modifier: Modifier) {
             )
         }
     }
-}
-
-/**
- * Defines a path to draw the X by drawing two lines crossing from edge to edge.
- */
-private fun DrawScope.xShapePath(color: Color, deflateDp: Dp = 0.dp): Path {
-    return Path()
-        .apply {
-            val strokeWidth = 2.dp.toPx()
-            val deflate = deflateDp.toPx()
-            val sizeRect = size
-                .toRect()
-                .deflate(deflate)
-
-            drawLine(
-                color = color,
-                start = sizeRect.topLeft,
-                end = sizeRect.bottomRight,
-                strokeWidth = strokeWidth,
-            )
-            drawLine(
-                color = color,
-                start = sizeRect.bottomLeft,
-                end = sizeRect.topRight,
-                strokeWidth = strokeWidth,
-            )
-        }
 }
