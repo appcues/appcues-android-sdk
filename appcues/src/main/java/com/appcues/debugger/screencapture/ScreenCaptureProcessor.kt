@@ -48,7 +48,8 @@ internal class ScreenCaptureProcessor(
         }
     }
 
-    suspend fun save(capture: Capture): ResultOf<Capture, Error> {
+    @Suppress("UnusedPrivateMember")
+    suspend fun save(capture: Capture, token: String): ResultOf<Capture, Error> {
 
         // upcoming work to execute API calls starts here
 

@@ -55,8 +55,13 @@ internal class DeepLinkHandler(
                 true
             }
             segments.any() && segments[0] == "capture_screen" -> {
-                debuggerManager.start(activity, ScreenCapture)
-                true
+                val token = linkData.getQueryParameter("token")
+                if (token != null) {
+                    debuggerManager.start(activity, ScreenCapture(token))
+                    true
+                } else {
+                    false
+                }
             }
             else -> false
         }
