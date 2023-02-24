@@ -125,7 +125,8 @@ internal class DebuggerViewModel(
                     // if no path is given, and currently expanded, go back to Idle
                     if (_uiState.value is Expanded ||
                         // OR if showing FAB but the mode changed, reset to new Idle mode
-                        (_uiState.value is Idle && reset)) {
+                        (_uiState.value is Idle && reset)
+                    ) {
                         _uiState.value = Idle(mode)
                     }
                     return
@@ -150,7 +151,8 @@ internal class DebuggerViewModel(
                 // if in debugger mode, expanded, go to new Idle state
                 if (_uiState.value is Expanded ||
                     // OR if in Idle (FAB) mode but mode changed, reset to new Idle mode
-                    (_uiState.value is Idle && reset)) {
+                    (_uiState.value is Idle && reset)
+                ) {
                     _uiState.value = Idle(mode)
                 }
             }
@@ -203,21 +205,28 @@ internal class DebuggerViewModel(
         screenCaptureProcessor.captureScreen()
 
     fun onScreenCaptureConfirm(capture: Capture) {
-        _uiState.value = Idle(ScreenCapture)
+        // return back to Idle for the current mode (ScreenCapture)
+        _uiState.value = Idle(mode)
 
-        viewModelScope.launch {
-            val result = screenCaptureProcessor.save(capture)
+        when (val currentMode = mode) {
+            // saving a capture is only valid in screen capture mode with token
+            is ScreenCapture -> {
+                viewModelScope.launch {
+                    val result = screenCaptureProcessor.save(capture, currentMode.token)
 
-            result.doIfSuccess {
-                // show success toast
+                    result.doIfSuccess {
+                        // show success toast
 
-                // TESTING!!
-                it.prettyPrint()
+                        // TESTING!!
+                        it.prettyPrint()
+                    }
+
+                    result.doIfFailure {
+                        // show failure toast
+                    }
+                }
             }
-
-            result.doIfFailure {
-                // show failure toast
-            }
+            else -> Unit
         }
     }
 
