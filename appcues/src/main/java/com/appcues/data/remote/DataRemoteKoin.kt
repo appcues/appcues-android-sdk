@@ -4,7 +4,7 @@ import com.appcues.AppcuesConfig
 import com.appcues.data.remote.appcues.AppcuesRemoteSource
 import com.appcues.data.remote.appcues.AppcuesService
 import com.appcues.data.remote.appcues.MetricsInterceptor
-import com.appcues.data.remote.customerapi.CustomerApiHostInterceptor
+import com.appcues.data.remote.customerapi.CustomerApiBaseUrlInterceptor
 import com.appcues.data.remote.customerapi.CustomerApiRemoteSource
 import com.appcues.data.remote.customerapi.CustomerApiService
 import com.appcues.data.remote.imageupload.ImageUploadRemoteSource
@@ -48,7 +48,7 @@ internal object DataRemoteKoin : KoinScopePlugin {
             CustomerApiRemoteSource(
                 service = RetrofitWrapper(
                     baseUrl = null,
-                    interceptors = listOf(CustomerApiHostInterceptor()),
+                    interceptors = listOf(CustomerApiBaseUrlInterceptor()),
                 ).create(CustomerApiService::class),
                 config = get()
             )

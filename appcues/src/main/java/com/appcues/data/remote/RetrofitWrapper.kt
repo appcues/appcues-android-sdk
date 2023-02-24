@@ -3,6 +3,7 @@ package com.appcues.data.remote
 import com.appcues.BuildConfig
 import com.appcues.data.MoshiConfiguration
 import okhttp3.HttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -35,11 +36,8 @@ internal class RetrofitWrapper(
         Retrofit.Builder()
             .client(okHttp)
             .addConverterFactory(MoshiConverterFactory.create(MoshiConfiguration.moshi))
-            .also {
-                if (baseUrl != null) {
-                    it.baseUrl(baseUrl)
-                }
-            }.build()
+            .baseUrl(baseUrl ?: "http://localhost/".toHttpUrl())
+            .build()
     }
 
     fun <T : Any> create(service: KClass<T>): T {
