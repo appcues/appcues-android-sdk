@@ -9,7 +9,7 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 internal interface CustomerApiService {
-    @POST("/v1/accounts/{account}/mobile/{application}/pre-upload-screenshot?name={name}")
+    @POST("v1/accounts/{account}/mobile/{application}/pre-upload-screenshot")
     suspend fun preUploadScreenshot(
         @Path("account") account: String,
         @Path("application") application: String,
@@ -17,7 +17,7 @@ internal interface CustomerApiService {
         @Header("Authorization") authorization: String,
     ): PreUploadScreenshotResponse
 
-    @POST("/v1/accounts/{account}/mobile/{application}/screens")
+    @POST("v1/accounts/{account}/mobile/{application}/screens")
     suspend fun screen(
         @Path("account") account: String,
         @Path("application") application: String,

@@ -7,6 +7,7 @@ import com.appcues.data.remote.RemoteError
 import com.appcues.data.remote.customerapi.response.PreUploadScreenshotResponse
 import com.appcues.debugger.screencapture.Capture
 import com.appcues.util.ResultOf
+import okhttp3.HttpUrl
 import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -45,12 +46,12 @@ internal class CustomerApiRemoteSource(
     }
 }
 
-internal class CustomerApiHostInterceptor : Interceptor {
+internal class CustomerApiBaseUrlInterceptor : Interceptor {
 
     companion object {
         // customer API host is looked up in settings, and must be set here
         // before any usage
-        lateinit var host: String
+        lateinit var baseUrl: HttpUrl
     }
 
     override fun intercept(chain: Interceptor.Chain): Response {
@@ -58,7 +59,8 @@ internal class CustomerApiHostInterceptor : Interceptor {
         var request = chain.request()
 
         val newUrl = request.url.newBuilder()
-            .host(host)
+            .scheme(baseUrl.scheme)
+            .host(baseUrl.host)
             .build()
 
         request = request.newBuilder()
