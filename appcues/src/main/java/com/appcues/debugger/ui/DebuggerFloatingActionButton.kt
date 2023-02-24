@@ -104,7 +104,7 @@ internal fun BoxScope.DebuggerFloatingActionButton(
                     .clip(RoundedCornerShape(percent = 100))
                     .background(
                         brush = Brush.horizontalGradient(
-                            listOf(AppcuesColors.ShadyNeonBlue, AppcuesColors.PurpleAnemone)
+                            listOf(AppcuesColors.Blurple, AppcuesColors.PurpleAnemone)
                         )
                     )
                     .padding(12.dp),
