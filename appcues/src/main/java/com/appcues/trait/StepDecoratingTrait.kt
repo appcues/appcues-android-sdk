@@ -1,6 +1,7 @@
 package com.appcues.trait
 
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 
 interface StepDecoratingTrait : ExperienceTrait {
@@ -15,5 +16,5 @@ interface StepDecoratingTrait : ExperienceTrait {
     val stepComposeOrder: StepDecoratingType
 
     @Composable
-    fun BoxScope.DecorateStep(stepDecoratingPadding: StepDecoratingPadding)
+    fun BoxScope.DecorateStep(wrapperInsets: PaddingValues, stickyContentPadding: StickyContentPadding)
 }

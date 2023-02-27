@@ -25,7 +25,6 @@ import com.appcues.trait.appcues.TooltipPointerPosition.NONE
 import com.appcues.trait.appcues.TooltipPointerPosition.TOP
 import com.appcues.trait.appcues.TooltipPointerPosition.TOP_END
 import com.appcues.trait.appcues.TooltipPointerPosition.TOP_START
-import com.appcues.ui.utils.AppcuesWindowInfo
 import com.appcues.util.ne
 
 internal enum class TooltipPointerPosition {
@@ -69,18 +68,6 @@ internal fun getTooltipSettings(
         pointerBasePx = with(density) { pointerBaseDp.toPx() },
         pointerLengthPx = with(density) { pointerLengthDp.toPx() }
     )
-}
-
-internal fun getPointerPosition(
-    windowInfo: AppcuesWindowInfo,
-    targetRect: Rect?,
-): TooltipPointerPosition {
-    // Figure out where to position the tooltip
-    return when {
-        targetRect == null -> NONE
-        targetRect.center.y.dp < windowInfo.heightDp / 2 -> TOP
-        else -> BOTTOM
-    }
 }
 
 @Composable

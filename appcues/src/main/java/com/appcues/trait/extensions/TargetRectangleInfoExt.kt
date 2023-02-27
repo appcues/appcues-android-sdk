@@ -7,7 +7,14 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.appcues.trait.appcues.TargetRectangleTrait
+import com.appcues.trait.appcues.TargetRectangleTrait.ContentPreferredPosition
 import com.appcues.trait.appcues.TargetRectangleTrait.TargetRectangleInfo
+import com.appcues.trait.appcues.TooltipContainerDimens
+import com.appcues.trait.appcues.TooltipPointerPosition
+import com.appcues.trait.appcues.TooltipPointerPosition.BOTTOM
+import com.appcues.trait.appcues.TooltipPointerPosition.NONE
+import com.appcues.trait.appcues.TooltipPointerPosition.TOP
+import com.appcues.trait.appcues.TooltipTrait
 import com.appcues.ui.composables.AppcuesStepMetadata
 import com.appcues.ui.utils.AppcuesWindowInfo
 
@@ -16,7 +23,6 @@ internal fun rememberTargetRectangleInfo(metadata: AppcuesStepMetadata): TargetR
     return metadata.actual[TargetRectangleTrait.TARGET_RECTANGLE_METADATA] as TargetRectangleInfo?
 }
 
-@Composable
 internal fun TargetRectangleInfo?.getRect(windowInfo: AppcuesWindowInfo): Rect? {
     if (this == null) return null
 
@@ -35,7 +41,27 @@ internal fun TargetRectangleInfo?.getRect(windowInfo: AppcuesWindowInfo): Rect? 
     )
 }
 
-@Composable
 internal fun TargetRectangleInfo?.getContentDistance(): Dp {
     return this?.contentDistance?.dp ?: 0.0.dp
+}
+
+internal fun TargetRectangleInfo?.getTooltipPointerPosition(
+    windowInfo: AppcuesWindowInfo,
+    containerDimens: TooltipContainerDimens?,
+    targetRect: Rect?,
+    contentDistanceFromTarget: Dp,
+): TooltipPointerPosition {
+    if (targetRect == null || containerDimens == null) return NONE
+
+    val topSafeArea = targetRect.top.dp - contentDistanceFromTarget - TooltipTrait.SCREEN_VERTICAL_PADDING
+    val bottomSafeArea = windowInfo.heightDp - contentDistanceFromTarget - TooltipTrait.SCREEN_VERTICAL_PADDING - targetRect.bottom.dp
+
+    return when (this?.prefPosition) {
+        ContentPreferredPosition.TOP -> if (topSafeArea > containerDimens.heightDp) BOTTOM else TOP
+        ContentPreferredPosition.BOTTOM -> if (bottomSafeArea > containerDimens.heightDp) TOP else BOTTOM
+        else -> when {
+            targetRect.center.y.dp < windowInfo.heightDp / 2 -> TOP
+            else -> BOTTOM
+        }
+    }
 }

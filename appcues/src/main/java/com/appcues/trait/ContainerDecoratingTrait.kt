@@ -1,6 +1,7 @@
 package com.appcues.trait
 
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 
 interface ContainerDecoratingTrait : ExperienceTrait {
@@ -15,5 +16,5 @@ interface ContainerDecoratingTrait : ExperienceTrait {
     val containerComposeOrder: ContainerDecoratingType
 
     @Composable
-    fun BoxScope.DecorateContainer()
+    fun BoxScope.DecorateContainer(wrapperInsets: PaddingValues)
 }

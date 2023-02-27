@@ -11,7 +11,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSizeIn
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.GenericShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -36,6 +38,7 @@ import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.trait.AppcuesTraitAnimatedVisibility
 import com.appcues.trait.ContentWrappingTrait
 import com.appcues.trait.PresentingTrait
+import com.appcues.trait.appcues.TargetRectangleTrait.TargetRectangleInfo
 import com.appcues.trait.appcues.TooltipPointerPosition.BOTTOM
 import com.appcues.trait.appcues.TooltipPointerPosition.BOTTOM_END
 import com.appcues.trait.appcues.TooltipPointerPosition.BOTTOM_START
@@ -45,6 +48,7 @@ import com.appcues.trait.appcues.TooltipPointerPosition.TOP_END
 import com.appcues.trait.appcues.TooltipPointerPosition.TOP_START
 import com.appcues.trait.extensions.getContentDistance
 import com.appcues.trait.extensions.getRect
+import com.appcues.trait.extensions.getTooltipPointerPosition
 import com.appcues.trait.extensions.rememberDpStepAnimation
 import com.appcues.trait.extensions.rememberFloatStepAnimation
 import com.appcues.trait.extensions.rememberTargetRectangleInfo
@@ -53,6 +57,7 @@ import com.appcues.ui.composables.LocalAppcuesStepMetadata
 import com.appcues.ui.composables.rememberAppcuesContentVisibility
 import com.appcues.ui.extensions.coloredShadowPath
 import com.appcues.ui.extensions.getColor
+import com.appcues.ui.extensions.getPaddings
 import com.appcues.ui.extensions.styleBackground
 import com.appcues.ui.modal.dialogEnterTransition
 import com.appcues.ui.modal.dialogExitTransition
@@ -70,8 +75,8 @@ internal class TooltipTrait(
 
         const val TYPE = "@appcues/tooltip"
 
-        private val SCREEN_HORIZONTAL_PADDING = 12.dp
-        private val SCREEN_VERTICAL_PADDING = 24.dp
+        val SCREEN_HORIZONTAL_PADDING = 12.dp
+        val SCREEN_VERTICAL_PADDING = 24.dp
         private val MAX_WIDTH_DP = 350.dp
         private val MAX_HEIGHT_DP = 600.dp
         private const val POINTER_BASE_DEFAULT = 12.0
@@ -80,41 +85,36 @@ internal class TooltipTrait(
 
     private val style = config.getConfigStyle("style")
 
-    private val pointerBaseDp = config.getConfigOrDefault("pointerBase", POINTER_BASE_DEFAULT).dp
-    private val pointerLengthDp = config.getConfigOrDefault("pointerLength", POINTER_LENGTH_DEFAULT).dp
-    // implementation remaining properties
-    // private val preferredPosition = config.getConfigOrDefault("preferredPosition", "center")
-    // private val hidePointer = config.getConfigOrDefault("hidePointer", false)
+    // if hidePointer is present, set base and length to 0 Dp
+    private val hidePointer = config.getConfigOrDefault("hidePointer", false)
+    private val pointerBaseDp = if (hidePointer) 0.dp else config.getConfigOrDefault("pointerBase", POINTER_BASE_DEFAULT).dp
+    private val pointerLengthDp = if (hidePointer) 0.dp else config.getConfigOrDefault("pointerLength", POINTER_LENGTH_DEFAULT).dp
 
     override fun present() {
         AppcuesOverlayViewManager(scope = scope).start()
     }
 
     @Composable
-    override fun WrapContent(content: @Composable (hasFixedHeight: Boolean, contentPadding: PaddingValues?) -> Unit) {
+    override fun WrapContent(content: @Composable (modifier: Modifier, wrapperInsets: PaddingValues) -> Unit) {
         val density = LocalDensity.current
         val metadata = LocalAppcuesStepMetadata.current
 
         val windowInfo = rememberAppcuesWindowInfo()
         val targetRectInfo = rememberTargetRectangleInfo(metadata)
-        val targetRect = targetRectInfo.getRect(windowInfo = windowInfo)
+        val containerDimens = remember { mutableStateOf<TooltipContainerDimens?>(null) }
+        val targetRect = targetRectInfo.getRect(windowInfo)
         val distance = targetRectInfo.getContentDistance()
 
         val floatAnimation = rememberFloatStepAnimation(metadata)
         val dpAnimation = rememberDpStepAnimation(metadata)
 
-        val containerDimens = remember { mutableStateOf<TooltipContainerDimens?>(null) }
-
-        val tooltipSettings =
-            remember(targetRect, containerDimens.value) {
-                getTooltipSettings(
-                    density = density,
-                    position = getPointerPosition(windowInfo, targetRect),
-                    distance = distance,
-                    pointerBaseDp = pointerBaseDp,
-                    pointerLengthDp = pointerLengthDp
-                )
-            }
+        val tooltipSettings = rememberTooltipSettings(
+            windowInfo = windowInfo,
+            targetRectangleInfo = targetRectInfo,
+            containerDimens = containerDimens.value,
+            targetRect = targetRect,
+            distance = distance
+        )
 
         Box(
             modifier = Modifier
@@ -127,7 +127,15 @@ internal class TooltipTrait(
                 exit = dialogExitTransition(),
             ) {
                 // positions both the tip and modal of the tooltip on the screen
-                Column(modifier = Modifier.positionTooltip(targetRect, containerDimens.value, tooltipSettings, windowInfo, dpAnimation)) {
+                Column(
+                    modifier = Modifier.positionTooltip(
+                        targetRect,
+                        containerDimens.value,
+                        tooltipSettings,
+                        windowInfo,
+                        dpAnimation
+                    )
+                ) {
                     val tooltipPath = tooltipPath(tooltipSettings, containerDimens.value, style, floatAnimation)
                     Box(
                         modifier = Modifier
@@ -138,9 +146,13 @@ internal class TooltipTrait(
                             .clipToPath(tooltipPath)
                             .styleBackground(style, isSystemInDarkTheme())
                             .styleBorderPath(style, tooltipPath, isSystemInDarkTheme())
-                            .tooltipPointerPadding(tooltipSettings)
                     ) {
-                        content(false, PaddingValues(0.dp))
+                        content(
+                            modifier = Modifier
+                                .verticalScroll(rememberScrollState())
+                                .padding(style.getPaddings()),
+                            wrapperInsets = tooltipSettings.getContentPaddingValues()
+                        )
                     }
                 }
             }
@@ -225,14 +237,12 @@ internal class TooltipTrait(
         then(Modifier.padding(start = toolTipPaddingStart.value, top = tooltipPaddingTop.value))
     }
 
-    private fun Modifier.tooltipPointerPadding(pointerSettings: TooltipSettings): Modifier {
-        return then(
-            when (pointerSettings.pointerPosition) {
-                TOP, TOP_START, TOP_END -> Modifier.padding(top = pointerSettings.pointerLengthDp)
-                BOTTOM, BOTTOM_START, BOTTOM_END -> Modifier.padding(bottom = pointerSettings.pointerLengthDp)
-                NONE -> Modifier
-            }
-        )
+    private fun TooltipSettings.getContentPaddingValues(): PaddingValues {
+        return when (pointerPosition) {
+            TOP, TOP_START, TOP_END -> PaddingValues(top = pointerLengthDp)
+            BOTTOM, BOTTOM_START, BOTTOM_END -> PaddingValues(bottom = pointerLengthDp)
+            NONE -> PaddingValues()
+        }
     }
 
     private fun Modifier.styleShadowPath(style: ComponentStyle?, path: Path, isDark: Boolean): Modifier {
@@ -251,4 +261,31 @@ internal class TooltipTrait(
     private fun Modifier.tooltipSize(style: ComponentStyle?): Modifier = then(
         Modifier.size(width = style?.width?.dp ?: Dp.Unspecified, height = style?.height?.dp ?: Dp.Unspecified)
     )
+
+    @Composable
+    private fun rememberTooltipSettings(
+        windowInfo: AppcuesWindowInfo,
+        targetRectangleInfo: TargetRectangleInfo?,
+        containerDimens: TooltipContainerDimens?,
+        targetRect: Rect?,
+        distance: Dp,
+    ): TooltipSettings {
+        val density = LocalDensity.current
+        return remember(targetRectangleInfo, containerDimens) {
+            val pointerPosition = targetRectangleInfo.getTooltipPointerPosition(
+                windowInfo = windowInfo,
+                containerDimens = containerDimens,
+                targetRect = targetRect,
+                contentDistanceFromTarget = distance
+            )
+
+            getTooltipSettings(
+                density = density,
+                position = pointerPosition,
+                distance = distance,
+                pointerBaseDp = pointerBaseDp,
+                pointerLengthDp = pointerLengthDp
+            )
+        }
+    }
 }

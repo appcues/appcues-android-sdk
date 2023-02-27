@@ -1,6 +1,7 @@
 package com.appcues.data.mapper.step
 
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import com.appcues.data.mapper.LeveledTraitResponse
 import com.appcues.data.mapper.trait.TraitsMapper
@@ -15,10 +16,10 @@ import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse
 import com.appcues.data.remote.appcues.response.trait.TraitResponse
 import com.appcues.trait.ExperienceTraitLevel
 import com.appcues.trait.PresentingTrait
-import com.appcues.trait.StepDecoratingPadding
 import com.appcues.trait.StepDecoratingTrait
 import com.appcues.trait.StepDecoratingTrait.StepDecoratingType
 import com.appcues.trait.StepDecoratingTrait.StepDecoratingType.OVERLAY
+import com.appcues.trait.StickyContentPadding
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
@@ -27,6 +28,7 @@ import org.junit.Test
 import java.util.UUID
 
 class StepMapperTest {
+
     @Test
     fun `map SHOULD extract top and bottom sticky content`() {
         // Given
@@ -259,7 +261,7 @@ private class TestStepDecoratingTrait : StepDecoratingTrait {
         get() = OVERLAY
 
     @Composable
-    override fun BoxScope.DecorateStep(stepDecoratingPadding: StepDecoratingPadding) {
+    override fun BoxScope.DecorateStep(wrapperInsets: PaddingValues, stickyContentPadding: StickyContentPadding) {
         return
     }
 

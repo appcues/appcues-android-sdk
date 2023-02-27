@@ -2,6 +2,7 @@ package com.appcues.ui.composables
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -13,13 +14,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInteropFilter
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import com.appcues.logging.Logcues
 import com.appcues.trait.BackdropDecoratingTrait
 import com.appcues.trait.ContainerDecoratingTrait
 import com.appcues.trait.ContainerDecoratingTrait.ContainerDecoratingType
 import com.appcues.trait.ContentHolderTrait.ContainerPages
-import com.appcues.trait.StepDecoratingPadding
 import com.appcues.ui.AppcuesViewModel
 import com.appcues.ui.AppcuesViewModel.UIState.Dismissing
 import com.appcues.ui.AppcuesViewModel.UIState.Rendering
@@ -126,11 +126,10 @@ private fun BoxScope.ComposeLastRenderingState(state: Rendering) {
             // apply backdrop traits
             ApplyBackgroundDecoratingTraits(backdropDecoratingTraits.value)
 
-            // TODO contentPadding + stepDecoratingPadding into one? to fix tooltip padding issue
             // create wrapper
-            contentWrappingTrait.WrapContent { hasFixedHeight, contentPadding ->
+            contentWrappingTrait.WrapContent { modifier, wrapperInsets ->
                 Box(contentAlignment = Alignment.TopCenter) {
-                    ApplyUnderlayContainerTraits(containerDecoratingTraits.value)
+                    ApplyUnderlayContainerTraits(containerDecoratingTraits.value, wrapperInsets)
 
                     // Apply content holder trait
                     with(contentHolderTrait) {
@@ -138,25 +137,13 @@ private fun BoxScope.ComposeLastRenderingState(state: Rendering) {
                         ContainerPages(
                             pageCount = steps.size,
                             currentPage = state.position,
-                            composePage = { index ->
-                                with(steps[index]) {
-                                    CompositionLocalProvider(
-                                        LocalAppcuesActions provides actions,
-                                        LocalExperienceStepFormStateDelegate provides formState
-                                    ) {
-                                        // used to get the padding values from step decorating trait and apply to the Column
-                                        val density = LocalDensity.current
-                                        val stepDecoratingPadding = remember(this) { StepDecoratingPadding(density) }
-
-                                        ApplyUnderlayStepTraits(this@Box, stepDecoratingPadding)
-
-                                        ComposeStepContent(index, hasFixedHeight, contentPadding, stepDecoratingPadding)
-
-                                        ApplyOverlayStepTraits(this@Box, stepDecoratingPadding)
-
-                                        ComposeStickyContent(this@Box, stepDecoratingPadding)
-                                    }
-                                }
+                            composePage = {
+                                steps[it]
+                                    .ComposeStep(
+                                        modifier = modifier.testTag("page_$it"),
+                                        wrapperInsets = wrapperInsets,
+                                        parent = this@Box
+                                    )
                             }
                         ).also {
                             // create content holder
@@ -166,11 +153,18 @@ private fun BoxScope.ComposeLastRenderingState(state: Rendering) {
                         }
                     }
 
-                    ApplyOverlayContainerTraits(containerDecoratingTraits.value)
+                    ApplyOverlayContainerTraits(containerDecoratingTraits.value, wrapperInsets)
                 }
             }
         }
     }
+}
+
+@Composable
+internal fun BoxScope.ApplyUnderlayContainerTraits(list: List<ContainerDecoratingTrait>, wrapperInsets: PaddingValues) {
+    list
+        .filter { it.containerComposeOrder == ContainerDecoratingType.UNDERLAY }
+        .forEach { it.run { DecorateContainer(wrapperInsets) } }
 }
 
 @Composable
@@ -183,15 +177,8 @@ private fun BoxScope.ApplyBackgroundDecoratingTraits(list: List<BackdropDecorati
 }
 
 @Composable
-internal fun BoxScope.ApplyUnderlayContainerTraits(list: List<ContainerDecoratingTrait>) {
-    list
-        .filter { it.containerComposeOrder == ContainerDecoratingType.UNDERLAY }
-        .forEach { it.run { DecorateContainer() } }
-}
-
-@Composable
-internal fun BoxScope.ApplyOverlayContainerTraits(list: List<ContainerDecoratingTrait>) {
+internal fun BoxScope.ApplyOverlayContainerTraits(list: List<ContainerDecoratingTrait>, wrapperInsets: PaddingValues) {
     list
         .filter { it.containerComposeOrder == ContainerDecoratingType.OVERLAY }
-        .forEach { it.run { DecorateContainer() } }
+        .forEach { it.run { DecorateContainer(wrapperInsets) } }
 }
