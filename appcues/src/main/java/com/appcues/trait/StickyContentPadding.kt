@@ -5,7 +5,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.unit.Density
 
-class StepDecoratingPadding(private val density: Density) {
+class StickyContentPadding(private val density: Density) {
 
     private val topPaddingPx = mutableStateOf(0)
     private val bottomPaddingPx = mutableStateOf(0)

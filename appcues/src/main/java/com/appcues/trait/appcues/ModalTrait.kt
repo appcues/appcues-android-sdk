@@ -3,6 +3,7 @@ package com.appcues.trait.appcues
 import android.content.Context
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.getConfigOrDefault
 import com.appcues.data.model.getConfigStyle
@@ -33,7 +34,7 @@ internal class ModalTrait(
     private val style = config.getConfigStyle("style")
 
     @Composable
-    override fun WrapContent(content: @Composable (hasFixedHeight: Boolean, contentPadding: PaddingValues?) -> Unit) {
+    override fun WrapContent(content: @Composable (modifier: Modifier, wrapperInsets: PaddingValues) -> Unit) {
         val windowInfo = rememberAppcuesWindowInfo()
 
         when (presentationStyle) {

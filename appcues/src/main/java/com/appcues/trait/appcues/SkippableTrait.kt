@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -76,10 +77,11 @@ internal class SkippableTrait(
     private val ignoreBackdropTap = config.getConfigOrDefault(CONFIG_IGNORE_BACKDROP_TAP, false)
 
     @Composable
-    override fun BoxScope.DecorateContainer() {
+    override fun BoxScope.DecorateContainer(wrapperInsets: PaddingValues) {
         val description = stringResource(id = R.string.appcues_skippable_trait_dismiss)
         Spacer(
             modifier = Modifier
+                .padding(wrapperInsets)
                 .align(Alignment.TopEnd)
                 .padding(buttonAppearance.margin)
                 .size(buttonAppearance.size)

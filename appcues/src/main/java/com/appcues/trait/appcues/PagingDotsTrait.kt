@@ -5,6 +5,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -45,7 +46,7 @@ internal class PagingDotsTrait(
     private val style = config.getConfigStyle("style")
 
     @Composable
-    override fun BoxScope.DecorateContainer() {
+    override fun BoxScope.DecorateContainer(wrapperInsets: PaddingValues) {
         val paginationData = rememberAppcuesPaginationState()
         val pageCount = paginationData.value.pageCount
 
@@ -69,13 +70,9 @@ internal class PagingDotsTrait(
 
         Box(
             modifier = Modifier
+                .padding(wrapperInsets)
                 .align(style.getBoxAlignment())
-                .padding(
-                    (DEFAULT_PADDING + (style?.marginLeading ?: 0.0)).dp,
-                    (DEFAULT_PADDING + (style?.marginTop ?: 0.0)).dp,
-                    (DEFAULT_PADDING + (style?.marginTrailing ?: 0.0)).dp,
-                    (DEFAULT_PADDING + (style?.marginBottom ?: 0.0)).dp
-                ),
+                .stylePadding(),
             contentAlignment = Alignment.CenterStart
         ) {
             Row(
@@ -114,4 +111,12 @@ internal class PagingDotsTrait(
             )
         }
     }
+
+    @Composable
+    private fun Modifier.stylePadding(): Modifier = padding(
+        (DEFAULT_PADDING + (style?.marginLeading ?: 0.0)).dp,
+        (DEFAULT_PADDING + (style?.marginTop ?: 0.0)).dp,
+        (DEFAULT_PADDING + (style?.marginTrailing ?: 0.0)).dp,
+        (DEFAULT_PADDING + (style?.marginBottom ?: 0.0)).dp
+    )
 }
