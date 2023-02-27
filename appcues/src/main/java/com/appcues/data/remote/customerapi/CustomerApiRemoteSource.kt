@@ -25,7 +25,7 @@ internal class CustomerApiRemoteSource(
             service.preUploadScreenshot(
                 account = config.accountId,
                 application = config.applicationId,
-                name = capture.id.toString(),
+                name = "${capture.id}.png",
                 authorization = "Bearer $token"
             )
         }
