@@ -216,7 +216,6 @@ internal class DebuggerViewModel(
 
                     result.doIfSuccess {
                         // show success toast
-
                         // TESTING!!
                         it.prettyPrint()
                     }

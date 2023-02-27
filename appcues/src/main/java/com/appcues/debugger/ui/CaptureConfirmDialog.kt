@@ -149,7 +149,8 @@ private fun CaptureContents(debuggerViewModel: DebuggerViewModel, capture: Captu
                     .conditionalClickable(
                         enabled = text.value.isEmpty().not(),
                         onClick = {
-                            debuggerViewModel.onScreenCaptureConfirm(capture.copy(displayName = text.value))
+                            val updatedCapture = capture.copy(displayName = text.value).apply { screenshot = capture.screenshot }
+                            debuggerViewModel.onScreenCaptureConfirm(updatedCapture)
                         }
                     ),
                 text = stringResource(id = string.appcues_screen_capture_ok),

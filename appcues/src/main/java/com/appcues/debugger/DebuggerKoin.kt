@@ -28,7 +28,13 @@ internal object DebuggerKoin : KoinScopePlugin {
         }
 
         scoped {
-            ScreenCaptureProcessor(config = get(), contextResources = get())
+            ScreenCaptureProcessor(
+                config = get(),
+                contextResources = get(),
+                sdkSettingsRemoteSource = get(),
+                customerApiRemoteSource = get(),
+                imageUploadRemoteSource = get(),
+            )
         }
     }
 }
