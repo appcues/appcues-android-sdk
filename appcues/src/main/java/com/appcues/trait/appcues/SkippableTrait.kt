@@ -21,6 +21,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.appcues.AppcuesCoroutineScope
@@ -58,8 +60,8 @@ internal class SkippableTrait(
         val rippleRadius = (size / 2) - padding
 
         object Hidden : ButtonAppearance(0.dp, 0.dp, 0.dp)
-        object Minimal : ButtonAppearance(4.dp, 32.dp, 6.dp)
-        object Default : ButtonAppearance(4.dp, 48.dp, 8.dp)
+        object Minimal : ButtonAppearance(4.dp, 30.dp, 8.dp)
+        object Default : ButtonAppearance(8.dp, 30.dp, 8.dp)
     }
 
     override val containerComposeOrder = ContainerDecoratingType.OVERLAY
@@ -75,6 +77,7 @@ internal class SkippableTrait(
 
     @Composable
     override fun BoxScope.DecorateContainer() {
+        val description = stringResource(id = R.string.appcues_skippable_trait_dismiss)
         Spacer(
             modifier = Modifier
                 .align(Alignment.TopEnd)
@@ -90,12 +93,11 @@ internal class SkippableTrait(
                     role = Role.Button,
                     interactionSource = remember { MutableInteractionSource() },
                     indication = rememberRipple(bounded = false, radius = buttonAppearance.rippleRadius),
-                    onClickLabel = stringResource(id = R.string.appcues_skippable_trait_dismiss)
+                    onClickLabel = description
                 )
-                .padding(buttonAppearance.padding)
-                .clip(CircleShape)
                 .drawSkippableButton(buttonAppearance)
-
+                // useful for testing and also for accessibility
+                .semantics { this.contentDescription = description }
         )
     }
 
@@ -129,15 +131,20 @@ internal class SkippableTrait(
                 Default ->
                     Modifier
                         .background(Color(color = 0x54000000))
+                        .padding(buttonAppearance.padding)
+                        .clip(CircleShape)
                         .drawBehind {
-                            xShapePath(Color(color = 0xFFEFEFEF), deflateDp = 8.dp)
+                            xShapePath(Color(color = 0xFFEFEFEF))
                                 .also { drawPath(path = it, color = Color.Transparent) }
                         }
                 Minimal ->
-                    Modifier.drawBehind {
-                        xShapePath(Color(color = 0xFFB2B2B2))
-                            .also { drawPath(path = it, color = Color.Transparent, blendMode = BlendMode.Difference) }
-                    }
+                    Modifier
+                        .padding(buttonAppearance.padding)
+                        .clip(CircleShape)
+                        .drawBehind {
+                            xShapePath(Color(color = 0xFFB2B2B2))
+                                .also { drawPath(path = it, color = Color.Transparent, blendMode = BlendMode.Difference) }
+                        }
             }
         )
     }
