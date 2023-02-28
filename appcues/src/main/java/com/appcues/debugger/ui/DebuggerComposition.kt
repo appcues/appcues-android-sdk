@@ -23,6 +23,8 @@ import androidx.lifecycle.LifecycleEventObserver
 import com.appcues.debugger.DebugMode.Debugger
 import com.appcues.debugger.DebugMode.ScreenCapture
 import com.appcues.debugger.DebuggerViewModel
+import com.appcues.debugger.DebuggerViewModel.ToastState
+import com.appcues.debugger.DebuggerViewModel.ToastState.Rendering
 import com.appcues.debugger.DebuggerViewModel.UIState.Creating
 import com.appcues.debugger.DebuggerViewModel.UIState.Dismissed
 import com.appcues.debugger.DebuggerViewModel.UIState.Dismissing
@@ -80,6 +82,8 @@ internal fun DebuggerComposition(viewModel: DebuggerViewModel, onDismiss: () -> 
                 debuggerViewModel = viewModel
             )
         }
+
+        ToastView(debuggerState = debuggerState)
     }
 
     with(debuggerState.isVisible) {
@@ -98,9 +102,31 @@ internal fun DebuggerComposition(viewModel: DebuggerViewModel, onDismiss: () -> 
         onDismiss = onDismiss,
     )
 
+    LaunchedToastStateEffect(
+        viewModel = viewModel,
+        debuggerState = debuggerState,
+    )
+
     // run once to transition state in viewModel
     LaunchedEffect(Unit) {
         viewModel.onRender()
+    }
+}
+
+@Composable
+private fun LaunchedToastStateEffect(
+    viewModel: DebuggerViewModel,
+    debuggerState: MutableDebuggerState,
+) {
+    viewModel.toastState.collectAsState().value.let {
+        when (it) {
+            is ToastState.Idle -> {
+                debuggerState.toast.targetState = null
+            }
+            is Rendering -> {
+                debuggerState.toast.targetState = it.type
+            }
+        }
     }
 }
 

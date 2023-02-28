@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.debugger.DebugMode.Debugger
 import com.appcues.debugger.DebugMode.ScreenCapture
+import com.appcues.debugger.DebuggerViewModel.ToastState.Rendering
 import com.appcues.debugger.DebuggerViewModel.UIState.Creating
 import com.appcues.debugger.DebuggerViewModel.UIState.Dismissed
 import com.appcues.debugger.DebuggerViewModel.UIState.Dismissing
@@ -14,13 +15,15 @@ import com.appcues.debugger.DebuggerViewModel.UIState.Idle
 import com.appcues.debugger.model.DebuggerEventItem
 import com.appcues.debugger.model.DebuggerFontItem
 import com.appcues.debugger.model.DebuggerStatusItem
+import com.appcues.debugger.model.DebuggerToast
+import com.appcues.debugger.model.DebuggerToast.ScreenCaptureFailure
+import com.appcues.debugger.model.DebuggerToast.ScreenCaptureSuccess
 import com.appcues.debugger.model.EventType
 import com.appcues.debugger.model.TapActionType
 import com.appcues.debugger.screencapture.Capture
 import com.appcues.debugger.screencapture.ScreenCaptureProcessor
-import com.appcues.debugger.screencapture.prettyPrint
-import com.appcues.util.doIfFailure
-import com.appcues.util.doIfSuccess
+import com.appcues.util.ResultOf.Failure
+import com.appcues.util.ResultOf.Success
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -53,10 +56,20 @@ internal class DebuggerViewModel(
         object Dismissed : UIState()
     }
 
+    sealed class ToastState {
+        object Idle : ToastState()
+        data class Rendering(val type: DebuggerToast) : ToastState()
+    }
+
     private val _uiState = MutableStateFlow<UIState>(Creating)
 
     val uiState: StateFlow<UIState>
         get() = _uiState
+
+    private val _toastState = MutableStateFlow<ToastState>(ToastState.Idle)
+
+    val toastState: StateFlow<ToastState>
+        get() = _toastState
 
     private val _statusInfo = MutableStateFlow<List<DebuggerStatusItem>>(arrayListOf())
 
@@ -212,16 +225,23 @@ internal class DebuggerViewModel(
             // saving a capture is only valid in screen capture mode with token
             is ScreenCapture -> {
                 viewModelScope.launch {
-                    val result = screenCaptureProcessor.save(capture, currentMode.token)
-
-                    result.doIfSuccess {
-                        // show success toast
-                        // TESTING!!
-                        it.prettyPrint()
-                    }
-
-                    result.doIfFailure {
-                        // show failure toast
+                    when (val result = screenCaptureProcessor.save(capture, currentMode.token)) {
+                        is Success -> _toastState.value = Rendering(
+                            type = ScreenCaptureSuccess(result.value) {
+                                // on dismiss
+                                _toastState.value = ToastState.Idle
+                            }
+                        )
+                        is Failure -> _toastState.value = Rendering(
+                            type = ScreenCaptureFailure(
+                                capture = capture,
+                                onDismiss = { _toastState.value = ToastState.Idle },
+                                onRetry = {
+                                    _toastState.value = ToastState.Idle
+                                    onScreenCaptureConfirm(capture)
+                                }
+                            )
+                        )
                     }
                 }
             }

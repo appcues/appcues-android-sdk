@@ -18,4 +18,6 @@ internal object AppcuesColors {
     val CaptureButtonGradientEnd = Color(color = 0xFF7D52FF)
     val CaptureImageBorder = Color(color = 0xFFDCE4F2)
     val CaptureTextInputBorder = Color(color = 0xFF79747E)
+    val DebuggerToastSuccessBackground = Color(color = 0xFF0072D6)
+    val DebuggerToastFailureBackground = Color(color = 0xFFDD2270)
 }
