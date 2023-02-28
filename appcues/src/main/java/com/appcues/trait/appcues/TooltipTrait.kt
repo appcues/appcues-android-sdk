@@ -73,7 +73,7 @@ internal class TooltipTrait(
         private val SCREEN_HORIZONTAL_PADDING = 12.dp
         private val SCREEN_VERTICAL_PADDING = 24.dp
         private val MAX_WIDTH_DP = 350.dp
-        private val MAX_HEIGHT_DP = 200.dp
+        private val MAX_HEIGHT_DP = 600.dp
         private const val POINTER_BASE_DEFAULT = 12.0
         private const val POINTER_LENGTH_DEFAULT = 8.0
     }
@@ -201,8 +201,8 @@ internal class TooltipTrait(
 
         val toolTipPaddingStart = animateDpAsState(
             targetValue = if (targetRect != null) {
-                val paddingStartMin = 0.dp
-                val paddingStartMax = windowInfo.widthDp - (SCREEN_HORIZONTAL_PADDING * 2) - containerDimens.widthDp
+                // padding start max cant be lower than 0, this causes coerceIn to throw an exception
+                val paddingStartMax = max(windowInfo.widthDp - (SCREEN_HORIZONTAL_PADDING * 2) - containerDimens.widthDp, 0.dp)
                 val paddingStartOnTarget = targetRect.center.x.dp - SCREEN_HORIZONTAL_PADDING - (containerDimens.widthDp / 2)
 
                 if (paddingStartOnTarget < 0.dp) {
@@ -212,7 +212,7 @@ internal class TooltipTrait(
                 }
 
                 // target value is between min and max
-                paddingStartOnTarget.coerceIn(paddingStartMin, paddingStartMax)
+                paddingStartOnTarget.coerceIn(0.dp, paddingStartMax)
             } else {
                 // When no targetRect is found we align the tooltip at bottomCenter of the screen
                 val paddingStartCentered = (windowInfo.widthDp - containerDimens.widthDp - (SCREEN_HORIZONTAL_PADDING * 2)) / 2

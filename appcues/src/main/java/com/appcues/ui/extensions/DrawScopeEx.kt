@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.dp
 internal fun DrawScope.xShapePath(color: Color, deflateDp: Dp = 0.dp): Path {
     return Path()
         .apply {
-            val strokeWidth = 2.dp.toPx()
+            val strokeWidth = 1.5.dp.toPx()
             val deflate = deflateDp.toPx()
             val sizeRect = size
                 .toRect()
