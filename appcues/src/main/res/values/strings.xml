@@ -90,4 +90,7 @@
     <string name="appcues_screen_capture_text_input_label">Name</string>
     <string name="appcues_screen_capture_cancel">Retry</string>
     <string name="appcues_screen_capture_ok">Send to builder</string>
+    <string name="appcues_screen_capture_toast_upload_failed">Upload failed</string>
+    <string name="appcues_screen_capture_toast_try_again">Try again</string>
+    <string name="appcues_screen_capture_toast_success_suffix">is now available for preview and targeting.</string>
 </resources>
