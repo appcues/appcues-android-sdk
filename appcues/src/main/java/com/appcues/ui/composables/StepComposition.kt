@@ -18,7 +18,12 @@ import com.appcues.trait.alignStepOverlay
 import com.appcues.ui.primitive.Compose
 
 @Composable
-internal fun Step.ComposeStep(modifier: Modifier = Modifier, wrapperInsets: PaddingValues, parent: BoxScope) {
+internal fun Step.ComposeStep(
+    modifier: Modifier = Modifier,
+    containerPadding: PaddingValues,
+    wrapperInsets: PaddingValues,
+    parent: BoxScope
+) {
     CompositionLocalProvider(
         LocalAppcuesActions provides actions,
         LocalExperienceStepFormStateDelegate provides formState
@@ -29,9 +34,9 @@ internal fun Step.ComposeStep(modifier: Modifier = Modifier, wrapperInsets: Padd
 
         ApplyUnderlayStepTraits(parent, wrapperInsets, stickyContentPadding)
 
-        ComposeStepContent(modifier, wrapperInsets, stickyContentPadding)
+        ComposeStepContent(modifier, containerPadding, wrapperInsets, stickyContentPadding)
 
-        ComposeStickyContent(parent, wrapperInsets, stickyContentPadding)
+        ComposeStickyContent(parent, containerPadding, wrapperInsets, stickyContentPadding)
 
         ApplyOverlayStepTraits(parent, wrapperInsets, stickyContentPadding)
     }
@@ -62,12 +67,14 @@ private fun Step.ApplyOverlayStepTraits(
 @Composable
 private fun Step.ComposeStepContent(
     modifier: Modifier,
+    containerPadding: PaddingValues,
     wrapperInsets: PaddingValues,
     stickyContentPadding: StickyContentPadding
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
+            .padding(containerPadding)
             .padding(wrapperInsets)
             .padding(stickyContentPadding.paddingValues.value)
     ) { content.Compose() }
@@ -76,12 +83,14 @@ private fun Step.ComposeStepContent(
 @Composable
 private fun Step.ComposeStickyContent(
     boxScope: BoxScope,
+    containerPadding: PaddingValues,
     wrapperInsets: PaddingValues,
     stickyContentPadding: StickyContentPadding
 ) {
     topStickyContent?.let {
         Box(
             modifier = Modifier
+                .padding(containerPadding)
                 .padding(wrapperInsets)
                 .alignStepOverlay(boxScope, Alignment.TopCenter, stickyContentPadding),
             contentAlignment = Alignment.BottomCenter
@@ -91,6 +100,7 @@ private fun Step.ComposeStickyContent(
     bottomStickyContent?.let {
         Box(
             modifier = Modifier
+                .padding(containerPadding)
                 .padding(wrapperInsets)
                 .alignStepOverlay(boxScope, Alignment.BottomCenter, stickyContentPadding),
             contentAlignment = Alignment.BottomCenter

@@ -127,7 +127,7 @@ private fun BoxScope.ComposeLastRenderingState(state: Rendering) {
             ApplyBackgroundDecoratingTraits(backdropDecoratingTraits.value)
 
             // create wrapper
-            contentWrappingTrait.WrapContent { modifier, wrapperInsets ->
+            contentWrappingTrait.WrapContent { modifier, containerPadding, wrapperInsets ->
                 Box(contentAlignment = Alignment.TopCenter) {
                     ApplyUnderlayContainerTraits(containerDecoratingTraits.value, wrapperInsets)
 
@@ -141,6 +141,7 @@ private fun BoxScope.ComposeLastRenderingState(state: Rendering) {
                                 steps[it]
                                     .ComposeStep(
                                         modifier = modifier.testTag("page_$it"),
+                                        containerPadding = containerPadding,
                                         wrapperInsets = wrapperInsets,
                                         parent = this@Box
                                     )

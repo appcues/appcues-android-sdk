@@ -39,7 +39,7 @@ private const val SCREEN_PADDING = 0.05
 @Composable
 internal fun DialogModal(
     style: ComponentStyle?,
-    content: @Composable (modifier: Modifier, wrapperInsets: PaddingValues) -> Unit,
+    content: @Composable (modifier: Modifier, containerPadding: PaddingValues, wrapperInsets: PaddingValues) -> Unit,
     windowInfo: AppcuesWindowInfo
 ) {
     val configuration = LocalConfiguration.current
@@ -67,9 +67,8 @@ internal fun DialogModal(
                     .modalStyle(style, isDark) { Modifier.dialogModifier(it, isDark) },
                 content = {
                     content(
-                        modifier = Modifier
-                            .verticalScroll(rememberScrollState())
-                            .padding(style.getPaddings()),
+                        modifier = Modifier.verticalScroll(rememberScrollState()),
+                        containerPadding = style.getPaddings(),
                         wrapperInsets = PaddingValues()
                     )
                 },

@@ -17,5 +17,5 @@ interface ContentWrappingTrait : ExperienceTrait {
      *                [wrapperInsets] defines safe area padding for the content inside.
      */
     @Composable
-    fun WrapContent(content: @Composable (modifier: Modifier, wrapperInsets: PaddingValues) -> Unit)
+    fun WrapContent(content: @Composable (modifier: Modifier, containerPadding: PaddingValues, wrapperInsets: PaddingValues) -> Unit)
 }
