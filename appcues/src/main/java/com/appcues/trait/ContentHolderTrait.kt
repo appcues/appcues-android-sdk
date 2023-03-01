@@ -7,6 +7,15 @@ import com.appcues.ui.composables.appcuesPaginationData
 
 interface ContentHolderTrait : ExperienceTrait {
 
+    /**
+     * Defines the content holder, usually used to support different kinds of pagination between steps
+     * that belong inside the same step group
+     *
+     * Example usage:
+     * @sample com.appcues.trait.appcues.CarouselTrait
+     *
+     * @param countainerPages current page information
+     */
     @Composable
     fun BoxScope.CreateContentHolder(containerPages: ContainerPages)
 

@@ -15,6 +15,15 @@ interface StepDecoratingTrait : ExperienceTrait {
      */
     val stepComposeOrder: StepDecoratingType
 
+    /**
+     * Decorates Specific step
+     *
+     * Example usage:
+     * @sample com.appcues.trait.appcues.BackgroundContentTrait
+     *
+     * @param wrapperInsets The safe area information from the wrapper trait.
+     * @param stickyContentPadding Padding amount defined by sticky content elements in this step
+     */
     @Composable
     fun BoxScope.DecorateStep(wrapperInsets: PaddingValues, stickyContentPadding: StickyContentPadding)
 }
