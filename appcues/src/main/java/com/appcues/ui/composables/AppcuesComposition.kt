@@ -121,7 +121,7 @@ private fun BoxScope.ComposeLastRenderingState(state: Rendering) {
 
                                     ApplyOverlayStepTraits(this@Box, stepDecoratingPadding)
 
-                                    ComposeStickyContent(this@Box, stepDecoratingPadding)
+                                    ComposeStickyContent(this@Box, contentPadding, stepDecoratingPadding)
                                 }
                             }
                         }

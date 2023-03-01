@@ -56,17 +56,21 @@ internal fun Step.ApplyOverlayStepTraits(boxScope: BoxScope, stepDecoratingPaddi
 }
 
 @Composable
-internal fun Step.ComposeStickyContent(boxScope: BoxScope, stepDecoratingPadding: StepDecoratingPadding) {
+internal fun Step.ComposeStickyContent(boxScope: BoxScope, contentPadding: PaddingValues?, stepDecoratingPadding: StepDecoratingPadding) {
     topStickyContent?.let {
         Box(
-            modifier = Modifier.alignStepOverlay(boxScope, Alignment.TopCenter, stepDecoratingPadding),
-            contentAlignment = Alignment.BottomCenter
+            modifier = Modifier
+                .then(if (contentPadding != null) Modifier.padding(contentPadding) else Modifier)
+                .alignStepOverlay(boxScope, Alignment.TopCenter, stepDecoratingPadding),
+            contentAlignment = Alignment.TopCenter
         ) { it.Compose() }
     }
 
     bottomStickyContent?.let {
         Box(
-            modifier = Modifier.alignStepOverlay(boxScope, Alignment.BottomCenter, stepDecoratingPadding),
+            modifier = Modifier
+                .then(if (contentPadding != null) Modifier.padding(contentPadding) else Modifier)
+                .alignStepOverlay(boxScope, Alignment.BottomCenter, stepDecoratingPadding),
             contentAlignment = Alignment.BottomCenter
         ) { it.Compose() }
     }
