@@ -15,7 +15,6 @@ import com.appcues.data.remote.customerapi.CustomerApiRemoteSource
 import com.appcues.data.remote.customerapi.response.PreUploadScreenshotResponse
 import com.appcues.data.remote.imageupload.ImageUploadRemoteSource
 import com.appcues.data.remote.sdksettings.SdkSettingsRemoteSource
-import com.appcues.data.remote.sdksettings.response.SdkSettingsResponse
 import com.appcues.monitor.AppcuesActivityMonitor
 import com.appcues.ui.ElementSelector
 import com.appcues.util.ContextResources
@@ -60,61 +59,47 @@ internal class ScreenCaptureProcessor(
         }
     }
 
-    suspend fun save(capture: Capture, token: String) =
+    suspend fun save(capture: Capture, token: String): ResultOf<Capture, RemoteError> {
         // Saving a screen is a 4-step chain. This is implemented here as a sequence of calls, chaining
         // a success continuation on each call to move to the next step. If any step fails, the RemoteError
         // is bubbled up to the caller of this function instead of the successful result, and an error
         // can be shown and handled.
-
-        // step 1 - get the settings, with the path to customer API
-        getSettings { sdkSettings ->
-
-            // step 2 - use the customer API path to get the link to upload the screenshot
-            CustomerApiBaseUrlInterceptor.baseUrl = sdkSettings.services.customerApi.toHttpUrl()
-            getUploadPath(capture, token) { preUpload ->
-
+        return try {
+            // step 1 - get the settings, with the path to customer API
+            configureCustomerApi()
+                // step 2 - use the customer API path to get the link to upload the screenshot
+                .getUploadPath(capture, token)
                 // step 3 - upload the screenshot
-                uploadImage(preUpload.upload.presignedUrl, capture) {
-
-                    // step 4 - update the screenshot link and save the screen
-                    val updatedCapture = capture.copy(screenshotImageUrl = preUpload.url)
-                    saveScreen(updatedCapture, token)
-                }
-            }
+                .uploadImage(capture)
+                // step 4 - update the screenshot link and save the screen
+                .saveScreen(token)
+                .let { Success(it) }
+        } catch (e: ScreenCaptureSaveException) {
+            Failure(e.error)
         }
+    }
 
     // step 1 - get the settings, with the path to customer API
-    private suspend fun getSettings(
-        onSuccess: suspend (SdkSettingsResponse) -> ResultOf<Capture, RemoteError>
-    ): ResultOf<Capture, RemoteError> {
-        return when (val settingsResponse = sdkSettingsRemoteSource.sdkSettings()) {
-            is Failure -> settingsResponse
+    private suspend fun configureCustomerApi(): CustomerApiRemoteSource {
+        return when (val settings = sdkSettingsRemoteSource.sdkSettings()) {
+            is Failure -> throw ScreenCaptureSaveException(settings.reason)
             is Success -> {
-                onSuccess(settingsResponse.value)
+                CustomerApiBaseUrlInterceptor.baseUrl = settings.value.services.customerApi.toHttpUrl()
+                customerApiRemoteSource
             }
         }
     }
 
     // step 2 - use the customer API path to get the link to upload the screenshot
-    private suspend fun getUploadPath(
-        capture: Capture,
-        token: String,
-        onSuccess: suspend (PreUploadScreenshotResponse) -> ResultOf<Capture, RemoteError>
-    ): ResultOf<Capture, RemoteError> {
-        return when (val preUploadResponse = customerApiRemoteSource.preUploadScreenshot(capture, token)) {
-            is Failure -> preUploadResponse
-            is Success -> {
-                onSuccess(preUploadResponse.value)
-            }
+    private suspend fun CustomerApiRemoteSource.getUploadPath(capture: Capture, token: String): PreUploadScreenshotResponse {
+        return when (val preUploadResponse = preUploadScreenshot(capture, token)) {
+            is Failure -> throw ScreenCaptureSaveException(preUploadResponse.reason)
+            is Success -> preUploadResponse.value
         }
     }
 
     // step 3 - upload the screenshot
-    private suspend fun uploadImage(
-        uploadUrl: String,
-        capture: Capture,
-        onSuccess: suspend () -> ResultOf<Capture, RemoteError>,
-    ): ResultOf<Capture, RemoteError> {
+    private suspend fun PreUploadScreenshotResponse.uploadImage(capture: Capture): Capture {
 
         val density = contextResources.displayMetrics.density
         val original = capture.screenshot
@@ -125,20 +110,18 @@ internal class ScreenCaptureProcessor(
             true
         )
         return when (
-            val uploadResponse = imageUploadRemoteSource.upload(uploadUrl, bitmap)
+            val uploadResponse = imageUploadRemoteSource.upload(this.upload.presignedUrl, bitmap)
         ) {
-            is Failure -> uploadResponse
-            is Success -> {
-                onSuccess()
-            }
+            is Failure -> throw ScreenCaptureSaveException(uploadResponse.reason)
+            is Success -> capture.copy(screenshotImageUrl = this.url)
         }
     }
 
     // step 4 - update the screenshot link and save the screen
-    private suspend fun saveScreen(capture: Capture, token: String) =
-        when (val screenResult = customerApiRemoteSource.screen(capture, token)) {
-            is Failure -> screenResult
-            is Success -> Success(capture)
+    private suspend fun Capture.saveScreen(token: String) =
+        when (val screenResult = customerApiRemoteSource.screen(this, token)) {
+            is Failure -> throw ScreenCaptureSaveException(screenResult.reason)
+            is Success -> this
         }
 
     private fun prepare(view: View) {
@@ -231,3 +214,5 @@ private fun View.screenshot() =
         this.draw(canvas)
         bitmap
     } else null
+
+private class ScreenCaptureSaveException(val error: RemoteError) : Exception("ScreenCaptureException: $error")
