@@ -34,7 +34,9 @@ internal class ModalTrait(
     private val style = config.getConfigStyle("style")
 
     @Composable
-    override fun WrapContent(content: @Composable (modifier: Modifier, wrapperInsets: PaddingValues) -> Unit) {
+    override fun WrapContent(
+        content: @Composable (modifier: Modifier, containerPadding: PaddingValues, wrapperInsets: PaddingValues) -> Unit
+    ) {
         val windowInfo = rememberAppcuesWindowInfo()
 
         when (presentationStyle) {
