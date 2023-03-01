@@ -129,11 +129,11 @@ internal class TooltipTrait(
                 // positions both the tip and modal of the tooltip on the screen
                 Column(
                     modifier = Modifier.positionTooltip(
-                        targetRect,
-                        containerDimens.value,
-                        tooltipSettings,
-                        windowInfo,
-                        dpAnimation
+                        targetRect = targetRect,
+                        containerDimens = containerDimens.value,
+                        pointerSettings = tooltipSettings,
+                        windowInfo = windowInfo,
+                        animationSpec = dpAnimation
                     )
                 ) {
                     val tooltipPath = tooltipPath(tooltipSettings, containerDimens.value, style, floatAnimation)

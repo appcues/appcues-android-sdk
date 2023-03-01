@@ -15,6 +15,14 @@ interface ContainerDecoratingTrait : ExperienceTrait {
      */
     val containerComposeOrder: ContainerDecoratingType
 
+    /**
+     * Decorates the container, it can decorate UNDER the content or OVER the content.
+     *
+     * Example usage:
+     * @sample com.appcues.trait.appcues.BackgroundContentTrait
+     *
+     * @param wrapperInsets The safe area information from the wrapper trait.
+     */
     @Composable
     fun BoxScope.DecorateContainer(wrapperInsets: PaddingValues)
 }
