@@ -20,7 +20,11 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Lifecycle.Event
 import androidx.lifecycle.Lifecycle.Event.ON_ANY
 import androidx.lifecycle.LifecycleEventObserver
+import com.appcues.debugger.DebugMode.Debugger
+import com.appcues.debugger.DebugMode.ScreenCapture
 import com.appcues.debugger.DebuggerViewModel
+import com.appcues.debugger.DebuggerViewModel.ToastState
+import com.appcues.debugger.DebuggerViewModel.ToastState.Rendering
 import com.appcues.debugger.DebuggerViewModel.UIState.Creating
 import com.appcues.debugger.DebuggerViewModel.UIState.Dismissed
 import com.appcues.debugger.DebuggerViewModel.UIState.Dismissing
@@ -34,7 +38,9 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun DebuggerComposition(viewModel: DebuggerViewModel, onDismiss: () -> Unit) {
     val density = LocalDensity.current
-    val debuggerState by remember { mutableStateOf(MutableDebuggerState(density, viewModel.uiState.value == Creating)) }
+    val debuggerState by remember {
+        mutableStateOf(MutableDebuggerState(viewModel.mode, density, viewModel.uiState.value == Creating))
+    }
 
     // listening for lifecycle changes to update isPaused properly
     LocalLifecycleOwner.current.lifecycle.observeAsState().let {
@@ -49,7 +55,7 @@ internal fun DebuggerComposition(viewModel: DebuggerViewModel, onDismiss: () -> 
 
         DebuggerOnDrag(
             debuggerState = debuggerState,
-            onDismiss = { viewModel.onDismiss() }
+            onDismiss = { viewModel.transition(Dismissing) }
         )
 
         DebuggerPanel(
@@ -57,7 +63,7 @@ internal fun DebuggerComposition(viewModel: DebuggerViewModel, onDismiss: () -> 
             debuggerViewModel = viewModel,
         )
 
-        // Fab is last because it will show on top of everything else in this composition
+        // Fab is on top of debugger panel in this composition
         DebuggerFloatingActionButton(
             debuggerState = debuggerState,
             debuggerViewModel = viewModel,
@@ -67,6 +73,17 @@ internal fun DebuggerComposition(viewModel: DebuggerViewModel, onDismiss: () -> 
             debuggerState = debuggerState,
             debuggerViewModel = viewModel,
         )
+
+        val capture = debuggerState.screenCapture.value
+        if (capture != null) {
+            CaptureConfirmDialog(
+                capture = capture,
+                debuggerState = debuggerState,
+                debuggerViewModel = viewModel
+            )
+        }
+
+        ToastView(debuggerState = debuggerState)
     }
 
     with(debuggerState.isVisible) {
@@ -85,9 +102,31 @@ internal fun DebuggerComposition(viewModel: DebuggerViewModel, onDismiss: () -> 
         onDismiss = onDismiss,
     )
 
+    LaunchedToastStateEffect(
+        viewModel = viewModel,
+        debuggerState = debuggerState,
+    )
+
     // run once to transition state in viewModel
     LaunchedEffect(Unit) {
         viewModel.onRender()
+    }
+}
+
+@Composable
+private fun LaunchedToastStateEffect(
+    viewModel: DebuggerViewModel,
+    debuggerState: MutableDebuggerState,
+) {
+    viewModel.toastState.collectAsState().value.let {
+        when (it) {
+            is ToastState.Idle -> {
+                debuggerState.toast.targetState = null
+            }
+            is Rendering -> {
+                debuggerState.toast.targetState = it.type
+            }
+        }
     }
 }
 
@@ -103,7 +142,11 @@ private fun LaunchedUIStateEffect(
                 Creating -> {
                     debuggerState.isVisible.targetState = true
                 }
-                Idle -> {
+                is Idle -> {
+                    // this controls FAB styling and behavior
+                    debuggerState.isVisible.targetState = true
+                    debuggerState.debugMode.value = state.mode
+
                     // lets only animate to idle when we come form isExpanded
                     if (debuggerState.isExpanded.targetState) {
                         animateFabToIdle(debuggerState)
@@ -116,6 +159,8 @@ private fun LaunchedUIStateEffect(
 
                         debuggerState.isDragging.targetState = false
                     }
+                    // clear any pending screen capture
+                    debuggerState.screenCapture.value = null
                 }
                 is Dragging -> {
                     debuggerState.isExpanded.targetState = false
@@ -123,9 +168,32 @@ private fun LaunchedUIStateEffect(
                     debuggerState.dragFabOffsets(state.dragAmount)
                 }
                 is Expanded -> {
-                    debuggerState.deepLinkPath.value = state.deepLinkPath
-                    animateFabToExpanded(debuggerState)
-                    debuggerState.isExpanded.targetState = true
+                    // this controls FAB styling and behavior
+                    debuggerState.debugMode.value = state.mode
+
+                    when (state.mode) {
+                        is Debugger -> {
+                            debuggerState.deepLinkPath.value = state.mode.deepLinkPath
+                            animateFabToExpanded(debuggerState)
+                            debuggerState.isExpanded.targetState = true
+                        }
+                        is ScreenCapture -> {
+                            debuggerState.deepLinkPath.value = null
+
+                            // hide FAB
+                            debuggerState.isVisible.targetState = false
+
+                            // capture screen
+                            val capture = viewModel.captureScreen()
+
+                            if (capture != null) {
+                                debuggerState.screenCapture.value = capture
+                            } else {
+                                // go back to idle if for some reason we could not capture the screen
+                                viewModel.closeExpandedView()
+                            }
+                        }
+                    }
                 }
                 Dismissing -> {
                     animateFabToDismiss(

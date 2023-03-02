@@ -4,8 +4,8 @@ import com.appcues.AppcuesCoroutineScope
 import com.appcues.LoggingLevel.NONE
 import com.appcues.data.AppcuesRepository
 import com.appcues.data.model.Experience
-import com.appcues.data.remote.request.ActivityRequest
-import com.appcues.data.remote.request.EventRequest
+import com.appcues.data.remote.appcues.request.ActivityRequest
+import com.appcues.data.remote.appcues.request.EventRequest
 import com.appcues.logging.Logcues
 import com.appcues.rules.MainDispatcherRule
 import com.appcues.ui.ExperienceRenderer

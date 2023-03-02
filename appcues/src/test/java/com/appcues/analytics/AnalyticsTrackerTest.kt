@@ -4,7 +4,7 @@ import com.appcues.AnalyticType
 import com.appcues.AppcuesCoroutineScope
 import com.appcues.LoggingLevel.NONE
 import com.appcues.analytics.AnalyticsEvent.SessionStarted
-import com.appcues.data.remote.request.ActivityRequest
+import com.appcues.data.remote.appcues.request.ActivityRequest
 import com.appcues.logging.Logcues
 import com.appcues.rules.MainDispatcherRule
 import com.google.common.truth.Truth.assertThat

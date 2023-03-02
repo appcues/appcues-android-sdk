@@ -1,6 +1,5 @@
 package com.appcues.data.mapper.experience
 
-import android.content.Context
 import com.appcues.action.ExperienceAction
 import com.appcues.action.appcues.LaunchExperienceAction
 import com.appcues.action.appcues.LinkAction
@@ -15,13 +14,11 @@ import com.appcues.data.model.ExperiencePriority.NORMAL
 import com.appcues.data.model.ExperienceTrigger
 import com.appcues.data.model.Experiment
 import com.appcues.data.model.StepContainer
-import com.appcues.data.remote.response.ExperimentResponse
-import com.appcues.data.remote.response.experience.ExperienceResponse
-import com.appcues.data.remote.response.experience.FailedExperienceResponse
-import com.appcues.data.remote.response.experience.LossyExperienceResponse
-import com.appcues.data.remote.response.step.StepContainerResponse
-import com.appcues.trait.BackdropDecoratingTrait
-import com.appcues.trait.ContainerDecoratingTrait
+import com.appcues.data.remote.appcues.response.ExperimentResponse
+import com.appcues.data.remote.appcues.response.experience.ExperienceResponse
+import com.appcues.data.remote.appcues.response.experience.FailedExperienceResponse
+import com.appcues.data.remote.appcues.response.experience.LossyExperienceResponse
+import com.appcues.data.remote.appcues.response.step.StepContainerResponse
 import com.appcues.trait.ContentHolderTrait
 import com.appcues.trait.ContentWrappingTrait
 import com.appcues.trait.ExperienceTrait
@@ -29,7 +26,6 @@ import com.appcues.trait.ExperienceTraitLevel.EXPERIENCE
 import com.appcues.trait.ExperienceTraitLevel.GROUP
 import com.appcues.trait.PresentingTrait
 import com.appcues.trait.appcues.DefaultContentHolderTrait
-import com.appcues.trait.appcues.DefaultPresentingTrait
 import org.koin.core.scope.Scope
 import java.util.UUID
 
@@ -38,7 +34,6 @@ internal class ExperienceMapper(
     private val traitsMapper: TraitsMapper,
     private val actionsMapper: ActionsMapper,
     private val scope: Scope,
-    private val context: Context,
 ) {
     // this version is used to map all decoded response objects, which may represent real Experiences
     // or failed responses with minimal info for error reporting
@@ -132,12 +127,10 @@ internal class ExperienceMapper(
             id = stepContainerResponse.id,
             steps = stepContainerResponse.children.map { step -> stepMapper.map(step, mergedTraits) },
             actions = actionsMapper.map(stepContainerResponse.actions),
-            presentingTrait = mappedTraits.getExperiencePresentingTraitOrDefault(),
+            presentingTrait = mappedTraits.getExperiencePresentingTraitOrThrow(),
             contentHolderTrait = mappedTraits.getContainerCreatingTraitOrDefault(),
             // what should we do if no content wrapping trait is found?
             contentWrappingTrait = mappedTraits.filterIsInstance<ContentWrappingTrait>().first(),
-            backdropDecoratingTraits = mappedTraits.filterIsInstance<BackdropDecoratingTrait>(),
-            containerDecoratingTraits = mappedTraits.filterIsInstance<ContainerDecoratingTrait>(),
         )
     }
 
@@ -145,9 +138,11 @@ internal class ExperienceMapper(
         return filterIsInstance<ContentHolderTrait>().firstOrNull() ?: DefaultContentHolderTrait(null)
     }
 
-    private fun List<ExperienceTrait>.getExperiencePresentingTraitOrDefault(): PresentingTrait {
-        return filterIsInstance<PresentingTrait>().firstOrNull() ?: DefaultPresentingTrait(null, scope, context)
+    private fun List<ExperienceTrait>.getExperiencePresentingTraitOrThrow(): PresentingTrait {
+        return filterIsInstance<PresentingTrait>().firstOrNull() ?: throw AppcuesPresentingTraitNotFound()
     }
+
+    private class AppcuesPresentingTraitNotFound : Exception("Presenting capability trait required")
 
     private fun List<ExperimentResponse>.getExperiment(experienceId: UUID) =
         this.firstOrNull { it.experienceId == experienceId }?.let { experimentResponse ->

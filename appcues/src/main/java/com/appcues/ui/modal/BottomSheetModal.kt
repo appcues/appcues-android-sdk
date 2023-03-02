@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -41,7 +43,7 @@ private const val HEIGHT_TABLET = 0.6f
 @Composable
 internal fun BottomSheetModal(
     style: ComponentStyle?,
-    content: @Composable (hasFixedHeight: Boolean, contentPadding: PaddingValues?) -> Unit,
+    content: @Composable (modifier: Modifier, containerPadding: PaddingValues, safeAreaInsets: PaddingValues) -> Unit,
     appcuesWindowInfo: AppcuesWindowInfo,
 ) {
     Box(
@@ -72,7 +74,15 @@ internal fun BottomSheetModal(
                         .fillMaxHeight(height.value)
                         // default modal style modifiers
                         .modalStyle(style, isDark) { Modifier.sheetModifier(appcuesWindowInfo, isDark, it) },
-                    content = { content(true, style?.getPaddings()) },
+                    content = {
+                        content(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .verticalScroll(rememberScrollState()),
+                            containerPadding = style.getPaddings(),
+                            safeAreaInsets = PaddingValues()
+                        )
+                    },
                 )
             }
         }

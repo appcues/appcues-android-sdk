@@ -1,7 +1,7 @@
 package com.appcues.data.mapper.styling
 
 import com.appcues.data.model.styling.ComponentBackgroundImage
-import com.appcues.data.remote.response.styling.StyleBackgroundImageResponse
+import com.appcues.data.remote.appcues.response.styling.StyleBackgroundImageResponse
 
 internal fun StyleBackgroundImageResponse.mapComponentBackgroundImage() = ComponentBackgroundImage(
     imageUrl = imageUrl,

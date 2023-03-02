@@ -5,7 +5,7 @@ import com.appcues.data.mapper.styling.mapComponentStyle
 import com.appcues.data.model.ExperiencePrimitive.HorizontalStackPrimitive
 import com.appcues.data.model.ExperiencePrimitive.VerticalStackPrimitive
 import com.appcues.data.model.styling.ComponentDistribution
-import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.StackPrimitiveResponse
+import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.StackPrimitiveResponse
 
 internal fun StackPrimitiveResponse.mapStackPrimitive() = when (orientation) {
     "vertical" -> mapVerticalStack()

@@ -2,18 +2,21 @@ package com.appcues.trait
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 
 interface ContentWrappingTrait : ExperienceTrait {
 
     /**
-     * Create a wrap of the content, the default wrap used by appcues is the modal with different types.
+     * Creates a wrapper for the [content].
      *
-     * When creating a custom WrapContent is important to pass [hasFixedHeight] as true if you are defining the height constraint yourself.
-     * or else the SDK will consider the container with the same height as the content we will inflate within
+     * Example usage:
+     * @sample com.appcues.trait.appcues.ModalTrait
      *
-     * [contentPadding] is passed from the WrapContent without applying it yourself so we can modify the correct
-     * container in order to keep the vertical scroll nicely at the edge or the container.
+     * @param content The content of the wrapper.
+     *                [modifier] gives flexibility of the content main box down the stream of composition.
+     *                [containerPadding] the padding defined in container style. The main content renders inside this padding.
+     *                [safeAreaInsets] defines safe area padding for the content inside.
      */
     @Composable
-    fun WrapContent(content: @Composable (hasFixedHeight: Boolean, contentPadding: PaddingValues?) -> Unit)
+    fun WrapContent(content: @Composable (modifier: Modifier, containerPadding: PaddingValues, safeAreaInsets: PaddingValues) -> Unit)
 }

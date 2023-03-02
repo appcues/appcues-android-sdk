@@ -3,6 +3,7 @@ package com.appcues.data.mapper.trait
 import com.appcues.data.mapper.LeveledTraitResponse
 import com.appcues.trait.ExperienceTrait
 import com.appcues.trait.TraitRegistry
+import com.appcues.trait.appcues.BackdropKeyholeTrait
 
 internal class TraitsMapper(
     private val traitRegistry: TraitRegistry
@@ -15,6 +16,9 @@ internal class TraitsMapper(
                     add(factory.invoke(it.first.config, it.second))
                 }
             }
+
+            // ensure BackdropKeyholeTrait is applied first
+            sortBy { it is BackdropKeyholeTrait }
         }
     }
 }

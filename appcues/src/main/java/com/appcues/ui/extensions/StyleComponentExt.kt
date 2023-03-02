@@ -26,12 +26,15 @@ internal fun ComponentStyle.getMargins() = PaddingValues(
     end = marginTrailing.dp,
 )
 
-internal fun ComponentStyle.getPaddings() = PaddingValues(
-    start = paddingLeading.dp.coerceAtLeast(0.dp),
-    bottom = paddingBottom.dp.coerceAtLeast(0.dp),
-    top = paddingTop.dp.coerceAtLeast(0.dp),
-    end = paddingTrailing.dp.coerceAtLeast(0.dp),
-)
+internal fun ComponentStyle?.getPaddings(): PaddingValues {
+    return if (this == null) PaddingValues() else
+        PaddingValues(
+            start = paddingLeading.dp.coerceAtLeast(0.dp),
+            bottom = paddingBottom.dp.coerceAtLeast(0.dp),
+            top = paddingTop.dp.coerceAtLeast(0.dp),
+            end = paddingTrailing.dp.coerceAtLeast(0.dp),
+        )
+}
 
 internal fun ComponentStyle.getTextAlignment(): TextAlign? {
     return when (textAlignment) {

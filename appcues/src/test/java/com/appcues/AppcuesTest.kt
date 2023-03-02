@@ -8,6 +8,7 @@ import com.appcues.analytics.ActivityScreenTracking
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.data.model.ExperienceTrigger
 import com.appcues.debugger.AppcuesDebuggerManager
+import com.appcues.debugger.DebugMode.Debugger
 import com.appcues.rules.KoinScopeRule
 import com.appcues.rules.MainDispatcherRule
 import com.appcues.trait.ExperienceTrait
@@ -206,20 +207,19 @@ internal class AppcuesTest : AppcuesScopeTest {
     @Test
     fun `anonymous SHOULD set Storage userId equal to the deviceId AND identify AND start a session`() {
         // GIVEN
-        val properties = mapOf<String, Any>("prop" to 33)
         val storage: Storage = get()
         val tracker: AnalyticsTracker = get()
         val sessionMonitor: SessionMonitor = get()
 
         // WHEN
-        appcues.anonymous(properties)
+        appcues.anonymous()
 
         // THEN
         assertThat(storage.userId).isEqualTo("anon:${storage.deviceId}")
         assertThat(storage.isAnonymous).isTrue()
         // called once at startup automatically, which is ignored, then again for the new valid user/session
         verify(exactly = 2) { sessionMonitor.start() }
-        verify { tracker.identify(properties) }
+        verify { tracker.identify(null) }
     }
 
     @Test
@@ -261,7 +261,7 @@ internal class AppcuesTest : AppcuesScopeTest {
         appcues.debug(activity)
 
         // THEN
-        verify { debuggerManager.start(activity) }
+        verify { debuggerManager.start(activity, Debugger(null)) }
     }
 
     @Test

@@ -9,6 +9,7 @@ import com.appcues.analytics.ActivityScreenTracking
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.data.model.ExperienceTrigger
 import com.appcues.debugger.AppcuesDebuggerManager
+import com.appcues.debugger.DebugMode.Debugger
 import com.appcues.di.AppcuesKoinContext
 import com.appcues.logging.Logcues
 import com.appcues.trait.ExperienceTrait
@@ -17,6 +18,7 @@ import com.appcues.trait.TraitRegistry
 import com.appcues.ui.ExperienceRenderer
 import kotlinx.coroutines.launch
 import org.koin.core.scope.Scope
+import kotlin.DeprecationLevel.ERROR
 
 /**
  * Construct and return an instance of the Appcues SDK.
@@ -134,14 +136,22 @@ class Appcues internal constructor(koinScope: Scope) {
      * Generate a unique Id for the current user when there is not a known identity to use in
      * the {@link identity(String, Map<String, Any>) identity} call. This will cause the SDK
      * to begin tracking activity and checking for qualified content.
-     *
-     * @param properties Optional properties that provide additional context about the anonymous user.
      */
-    fun anonymous(properties: Map<String, Any>? = null) {
+    fun anonymous() {
         // use the device ID as the default anonymous user ID, unless an override for generating
         // anonymous user IDs is supplied in the config builder
         val anonymousId = config.anonymousIdFactory?.invoke() ?: storage.deviceId
-        identify(true, "anon:$anonymousId", properties)
+        identify(true, "anon:$anonymousId", null)
+    }
+
+    /**
+     * This function has been removed. Calling the anonymous function with a properties parameter
+     * is no longer supported. A call to `anonymous()` with no parameters should be used instead.
+     */
+    @Deprecated("properties are no longer supported for anonymous users.", level = ERROR)
+    @Suppress("UnusedPrivateMember")
+    fun anonymous(properties: Map<String, Any>?) {
+        // removed
     }
 
     /**
@@ -229,7 +239,7 @@ class Appcues internal constructor(koinScope: Scope) {
      * @param activity The Activity to launch the debugger over.
      */
     fun debug(activity: Activity) {
-        debuggerManager.start(activity)
+        debuggerManager.start(activity, Debugger(null))
     }
 
     /**

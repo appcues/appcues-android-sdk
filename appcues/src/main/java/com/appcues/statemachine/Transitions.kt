@@ -62,7 +62,7 @@ internal interface Transitions {
         }
 
         // for pre-step navigation actions - only allow these to execute if this experience is being launched for some
-        // other reason that Qualification (i.e. deep links, preview, manual show). For any qualified experience, the initial
+        // other reason than qualification (i.e. deep links, preview, manual show). For any qualified experience, the initial
         // starting state of the experience is determined solely by flow settings determining the trigger
         // (i.e. trigger on certain screen).
         val actions = if (experience.trigger is Qualification) emptyList() else experience.getNavigationActions(0)

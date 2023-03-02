@@ -1,1 +1,1 @@
--keep class com.appcues.data.remote.response.** { *; }
+-keep class com.appcues.data.remote.**.response.** { *; }

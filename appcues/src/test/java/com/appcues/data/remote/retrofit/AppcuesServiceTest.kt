@@ -1,10 +1,13 @@
 package com.appcues.data.remote.retrofit
 
-import com.appcues.data.remote.response.experience.ExperienceResponse
-import com.appcues.data.remote.response.experience.FailedExperienceResponse
+import com.appcues.data.remote.RetrofitWrapper
+import com.appcues.data.remote.appcues.AppcuesService
+import com.appcues.data.remote.appcues.response.experience.ExperienceResponse
+import com.appcues.data.remote.appcues.response.experience.FailedExperienceResponse
 import com.appcues.data.remote.retrofit.stubs.contentModalOneStubs
 import com.appcues.util.appcuesFormatted
 import com.google.common.truth.Truth.assertThat
+import com.squareup.moshi.JsonDataException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -30,18 +33,14 @@ class AppcuesServiceTest {
     @Test
     fun `content SHOULD fetch Experience correctly from specific path`() = runTest {
         // Given
-        mockWebServer.dispatchResponses(
-            responses = hashMapOf(
-                "/v1/accounts/1234/users/TestUser/experience_content/5678" to "content/content_modal_one.json"
-            )
-        )
+        val accountId = "account-id"
+        val userId = "user-id"
+        val experienceId = "experience-id"
+        val mock = "content_modal_one"
+        mockWebServer.mockExperienceContent(accountId, userId, experienceId, mock)
+
         // When
-        val result = api.experienceContent(
-            account = "1234",
-            user = "TestUser",
-            experienceId = "5678",
-            authorization = null,
-        )
+        val result = api.experienceContent(accountId, userId, experienceId, null)
 
         // Then
         with(result) {
@@ -52,20 +51,13 @@ class AppcuesServiceTest {
     @Test
     fun `qualify SHOULD lossy decode Experiences from specific path`() = runTest {
         // Given
-        mockWebServer.dispatchResponses(
-            responses = hashMapOf(
-                "/v1/accounts/1234/users/TestUser/qualify" to "content/content_lossy_decoding.json"
-            )
-        )
+        val accountId = "account-id"
+        val userId = "user-id"
+        val mock = "content_lossy_decoding"
+        mockWebServer.mockQualify(accountId, userId, mock)
 
         // When
-        val result = api.qualify(
-            account = "1234",
-            user = "TestUser",
-            authorization = null,
-            requestId = UUID.randomUUID(),
-            activity = "".toRequestBody(),
-        )
+        val result = api.qualify(accountId, userId, null, UUID.randomUUID(), "".toRequestBody())
 
         // Then
         //
@@ -163,4 +155,89 @@ class AppcuesServiceTest {
             Assert.fail(exception.message)
         }
     }
+
+    @Test
+    fun `trait decoding SHOULD fail WHEN multiple traits of same type declared at step level`() = runTest {
+        // Given
+        var error: String? = null
+        val accountId = "account-id"
+        val userId = "user-id"
+        val experienceId = "experience-id"
+        val mock = "content_duplicate_traits_step"
+        mockWebServer.mockExperienceContent(accountId, userId, experienceId, mock)
+
+        // When
+        try {
+            api.experienceContent(accountId, userId, experienceId, null)
+        } catch (exception: JsonDataException) {
+            error = exception.message
+        }
+
+        // Then
+        assertThat(error).isEqualTo(
+            "multiple traits of same type are not supported: step-trait. Found at path $.steps[0].children[0].traits[2]"
+        )
+    }
+
+    @Test
+    fun `trait decoding SHOULD fail WHEN multiple traits of same type declared at group level`() = runTest {
+        // Given
+        var error: String? = null
+        val accountId = "account-id"
+        val userId = "user-id"
+        val experienceId = "experience-id"
+        val mock = "content_duplicate_traits_group"
+        mockWebServer.mockExperienceContent(accountId, userId, experienceId, mock)
+
+        // When
+        try {
+            api.experienceContent(accountId, userId, experienceId, null)
+        } catch (exception: JsonDataException) {
+            error = exception.message
+        }
+
+        // Then
+        assertThat(error).isEqualTo(
+            "multiple traits of same type are not supported: group-trait. Found at path $.steps[0].traits[2]"
+        )
+    }
+
+    @Test
+    fun `trait decoding SHOULD fail WHEN multiple traits of same type declared at experience level`() = runTest {
+        // Given
+        var error: String? = null
+        val accountId = "account-id"
+        val userId = "user-id"
+        val experienceId = "experience-id"
+        val mock = "content_duplicate_traits_experience"
+        mockWebServer.mockExperienceContent(accountId, userId, experienceId, mock)
+
+        // When
+        try {
+            api.experienceContent(accountId, userId, experienceId, null)
+        } catch (exception: JsonDataException) {
+            error = exception.message
+        }
+
+        // Then
+        assertThat(error).isEqualTo(
+            "multiple traits of same type are not supported: experience-trait. Found at path \$.traits[2]"
+        )
+    }
+}
+
+private fun MockWebServer.mockExperienceContent(accountId: String, userId: String, experienceId: String, mock: String) {
+    this.dispatchResponses(
+        responses = hashMapOf(
+            "/v1/accounts/$accountId/users/$userId/experience_content/$experienceId" to "content/$mock.json"
+        )
+    )
+}
+
+private fun MockWebServer.mockQualify(accountId: String, userId: String, mock: String) {
+    this.dispatchResponses(
+        responses = hashMapOf(
+            "/v1/accounts/$accountId/users/$userId/qualify" to "content/$mock.json"
+        )
+    )
 }

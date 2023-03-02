@@ -1,5 +1,6 @@
 package com.appcues.debugger
 
+import com.appcues.debugger.screencapture.ScreenCaptureProcessor
 import com.appcues.di.KoinScopePlugin
 import org.koin.dsl.ScopeDSL
 
@@ -24,6 +25,16 @@ internal object DebuggerKoin : KoinScopePlugin {
 
         scoped {
             DebuggerFontManager(context = get(), logcues = get())
+        }
+
+        scoped {
+            ScreenCaptureProcessor(
+                config = get(),
+                contextResources = get(),
+                sdkSettingsRemoteSource = get(),
+                customerApiRemoteSource = get(),
+                imageUploadRemoteSource = get(),
+            )
         }
     }
 }

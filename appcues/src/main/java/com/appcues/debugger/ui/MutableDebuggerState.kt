@@ -12,9 +12,17 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import com.appcues.debugger.DebugMode
+import com.appcues.debugger.model.DebuggerToast
+import com.appcues.debugger.screencapture.Capture
 import kotlin.math.roundToInt
 
-internal class MutableDebuggerState(private val density: Density, private val isCreating: Boolean, val fabSize: Dp = 56.dp) {
+internal class MutableDebuggerState(
+    mode: DebugMode,
+    private val density: Density,
+    private val isCreating: Boolean,
+    val fabSize: Dp = 56.dp
+) {
 
     companion object {
 
@@ -28,13 +36,16 @@ internal class MutableDebuggerState(private val density: Density, private val is
     val isVisible = MutableTransitionState(isCreating.not())
     val isDragging = MutableTransitionState(false)
     val isExpanded = MutableTransitionState(false)
+    val screenCapture = mutableStateOf<Capture?>(null)
     val isPaused = mutableStateOf(value = false)
+    val toast = MutableTransitionState<DebuggerToast?>(null)
 
     val fabXOffset = mutableStateOf(value = -1f)
     val fabYOffset = mutableStateOf(value = -1f)
     val isDraggingOverDismiss = mutableStateOf(value = false)
 
     val deepLinkPath = mutableStateOf<String?>(value = null)
+    val debugMode = mutableStateOf(mode)
 
     private var boxSize = IntSize(0, 0)
     private var dismissRect = Rect(Offset(0f, 0f), Size(0f, 0f))

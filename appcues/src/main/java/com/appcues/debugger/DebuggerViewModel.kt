@@ -4,17 +4,26 @@ import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.appcues.analytics.AnalyticsTracker
+import com.appcues.debugger.DebugMode.Debugger
+import com.appcues.debugger.DebugMode.ScreenCapture
+import com.appcues.debugger.DebuggerViewModel.ToastState.Rendering
 import com.appcues.debugger.DebuggerViewModel.UIState.Creating
 import com.appcues.debugger.DebuggerViewModel.UIState.Dismissed
 import com.appcues.debugger.DebuggerViewModel.UIState.Dismissing
-import com.appcues.debugger.DebuggerViewModel.UIState.Dragging
 import com.appcues.debugger.DebuggerViewModel.UIState.Expanded
 import com.appcues.debugger.DebuggerViewModel.UIState.Idle
 import com.appcues.debugger.model.DebuggerEventItem
 import com.appcues.debugger.model.DebuggerFontItem
 import com.appcues.debugger.model.DebuggerStatusItem
+import com.appcues.debugger.model.DebuggerToast
+import com.appcues.debugger.model.DebuggerToast.ScreenCaptureFailure
+import com.appcues.debugger.model.DebuggerToast.ScreenCaptureSuccess
 import com.appcues.debugger.model.EventType
 import com.appcues.debugger.model.TapActionType
+import com.appcues.debugger.screencapture.Capture
+import com.appcues.debugger.screencapture.ScreenCaptureProcessor
+import com.appcues.util.ResultOf.Failure
+import com.appcues.util.ResultOf.Success
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -36,19 +45,31 @@ internal class DebuggerViewModel(
 
     private val debuggerFontManager by inject<DebuggerFontManager>()
 
+    private val screenCaptureProcessor by inject<ScreenCaptureProcessor>()
+
     sealed class UIState {
         object Creating : UIState()
-        object Idle : UIState()
+        data class Idle(val mode: DebugMode) : UIState()
         data class Dragging(val dragAmount: Offset) : UIState()
-        data class Expanded(val deepLinkPath: String? = null) : UIState()
+        data class Expanded(val mode: DebugMode) : UIState()
         object Dismissing : UIState()
         object Dismissed : UIState()
+    }
+
+    sealed class ToastState {
+        object Idle : ToastState()
+        data class Rendering(val type: DebuggerToast) : ToastState()
     }
 
     private val _uiState = MutableStateFlow<UIState>(Creating)
 
     val uiState: StateFlow<UIState>
         get() = _uiState
+
+    private val _toastState = MutableStateFlow<ToastState>(ToastState.Idle)
+
+    val toastState: StateFlow<ToastState>
+        get() = _toastState
 
     private val _statusInfo = MutableStateFlow<List<DebuggerStatusItem>>(arrayListOf())
 
@@ -74,7 +95,7 @@ internal class DebuggerViewModel(
     val allFonts: List<DebuggerFontItem>
         get() = debuggerFontManager.getAllFonts()
 
-    private var deepLinkPath: String? = null
+    lateinit var mode: DebugMode
 
     init {
         with(viewModelScope) {
@@ -107,36 +128,61 @@ internal class DebuggerViewModel(
         }
     }
 
-    fun onStart(deepLinkPath: String?) {
-        if (deepLinkPath.isNullOrEmpty()) {
-            // if no path is given, and currently expanded, go back to idle
-            if (_uiState.value is Expanded) {
-                _uiState.value = Idle
-            }
-            return
-        } else {
-            // the deep link might be from the debugger checking that the configuration is correct
-            // pass along to allow it to check
-            viewModelScope.launch {
-                debuggerStatusManager.checkDeepLinkValidation(deepLinkPath)
-            }
-        }
+    fun onStart(mode: DebugMode, reset: Boolean) {
+        this.mode = mode
 
-        when (_uiState.value) {
-            // if still in initial start of debugger - save the path for onRender to use
-            Creating -> this.deepLinkPath = deepLinkPath
-            // if currently idle and a new link comes in - expand to that link
-            Idle -> _uiState.value = Expanded(deepLinkPath)
-            // currently open - reset to the new path
-            is Expanded -> _uiState.value = Expanded(deepLinkPath)
-            // otherwise, no valid link action available
-            else -> Unit
+        when (mode) {
+            is Debugger -> {
+                val deepLinkPath = mode.deepLinkPath
+                if (deepLinkPath.isNullOrEmpty()) {
+                    // if no path is given, and currently expanded, go back to Idle
+                    if (_uiState.value is Expanded ||
+                        // OR if showing FAB but the mode changed, reset to new Idle mode
+                        (_uiState.value is Idle && reset)
+                    ) {
+                        _uiState.value = Idle(mode)
+                    }
+                    return
+                } else {
+                    // the deep link might be from the debugger checking that the configuration is correct
+                    // pass along to allow it to check
+                    viewModelScope.launch {
+                        debuggerStatusManager.checkDeepLinkValidation(deepLinkPath)
+                    }
+                }
+
+                when (_uiState.value) {
+                    // if currently idle and a new link comes in - expand to that link
+                    is Idle -> _uiState.value = Expanded(mode)
+                    // currently open - reset to the new path
+                    is Expanded -> _uiState.value = Expanded(mode)
+                    // otherwise, no valid link action available
+                    else -> Unit
+                }
+            }
+            is ScreenCapture -> {
+                // if in debugger mode, expanded, go to new Idle state
+                if (_uiState.value is Expanded ||
+                    // OR if in Idle (FAB) mode but mode changed, reset to new Idle mode
+                    (_uiState.value is Idle && reset)
+                ) {
+                    _uiState.value = Idle(mode)
+                }
+            }
         }
     }
 
     fun onRender() {
-        // if we had a deep link from initial startup, process it now
-        _uiState.value = if (deepLinkPath.isNullOrEmpty()) Idle else Expanded(deepLinkPath)
+        when (val currentMode = mode) {
+            is Debugger -> {
+                val deepLinkPath = currentMode.deepLinkPath
+                // if we had a deep link from initial startup, process it now
+                _uiState.value = if (deepLinkPath.isNullOrEmpty()) Idle(currentMode) else Expanded(currentMode)
+            }
+            is ScreenCapture -> {
+                _uiState.value = Idle(currentMode)
+            }
+        }
     }
 
     fun onDismissAnimationCompleted() {
@@ -146,35 +192,60 @@ internal class DebuggerViewModel(
         }
     }
 
-    fun onDragging(dragAmount: Offset) {
-        _uiState.value = Dragging(dragAmount)
-    }
-
-    fun onDragEnd() {
-        _uiState.value = Idle
-    }
-
-    fun onDismiss() {
-        _uiState.value = Dismissing
+    fun transition(state: UIState) {
+        _uiState.value = state
     }
 
     fun onFabClick() {
-        if (_uiState.value == Idle) {
-            _uiState.value = Expanded()
-        } else if (_uiState.value is Expanded) {
-            _uiState.value = Idle
+        when (val state = _uiState.value) {
+            is Idle -> {
+                _uiState.value = Expanded(state.mode)
+            }
+            is Expanded -> {
+                _uiState.value = Idle(mode)
+            }
+            else -> Unit
         }
     }
 
-    fun onBackPress() {
+    fun closeExpandedView() {
         if (_uiState.value is Expanded) {
-            _uiState.value = Idle
+            _uiState.value = Idle(mode)
         }
     }
 
-    fun onBackdropClick() {
-        if (_uiState.value is Expanded) {
-            _uiState.value = Idle
+    fun captureScreen() =
+        screenCaptureProcessor.captureScreen()
+
+    fun onScreenCaptureConfirm(capture: Capture) {
+        // return back to Idle for the current mode (ScreenCapture)
+        _uiState.value = Idle(mode)
+
+        when (val currentMode = mode) {
+            // saving a capture is only valid in screen capture mode with token
+            is ScreenCapture -> {
+                viewModelScope.launch {
+                    when (val result = screenCaptureProcessor.save(capture, currentMode.token)) {
+                        is Success -> _toastState.value = Rendering(
+                            type = ScreenCaptureSuccess(result.value) {
+                                // on dismiss
+                                _toastState.value = ToastState.Idle
+                            }
+                        )
+                        is Failure -> _toastState.value = Rendering(
+                            type = ScreenCaptureFailure(
+                                capture = capture,
+                                onDismiss = { _toastState.value = ToastState.Idle },
+                                onRetry = {
+                                    _toastState.value = ToastState.Idle
+                                    onScreenCaptureConfirm(capture)
+                                }
+                            )
+                        )
+                    }
+                }
+            }
+            else -> Unit
         }
     }
 
@@ -199,10 +270,5 @@ internal class DebuggerViewModel(
 
     private fun List<DebuggerEventItem>.hideEventsForFab(): List<DebuggerEventItem> {
         return toMutableList().onEach { it.showOnFab = false }
-    }
-
-    fun onDetailDismiss() {
-        // reset the view state to remove any deep link path
-        _uiState.value = Expanded()
     }
 }
