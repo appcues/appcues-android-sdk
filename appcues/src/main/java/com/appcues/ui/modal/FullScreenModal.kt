@@ -44,7 +44,7 @@ private const val HEIGHT_TABLET = 0.85f
 @Composable
 internal fun FullScreenModal(
     style: ComponentStyle?,
-    content: @Composable (modifier: Modifier, containerPadding: PaddingValues, wrapperInsets: PaddingValues) -> Unit,
+    content: @Composable (modifier: Modifier, containerPadding: PaddingValues, safeAreaInsets: PaddingValues) -> Unit,
     windowInfo: AppcuesWindowInfo,
 ) {
     Box(
@@ -79,7 +79,7 @@ internal fun FullScreenModal(
                                 .fillMaxSize()
                                 .verticalScroll(rememberScrollState()),
                             containerPadding = style.getPaddings(),
-                            wrapperInsets = PaddingValues()
+                            safeAreaInsets = PaddingValues()
                         )
                     },
                 )

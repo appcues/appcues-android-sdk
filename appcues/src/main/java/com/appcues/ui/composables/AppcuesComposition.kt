@@ -127,9 +127,9 @@ private fun BoxScope.ComposeLastRenderingState(state: Rendering) {
             ApplyBackgroundDecoratingTraits(backdropDecoratingTraits.value)
 
             // create wrapper
-            contentWrappingTrait.WrapContent { modifier, containerPadding, wrapperInsets ->
+            contentWrappingTrait.WrapContent { modifier, containerPadding, safeAreaInsets ->
                 Box(contentAlignment = Alignment.TopCenter) {
-                    ApplyUnderlayContainerTraits(containerDecoratingTraits.value, wrapperInsets)
+                    ApplyUnderlayContainerTraits(containerDecoratingTraits.value, containerPadding, safeAreaInsets)
 
                     // Apply content holder trait
                     with(contentHolderTrait) {
@@ -142,7 +142,7 @@ private fun BoxScope.ComposeLastRenderingState(state: Rendering) {
                                     .ComposeStep(
                                         modifier = modifier.testTag("page_$it"),
                                         containerPadding = containerPadding,
-                                        wrapperInsets = wrapperInsets,
+                                        safeAreaInsets = safeAreaInsets,
                                         parent = this@Box
                                     )
                             }
@@ -154,7 +154,7 @@ private fun BoxScope.ComposeLastRenderingState(state: Rendering) {
                         }
                     }
 
-                    ApplyOverlayContainerTraits(containerDecoratingTraits.value, wrapperInsets)
+                    ApplyOverlayContainerTraits(containerDecoratingTraits.value, containerPadding, safeAreaInsets)
                 }
             }
         }
@@ -162,10 +162,14 @@ private fun BoxScope.ComposeLastRenderingState(state: Rendering) {
 }
 
 @Composable
-internal fun BoxScope.ApplyUnderlayContainerTraits(list: List<ContainerDecoratingTrait>, wrapperInsets: PaddingValues) {
+internal fun BoxScope.ApplyUnderlayContainerTraits(
+    list: List<ContainerDecoratingTrait>,
+    containerPadding: PaddingValues,
+    safeAreaInsets: PaddingValues,
+) {
     list
         .filter { it.containerComposeOrder == ContainerDecoratingType.UNDERLAY }
-        .forEach { it.run { DecorateContainer(wrapperInsets) } }
+        .forEach { it.run { DecorateContainer(containerPadding, safeAreaInsets) } }
 }
 
 @Composable
@@ -178,8 +182,12 @@ private fun BoxScope.ApplyBackgroundDecoratingTraits(list: List<BackdropDecorati
 }
 
 @Composable
-internal fun BoxScope.ApplyOverlayContainerTraits(list: List<ContainerDecoratingTrait>, wrapperInsets: PaddingValues) {
+internal fun BoxScope.ApplyOverlayContainerTraits(
+    list: List<ContainerDecoratingTrait>,
+    containerPadding: PaddingValues,
+    safeAreaInsets: PaddingValues,
+) {
     list
         .filter { it.containerComposeOrder == ContainerDecoratingType.OVERLAY }
-        .forEach { it.run { DecorateContainer(wrapperInsets) } }
+        .forEach { it.run { DecorateContainer(containerPadding, safeAreaInsets) } }
 }

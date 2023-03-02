@@ -96,7 +96,7 @@ internal class TooltipTrait(
 
     @Composable
     override fun WrapContent(
-        content: @Composable (modifier: Modifier, containerPadding: PaddingValues, wrapperInsets: PaddingValues) -> Unit
+        content: @Composable (modifier: Modifier, containerPadding: PaddingValues, safeAreaInsets: PaddingValues) -> Unit
     ) {
         val density = LocalDensity.current
         val metadata = LocalAppcuesStepMetadata.current
@@ -152,7 +152,7 @@ internal class TooltipTrait(
                         content(
                             modifier = Modifier.verticalScroll(rememberScrollState()),
                             containerPadding = style.getPaddings(),
-                            wrapperInsets = tooltipSettings.getContentPaddingValues()
+                            safeAreaInsets = tooltipSettings.getContentPaddingValues()
                         )
                     }
                 }

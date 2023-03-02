@@ -21,9 +21,10 @@ interface StepDecoratingTrait : ExperienceTrait {
      * Example usage:
      * @sample com.appcues.trait.appcues.BackgroundContentTrait
      *
-     * @param wrapperInsets The safe area information from the wrapper trait.
+     * @param containerPadding The padding defined in the style of the container, to apply to main content within.
+     * @param safeAreaInsets The safe area information from the wrapper trait.
      * @param stickyContentPadding Padding amount defined by sticky content elements in this step
      */
     @Composable
-    fun BoxScope.DecorateStep(wrapperInsets: PaddingValues, stickyContentPadding: StickyContentPadding)
+    fun BoxScope.DecorateStep(containerPadding: PaddingValues, safeAreaInsets: PaddingValues, stickyContentPadding: StickyContentPadding)
 }

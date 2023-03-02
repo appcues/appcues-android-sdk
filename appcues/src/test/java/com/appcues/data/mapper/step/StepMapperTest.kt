@@ -261,7 +261,11 @@ private class TestStepDecoratingTrait : StepDecoratingTrait {
         get() = OVERLAY
 
     @Composable
-    override fun BoxScope.DecorateStep(wrapperInsets: PaddingValues, stickyContentPadding: StickyContentPadding) {
+    override fun BoxScope.DecorateStep(
+        containerPadding: PaddingValues,
+        safeAreaInsets: PaddingValues,
+        stickyContentPadding: StickyContentPadding,
+    ) {
         return
     }
 

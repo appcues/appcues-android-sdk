@@ -37,12 +37,19 @@ internal class BackgroundContentTrait(
     private val content = config.getConfigPrimitive("content")
 
     @Composable
-    override fun BoxScope.DecorateStep(wrapperInsets: PaddingValues, stickyContentPadding: StickyContentPadding) {
+    override fun BoxScope.DecorateStep(
+        containerPadding: PaddingValues,
+        safeAreaInsets: PaddingValues,
+        stickyContentPadding: StickyContentPadding,
+    ) {
         if (level == STEP) Decorate()
     }
 
     @Composable
-    override fun BoxScope.DecorateContainer(wrapperInsets: PaddingValues) {
+    override fun BoxScope.DecorateContainer(
+        containerPadding: PaddingValues,
+        safeAreaInsets: PaddingValues,
+    ) {
         if (level == GROUP) Decorate()
     }
 
