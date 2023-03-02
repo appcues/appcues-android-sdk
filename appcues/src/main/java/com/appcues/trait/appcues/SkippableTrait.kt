@@ -77,11 +77,11 @@ internal class SkippableTrait(
     private val ignoreBackdropTap = config.getConfigOrDefault(CONFIG_IGNORE_BACKDROP_TAP, false)
 
     @Composable
-    override fun BoxScope.DecorateContainer(wrapperInsets: PaddingValues) {
+    override fun BoxScope.DecorateContainer(containerPadding: PaddingValues, safeAreaInsets: PaddingValues) {
         val description = stringResource(id = R.string.appcues_skippable_trait_dismiss)
         Spacer(
             modifier = Modifier
-                .padding(wrapperInsets)
+                .padding(safeAreaInsets)
                 .align(Alignment.TopEnd)
                 .padding(buttonAppearance.margin)
                 .size(buttonAppearance.size)

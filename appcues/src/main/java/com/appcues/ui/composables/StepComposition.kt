@@ -21,7 +21,7 @@ import com.appcues.ui.primitive.Compose
 internal fun Step.ComposeStep(
     modifier: Modifier = Modifier,
     containerPadding: PaddingValues,
-    wrapperInsets: PaddingValues,
+    safeAreaInsets: PaddingValues,
     parent: BoxScope
 ) {
     CompositionLocalProvider(
@@ -32,50 +32,52 @@ internal fun Step.ComposeStep(
         val density = LocalDensity.current
         val stickyContentPadding = remember(this) { StickyContentPadding(density) }
 
-        ApplyUnderlayStepTraits(parent, wrapperInsets, stickyContentPadding)
+        ApplyUnderlayStepTraits(parent, containerPadding, safeAreaInsets, stickyContentPadding)
 
-        ComposeStepContent(modifier, containerPadding, wrapperInsets, stickyContentPadding)
+        ComposeStepContent(modifier, containerPadding, safeAreaInsets, stickyContentPadding)
 
-        ComposeStickyContent(parent, containerPadding, wrapperInsets, stickyContentPadding)
+        ComposeStickyContent(parent, containerPadding, safeAreaInsets, stickyContentPadding)
 
-        ApplyOverlayStepTraits(parent, wrapperInsets, stickyContentPadding)
+        ApplyOverlayStepTraits(parent, containerPadding, safeAreaInsets, stickyContentPadding)
     }
 }
 
 @Composable
 private fun Step.ApplyUnderlayStepTraits(
     boxScope: BoxScope,
-    wrapperInsets: PaddingValues,
+    containerPadding: PaddingValues,
+    safeAreaInsets: PaddingValues,
     stickyContentPadding: StickyContentPadding
 ) {
     stepDecoratingTraits
         .filter { it.stepComposeOrder == StepDecoratingType.UNDERLAY }
-        .forEach { it.run { boxScope.DecorateStep(wrapperInsets, stickyContentPadding) } }
+        .forEach { it.run { boxScope.DecorateStep(containerPadding, safeAreaInsets, stickyContentPadding) } }
 }
 
 @Composable
 private fun Step.ApplyOverlayStepTraits(
     boxScope: BoxScope,
-    wrapperInsets: PaddingValues,
+    containerPadding: PaddingValues,
+    safeAreaInsets: PaddingValues,
     stickyContentPadding: StickyContentPadding
 ) {
     stepDecoratingTraits
         .filter { it.stepComposeOrder == StepDecoratingType.OVERLAY }
-        .forEach { it.run { boxScope.DecorateStep(wrapperInsets, stickyContentPadding) } }
+        .forEach { it.run { boxScope.DecorateStep(containerPadding, safeAreaInsets, stickyContentPadding) } }
 }
 
 @Composable
 private fun Step.ComposeStepContent(
     modifier: Modifier,
     containerPadding: PaddingValues,
-    wrapperInsets: PaddingValues,
+    safeAreaInsets: PaddingValues,
     stickyContentPadding: StickyContentPadding
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
             .padding(containerPadding)
-            .padding(wrapperInsets)
+            .padding(safeAreaInsets)
             .padding(stickyContentPadding.paddingValues.value)
     ) { content.Compose() }
 }
@@ -84,14 +86,14 @@ private fun Step.ComposeStepContent(
 private fun Step.ComposeStickyContent(
     boxScope: BoxScope,
     containerPadding: PaddingValues,
-    wrapperInsets: PaddingValues,
+    safeAreaInsets: PaddingValues,
     stickyContentPadding: StickyContentPadding
 ) {
     topStickyContent?.let {
         Box(
             modifier = Modifier
                 .padding(containerPadding)
-                .padding(wrapperInsets)
+                .padding(safeAreaInsets)
                 .alignStepOverlay(boxScope, Alignment.TopCenter, stickyContentPadding),
             contentAlignment = Alignment.BottomCenter
         ) { it.Compose() }
@@ -101,7 +103,7 @@ private fun Step.ComposeStickyContent(
         Box(
             modifier = Modifier
                 .padding(containerPadding)
-                .padding(wrapperInsets)
+                .padding(safeAreaInsets)
                 .alignStepOverlay(boxScope, Alignment.BottomCenter, stickyContentPadding),
             contentAlignment = Alignment.BottomCenter
         ) { it.Compose() }

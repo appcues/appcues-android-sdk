@@ -41,7 +41,7 @@ private const val HEIGHT_TABLET = 0.7f
 @Composable
 internal fun ExpandedBottomSheetModal(
     style: ComponentStyle?,
-    content: @Composable (modifier: Modifier, containerPadding: PaddingValues, wrapperInsets: PaddingValues) -> Unit,
+    content: @Composable (modifier: Modifier, containerPadding: PaddingValues, safeAreaInsets: PaddingValues) -> Unit,
     windowInfo: AppcuesWindowInfo,
 ) {
     Box(
@@ -76,7 +76,7 @@ internal fun ExpandedBottomSheetModal(
                                 .fillMaxSize()
                                 .verticalScroll(rememberScrollState()),
                             containerPadding = style.getPaddings(),
-                            wrapperInsets = PaddingValues()
+                            safeAreaInsets = PaddingValues()
                         )
                     },
                 )

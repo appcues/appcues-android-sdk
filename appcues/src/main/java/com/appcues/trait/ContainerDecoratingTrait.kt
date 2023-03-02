@@ -21,8 +21,9 @@ interface ContainerDecoratingTrait : ExperienceTrait {
      * Example usage:
      * @sample com.appcues.trait.appcues.BackgroundContentTrait
      *
-     * @param wrapperInsets The safe area information from the wrapper trait.
+     * @param containerPadding The padding defined in the style of the container, to apply to main content within.
+     * @param safeAreaInsets The safe area information from the wrapper trait.
      */
     @Composable
-    fun BoxScope.DecorateContainer(wrapperInsets: PaddingValues)
+    fun BoxScope.DecorateContainer(containerPadding: PaddingValues, safeAreaInsets: PaddingValues)
 }

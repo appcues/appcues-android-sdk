@@ -46,7 +46,7 @@ internal class PagingDotsTrait(
     private val style = config.getConfigStyle("style")
 
     @Composable
-    override fun BoxScope.DecorateContainer(wrapperInsets: PaddingValues) {
+    override fun BoxScope.DecorateContainer(containerPadding: PaddingValues, safeAreaInsets: PaddingValues) {
         val paginationData = rememberAppcuesPaginationState()
         val pageCount = paginationData.value.pageCount
 
@@ -70,7 +70,7 @@ internal class PagingDotsTrait(
 
         Box(
             modifier = Modifier
-                .padding(wrapperInsets)
+                .padding(safeAreaInsets)
                 .align(style.getBoxAlignment())
                 .stylePadding(),
             contentAlignment = Alignment.CenterStart
