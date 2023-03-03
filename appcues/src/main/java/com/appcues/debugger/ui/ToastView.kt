@@ -33,7 +33,8 @@ import com.appcues.debugger.model.DebuggerToast.ScreenCaptureSuccess
 import com.appcues.ui.theme.AppcuesColors
 import kotlinx.coroutines.delay
 
-private const val TOAST_LENGTH = 3_000L
+private const val SUCCESS_TOAST_LENGTH = 3_000L
+private const val FAILURE_TOAST_LENGTH = 6_000L
 
 @Composable
 internal fun BoxScope.ToastView(debuggerState: MutableDebuggerState) {
@@ -89,7 +90,7 @@ internal fun BoxScope.SuccessToast(toast: ScreenCaptureSuccess, debuggerState: M
             )
         }
         LaunchedEffect(debuggerState.toast.targetState) {
-            delay(timeMillis = TOAST_LENGTH)
+            delay(timeMillis = SUCCESS_TOAST_LENGTH)
             toast.onDismiss()
         }
     }
@@ -150,7 +151,7 @@ internal fun BoxScope.FailureToast(toast: ScreenCaptureFailure, debuggerState: M
             }
         }
         LaunchedEffect(debuggerState.toast.targetState) {
-            delay(timeMillis = TOAST_LENGTH)
+            delay(timeMillis = FAILURE_TOAST_LENGTH)
             toast.onDismiss()
         }
     }
