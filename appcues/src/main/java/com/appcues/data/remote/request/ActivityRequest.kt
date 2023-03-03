@@ -26,4 +26,10 @@ internal data class ActivityRequest(
     val timestamp: Date = Date(),
     @Transient
     val userSignature: String? = null,
+    @Transient
+    // A synchronous request will wait for a response before allowing
+    // the next activity to make its network request. Used when a request
+    // may include updates that impact subsequent flow qualification (user and group
+    // attributes on identify and group calls).
+    val synchronous: Boolean = false
 )

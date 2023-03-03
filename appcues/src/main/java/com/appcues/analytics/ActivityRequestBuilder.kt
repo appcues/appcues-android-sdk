@@ -24,6 +24,7 @@ internal class ActivityRequestBuilder(
             groupId = storage.groupId,
             profileUpdate = properties?.toMutableMap(),
             userSignature = storage.userSignature,
+            synchronous = true,
         )
     )
 
@@ -33,6 +34,7 @@ internal class ActivityRequestBuilder(
         groupId = storage.groupId,
         groupUpdate = properties, // no auto-properties on group calls
         userSignature = storage.userSignature,
+        synchronous = true,
     )
 
     fun track(name: String, properties: Map<String, Any>? = null): ActivityRequest {

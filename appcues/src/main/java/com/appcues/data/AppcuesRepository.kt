@@ -19,6 +19,7 @@ import com.appcues.util.ResultOf.Success
 import com.appcues.util.doIfFailure
 import com.appcues.util.doIfSuccess
 import com.squareup.moshi.JsonDataException
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -62,7 +63,16 @@ internal class AppcuesRepository(
         }
     }
 
+    private var synchronousCompletion = CompletableDeferred(true)
+
     suspend fun trackActivity(activity: ActivityRequest): List<Experience> = withContext(Dispatchers.IO) {
+
+        // wait for any pending synchronous activity
+        synchronousCompletion.await()
+
+        if (activity.synchronous) {
+            synchronousCompletion = CompletableDeferred()
+        }
 
         val activityStorage = ActivityStorage(
             requestId = activity.requestId,
@@ -150,6 +160,8 @@ internal class AppcuesRepository(
             // if we are processing the current item (last item in queue) - then use the /qualify
             // endpoint and optionally get back qualified experiences to render
             val qualifyResult = appcuesRemoteSource.qualify(activity.userId, activity.userSignature, activity.requestId, activity.data)
+
+            synchronousCompletion.complete(true)
 
             qualifyResult.doIfSuccess { response ->
                 val priority: ExperiencePriority = if (response.qualificationReason == "screen_view") LOW else NORMAL
