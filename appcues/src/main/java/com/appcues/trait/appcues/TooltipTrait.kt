@@ -38,7 +38,6 @@ import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.trait.AppcuesTraitAnimatedVisibility
 import com.appcues.trait.ContentWrappingTrait
 import com.appcues.trait.PresentingTrait
-import com.appcues.trait.appcues.TargetRectangleTrait.TargetRectangleInfo
 import com.appcues.trait.appcues.TooltipPointerPosition.Bottom
 import com.appcues.trait.appcues.TooltipPointerPosition.None
 import com.appcues.trait.appcues.TooltipPointerPosition.Top
@@ -97,8 +96,10 @@ internal class TooltipTrait(
         val density = LocalDensity.current
         val metadata = LocalAppcuesStepMetadata.current
 
+        // trait does not apply if no target rectangle in metadata
+        val targetRectInfo = rememberTargetRectangleInfo(metadata) ?: return
+
         val windowInfo = rememberAppcuesWindowInfo()
-        val targetRectInfo = rememberTargetRectangleInfo(metadata)
         val containerDimens = remember { mutableStateOf<TooltipContainerDimens?>(null) }
         val targetRect = targetRectInfo.getRect(windowInfo)
         val distance = targetRectInfo.getContentDistance()

@@ -59,3 +59,11 @@ internal fun AppcuesConfigMap.getConfigColor(key: String): ComponentColor? {
         MoshiConfiguration.fromAny<StyleColorResponse>(it)?.mapComponentColor()
     }
 }
+
+// general helper to get any object of type T from the config map and have it deserialized from JSON
+// using it's Moshi adapter
+internal inline fun <reified T : Any> AppcuesConfigMap.getConfigObject(key: String): T? {
+    return getConfig<Any>(key)?.let {
+        MoshiConfiguration.fromAny(it)
+    }
+}

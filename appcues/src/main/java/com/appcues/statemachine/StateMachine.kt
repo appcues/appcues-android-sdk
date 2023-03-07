@@ -34,6 +34,7 @@ import com.appcues.trait.AppcuesTraitException
 import com.appcues.util.ResultOf
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
@@ -112,24 +113,18 @@ internal class StateMachine(
                         // kick off UI
                         sideEffect.experience.stepContainers[sideEffect.containerIndex].presentingTrait.present()
                         // wait on the RenderingStep state to flow in from the UI, return that result
-                        sideEffect.completion.await()
+                        handleCompletion(sideEffect.completion)
                     } catch (exception: AppcuesTraitException) {
-                        // force state machine to move to idling when we get this exception
-                        _state = Idling
-
-                        // return failure and report to errorFlow
-                        Failure(
+                        fatalError(
                             ExperienceError(
                                 experience = sideEffect.experience,
                                 message = exception.message ?: "Presenting trait failed to present for index ${sideEffect.containerIndex}"
-                            ).also {
-                                _errorFlow.emit(it)
-                            }
+                            )
                         )
                     }
                 }
                 is AwaitEffect -> {
-                    sideEffect.completion.await()
+                    handleCompletion(sideEffect.completion)
                 }
                 is ProcessActions -> {
                     actionProcessor.process(sideEffect.actions)
@@ -140,6 +135,25 @@ internal class StateMachine(
             // if no side effect, return success with current state
             return Success(_state)
         }
+    }
+
+    private suspend fun handleCompletion(completion: CompletableDeferred<ResultOf<State, Error>>): ResultOf<State, Error> {
+        return when (val result = completion.await()) {
+            is Success -> result
+            is Failure -> fatalError(result.reason)
+        }
+    }
+
+    private suspend fun fatalError(error: Error): Failure<Error> {
+        // force state machine to move to idling when we get this exception
+        _state = Idling
+
+        // return failure and report to errorFlow
+        return Failure(
+            error.also {
+                _errorFlow.emit(it)
+            }
+        )
     }
 
     private fun State.take(action: Action): Transition {

@@ -13,25 +13,6 @@ internal class TargetRectangleTrait(
     companion object {
 
         const val TYPE = "@appcues/target-rectangle"
-
-        const val TARGET_RECTANGLE_METADATA = "targetRectangle"
-    }
-
-    internal data class TargetRectangleInfo(
-        val x: Float = 0f,
-        val y: Float = 0f,
-        val relativeX: Double = 0.0,
-        val relativeY: Double = 0.0,
-        val width: Float = 0f,
-        val height: Float = 0f,
-        val relativeWidth: Double = 0.0,
-        val relativeHeight: Double = 0.0,
-        val contentDistance: Double = 0.0,
-        val prefPosition: ContentPreferredPosition? = null
-    )
-
-    enum class ContentPreferredPosition {
-        TOP, BOTTOM, LEADING, TRAILING
     }
 
     override fun produceMetadata(): Map<String, Any?> {
@@ -49,15 +30,5 @@ internal class TargetRectangleTrait(
         )
 
         return hashMapOf(TARGET_RECTANGLE_METADATA to targetRectangle)
-    }
-
-    private fun String?.toPosition(): ContentPreferredPosition? {
-        return when (this) {
-            "top" -> ContentPreferredPosition.TOP
-            "bottom" -> ContentPreferredPosition.BOTTOM
-            "leading" -> ContentPreferredPosition.LEADING
-            "trailing" -> ContentPreferredPosition.TRAILING
-            else -> null
-        }
     }
 }

@@ -79,7 +79,7 @@ class AppcuesOverlayViewManager(private val scope: Scope) : DefaultLifecycleObse
         if (parentView.findViewById<ComposeView>(R.id.appcues_overlay_layout) == null) {
             // then we add
             val binding = AppcuesOverlayLayoutBinding.inflate(layoutInflater)
-            if (viewModel == null) viewModel = AppcuesViewModel(scope)
+            if (viewModel == null) viewModel = AppcuesViewModel(scope, ::onCompositionDismiss)
             shakeGestureListener = ShakeGestureListener(this)
 
             // ensures it always comes before appcues_debugger_view
@@ -104,7 +104,6 @@ class AppcuesOverlayViewManager(private val scope: Scope) : DefaultLifecycleObse
                     shakeGestureListener = remember { shakeGestureListener!! },
                     logcues = logcues,
                     chromeClient = EmbedChromeClient(binding.appcuesOverlayCustomViewContainer),
-                    onCompositionDismissed = ::onCompositionDismiss
                 )
             }
         }

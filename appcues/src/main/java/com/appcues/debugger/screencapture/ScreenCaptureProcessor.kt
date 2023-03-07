@@ -189,6 +189,18 @@ private fun View.asCaptureView(): Capture.View? {
         children = null
     }
 
+    return Capture.View(
+        x = actualPosition.left.toDp(density),
+        y = actualPosition.top.toDp(density),
+        width = actualPosition.width().toDp(density),
+        height = actualPosition.height().toDp(density),
+        selector = selector(),
+        type = this.javaClass.name,
+        children = children,
+    )
+}
+
+internal fun View.selector(): ElementSelector? {
     val selector = ElementSelector(
         id = null, // for manual tagging
         accessibilityIdentifier = null, // not valid on android
@@ -196,15 +208,7 @@ private fun View.asCaptureView(): Capture.View? {
         tag = tag?.toString()
     )
 
-    return Capture.View(
-        x = actualPosition.left.toDp(density),
-        y = actualPosition.top.toDp(density),
-        width = actualPosition.width().toDp(density),
-        height = actualPosition.height().toDp(density),
-        selector = if (selector.isValid) selector else null,
-        type = this.javaClass.name,
-        children = children,
-    )
+    return if (selector.isValid) selector else null
 }
 
 private fun View.screenshot() =

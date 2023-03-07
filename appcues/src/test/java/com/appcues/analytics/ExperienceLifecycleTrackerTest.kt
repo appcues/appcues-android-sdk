@@ -23,6 +23,7 @@ import com.appcues.statemachine.StepReference.StepOffset
 import com.appcues.trait.TraitRegistry
 import com.appcues.ui.ExperienceRenderer
 import com.appcues.util.LinkOpener
+import com.appcues.util.ResultOf.Success
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -135,7 +136,7 @@ class ExperienceLifecycleTrackerTest : KoinTest {
             machine.stateFlow.collect {
                 when (it) {
                     is BeginningStep -> {
-                        it.presentationComplete.invoke()
+                        it.presentationComplete.invoke(Success(Unit))
                     }
                     is EndingStep -> {
                         it.dismissAndContinue?.invoke()
