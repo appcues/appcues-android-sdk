@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.testTag
 import com.appcues.logging.Logcues
+import com.appcues.trait.AppcuesTraitException
 import com.appcues.trait.BackdropDecoratingTrait
 import com.appcues.trait.ContainerDecoratingTrait
 import com.appcues.trait.ContainerDecoratingTrait.ContainerDecoratingType
@@ -25,6 +26,7 @@ import com.appcues.ui.AppcuesViewModel.UIState.Dismissing
 import com.appcues.ui.AppcuesViewModel.UIState.Rendering
 import com.appcues.ui.ShakeGestureListener
 import com.appcues.ui.theme.AppcuesTheme
+import com.appcues.util.ResultOf.Success
 import com.google.accompanist.web.AccompanistWebChromeClient
 
 @Composable
@@ -33,7 +35,6 @@ internal fun AppcuesComposition(
     shakeGestureListener: ShakeGestureListener,
     logcues: Logcues,
     chromeClient: AccompanistWebChromeClient,
-    onCompositionDismissed: () -> Unit,
 ) {
     // ensure to change some colors to match appropriate design for custom primitive blocks
     AppcuesTheme {
@@ -46,15 +47,13 @@ internal fun AppcuesComposition(
             LocalAppcuesActionDelegate provides DefaultAppcuesActionsDelegate(viewModel),
             LocalAppcuesPaginationDelegate provides AppcuesPagination { viewModel.onPageChanged(it) },
         ) {
-            MainSurface(
-                onCompositionDismissed = onCompositionDismissed
-            )
+            MainSurface()
         }
     }
 }
 
 @Composable
-private fun MainSurface(onCompositionDismissed: () -> Unit) {
+private fun MainSurface() {
     Box(
         modifier = Modifier.consumeAllTouchEvents(),
         contentAlignment = Alignment.Center
@@ -71,7 +70,7 @@ private fun MainSurface(onCompositionDismissed: () -> Unit) {
             LaunchOnShowAnimationCompleted {
                 val currentState = state.value
                 if (currentState is Rendering) {
-                    currentState.presentationComplete.invoke()
+                    currentState.presentationComplete.invoke(Success(Unit))
                 }
             }
 
@@ -79,7 +78,7 @@ private fun MainSurface(onCompositionDismissed: () -> Unit) {
             LaunchOnHideAnimationCompleted {
                 // if state is dismissing then finish activity
                 if (state.value is Dismissing) {
-                    onCompositionDismissed()
+                    viewModel.dismiss()
                 }
             }
         }
@@ -100,9 +99,7 @@ private fun BoxScope.ComposeLastRenderingState(state: Rendering) {
 
     LaunchedEffect(state.isPreview) {
         if (state.isPreview) {
-            shakeGestureListener.addListener(true) {
-                viewModel.refreshPreview()
-            }
+            shakeGestureListener.addListener(true) { viewModel.refreshPreview() }
         } else {
             shakeGestureListener.clearListener()
         }
@@ -114,47 +111,52 @@ private fun BoxScope.ComposeLastRenderingState(state: Rendering) {
         val metadataSettingTraits = remember(state.position) { mutableStateOf(steps[state.position].metadataSettingTraits) }
         val previousStepMetaData = remember { mutableStateOf(AppcuesStepMetadata()) }
         val stepMetadata = remember(metadataSettingTraits.value) {
-
-            val actual = hashMapOf<String, Any?>().apply { metadataSettingTraits.value.forEach { putAll(it.produceMetadata()) } }
-
-            mutableStateOf(AppcuesStepMetadata(previous = previousStepMetaData.value.actual, actual = actual)).also {
-                previousStepMetaData.value = it.value
+            try {
+                val actual = hashMapOf<String, Any?>().apply { metadataSettingTraits.value.forEach { putAll(it.produceMetadata()) } }
+                mutableStateOf(AppcuesStepMetadata(previous = previousStepMetaData.value.actual, actual = actual)).also {
+                    previousStepMetaData.value = it.value
+                }
+            } catch (ex: AppcuesTraitException) {
+                viewModel.onTraitException(ex)
+                null
             }
         }
 
-        CompositionLocalProvider(LocalAppcuesStepMetadata provides stepMetadata.value) {
-            // apply backdrop traits
-            ApplyBackgroundDecoratingTraits(backdropDecoratingTraits.value)
+        if (stepMetadata != null) {
+            CompositionLocalProvider(LocalAppcuesStepMetadata provides stepMetadata.value) {
+                // apply backdrop traits
+                ApplyBackgroundDecoratingTraits(backdropDecoratingTraits.value)
 
-            // create wrapper
-            contentWrappingTrait.WrapContent { modifier, containerPadding, safeAreaInsets ->
-                Box(contentAlignment = Alignment.TopCenter) {
-                    ApplyUnderlayContainerTraits(containerDecoratingTraits.value, containerPadding, safeAreaInsets)
+                // create wrapper
+                contentWrappingTrait.WrapContent { modifier, containerPadding, safeAreaInsets ->
+                    Box(contentAlignment = Alignment.TopCenter) {
+                        ApplyUnderlayContainerTraits(containerDecoratingTraits.value, containerPadding, safeAreaInsets)
 
-                    // Apply content holder trait
-                    with(contentHolderTrait) {
-                        // create object that will passed down to CreateContentHolder
-                        ContainerPages(
-                            pageCount = steps.size,
-                            currentPage = state.position,
-                            composePage = {
-                                steps[it]
-                                    .ComposeStep(
-                                        modifier = modifier.testTag("page_$it"),
-                                        containerPadding = containerPadding,
-                                        safeAreaInsets = safeAreaInsets,
-                                        parent = this@Box
-                                    )
+                        // Apply content holder trait
+                        with(contentHolderTrait) {
+                            // create object that will passed down to CreateContentHolder
+                            ContainerPages(
+                                pageCount = steps.size,
+                                currentPage = state.position,
+                                composePage = {
+                                    steps[it]
+                                        .ComposeStep(
+                                            modifier = modifier.testTag("page_$it"),
+                                            containerPadding = containerPadding,
+                                            safeAreaInsets = safeAreaInsets,
+                                            parent = this@Box
+                                        )
+                                }
+                            ).also {
+                                // create content holder
+                                CreateContentHolder(it)
+                                // sync pagination data in case content holder didn't update it
+                                it.syncPaginationData()
                             }
-                        ).also {
-                            // create content holder
-                            CreateContentHolder(it)
-                            // sync pagination data in case content holder didn't update it
-                            it.syncPaginationData()
                         }
-                    }
 
-                    ApplyOverlayContainerTraits(containerDecoratingTraits.value, containerPadding, safeAreaInsets)
+                        ApplyOverlayContainerTraits(containerDecoratingTraits.value, containerPadding, safeAreaInsets)
+                    }
                 }
             }
         }

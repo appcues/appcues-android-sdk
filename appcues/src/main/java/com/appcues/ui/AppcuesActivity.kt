@@ -34,7 +34,7 @@ internal class AppcuesActivity : AppCompatActivity() {
 
     private val scope: Scope by lazy { AppcuesKoinContext.koin.getScope(intent.getStringExtra(EXTRA_SCOPE_ID)!!) }
 
-    private val viewModel: AppcuesViewModel by viewModels { AppcuesViewModelFactory(scope) }
+    private val viewModel: AppcuesViewModel by viewModels { AppcuesViewModelFactory(scope, ::finish) }
 
     private val shakeGestureListener: ShakeGestureListener by lazy { ShakeGestureListener(context = this) }
 
@@ -52,7 +52,6 @@ internal class AppcuesActivity : AppCompatActivity() {
                 shakeGestureListener = shakeGestureListener,
                 logcues = logcues,
                 chromeClient = EmbedChromeClient(binding.appcuesCustomViewContainer),
-                onCompositionDismissed = ::finish
             )
         }
     }

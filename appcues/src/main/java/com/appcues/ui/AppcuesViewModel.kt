@@ -7,17 +7,22 @@ import com.appcues.action.ActionProcessor
 import com.appcues.action.ExperienceAction
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType
 import com.appcues.analytics.SdkMetrics
+import com.appcues.data.model.Experience
 import com.appcues.data.model.StepContainer
 import com.appcues.statemachine.Action.Pause
 import com.appcues.statemachine.Action.Resume
 import com.appcues.statemachine.Action.StartStep
+import com.appcues.statemachine.Error.ExperienceError
 import com.appcues.statemachine.State.BeginningStep
 import com.appcues.statemachine.State.EndingStep
 import com.appcues.statemachine.StateMachine
 import com.appcues.statemachine.StepReference.StepGroupPageIndex
+import com.appcues.trait.AppcuesTraitException
 import com.appcues.ui.AppcuesViewModel.UIState.Dismissing
 import com.appcues.ui.AppcuesViewModel.UIState.Idle
 import com.appcues.ui.AppcuesViewModel.UIState.Rendering
+import com.appcues.util.ResultOf
+import com.appcues.util.ResultOf.Failure
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -25,22 +30,22 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
-import java.util.UUID
 
 internal class AppcuesViewModel(
     override val scope: Scope,
+    private val onDismiss: () -> Unit,
 ) : ViewModel(), KoinScopeComponent {
 
     sealed class UIState {
         object Idle : UIState()
 
         data class Rendering(
-            val experienceId: UUID,
+            val experience: Experience,
             val stepContainer: StepContainer,
             val position: Int,
             val flatStepIndex: Int,
             val isPreview: Boolean,
-            val presentationComplete: (() -> Unit),
+            val presentationComplete: ((ResultOf<Unit, com.appcues.statemachine.Error>) -> Unit),
         ) : UIState()
 
         data class Dismissing(val continueAction: () -> Unit) : UIState()
@@ -107,7 +112,7 @@ internal class AppcuesViewModel(
             // if both are valid ids we return Rendering else null
             if (containerId != null && stepIndexInContainer != null) {
                 // returns rendering state
-                Rendering(id, stepContainers[containerId], stepIndexInContainer, flatStepIndex, published.not(), presentationComplete)
+                Rendering(this, stepContainers[containerId], stepIndexInContainer, flatStepIndex, published.not(), presentationComplete)
             } else null
         }
     }
@@ -148,6 +153,33 @@ internal class AppcuesViewModel(
         }
     }
 
+    fun onTraitException(exception: AppcuesTraitException) {
+        uiState.value.let { state ->
+            // if currently attempting to Render and failed, signal back
+            // the render complete (even on fail) and then continue to report
+            // error and reset
+            if (state is Rendering) {
+                state.presentationComplete(
+                    Failure(
+                        ExperienceError(
+                            experience = state.experience,
+                            // this message cannot be null in AppcuesTraitException, but the parent Exception class
+                            // has it optional. Thus, this fallback message should never actually be used.
+                            message = exception.message ?: "Unable to render step ${state.flatStepIndex}"
+                        )
+                    )
+                )
+            }
+        }
+
+        // dismiss this experience
+        dismiss()
+    }
+
+    fun dismiss() {
+        onDismiss()
+    }
+
     fun onPause() {
         if (uiState.value is Dismissing) return
 
@@ -167,7 +199,7 @@ internal class AppcuesViewModel(
             // if current state IS Rendering and we are Previewing then we refresh
             if (state is Rendering && state.isPreview) {
                 appcuesCoroutineScope.launch {
-                    experienceRenderer.preview(state.experienceId.toString())
+                    experienceRenderer.preview(state.experience.id.toString())
                 }
             }
         }

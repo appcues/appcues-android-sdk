@@ -6,9 +6,9 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.appcues.trait.appcues.TargetRectangleTrait
-import com.appcues.trait.appcues.TargetRectangleTrait.ContentPreferredPosition
-import com.appcues.trait.appcues.TargetRectangleTrait.TargetRectangleInfo
+import com.appcues.trait.appcues.ContentPreferredPosition
+import com.appcues.trait.appcues.TARGET_RECTANGLE_METADATA
+import com.appcues.trait.appcues.TargetRectangleInfo
 import com.appcues.trait.appcues.TooltipContainerDimens
 import com.appcues.trait.appcues.TooltipPointerPosition
 import com.appcues.trait.appcues.TooltipTrait
@@ -17,7 +17,7 @@ import com.appcues.ui.utils.AppcuesWindowInfo
 
 @Composable
 internal fun rememberTargetRectangleInfo(metadata: AppcuesStepMetadata): TargetRectangleInfo? {
-    return metadata.actual[TargetRectangleTrait.TARGET_RECTANGLE_METADATA] as TargetRectangleInfo?
+    return metadata.actual[TARGET_RECTANGLE_METADATA] as TargetRectangleInfo?
 }
 
 internal fun TargetRectangleInfo?.getRect(windowInfo: AppcuesWindowInfo): Rect? {
