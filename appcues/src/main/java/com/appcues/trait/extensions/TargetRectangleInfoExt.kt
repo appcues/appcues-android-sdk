@@ -11,9 +11,6 @@ import com.appcues.trait.appcues.TargetRectangleTrait.ContentPreferredPosition
 import com.appcues.trait.appcues.TargetRectangleTrait.TargetRectangleInfo
 import com.appcues.trait.appcues.TooltipContainerDimens
 import com.appcues.trait.appcues.TooltipPointerPosition
-import com.appcues.trait.appcues.TooltipPointerPosition.BOTTOM
-import com.appcues.trait.appcues.TooltipPointerPosition.NONE
-import com.appcues.trait.appcues.TooltipPointerPosition.TOP
 import com.appcues.trait.appcues.TooltipTrait
 import com.appcues.ui.composables.AppcuesStepMetadata
 import com.appcues.ui.utils.AppcuesWindowInfo
@@ -51,17 +48,19 @@ internal fun TargetRectangleInfo?.getTooltipPointerPosition(
     targetRect: Rect?,
     contentDistanceFromTarget: Dp,
 ): TooltipPointerPosition {
-    if (targetRect == null || containerDimens == null) return NONE
+    if (targetRect == null || containerDimens == null) return TooltipPointerPosition.None
 
     val topSafeArea = targetRect.top.dp - contentDistanceFromTarget - TooltipTrait.SCREEN_VERTICAL_PADDING
     val bottomSafeArea = windowInfo.heightDp - contentDistanceFromTarget - TooltipTrait.SCREEN_VERTICAL_PADDING - targetRect.bottom.dp
 
     return when (this?.prefPosition) {
-        ContentPreferredPosition.TOP -> if (topSafeArea > containerDimens.heightDp) BOTTOM else TOP
-        ContentPreferredPosition.BOTTOM -> if (bottomSafeArea > containerDimens.heightDp) TOP else BOTTOM
+        ContentPreferredPosition.TOP ->
+            if (topSafeArea > containerDimens.heightDp) TooltipPointerPosition.Bottom else TooltipPointerPosition.Top
+        ContentPreferredPosition.BOTTOM ->
+            if (bottomSafeArea > containerDimens.heightDp) TooltipPointerPosition.Top else TooltipPointerPosition.Bottom
         else -> when {
-            targetRect.center.y.dp < windowInfo.heightDp / 2 -> TOP
-            else -> BOTTOM
+            targetRect.center.y.dp < windowInfo.heightDp / 2 -> TooltipPointerPosition.Top
+            else -> TooltipPointerPosition.Bottom
         }
     }
 }
