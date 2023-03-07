@@ -39,13 +39,9 @@ import com.appcues.trait.AppcuesTraitAnimatedVisibility
 import com.appcues.trait.ContentWrappingTrait
 import com.appcues.trait.PresentingTrait
 import com.appcues.trait.appcues.TargetRectangleTrait.TargetRectangleInfo
-import com.appcues.trait.appcues.TooltipPointerPosition.BOTTOM
-import com.appcues.trait.appcues.TooltipPointerPosition.BOTTOM_END
-import com.appcues.trait.appcues.TooltipPointerPosition.BOTTOM_START
-import com.appcues.trait.appcues.TooltipPointerPosition.NONE
-import com.appcues.trait.appcues.TooltipPointerPosition.TOP
-import com.appcues.trait.appcues.TooltipPointerPosition.TOP_END
-import com.appcues.trait.appcues.TooltipPointerPosition.TOP_START
+import com.appcues.trait.appcues.TooltipPointerPosition.Bottom
+import com.appcues.trait.appcues.TooltipPointerPosition.None
+import com.appcues.trait.appcues.TooltipPointerPosition.Top
 import com.appcues.trait.extensions.getContentDistance
 import com.appcues.trait.extensions.getRect
 import com.appcues.trait.extensions.getTooltipPointerPosition
@@ -138,12 +134,12 @@ internal class TooltipTrait(
                         animationSpec = dpAnimation
                     )
                 ) {
-                    val tooltipPath = tooltipPath(tooltipSettings, containerDimens.value, style, floatAnimation)
+                    val tooltipPath = tooltipPath(tooltipSettings, containerDimens.value, floatAnimation, dpAnimation)
                     Box(
                         modifier = Modifier
                             .requiredSizeIn(maxWidth = MAX_WIDTH_DP, maxHeight = MAX_HEIGHT_DP)
                             .tooltipSize(style)
-                            .onTooltipSizeChanged(density, containerDimens)
+                            .onTooltipSizeChanged(style, density, containerDimens)
                             .styleShadowPath(style, tooltipPath, isSystemInDarkTheme())
                             .clipToPath(tooltipPath)
                             .styleBackground(style, isSystemInDarkTheme())
@@ -160,14 +156,19 @@ internal class TooltipTrait(
         }
     }
 
-    private fun Modifier.onTooltipSizeChanged(density: Density, containerDimens: MutableState<TooltipContainerDimens?>) = then(
+    private fun Modifier.onTooltipSizeChanged(
+        style: ComponentStyle?,
+        density: Density,
+        containerDimens: MutableState<TooltipContainerDimens?>
+    ) = then(
         Modifier.onSizeChanged {
             with(density) {
                 containerDimens.value = TooltipContainerDimens(
                     widthDp = it.width.toDp(),
                     heightDp = it.height.toDp(),
                     widthPx = it.width.toFloat(),
-                    heightPx = it.height.toFloat()
+                    heightPx = it.height.toFloat(),
+                    cornerRadius = (style?.cornerRadius?.dp ?: 0.dp)
                 )
             }
         }
@@ -202,12 +203,13 @@ internal class TooltipTrait(
         if (containerDimens == null) return@composed Modifier
 
         val tooltipPaddingTop = animateDpAsState(
-            targetValue = when (pointerSettings.pointerPosition) {
-                TOP, TOP_START, TOP_END -> max((targetRect?.bottom?.dp ?: 0.dp) - SCREEN_VERTICAL_PADDING + pointerSettings.distance, 0.dp)
-                BOTTOM, BOTTOM_START, BOTTOM_END -> max(
-                    (targetRect?.top?.dp ?: 0.dp) - containerDimens.heightDp - SCREEN_VERTICAL_PADDING - pointerSettings.distance, 0.dp
-                )
-                NONE -> windowInfo.heightDp - containerDimens.heightDp - SCREEN_VERTICAL_PADDING
+            targetValue = when (pointerSettings.tooltipPointerPosition) {
+                is Top ->
+                    max((targetRect?.bottom?.dp ?: 0.dp) - SCREEN_VERTICAL_PADDING + pointerSettings.distance, 0.dp)
+                is Bottom ->
+                    max((targetRect?.top?.dp ?: 0.dp) - containerDimens.heightDp - SCREEN_VERTICAL_PADDING - pointerSettings.distance, 0.dp)
+                is None ->
+                    windowInfo.heightDp - containerDimens.heightDp - SCREEN_VERTICAL_PADDING
             },
             animationSpec = animationSpec
         )
@@ -239,10 +241,10 @@ internal class TooltipTrait(
     }
 
     private fun TooltipSettings.getContentPaddingValues(): PaddingValues {
-        return when (pointerPosition) {
-            TOP, TOP_START, TOP_END -> PaddingValues(top = pointerLengthDp)
-            BOTTOM, BOTTOM_START, BOTTOM_END -> PaddingValues(bottom = pointerLengthDp)
-            NONE -> PaddingValues()
+        return when (tooltipPointerPosition) {
+            is Top -> PaddingValues(top = pointerLengthDp)
+            is Bottom -> PaddingValues(bottom = pointerLengthDp)
+            None -> PaddingValues()
         }
     }
 

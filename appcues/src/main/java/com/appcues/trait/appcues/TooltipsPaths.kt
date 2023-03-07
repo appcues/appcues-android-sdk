@@ -5,9 +5,10 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathOperation
@@ -17,23 +18,88 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.appcues.data.model.styling.ComponentStyle
-import com.appcues.trait.appcues.TooltipPointerPosition.BOTTOM
-import com.appcues.trait.appcues.TooltipPointerPosition.BOTTOM_END
-import com.appcues.trait.appcues.TooltipPointerPosition.BOTTOM_START
-import com.appcues.trait.appcues.TooltipPointerPosition.NONE
-import com.appcues.trait.appcues.TooltipPointerPosition.TOP
-import com.appcues.trait.appcues.TooltipPointerPosition.TOP_END
-import com.appcues.trait.appcues.TooltipPointerPosition.TOP_START
-import com.appcues.util.ne
+import com.appcues.trait.appcues.PointerHorizontalAlignment.CENTER
+import com.appcues.trait.appcues.PointerHorizontalAlignment.END
+import com.appcues.trait.appcues.PointerHorizontalAlignment.START
+import com.appcues.trait.appcues.TooltipPointerPosition.Bottom
+import com.appcues.trait.appcues.TooltipPointerPosition.None
+import com.appcues.trait.appcues.TooltipPointerPosition.Top
+import kotlin.math.max
 
-internal enum class TooltipPointerPosition {
-    TOP, TOP_START, TOP_END, BOTTOM, BOTTOM_START, BOTTOM_END, NONE
+internal data class PointerAlignment(
+    val verticalAlignment: PointerVerticalAlignment = PointerVerticalAlignment.CENTER,
+    val horizontalAlignment: PointerHorizontalAlignment = CENTER,
+)
+
+internal enum class PointerVerticalAlignment {
+    TOP, CENTER, BOTTOM
+}
+
+internal enum class PointerHorizontalAlignment {
+    START, CENTER, END
+}
+
+internal data class ContainerCornerRadius(
+    val topStart: Dp,
+    val topEnd: Dp,
+    val bottomStart: Dp,
+    val bottomEnd: Dp,
+)
+
+internal sealed class TooltipPointerPosition {
+
+    private val _alignment = mutableStateOf(PointerAlignment())
+    val alignment: State<PointerAlignment> = _alignment
+    fun verticalAlignment(alignment: PointerVerticalAlignment) {
+        this._alignment.value = PointerAlignment(verticalAlignment = alignment)
+    }
+
+    fun horizontalAlignment(alignment: PointerHorizontalAlignment) {
+        this._alignment.value = PointerAlignment(horizontalAlignment = alignment)
+    }
+
+    abstract fun toContainerCornerRadius(cornerRadius: Dp): ContainerCornerRadius
+
+    object Top : TooltipPointerPosition() {
+
+        override fun toContainerCornerRadius(cornerRadius: Dp): ContainerCornerRadius {
+            return ContainerCornerRadius(
+                topStart = if (alignment.value.horizontalAlignment == START) 0.dp else cornerRadius,
+                topEnd = if (alignment.value.horizontalAlignment == END) 0.dp else cornerRadius,
+                bottomEnd = cornerRadius,
+                bottomStart = cornerRadius
+            )
+        }
+    }
+
+    object Bottom : TooltipPointerPosition() {
+
+        override fun toContainerCornerRadius(cornerRadius: Dp): ContainerCornerRadius {
+            return ContainerCornerRadius(
+                topStart = cornerRadius,
+                topEnd = cornerRadius,
+                bottomStart = if (alignment.value.horizontalAlignment == START) 0.dp else cornerRadius,
+                bottomEnd = if (alignment.value.horizontalAlignment == END) 0.dp else cornerRadius
+            )
+        }
+    }
+
+    object None : TooltipPointerPosition() {
+
+        override fun toContainerCornerRadius(cornerRadius: Dp): ContainerCornerRadius {
+            return ContainerCornerRadius(
+                topStart = cornerRadius,
+                topEnd = cornerRadius,
+                bottomEnd = cornerRadius,
+                bottomStart = cornerRadius
+            )
+        }
+    }
 }
 
 internal data class TooltipSettings(
     val hidePointer: Boolean,
-    val pointerPosition: TooltipPointerPosition,
+    val tooltipPointerPosition: TooltipPointerPosition,
     val distance: Dp,
     val pointerBaseDp: Dp,
     val pointerLengthDp: Dp,
@@ -49,7 +115,8 @@ internal data class TooltipContainerDimens(
     val widthDp: Dp,
     val heightDp: Dp,
     val widthPx: Float,
-    val heightPx: Float
+    val heightPx: Float,
+    val cornerRadius: Dp,
 )
 
 internal fun getTooltipSettings(
@@ -61,7 +128,7 @@ internal fun getTooltipSettings(
 ): TooltipSettings {
     return TooltipSettings(
         hidePointer = false,
-        pointerPosition = position,
+        tooltipPointerPosition = position,
         distance = distance,
         pointerBaseDp = pointerBaseDp,
         pointerLengthDp = pointerLengthDp,
@@ -74,19 +141,16 @@ internal fun getTooltipSettings(
 internal fun tooltipPath(
     tooltipSettings: TooltipSettings,
     containerDimens: TooltipContainerDimens?,
-    style: ComponentStyle?,
-    animationSpec: AnimationSpec<Float>,
+    animationFloatSpec: AnimationSpec<Float>,
+    animationDpSpec: AnimationSpec<Dp>,
 ): Path {
     return Path().apply {
         // if containerDimens is null we don't to path the tooltip yet
         if (containerDimens == null) return@apply
 
-        // information used by both container path and tooltip pointer path
-        val containerRealSize = Size(containerDimens.widthPx, containerDimens.heightPx - tooltipSettings.pointerLengthPx)
-
         op(
-            path1 = getTooltipPointerPath(style, containerDimens, tooltipSettings, containerRealSize, animationSpec),
-            path2 = getContainerPath(tooltipSettings, style, containerRealSize),
+            path1 = getTooltipPointerPath(containerDimens, tooltipSettings, animationFloatSpec),
+            path2 = getContainerPath(containerDimens, tooltipSettings, animationDpSpec),
             operation = PathOperation.Union
         )
     }
@@ -94,54 +158,76 @@ internal fun tooltipPath(
 
 @Composable
 private fun getTooltipPointerPath(
-    style: ComponentStyle?,
     containerDimens: TooltipContainerDimens,
-    pointerSettings: TooltipSettings,
-    containerSize: Size,
+    tooltipSettings: TooltipSettings,
     animationSpec: AnimationSpec<Float>,
 ): Path {
     val density = LocalDensity.current
 
-    // mapping all values to px
-    val cornerRadius = with(density) { style?.cornerRadius?.dp?.toPx() ?: 0f }
-    val pointerOffset = with(density) { pointerSettings.pointerOffsetX.value.toPx() }
-    val offsetX = (containerDimens.widthPx / 2) - pointerSettings.pointerBaseCenterPx + pointerOffset
+    val pointerOffsetX = calculatePointerXOffset(
+        containerDimens = containerDimens,
+        tooltipSettings = tooltipSettings,
+        pointerOffsetX = with(density) { tooltipSettings.pointerOffsetX.value.toPx() },
+        cornerRadius = with(density) { containerDimens.cornerRadius.toPx() },
+    )
 
-    // boundaries for the tooltip
-    val minPointerOffset = 0f
-    val minPointerOffsetCornerRadius = minPointerOffset + cornerRadius
-    val maxPointerOffset = (containerDimens.widthPx - pointerSettings.pointerBasePx)
-        .let { return@let if (it < 0) 0f else it }
-    val maxPointerOffsetCornerRadius = maxPointerOffset - cornerRadius
+    val pointerOffsetY = if (tooltipSettings.tooltipPointerPosition is Bottom)
+        containerDimens.heightPx - tooltipSettings.pointerLengthPx else tooltipSettings.pointerLengthPx
 
     // vertical pointer implementation, probably in the future make this a separate method and add
     // another one to generate a horizontal pointer for leading and trailing positions.
     return Path().apply {
-        val pathOffsetY = animateFloatAsState(
-            targetValue = if (pointerSettings.pointerPosition == BOTTOM)
-                containerSize.height else pointerSettings.pointerLengthPx,
-            animationSpec = animationSpec,
-        )
 
-        val pathOffsetX = animateFloatAsState(
-            targetValue = offsetX.coerceIn(minPointerOffset..maxPointerOffset),
-            animationSpec = animationSpec,
-        )
+        val pointerTipOffsetX = animateFloatAsState(pointerOffsetX.second, animationSpec)
 
-        val pointerTipOffsetX = animateFloatAsState(
-            targetValue = if (offsetX < minPointerOffsetCornerRadius) {
-                -pointerSettings.pointerBaseCenterPx
-            } else if (offsetX > maxPointerOffsetCornerRadius) {
-                pointerSettings.pointerBaseCenterPx
-            } else 0f,
-            animationSpec = animationSpec,
-        )
+        TooltipPointerPath(tooltipSettings, pointerTipOffsetX.value)
 
-        TooltipPointerPath(pointerSettings, pointerTipOffsetX.value)
+        val pathOffsetX = animateFloatAsState(pointerOffsetX.first, animationSpec)
+        val pathOffsetY = animateFloatAsState(pointerOffsetY, animationSpec)
 
         // Move path to correct place
         translate(Offset(pathOffsetX.value, pathOffsetY.value))
     }
+}
+
+private fun calculatePointerXOffset(
+    containerDimens: TooltipContainerDimens,
+    tooltipSettings: TooltipSettings,
+    pointerOffsetX: Float,
+    cornerRadius: Float,
+): Pair<Float, Float> {
+    val tempPointerOffset = (containerDimens.widthPx / 2) - tooltipSettings.pointerBaseCenterPx + pointerOffsetX
+
+    // boundaries for the tooltip
+    val minPointerOffset = 0f
+    val minPointerOffsetCornerRadius = minPointerOffset + cornerRadius
+    val maxPointerOffset = max((containerDimens.widthPx - tooltipSettings.pointerBasePx), 0f)
+    val maxPointerOffsetCornerRadius = maxPointerOffset - cornerRadius
+
+    // figure out the offset of the pointer and offset for the tooltip pointer when hits the edges
+    var tooltipPointerOffsetX = 0f
+    val offsetX = when {
+        tempPointerOffset > minPointerOffsetCornerRadius && tempPointerOffset < maxPointerOffsetCornerRadius -> {
+            tooltipSettings.tooltipPointerPosition.horizontalAlignment(CENTER)
+            tempPointerOffset
+        }
+        tempPointerOffset > minPointerOffset && tempPointerOffset < maxPointerOffset -> {
+            tooltipSettings.tooltipPointerPosition.horizontalAlignment(CENTER)
+            tempPointerOffset.coerceIn(minPointerOffsetCornerRadius..maxPointerOffsetCornerRadius).toFloat()
+        }
+        tempPointerOffset <= minPointerOffset -> {
+            tooltipPointerOffsetX = -tooltipSettings.pointerBaseCenterPx
+            tooltipSettings.tooltipPointerPosition.horizontalAlignment(START)
+            minPointerOffset
+        }
+        tempPointerOffset >= maxPointerOffset -> {
+            tooltipPointerOffsetX = tooltipSettings.pointerBaseCenterPx
+            tooltipSettings.tooltipPointerPosition.horizontalAlignment(END)
+            maxPointerOffset
+        }
+        else -> 0f
+    }
+    return Pair(offsetX, tooltipPointerOffsetX)
 }
 
 @Composable
@@ -150,10 +236,10 @@ private fun Path.TooltipPointerPath(
     pointerOffsetX: Float
 ) {
     animateFloatAsState(
-        targetValue = when (pointerSettings.pointerPosition) {
-            TOP, TOP_START, TOP_END -> -pointerSettings.pointerLengthPx
-            BOTTOM, BOTTOM_START, BOTTOM_END -> pointerSettings.pointerLengthPx
-            NONE -> 0f
+        targetValue = when (pointerSettings.tooltipPointerPosition) {
+            is Top -> -pointerSettings.pointerLengthPx
+            is Bottom -> pointerSettings.pointerLengthPx
+            None -> 0f
         }
     ).let {
         reset()
@@ -166,49 +252,48 @@ private fun Path.TooltipPointerPath(
 
 @Composable
 private fun getContainerPath(
-    pointerSettings: TooltipSettings,
-    style: ComponentStyle?,
-    containerSizeWithPointer: Size,
+    containerDimens: TooltipContainerDimens,
+    tooltipSettings: TooltipSettings,
+    animationSpec: AnimationSpec<Dp>,
 ): Path {
-    return Path().apply {
-        val containerOffsetPx =
-            Offset(
-                0f,
-                y = when (pointerSettings.pointerPosition) {
-                    // offset entire content rectangle in case tooltip is at the top
-                    TOP, TOP_START, TOP_END -> pointerSettings.pointerLengthPx
-                    else -> 0f
-                }
-            )
+    val containerCornerRadius = remember(tooltipSettings.tooltipPointerPosition.alignment.value) {
+        tooltipSettings.tooltipPointerPosition.toContainerCornerRadius(containerDimens.cornerRadius)
+    }
 
-        if (style != null && style.cornerRadius ne 0.0) {
-            val cornerTopStart =
-                animateDpAsState(targetValue = if (pointerSettings.pointerPosition == TOP_START) 0.dp else style.cornerRadius.dp)
-            val cornerTopEnd =
-                animateDpAsState(targetValue = if (pointerSettings.pointerPosition == TOP_END) 0.dp else style.cornerRadius.dp)
-            val cornerBottomStart =
-                animateDpAsState(targetValue = if (pointerSettings.pointerPosition == BOTTOM_START) 0.dp else style.cornerRadius.dp)
-            val cornerBottomEnd =
-                animateDpAsState(targetValue = if (pointerSettings.pointerPosition == BOTTOM_END) 0.dp else style.cornerRadius.dp)
-            addPath(
-                Path().apply {
-                    addOutline(
-                        RoundedCornerShape(
-                            topStart = cornerTopStart.value,
-                            topEnd = cornerTopEnd.value,
-                            bottomEnd = cornerBottomEnd.value,
-                            bottomStart = cornerBottomStart.value
-                        ).createOutline(
-                            containerSizeWithPointer,
-                            LocalLayoutDirection.current,
-                            LocalDensity.current
-                        )
+    val cornerTopStart = animateDpAsState(containerCornerRadius.topStart, animationSpec)
+    val cornerTopEnd = animateDpAsState(containerCornerRadius.topEnd, animationSpec)
+    val cornerBottomStart = animateDpAsState(containerCornerRadius.bottomStart, animationSpec)
+    val cornerBottomEnd = animateDpAsState(containerCornerRadius.bottomEnd, animationSpec)
+
+    return Path().apply {
+        // takes into account the length of the tooltip pointer when calculating new container size
+        val containerSizePx = Size(containerDimens.widthPx, containerDimens.heightPx - tooltipSettings.pointerLengthPx)
+
+        val containerOffsetPx = Offset(
+            x = 0f,
+            y = when (tooltipSettings.tooltipPointerPosition) {
+                // offset entire content rectangle in case tooltip is at the top
+                is Top -> tooltipSettings.pointerLengthPx
+                else -> 0f
+            }
+        )
+
+        addPath(
+            Path().apply {
+                addOutline(
+                    RoundedCornerShape(
+                        topStart = cornerTopStart.value,
+                        topEnd = cornerTopEnd.value,
+                        bottomEnd = cornerBottomEnd.value,
+                        bottomStart = cornerBottomStart.value
+                    ).createOutline(
+                        containerSizePx,
+                        LocalLayoutDirection.current,
+                        LocalDensity.current
                     )
-                },
-                containerOffsetPx
-            )
-        } else {
-            addRect(Rect(containerOffsetPx, containerSizeWithPointer))
-        }
+                )
+            },
+            containerOffsetPx
+        )
     }
 }
