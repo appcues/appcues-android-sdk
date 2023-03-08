@@ -63,8 +63,7 @@ internal class BackdropKeyholeTrait(
         val density = LocalDensity.current
         val metadata = LocalAppcuesStepMetadata.current
 
-        // trait does not apply if no target rectangle in metadata
-        val targetRectInfo = rememberTargetRectangleInfo(metadata) ?: return
+        val targetRectInfo = rememberTargetRectangleInfo(metadata)
 
         val shapeBlurRadius = if (shape == CIRCLE) configBlurRadius.toFloat() else 0.0f
         val targetRect = targetRectInfo.getRect(rememberAppcuesWindowInfo()).inflateOrEmpty(configSpreadRadius)
@@ -94,7 +93,7 @@ internal class BackdropKeyholeTrait(
                 .drawWithContent {
                     drawContent()
 
-                    if (sizePx.width > 0 && sizePx.height > 0) {
+                    if (encompassesRadiusPx.value > 0) {
                         val shapeCenter = Offset(positionPx.x + sizePx.width / 2, positionPx.y + sizePx.height / 2)
                         val blurStartPoint = ((sizePx.width / 2) - blurRadiusPx) / (sizePx.width / 2)
 
