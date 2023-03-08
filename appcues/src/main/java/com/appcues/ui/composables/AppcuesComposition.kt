@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -21,6 +22,7 @@ import com.appcues.trait.BackdropDecoratingTrait
 import com.appcues.trait.ContainerDecoratingTrait
 import com.appcues.trait.ContainerDecoratingTrait.ContainerDecoratingType
 import com.appcues.trait.ContentHolderTrait.ContainerPages
+import com.appcues.trait.MetadataSettingTrait
 import com.appcues.ui.AppcuesViewModel
 import com.appcues.ui.AppcuesViewModel.UIState.Dismissing
 import com.appcues.ui.AppcuesViewModel.UIState.Rendering
@@ -109,18 +111,7 @@ private fun BoxScope.ComposeLastRenderingState(state: Rendering) {
         val backdropDecoratingTraits = remember(state.position) { mutableStateOf(steps[state.position].backdropDecoratingTraits) }
         val containerDecoratingTraits = remember(state.position) { mutableStateOf(steps[state.position].containerDecoratingTraits) }
         val metadataSettingTraits = remember(state.position) { mutableStateOf(steps[state.position].metadataSettingTraits) }
-        val previousStepMetaData = remember { mutableStateOf(AppcuesStepMetadata()) }
-        val stepMetadata = remember(metadataSettingTraits.value) {
-            try {
-                val actual = hashMapOf<String, Any?>().apply { metadataSettingTraits.value.forEach { putAll(it.produceMetadata()) } }
-                mutableStateOf(AppcuesStepMetadata(previous = previousStepMetaData.value.actual, actual = actual)).also {
-                    previousStepMetaData.value = it.value
-                }
-            } catch (ex: AppcuesTraitException) {
-                viewModel.onTraitException(ex)
-                null
-            }
-        }
+        val stepMetadata = rememberMetadataSettingTraits(viewModel, metadataSettingTraits)
 
         if (stepMetadata != null) {
             CompositionLocalProvider(LocalAppcuesStepMetadata provides stepMetadata.value) {
@@ -159,6 +150,25 @@ private fun BoxScope.ComposeLastRenderingState(state: Rendering) {
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun rememberMetadataSettingTraits(
+    viewModel: AppcuesViewModel,
+    metadataSettingTraits: MutableState<List<MetadataSettingTrait>>,
+): MutableState<AppcuesStepMetadata>? {
+    val previousStepMetaData = remember { mutableStateOf(AppcuesStepMetadata()) }
+    return remember(metadataSettingTraits.value) {
+        try {
+            val actual = hashMapOf<String, Any?>().apply { metadataSettingTraits.value.forEach { putAll(it.produceMetadata()) } }
+            mutableStateOf(AppcuesStepMetadata(previous = previousStepMetaData.value.actual, actual = actual)).also {
+                previousStepMetaData.value = it.value
+            }
+        } catch (ex: AppcuesTraitException) {
+            viewModel.onTraitException(ex)
+            null
         }
     }
 }

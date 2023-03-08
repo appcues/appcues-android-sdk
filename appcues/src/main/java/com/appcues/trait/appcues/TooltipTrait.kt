@@ -96,9 +96,7 @@ internal class TooltipTrait(
         val density = LocalDensity.current
         val metadata = LocalAppcuesStepMetadata.current
 
-        // trait does not apply if no target rectangle in metadata
-        val targetRectInfo = rememberTargetRectangleInfo(metadata) ?: return
-
+        val targetRectInfo = rememberTargetRectangleInfo(metadata)
         val windowInfo = rememberAppcuesWindowInfo()
         val containerDimens = remember { mutableStateOf<TooltipContainerDimens?>(null) }
         val targetRect = targetRectInfo.getRect(windowInfo)
