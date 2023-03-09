@@ -4,6 +4,7 @@ import com.appcues.action.appcues.CloseAction
 import com.appcues.action.appcues.ContinueAction
 import com.appcues.action.appcues.LaunchExperienceAction
 import com.appcues.action.appcues.LinkAction
+import com.appcues.action.appcues.RequestReviewAction
 import com.appcues.action.appcues.StepInteractionAction
 import com.appcues.action.appcues.SubmitFormAction
 import com.appcues.action.appcues.TrackEventAction
@@ -17,63 +18,14 @@ internal object ActionKoin : KoinScopePlugin {
         scoped { ActionRegistry(scope = get()) }
         scoped { ActionProcessor(scope = get()) }
 
-        factory { params ->
-            CloseAction(
-                config = params.getOrNull(),
-                experienceRenderer = get(),
-            )
-        }
-
-        factory { params ->
-            LinkAction(
-                config = params.getOrNull(),
-                linkOpener = get(),
-            )
-        }
-
-        factory { params ->
-            TrackEventAction(
-                config = params.getOrNull()
-            )
-        }
-
-        factory { params ->
-            ContinueAction(
-                config = params.getOrNull(),
-                stateMachine = get(),
-            )
-        }
-
-        factory { params ->
-            LaunchExperienceAction(
-                config = params.getOrNull(),
-                stateMachine = get(),
-                experienceRenderer = get(),
-            )
-        }
-
-        factory { params ->
-            UpdateProfileAction(
-                config = params.getOrNull(),
-                storage = get(),
-            )
-        }
-
-        factory { params ->
-            SubmitFormAction(
-                config = params.getOrNull(),
-                analyticsTracker = get(),
-                stateMachine = get(),
-            )
-        }
-
-        factory { params ->
-            StepInteractionAction(
-                config = params.getOrNull(),
-                interaction = params.get(),
-                analyticsTracker = get(),
-                stateMachine = get(),
-            )
-        }
+        factory { CloseAction(config = it.getOrNull(), experienceRenderer = get()) }
+        factory { LinkAction(config = it.getOrNull(), linkOpener = get()) }
+        factory { TrackEventAction(config = it.getOrNull()) }
+        factory { ContinueAction(config = it.getOrNull(), stateMachine = get()) }
+        factory { LaunchExperienceAction(config = it.getOrNull(), stateMachine = get(), experienceRenderer = get()) }
+        factory { UpdateProfileAction(config = it.getOrNull(), storage = get()) }
+        factory { SubmitFormAction(config = it.getOrNull(), analyticsTracker = get(), stateMachine = get()) }
+        factory { StepInteractionAction(config = it.getOrNull(), interaction = it.get(), analyticsTracker = get(), stateMachine = get()) }
+        factory { RequestReviewAction(config = it.getOrNull(), context = get(), koinScope = get()) }
     }
 }
