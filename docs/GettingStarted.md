@@ -35,12 +35,7 @@ In order to target content to the right users at the right time, you need to ide
 appcues.identify(userId, properties)
 ```
 
-> Appcues recommends choosing opaque and hard to guess user IDs, such as a UUID. See the [FAQ for Developers](https://docs.appcues.com/article/159-faq#choosing-a-user-id) for more details about how to choose a User ID.
-
-The inverse of identifying is resetting.  For example, if a user logs out of your app calling `reset()` will disable tracking of screens and events until a user is identified again.
-
-You can target users during anonymous usage in your application using `anonymous()` instead of `identify()`.  This can have implications on your billing based on active user counts.  The format of anonymous IDs can be customized during initialization with the `AppcuesConfig`, using the `anonymousIdFactory` property.
-
+For more detail about session management and anonymous user tracking, refer to [Identifying and Managing Users](https://github.com/appcues/appcues-android-sdk/blob/main/docs/Identifying.md).
 
 ## Tracking Screens and Events
 
