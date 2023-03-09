@@ -13,6 +13,10 @@
             android:windowSoftInputMode="adjustResize"
             android:configChanges="orientation|screenSize|screenLayout"
             android:theme="@style/Appcues.AppcuesActivityTheme" />
+        <activity
+            android:name=".ui.InAppReviewActivity"
+            android:exported="false"
+            android:theme="@style/Appcues.AppcuesActivityTheme" />
     </application>
 
 </manifest>
