@@ -46,12 +46,11 @@ internal fun TargetRectangleInfo?.getTooltipPointerPosition(
     windowInfo: AppcuesWindowInfo,
     containerDimens: TooltipContainerDimens?,
     targetRect: Rect?,
-    contentDistanceFromTarget: Dp,
 ): TooltipPointerPosition {
     if (targetRect == null || containerDimens == null) return TooltipPointerPosition.None
 
-    val topSafeArea = targetRect.top.dp - contentDistanceFromTarget - TooltipTrait.SCREEN_VERTICAL_PADDING
-    val bottomSafeArea = windowInfo.heightDp - contentDistanceFromTarget - TooltipTrait.SCREEN_VERTICAL_PADDING - targetRect.bottom.dp
+    val topSafeArea = targetRect.top.dp - TooltipTrait.SCREEN_VERTICAL_PADDING
+    val bottomSafeArea = windowInfo.heightDp - TooltipTrait.SCREEN_VERTICAL_PADDING - targetRect.bottom.dp
 
     return when (this?.prefPosition) {
         ContentPreferredPosition.TOP ->

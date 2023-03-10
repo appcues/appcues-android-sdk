@@ -171,22 +171,18 @@ private fun getTooltipPointerPath(
         cornerRadius = with(density) { containerDimens.cornerRadius.toPx() },
     )
 
-    val pointerOffsetY = if (tooltipSettings.tooltipPointerPosition is Bottom)
-        containerDimens.heightPx - tooltipSettings.pointerLengthPx else tooltipSettings.pointerLengthPx
-
     // vertical pointer implementation, probably in the future make this a separate method and add
     // another one to generate a horizontal pointer for leading and trailing positions.
     return Path().apply {
 
-        val pointerTipOffsetX = animateFloatAsState(pointerOffsetX.second, animationSpec)
-
-        TooltipPointerPath(tooltipSettings, pointerTipOffsetX.value)
+        TooltipPointerPath(tooltipSettings, pointerOffsetX.second, animationSpec)
 
         val pathOffsetX = animateFloatAsState(pointerOffsetX.first, animationSpec)
-        val pathOffsetY = animateFloatAsState(pointerOffsetY, animationSpec)
+        val pathOffsetY = if (tooltipSettings.tooltipPointerPosition is Bottom)
+            containerDimens.heightPx - tooltipSettings.pointerLengthPx else tooltipSettings.pointerLengthPx
 
         // Move path to correct place
-        translate(Offset(pathOffsetX.value, pathOffsetY.value))
+        translate(Offset(pathOffsetX.value, pathOffsetY))
     }
 }
 
@@ -233,21 +229,24 @@ private fun calculatePointerXOffset(
 @Composable
 private fun Path.TooltipPointerPath(
     pointerSettings: TooltipSettings,
-    pointerOffsetX: Float
+    pointerOffsetX: Float,
+    animationSpec: AnimationSpec<Float>
 ) {
-    animateFloatAsState(
+    val animatedTipXOffset = animateFloatAsState(pointerOffsetX, animationSpec)
+    val animatedTipLength = animateFloatAsState(
         targetValue = when (pointerSettings.tooltipPointerPosition) {
             is Top -> -pointerSettings.pointerLengthPx
             is Bottom -> pointerSettings.pointerLengthPx
             None -> 0f
-        }
-    ).let {
-        reset()
-        lineTo(x = 0f, y = 0f)
-        lineTo(x = pointerSettings.pointerBaseCenterPx + pointerOffsetX, y = it.value)
-        lineTo(x = pointerSettings.pointerBasePx, y = 0f)
-        close()
-    }
+        },
+        animationSpec = animationSpec
+    )
+
+    reset()
+    lineTo(x = 0f, y = 0f)
+    lineTo(x = pointerSettings.pointerBaseCenterPx + animatedTipXOffset.value, y = animatedTipLength.value)
+    lineTo(x = pointerSettings.pointerBasePx, y = 0f)
+    close()
 }
 
 @Composable

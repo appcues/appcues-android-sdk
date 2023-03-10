@@ -8,14 +8,17 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredSizeIn
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.requiredHeightIn
+import androidx.compose.foundation.layout.requiredWidthIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.GenericShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -31,6 +34,7 @@ import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.coerceIn
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
+import androidx.compose.ui.unit.min
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.getConfigOrDefault
 import com.appcues.data.model.getConfigStyle
@@ -70,10 +74,9 @@ internal class TooltipTrait(
 
         const val TYPE = "@appcues/tooltip"
 
-        val SCREEN_HORIZONTAL_PADDING = 12.dp
-        val SCREEN_VERTICAL_PADDING = 24.dp
-        private val MAX_WIDTH_DP = 350.dp
-        private val MAX_HEIGHT_DP = 600.dp
+        internal val SCREEN_HORIZONTAL_PADDING = 12.dp
+        internal val SCREEN_VERTICAL_PADDING = 24.dp
+
         private const val POINTER_BASE_DEFAULT = 12.0
         private const val POINTER_LENGTH_DEFAULT = 8.0
     }
@@ -134,10 +137,12 @@ internal class TooltipTrait(
                     )
                 ) {
                     val tooltipPath = tooltipPath(tooltipSettings, containerDimens.value, floatAnimation, dpAnimation)
+                    val maxWidth = windowInfo.widthDp - SCREEN_HORIZONTAL_PADDING * 2
+                    val maxHeight = windowInfo.heightDp - SCREEN_VERTICAL_PADDING * 2
+
                     Box(
                         modifier = Modifier
-                            .requiredSizeIn(maxWidth = MAX_WIDTH_DP, maxHeight = MAX_HEIGHT_DP)
-                            .tooltipSize(style)
+                            .tooltipSize(style, maxWidth, maxHeight)
                             .onTooltipSizeChanged(style, density, containerDimens)
                             .styleShadowPath(style, tooltipPath, isSystemInDarkTheme())
                             .clipToPath(tooltipPath)
@@ -201,42 +206,71 @@ internal class TooltipTrait(
         // skip this until we have containerDimens defined
         if (containerDimens == null) return@composed Modifier
 
-        val tooltipPaddingTop = animateDpAsState(
+        Modifier.padding(
+            start = calculatePaddingStart(windowInfo, containerDimens, pointerSettings, targetRect, animationSpec).value,
+            top = calculatePaddingTop(windowInfo, containerDimens, pointerSettings, targetRect, animationSpec).value
+        )
+    }
+
+    @Composable
+    private fun calculatePaddingStart(
+        windowInfo: AppcuesWindowInfo,
+        containerDimens: TooltipContainerDimens,
+        pointerSettings: TooltipSettings,
+        targetRect: Rect?,
+        animationSpec: FiniteAnimationSpec<Dp>
+    ): State<Dp> {
+        val minPaddingStart = 0.dp
+        val maxPaddingStart = windowInfo.widthDp - containerDimens.widthDp - (SCREEN_HORIZONTAL_PADDING * 2)
+
+        return animateDpAsState(
             targetValue = when (pointerSettings.tooltipPointerPosition) {
-                is Top ->
-                    max((targetRect?.bottom?.dp ?: 0.dp) - SCREEN_VERTICAL_PADDING + pointerSettings.distance, 0.dp)
-                is Bottom ->
-                    max((targetRect?.top?.dp ?: 0.dp) - containerDimens.heightDp - SCREEN_VERTICAL_PADDING - pointerSettings.distance, 0.dp)
-                is None ->
-                    windowInfo.heightDp - containerDimens.heightDp - SCREEN_VERTICAL_PADDING
-            },
-            animationSpec = animationSpec
-        )
-
-        val toolTipPaddingStart = animateDpAsState(
-            targetValue = if (targetRect != null) {
-                // padding start max cant be lower than 0, this causes coerceIn to throw an exception
-                val paddingStartMax = max(windowInfo.widthDp - (SCREEN_HORIZONTAL_PADDING * 2) - containerDimens.widthDp, 0.dp)
-                val paddingStartOnTarget = targetRect.center.x.dp - SCREEN_HORIZONTAL_PADDING - (containerDimens.widthDp / 2)
-
-                if (paddingStartOnTarget < 0.dp) {
-                    pointerSettings.pointerOffsetX.value = paddingStartOnTarget
-                } else if (paddingStartOnTarget > paddingStartMax) {
-                    pointerSettings.pointerOffsetX.value = paddingStartOnTarget - paddingStartMax
+                None -> {
+                    val paddingStartCentered = (windowInfo.widthDp - containerDimens.widthDp - (SCREEN_HORIZONTAL_PADDING * 2)) / 2
+                    paddingStartCentered.coerceAtLeast(minPaddingStart)
                 }
+                else -> {
+                    val targetReference = (targetRect?.center?.x?.dp ?: 0.dp) - SCREEN_HORIZONTAL_PADDING - (containerDimens.widthDp / 2)
 
-                // target value is between min and max
-                paddingStartOnTarget.coerceIn(0.dp, paddingStartMax)
-            } else {
-                // When no targetRect is found we align the tooltip at bottomCenter of the screen
-                val paddingStartCentered = (windowInfo.widthDp - containerDimens.widthDp - (SCREEN_HORIZONTAL_PADDING * 2)) / 2
-                // Min value
-                paddingStartCentered.coerceAtLeast(0.dp)
+                    pointerSettings.pointerOffsetX.value = when {
+                        targetReference < 0.dp -> targetReference
+                        targetReference > maxPaddingStart -> targetReference - maxPaddingStart
+                        else -> pointerSettings.pointerOffsetX.value
+                    }
+
+                    targetReference.coerceIn(minPaddingStart, maxPaddingStart)
+                }
             },
             animationSpec = animationSpec
         )
+    }
 
-        then(Modifier.padding(start = toolTipPaddingStart.value, top = tooltipPaddingTop.value))
+    @Composable
+    private fun calculatePaddingTop(
+        windowInfo: AppcuesWindowInfo,
+        containerDimens: TooltipContainerDimens,
+        pointerSettings: TooltipSettings,
+        targetRect: Rect?,
+        animationSpec: FiniteAnimationSpec<Dp>
+    ): State<Dp> {
+        val minPaddingTop = 0.dp
+        val maxPaddingTop = windowInfo.heightDp - containerDimens.heightDp - (SCREEN_VERTICAL_PADDING * 2)
+        return animateDpAsState(
+            targetValue = when (pointerSettings.tooltipPointerPosition) {
+                is Top -> {
+                    val targetReference = (targetRect?.bottom?.dp ?: 0.dp) - SCREEN_VERTICAL_PADDING
+                    val padding = targetReference + pointerSettings.distance
+                    padding.coerceIn(minPaddingTop, maxPaddingTop)
+                }
+                is Bottom -> {
+                    val targetReference = (targetRect?.top?.dp ?: 0.dp) - SCREEN_VERTICAL_PADDING
+                    val padding = targetReference - pointerSettings.distance - containerDimens.heightDp
+                    padding.coerceIn(minPaddingTop, maxPaddingTop)
+                }
+                is None -> maxPaddingTop
+            },
+            animationSpec = animationSpec
+        )
     }
 
     private fun TooltipSettings.getContentPaddingValues(): PaddingValues {
@@ -260,8 +294,16 @@ internal class TooltipTrait(
         )
     }
 
-    private fun Modifier.tooltipSize(style: ComponentStyle?): Modifier = then(
-        Modifier.size(width = style?.width?.dp ?: Dp.Unspecified, height = style?.height?.dp ?: Dp.Unspecified)
+    private fun Modifier.tooltipSize(style: ComponentStyle?, maxWidth: Dp, maxHeight: Dp): Modifier = then(
+        if (style?.width == null) Modifier.requiredWidthIn(
+            min = 48.dp,
+            max = min(400.dp, maxWidth)
+        ) else Modifier.width(width = style.width.dp)
+    ).then(
+        if (style?.height == null) Modifier.requiredHeightIn(
+            min = 48.dp,
+            max = max(48.dp, maxHeight)
+        ) else Modifier.height(height = style.height.dp)
     )
 
     @Composable
@@ -278,7 +320,6 @@ internal class TooltipTrait(
                 windowInfo = windowInfo,
                 containerDimens = containerDimens,
                 targetRect = targetRect,
-                contentDistanceFromTarget = distance
             )
 
             getTooltipSettings(
