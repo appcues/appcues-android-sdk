@@ -113,7 +113,7 @@ case "$response" in
 esac
 
 # get the commits since the last release, filtering ones that aren't relevant.
-changelog=$(git log --pretty=format:"- [%as] %s (%h)" $(git describe --tags --abbrev=0 @^)..@ --abbrev=7 | sed '/[🔧🎬⬆️📸✅💡📝]/d')
+changelog=$(git log --pretty=format:"- [%as] %s (%h)" $(git describe --tags --abbrev=0 @^)..@ --abbrev=7 | sed '/[🔧🎬⬆📸✅💡📝]/d')
 tempFile=$(mktemp)
 echo $changelog
 # write changelog to temp file.
