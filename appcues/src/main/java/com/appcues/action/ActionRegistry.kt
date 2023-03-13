@@ -4,6 +4,7 @@ import com.appcues.action.appcues.CloseAction
 import com.appcues.action.appcues.ContinueAction
 import com.appcues.action.appcues.LaunchExperienceAction
 import com.appcues.action.appcues.LinkAction
+import com.appcues.action.appcues.RequestReviewAction
 import com.appcues.action.appcues.SubmitFormAction
 import com.appcues.action.appcues.TrackEventAction
 import com.appcues.action.appcues.UpdateProfileAction
@@ -32,6 +33,7 @@ internal class ActionRegistry(override val scope: Scope) : KoinScopeComponent {
         register(UpdateProfileAction.TYPE) { get<UpdateProfileAction> { parametersOf(it) } }
         register(LaunchExperienceAction.TYPE) { get<LaunchExperienceAction> { parametersOf(it) } }
         register(SubmitFormAction.TYPE) { get<SubmitFormAction> { parametersOf(it) } }
+        register(RequestReviewAction.TYPE) { get<RequestReviewAction> { parametersOf(it) } }
     }
 
     operator fun get(key: String): ActionFactoryBlock? {

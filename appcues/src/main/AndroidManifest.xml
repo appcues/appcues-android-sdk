@@ -14,7 +14,10 @@
             android:exported="false"
             android:theme="@style/Appcues.AppcuesActivityTheme"
             android:windowSoftInputMode="adjustResize" />
-
+        <activity
+            android:name=".ui.InAppReviewActivity"
+            android:exported="false"
+            android:theme="@style/Appcues.AppcuesActivityTheme" />
         <provider
             android:name="androidx.startup.InitializationProvider"
             android:authorities="${applicationId}.androidx-startup"
