@@ -4,7 +4,8 @@
     <string name="appcues_skippable_trait_dismiss">dismiss</string>
 
     <!-- Debugger Fab -->
-    <string name="appcues_debugger_fab_on_click_label">Appcues debugger details</string>
+    <string name="appcues_debugger_fab_on_debugger_click_label">Appcues debugger details</string>
+    <string name="appcues_debugger_fab_on_screen_capture_click_label">Appcues screen capture</string>
     <string name="appcues_debugger_fab_image_content_description">Appcues floating action button</string>
     <string name="appcues_debugger_fab_dismiss_image_content_description">Appcues floating action button dismissing area</string>
 
@@ -82,4 +83,14 @@
     <string name="appcues_debugger_font_details_clean_filter">Clear</string>
     <string name="appcues_debugger_font_details_hint">"Search…"</string>
 
+    <!-- Screen Capture Dialog -->
+    <string name="appcues_screen_capture_dismiss">dismiss</string>
+    <string name="appcues_screen_capture_title">Send screen capture</string>
+    <string name="appcues_screen_capture_image_description">screenshot</string>
+    <string name="appcues_screen_capture_text_input_label">Name</string>
+    <string name="appcues_screen_capture_cancel">Retry</string>
+    <string name="appcues_screen_capture_ok">Send to builder</string>
+    <string name="appcues_screen_capture_toast_upload_failed">Upload failed</string>
+    <string name="appcues_screen_capture_toast_try_again">Try again</string>
+    <string name="appcues_screen_capture_toast_success_suffix">is now available for preview and targeting.</string>
 </resources>

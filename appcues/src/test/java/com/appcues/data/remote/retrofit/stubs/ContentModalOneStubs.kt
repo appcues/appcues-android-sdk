@@ -2,21 +2,21 @@
 
 package com.appcues.data.remote.retrofit.stubs
 
-import com.appcues.data.remote.response.action.ActionResponse
-import com.appcues.data.remote.response.experience.ExperienceResponse
-import com.appcues.data.remote.response.step.StepContainerResponse
-import com.appcues.data.remote.response.step.StepResponse
-import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.BlockPrimitiveResponse
-import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.ButtonPrimitiveResponse
-import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.ImagePrimitiveResponse
-import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.StackPrimitiveResponse
-import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.TextPrimitiveResponse
-import com.appcues.data.remote.response.styling.StyleColorResponse
-import com.appcues.data.remote.response.styling.StyleGradientColorResponse
-import com.appcues.data.remote.response.styling.StyleResponse
-import com.appcues.data.remote.response.styling.StyleShadowResponse
-import com.appcues.data.remote.response.styling.StyleSizeResponse
-import com.appcues.data.remote.response.trait.TraitResponse
+import com.appcues.data.remote.appcues.response.action.ActionResponse
+import com.appcues.data.remote.appcues.response.experience.ExperienceResponse
+import com.appcues.data.remote.appcues.response.step.StepContainerResponse
+import com.appcues.data.remote.appcues.response.step.StepResponse
+import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.BlockPrimitiveResponse
+import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.ButtonPrimitiveResponse
+import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.ImagePrimitiveResponse
+import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.StackPrimitiveResponse
+import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.TextPrimitiveResponse
+import com.appcues.data.remote.appcues.response.styling.StyleColorResponse
+import com.appcues.data.remote.appcues.response.styling.StyleGradientColorResponse
+import com.appcues.data.remote.appcues.response.styling.StyleResponse
+import com.appcues.data.remote.appcues.response.styling.StyleShadowResponse
+import com.appcues.data.remote.appcues.response.styling.StyleSizeResponse
+import com.appcues.data.remote.appcues.response.trait.TraitResponse
 import java.util.UUID
 
 internal val contentModalOneStubs = ExperienceResponse(

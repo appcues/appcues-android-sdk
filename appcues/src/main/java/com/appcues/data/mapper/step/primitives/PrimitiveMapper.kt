@@ -1,17 +1,17 @@
 package com.appcues.data.mapper.step.primitives
 
 import com.appcues.data.model.ExperiencePrimitive
-import com.appcues.data.remote.response.step.primitive.PrimitiveResponse
-import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.BlockPrimitiveResponse
-import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.BoxPrimitiveResponse
-import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.ButtonPrimitiveResponse
-import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.EmbedPrimitiveResponse
-import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.ImagePrimitiveResponse
-import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.OptionSelectPrimitiveResponse
-import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.SpacerPrimitiveResponse
-import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.StackPrimitiveResponse
-import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.TextInputPrimitiveResponse
-import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.TextPrimitiveResponse
+import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse
+import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.BlockPrimitiveResponse
+import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.BoxPrimitiveResponse
+import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.ButtonPrimitiveResponse
+import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.EmbedPrimitiveResponse
+import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.ImagePrimitiveResponse
+import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.OptionSelectPrimitiveResponse
+import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.SpacerPrimitiveResponse
+import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.StackPrimitiveResponse
+import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.TextInputPrimitiveResponse
+import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.TextPrimitiveResponse
 
 internal fun PrimitiveResponse.mapPrimitive(): ExperiencePrimitive {
     return when (this) {

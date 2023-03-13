@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -37,7 +39,7 @@ private const val SCREEN_PADDING = 0.05
 @Composable
 internal fun DialogModal(
     style: ComponentStyle?,
-    content: @Composable (hasFixedHeight: Boolean, contentPadding: PaddingValues?) -> Unit,
+    content: @Composable (modifier: Modifier, containerPadding: PaddingValues, safeAreaInsets: PaddingValues) -> Unit,
     windowInfo: AppcuesWindowInfo
 ) {
     val configuration = LocalConfiguration.current
@@ -63,7 +65,13 @@ internal fun DialogModal(
                     .padding(horizontal = dialogHorizontalMargin, vertical = dialogVerticalMargin)
                     // default modal style modifiers
                     .modalStyle(style, isDark) { Modifier.dialogModifier(it, isDark) },
-                content = { content(false, style?.getPaddings()) },
+                content = {
+                    content(
+                        modifier = Modifier.verticalScroll(rememberScrollState()),
+                        containerPadding = style.getPaddings(),
+                        safeAreaInsets = PaddingValues()
+                    )
+                },
             )
         }
     }

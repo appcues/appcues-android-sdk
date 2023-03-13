@@ -1,7 +1,10 @@
 package com.appcues.data.remote.retrofit
 
+import com.appcues.AppcuesConfig
 import com.appcues.SessionMonitor
 import com.appcues.Storage
+import com.appcues.data.remote.appcues.AppcuesRemoteSource
+import com.appcues.data.remote.appcues.AppcuesService
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
@@ -14,21 +17,23 @@ import java.util.UUID
 @OptIn(ExperimentalCoroutinesApi::class)
 class RetrofitAppcuesRemoteSourceTest {
 
-    private lateinit var storage: Storage
     private lateinit var appcuesService: AppcuesService
     private lateinit var sessionMonitor: SessionMonitor
-    private lateinit var retrofitAppcuesRemoteSource: RetrofitAppcuesRemoteSource
+    private lateinit var retrofitAppcuesRemoteSource: AppcuesRemoteSource
 
     @Before
     fun setUp() {
-        storage = mockk() {
+        val storage: Storage = mockk() {
             every { this@mockk.userId } returns "test-user"
+        }
+        val config: AppcuesConfig = mockk() {
+            every { this@mockk.accountId } returns "123"
         }
         appcuesService = mockk()
         sessionMonitor = mockk()
-        retrofitAppcuesRemoteSource = RetrofitAppcuesRemoteSource(
-            appcuesService = appcuesService,
-            accountId = "123",
+        retrofitAppcuesRemoteSource = AppcuesRemoteSource(
+            service = appcuesService,
+            config = config,
             storage = storage,
             sessionMonitor = sessionMonitor,
         )

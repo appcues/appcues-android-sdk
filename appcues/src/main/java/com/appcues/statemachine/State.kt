@@ -1,6 +1,7 @@
 package com.appcues.statemachine
 
 import com.appcues.data.model.Experience
+import com.appcues.util.ResultOf
 
 internal sealed class State {
 
@@ -12,7 +13,7 @@ internal sealed class State {
         val isFirst: Boolean,
         // this is how the UI communicates success/failure in presentation
         // back to the state machine
-        val presentationComplete: (() -> Unit),
+        val presentationComplete: ((ResultOf<Unit, Error>) -> Unit),
     ) : State()
 
     data class RenderingStep(val experience: Experience, val flatStepIndex: Int, val isFirst: Boolean) : State()

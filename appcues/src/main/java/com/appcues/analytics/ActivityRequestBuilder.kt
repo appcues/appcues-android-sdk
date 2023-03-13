@@ -2,8 +2,9 @@ package com.appcues.analytics
 
 import com.appcues.AppcuesConfig
 import com.appcues.Storage
-import com.appcues.data.remote.request.ActivityRequest
-import com.appcues.data.remote.request.EventRequest
+import com.appcues.analytics.AnalyticsEvent.ScreenView
+import com.appcues.data.remote.appcues.request.ActivityRequest
+import com.appcues.data.remote.appcues.request.EventRequest
 
 internal class ActivityRequestBuilder(
     private val config: AppcuesConfig,
@@ -58,7 +59,7 @@ internal class ActivityRequestBuilder(
         val screenEvent = decorator.decorateTrack(
             EventRequest(
                 // screen calls are really just a special type of event: "appcues:screen_view"
-                name = AnalyticsEvent.ScreenView.eventName,
+                name = ScreenView.eventName,
                 attributes = (properties ?: hashMapOf()).apply { put(SCREEN_TITLE_ATTRIBUTE, title) },
                 context = hashMapOf(SCREEN_TITLE_CONTEXT to title)
             )

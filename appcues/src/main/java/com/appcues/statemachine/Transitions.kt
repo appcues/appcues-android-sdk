@@ -26,6 +26,8 @@ import com.appcues.statemachine.State.Idling
 import com.appcues.statemachine.State.RenderingStep
 import com.appcues.statemachine.StepReference.StepIndex
 import com.appcues.util.ResultOf
+import com.appcues.util.ResultOf.Failure
+import com.appcues.util.ResultOf.Success
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -62,15 +64,18 @@ internal interface Transitions {
         }
 
         // for pre-step navigation actions - only allow these to execute if this experience is being launched for some
-        // other reason that Qualification (i.e. deep links, preview, manual show). For any qualified experience, the initial
+        // other reason than qualification (i.e. deep links, preview, manual show). For any qualified experience, the initial
         // starting state of the experience is determined solely by flow settings determining the trigger
         // (i.e. trigger on certain screen).
         val actions = if (experience.trigger is Qualification) emptyList() else experience.getNavigationActions(0)
 
         return Transition(
             state = BeginningStep(experience, 0, true) {
-                coroutineScope.launch {
-                    completion.complete(continuation())
+                when (it) {
+                    // the presentation completed, continue on with the continuation
+                    is Success -> coroutineScope.launch { completion.complete(continuation()) }
+                    // the presentation failed, bubble up the error
+                    is Failure -> completion.complete(Failure(it.reason))
                 }
             },
             sideEffect = PresentContainerEffect(experience, 0, completion, actions)
@@ -194,8 +199,11 @@ private fun transitionsToBeginningStep(
         val completion: CompletableDeferred<ResultOf<State, Error>> = CompletableDeferred()
         Transition(
             state = BeginningStep(experience, nextStepIndex, false) {
-                coroutineScope.launch {
-                    completion.complete(continuation())
+                when (it) {
+                    // the presentation completed, continue on with the continuation
+                    is Success -> coroutineScope.launch { completion.complete(continuation()) }
+                    // the presentation failed, bubble up the error
+                    is Failure -> completion.complete(Failure(it.reason))
                 }
             },
             sideEffect = PresentContainerEffect(experience, stepContainerIndex, completion, actions)
@@ -210,8 +218,11 @@ private fun transitionsToBeginningStep(
     val completion: CompletableDeferred<ResultOf<State, Error>> = CompletableDeferred()
     Transition(
         state = BeginningStep(experience, nextStepIndex, false) {
-            coroutineScope.launch {
-                completion.complete(continuation())
+            when (it) {
+                // the presentation completed, continue on with the continuation
+                is Success -> coroutineScope.launch { completion.complete(continuation()) }
+                // the presentation failed, bubble up the error
+                is Failure -> completion.complete(Failure(it.reason))
             }
         },
         sideEffect = AwaitEffect(completion)

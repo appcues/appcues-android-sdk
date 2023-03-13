@@ -12,6 +12,7 @@ import com.appcues.statemachine.Action.Resume
 import com.appcues.statemachine.Action.StartExperience
 import com.appcues.statemachine.Action.StartStep
 import com.appcues.statemachine.Error.ExperienceAlreadyActive
+import com.appcues.statemachine.Error.ExperienceError
 import com.appcues.statemachine.SideEffect.AwaitEffect
 import com.appcues.statemachine.SideEffect.ContinuationEffect
 import com.appcues.statemachine.SideEffect.PresentContainerEffect
@@ -29,9 +30,11 @@ import com.appcues.statemachine.Transition.EmptyTransition
 import com.appcues.statemachine.Transition.ErrorLoggingTransition
 import com.appcues.statemachine.Transitions.Companion.fromRenderingStepToEndingExperience
 import com.appcues.statemachine.Transitions.Companion.fromRenderingStepToEndingStep
+import com.appcues.trait.AppcuesTraitException
 import com.appcues.util.ResultOf
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
@@ -106,14 +109,22 @@ internal class StateMachine(
                     // for example - navigating to another screen in the app
                     actionProcessor.process(sideEffect.actions)
 
-                    // kick off UI
-                    sideEffect.experience.stepContainers[sideEffect.containerIndex].presentingTrait.present()
-
-                    // wait on the RenderingStep state to flow in from the UI, return that result
-                    sideEffect.completion.await()
+                    try {
+                        // kick off UI
+                        sideEffect.experience.stepContainers[sideEffect.containerIndex].presentingTrait.present()
+                        // wait on the RenderingStep state to flow in from the UI, return that result
+                        handleCompletion(sideEffect.completion)
+                    } catch (exception: AppcuesTraitException) {
+                        fatalError(
+                            ExperienceError(
+                                experience = sideEffect.experience,
+                                message = exception.message ?: "Presenting trait failed to present for index ${sideEffect.containerIndex}"
+                            )
+                        )
+                    }
                 }
                 is AwaitEffect -> {
-                    sideEffect.completion.await()
+                    handleCompletion(sideEffect.completion)
                 }
                 is ProcessActions -> {
                     actionProcessor.process(sideEffect.actions)
@@ -124,6 +135,25 @@ internal class StateMachine(
             // if no side effect, return success with current state
             return Success(_state)
         }
+    }
+
+    private suspend fun handleCompletion(completion: CompletableDeferred<ResultOf<State, Error>>): ResultOf<State, Error> {
+        return when (val result = completion.await()) {
+            is Success -> result
+            is Failure -> fatalError(result.reason)
+        }
+    }
+
+    private suspend fun fatalError(error: Error): Failure<Error> {
+        // force state machine to move to idling when we get this exception
+        _state = Idling
+
+        // return failure and report to errorFlow
+        return Failure(
+            error.also {
+                _errorFlow.emit(it)
+            }
+        )
     }
 
     private fun State.take(action: Action): Transition {

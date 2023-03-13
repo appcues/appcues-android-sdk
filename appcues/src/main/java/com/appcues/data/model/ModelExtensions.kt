@@ -6,9 +6,9 @@ import com.appcues.data.mapper.styling.mapComponentColor
 import com.appcues.data.mapper.styling.mapComponentStyle
 import com.appcues.data.model.styling.ComponentColor
 import com.appcues.data.model.styling.ComponentStyle
-import com.appcues.data.remote.response.step.primitive.PrimitiveResponse
-import com.appcues.data.remote.response.styling.StyleColorResponse
-import com.appcues.data.remote.response.styling.StyleResponse
+import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse
+import com.appcues.data.remote.appcues.response.styling.StyleColorResponse
+import com.appcues.data.remote.appcues.response.styling.StyleResponse
 
 internal typealias AppcuesConfigMap = Map<String, Any>?
 
@@ -57,5 +57,13 @@ internal fun AppcuesConfigMap.getConfigPrimitive(key: String): ExperiencePrimiti
 internal fun AppcuesConfigMap.getConfigColor(key: String): ComponentColor? {
     return getConfig<Any>(key)?.let {
         MoshiConfiguration.fromAny<StyleColorResponse>(it)?.mapComponentColor()
+    }
+}
+
+// general helper to get any object of type T from the config map and have it deserialized from JSON
+// using it's Moshi adapter
+internal inline fun <reified T : Any> AppcuesConfigMap.getConfigObject(key: String): T? {
+    return getConfig<Any>(key)?.let {
+        MoshiConfiguration.fromAny(it)
     }
 }

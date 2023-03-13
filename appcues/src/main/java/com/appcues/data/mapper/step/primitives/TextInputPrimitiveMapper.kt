@@ -4,7 +4,7 @@ import com.appcues.data.mapper.styling.mapComponentColor
 import com.appcues.data.mapper.styling.mapComponentStyle
 import com.appcues.data.model.ExperiencePrimitive.TextInputPrimitive
 import com.appcues.data.model.styling.ComponentDataType
-import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.TextInputPrimitiveResponse
+import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.TextInputPrimitiveResponse
 
 internal fun TextInputPrimitiveResponse.mapTextInputPrimitive() = TextInputPrimitive(
     id = id,

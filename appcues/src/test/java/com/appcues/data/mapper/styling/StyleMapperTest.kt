@@ -1,6 +1,6 @@
 package com.appcues.data.mapper.styling
 
-import com.appcues.data.remote.response.styling.StyleResponse
+import com.appcues.data.remote.appcues.response.styling.StyleResponse
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 

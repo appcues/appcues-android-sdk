@@ -4,8 +4,10 @@ import com.appcues.AppcuesConfig
 import com.appcues.AppcuesCoroutineScope
 import com.appcues.SessionMonitor
 import com.appcues.Storage
-import com.appcues.data.remote.request.ActivityRequest
-import com.appcues.data.remote.request.EventRequest
+import com.appcues.analytics.AnalyticsEvent.ScreenView
+import com.appcues.analytics.AnalyticsEvent.SessionStarted
+import com.appcues.data.remote.appcues.request.ActivityRequest
+import com.appcues.data.remote.appcues.request.EventRequest
 import com.appcues.rules.MainDispatcherRule
 import com.appcues.util.ContextResources
 import com.google.common.truth.Truth.assertThat
@@ -58,7 +60,7 @@ class AutoPropertyDecoratorTest {
         // given
         autoPropertyDecorator.decorateTrack(
             EventRequest(
-                name = AnalyticsEvent.ScreenView.eventName,
+                name = ScreenView.eventName,
                 attributes = hashMapOf(
                     ActivityRequestBuilder.SCREEN_TITLE_ATTRIBUTE to "Screen 1"
                 )
@@ -73,7 +75,7 @@ class AutoPropertyDecoratorTest {
         // given
         autoPropertyDecorator.decorateTrack(
             EventRequest(
-                name = AnalyticsEvent.ScreenView.eventName,
+                name = ScreenView.eventName,
                 attributes = hashMapOf(
                     ActivityRequestBuilder.SCREEN_TITLE_ATTRIBUTE to "Screen 1"
                 )
@@ -81,7 +83,7 @@ class AutoPropertyDecoratorTest {
         )
         autoPropertyDecorator.decorateTrack(
             EventRequest(
-                name = AnalyticsEvent.ScreenView.eventName,
+                name = ScreenView.eventName,
                 attributes = hashMapOf(
                     ActivityRequestBuilder.SCREEN_TITLE_ATTRIBUTE to "Screen 2"
                 )
@@ -95,7 +97,7 @@ class AutoPropertyDecoratorTest {
     fun `decorateTrack SHOULD decorate context properties`() {
         // given
         val event = EventRequest(
-            name = AnalyticsEvent.ScreenView.eventName,
+            name = ScreenView.eventName,
         )
         // when
         with(autoPropertyDecorator.decorateTrack(event)) {
@@ -109,13 +111,13 @@ class AutoPropertyDecoratorTest {
     fun `decorateTrack SHOULD decorate identity properties WHEN event is ScreenView`() {
         // given
         val event = EventRequest(
-            name = AnalyticsEvent.ScreenView.eventName,
+            name = ScreenView.eventName,
             attributes = hashMapOf(
                 ActivityRequestBuilder.SCREEN_TITLE_ATTRIBUTE to "Screen 1"
             )
         )
         val event2 = EventRequest(
-            name = AnalyticsEvent.ScreenView.eventName,
+            name = ScreenView.eventName,
             attributes = hashMapOf(
                 ActivityRequestBuilder.SCREEN_TITLE_ATTRIBUTE to "Screen 2"
             )
@@ -146,7 +148,7 @@ class AutoPropertyDecoratorTest {
     fun `decorateTrack SHOULD decorate identity properties WHEN event is SessionStarted`() {
         // given
         val event = EventRequest(
-            name = AnalyticsEvent.SessionStarted.eventName,
+            name = SessionStarted.eventName,
         )
         // when
         with(autoPropertyDecorator.decorateTrack(event)) {
@@ -163,7 +165,7 @@ class AutoPropertyDecoratorTest {
     fun `decorateTrack SHOULD decorate identity WITH new sessionRandomizer WHEN event is SessionStarted`() {
         // given
         val event = EventRequest(
-            name = AnalyticsEvent.SessionStarted.eventName,
+            name = SessionStarted.eventName,
         )
         every { sessionRandomizer.get() } returns 10
         // when
@@ -227,7 +229,7 @@ class AutoPropertyDecoratorTest {
             sessionRandomizer = sessionRandomizer,
         )
         val event = EventRequest(
-            name = AnalyticsEvent.SessionStarted.eventName,
+            name = SessionStarted.eventName,
         )
 
         // when

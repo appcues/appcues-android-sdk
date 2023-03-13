@@ -6,7 +6,7 @@ import com.appcues.AnalyticType.GROUP
 import com.appcues.AnalyticType.IDENTIFY
 import com.appcues.AnalyticType.SCREEN
 import com.appcues.AppcuesCoroutineScope
-import com.appcues.data.remote.request.ActivityRequest
+import com.appcues.data.remote.appcues.request.ActivityRequest
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch

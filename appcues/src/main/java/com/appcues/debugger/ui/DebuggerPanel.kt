@@ -38,7 +38,9 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import com.appcues.R
+import com.appcues.debugger.DebugMode.Debugger
 import com.appcues.debugger.DebuggerViewModel
+import com.appcues.debugger.DebuggerViewModel.UIState.Expanded
 import com.appcues.debugger.model.DebuggerEventItem
 import com.appcues.debugger.ui.details.DebuggerEventDetails
 import com.appcues.debugger.ui.fonts.DebuggerFontDetails
@@ -71,7 +73,7 @@ internal fun BoxScope.DebuggerPanel(debuggerState: MutableDebuggerState, debugge
             modifier = Modifier
                 .fillMaxSize()
                 .background(AppcuesColors.DebuggerBackdrop)
-                .clickable { debuggerViewModel.onBackdropClick() }
+                .clickable { debuggerViewModel.closeExpandedView() }
         )
     }
 
@@ -244,7 +246,7 @@ private fun NavGraphBuilder.fontDetailsComposable(
             onBackPressed = {
                 debuggerState.deepLinkPath.value = null
                 navController.popBackStack()
-                debuggerViewModel.onDetailDismiss()
+                debuggerViewModel.transition(Expanded(Debugger(null)))
             }
         )
     }

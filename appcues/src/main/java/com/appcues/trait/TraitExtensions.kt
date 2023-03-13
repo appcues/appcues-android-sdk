@@ -16,7 +16,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 fun Modifier.alignStepOverlay(
     boxScope: BoxScope,
     alignment: Alignment,
-    stepDecoratingPadding: StepDecoratingPadding
+    stickyContentPadding: StickyContentPadding
 ): Modifier {
     return with(boxScope) {
         then(
@@ -26,10 +26,10 @@ fun Modifier.alignStepOverlay(
                     if (alignment is BiasAlignment) {
                         with(alignment) {
                             when {
-                                horizontalBias == -1f && verticalBias == 0f -> stepDecoratingPadding.setStartPadding(it.size.width)
-                                horizontalBias == 1f && verticalBias == 0f -> stepDecoratingPadding.setEndPadding(it.size.width)
-                                verticalBias == -1f -> stepDecoratingPadding.setTopPadding(it.size.height)
-                                verticalBias == 1f -> stepDecoratingPadding.setBottomPadding(it.size.height)
+                                horizontalBias == -1f && verticalBias == 0f -> stickyContentPadding.setStartPadding(it.size.width)
+                                horizontalBias == 1f && verticalBias == 0f -> stickyContentPadding.setEndPadding(it.size.width)
+                                verticalBias == -1f -> stickyContentPadding.setTopPadding(it.size.height)
+                                verticalBias == 1f -> stickyContentPadding.setBottomPadding(it.size.height)
                             }
                         }
                     }

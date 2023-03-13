@@ -1,0 +1,6 @@
+{
+  "settingsInheritedFrom": "appcues/whitesource-config@main",
+  "remediateSettings": {
+    "enableRenovate": false
+  }
+}

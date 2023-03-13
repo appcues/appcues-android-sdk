@@ -11,8 +11,8 @@ import com.appcues.BuildConfig
 import com.appcues.R
 import com.appcues.Storage
 import com.appcues.analytics.AnalyticsEvent
-import com.appcues.data.remote.AppcuesRemoteSource
-import com.appcues.data.remote.request.ActivityRequest
+import com.appcues.data.remote.appcues.AppcuesRemoteSource
+import com.appcues.data.remote.appcues.request.ActivityRequest
 import com.appcues.debugger.model.DebuggerStatusItem
 import com.appcues.debugger.model.StatusType.ERROR
 import com.appcues.debugger.model.StatusType.EXPERIENCE

@@ -1,21 +1,22 @@
 package com.appcues.data
 
 import com.appcues.data.remote.adapters.DateAdapter
-import com.appcues.data.remote.adapters.ExperienceStepFormStateAdapter
-import com.appcues.data.remote.adapters.LossyExperienceResponseAdapterFactory
-import com.appcues.data.remote.adapters.StepContainerAdapter
 import com.appcues.data.remote.adapters.UUIDAdapter
-import com.appcues.data.remote.response.step.primitive.PrimitiveResponse
-import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.BlockPrimitiveResponse
-import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.BoxPrimitiveResponse
-import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.ButtonPrimitiveResponse
-import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.EmbedPrimitiveResponse
-import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.ImagePrimitiveResponse
-import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.OptionSelectPrimitiveResponse
-import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.SpacerPrimitiveResponse
-import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.StackPrimitiveResponse
-import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.TextInputPrimitiveResponse
-import com.appcues.data.remote.response.step.primitive.PrimitiveResponse.TextPrimitiveResponse
+import com.appcues.data.remote.appcues.adapters.ExperienceStepFormStateAdapter
+import com.appcues.data.remote.appcues.adapters.LossyExperienceResponseAdapterFactory
+import com.appcues.data.remote.appcues.adapters.StepContainerAdapter
+import com.appcues.data.remote.appcues.adapters.TraitResponseAdapterFactory
+import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse
+import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.BlockPrimitiveResponse
+import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.BoxPrimitiveResponse
+import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.ButtonPrimitiveResponse
+import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.EmbedPrimitiveResponse
+import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.ImagePrimitiveResponse
+import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.OptionSelectPrimitiveResponse
+import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.SpacerPrimitiveResponse
+import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.StackPrimitiveResponse
+import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.TextInputPrimitiveResponse
+import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.TextPrimitiveResponse
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonAdapter.Factory
 import com.squareup.moshi.JsonQualifier
@@ -57,6 +58,7 @@ internal object MoshiConfiguration {
         .add(StepContainerAdapter())
         .add(ExperienceStepFormStateAdapter())
         .add(LossyExperienceResponseAdapterFactory())
+        .add(TraitResponseAdapterFactory())
         .addLast(KotlinJsonAdapterFactory())
         .build()
 

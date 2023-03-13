@@ -10,9 +10,9 @@ import com.appcues.data.model.ExperiencePriority
 import com.appcues.data.model.ExperiencePriority.LOW
 import com.appcues.data.model.ExperiencePriority.NORMAL
 import com.appcues.data.model.ExperienceTrigger
-import com.appcues.data.remote.AppcuesRemoteSource
 import com.appcues.data.remote.RemoteError.NetworkError
-import com.appcues.data.remote.request.ActivityRequest
+import com.appcues.data.remote.appcues.AppcuesRemoteSource
+import com.appcues.data.remote.appcues.request.ActivityRequest
 import com.appcues.logging.Logcues
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success

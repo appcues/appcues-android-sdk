@@ -2,8 +2,8 @@ package com.appcues.data.mapper.styling
 
 import com.appcues.data.model.styling.ComponentColor
 import com.appcues.data.model.styling.ComponentStyle
-import com.appcues.data.remote.response.styling.StyleGradientColorResponse
-import com.appcues.data.remote.response.styling.StyleResponse
+import com.appcues.data.remote.appcues.response.styling.StyleGradientColorResponse
+import com.appcues.data.remote.appcues.response.styling.StyleResponse
 
 internal fun StyleResponse?.mapComponentStyle(): ComponentStyle {
     if (this == null) return ComponentStyle()
