@@ -43,7 +43,9 @@ import com.appcues.trait.AppcuesTraitAnimatedVisibility
 import com.appcues.trait.ContentWrappingTrait
 import com.appcues.trait.PresentingTrait
 import com.appcues.trait.appcues.TooltipPointerPosition.Bottom
+import com.appcues.trait.appcues.TooltipPointerPosition.Left
 import com.appcues.trait.appcues.TooltipPointerPosition.None
+import com.appcues.trait.appcues.TooltipPointerPosition.Right
 import com.appcues.trait.appcues.TooltipPointerPosition.Top
 import com.appcues.trait.extensions.getContentDistance
 import com.appcues.trait.extensions.getRect
@@ -77,7 +79,7 @@ internal class TooltipTrait(
         internal val SCREEN_HORIZONTAL_PADDING = 12.dp
         internal val SCREEN_VERTICAL_PADDING = 24.dp
 
-        private const val POINTER_BASE_DEFAULT = 12.0
+        private const val POINTER_BASE_DEFAULT = 16.0
         private const val POINTER_LENGTH_DEFAULT = 8.0
     }
 
@@ -104,6 +106,8 @@ internal class TooltipTrait(
         val containerDimens = remember { mutableStateOf<TooltipContainerDimens?>(null) }
         val targetRect = targetRectInfo.getRect(windowInfo)
         val distance = targetRectInfo.getContentDistance()
+        // keep tooltipMaxHeight here as a rememberable so it force recomposition when value change
+        val tooltipMaxHeight = remember(targetRectInfo) { mutableStateOf(windowInfo.heightDp - (SCREEN_VERTICAL_PADDING * 2)) }
 
         val floatAnimation = rememberFloatStepAnimation(metadata)
         val dpAnimation = rememberDpStepAnimation(metadata)
@@ -113,7 +117,8 @@ internal class TooltipTrait(
             targetRectangleInfo = targetRectInfo,
             containerDimens = containerDimens.value,
             targetRect = targetRect,
-            distance = distance
+            distance = distance,
+            tooltipMaxHeight = tooltipMaxHeight,
         )
 
         Box(
@@ -138,11 +143,10 @@ internal class TooltipTrait(
                 ) {
                     val tooltipPath = tooltipPath(tooltipSettings, containerDimens.value, floatAnimation, dpAnimation)
                     val maxWidth = windowInfo.widthDp - SCREEN_HORIZONTAL_PADDING * 2
-                    val maxHeight = windowInfo.heightDp - SCREEN_VERTICAL_PADDING * 2
 
                     Box(
                         modifier = Modifier
-                            .tooltipSize(style, maxWidth, maxHeight)
+                            .tooltipSize(style, maxWidth, tooltipMaxHeight.value)
                             .onTooltipSizeChanged(style, density, containerDimens)
                             .styleShadowPath(style, tooltipPath, isSystemInDarkTheme())
                             .clipToPath(tooltipPath)
@@ -221,10 +225,20 @@ internal class TooltipTrait(
         animationSpec: FiniteAnimationSpec<Dp>
     ): State<Dp> {
         val minPaddingStart = 0.dp
-        val maxPaddingStart = windowInfo.widthDp - containerDimens.widthDp - (SCREEN_HORIZONTAL_PADDING * 2)
+        val maxPaddingStart = (windowInfo.widthDp - containerDimens.widthDp - (SCREEN_HORIZONTAL_PADDING * 2)).coerceAtLeast(0.dp)
 
         return animateDpAsState(
             targetValue = when (pointerSettings.tooltipPointerPosition) {
+                Left -> {
+                    val targetReference = (targetRect?.right?.dp ?: 0.dp) - SCREEN_HORIZONTAL_PADDING
+                    val padding = targetReference + pointerSettings.distance
+                    padding.coerceIn(minPaddingStart, maxPaddingStart)
+                }
+                Right -> {
+                    val targetReference = (targetRect?.left?.dp ?: 0.dp) - SCREEN_HORIZONTAL_PADDING
+                    val padding = targetReference - pointerSettings.distance - containerDimens.widthDp
+                    padding.coerceIn(minPaddingStart, maxPaddingStart)
+                }
                 None -> {
                     val paddingStartCentered = (windowInfo.widthDp - containerDimens.widthDp - (SCREEN_HORIZONTAL_PADDING * 2)) / 2
                     paddingStartCentered.coerceAtLeast(minPaddingStart)
@@ -254,20 +268,31 @@ internal class TooltipTrait(
         animationSpec: FiniteAnimationSpec<Dp>
     ): State<Dp> {
         val minPaddingTop = 0.dp
-        val maxPaddingTop = windowInfo.heightDp - containerDimens.heightDp - (SCREEN_VERTICAL_PADDING * 2)
+        val maxPaddingTop = (windowInfo.heightDp - containerDimens.heightDp - (SCREEN_VERTICAL_PADDING * 2)).coerceAtLeast(0.dp)
         return animateDpAsState(
             targetValue = when (pointerSettings.tooltipPointerPosition) {
-                is Top -> {
+                Top -> {
                     val targetReference = (targetRect?.bottom?.dp ?: 0.dp) - SCREEN_VERTICAL_PADDING
                     val padding = targetReference + pointerSettings.distance
                     padding.coerceIn(minPaddingTop, maxPaddingTop)
                 }
-                is Bottom -> {
+                Bottom -> {
                     val targetReference = (targetRect?.top?.dp ?: 0.dp) - SCREEN_VERTICAL_PADDING
                     val padding = targetReference - pointerSettings.distance - containerDimens.heightDp
                     padding.coerceIn(minPaddingTop, maxPaddingTop)
                 }
-                is None -> maxPaddingTop
+                None -> maxPaddingTop
+                else -> {
+                    val targetReference = (targetRect?.center?.y?.dp ?: 0.dp) - SCREEN_VERTICAL_PADDING - (containerDimens.heightDp / 2)
+
+                    pointerSettings.pointerOffsetY.value = when {
+                        targetReference < 0.dp -> targetReference
+                        targetReference > maxPaddingTop -> targetReference - maxPaddingTop
+                        else -> pointerSettings.pointerOffsetY.value
+                    }
+
+                    targetReference.coerceIn(minPaddingTop, maxPaddingTop)
+                }
             },
             animationSpec = animationSpec
         )
@@ -275,8 +300,10 @@ internal class TooltipTrait(
 
     private fun TooltipSettings.getContentPaddingValues(): PaddingValues {
         return when (tooltipPointerPosition) {
-            is Top -> PaddingValues(top = pointerLengthDp)
-            is Bottom -> PaddingValues(bottom = pointerLengthDp)
+            Top -> PaddingValues(top = pointerLengthDp)
+            Bottom -> PaddingValues(bottom = pointerLengthDp)
+            Left -> PaddingValues(start = pointerLengthDp)
+            Right -> PaddingValues(end = pointerLengthDp)
             None -> PaddingValues()
         }
     }
@@ -313,6 +340,7 @@ internal class TooltipTrait(
         containerDimens: TooltipContainerDimens?,
         targetRect: Rect?,
         distance: Dp,
+        tooltipMaxHeight: MutableState<Dp>,
     ): TooltipSettings {
         val density = LocalDensity.current
         return remember(targetRectangleInfo, containerDimens) {
@@ -320,6 +348,7 @@ internal class TooltipTrait(
                 windowInfo = windowInfo,
                 containerDimens = containerDimens,
                 targetRect = targetRect,
+                tooltipMaxHeight = tooltipMaxHeight
             )
 
             getTooltipSettings(

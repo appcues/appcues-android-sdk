@@ -16,15 +16,15 @@ internal data class TargetRectangleInfo(
 )
 
 internal enum class ContentPreferredPosition {
-    TOP, BOTTOM, LEADING, TRAILING
+    TOP, BOTTOM, LEFT, RIGHT
 }
 
 internal fun String?.toPosition(): ContentPreferredPosition? {
     return when (this) {
         "top" -> ContentPreferredPosition.TOP
         "bottom" -> ContentPreferredPosition.BOTTOM
-        "leading" -> ContentPreferredPosition.LEADING
-        "trailing" -> ContentPreferredPosition.TRAILING
+        "left" -> ContentPreferredPosition.LEFT
+        "right" -> ContentPreferredPosition.RIGHT
         else -> null
     }
 }
