@@ -58,6 +58,12 @@ internal sealed class TooltipPointerPosition {
         this._alignment.value = PointerAlignment(horizontalAlignment = alignment)
     }
 
+    /**
+     * returns ContainerCornerRadius that based on TooltipPointerPosition, will ignore/use
+     * the existing cornerRadius value for some of the edges.
+     *
+     * eg. When HorizontalAlignment is Left the container topStart should not apply cornerRadius.
+     */
     abstract fun toContainerCornerRadius(cornerRadius: Dp): ContainerCornerRadius
 
     object Top : TooltipPointerPosition() {
@@ -240,6 +246,13 @@ private fun getTooltipPointerPath(
     }
 }
 
+/**
+ * Calculates the pointerXOffset position, returns a pair of value containing:
+ * first: pointer x offset
+ * second: pointer tip offset
+ *
+ * during the processing of this function we also update the tooltipPointerPosition horizontal alignment
+ */
 private fun calculatePointerXOffset(
     containerDimens: TooltipContainerDimens,
     tooltipSettings: TooltipSettings,
@@ -257,24 +270,27 @@ private fun calculatePointerXOffset(
     var pointerOffset = (containerDimens.widthPx / 2) - tooltipSettings.pointerBaseCenterPx + pointerOffsetX
 
     when {
+        // * offset the pointer to the right of the content
         tooltipSettings.tooltipPointerPosition is Right -> {
             pointerOffset = containerDimens.widthPx - tooltipSettings.pointerLengthPx
         }
+        // * offset the pointer to the left of the content
         tooltipSettings.tooltipPointerPosition is Left -> {
             pointerOffset = tooltipSettings.pointerLengthPx
         }
-        pointerOffset > minPointerOffsetCornerRadius && pointerOffset < maxPointerOffsetCornerRadius -> {
-            tooltipSettings.tooltipPointerPosition.horizontalAlignment(PointerHorizontalAlignment.CENTER)
-        }
+        // After this it means the position is either TOP or BOTTOM. - NONE is irrelevant here since the pointer is not drawn.
+        // * pointer offset is between min and max, we coerceIn the value accounting for cornerRadius and set alignment to CENTER
         pointerOffset > minPointerOffset && pointerOffset < maxPointerOffset -> {
             tooltipSettings.tooltipPointerPosition.horizontalAlignment(PointerHorizontalAlignment.CENTER)
             pointerOffset = pointerOffset.coerceIn(minPointerOffsetCornerRadius..maxPointerOffsetCornerRadius).toFloat()
         }
+        // * pointer is less or equal to the min, its anchored to the LEFT
         pointerOffset <= minPointerOffset -> {
             pointerTipOffset = -tooltipSettings.pointerBaseCenterPx
             tooltipSettings.tooltipPointerPosition.horizontalAlignment(PointerHorizontalAlignment.LEFT)
             pointerOffset = minPointerOffset
         }
+        // * pointer is greater or equal the max, its anchored to the RIGHT
         pointerOffset >= maxPointerOffset -> {
             pointerTipOffset = tooltipSettings.pointerBaseCenterPx
             tooltipSettings.tooltipPointerPosition.horizontalAlignment(PointerHorizontalAlignment.RIGHT)
@@ -285,6 +301,13 @@ private fun calculatePointerXOffset(
     return Pair(pointerOffset, pointerTipOffset)
 }
 
+/**
+ * Calculates the pointerYOffset position, returns a pair of value containing:
+ * first: pointer y offset
+ * second: pointer tip offset
+ *
+ * during the processing of this function we also update the tooltipPointerPosition vertical alignment
+ */
 private fun calculatePointerYOffset(
     containerDimens: TooltipContainerDimens,
     tooltipSettings: TooltipSettings,
@@ -302,24 +325,27 @@ private fun calculatePointerYOffset(
     var pointerOffset = (containerDimens.heightPx / 2) - tooltipSettings.pointerBaseCenterPx + pointerOffsetY
 
     when {
+        // * offset the pointer to the bottom of the content
         tooltipSettings.tooltipPointerPosition is Bottom -> {
             pointerOffset = containerDimens.heightPx - tooltipSettings.pointerLengthPx
         }
+        // * offset the pointer to the top of the content
         tooltipSettings.tooltipPointerPosition is Top -> {
             pointerOffset = tooltipSettings.pointerLengthPx
         }
-        pointerOffset > minPointerOffsetCornerRadius && pointerOffset < maxPointerOffsetCornerRadius -> {
-            tooltipSettings.tooltipPointerPosition.verticalAlignment(PointerVerticalAlignment.CENTER)
-        }
+        // After this it means the position is either LEFT or RIGHT. - NONE is irrelevant here since the pointer is not drawn.
+        // * pointer offset is between min and max, we coerceIn the value accounting for cornerRadius and set alignment to CENTER
         pointerOffset > minPointerOffset && pointerOffset < maxPointerOffset -> {
             tooltipSettings.tooltipPointerPosition.verticalAlignment(PointerVerticalAlignment.CENTER)
             pointerOffset = pointerOffset.coerceIn(minPointerOffsetCornerRadius..maxPointerOffsetCornerRadius).toFloat()
         }
+        // * pointer is less or equal to the min, its anchored to the TOP
         pointerOffset <= minPointerOffset -> {
             pointerTipOffset = -tooltipSettings.pointerBaseCenterPx
             tooltipSettings.tooltipPointerPosition.verticalAlignment(PointerVerticalAlignment.TOP)
             pointerOffset = minPointerOffset
         }
+        // * pointer is greater or equal the max, its anchored to the BOTTOM
         pointerOffset >= maxPointerOffset -> {
             pointerTipOffset = tooltipSettings.pointerBaseCenterPx
             tooltipSettings.tooltipPointerPosition.verticalAlignment(PointerVerticalAlignment.BOTTOM)
@@ -338,6 +364,7 @@ private fun Path.TooltipVerticalPointerPath(
     animationSpec: AnimationSpec<Float>
 ) {
     val animatedTipOffset = animateFloatAsState(tipOffset, animationSpec)
+
     reset()
     lineTo(x = 0f, y = 0f)
     lineTo(x = (base / 2) + animatedTipOffset.value, y = length)
