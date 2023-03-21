@@ -8,8 +8,8 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.appcues.BuildConfig
 import com.appcues.R
+import com.appcues.ViewElement
 import com.appcues.data.MoshiConfiguration
-import com.appcues.ui.ElementSelector
 import com.appcues.util.ContextResources
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
@@ -22,7 +22,7 @@ internal data class Capture(
     val appId: String,
     var displayName: String,
     val screenshotImageUrl: String?,
-    val layout: View,
+    val layout: ViewElement,
     val metadata: Metadata,
     val timestamp: Date,
 ) {
@@ -30,18 +30,6 @@ internal data class Capture(
     // serialization and a default value is not needed for the Moshi generated adapter
     @Json(ignore = true)
     lateinit var screenshot: Bitmap
-
-    @JsonClass(generateAdapter = true)
-    internal data class View(
-        val id: UUID = UUID.randomUUID(),
-        val x: Int,
-        val y: Int,
-        val width: Int,
-        val height: Int,
-        val type: String,
-        val selector: ElementSelector?,
-        val children: List<View>?,
-    )
 
     @JsonClass(generateAdapter = true)
     internal data class Metadata(

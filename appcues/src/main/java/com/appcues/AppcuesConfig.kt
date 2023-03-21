@@ -1,6 +1,7 @@
 package com.appcues
 
 import com.appcues.LoggingLevel.NONE
+import com.appcues.debugger.screencapture.AndroidViewTargeting
 
 /**
  * A configuration object that defines the behavior and policies for Appcues.
@@ -86,4 +87,11 @@ data class AppcuesConfig internal constructor(
      * it is ignored.
      */
     var additionalAutoProperties: Map<String, Any> = emptyMap()
+
+    /**
+     * Define an element targeting strategy to use to capture application UI elements
+     * and use in target element experiences, such as anchored tooltips. The default implementation
+     * provided by the SDK is based on Android View layout information.
+     */
+    var elementTargeting: ElementTargeting = AndroidViewTargeting()
 }
