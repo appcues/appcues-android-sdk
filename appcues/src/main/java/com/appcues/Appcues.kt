@@ -10,6 +10,7 @@ import com.appcues.analytics.AnalyticsTracker
 import com.appcues.data.model.ExperienceTrigger
 import com.appcues.debugger.AppcuesDebuggerManager
 import com.appcues.debugger.DebugMode.Debugger
+import com.appcues.debugger.screencapture.AndroidViewTargeting
 import com.appcues.di.AppcuesKoinContext
 import com.appcues.logging.Logcues
 import com.appcues.trait.ExperienceTrait
@@ -51,6 +52,12 @@ class Appcues internal constructor(koinScope: Scope) {
          */
         val version: String
             get() = BuildConfig.SDK_VERSION
+
+        /**
+         * Controls the type of element targeting to use for the UI framework of this app.
+         * The default implementation is based on Android Views.
+         */
+        internal var elementTargeting: ElementTargeting = AndroidViewTargeting()
     }
 
     private val config by koinScope.inject<AppcuesConfig>()
@@ -91,6 +98,8 @@ class Appcues internal constructor(koinScope: Scope) {
         sessionMonitor.start()
 
         logcues.info("Appcues SDK $version initialized")
+
+        elementTargeting = config.elementTargeting
 
         appcuesCoroutineScope.launch {
             analyticsTracker.analyticsFlow.collect {

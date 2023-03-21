@@ -2,11 +2,9 @@ package com.appcues.debugger.screencapture
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.Rect
 import android.text.format.DateFormat
 import android.view.View
-import android.view.ViewGroup
-import androidx.core.view.children
+import com.appcues.Appcues
 import com.appcues.AppcuesConfig
 import com.appcues.R
 import com.appcues.data.remote.RemoteError
@@ -16,7 +14,6 @@ import com.appcues.data.remote.customerapi.response.PreUploadScreenshotResponse
 import com.appcues.data.remote.imageupload.ImageUploadRemoteSource
 import com.appcues.data.remote.sdksettings.SdkSettingsRemoteSource
 import com.appcues.monitor.AppcuesActivityMonitor
-import com.appcues.ui.ElementSelector
 import com.appcues.util.ContextResources
 import com.appcues.util.ResultOf
 import com.appcues.util.ResultOf.Failure
@@ -32,14 +29,13 @@ internal class ScreenCaptureProcessor(
     private val imageUploadRemoteSource: ImageUploadRemoteSource,
 ) {
     fun captureScreen(): Capture? {
-
         return AppcuesActivityMonitor.activity?.window?.decorView?.rootView?.let {
             prepare(it)
 
             val timestamp = Date()
             val displayName = it.screenCaptureDisplayName(timestamp)
             val screenshot = it.screenshot()
-            val layout = it.asCaptureView()
+            val layout = Appcues.elementTargeting.captureLayout()
             val capture = if (screenshot != null && layout != null) {
                 Capture(
                     appId = config.applicationId,
@@ -153,62 +149,6 @@ private fun View.screenCaptureDisplayName(timestamp: Date): String {
         name = this.javaClass.simpleName
     }
     return "$name (${DateFormat.format("yyyy-MM-dd_HH:mm:ss", timestamp)})"
-}
-
-private fun View.asCaptureView(): Capture.View? {
-    val displayMetrics = context.resources.displayMetrics
-    val density = displayMetrics.density
-
-    // this is the position of the view relative to the entire screen
-    val actualPosition = Rect()
-    getGlobalVisibleRect(actualPosition)
-
-    // the bounds of the screen
-    val screenRect = Rect(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels)
-
-    // if the view is not currently in the screenshot image (scrolled away), ignore
-    if (Rect.intersects(actualPosition, screenRect).not()) {
-        return null
-    }
-
-    // ignore the Appcues SDK content that has been injected into the view hierarchy
-    if (this.id == R.id.appcues_debugger_view) {
-        return null
-    }
-
-    var children = (this as? ViewGroup)?.children?.mapNotNull {
-        if (!it.isShown) {
-            // discard hidden views and subviews within
-            null
-        } else {
-            it.asCaptureView()
-        }
-    }?.toList()
-
-    if (children?.isEmpty() == true) {
-        children = null
-    }
-
-    return Capture.View(
-        x = actualPosition.left.toDp(density),
-        y = actualPosition.top.toDp(density),
-        width = actualPosition.width().toDp(density),
-        height = actualPosition.height().toDp(density),
-        selector = selector(),
-        type = this.javaClass.name,
-        children = children,
-    )
-}
-
-internal fun View.selector(): ElementSelector? {
-    val selector = ElementSelector(
-        id = null, // for manual tagging
-        accessibilityIdentifier = null, // not valid on android
-        description = this.contentDescription?.toString(),
-        tag = tag?.toString()
-    )
-
-    return if (selector.isValid) selector else null
 }
 
 private fun View.screenshot() =
