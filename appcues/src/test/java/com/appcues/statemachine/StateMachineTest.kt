@@ -519,13 +519,13 @@ class StateMachineTest : AppcuesScopeTest {
     }
 
     @Test
-    fun `RenderingStep SHOULD NOT transition WHEN action is ReportError`() = runTest {
+    fun `RenderingStep SHOULD NOT transition WHEN action is ReportError AND non-fatal`() = runTest {
         // GIVEN
         val experience = mockExperience()
         val initialState = RenderingStep(experience, 1, false)
         val stateMachine = initMachine(initialState)
         val error = ExperienceError(experience, "test error")
-        val action = ReportError(error)
+        val action = ReportError(error, false)
 
         // WHEN
         val result = stateMachine.handleAction(action)
@@ -533,6 +533,23 @@ class StateMachineTest : AppcuesScopeTest {
         // THEN
         assertThat(result.failureReason()).isEqualTo(error)
         assertThat(stateMachine.state).isEqualTo(initialState)
+    }
+
+    @Test
+    fun `RenderingStep SHOULD transition to Idling WHEN action is ReportError AND is fatal`() = runTest {
+        // GIVEN
+        val experience = mockExperience()
+        val initialState = RenderingStep(experience, 1, false)
+        val stateMachine = initMachine(initialState)
+        val error = ExperienceError(experience, "test error")
+        val action = ReportError(error, true)
+
+        // WHEN
+        val result = stateMachine.handleAction(action)
+
+        // THEN
+        assertThat(result.failureReason()).isEqualTo(error)
+        assertThat(stateMachine.state).isEqualTo(Idling)
     }
 
     @Test
@@ -563,7 +580,7 @@ class StateMachineTest : AppcuesScopeTest {
         val initialState = RenderingStep(experience, 1, false)
         val stateMachine = initMachine(initialState, onError = { errorCompletable.complete(it) })
         val error = ExperienceError(experience, "test error")
-        val action = ReportError(error)
+        val action = ReportError(error, false)
 
         // WHEN
         stateMachine.handleAction(action)
