@@ -26,8 +26,6 @@ import com.appcues.statemachine.State.Idling
 import com.appcues.statemachine.State.RenderingStep
 import com.appcues.statemachine.StepReference.StepIndex
 import com.appcues.util.ResultOf
-import com.appcues.util.ResultOf.Failure
-import com.appcues.util.ResultOf.Success
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -49,7 +47,7 @@ internal interface Transitions {
     fun BeginningExperience.fromBeginningExperienceToBeginningStep(
         action: StartStep,
         coroutineScope: CoroutineScope,
-        continuation: suspend () -> ResultOf<State, Error>
+        continuation: suspend (ResultOf<Unit, Error>) -> ResultOf<State, Error>
     ): Transition {
         val completion: CompletableDeferred<ResultOf<State, Error>> = CompletableDeferred()
 
@@ -71,12 +69,7 @@ internal interface Transitions {
 
         return Transition(
             state = BeginningStep(experience, 0, true) {
-                when (it) {
-                    // the presentation completed, continue on with the continuation
-                    is Success -> coroutineScope.launch { completion.complete(continuation()) }
-                    // the presentation failed, bubble up the error
-                    is Failure -> completion.complete(Failure(it.reason))
-                }
+                coroutineScope.launch { completion.complete(continuation(it)) }
             },
             sideEffect = PresentContainerEffect(experience, 0, completion, actions)
         )
@@ -155,7 +148,7 @@ internal interface Transitions {
     fun EndingStep.fromEndingStepToBeginningStep(
         action: StartStep,
         coroutineScope: CoroutineScope,
-        continuation: suspend () -> ResultOf<State, Error>
+        continuation: suspend (ResultOf<Unit, Error>) -> ResultOf<State, Error>
     ): Transition {
         // get next step index
         return action.stepReference.getIndex(experience, flatStepIndex).let { nextStepIndex ->
@@ -191,7 +184,7 @@ private fun transitionsToBeginningStep(
     experience: Experience,
     currentStepIndex: Int,
     nextStepIndex: Int,
-    continuation: suspend () -> ResultOf<State, Error>,
+    continuation: suspend (ResultOf<Unit, Error>) -> ResultOf<State, Error>,
 ) = if (experience.areStepsFromDifferentGroup(currentStepIndex, nextStepIndex)) {
     // given that steps are from different container, we now get step container index to present
     experience.groupLookup[nextStepIndex]?.let { stepContainerIndex ->
@@ -199,12 +192,7 @@ private fun transitionsToBeginningStep(
         val completion: CompletableDeferred<ResultOf<State, Error>> = CompletableDeferred()
         Transition(
             state = BeginningStep(experience, nextStepIndex, false) {
-                when (it) {
-                    // the presentation completed, continue on with the continuation
-                    is Success -> coroutineScope.launch { completion.complete(continuation()) }
-                    // the presentation failed, bubble up the error
-                    is Failure -> completion.complete(Failure(it.reason))
-                }
+                coroutineScope.launch { completion.complete(continuation(it)) }
             },
             sideEffect = PresentContainerEffect(experience, stepContainerIndex, completion, actions)
         )
@@ -218,12 +206,7 @@ private fun transitionsToBeginningStep(
     val completion: CompletableDeferred<ResultOf<State, Error>> = CompletableDeferred()
     Transition(
         state = BeginningStep(experience, nextStepIndex, false) {
-            when (it) {
-                // the presentation completed, continue on with the continuation
-                is Success -> coroutineScope.launch { completion.complete(continuation()) }
-                // the presentation failed, bubble up the error
-                is Failure -> completion.complete(Failure(it.reason))
-            }
+            coroutineScope.launch { completion.complete(continuation(it)) }
         },
         sideEffect = AwaitEffect(completion)
     )

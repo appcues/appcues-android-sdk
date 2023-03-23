@@ -8,7 +8,7 @@ internal sealed class Action {
     object RenderStep : Action()
     data class EndExperience(val markComplete: Boolean, val destroyed: Boolean) : Action()
     object Reset : Action()
-    data class ReportError(val error: Error) : Action()
+    data class ReportError(val error: Error, val fatal: Boolean) : Action()
     object Pause : Action()
     object Resume : Action()
 }

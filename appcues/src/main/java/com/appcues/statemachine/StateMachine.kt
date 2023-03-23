@@ -34,7 +34,6 @@ import com.appcues.trait.AppcuesTraitException
 import com.appcues.util.ResultOf
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
@@ -113,18 +112,14 @@ internal class StateMachine(
                         // kick off UI
                         sideEffect.experience.stepContainers[sideEffect.containerIndex].presentingTrait.present()
                         // wait on the RenderingStep state to flow in from the UI, return that result
-                        handleCompletion(sideEffect.completion)
+                        sideEffect.completion.await()
                     } catch (exception: AppcuesTraitException) {
-                        fatalError(
-                            ExperienceError(
-                                experience = sideEffect.experience,
-                                message = exception.message ?: "Presenting trait failed to present for index ${sideEffect.containerIndex}"
-                            )
-                        )
+                        val message = exception.message ?: "Presenting trait failed to present for index ${sideEffect.containerIndex}"
+                        handleActionInternal(ReportError(ExperienceError(sideEffect.experience, message), true))
                     }
                 }
                 is AwaitEffect -> {
-                    handleCompletion(sideEffect.completion)
+                    sideEffect.completion.await()
                 }
                 is ProcessActions -> {
                     actionProcessor.process(sideEffect.actions)
@@ -137,31 +132,12 @@ internal class StateMachine(
         }
     }
 
-    private suspend fun handleCompletion(completion: CompletableDeferred<ResultOf<State, Error>>): ResultOf<State, Error> {
-        return when (val result = completion.await()) {
-            is Success -> result
-            is Failure -> fatalError(result.reason)
-        }
-    }
-
-    private suspend fun fatalError(error: Error): Failure<Error> {
-        // force state machine to move to idling when we get this exception
-        _state = Idling
-
-        // return failure and report to errorFlow
-        return Failure(
-            error.also {
-                _errorFlow.emit(it)
-            }
-        )
-    }
-
     private fun State.take(action: Action): Transition {
         return takeValidStateTransitions(this, action) ?: when (action) {
             // start experience action when experience is already active
-            is StartExperience -> ErrorLoggingTransition(ExperienceAlreadyActive(action.experience, "Experience already active"))
+            is StartExperience -> ErrorLoggingTransition(ExperienceAlreadyActive(action.experience, "Experience already active"), false)
             // report error action
-            is ReportError -> ErrorLoggingTransition(action.error)
+            is ReportError -> ErrorLoggingTransition(action.error, action.fatal)
             // undefined transition - no-op
             else -> EmptyTransition()
         }
@@ -178,9 +154,7 @@ internal class StateMachine(
 
             // BeginningExperience
             state is BeginningExperience && action is StartStep ->
-                state.fromBeginningExperienceToBeginningStep(action, appcuesCoroutineScope) {
-                    handleActionInternal(RenderStep)
-                }
+                state.fromBeginningExperienceToBeginningStep(action, appcuesCoroutineScope) { handleRenderResult(it) }
 
             // BeginningStep
             state is BeginningStep && action is RenderStep ->
@@ -191,18 +165,14 @@ internal class StateMachine(
                 determineStartStepTransition(state, action)
 
             state is RenderingStep && action is EndExperience ->
-                state.fromRenderingStepToEndingExperience(action, appcuesCoroutineScope) {
-                    handleActionInternal(action)
-                }
+                state.fromRenderingStepToEndingExperience(action, appcuesCoroutineScope) { handleActionInternal(action) }
 
             // EndingStep
             state is EndingStep && action is EndExperience ->
                 state.fromEndingStepToEndingExperience(action)
 
             state is EndingStep && action is StartStep ->
-                state.fromEndingStepToBeginningStep(action, appcuesCoroutineScope) {
-                    handleActionInternal(RenderStep)
-                }
+                state.fromEndingStepToBeginningStep(action, appcuesCoroutineScope) { handleRenderResult(it) }
 
             // EndingExperience
             state is EndingExperience && action is Reset ->
@@ -223,6 +193,14 @@ internal class StateMachine(
             else -> null
         }
     }
+
+    private suspend fun handleRenderResult(result: ResultOf<Unit, Error>) =
+        when (result) {
+            // presentation completed successfully
+            is Success -> handleActionInternal(RenderStep)
+            // failed to present, this will bubble up the error and reset to Idling
+            is Failure -> handleActionInternal(ReportError(result.reason, true))
+        }
 
     // helper to determine if StartStep should try to resolve and start the next step, or shortcut
     // to end the experience, if a continue action is executed while already on the last step
