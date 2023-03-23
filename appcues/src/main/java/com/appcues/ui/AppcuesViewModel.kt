@@ -12,7 +12,7 @@ import com.appcues.data.model.StepContainer
 import com.appcues.statemachine.Action.Pause
 import com.appcues.statemachine.Action.Resume
 import com.appcues.statemachine.Action.StartStep
-import com.appcues.statemachine.Error.ExperienceError
+import com.appcues.statemachine.Error.StepError
 import com.appcues.statemachine.State.BeginningStep
 import com.appcues.statemachine.State.EndingStep
 import com.appcues.statemachine.StateMachine
@@ -161,11 +161,12 @@ internal class AppcuesViewModel(
             if (state is Rendering) {
                 state.presentationComplete(
                     Failure(
-                        ExperienceError(
+                        StepError(
                             experience = state.experience,
+                            stepIndex = state.flatStepIndex,
                             // this message cannot be null in AppcuesTraitException, but the parent Exception class
                             // has it optional. Thus, this fallback message should never actually be used.
-                            message = exception.message ?: "Unable to render step ${state.flatStepIndex}"
+                            message = exception.message ?: "Unable to render step ${state.flatStepIndex}",
                         )
                     )
                 )
