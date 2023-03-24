@@ -54,10 +54,11 @@ class Appcues internal constructor(koinScope: Scope) {
             get() = BuildConfig.SDK_VERSION
 
         /**
-         * Controls the type of element targeting to use for the UI framework of this app.
-         * The default implementation is based on Android Views.
+         * Defines an element targeting strategy to use to capture application UI elements
+         * and use in target element experiences, such as anchored tooltips. The default implementation
+         * provided by the SDK is based on Android View layout information.
          */
-        internal var elementTargeting: ElementTargeting = AndroidViewTargeting()
+        var elementTargeting: ElementTargeting = AndroidViewTargeting()
     }
 
     private val config by koinScope.inject<AppcuesConfig>()
@@ -98,8 +99,6 @@ class Appcues internal constructor(koinScope: Scope) {
         sessionMonitor.start()
 
         logcues.info("Appcues SDK $version initialized")
-
-        elementTargeting = config.elementTargeting
 
         appcuesCoroutineScope.launch {
             analyticsTracker.analyticsFlow.collect {

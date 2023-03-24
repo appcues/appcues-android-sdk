@@ -68,11 +68,13 @@ data class ViewElement(
 
     /**
      * The x-coordinate for view position, with origin in the upper-left corner.
+     * This value is in screen coordinates, not relative to the parent.
      */
     val x: Int,
 
     /**
      * The y-coordinate for view position, with origin is in the upper-left corner.
+     * This value is in screen coordinates, not relative to the parent.
      */
     val y: Int,
 
@@ -107,16 +109,17 @@ fun View.isAppcuesView(): Boolean {
     return this.id == R.id.appcues_debugger_view
 }
 
-internal fun ElementTargeting.findMatches(selector: ElementSelector): List<ViewElement> {
-    return captureLayout()?.viewsMatching(selector) ?: listOf()
+internal fun ElementTargeting.findMatches(selector: ElementSelector): List<Pair<ViewElement, Int>>? {
+    return captureLayout()?.viewsMatching(selector)
 }
 
-internal fun ViewElement.viewsMatching(target: ElementSelector): List<ViewElement> {
-    val views = mutableListOf<ViewElement>()
+internal fun ViewElement.viewsMatching(target: ElementSelector): List<Pair<ViewElement, Int>> {
+    val views = mutableListOf<Pair<ViewElement, Int>>()
 
     selector?.let {
-        if (it.evaluateMatch(target) > 0) {
-            views.add(this)
+        val weight = it.evaluateMatch(target)
+        if (weight > 0) {
+            views.add(Pair(this, weight))
         }
     }
 
