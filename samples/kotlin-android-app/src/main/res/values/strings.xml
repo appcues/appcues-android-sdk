@@ -22,4 +22,11 @@
     <string name="save_button">save</string>
     <string name="group_label">Group</string>
     <string name="anonymous_user_button">Anonymous User</string>
+    <string name="content_description_event_1">Trigger Event 1</string>
+    <string name="content_description_event_2">Trigger Event 2</string>
+    <string name="content_description_save_profile">Save Profile</string>
+    <string name="content_description_save_group">Save Group</string>
+    <string name="content_description_tab_events">Events Tab</string>
+    <string name="content_description_tab_profile">Profile Tab</string>
+    <string name="content_description_tab_group">Group Tab</string>
 </resources>

@@ -4,11 +4,13 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.MenuItemCompat
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.appcues.samples.kotlin.ExampleApplication
+import com.appcues.samples.kotlin.R
 import com.appcues.samples.kotlin.R.id
 import com.appcues.samples.kotlin.databinding.ActivityMainBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -29,11 +31,21 @@ class MainActivity : AppCompatActivity() {
         // menu should be considered as top level destinations.
         val appBarConfiguration = AppBarConfiguration(
             setOf(
-                id.navigation_events, id.navigation_profile, id.navigation_group
+                id.navigation_events,
+                id.navigation_profile,
+                id.navigation_group,
             )
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+
+        val menu = binding.navView.menu
+        val eventsTab = menu.findItem(id.navigation_events)
+        val profileTab = menu.findItem(id.navigation_profile)
+        val groupTab = menu.findItem(id.navigation_group)
+        MenuItemCompat.setContentDescription(eventsTab, resources.getString(R.string.content_description_tab_events))
+        MenuItemCompat.setContentDescription(profileTab, resources.getString(R.string.content_description_tab_profile))
+        MenuItemCompat.setContentDescription(groupTab, resources.getString(R.string.content_description_tab_group))
 
         handleLinkIntent(intent)
     }
