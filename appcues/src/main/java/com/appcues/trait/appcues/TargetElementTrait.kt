@@ -60,30 +60,44 @@ internal class TargetElementTrait(
         // no valid selector properties for the current ElementTargeting strategy in this app
         if (selector == null) throw AppcuesTraitException("invalid selector")
 
-        val views = Appcues.elementTargeting.findMatches(selector)
+        val weightedViews = Appcues.elementTargeting.findMatches(selector)
+            // if the result is null (not just empty) - that means the UI layout was not available at all
+            ?: throw AppcuesTraitException("could not read application layout information")
 
-        if (views.isEmpty()) {
+        if (weightedViews.isEmpty()) {
             throw AppcuesTraitException("no view matching selector ${selector.toMap()}")
         }
 
+        // views contains an array of Pairs, each item being the view and its integer match value
+
         // if only a single match of anything, use it
-        if (views.count() == 1) {
-            return views[0]
+        if (weightedViews.count() == 1) {
+            return weightedViews[0].first
         }
 
-        // weight the selector property matches by how distinct they are considered
-        val weightedMatches = views.map {
-            val weight = it.selector?.evaluateMatch(selector) ?: 0
-            Pair(it, weight)
+        // iterating through the array, storing the highest weight value and the list of views
+        // with that weight, resetting the list when we find a higher weight
+        var maxWeight = -1
+        var maxWeightViews = mutableListOf<ViewElement>()
+
+        weightedViews.forEach {
+            val view = it.first
+            val weight = it.second
+            if (weight > maxWeight) {
+                // new max weight, reset list
+                maxWeight = weight
+                maxWeightViews = mutableListOf(view)
+            } else if (weight == maxWeight) {
+                // add to the list of current max weight views
+                maxWeightViews.add(view)
+            }
         }
 
-        // find the max weight value from all matches
-        val maxWeight = weightedMatches.maxBy { it.second }.second
-        val maxItems = weightedMatches.filter { it.second == maxWeight }
-        if (maxItems.count() == 1) {
-            return maxItems[0].first
+        // if this has produced a single most distinct result, use it
+        if (maxWeightViews.count() == 1) {
+            return maxWeightViews[0]
         }
 
-        throw AppcuesTraitException("multiple non-distinct views (${views.count()}) matched selector ${selector.toMap()}")
+        throw AppcuesTraitException("multiple non-distinct views (${weightedViews.count()}) matched selector ${selector.toMap()}")
     }
 }
