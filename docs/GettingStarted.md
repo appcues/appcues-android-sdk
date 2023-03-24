@@ -66,3 +66,14 @@ See [Configuring the Appcues URL Scheme](https://github.com/appcues/appcues-andr
 ## Observing Analytics
 
 See [Observing Analytics](https://github.com/appcues/appcues-android-sdk/blob/main/docs/AnalyticObserving.md) for information about how to listen to analytics tracking data being reported by the Appcues SDK, including uses cases for integrating with other Analytics tracking packages.
+
+## Google Play Dependencies
+
+The Appcues Android SDK includes a dependency on the [Google Play In-App Review](https://developer.android.com/guide/playcore/in-app-review) libraries. This dependency allows for building experiences that can request a Play Store in-app review. If your application is not distributed through Google Play, or you otherwise want to opt out of this dependency and the in-app review capability in Appcues, you can update your build.gradle dependency as shown below.
+
+```kotlin
+implementation('com.appcues:appcues:<latest_version>') {
+    exclude group: 'com.google.android.play', module: 'review'
+    exclude group: 'com.google.android.play', module: 'review-ktx'
+}
+```
