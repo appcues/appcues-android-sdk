@@ -24,6 +24,7 @@ import com.appcues.debugger.model.TapActionType
 import com.appcues.debugger.model.TapActionType.DEEPLINK_CHECK
 import com.appcues.debugger.model.TapActionType.HEALTH_CHECK
 import com.appcues.util.ContextResources
+import com.appcues.util.resolveActivityCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -242,7 +243,7 @@ internal class DebuggerStatusManager(
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK
             }
 
-            val manifestConfigured = context.packageManager.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY) != null
+            val manifestConfigured = context.packageManager.resolveActivityCompat(intent, PackageManager.MATCH_DEFAULT_ONLY) != null
 
             if (manifestConfigured) {
                 deepLinkValidationToken = token

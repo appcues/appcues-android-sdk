@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
 import com.appcues.logging.Logcues
+import com.appcues.util.getActivityInfoCompat
 
 internal class ActivityScreenTracking(
     private val context: Context,
@@ -30,7 +31,7 @@ internal class ActivityScreenTracking(
     override fun onActivityStarted(activity: Activity) {
         val packageManager = activity.packageManager
         try {
-            val info = packageManager.getActivityInfo(activity.componentName, PackageManager.GET_META_DATA)
+            val info = packageManager.getActivityInfoCompat(activity.componentName, PackageManager.GET_META_DATA)
             val activityLabel = info.loadLabel(packageManager)
             analyticsTracker.screen(activityLabel.toString(), isInternal = true)
         } catch (ex: PackageManager.NameNotFoundException) {

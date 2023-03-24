@@ -3,6 +3,7 @@ package com.appcues.ui
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
@@ -40,6 +41,24 @@ internal class AppcuesActivity : AppCompatActivity() {
 
     private val logcues: Logcues by lazy { scope.get() }
 
+    private val onBackPressCallback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            // disable our own back press callback
+            this.isEnabled = false
+
+            // then check if we have any other callback, i.e. debugger
+            if (onBackPressedDispatcher.hasEnabledCallbacks()) {
+                // call it if so
+                onBackPressedDispatcher.onBackPressed()
+                // then re-enable our own callback
+                this.isEnabled = true
+            } else {
+                // otherwise initiate dismissal
+                viewModel.onBackPressed()
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         // remove enter animation from this activity
         overridePendingTransition(0, 0)
@@ -54,6 +73,8 @@ internal class AppcuesActivity : AppCompatActivity() {
                 chromeClient = EmbedChromeClient(binding.appcuesCustomViewContainer),
             )
         }
+
+        onBackPressedDispatcher.addCallback(onBackPressCallback)
     }
 
     override fun onResume() {
@@ -66,17 +87,6 @@ internal class AppcuesActivity : AppCompatActivity() {
         super.onPause()
         viewModel.onPause()
         shakeGestureListener.stop()
-    }
-
-    override fun onBackPressed() {
-        // if we have a back pressed dispatcher enabled then we call it. its not a good practice
-        // not call super onBackPressed but sometimes people do it, in that case the debugger wont
-        // consume the back press properly and there is nothing we can do about it.
-        if (onBackPressedDispatcher.hasEnabledCallbacks()) {
-            super.onBackPressed()
-        } else {
-            viewModel.onBackPressed()
-        }
     }
 
     override fun finish() {

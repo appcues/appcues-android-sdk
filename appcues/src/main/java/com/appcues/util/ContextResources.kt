@@ -32,12 +32,12 @@ internal class ContextResources(private val context: Context) {
     }
 
     fun getAppVersion(): String = with(context) {
-        packageManager.getPackageInfo(packageName, 0).versionName
+        packageManager.getPackageInfoCompat(packageName, 0).versionName
     }
 
     fun getAppBuild(): Long = with(context) {
         if (VERSION.SDK_INT >= VERSION_CODES.P) {
-            packageManager.getPackageInfo(packageName, 0).longVersionCode
+            packageManager.getPackageInfoCompat(packageName, 0).longVersionCode
         } else {
             @Suppress("DEPRECATION")
             packageManager.getPackageInfo(packageName, 0).versionCode.toLong()
