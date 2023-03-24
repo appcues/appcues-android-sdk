@@ -37,14 +37,15 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="24dp"
+        android:autofillHints="personGivenName"
         android:ems="10"
         android:hint="@string/given_name_label"
         android:inputType="textPersonName"
         android:minHeight="48dp"
+        android:tag="txtGivenName"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@+id/textViewGivenName"
-        app:layout_constraintTop_toBottomOf="@+id/textViewGivenName"
-        android:autofillHints="personGivenName" />
+        app:layout_constraintTop_toBottomOf="@+id/textViewGivenName" />
 
     <TextView
         android:id="@+id/textViewFamilyName"
@@ -67,6 +68,7 @@
         android:hint="@string/family_name_label"
         android:inputType="textPersonName"
         android:minHeight="48dp"
+        android:tag="txtFamilyName"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@+id/textViewFamilyName"
         app:layout_constraintTop_toBottomOf="@+id/textViewFamilyName"
@@ -79,6 +81,8 @@
         android:layout_marginStart="24dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="24dp"
+        android:contentDescription="@string/content_description_save_profile"
+        android:tag="btnSaveProfile"
         android:text="@string/save_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
