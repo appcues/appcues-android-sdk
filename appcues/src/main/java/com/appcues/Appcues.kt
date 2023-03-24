@@ -149,7 +149,7 @@ class Appcues internal constructor(koinScope: Scope) {
      * is no longer supported. A call to `anonymous()` with no parameters should be used instead.
      */
     @Deprecated("properties are no longer supported for anonymous users.", level = ERROR)
-    @Suppress("UnusedPrivateMember")
+    @Suppress("UnusedPrivateMember", "UNUSED_PARAMETER")
     fun anonymous(properties: Map<String, Any>?) {
         // removed
     }
