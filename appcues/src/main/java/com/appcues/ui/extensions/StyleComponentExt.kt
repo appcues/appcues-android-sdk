@@ -11,6 +11,7 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -19,21 +20,25 @@ import com.appcues.data.model.styling.ComponentStyle.ComponentHorizontalAlignmen
 import com.appcues.data.model.styling.ComponentStyle.ComponentVerticalAlignment
 import java.io.File
 
-internal fun ComponentStyle.getMargins() = PaddingValues(
-    start = marginLeading.dp,
-    top = marginTop.dp,
-    bottom = marginBottom.dp,
-    end = marginTrailing.dp,
+internal fun ComponentStyle.getMargins(defaultValue: Dp = 0.dp) = PaddingValues(
+    start = marginLeading?.dp ?: defaultValue,
+    top = marginTop?.dp ?: defaultValue,
+    bottom = marginBottom?.dp ?: defaultValue,
+    end = marginTrailing?.dp ?: defaultValue,
 )
 
-internal fun ComponentStyle?.getPaddings(): PaddingValues {
+internal fun ComponentStyle?.getPaddings(defaultValue: Dp = 0.dp): PaddingValues {
     return if (this == null) PaddingValues() else
         PaddingValues(
-            start = paddingLeading.dp.coerceAtLeast(0.dp),
-            bottom = paddingBottom.dp.coerceAtLeast(0.dp),
-            top = paddingTop.dp.coerceAtLeast(0.dp),
-            end = paddingTrailing.dp.coerceAtLeast(0.dp),
+            start = (paddingLeading?.dp ?: defaultValue).coerceAtLeast(0.dp),
+            bottom = (paddingBottom?.dp ?: defaultValue).coerceAtLeast(0.dp),
+            top = (paddingTop?.dp ?: defaultValue).coerceAtLeast(0.dp),
+            end = (paddingTrailing?.dp ?: defaultValue).coerceAtLeast(0.dp),
         )
+}
+
+internal fun ComponentStyle.getCornerRadius(defaultValue: Dp = 0.dp): Dp {
+    return cornerRadius?.dp ?: defaultValue
 }
 
 internal fun ComponentStyle.getTextAlignment(): TextAlign? {
@@ -176,8 +181,8 @@ internal fun ComponentStyle.getHorizontalAlignment(default: Alignment.Horizontal
     }
 }
 
-internal fun ComponentStyle?.getBoxAlignment(): Alignment {
-    if (this == null) return Alignment.Center
+internal fun ComponentStyle?.getBoxAlignment(defaultAlignment: Alignment = Alignment.Center): Alignment {
+    if (this == null) return defaultAlignment
 
     return getBoxAlignment(horizontalAlignment, verticalAlignment)
 }

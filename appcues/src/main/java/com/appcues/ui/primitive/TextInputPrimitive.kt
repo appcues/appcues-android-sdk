@@ -55,6 +55,7 @@ import com.appcues.ui.composables.LocalExperienceStepFormStateDelegate
 import com.appcues.ui.extensions.applyStyle
 import com.appcues.ui.extensions.checkErrorStyle
 import com.appcues.ui.extensions.getColor
+import com.appcues.ui.extensions.getCornerRadius
 import com.appcues.ui.extensions.getHorizontalAlignment
 import com.appcues.ui.extensions.getMargins
 import com.appcues.ui.extensions.getPaddings
@@ -201,7 +202,7 @@ private fun Modifier.styleTintedBorder(
 ) = this.then(
     if (tintColor != null) {
         val borderWidth = max(style.borderWidth ?: 0.0, 1.0).dp
-        Modifier.border(borderWidth, tintColor.getColor(isDark), RoundedCornerShape(style.cornerRadius.dp))
+        Modifier.border(borderWidth, tintColor.getColor(isDark), RoundedCornerShape(style.getCornerRadius()))
     } else {
         Modifier.styleBorder(style, isDark)
     }

@@ -12,13 +12,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.appcues.data.model.styling.ComponentStyle
+import com.appcues.ui.extensions.getCornerRadius
 import com.appcues.ui.extensions.styleCorner
 import com.appcues.ui.extensions.styleShadow
 import com.appcues.ui.utils.AppcuesWindowInfo
 import com.appcues.ui.utils.AppcuesWindowInfo.DeviceType.MOBILE
 import com.appcues.ui.utils.AppcuesWindowInfo.DeviceType.TABLET
 import com.appcues.ui.utils.AppcuesWindowInfo.Orientation.PORTRAIT
-import com.appcues.util.ne
 
 @OptIn(ExperimentalAnimationApi::class)
 internal fun dialogEnterTransition(): EnterTransition {
@@ -40,10 +40,12 @@ internal fun Modifier.dialogModifier(style: ComponentStyle, isDark: Boolean) =
 
 internal fun Modifier.sheetModifier(windowInfo: AppcuesWindowInfo, isDark: Boolean, style: ComponentStyle) = then(
     when (windowInfo.deviceType) {
-        MOBILE -> if (windowInfo.orientation == PORTRAIT && style.cornerRadius ne 0.0)
-            Modifier.clip(RoundedCornerShape(topStart = style.cornerRadius.dp, topEnd = style.cornerRadius.dp))
-        else
-            Modifier
+        MOBILE -> style.getCornerRadius().let { cornerRadius ->
+            if (windowInfo.orientation == PORTRAIT && cornerRadius != 0.dp)
+                Modifier.clip(RoundedCornerShape(topStart = cornerRadius, topEnd = cornerRadius))
+            else
+                Modifier
+        }
         TABLET ->
             Modifier
                 .styleShadow(style, isDark)

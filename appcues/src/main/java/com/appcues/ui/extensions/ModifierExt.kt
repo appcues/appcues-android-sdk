@@ -120,7 +120,7 @@ internal fun Modifier.styleBorder(
 ) = this.then(
     if (style?.borderWidth != null && style.borderWidth ne 0.0 && style.borderColor != null) {
         Modifier
-            .border(style.borderWidth.dp, style.borderColor.getColor(isDark), RoundedCornerShape(style.cornerRadius.dp))
+            .border(style.borderWidth.dp, style.borderColor.getColor(isDark), RoundedCornerShape(style.getCornerRadius()))
             .padding(style.borderWidth.dp)
     } else {
         Modifier
@@ -165,9 +165,11 @@ private fun Modifier.styleDefaultWidth(contentMode: ComponentContentMode) = this
 )
 
 internal fun Modifier.styleCorner(style: ComponentStyle) = this.then(
-    when {
-        style.cornerRadius ne 0.0 -> Modifier.clip(RoundedCornerShape(style.cornerRadius.dp))
-        else -> Modifier
+    style.getCornerRadius().let { cornerRadius ->
+        when {
+            cornerRadius != 0.dp -> Modifier.clip(RoundedCornerShape(cornerRadius))
+            else -> Modifier
+        }
     }
 )
 
@@ -176,7 +178,7 @@ internal fun Modifier.styleShadow(style: ComponentStyle?, isDark: Boolean): Modi
         if (style?.shadow != null) Modifier.coloredShadowRect(
             color = style.shadow.color.getColor(isDark),
             radius = style.shadow.radius.dp,
-            cornerRadius = style.cornerRadius.dp,
+            cornerRadius = style.getCornerRadius(),
             offsetX = style.shadow.x.dp,
             offsetY = style.shadow.y.dp,
         )
@@ -345,13 +347,15 @@ internal fun Modifier.imageAspectRatio(
 private fun ComponentStyle.getImageWidthPixels(density: Density) = with(density) {
     // get true image width by subtracting current width with existing
     // padding (leading and trailing) and borderWidth times 2 (as it applies on both sides)
-    width?.let { (it - (paddingLeading + paddingTrailing + (borderWidth ?: 0.0) * 2)).dp.toPx() }
+    val horizontalPadding = (paddingLeading ?: 0.0) + (paddingTrailing ?: 0.0)
+    width?.let { (it - (horizontalPadding + (borderWidth ?: 0.0) * 2)).dp.toPx() }
 }
 
 private fun ComponentStyle.getImageHeightPixels(density: Density) = with(density) {
     // get true image height by subtracting current height with existing
     // padding (top and bottom) and borderWidth times 2 (as it applies on both sides)
-    height?.let { (it - (paddingTop + paddingBottom + (borderWidth ?: 0.0) * 2)).dp.toPx() }
+    val verticalPadding = (paddingTop ?: 0.0) + (paddingBottom ?: 0.0)
+    height?.let { (it - (verticalPadding + (borderWidth ?: 0.0) * 2)).dp.toPx() }
 }
 
 internal fun Modifier.appcuesAspectRatio(
