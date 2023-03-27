@@ -10,7 +10,7 @@ import com.appcues.analytics.AnalyticsTracker
 import com.appcues.data.model.ExperienceTrigger
 import com.appcues.debugger.AppcuesDebuggerManager
 import com.appcues.debugger.DebugMode.Debugger
-import com.appcues.debugger.screencapture.AndroidViewTargeting
+import com.appcues.debugger.screencapture.AndroidTargetingStrategy
 import com.appcues.di.AppcuesKoinContext
 import com.appcues.logging.Logcues
 import com.appcues.trait.ExperienceTrait
@@ -58,7 +58,7 @@ class Appcues internal constructor(koinScope: Scope) {
          * and use in target element experiences, such as anchored tooltips. The default implementation
          * provided by the SDK is based on Android View layout information.
          */
-        var elementTargeting: ElementTargeting = AndroidViewTargeting()
+        var elementTargeting: ElementTargetingStrategy = AndroidTargetingStrategy()
     }
 
     private val config by koinScope.inject<AppcuesConfig>()

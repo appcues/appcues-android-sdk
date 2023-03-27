@@ -5,7 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.children
 import com.appcues.ElementSelector
-import com.appcues.ElementTargeting
+import com.appcues.ElementTargetingStrategy
 import com.appcues.ViewElement
 import com.appcues.isAppcuesView
 import com.appcues.monitor.AppcuesActivityMonitor
@@ -41,7 +41,7 @@ internal data class AndroidViewSelector(
     }
 }
 
-internal class AndroidViewTargeting : ElementTargeting {
+internal class AndroidTargetingStrategy : ElementTargetingStrategy {
 
     override fun captureLayout(): ViewElement? {
         return AppcuesActivityMonitor.activity?.window?.decorView?.rootView?.asCaptureView()
