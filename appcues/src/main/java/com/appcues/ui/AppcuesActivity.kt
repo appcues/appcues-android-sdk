@@ -43,7 +43,9 @@ internal class AppcuesActivity : AppCompatActivity() {
 
     private val onBackPressCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
-            // disable our own back press callback
+            // disable our own back press callback - so that the check below for hasEnabledCallbacks
+            // will only be checking for callback additional to our own here (avoid infinite recursion
+            // in the onBackPressed call)
             this.isEnabled = false
 
             // then check if we have any other callback, i.e. debugger
