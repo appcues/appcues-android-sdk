@@ -8,12 +8,12 @@ import java.util.UUID
  * Defines an element targeting strategy type, which can be used to capture view layout
  * information in the application UI as well as render element targeted experiences.
  */
-interface ElementTargeting {
+interface ElementTargetingStrategy {
 
     /**
      * Capture the layout hierarchy in the currently rendered screen of the application.
      *
-     * @return: Root view element for the current screen, or `nil` if not available. The view element
+     * @return: Root view element for the current screen, or null if not available. The view element
      *          contains sub-views recursively in the `children` property.
      */
     fun captureLayout(): ViewElement?
@@ -95,7 +95,7 @@ data class ViewElement(
 
     /**
      * The element selector details that can be used to target content to this view. The selector structure
-     * depends on the UI toolkit in use. If no identifiable properties exist for this view, this selector value should be `nil`.
+     * depends on the UI toolkit in use. If no identifiable properties exist for this view, this selector value should be null.
      */
     val selector: ElementSelector?,
 
@@ -109,7 +109,7 @@ fun View.isAppcuesView(): Boolean {
     return this.id == R.id.appcues_debugger_view
 }
 
-internal fun ElementTargeting.findMatches(selector: ElementSelector): List<Pair<ViewElement, Int>>? {
+internal fun ElementTargetingStrategy.findMatches(selector: ElementSelector): List<Pair<ViewElement, Int>>? {
     return captureLayout()?.viewsMatching(selector)
 }
 
