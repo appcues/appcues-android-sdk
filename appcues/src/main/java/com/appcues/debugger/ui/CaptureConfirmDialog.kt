@@ -93,7 +93,7 @@ private fun Header(debuggerViewModel: DebuggerViewModel) {
                     onClickLabel = stringResource(id = string.appcues_screen_capture_dismiss)
                 )
                 .drawBehind {
-                    xShapePath(Color.Black, 16.dp)
+                    xShapePath(color = Color.Black, pathSize = 16.dp, strokeWidth = 1.5.dp)
                         .also { drawPath(path = it, Color.Black) }
                 }
         )

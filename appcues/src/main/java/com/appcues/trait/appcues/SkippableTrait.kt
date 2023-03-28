@@ -136,16 +136,22 @@ internal class SkippableTrait(
                         .padding(buttonAppearance.padding)
                         .clip(CircleShape)
                         .drawBehind {
-                            xShapePath(Color(color = 0xFFEFEFEF))
-                                .also { drawPath(path = it, color = Color.Transparent) }
+                            xShapePath(
+                                color = Color(color = 0xFFEFEFEF),
+                                pathSize = buttonAppearance.size,
+                                strokeWidth = 1.5.dp,
+                            ).also { drawPath(path = it, color = Color.Transparent) }
                         }
                 Minimal ->
                     Modifier
                         .padding(buttonAppearance.padding)
                         .clip(CircleShape)
                         .drawBehind {
-                            xShapePath(Color(color = 0xFFB2B2B2))
-                                .also { drawPath(path = it, color = Color.Transparent, blendMode = BlendMode.Difference) }
+                            xShapePath(
+                                color = Color(color = 0xFFB2B2B2),
+                                pathSize = buttonAppearance.size,
+                                strokeWidth = 1.5.dp,
+                            ).also { drawPath(path = it, color = Color.Transparent, blendMode = BlendMode.Difference) }
                         }
             }
         )
