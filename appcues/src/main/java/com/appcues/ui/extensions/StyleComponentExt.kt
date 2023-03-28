@@ -20,15 +20,18 @@ import com.appcues.data.model.styling.ComponentStyle.ComponentHorizontalAlignmen
 import com.appcues.data.model.styling.ComponentStyle.ComponentVerticalAlignment
 import java.io.File
 
-internal fun ComponentStyle.getMargins(defaultValue: Dp = 0.dp) = PaddingValues(
-    start = marginLeading?.dp ?: defaultValue,
-    top = marginTop?.dp ?: defaultValue,
-    bottom = marginBottom?.dp ?: defaultValue,
-    end = marginTrailing?.dp ?: defaultValue,
-)
+internal fun ComponentStyle?.getMargins(defaultValue: Dp = 0.dp): PaddingValues {
+    return if (this == null) PaddingValues(defaultValue) else
+        PaddingValues(
+            start = marginLeading?.dp ?: defaultValue,
+            top = marginTop?.dp ?: defaultValue,
+            bottom = marginBottom?.dp ?: defaultValue,
+            end = marginTrailing?.dp ?: defaultValue,
+        )
+}
 
 internal fun ComponentStyle?.getPaddings(defaultValue: Dp = 0.dp): PaddingValues {
-    return if (this == null) PaddingValues() else
+    return if (this == null) PaddingValues(defaultValue) else
         PaddingValues(
             start = (paddingLeading?.dp ?: defaultValue).coerceAtLeast(0.dp),
             bottom = (paddingBottom?.dp ?: defaultValue).coerceAtLeast(0.dp),
@@ -181,8 +184,8 @@ internal fun ComponentStyle.getHorizontalAlignment(default: Alignment.Horizontal
     }
 }
 
-internal fun ComponentStyle?.getBoxAlignment(defaultAlignment: Alignment = Alignment.Center): Alignment {
-    if (this == null) return defaultAlignment
+internal fun ComponentStyle?.getBoxAlignment(): Alignment {
+    if (this == null) return Alignment.Center
 
     return getBoxAlignment(horizontalAlignment, verticalAlignment)
 }
