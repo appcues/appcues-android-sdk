@@ -37,22 +37,22 @@ class StyleMapperTest {
     }
 
     @Test
-    fun `map SHOULD map from StyleResponse to StyleComponent WITH default values WHEN StyleResponse is null`() {
+    fun `map SHOULD map from StyleResponse to StyleComponent WITH null values WHEN StyleResponse is null`() {
         // Given
         val from = null
         // When
         val result = from.mapComponentStyle()
         // Then
         with(result) {
-            assertThat(marginLeading).isEqualTo(0)
-            assertThat(marginTop).isEqualTo(0)
-            assertThat(marginTrailing).isEqualTo(0)
-            assertThat(marginBottom).isEqualTo(0)
-            assertThat(paddingLeading).isEqualTo(0)
-            assertThat(paddingTop).isEqualTo(0)
-            assertThat(paddingBottom).isEqualTo(0)
-            assertThat(paddingTrailing).isEqualTo(0)
-            assertThat(cornerRadius).isEqualTo(0)
+            assertThat(marginLeading).isEqualTo(null)
+            assertThat(marginTop).isEqualTo(null)
+            assertThat(marginTrailing).isEqualTo(null)
+            assertThat(marginBottom).isEqualTo(null)
+            assertThat(paddingLeading).isEqualTo(null)
+            assertThat(paddingTop).isEqualTo(null)
+            assertThat(paddingBottom).isEqualTo(null)
+            assertThat(paddingTrailing).isEqualTo(null)
+            assertThat(cornerRadius).isEqualTo(null)
         }
     }
 }
