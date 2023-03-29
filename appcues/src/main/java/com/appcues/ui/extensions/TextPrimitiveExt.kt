@@ -7,8 +7,13 @@ import com.appcues.data.model.ExperiencePrimitive.TextPrimitive
 internal fun TextPrimitive.checkErrorStyle(showError: Boolean, errorLabel: TextPrimitive?): TextPrimitive {
     val errorTint = if (showError) errorLabel?.style?.foregroundColor else null
     return if (errorTint != null) {
-        // use a copy of the label with a modified foreground color
-        copy(style = style.copy(foregroundColor = errorTint))
+        // need to push this foreground color down into each text span (or single in default case)
+        // for styling to properly apply when rendered into UI
+        copy(
+            spans = spans.map {
+                it.copy(style = it.style.copy(foregroundColor = errorTint))
+            }
+        )
     } else {
         // use unchanged label
         this
