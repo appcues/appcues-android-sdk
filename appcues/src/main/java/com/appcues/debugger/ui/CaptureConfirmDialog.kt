@@ -33,6 +33,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -93,8 +94,13 @@ private fun Header(debuggerViewModel: DebuggerViewModel) {
                     onClickLabel = stringResource(id = string.appcues_screen_capture_dismiss)
                 )
                 .drawBehind {
-                    xShapePath(color = Color.Black, pathSize = 16.dp, strokeWidth = 1.5.dp)
-                        .also { drawPath(path = it, Color.Black) }
+                    xShapePath(pathSize = 16.dp).also {
+                        drawPath(
+                            path = it,
+                            color = Color.Black,
+                            style = Stroke(1.5.dp.toPx()),
+                        )
+                    }
                 }
         )
     }
