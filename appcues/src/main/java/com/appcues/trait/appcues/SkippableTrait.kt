@@ -129,15 +129,17 @@ internal class SkippableTrait(
     override fun BoxScope.DecorateContainer(containerPadding: PaddingValues, safeAreaInsets: PaddingValues) {
         val description = stringResource(id = R.string.appcues_skippable_trait_dismiss)
 
-        Spacer(
-            modifier = Modifier
-                .padding(safeAreaInsets)
-                .align(getBoxAlignment(horizontalAlignment, verticalAlignment))
-                .padding(buttonStyle.getMargins(BUTTON_DEFAULT_MARGIN.dp))
-                .styleButton(isSystemInDarkTheme())
-                // useful for testing and also for accessibility
-                .semantics { this.contentDescription = description }
-        )
+        if (buttonAppearance != ButtonAppearance.HIDDEN) {
+            Spacer(
+                modifier = Modifier
+                    .padding(safeAreaInsets)
+                    .align(getBoxAlignment(horizontalAlignment, verticalAlignment))
+                    .padding(buttonStyle.getMargins(BUTTON_DEFAULT_MARGIN.dp))
+                    .styleButton(isSystemInDarkTheme())
+                    // useful for testing and also for accessibility
+                    .semantics { this.contentDescription = description }
+            )
+        }
     }
 
     @Composable
