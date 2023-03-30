@@ -191,7 +191,8 @@ internal class TooltipTrait(
         path: Path,
         isDark: Boolean
     ) = this.then(
-        if (style?.borderWidth != null && style.borderWidth ne 0.0 && style.borderColor != null) {
+        @Suppress("ComplexCondition")
+        if (style?.borderWidth != null && style.borderWidth ne 0.0 && style.borderColor != null && !path.isEmpty) {
             Modifier
                 .border(style.borderWidth.dp, style.borderColor.getColor(isDark), GenericShape { _, _ -> addPath(path) })
                 .padding(style.borderWidth.dp)
