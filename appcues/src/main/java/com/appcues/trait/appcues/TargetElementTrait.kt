@@ -4,11 +4,9 @@ import androidx.core.graphics.Insets
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.appcues.Appcues
-import com.appcues.ElementSelector
 import com.appcues.ViewElement
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.getConfig
-import com.appcues.data.model.getConfigObject
 import com.appcues.data.model.getConfigOrDefault
 import com.appcues.debugger.screencapture.toDp
 import com.appcues.findMatches
@@ -24,7 +22,7 @@ internal class TargetElementTrait(
         const val TYPE = "@appcues/target-element"
     }
 
-    private val selector: ElementSelector? = config.getConfigObject("selector")
+    private val selectorProperties = config.getConfig<Map<String, String>>("selector") ?: mapOf()
     private val contentDistance = config.getConfigOrDefault("contentDistanceFromTarget", 0.0)
     private val preferredPosition = config.getConfig<String>("contentPreferredPosition").toPosition()
 
@@ -55,12 +53,14 @@ internal class TargetElementTrait(
     }
 
     private fun viewMatchingSelector(): ViewElement {
-        // a null value here means it failed JSON deserialization
-        // see ElementSelectorAdapter for more details, but it basically means that there were
-        // no valid selector properties for the current ElementTargeting strategy in this app
-        if (selector == null) throw AppcuesTraitException("invalid selector")
+        val strategy = Appcues.elementTargeting
 
-        val weightedViews = Appcues.elementTargeting.findMatches(selector)
+        // a null value here means that there were no valid selector properties for
+        // the current ElementTargeting strategy in this app
+        val selector = strategy.inflateSelectorFrom(selectorProperties)
+            ?: throw AppcuesTraitException("invalid selector $selectorProperties")
+
+        val weightedViews = strategy.findMatches(selector)
             // if the result is null (not just empty) - that means the UI layout was not available at all
             ?: throw AppcuesTraitException("could not read application layout information")
 
