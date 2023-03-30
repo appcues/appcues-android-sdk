@@ -16,6 +16,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.testTag
+import com.appcues.data.model.StepContainer
 import com.appcues.logging.Logcues
 import com.appcues.trait.AppcuesTraitException
 import com.appcues.trait.BackdropDecoratingTrait
@@ -48,6 +49,7 @@ internal fun AppcuesComposition(
             LocalChromeClient provides chromeClient,
             LocalAppcuesActionDelegate provides DefaultAppcuesActionsDelegate(viewModel),
             LocalAppcuesPaginationDelegate provides AppcuesPagination { viewModel.onPageChanged(it) },
+            LocalAppcuesTraitExceptionHandler provides AppcuesTraitExceptionHandler { viewModel.onTraitException(it) },
         ) {
             MainSurface()
         }
@@ -107,11 +109,16 @@ private fun BoxScope.ComposeLastRenderingState(state: Rendering) {
         }
     }
 
-    with(state.stepContainer) {
-        val backdropDecoratingTraits = remember(state.position) { mutableStateOf(steps[state.position].backdropDecoratingTraits) }
-        val containerDecoratingTraits = remember(state.position) { mutableStateOf(steps[state.position].containerDecoratingTraits) }
-        val metadataSettingTraits = remember(state.position) { mutableStateOf(steps[state.position].metadataSettingTraits) }
-        val stepMetadata = rememberMetadataSettingTraits(viewModel, metadataSettingTraits)
+    ComposeContainer(state.stepContainer, state.position)
+}
+
+@Composable
+internal fun BoxScope.ComposeContainer(stepContainer: StepContainer, stepIndex: Int) {
+    with(stepContainer) {
+        val backdropDecoratingTraits = remember(stepIndex) { mutableStateOf(steps[stepIndex].backdropDecoratingTraits) }
+        val containerDecoratingTraits = remember(stepIndex) { mutableStateOf(steps[stepIndex].containerDecoratingTraits) }
+        val metadataSettingTraits = remember(stepIndex) { mutableStateOf(steps[stepIndex].metadataSettingTraits) }
+        val stepMetadata = rememberMetadataSettingTraits(metadataSettingTraits)
 
         if (stepMetadata != null) {
             CompositionLocalProvider(LocalAppcuesStepMetadata provides stepMetadata.value) {
@@ -128,7 +135,7 @@ private fun BoxScope.ComposeLastRenderingState(state: Rendering) {
                             // create object that will passed down to CreateContentHolder
                             ContainerPages(
                                 pageCount = steps.size,
-                                currentPage = state.position,
+                                currentPage = stepIndex,
                                 composePage = {
                                     steps[it]
                                         .ComposeStep(
@@ -156,9 +163,9 @@ private fun BoxScope.ComposeLastRenderingState(state: Rendering) {
 
 @Composable
 private fun rememberMetadataSettingTraits(
-    viewModel: AppcuesViewModel,
     metadataSettingTraits: MutableState<List<MetadataSettingTrait>>,
 ): MutableState<AppcuesStepMetadata>? {
+    val traitExceptionHandler = LocalAppcuesTraitExceptionHandler.current
     val previousStepMetaData = remember { mutableStateOf(AppcuesStepMetadata()) }
     return remember(metadataSettingTraits.value) {
         try {
@@ -167,7 +174,7 @@ private fun rememberMetadataSettingTraits(
                 previousStepMetaData.value = it.value
             }
         } catch (ex: AppcuesTraitException) {
-            viewModel.onTraitException(ex)
+            traitExceptionHandler.onTraitException(ex)
             null
         }
     }
