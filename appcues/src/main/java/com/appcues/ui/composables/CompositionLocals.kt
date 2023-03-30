@@ -10,6 +10,7 @@ import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.Interactio
 import com.appcues.data.model.Action
 import com.appcues.data.model.ExperienceStepFormState
 import com.appcues.logging.Logcues
+import com.appcues.trait.AppcuesTraitException
 import com.appcues.ui.AppcuesViewModel
 import com.appcues.ui.ShakeGestureListener
 import com.appcues.ui.composables.StackScope.ColumnStackScope
@@ -60,6 +61,9 @@ internal val LocalExperienceStepFormStateDelegate = compositionLocalOf { Experie
 internal val LocalStackScope = compositionLocalOf<StackScope> { ColumnStackScope(null, 0) }
 
 internal val LocalChromeClient = compositionLocalOf { AccompanistWebChromeClient() }
+
+internal val LocalAppcuesTraitExceptionHandler = compositionLocalOf { AppcuesTraitExceptionHandler {} }
+internal data class AppcuesTraitExceptionHandler(val onTraitException: (AppcuesTraitException) -> Unit)
 
 internal sealed class StackScope(private val childrenCount: Int) {
 
