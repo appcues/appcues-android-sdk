@@ -1,20 +1,9 @@
 package com.appcues.trait.appcues
 
-import androidx.compose.animation.core.AnimationSpec
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.runtime.Composable
+import android.graphics.PointF
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.PathOperation
-import androidx.compose.ui.graphics.addOutline
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -22,7 +11,10 @@ import com.appcues.trait.appcues.TooltipPointerPosition.Bottom
 import com.appcues.trait.appcues.TooltipPointerPosition.Left
 import com.appcues.trait.appcues.TooltipPointerPosition.Right
 import com.appcues.trait.appcues.TooltipPointerPosition.Top
+import kotlin.math.atan2
+import kotlin.math.cos
 import kotlin.math.max
+import kotlin.math.sin
 
 internal data class PointerAlignment(
     val verticalAlignment: PointerVerticalAlignment = PointerVerticalAlignment.CENTER,
@@ -144,7 +136,8 @@ internal data class TooltipSettings(
     val pointerBaseDp: Dp,
     val pointerLengthDp: Dp,
     val pointerBasePx: Float,
-    val pointerLengthPx: Float
+    val pointerLengthPx: Float,
+    val pointerCornerRadiusPx: Float,
 ) {
 
     val pointerBaseCenterPx = pointerBasePx / 2
@@ -166,6 +159,7 @@ internal fun getTooltipSettings(
     distance: Dp,
     pointerBaseDp: Dp,
     pointerLengthDp: Dp,
+    pointerCornerRadius: Dp = 0.dp,
 ): TooltipSettings {
     return TooltipSettings(
         hidePointer = false,
@@ -174,96 +168,22 @@ internal fun getTooltipSettings(
         pointerBaseDp = pointerBaseDp,
         pointerLengthDp = pointerLengthDp,
         pointerBasePx = with(density) { pointerBaseDp.toPx() },
-        pointerLengthPx = with(density) { pointerLengthDp.toPx() }
+        pointerLengthPx = with(density) { pointerLengthDp.toPx() },
+        pointerCornerRadiusPx = with(density) { pointerCornerRadius.toPx() }
     )
 }
 
-@Composable
-internal fun tooltipPath(
-    tooltipSettings: TooltipSettings,
-    containerDimens: TooltipContainerDimens?,
-    animationFloatSpec: AnimationSpec<Float>,
-    animationDpSpec: AnimationSpec<Dp>,
-): Path {
-    return Path().apply {
-        // if containerDimens is null we don't to path the tooltip yet
-        if (containerDimens == null) return@apply
-
-        op(
-            path1 = getTooltipPointerPath(containerDimens, tooltipSettings, animationFloatSpec),
-            path2 = getContainerPath(containerDimens, tooltipSettings, animationDpSpec),
-            operation = PathOperation.Union
-        )
-    }
-}
-
-@Composable
-private fun getTooltipPointerPath(
-    containerDimens: TooltipContainerDimens,
-    tooltipSettings: TooltipSettings,
-    animationSpec: AnimationSpec<Float>,
-): Path {
-    val density = LocalDensity.current
-    val cornerRadiusPx = with(density) { containerDimens.cornerRadius.toPx() }
-
-    val (pointerOffsetX, verticalTipOffset) = calculatePointerXOffset(
-        containerDimens = containerDimens,
-        tooltipSettings = tooltipSettings,
-        pointerOffsetX = with(density) { tooltipSettings.pointerOffsetX.value.toPx() },
-        cornerRadiusPx = cornerRadiusPx,
-    )
-
-    val (pointerOffsetY, horizontalTipOffset) = calculatePointerYOffset(
-        containerDimens = containerDimens,
-        tooltipSettings = tooltipSettings,
-        pointerOffsetY = with(density) { tooltipSettings.pointerOffsetY.value.toPx() },
-        cornerRadiusPx = cornerRadiusPx,
-    )
-
-    val tipLength = animateFloatAsState(
-        targetValue = when (tooltipSettings.tooltipPointerPosition) {
-            Top, Left -> -tooltipSettings.pointerLengthPx
-            Bottom, Right -> tooltipSettings.pointerLengthPx
-            else -> 0f
-        },
-        animationSpec = animationSpec
-    )
-
-    // vertical pointer implementation, probably in the future make this a separate method and add
-    // another one to generate a horizontal pointer for leading and trailing positions.
-    return Path().apply {
-
-        val animatedPointerOffsetX = animateFloatAsState(pointerOffsetX, animationSpec)
-        val animatedPointerOffsetY = animateFloatAsState(pointerOffsetY, animationSpec)
-
-        if (tooltipSettings.tooltipPointerPosition.isVertical) {
-            TooltipVerticalPointerPath(tipLength.value, tooltipSettings.pointerBasePx, verticalTipOffset, animationSpec)
-            translate(Offset(animatedPointerOffsetX.value, pointerOffsetY))
-        } else {
-            TooltipHorizontalPointerPath(tipLength.value, tooltipSettings.pointerBasePx, horizontalTipOffset, animationSpec)
-            translate(Offset(pointerOffsetX, animatedPointerOffsetY.value))
-        }
-    }
-}
-
-/**
- * Calculates the pointerXOffset position, returns a pair of value containing:
- * first: pointer x offset
- * second: pointer tip offset
- *
- * during the processing of this function we also update the tooltipPointerPosition horizontal alignment
- */
-private fun calculatePointerXOffset(
+internal fun calculatePointerXOffset(
     containerDimens: TooltipContainerDimens,
     tooltipSettings: TooltipSettings,
     pointerOffsetX: Float,
-    cornerRadiusPx: Float,
+    containerCornerRadiusPx: Float,
 ): Pair<Float, Float> {
     // boundaries for the tooltip
     val minPointerOffset = 0f
-    val minPointerOffsetCornerRadius = minPointerOffset + cornerRadiusPx
+    val minPointerOffsetCornerRadius = minPointerOffset + containerCornerRadiusPx
     val maxPointerOffset = max((containerDimens.widthPx - tooltipSettings.pointerBasePx), 0f)
-    val maxPointerOffsetCornerRadius = maxPointerOffset - cornerRadiusPx
+    val maxPointerOffsetCornerRadius = maxPointerOffset - containerCornerRadiusPx
 
     // figure out the offset of the pointer and offset for the tooltip pointer when hits the edges
     var pointerTipOffset = 0f
@@ -308,17 +228,17 @@ private fun calculatePointerXOffset(
  *
  * during the processing of this function we also update the tooltipPointerPosition vertical alignment
  */
-private fun calculatePointerYOffset(
+internal fun calculatePointerYOffset(
     containerDimens: TooltipContainerDimens,
     tooltipSettings: TooltipSettings,
     pointerOffsetY: Float,
-    cornerRadiusPx: Float
+    containerCornerRadiusPx: Float
 ): Pair<Float, Float> {
     // boundaries for the tooltip
     val minPointerOffset = 0f
-    val minPointerOffsetCornerRadius = minPointerOffset + cornerRadiusPx
+    val minPointerOffsetCornerRadius = minPointerOffset + containerCornerRadiusPx
     val maxPointerOffset = max((containerDimens.heightPx - tooltipSettings.pointerBasePx), 0f)
-    val maxPointerOffsetCornerRadius = maxPointerOffset - cornerRadiusPx
+    val maxPointerOffsetCornerRadius = maxPointerOffset - containerCornerRadiusPx
 
     // figure out the offset of the pointer and offset for the tooltip pointer when hits the edges
     var pointerTipOffset = 0f
@@ -356,79 +276,123 @@ private fun calculatePointerYOffset(
     return Pair(pointerOffset, pointerTipOffset)
 }
 
-@Composable
-private fun Path.TooltipVerticalPointerPath(
-    length: Float,
-    base: Float,
-    tipOffset: Float,
-    animationSpec: AnimationSpec<Float>
-) {
-    val animatedTipOffset = animateFloatAsState(tipOffset, animationSpec)
-
-    reset()
-    lineTo(x = 0f, y = 0f)
-    lineTo(x = (base / 2) + animatedTipOffset.value, y = length)
-    lineTo(x = base, y = 0f)
-    close()
+/**
+ * How does this work?
+ * We're interested in the radius value such that the arc from outer circle (C1) and arc from the inner circle (C2)
+ * intersect, drawing a continuous line for the pointer rather than C2 exceeding C1 and there being an odd straight
+ * line while the path backtracks.
+ *
+ * There's a few constraints we know:
+ * 1. The angle of the line between C1 and C2 (perpendicular to the side of the pointer triangle)
+ * 2. The x value of the center of C2 must be in the middle of the pointer (so pointerSize.width / 2)
+ * 3. The y value of the center of C2 (h) can be calculated from the tip of the pointer
+ * 4. The distance between C1 and C2 is 2 * radius
+ * 5. The center of C1 can be calculated by projecting from C2 distance 2 * radius by the angle
+ * 6. The y value of the center of C1 must be exactly -radius from the base (so pointerSize.height - radius)
+ */
+fun calculateTooltipMaxRadius(base: Float, height: Float): Float {
+    // pt1 and pt2 represents a rectangular triangle based on the original shape
+    val pt1 = PointF(0f, height)
+    val pt2 = PointF(base / 2f, 0f)
+    // the angle from pt1 and pt2 is the angle that is perpendicular to one side of the said shape.
+    val angle = atan2(pt1.y, pt2.x) // (1)*
+    // h = r / cos(angle)                                // (3)*
+    //
+    // centerOfC2 = Point(
+    //    x: pt2.x,                                      // (2)
+    //    y: pt2.y + h                                   // (3)*
+    // )
+    //
+    // To project C1 (Outer circle based on known C2)
+    // centerOfC1 = Point(
+    //    x: centerC2.x - cos(angle - .pi / 2) * r * 2,  // (4, 5)
+    //    y: centerC2.y + sin(angle - .pi / 2) * r * 2   // (4, 5)*
+    // )
+    //
+    // We know that pt1.y - r = centerC1.y               // (6)*
+    //
+    // Substitute and solve r (radius) for:
+    // r = pt1.y - centerC1.y
+    // r = (pt1.y) - (centerC2.y + sin(angle - .pi / 2) * r * 2)
+    // r = (pt1.y) - ((pt2.y + h) + sin(angle - Math.PI / 2) * r * 2)
+    // r = (pt1.y) - (pt2.x) - (r/cos(angle)) - sin(angle - Math.PI / 2) * r * 2
+    // r + (r/cos(angle)) + sin(angle - Math.PI / 2) * r * 2 = (pt1.y) - (pt2.x)
+    // r * (1 + (1/cos(angle)) + sin(angle - Math.PI / 2) * 2) = (pt1.y) - (pt2.x)
+    // r = ((pt1.y) - (pt2.x)) / (1 + (1/cos(angle)) + sin(angle - Math.PI / 2) * 2)
+    return (pt1.y - pt2.y) / (1 + 2 * sin(angle - Math.PI / 2) + (1 / cos(angle))).toFloat()
 }
 
-@Composable
-private fun Path.TooltipHorizontalPointerPath(
-    length: Float,
-    base: Float,
-    tipOffset: Float,
-    animationSpec: AnimationSpec<Float>
-) {
-    val animatedTipOffset = animateFloatAsState(tipOffset, animationSpec)
+data class CornerPoint(
+    val centerPoint: PointF,
+    val startAngle: Float,
+    val endAngle: Float,
+    val radius: Float,
+    val isClockWise: Boolean,
+)
 
-    reset()
-    lineTo(x = 0f, y = 0f)
-    lineTo(x = length, y = (base / 2) + animatedTipOffset.value)
-    lineTo(x = 0f, y = base)
-    close()
+fun getTooltipRoundedCorner(
+    from: PointF,
+    via: PointF,
+    to: PointF,
+    radius: Float,
+    clockWise: Boolean = false,
+): CornerPoint {
+    val startAngle = (atan2(via.y - from.y, via.x - from.x) - Math.PI / 2).toFloat()
+    val endAngle = (atan2(to.y - via.y, to.x - via.x) - Math.PI / 2).toFloat()
+
+    return CornerPoint(
+        centerPoint = findRadiusCenterPoint(from, via, to, radius),
+        startAngle = if (clockWise) startAngle else endAngle,
+        endAngle = if (clockWise) endAngle else startAngle,
+        radius = radius,
+        isClockWise = clockWise
+    )
 }
 
-@Composable
-private fun getContainerPath(
-    containerDimens: TooltipContainerDimens,
-    tooltipSettings: TooltipSettings,
-    animationSpec: AnimationSpec<Dp>,
-): Path {
-    val containerCornerRadius = remember(tooltipSettings.tooltipPointerPosition.alignment.value) {
-        tooltipSettings.tooltipPointerPosition.toContainerCornerRadius(containerDimens.cornerRadius)
-    }
+/**
+ * Finds the center point for the given edge of the shape, it works by figuring out where the projected lines
+ * intersect in 2D space.
+ */
+private fun findRadiusCenterPoint(
+    from: PointF,
+    via: PointF,
+    to: PointF,
+    radius: Float
+): PointF {
+    val fromAngle = atan2(via.y - from.y, via.x - from.x)
+    val toAngle = atan2(to.y - via.y, to.x - via.x)
+    val fromOffset = Offset(-sin(fromAngle) * radius, cos(fromAngle) * radius)
+    val toOffset = Offset(-sin(toAngle) * radius, cos(toAngle) * radius)
 
-    val cornerTopStart = animateDpAsState(containerCornerRadius.topStart, animationSpec)
-    val cornerTopEnd = animateDpAsState(containerCornerRadius.topEnd, animationSpec)
-    val cornerBottomStart = animateDpAsState(containerCornerRadius.bottomStart, animationSpec)
-    val cornerBottomEnd = animateDpAsState(containerCornerRadius.bottomEnd, animationSpec)
+    // projects lines for given radius
+    val line1pt1x = from.x + fromOffset.x
+    val line1pt1y = from.y + fromOffset.y
+    val line1pt2x = via.x + fromOffset.x
+    val line1pt2y = via.y + fromOffset.y
 
-    return Path().apply {
-        // takes into account the length of the tooltip pointer when calculating new container size
-        val size = if (tooltipSettings.tooltipPointerPosition.isVertical) {
-            Size(containerDimens.widthPx, containerDimens.heightPx - tooltipSettings.pointerLengthPx)
-        } else {
-            Size(containerDimens.widthPx - tooltipSettings.pointerLengthPx, containerDimens.heightPx)
-        }
+    val line2pt1x = via.x + toOffset.x
+    val line2pt1y = via.y + toOffset.y
+    val line2pt2x = to.x + toOffset.x
+    val line2pt2y = to.y + toOffset.y
 
-        val offset = when (tooltipSettings.tooltipPointerPosition) {
-            is Top -> Offset(0f, tooltipSettings.pointerLengthPx)
-            Left -> Offset(tooltipSettings.pointerLengthPx, 0f)
-            else -> Offset(0f, 0f)
-        }
-
-        addPath(
-            Path().apply {
-                addOutline(
-                    RoundedCornerShape(
-                        topStart = cornerTopStart.value,
-                        topEnd = cornerTopEnd.value,
-                        bottomEnd = cornerBottomEnd.value,
-                        bottomStart = cornerBottomStart.value
-                    ).createOutline(size, LocalLayoutDirection.current, LocalDensity.current)
-                )
-            },
-            offset
+    // figure out x, y intersection point
+    val intersectionX = (
+        (line1pt1x * line1pt2y - line1pt1y * line1pt2x) *
+            (line2pt1x - line2pt2x) - (line1pt1x - line1pt2x) *
+            (line2pt1x * line2pt2y - line2pt1y * line2pt2x)
+        ) / (
+        (line1pt1x - line1pt2x) * (line2pt1y - line2pt2y) -
+            (line1pt1y - line1pt2y) * (line2pt1x - line2pt2x)
         )
-    }
+
+    val intersectionY = (
+        (line1pt1x * line1pt2y - line1pt1y * line1pt2x) *
+            (line2pt1y - line2pt2y) - (line1pt1y - line1pt2y) *
+            (line2pt1x * line2pt2y - line2pt1y * line2pt2x)
+        ) / (
+        (line1pt1x - line1pt2x) * (line2pt1y - line2pt2y) -
+            (line1pt1y - line1pt2y) * (line2pt1x - line2pt2x)
+        )
+
+    return if (intersectionX.isNaN() || intersectionY.isNaN()) via else PointF(intersectionX, intersectionY)
 }
