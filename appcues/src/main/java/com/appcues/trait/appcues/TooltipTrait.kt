@@ -89,6 +89,14 @@ internal class TooltipTrait(
     private val hidePointer = config.getConfigOrDefault("hidePointer", false)
     private val pointerBaseDp = if (hidePointer) 0.dp else config.getConfigOrDefault("pointerBase", POINTER_BASE_DEFAULT).dp
     private val pointerLengthDp = if (hidePointer) 0.dp else config.getConfigOrDefault("pointerLength", POINTER_LENGTH_DEFAULT).dp
+    private val pointerCornerRadius = if (hidePointer) 0.dp else
+        config.getConfigOrDefault("pointerCornerRadius", 0.0).dp.coerceInMaxRadius(pointerBaseDp, pointerLengthDp)
+
+    // figures out the max corner radius for this shape and returns the lesser value between
+    // the pointerCornerRadius and the calculated max.
+    private fun Dp.coerceInMaxRadius(pointerBaseDp: Dp, pointerLengthDp: Dp): Dp {
+        return min(this, calculateTooltipMaxRadius(pointerBaseDp.value, pointerLengthDp.value).dp)
+    }
 
     override fun present() {
         AppcuesOverlayViewManager(scope = scope).start()
@@ -121,6 +129,9 @@ internal class TooltipTrait(
             tooltipMaxHeight = tooltipMaxHeight,
         )
 
+        val tooltipPath = drawTooltipPointerPath(tooltipSettings, containerDimens.value, floatAnimation, dpAnimation)
+        val maxWidth = windowInfo.widthDp - SCREEN_HORIZONTAL_PADDING * 2
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -141,9 +152,6 @@ internal class TooltipTrait(
                         animationSpec = dpAnimation
                     )
                 ) {
-                    val tooltipPath = tooltipPath(tooltipSettings, containerDimens.value, floatAnimation, dpAnimation)
-                    val maxWidth = windowInfo.widthDp - SCREEN_HORIZONTAL_PADDING * 2
-
                     Box(
                         modifier = Modifier
                             .tooltipSize(style, maxWidth, tooltipMaxHeight.value)
@@ -357,7 +365,8 @@ internal class TooltipTrait(
                 position = pointerPosition,
                 distance = distance,
                 pointerBaseDp = pointerBaseDp,
-                pointerLengthDp = pointerLengthDp
+                pointerLengthDp = pointerLengthDp,
+                pointerCornerRadius = pointerCornerRadius,
             )
         }
     }
