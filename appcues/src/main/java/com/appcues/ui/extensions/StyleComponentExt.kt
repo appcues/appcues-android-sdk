@@ -1,7 +1,10 @@
 package com.appcues.ui.extensions
 
 import android.content.Context
+import android.content.res.Resources.NotFoundException
 import android.graphics.Typeface
+import android.os.Build.VERSION
+import android.os.Build.VERSION_CODES
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
@@ -75,13 +78,27 @@ private fun FontFamily.Companion.getSystemFontFamily(fontName: String?): FontFam
 
 // try to load a custom font from a resource in the host application
 private fun FontFamily.Companion.getFontResource(context: Context, fontName: String?): FontFamily? {
-    if (fontName != null) {
+    // Font resources are only available on API 26+ (Android 8.0, "O"), so don't even try on lower versions
+    if (VERSION.SDK_INT >= VERSION_CODES.O && fontName != null) {
         // this is an attempt to provide convenience to convert to valid resource names, for ex. if a font
         // name of "Lato-Black" was used, it will auto convert to "lato_black" resource name
         val resourceName = fontName.lowercase().replace("-", "_")
         val fontId = context.resources.getIdentifier(resourceName, "font", context.packageName)
         if (fontId != 0) {
-            return FontFamily(Font(fontId))
+            // Even if the font identifier is found, this typeface may not be available on the current
+            // OS level, if any api-specific resource folders have been used, i.e. "font-v30". We do
+            // another check here to try and catch this, since otherwise it will result in an uncaught
+            // exception during Compose render time. That exception will crash the app when
+            // trying to show the Appcues experience.
+            @Suppress("SwallowedException")
+            return try {
+                // the result of this getFont is unused, but success indicates the resource is available
+                // and we can progress with the creation of the Font and FontFamily
+                context.resources.getFont(fontId)
+                FontFamily(Font(fontId))
+            } catch (ex: NotFoundException) {
+                null
+            }
         }
     }
     return null
