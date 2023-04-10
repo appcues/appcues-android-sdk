@@ -33,10 +33,10 @@ internal fun ComponentStyle?.getMargins(defaultValue: Dp = 0.dp): PaddingValues 
 internal fun ComponentStyle?.getPaddings(defaultValue: Dp = 0.dp): PaddingValues {
     return if (this == null) PaddingValues(defaultValue) else
         PaddingValues(
-            start = (paddingLeading?.dp ?: defaultValue).coerceAtLeast(0.dp),
-            bottom = (paddingBottom?.dp ?: defaultValue).coerceAtLeast(0.dp),
-            top = (paddingTop?.dp ?: defaultValue).coerceAtLeast(0.dp),
-            end = (paddingTrailing?.dp ?: defaultValue).coerceAtLeast(0.dp),
+            start = paddingLeading?.dp ?: defaultValue,
+            bottom = paddingBottom?.dp ?: defaultValue,
+            top = paddingTop?.dp ?: defaultValue,
+            end = paddingTrailing?.dp ?: defaultValue,
         )
 }
 
