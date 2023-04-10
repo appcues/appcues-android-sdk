@@ -52,6 +52,7 @@ import com.appcues.ui.extensions.getBoxAlignment
 import com.appcues.ui.extensions.getColor
 import com.appcues.ui.extensions.getMargins
 import com.appcues.ui.extensions.xShapePath
+import com.appcues.ui.utils.margin
 import com.appcues.util.ne
 import kotlinx.coroutines.launch
 import kotlin.math.min
@@ -134,7 +135,7 @@ internal class SkippableTrait(
                 modifier = Modifier
                     .padding(safeAreaInsets)
                     .align(getBoxAlignment(horizontalAlignment, verticalAlignment))
-                    .padding(buttonStyle.getMargins(BUTTON_DEFAULT_MARGIN.dp))
+                    .margin(buttonStyle.getMargins(BUTTON_DEFAULT_MARGIN.dp))
                     .styleButton(isSystemInDarkTheme())
                     // useful for testing and also for accessibility
                     .semantics { this.contentDescription = description }
