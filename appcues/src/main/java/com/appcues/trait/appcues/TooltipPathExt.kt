@@ -15,6 +15,7 @@ import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.sin
+import kotlin.math.tan
 
 internal data class PointerAlignment(
     val verticalAlignment: PointerVerticalAlignment = PointerVerticalAlignment.CENTER,
@@ -322,6 +323,27 @@ fun calculateTooltipMaxRadius(base: Float, height: Float): Float {
     return (pt1.y - pt2.y) / (1 + 2 * sin(angle - Math.PI / 2) + (1 / cos(angle))).toFloat()
 }
 
+/**
+ * determine the real width of the pointer tooltip
+ */
+@Suppress("unused")
+@SuppressWarnings("unused")
+// the value calculated here should be factored when figuring out the amount of cornerRadius to be applied,
+// if any
+fun calculateTooltipWidth(base: Float, length: Float, radius: Float, roundedBase: Int = 2): Float {
+    // (1) figure out the angle
+    val angle = atan2(base, length / 2) / 2
+    // (2) finds out the value of the opposite side using:
+    //        - tan(angle) = opposite side / adjacent side
+    //
+    //     giving that the adjacent side is radius, then:
+    //        - opposite side = tan(angle) * radius
+    //
+    // (3) multiply by two to account for the two sides of the pointer
+    //     and add the existing width to the end result
+    return (tan(angle) * radius * roundedBase) + base
+}
+
 data class CornerPoint(
     val centerPoint: PointF,
     val startAngle: Float,
@@ -336,15 +358,16 @@ fun getTooltipRoundedCorner(
     to: PointF,
     radius: Float,
     clockWise: Boolean = false,
+    shouldRound: Boolean = true,
 ): CornerPoint {
     val startAngle = (atan2(via.y - from.y, via.x - from.x) - Math.PI / 2).toFloat()
     val endAngle = (atan2(to.y - via.y, to.x - via.x) - Math.PI / 2).toFloat()
 
     return CornerPoint(
-        centerPoint = findRadiusCenterPoint(from, via, to, radius),
+        centerPoint = if (shouldRound) findRadiusCenterPoint(from, via, to, radius) else via,
         startAngle = if (clockWise) startAngle else endAngle,
         endAngle = if (clockWise) endAngle else startAngle,
-        radius = radius,
+        radius = if (shouldRound) radius else 0f,
         isClockWise = clockWise
     )
 }
