@@ -20,6 +20,7 @@ import com.appcues.trait.appcues.TooltipPointerPosition.Bottom
 import com.appcues.trait.appcues.TooltipPointerPosition.Left
 import com.appcues.trait.appcues.TooltipPointerPosition.Right
 import com.appcues.trait.appcues.TooltipPointerPosition.Top
+import com.appcues.util.eq
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
@@ -35,6 +36,7 @@ internal fun drawTooltipPointerPath(
         // if containerDimens is null we don't to path the tooltip yet
         if (containerDimens == null) return@apply
 
+        // operation that unifies both the container Path and tooltip pointer Path
         op(
             path1 = getTooltipPointerPath(containerDimens, tooltipSettings, animationFloatSpec),
             path2 = getContainerPath(containerDimens, tooltipSettings, animationDpSpec),
@@ -68,20 +70,34 @@ private fun getTooltipPointerPath(
 
     val animatedPointerOffsetX = animateFloatAsState(pointerOffsetX, animationSpec)
     val animatedPointerOffsetY = animateFloatAsState(pointerOffsetY, animationSpec)
-    val length = when (tooltipSettings.tooltipPointerPosition) {
-        Top, Left -> -tooltipSettings.pointerLengthPx
-        Bottom, Right -> tooltipSettings.pointerLengthPx
-        else -> 0f
-    }
+
+    // the value of length is the pointerLengthPx considering the direction it should
+    val animatedVerticalLength = animateFloatAsState(
+        when (tooltipSettings.tooltipPointerPosition) {
+            Top -> -tooltipSettings.pointerLengthPx
+            Bottom -> tooltipSettings.pointerLengthPx
+            else -> 0f
+        },
+        animationSpec
+    )
+
+    val animatedHorizontalLength = animateFloatAsState(
+        when (tooltipSettings.tooltipPointerPosition) {
+            Left -> -tooltipSettings.pointerLengthPx
+            Right -> tooltipSettings.pointerLengthPx
+            else -> 0f
+        },
+        animationSpec
+    )
 
     // vertical pointer implementation, probably in the future make this a separate method and add
     // another one to generate a horizontal pointer for leading and trailing positions.
     return Path().apply {
         if (tooltipSettings.tooltipPointerPosition.isVertical) {
-            TooltipVerticalPointerPath(tooltipSettings, verticalTipOffset, length, animationSpec)
+            TooltipVerticalPointerPath(tooltipSettings, verticalTipOffset, animatedVerticalLength.value, animationSpec)
             translate(Offset(animatedPointerOffsetX.value, pointerOffsetY))
         } else {
-            TooltipHorizontalPointerPath(tooltipSettings, horizontalTipOffset, length, animationSpec)
+            TooltipHorizontalPointerPath(tooltipSettings, horizontalTipOffset, animatedHorizontalLength.value, animationSpec)
             translate(Offset(pointerOffsetX, animatedPointerOffsetY.value))
         }
     }
@@ -105,20 +121,19 @@ private fun Path.TooltipVerticalPointerPath(
     val cornerRadius = tooltipSettings.pointerCornerRadiusPx
     val animatedTipOffset = animateFloatAsState(tipOffset, animationSpec)
 
+    // based on point 1,2,3 we define imaginary points 0 and 4 that will help us round the base of the tooltip
     val pt1 = PointF(0f, 0f)
     val pt2 = PointF(tooltipSettings.pointerBaseCenterPx + animatedTipOffset.value, tipLength)
     val pt3 = PointF(tooltipSettings.pointerBasePx, 0f)
     val pt0 = PointF(pt1.x - tooltipSettings.pointerBaseCenterPx, 0f)
     val pt4 = PointF(pt3.x + tooltipSettings.pointerBaseCenterPx, 0f)
 
-    val points = if (tipLength < 0) {
-        arrayListOf(pt0, pt1, pt2, pt3, pt4)
-    } else {
-        arrayListOf(pt4, pt3, pt2, pt1, pt0)
-    }
+    // map points into a list and reverse the order in case vertical tooltip pointer is at bottom
+    val points = arrayListOf(pt0, pt1, pt2, pt3, pt4).apply { if (tooltipSettings.tooltipPointerPosition is Bottom) reverse() }
 
+    // from points, define corners to apply cornerRadius
     val corner1 = getTooltipRoundedCorner(points[2], points[1], points[0], cornerRadius)
-    val corner2 = getTooltipRoundedCorner(points[1], points[2], points[3], cornerRadius, true)
+    val corner2 = getTooltipRoundedCorner(points[1], points[2], points[3], cornerRadius, clockWise = true)
     val corner3 = getTooltipRoundedCorner(points[4], points[3], points[2], cornerRadius)
 
     drawTooltipPath(arrayListOf(corner1, corner2, corner3))
@@ -141,12 +156,10 @@ private fun Path.TooltipHorizontalPointerPath(
     val pt0 = PointF(0f, pt1.y + tooltipSettings.pointerBaseCenterPx)
     val pt4 = PointF(0f, pt3.y - tooltipSettings.pointerBaseCenterPx)
 
-    val points = if (tipLength < 0) {
-        arrayListOf(pt0, pt1, pt2, pt3, pt4)
-    } else {
-        arrayListOf(pt4, pt3, pt2, pt1, pt0)
-    }
+    // map points into a list and reverse the order in case vertical tooltip pointer is at bottom
+    val points = arrayListOf(pt0, pt1, pt2, pt3, pt4).apply { if (tooltipSettings.tooltipPointerPosition is Right) reverse() }
 
+    // from points, define corners to apply cornerRadius
     val corner1 = getTooltipRoundedCorner(points[2], points[1], points[0], cornerRadius)
     val corner2 = getTooltipRoundedCorner(points[1], points[2], points[3], cornerRadius, true)
     val corner3 = getTooltipRoundedCorner(points[4], points[3], points[2], cornerRadius)
@@ -156,6 +169,7 @@ private fun Path.TooltipHorizontalPointerPath(
 
 private fun Path.drawTooltipPath(points: List<CornerPoint>) {
     reset()
+
     points.forEach {
         val startX = it.centerPoint.x + it.radius * cos(it.startAngle)
         val startY = it.centerPoint.y + it.radius * sin(it.startAngle)
@@ -165,18 +179,26 @@ private fun Path.drawTooltipPath(points: List<CornerPoint>) {
         val firstSweepAngle = atan2(endY - it.centerPoint.y, endX - it.centerPoint.x) -
             atan2(startY - it.centerPoint.y, startX - it.centerPoint.x)
 
-        val reverseSweepAngle = atan2(startX - it.centerPoint.x, startY - it.centerPoint.y) -
+        val secondSweepAngle = atan2(startX - it.centerPoint.x, startY - it.centerPoint.y) -
             atan2(endX - it.centerPoint.x, endY - it.centerPoint.y)
 
-        val sweepAngle = if (firstSweepAngle in -Math.PI..Math.PI) firstSweepAngle else reverseSweepAngle
+        // rather than trying to figure out a more advanced way to calculate the sweep angle for
+        // our limited case scenarios when rounding the corners of the pointer,
+        // performing the following checks ensure the proper value for the sweepAngleDegrees
+        val sweepAngle = when {
+            firstSweepAngle in -Math.PI..Math.PI -> firstSweepAngle
+            firstSweepAngle.eq(secondSweepAngle) -> firstSweepAngle + Math.PI * 2
+            else -> secondSweepAngle
+        }
 
         arcTo(
             rect = Rect(it.centerPoint.toOffset(), it.radius),
             startAngleDegrees = Math.toDegrees(it.startAngle.toDouble()).toFloat(),
             sweepAngleDegrees = Math.toDegrees(sweepAngle.toDouble()).toFloat(),
-            false
+            forceMoveTo = false
         )
     }
+
     close()
 }
 
@@ -208,7 +230,7 @@ private fun getContainerPath(
         }
 
         val offset = when (tooltipSettings.tooltipPointerPosition) {
-            is Top -> Offset(0f, tooltipSettings.pointerLengthPx)
+            Top -> Offset(0f, tooltipSettings.pointerLengthPx)
             Left -> Offset(tooltipSettings.pointerLengthPx, 0f)
             else -> Offset(0f, 0f)
         }
