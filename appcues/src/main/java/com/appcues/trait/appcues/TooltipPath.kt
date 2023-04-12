@@ -90,8 +90,6 @@ private fun getTooltipPointerPath(
         animationSpec
     )
 
-    // vertical pointer implementation, probably in the future make this a separate method and add
-    // another one to generate a horizontal pointer for leading and trailing positions.
     return Path().apply {
         if (tooltipSettings.tooltipPointerPosition.isVertical) {
             TooltipVerticalPointerPath(tooltipSettings, verticalTipOffset, animatedVerticalLength.value, animationSpec)
@@ -156,7 +154,7 @@ private fun Path.TooltipHorizontalPointerPath(
     val pt0 = PointF(0f, pt1.y + tooltipSettings.pointerBaseCenterPx)
     val pt4 = PointF(0f, pt3.y - tooltipSettings.pointerBaseCenterPx)
 
-    // map points into a list and reverse the order in case vertical tooltip pointer is at bottom
+    // map points into a list and reverse the order in case vertical tooltip pointer is at Right
     val points = arrayListOf(pt0, pt1, pt2, pt3, pt4).apply { if (tooltipSettings.tooltipPointerPosition is Right) reverse() }
 
     // from points, define corners to apply cornerRadius
