@@ -26,10 +26,13 @@ import com.appcues.ui.composables.LocalAppcuesActionDelegate
 import com.appcues.ui.composables.LocalExperienceStepFormStateDelegate
 import com.appcues.ui.composables.LocalImageLoader
 import com.appcues.ui.composables.LocalLogcues
+import com.appcues.ui.composables.isBackdropVisible
 import com.appcues.ui.composables.isContentVisible
 import com.appcues.ui.primitive.Compose
 import com.appcues.ui.theme.AppcuesTheme
 
+// This helper supports testing a single experience primitive (can have nested children),
+// defined in the given json string.
 @Composable
 fun ComposeContent(json: String, imageLoader: ImageLoader) {
     val response = MoshiConfiguration.moshi.adapter(PrimitiveResponse::class.java).fromJson(json)
@@ -47,33 +50,36 @@ fun ComposeContent(json: String, imageLoader: ImageLoader) {
     }
 }
 
+// This helper supports testing any arbitrary combination of traits with optional given content.
+// It constructs a synthetic 1-step experience. The traits are applied at the experience level. The
+// optional content is injected into the single step, if present.
 @Composable
-fun ComposeContainer(
-    context: Context,
-    experienceJson: String,
-    traitJson: String,
-    groupIndex: Int,
-    stepIndex: Int,
-    imageLoader: ImageLoader)
+fun ComposeContainer(context: Context, stepContentJson: String?, traitJson: List<String>, imageLoader: ImageLoader)
 {
     // set up a Koin scope for testing - for experience/trait mapping, trait registry, etc
     val scope = AppcuesKoinContext.createAppcuesScope(context, AppcuesConfig("", ""))
 
-    // read the JSON test data
-    val experienceResponse = MoshiConfiguration.moshi.adapter(ExperienceResponse::class.java).fromJson(experienceJson)!!
-    val traitResponse = MoshiConfiguration.moshi.adapter(TraitResponse::class.java).fromJson(traitJson)!!
+    // the baseline experience is very simple, single step with empty content
+    // read this in and then inject traits and content
+    val experienceResponse = MoshiConfiguration.moshi.adapter(ExperienceResponse::class.java).fromJson(baseExperienceJSON)!!
+    val traitResponses = traitJson.map {
+        MoshiConfiguration.moshi.adapter(TraitResponse::class.java).fromJson(it)!!
+    }
 
-    // update the experience to add the given trait in the given step
+    // injecting content is optional, may only be testing a trait
+    val stepContent = stepContentJson?.let {
+        MoshiConfiguration.moshi.adapter(PrimitiveResponse::class.java).fromJson(it)!!
+    }
+
+    // update the experience to add the given traits at the experience level
      val updatedExperienceResponse = experienceResponse.copy(
-        steps = experienceResponse.steps.mapIndexed { stepContainerResponseIndex, stepContainerResponse ->
+         traits = traitResponses,
+         steps = experienceResponse.steps.map { stepContainerResponse ->
             stepContainerResponse.copy(
-                children = stepContainerResponse.children.mapIndexed { stepResponseIndex, stepResponse ->
+                children = stepContainerResponse.children.map { stepResponse ->
                     stepResponse.copy(
-                        traits = stepResponse.traits.toMutableList().also {
-                            if (stepContainerResponseIndex == groupIndex && stepResponseIndex == stepIndex) {
-                                it.add(traitResponse)
-                            }
-                        }
+                        // optionally inject the step content
+                        content = stepContent ?: stepResponse.content
                     )
                 }
             )
@@ -83,10 +89,11 @@ fun ComposeContainer(
     // map the experience
     val experienceMapper: ExperienceMapper = scope.get()
     val experience = experienceMapper.map(updatedExperienceResponse, ExperienceTrigger.Preview)
-    val container = experience.stepContainers[groupIndex]
+    val container = experience.stepContainers[0]
 
     // render the step container on the desired step
     isContentVisible.targetState = true // so animated visibility works
+    isBackdropVisible.targetState = true // so animated visibility works
     AppcuesTheme {
         CompositionLocalProvider(
             LocalImageLoader provides imageLoader,
@@ -98,11 +105,38 @@ fun ComposeContainer(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                ComposeContainer(container, stepIndex)
+                ComposeContainer(container, 0)
             }
         }
     }
 }
+
+private var baseExperienceJSON =
+    """
+    {
+        "id": "9f4baa80-8f6a-41b1-a7b9-979da5c175e2",
+        "name": "Trait Testing",
+        "type": "mobile",
+        "traits": [],
+        "steps": [
+            {
+                "id": "68c0d4b4-4909-4d4a-9ce4-7af8b04efab2",
+                "parentId": "6c2b7488-309c-432f-b62e-9f8539b46c9d",
+                "type": "modal",
+                "contentType": "application/json",
+                "content": {
+                    "type": "stack",
+                    "orientation": "vertical",
+                    "id": "2cf7dbf7-c6be-4130-b642-85861f9c6b6a",
+                    "style": {},
+                    "items": []
+                },
+                "traits": [],
+                "actions": {}
+            }
+        ]
+    }
+    """
 
 private class FakeAppcuesActionDelegate : AppcuesActionsDelegate {
 
