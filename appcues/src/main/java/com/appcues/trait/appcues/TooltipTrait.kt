@@ -353,20 +353,20 @@ internal class TooltipTrait(
     ): TooltipSettings {
         val density = LocalDensity.current
         return remember(targetRectangleInfo, containerDimens) {
-            val pointerPosition = targetRectangleInfo.getTooltipPointerPosition(
+            val position = targetRectangleInfo.getTooltipPointerPosition(
                 windowInfo = windowInfo,
                 containerDimens = containerDimens,
                 targetRect = targetRect,
                 tooltipMaxHeight = tooltipMaxHeight
             )
 
-            getTooltipSettings(
-                density = density,
-                position = pointerPosition,
+            TooltipSettings(
+                hidePointer = false,
+                tooltipPointerPosition = position,
                 distance = distance,
-                pointerBaseDp = pointerBaseDp,
-                pointerLengthDp = pointerLengthDp,
-                pointerCornerRadius = pointerCornerRadius,
+                pointerBasePx = with(density) { pointerBaseDp.toPx() },
+                pointerLengthPx = with(density) { pointerLengthDp.toPx() },
+                pointerCornerRadiusPx = with(density) { pointerCornerRadius.toPx() }
             )
         }
     }

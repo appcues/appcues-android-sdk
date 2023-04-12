@@ -4,7 +4,6 @@ import android.graphics.PointF
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.appcues.trait.appcues.TooltipPointerPosition.Bottom
@@ -134,8 +133,6 @@ internal data class TooltipSettings(
     val hidePointer: Boolean,
     val tooltipPointerPosition: TooltipPointerPosition,
     val distance: Dp,
-    val pointerBaseDp: Dp,
-    val pointerLengthDp: Dp,
     val pointerBasePx: Float,
     val pointerLengthPx: Float,
     val pointerCornerRadiusPx: Float,
@@ -153,26 +150,6 @@ internal data class TooltipContainerDimens(
     val heightPx: Float,
     val cornerRadius: Dp,
 )
-
-internal fun getTooltipSettings(
-    density: Density,
-    position: TooltipPointerPosition,
-    distance: Dp,
-    pointerBaseDp: Dp,
-    pointerLengthDp: Dp,
-    pointerCornerRadius: Dp = 0.dp,
-): TooltipSettings {
-    return TooltipSettings(
-        hidePointer = false,
-        tooltipPointerPosition = position,
-        distance = distance,
-        pointerBaseDp = pointerBaseDp,
-        pointerLengthDp = pointerLengthDp,
-        pointerBasePx = with(density) { pointerBaseDp.toPx() },
-        pointerLengthPx = with(density) { pointerLengthDp.toPx() },
-        pointerCornerRadiusPx = with(density) { pointerCornerRadius.toPx() }
-    )
-}
 
 internal fun calculatePointerXOffset(
     containerDimens: TooltipContainerDimens,
