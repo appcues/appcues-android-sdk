@@ -143,5 +143,11 @@ rm $tempFile
 # publish to Maven Central
 gradle appcues:publishReleasePublicationToOSSRHRepository
 
-# compile the docs for the new version and deploy to GitHub pages
-./fastlane/docs.sh
+# if the new version has a '-' in it, then it's a pre-release version (eg 1.0.0-rc01, 1.0.0-beta01, 1.0.0-alpha01)
+if [[ "$newVersion" == *-* ]]
+then
+	echo "Pre-release version. No docs deployed."
+else
+	# compile the docs for the new version and deploy to GitHub pages
+	./fastlane/docs.sh
+fi
