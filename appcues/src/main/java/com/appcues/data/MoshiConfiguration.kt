@@ -20,6 +20,7 @@ import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse
 import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.TextPrimitiveResponse
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonAdapter.Factory
+import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.JsonQualifier
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
@@ -68,7 +69,11 @@ internal object MoshiConfiguration {
         val adapter = moshi.adapter(T::class.java)
         val anyAdapter = moshi.adapter<Any>(Object::class.java)
         return adapter.run {
-            fromJson(anyAdapter.toJson(any))
+            try {
+                fromJson(anyAdapter.toJson(any))
+            } catch (exception: JsonDataException) {
+                null
+            }
         }
     }
 
