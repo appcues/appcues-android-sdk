@@ -19,7 +19,7 @@ internal class TargetElementTrait(
 ) : MetadataSettingTrait {
 
     companion object {
-        const val TYPE = "@appcues/target-element"
+        const val TYPE = "@appcues/target-element-beta"
     }
 
     private val selectorProperties = config.getConfig<Map<String, String>>("selector") ?: mapOf()
