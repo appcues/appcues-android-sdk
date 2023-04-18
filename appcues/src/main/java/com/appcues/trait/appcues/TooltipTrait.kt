@@ -8,10 +8,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeightIn
-import androidx.compose.foundation.layout.requiredWidthIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.GenericShape
@@ -19,6 +17,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -28,12 +27,11 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.coerceIn
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.min
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.getConfigOrDefault
@@ -106,36 +104,44 @@ internal class TooltipTrait(
     override fun WrapContent(
         content: @Composable (modifier: Modifier, containerPadding: PaddingValues, safeAreaInsets: PaddingValues) -> Unit
     ) {
-        val density = LocalDensity.current
         val metadata = LocalAppcuesStepMetadata.current
-
         val targetRectInfo = rememberTargetRectangleInfo(metadata)
         val windowInfo = rememberAppcuesWindowInfo()
-        val containerDimens = remember { mutableStateOf<TooltipContainerDimens?>(null) }
         val targetRect = targetRectInfo.getRect(windowInfo)
         val distance = targetRectInfo.getContentDistance()
-        // keep tooltipMaxHeight here as a rememberable so it force recomposition when value change
-        val tooltipMaxHeight = remember(targetRectInfo) { mutableStateOf(windowInfo.heightDp - (SCREEN_VERTICAL_PADDING * 2)) }
+
+        val containerDimens = remember { mutableStateOf<TooltipContainerDimens?>(null) }
+        // this is like containerDimens, but removing the size of the pointer from the width or height,
+        // depending on the pointer position - used in layout calculation of desired pointer position
+        val contentDimens = remember { mutableStateOf<TooltipContainerDimens?>(null) }
+        val contentSized = remember(contentDimens) { derivedStateOf { contentDimens.value != null } }
 
         val floatAnimation = rememberFloatStepAnimation(metadata)
         val dpAnimation = rememberDpStepAnimation(metadata)
 
-        val tooltipSettings = rememberTooltipSettings(
+        val tooltipPointerPosition = rememberTooltipPointerPosition(
             windowInfo = windowInfo,
             targetRectangleInfo = targetRectInfo,
-            containerDimens = containerDimens.value,
+            contentDimens = contentDimens.value,
             targetRect = targetRect,
             distance = distance,
-            tooltipMaxHeight = tooltipMaxHeight,
+            pointerLength = pointerLengthDp,
+            contentSized = contentSized.value,
+        )
+
+        val tooltipSettings = rememberTooltipSettings(
+            targetRectangleInfo = targetRectInfo,
+            containerDimens = containerDimens.value,
+            distance = distance,
+            position = tooltipPointerPosition,
         )
 
         val tooltipPath = drawTooltipPointerPath(tooltipSettings, containerDimens.value, floatAnimation, dpAnimation)
-        val maxWidth = windowInfo.widthDp - SCREEN_HORIZONTAL_PADDING * 2
 
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = SCREEN_HORIZONTAL_PADDING, vertical = SCREEN_VERTICAL_PADDING)
+                .padding(SCREEN_HORIZONTAL_PADDING, SCREEN_VERTICAL_PADDING)
         ) {
             AppcuesTraitAnimatedVisibility(
                 visibleState = rememberAppcuesContentVisibility(),
@@ -144,18 +150,12 @@ internal class TooltipTrait(
             ) {
                 // positions both the tip and modal of the tooltip on the screen
                 Column(
-                    modifier = Modifier.positionTooltip(
-                        targetRect = targetRect,
-                        containerDimens = containerDimens.value,
-                        pointerSettings = tooltipSettings,
-                        windowInfo = windowInfo,
-                        animationSpec = dpAnimation
-                    )
+                    modifier = Modifier.positionTooltip(targetRect, containerDimens.value, tooltipSettings, windowInfo, dpAnimation)
                 ) {
                     Box(
                         modifier = Modifier
-                            .tooltipSize(style, maxWidth, tooltipMaxHeight.value)
-                            .onTooltipSizeChanged(style, density, containerDimens)
+                            .tooltipSize(style, windowInfo, tooltipSettings)
+                            .onTooltipSizeChanged(style, containerDimens, contentDimens, tooltipPointerPosition, tooltipSettings)
                             .styleShadowPath(style, tooltipPath, isSystemInDarkTheme())
                             .clipToPath(tooltipPath)
                             .styleBackground(style, isSystemInDarkTheme())
@@ -174,21 +174,44 @@ internal class TooltipTrait(
 
     private fun Modifier.onTooltipSizeChanged(
         style: ComponentStyle?,
-        density: Density,
-        containerDimens: MutableState<TooltipContainerDimens?>
-    ) = then(
-        Modifier.onSizeChanged {
-            with(density) {
-                containerDimens.value = TooltipContainerDimens(
-                    widthDp = it.width.toDp(),
-                    heightDp = it.height.toDp(),
-                    widthPx = it.width.toFloat(),
-                    heightPx = it.height.toFloat(),
-                    cornerRadius = (style?.cornerRadius?.dp ?: 0.dp)
-                )
+        containerDimens: MutableState<TooltipContainerDimens?>,
+        contentDimens: MutableState<TooltipContainerDimens?>,
+        tooltipPointerPosition: TooltipPointerPosition,
+        tooltipSettings: TooltipSettings,
+    ) = composed {
+        val density = LocalDensity.current
+        then(
+            Modifier.onSizeChanged {
+                with(density) {
+                    containerDimens.value = TooltipContainerDimens(
+                        widthDp = it.width.toDp(),
+                        heightDp = it.height.toDp(),
+                        widthPx = it.width.toFloat(),
+                        heightPx = it.height.toFloat(),
+                        cornerRadius = (style?.cornerRadius?.dp ?: 0.dp)
+                    )
+
+                    // find any pointer width to exclude from width/height in containerDimens
+                    var pointerWidth = 0f
+                    var pointerHeight = 0f
+
+                    when (tooltipPointerPosition) {
+                        Top, Bottom -> pointerHeight = tooltipSettings.pointerLengthPx
+                        Left, Right -> pointerWidth = tooltipSettings.pointerLengthPx
+                        None -> Unit
+                    }
+
+                    contentDimens.value = TooltipContainerDimens(
+                        widthDp = it.width.toDp() - pointerWidth.toDp(),
+                        heightDp = it.height.toDp() - pointerHeight.toDp(),
+                        widthPx = it.width.toFloat() - pointerWidth,
+                        heightPx = it.height.toFloat() - pointerHeight,
+                        cornerRadius = (style?.cornerRadius?.dp ?: 0.dp)
+                    )
+                }
             }
-        }
-    )
+        )
+    }
 
     private fun Modifier.clipToPath(path: Path) = then(
         Modifier.clip(GenericShape { _, _ -> addPath(path) })
@@ -330,38 +353,61 @@ internal class TooltipTrait(
         )
     }
 
-    private fun Modifier.tooltipSize(style: ComponentStyle?, maxWidth: Dp, maxHeight: Dp): Modifier = then(
-        if (style?.width == null) Modifier.requiredWidthIn(
-            min = 48.dp,
-            max = min(400.dp, maxWidth)
-        ) else Modifier.width(width = style.width.dp)
-    ).then(
-        if (style?.height == null) Modifier.requiredHeightIn(
-            min = 48.dp,
-            max = max(48.dp, maxHeight)
-        ) else Modifier.height(height = style.height.dp)
-    )
+    private fun Modifier.tooltipSize(style: ComponentStyle?, windowInfo: AppcuesWindowInfo, tooltipSettings: TooltipSettings): Modifier =
+        composed {
+            // keep containerMaxSize here as a rememberable so it force recomposition when value change
+            val containerMaxSize = DpSize(
+                width = windowInfo.widthDp - (SCREEN_HORIZONTAL_PADDING * 2),
+                height = windowInfo.heightDp - (SCREEN_VERTICAL_PADDING * 2)
+            )
+
+            val width = if (style?.width != null) style.width.dp else 400.dp
+            val pointerLengthDp = with(LocalDensity.current) { tooltipSettings.pointerLengthPx.toDp() }
+
+            val modifier = when (tooltipSettings.tooltipPointerPosition) {
+                Bottom, Top -> Modifier.width(min(width, containerMaxSize.width))
+                Left, Right -> Modifier.width(min(width + pointerLengthDp, containerMaxSize.width))
+                None -> Modifier.width(min(width, containerMaxSize.width))
+            }.requiredHeightIn(48.dp, containerMaxSize.height)
+
+            return@composed modifier
+        }
+
+    @Composable
+    private fun rememberTooltipPointerPosition(
+        windowInfo: AppcuesWindowInfo,
+        targetRectangleInfo: TargetRectangleInfo?,
+        contentDimens: TooltipContainerDimens?,
+        targetRect: Rect?,
+        distance: Dp,
+        pointerLength: Dp,
+        contentSized: Boolean,
+    ): TooltipPointerPosition {
+        // pointer position is only calculated once for a given target rectangle, after the container
+        // is sized. The tooltip may end up getting a new container layout if it shifts the pointer
+        // to another edge (not preferred edge) based on this calculation, but we stick with that
+        // calculated position from that point forward and don't allow it to flip back
+        return remember(targetRectangleInfo, contentSized) {
+            targetRectangleInfo.getTooltipPointerPosition(
+                windowInfo = windowInfo,
+                contentDimens = contentDimens,
+                targetRect = targetRect,
+                distance = distance,
+                pointerLength = pointerLength,
+            )
+        }
+    }
 
     @Composable
     private fun rememberTooltipSettings(
-        windowInfo: AppcuesWindowInfo,
         targetRectangleInfo: TargetRectangleInfo?,
         containerDimens: TooltipContainerDimens?,
-        targetRect: Rect?,
         distance: Dp,
-        tooltipMaxHeight: MutableState<Dp>,
+        position: TooltipPointerPosition,
     ): TooltipSettings {
         val density = LocalDensity.current
         return remember(targetRectangleInfo, containerDimens) {
-            val position = targetRectangleInfo.getTooltipPointerPosition(
-                windowInfo = windowInfo,
-                containerDimens = containerDimens,
-                targetRect = targetRect,
-                tooltipMaxHeight = tooltipMaxHeight
-            )
-
             TooltipSettings(
-                hidePointer = false,
                 tooltipPointerPosition = position,
                 distance = distance,
                 pointerBasePx = with(density) { pointerBaseDp.toPx() },

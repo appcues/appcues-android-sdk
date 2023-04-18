@@ -1,7 +1,6 @@
 package com.appcues.trait.extensions
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
@@ -54,19 +53,24 @@ internal fun TargetRectangleInfo?.getContentDistance(): Dp {
 
 internal fun TargetRectangleInfo?.getTooltipPointerPosition(
     windowInfo: AppcuesWindowInfo,
-    containerDimens: TooltipContainerDimens?,
+    contentDimens: TooltipContainerDimens?,
     targetRect: Rect?,
-    tooltipMaxHeight: MutableState<Dp>,
+    distance: Dp,
+    pointerLength: Dp,
 ): TooltipPointerPosition {
-    if (this == null || targetRect == null || containerDimens == null) return None
+    if (this == null || targetRect == null || contentDimens == null) return None
 
     val availableSpaceTop = targetRect.top.dp - TooltipTrait.SCREEN_VERTICAL_PADDING
     val availableSpaceBottom = windowInfo.heightDp - TooltipTrait.SCREEN_VERTICAL_PADDING - targetRect.bottom.dp
 
-    val excessSpaceTop = availableSpaceTop - containerDimens.heightDp
-    val excessSpaceBottom = availableSpaceBottom - containerDimens.heightDp
-    val excessSpaceLeft = targetRect.left.dp - TooltipTrait.SCREEN_HORIZONTAL_PADDING - containerDimens.widthDp
-    val excessSpaceRight = windowInfo.widthDp - TooltipTrait.SCREEN_HORIZONTAL_PADDING - targetRect.right.dp - containerDimens.widthDp
+    val excessSpaceTop = availableSpaceTop - contentDimens.heightDp - distance - pointerLength
+    val excessSpaceBottom = availableSpaceBottom - contentDimens.heightDp - distance - pointerLength
+
+    val availableSpaceLeft = targetRect.left.dp - TooltipTrait.SCREEN_HORIZONTAL_PADDING
+    val availableSpaceRight = windowInfo.widthDp - TooltipTrait.SCREEN_HORIZONTAL_PADDING
+
+    val excessSpaceLeft = availableSpaceLeft - contentDimens.widthDp - distance - pointerLength
+    val excessSpaceRight = availableSpaceRight - targetRect.right.dp - contentDimens.widthDp - distance - pointerLength
 
     val canPositionVertically = excessSpaceTop > 0.dp || excessSpaceBottom > 0.dp
     val canPositionHorizontally = excessSpaceLeft > 0.dp || excessSpaceRight > 0.dp
@@ -77,8 +81,8 @@ internal fun TargetRectangleInfo?.getTooltipPointerPosition(
         canPositionHorizontally -> if (excessSpaceLeft > excessSpaceRight) Right else Left
         // Doesn't fit anywhere so pick the top/bottom side that has the most space.
         // Allowing left/right here would mean the width gets compressed and that opens a can of worms.
-        excessSpaceTop > excessSpaceBottom -> Bottom.also { tooltipMaxHeight.value = availableSpaceTop }
-        else -> Top.also { tooltipMaxHeight.value = availableSpaceBottom }
+        excessSpaceTop > excessSpaceBottom -> Bottom
+        else -> Top
     }
 }
 

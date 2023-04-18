@@ -130,7 +130,6 @@ internal sealed class TooltipPointerPosition {
 }
 
 internal data class TooltipSettings(
-    val hidePointer: Boolean,
     val tooltipPointerPosition: TooltipPointerPosition,
     val distance: Dp,
     val pointerBasePx: Float,
