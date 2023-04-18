@@ -79,6 +79,8 @@ internal class TooltipTrait(
 
         private const val POINTER_BASE_DEFAULT = 16.0
         private const val POINTER_LENGTH_DEFAULT = 8.0
+
+        private val MAX_TOOLTIP_WIDTH = 400.0.dp
     }
 
     private val style = config.getConfigStyle("style")
@@ -113,7 +115,7 @@ internal class TooltipTrait(
         val containerDimens = remember { mutableStateOf<TooltipContainerDimens?>(null) }
         // this is like containerDimens, but removing the size of the pointer from the width or height,
         // depending on the pointer position - used in layout calculation of desired pointer position
-        val contentDimens = remember { mutableStateOf<TooltipContainerDimens?>(null) }
+        val contentDimens = remember(targetRectInfo) { mutableStateOf<TooltipContainerDimens?>(null) }
         val contentSized = remember(contentDimens) { derivedStateOf { contentDimens.value != null } }
 
         val floatAnimation = rememberFloatStepAnimation(metadata)
@@ -154,7 +156,7 @@ internal class TooltipTrait(
                 ) {
                     Box(
                         modifier = Modifier
-                            .tooltipSize(style, windowInfo, tooltipSettings)
+                            .tooltipSize(style, windowInfo, tooltipSettings, targetRect == null)
                             .onTooltipSizeChanged(style, containerDimens, contentDimens, tooltipPointerPosition, tooltipSettings)
                             .styleShadowPath(style, tooltipPath, isSystemInDarkTheme())
                             .clipToPath(tooltipPath)
@@ -272,8 +274,11 @@ internal class TooltipTrait(
                     padding.coerceIn(minPaddingStart, maxPaddingStart)
                 }
                 None -> {
-                    val paddingStartCentered = (windowInfo.widthDp - containerDimens.widthDp - (SCREEN_HORIZONTAL_PADDING * 2)) / 2
-                    paddingStartCentered.coerceAtLeast(minPaddingStart)
+                    // in None case, the width is a fixed full width, 400 max
+                    val containerMaxSize = windowInfo.widthDp - (SCREEN_HORIZONTAL_PADDING * 2)
+                    val containerWidth = min(MAX_TOOLTIP_WIDTH, containerMaxSize)
+                    val paddingStart = windowInfo.widthDp - containerWidth - (SCREEN_HORIZONTAL_PADDING * 2)
+                    paddingStart.coerceAtLeast(minPaddingStart)
                 }
                 else -> {
                     val targetReference = (targetRect?.center?.x?.dp ?: 0.dp) - SCREEN_HORIZONTAL_PADDING - (containerDimens.widthDp / 2)
@@ -353,7 +358,12 @@ internal class TooltipTrait(
         )
     }
 
-    private fun Modifier.tooltipSize(style: ComponentStyle?, windowInfo: AppcuesWindowInfo, tooltipSettings: TooltipSettings): Modifier =
+    private fun Modifier.tooltipSize(
+        style: ComponentStyle?,
+        windowInfo: AppcuesWindowInfo,
+        tooltipSettings: TooltipSettings,
+        useBottomToastStyle: Boolean,
+    ): Modifier =
         composed {
             // keep containerMaxSize here as a rememberable so it force recomposition when value change
             val containerMaxSize = DpSize(
@@ -361,7 +371,9 @@ internal class TooltipTrait(
                 height = windowInfo.heightDp - (SCREEN_VERTICAL_PADDING * 2)
             )
 
-            val width = if (style?.width != null) style.width.dp else 400.dp
+            // Note: when pointer position is None (un-targeted), we use "bottom toast style". We fall back
+            // to the max default width, capped at 400 for this bottom toast style presentation.
+            val width = if (style?.width != null && !useBottomToastStyle) style.width.dp else MAX_TOOLTIP_WIDTH
             val pointerLengthDp = with(LocalDensity.current) { tooltipSettings.pointerLengthPx.toDp() }
 
             val modifier = when (tooltipSettings.tooltipPointerPosition) {
@@ -407,12 +419,17 @@ internal class TooltipTrait(
     ): TooltipSettings {
         val density = LocalDensity.current
         return remember(targetRectangleInfo, containerDimens) {
+            // remove any pointer related sizing params if this is an un-targeted tool tip, position == None
+            val pointerBasePx = if (position == None) 0f else with(density) { pointerBaseDp.toPx() }
+            val pointerLengthPx = if (position == None) 0f else with(density) { pointerLengthDp.toPx() }
+            val pointerCornerRadiusPx = if (position == None) 0f else with(density) { pointerCornerRadius.toPx() }
+
             TooltipSettings(
                 tooltipPointerPosition = position,
                 distance = distance,
-                pointerBasePx = with(density) { pointerBaseDp.toPx() },
-                pointerLengthPx = with(density) { pointerLengthDp.toPx() },
-                pointerCornerRadiusPx = with(density) { pointerCornerRadius.toPx() }
+                pointerBasePx = pointerBasePx,
+                pointerLengthPx = pointerLengthPx,
+                pointerCornerRadiusPx = pointerCornerRadiusPx
             )
         }
     }
