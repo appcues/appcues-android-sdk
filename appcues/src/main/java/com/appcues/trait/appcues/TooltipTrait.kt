@@ -241,7 +241,7 @@ internal class TooltipTrait(
         windowInfo: AppcuesWindowInfo,
         animationSpec: FiniteAnimationSpec<Dp>,
     ): Modifier = composed {
-        // skip this until we have containerDimens defined
+        // skip this until we have contentDimens defined
         if (contentDimens == null) return@composed Modifier
 
         Modifier.padding(
@@ -259,8 +259,10 @@ internal class TooltipTrait(
         animationSpec: FiniteAnimationSpec<Dp>
     ): State<Dp> {
         val minPaddingStart = 0.dp
-        val maxPaddingStart = (windowInfo.widthDp - contentDimens.widthDp - (SCREEN_HORIZONTAL_PADDING * 2)).coerceAtLeast(0.dp)
         val pointerLengthDp = with(LocalDensity.current) { pointerSettings.pointerLengthPx.toDp() }
+        val pointerWidthDp = if (pointerSettings.tooltipPointerPosition.isVertical) 0.dp else pointerLengthDp
+        val maxPaddingStart =
+            (windowInfo.widthDp - contentDimens.widthDp - pointerWidthDp - (SCREEN_HORIZONTAL_PADDING * 2)).coerceAtLeast(0.dp)
 
         return animateDpAsState(
             targetValue = when (pointerSettings.tooltipPointerPosition) {
@@ -268,14 +270,14 @@ internal class TooltipTrait(
                     val targetReference = (targetRect?.right?.dp ?: 0.dp) - SCREEN_HORIZONTAL_PADDING
                     val padding = targetReference + pointerSettings.distance
                     // note: on horizontal, the max needs to account for the pointerLength as well
-                    padding.coerceIn(minPaddingStart, maxPaddingStart - pointerLengthDp)
+                    padding.coerceIn(minPaddingStart, maxPaddingStart)
                 }
                 Right -> {
                     val targetReference = (targetRect?.left?.dp ?: 0.dp) - SCREEN_HORIZONTAL_PADDING
                     // when pointing to the right - offset by the container width AND the pointer length to find the start
                     val padding = targetReference - pointerSettings.distance - contentDimens.widthDp - pointerLengthDp
                     // note: on horizontal, the max needs to account for the pointerLength as well
-                    padding.coerceIn(minPaddingStart, maxPaddingStart - pointerLengthDp)
+                    padding.coerceIn(minPaddingStart, maxPaddingStart)
                 }
                 None -> {
                     // in None case, the width is a fixed full width, 400 max
