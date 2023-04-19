@@ -419,17 +419,31 @@ internal class TooltipTrait(
     ): TooltipSettings {
         val density = LocalDensity.current
         return remember(targetRectangleInfo, containerDimens) {
-            // remove any pointer related sizing params if this is an un-targeted tool tip, position == None
-            val pointerBasePx = if (position == None) 0f else with(density) { pointerBaseDp.toPx() }
+            // gets the available space for the pointer based on position orientation
+            val availableContainerSpace = if (position.isVertical) {
+                containerDimens?.availableHorizontalSpace
+            } else {
+                containerDimens?.availableVerticalSpace
+            } ?: 0.dp
+
+            // 1. Remove any pointer related sizing params if this is an un-targeted tool tip, position == None
+            // 2. limit the base to the available container space to avoid unwanted path shapes
+            val pointerBasePx = if (position == None) 0f else with(density) { min(pointerBaseDp, availableContainerSpace).toPx() }
             val pointerLengthPx = if (position == None) 0f else with(density) { pointerLengthDp.toPx() }
             val pointerCornerRadiusPx = if (position == None) 0f else with(density) { pointerCornerRadius.toPx() }
+
+            // calculate what is the width if we round the base corners (which increases the general base of the pointer)
+            val roundedPointerWidth = calculateTooltipWidth(pointerBasePx, pointerLengthPx, pointerCornerRadiusPx)
+            // only allow for rounding base corners if the width is still less than the available space
+            val isRoundingBase = with(density) { roundedPointerWidth < availableContainerSpace.toPx() }
 
             TooltipSettings(
                 tooltipPointerPosition = position,
                 distance = distance,
                 pointerBasePx = pointerBasePx,
                 pointerLengthPx = pointerLengthPx,
-                pointerCornerRadiusPx = pointerCornerRadiusPx
+                pointerCornerRadiusPx = pointerCornerRadiusPx,
+                isRoundingBase = isRoundingBase
             )
         }
     }

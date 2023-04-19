@@ -130,9 +130,9 @@ private fun Path.TooltipVerticalPointerPath(
     val points = arrayListOf(pt0, pt1, pt2, pt3, pt4).apply { if (tooltipSettings.tooltipPointerPosition is Bottom) reverse() }
 
     // from points, define corners to apply cornerRadius
-    val corner1 = getTooltipRoundedCorner(points[2], points[1], points[0], cornerRadius)
+    val corner1 = getTooltipRoundedCorner(points[2], points[1], points[0], cornerRadius, shouldRound = tooltipSettings.isRoundingBase)
     val corner2 = getTooltipRoundedCorner(points[1], points[2], points[3], cornerRadius, clockWise = true)
-    val corner3 = getTooltipRoundedCorner(points[4], points[3], points[2], cornerRadius)
+    val corner3 = getTooltipRoundedCorner(points[4], points[3], points[2], cornerRadius, shouldRound = tooltipSettings.isRoundingBase)
 
     drawTooltipPath(arrayListOf(corner1, corner2, corner3))
 }
@@ -158,9 +158,9 @@ private fun Path.TooltipHorizontalPointerPath(
     val points = arrayListOf(pt0, pt1, pt2, pt3, pt4).apply { if (tooltipSettings.tooltipPointerPosition is Right) reverse() }
 
     // from points, define corners to apply cornerRadius
-    val corner1 = getTooltipRoundedCorner(points[2], points[1], points[0], cornerRadius)
-    val corner2 = getTooltipRoundedCorner(points[1], points[2], points[3], cornerRadius, true)
-    val corner3 = getTooltipRoundedCorner(points[4], points[3], points[2], cornerRadius)
+    val corner1 = getTooltipRoundedCorner(points[2], points[1], points[0], cornerRadius, shouldRound = tooltipSettings.isRoundingBase)
+    val corner2 = getTooltipRoundedCorner(points[1], points[2], points[3], cornerRadius, clockWise = true)
+    val corner3 = getTooltipRoundedCorner(points[4], points[3], points[2], cornerRadius, shouldRound = tooltipSettings.isRoundingBase)
 
     drawTooltipPath(arrayListOf(corner1, corner2, corner3))
 }
