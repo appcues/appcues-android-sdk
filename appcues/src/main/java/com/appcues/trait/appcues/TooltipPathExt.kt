@@ -135,6 +135,7 @@ internal data class TooltipSettings(
     val pointerBasePx: Float,
     val pointerLengthPx: Float,
     val pointerCornerRadiusPx: Float,
+    val isRoundingBase: Boolean,
 ) {
 
     val pointerBaseCenterPx = pointerBasePx / 2
@@ -148,7 +149,11 @@ internal data class TooltipContainerDimens(
     val widthPx: Float,
     val heightPx: Float,
     val cornerRadius: Dp,
-)
+) {
+
+    val availableHorizontalSpace = (widthDp - (cornerRadius * 2)).coerceAtLeast(0.dp)
+    val availableVerticalSpace = (heightDp - (cornerRadius * 2)).coerceAtLeast(0.dp)
+}
 
 internal fun calculatePointerXOffset(
     containerDimens: TooltipContainerDimens,
@@ -214,8 +219,8 @@ internal fun calculatePointerYOffset(
     // boundaries for the tooltip
     val minPointerOffset = 0f
     val minPointerOffsetCornerRadius = minPointerOffset + containerCornerRadiusPx
-    val maxPointerOffset = max((containerDimens.heightPx - tooltipSettings.pointerBasePx), 0f)
-    val maxPointerOffsetCornerRadius = maxPointerOffset - containerCornerRadiusPx
+    val maxPointerOffset = max(containerDimens.heightPx - tooltipSettings.pointerBasePx, 0f)
+    val maxPointerOffsetCornerRadius = max(maxPointerOffset - containerCornerRadiusPx, minPointerOffsetCornerRadius)
 
     // figure out the offset of the pointer and offset for the tooltip pointer when hits the edges
     var pointerTipOffset = 0f
@@ -267,7 +272,7 @@ internal fun calculatePointerYOffset(
  * 5. The center of C1 can be calculated by projecting from C2 distance 2 * radius by the angle
  * 6. The y value of the center of C1 must be exactly -radius from the base (so pointerSize.height - radius)
  */
-fun calculateTooltipMaxRadius(base: Float, height: Float): Float {
+internal fun calculateTooltipMaxRadius(base: Float, height: Float): Float {
     // pt1 and pt2 represents a rectangular triangle based on the original shape
     val pt1 = PointF(0f, height)
     val pt2 = PointF(base / 2f, 0f)
@@ -302,11 +307,9 @@ fun calculateTooltipMaxRadius(base: Float, height: Float): Float {
 /**
  * determine the real width of the pointer tooltip
  */
-@Suppress("unused")
-@SuppressWarnings("unused")
 // the value calculated here should be factored when figuring out the amount of cornerRadius to be applied,
 // if any
-fun calculateTooltipWidth(base: Float, length: Float, radius: Float, roundedBase: Int = 2): Float {
+internal fun calculateTooltipWidth(base: Float, length: Float, radius: Float): Float {
     // (1) figure out the angle
     val angle = atan2(base, length / 2) / 2
     // (2) finds out the value of the opposite side using:
@@ -317,10 +320,10 @@ fun calculateTooltipWidth(base: Float, length: Float, radius: Float, roundedBase
     //
     // (3) multiply by two to account for the two sides of the pointer
     //     and add the existing width to the end result
-    return (tan(angle) * radius * roundedBase) + base
+    return (tan(angle) * radius * 2) + base
 }
 
-data class CornerPoint(
+internal data class CornerPoint(
     val centerPoint: PointF,
     val startAngle: Float,
     val endAngle: Float,
@@ -328,7 +331,7 @@ data class CornerPoint(
     val isClockWise: Boolean,
 )
 
-fun getTooltipRoundedCorner(
+internal fun getTooltipRoundedCorner(
     from: PointF,
     via: PointF,
     to: PointF,
