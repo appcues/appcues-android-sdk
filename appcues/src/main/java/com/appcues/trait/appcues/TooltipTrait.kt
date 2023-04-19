@@ -152,7 +152,7 @@ internal class TooltipTrait(
             ) {
                 // positions both the tip and modal of the tooltip on the screen
                 Column(
-                    modifier = Modifier.positionTooltip(targetRect, containerDimens.value, tooltipSettings, windowInfo, dpAnimation)
+                    modifier = Modifier.positionTooltip(targetRect, contentDimens.value, tooltipSettings, windowInfo, dpAnimation)
                 ) {
                     Box(
                         modifier = Modifier
@@ -236,42 +236,46 @@ internal class TooltipTrait(
 
     private fun Modifier.positionTooltip(
         targetRect: Rect?,
-        containerDimens: TooltipContainerDimens?,
+        contentDimens: TooltipContainerDimens?,
         pointerSettings: TooltipSettings,
         windowInfo: AppcuesWindowInfo,
         animationSpec: FiniteAnimationSpec<Dp>,
     ): Modifier = composed {
         // skip this until we have containerDimens defined
-        if (containerDimens == null) return@composed Modifier
+        if (contentDimens == null) return@composed Modifier
 
         Modifier.padding(
-            start = calculatePaddingStart(windowInfo, containerDimens, pointerSettings, targetRect, animationSpec).value,
-            top = calculatePaddingTop(windowInfo, containerDimens, pointerSettings, targetRect, animationSpec).value
+            start = calculatePaddingStart(windowInfo, contentDimens, pointerSettings, targetRect, animationSpec).value,
+            top = calculatePaddingTop(windowInfo, contentDimens, pointerSettings, targetRect, animationSpec).value
         )
     }
 
     @Composable
     private fun calculatePaddingStart(
         windowInfo: AppcuesWindowInfo,
-        containerDimens: TooltipContainerDimens,
+        contentDimens: TooltipContainerDimens,
         pointerSettings: TooltipSettings,
         targetRect: Rect?,
         animationSpec: FiniteAnimationSpec<Dp>
     ): State<Dp> {
         val minPaddingStart = 0.dp
-        val maxPaddingStart = (windowInfo.widthDp - containerDimens.widthDp - (SCREEN_HORIZONTAL_PADDING * 2)).coerceAtLeast(0.dp)
+        val maxPaddingStart = (windowInfo.widthDp - contentDimens.widthDp - (SCREEN_HORIZONTAL_PADDING * 2)).coerceAtLeast(0.dp)
+        val pointerLengthDp = with(LocalDensity.current) { pointerSettings.pointerLengthPx.toDp() }
 
         return animateDpAsState(
             targetValue = when (pointerSettings.tooltipPointerPosition) {
                 Left -> {
                     val targetReference = (targetRect?.right?.dp ?: 0.dp) - SCREEN_HORIZONTAL_PADDING
                     val padding = targetReference + pointerSettings.distance
-                    padding.coerceIn(minPaddingStart, maxPaddingStart)
+                    // note: on horizontal, the max needs to account for the pointerLength as well
+                    padding.coerceIn(minPaddingStart, maxPaddingStart - pointerLengthDp)
                 }
                 Right -> {
                     val targetReference = (targetRect?.left?.dp ?: 0.dp) - SCREEN_HORIZONTAL_PADDING
-                    val padding = targetReference - pointerSettings.distance - containerDimens.widthDp
-                    padding.coerceIn(minPaddingStart, maxPaddingStart)
+                    // when pointing to the right - offset by the container width AND the pointer length to find the start
+                    val padding = targetReference - pointerSettings.distance - contentDimens.widthDp - pointerLengthDp
+                    // note: on horizontal, the max needs to account for the pointerLength as well
+                    padding.coerceIn(minPaddingStart, maxPaddingStart - pointerLengthDp)
                 }
                 None -> {
                     // in None case, the width is a fixed full width, 400 max
@@ -281,7 +285,7 @@ internal class TooltipTrait(
                     paddingStart.coerceAtLeast(minPaddingStart)
                 }
                 else -> {
-                    val targetReference = (targetRect?.center?.x?.dp ?: 0.dp) - SCREEN_HORIZONTAL_PADDING - (containerDimens.widthDp / 2)
+                    val targetReference = (targetRect?.center?.x?.dp ?: 0.dp) - SCREEN_HORIZONTAL_PADDING - (contentDimens.widthDp / 2)
 
                     pointerSettings.pointerOffsetX.value = when {
                         targetReference < 0.dp -> targetReference
@@ -299,13 +303,13 @@ internal class TooltipTrait(
     @Composable
     private fun calculatePaddingTop(
         windowInfo: AppcuesWindowInfo,
-        containerDimens: TooltipContainerDimens,
+        contentDimens: TooltipContainerDimens,
         pointerSettings: TooltipSettings,
         targetRect: Rect?,
         animationSpec: FiniteAnimationSpec<Dp>
     ): State<Dp> {
         val minPaddingTop = 0.dp
-        val maxPaddingTop = (windowInfo.heightDp - containerDimens.heightDp - (SCREEN_VERTICAL_PADDING * 2)).coerceAtLeast(0.dp)
+        val maxPaddingTop = (windowInfo.heightDp - contentDimens.heightDp - (SCREEN_VERTICAL_PADDING * 2)).coerceAtLeast(0.dp)
         return animateDpAsState(
             targetValue = when (pointerSettings.tooltipPointerPosition) {
                 Top -> {
@@ -315,12 +319,12 @@ internal class TooltipTrait(
                 }
                 Bottom -> {
                     val targetReference = (targetRect?.top?.dp ?: 0.dp) - SCREEN_VERTICAL_PADDING
-                    val padding = targetReference - pointerSettings.distance - containerDimens.heightDp
+                    val padding = targetReference - pointerSettings.distance - contentDimens.heightDp
                     padding.coerceIn(minPaddingTop, maxPaddingTop)
                 }
                 None -> maxPaddingTop
                 else -> {
-                    val targetReference = (targetRect?.center?.y?.dp ?: 0.dp) - SCREEN_VERTICAL_PADDING - (containerDimens.heightDp / 2)
+                    val targetReference = (targetRect?.center?.y?.dp ?: 0.dp) - SCREEN_VERTICAL_PADDING - (contentDimens.heightDp / 2)
 
                     pointerSettings.pointerOffsetY.value = when {
                         targetReference < 0.dp -> targetReference
