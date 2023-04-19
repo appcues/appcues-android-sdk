@@ -375,12 +375,14 @@ internal class TooltipTrait(
             // to the max default width, capped at 400 for this bottom toast style presentation.
             val width = if (style?.width != null && !useBottomToastStyle) style.width.dp else MAX_TOOLTIP_WIDTH
             val pointerLengthDp = with(LocalDensity.current) { tooltipSettings.pointerLengthPx.toDp() }
+            // add the pointerLength in case the tooltip has the pointer vertically positioned
+            val requiredHeight = if (tooltipSettings.tooltipPointerPosition.isVertical) pointerLengthDp else 0.dp
 
             val modifier = when (tooltipSettings.tooltipPointerPosition) {
                 Bottom, Top -> Modifier.width(min(width, containerMaxSize.width))
                 Left, Right -> Modifier.width(min(width + pointerLengthDp, containerMaxSize.width))
                 None -> Modifier.width(min(width, containerMaxSize.width))
-            }.requiredHeightIn(48.dp, containerMaxSize.height)
+            }.requiredHeightIn(48.dp + requiredHeight, containerMaxSize.height)
 
             return@composed modifier
         }
