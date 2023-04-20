@@ -13,7 +13,7 @@ import com.appcues.trait.appcues.ContentPreferredPosition.RIGHT
 import com.appcues.trait.appcues.ContentPreferredPosition.TOP
 import com.appcues.trait.appcues.TARGET_RECTANGLE_METADATA
 import com.appcues.trait.appcues.TargetRectangleInfo
-import com.appcues.trait.appcues.TooltipContainerDimens
+import com.appcues.trait.appcues.TooltipContentDimens
 import com.appcues.trait.appcues.TooltipPointerPosition
 import com.appcues.trait.appcues.TooltipPointerPosition.Bottom
 import com.appcues.trait.appcues.TooltipPointerPosition.Left
@@ -53,7 +53,7 @@ internal fun TargetRectangleInfo?.getContentDistance(): Dp {
 
 internal fun TargetRectangleInfo?.getTooltipPointerPosition(
     windowInfo: AppcuesWindowInfo,
-    contentDimens: TooltipContainerDimens?,
+    contentDimens: TooltipContentDimens?,
     targetRect: Rect?,
     distance: Dp,
     pointerLength: Dp,

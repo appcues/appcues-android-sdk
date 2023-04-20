@@ -143,6 +143,13 @@ internal data class TooltipSettings(
     val pointerOffsetY = mutableStateOf(0.dp)
 }
 
+// represents the size of the content only, not including the pointer
+internal data class TooltipContentDimens(
+    val widthDp: Dp,
+    val heightDp: Dp,
+)
+
+// represents the full size of the composition, including the pointer
 internal data class TooltipContainerDimens(
     val widthDp: Dp,
     val heightDp: Dp,

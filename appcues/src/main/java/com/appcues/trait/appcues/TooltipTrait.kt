@@ -112,10 +112,22 @@ internal class TooltipTrait(
         val targetRect = targetRectInfo.getRect(windowInfo)
         val distance = targetRectInfo.getContentDistance()
 
+        // This is the size of the full container, including the pointer length on whatever edge it is applied
         val containerDimens = remember { mutableStateOf<TooltipContainerDimens?>(null) }
-        // this is like containerDimens, but removing the size of the pointer from the width or height,
-        // depending on the pointer position - used in layout calculation of desired pointer position
-        val contentDimens = remember(targetRectInfo) { mutableStateOf<TooltipContainerDimens?>(null) }
+
+        // This is like containerDimens, but removing the size of the pointer from the width or height,
+        // depending on the pointer position - used in layout calculation of desired pointer position.
+        //
+        // Would have liked this to be a derivedStateOf using containerDimens, but there is a chicken/egg
+        // problem, as contentDimens needs the tooltipPointerPosition to calculate, but to get that pointer
+        // position in the first place, it needs contentDimens. So, it is set in onTooltipSizeChanged like
+        // containerDimens
+        val contentDimens = remember(targetRectInfo) { mutableStateOf<TooltipContentDimens?>(null) }
+
+        // This computed boolean indicates that content has been sized once, meaning the tooltip pointer
+        // position can be calculated. It is then not recalculated again until the step changes. Once a pointer
+        // position is decided for the given step rendering, it remains in that position to avoid extra
+        // layout passes flipping the position.
         val contentSized = remember(contentDimens) { derivedStateOf { contentDimens.value != null } }
 
         val floatAnimation = rememberFloatStepAnimation(metadata)
@@ -177,7 +189,7 @@ internal class TooltipTrait(
     private fun Modifier.onTooltipSizeChanged(
         style: ComponentStyle?,
         containerDimens: MutableState<TooltipContainerDimens?>,
-        contentDimens: MutableState<TooltipContainerDimens?>,
+        contentDimens: MutableState<TooltipContentDimens?>,
         tooltipPointerPosition: TooltipPointerPosition,
         tooltipSettings: TooltipSettings,
     ) = composed {
@@ -194,21 +206,12 @@ internal class TooltipTrait(
                     )
 
                     // find any pointer width to exclude from width/height in containerDimens
-                    var pointerWidth = 0f
-                    var pointerHeight = 0f
+                    val pointerWidth = if (tooltipPointerPosition.isVertical) 0f else tooltipSettings.pointerLengthPx
+                    val pointerHeight = if (tooltipPointerPosition.isVertical) tooltipSettings.pointerLengthPx else 0f
 
-                    when (tooltipPointerPosition) {
-                        Top, Bottom -> pointerHeight = tooltipSettings.pointerLengthPx
-                        Left, Right -> pointerWidth = tooltipSettings.pointerLengthPx
-                        None -> Unit
-                    }
-
-                    contentDimens.value = TooltipContainerDimens(
+                    contentDimens.value = TooltipContentDimens(
                         widthDp = it.width.toDp() - pointerWidth.toDp(),
                         heightDp = it.height.toDp() - pointerHeight.toDp(),
-                        widthPx = it.width.toFloat() - pointerWidth,
-                        heightPx = it.height.toFloat() - pointerHeight,
-                        cornerRadius = (style?.cornerRadius?.dp ?: 0.dp)
                     )
                 }
             }
@@ -236,7 +239,7 @@ internal class TooltipTrait(
 
     private fun Modifier.positionTooltip(
         targetRect: Rect?,
-        contentDimens: TooltipContainerDimens?,
+        contentDimens: TooltipContentDimens?,
         pointerSettings: TooltipSettings,
         windowInfo: AppcuesWindowInfo,
         animationSpec: FiniteAnimationSpec<Dp>,
@@ -253,7 +256,7 @@ internal class TooltipTrait(
     @Composable
     private fun calculatePaddingStart(
         windowInfo: AppcuesWindowInfo,
-        contentDimens: TooltipContainerDimens,
+        contentDimens: TooltipContentDimens,
         pointerSettings: TooltipSettings,
         targetRect: Rect?,
         animationSpec: FiniteAnimationSpec<Dp>
@@ -305,7 +308,7 @@ internal class TooltipTrait(
     @Composable
     private fun calculatePaddingTop(
         windowInfo: AppcuesWindowInfo,
-        contentDimens: TooltipContainerDimens,
+        contentDimens: TooltipContentDimens,
         pointerSettings: TooltipSettings,
         targetRect: Rect?,
         animationSpec: FiniteAnimationSpec<Dp>
@@ -397,7 +400,7 @@ internal class TooltipTrait(
     private fun rememberTooltipPointerPosition(
         windowInfo: AppcuesWindowInfo,
         targetRectangleInfo: TargetRectangleInfo?,
-        contentDimens: TooltipContainerDimens?,
+        contentDimens: TooltipContentDimens?,
         targetRect: Rect?,
         distance: Dp,
         pointerLength: Dp,
