@@ -2,4 +2,4 @@ package com.appcues.util
 
 import java.util.UUID
 
-fun UUID.appcuesFormatted() = toString().lowercase()
+internal fun UUID.appcuesFormatted() = toString().lowercase()

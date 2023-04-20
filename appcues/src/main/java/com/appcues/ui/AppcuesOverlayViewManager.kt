@@ -20,7 +20,7 @@ import com.appcues.util.getNavigationBarHeight
 import com.appcues.util.getStatusBarHeight
 import org.koin.core.scope.Scope
 
-class AppcuesOverlayViewManager(private val scope: Scope) : DefaultLifecycleObserver, ActivityMonitorListener {
+internal class AppcuesOverlayViewManager(private val scope: Scope) : DefaultLifecycleObserver, ActivityMonitorListener {
 
     private val logcues: Logcues by lazy { scope.get() }
 

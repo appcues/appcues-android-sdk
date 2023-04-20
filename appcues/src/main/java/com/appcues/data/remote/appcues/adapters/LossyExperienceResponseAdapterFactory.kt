@@ -16,7 +16,7 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import java.lang.reflect.Type
 
-class LossyExperienceResponseAdapterFactory : JsonAdapter.Factory {
+internal class LossyExperienceResponseAdapterFactory : JsonAdapter.Factory {
 
     override fun create(type: Type, annotations: MutableSet<out Annotation>, moshi: Moshi): JsonAdapter<*>? {
         return if (

@@ -21,7 +21,7 @@ import com.appcues.ui.composables.AppcuesStepMetadata
 @Composable
 internal fun rememberFloatStepAnimation(metadata: AppcuesStepMetadata): TweenSpec<Float> {
     return remember(metadata) {
-        val info = metadata.actual[StepAnimationTrait.STEP_TRANSITION_ANIMATION_METADATA] as StepTransitionAnimationInfo?
+        val info = metadata.current[StepAnimationTrait.STEP_TRANSITION_ANIMATION_METADATA] as StepTransitionAnimationInfo?
         when (info?.easing) {
             LINEAR -> tween(durationMillis = info.duration, easing = LinearEasing)
             EASE_IN -> tween(durationMillis = info.duration, easing = EaseIn)
@@ -36,7 +36,7 @@ internal fun rememberFloatStepAnimation(metadata: AppcuesStepMetadata): TweenSpe
 @Composable
 internal fun rememberColorStepAnimation(metadata: AppcuesStepMetadata): TweenSpec<Color> {
     return remember(metadata) {
-        val info = metadata.actual[StepAnimationTrait.STEP_TRANSITION_ANIMATION_METADATA] as StepTransitionAnimationInfo?
+        val info = metadata.current[StepAnimationTrait.STEP_TRANSITION_ANIMATION_METADATA] as StepTransitionAnimationInfo?
         when (info?.easing) {
             LINEAR -> tween(durationMillis = info.duration, easing = LinearEasing)
             EASE_IN -> tween(durationMillis = info.duration, easing = EaseIn)
@@ -51,7 +51,7 @@ internal fun rememberColorStepAnimation(metadata: AppcuesStepMetadata): TweenSpe
 @Composable
 internal fun rememberDpStepAnimation(metadata: AppcuesStepMetadata): TweenSpec<Dp> {
     return remember(metadata) {
-        val info = metadata.actual[StepAnimationTrait.STEP_TRANSITION_ANIMATION_METADATA] as StepTransitionAnimationInfo?
+        val info = metadata.current[StepAnimationTrait.STEP_TRANSITION_ANIMATION_METADATA] as StepTransitionAnimationInfo?
         when (info?.easing) {
             LINEAR -> tween(durationMillis = info.duration, easing = LinearEasing)
             EASE_IN -> tween(durationMillis = info.duration, easing = EaseIn)
