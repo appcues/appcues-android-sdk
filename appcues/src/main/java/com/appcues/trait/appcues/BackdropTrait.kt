@@ -110,7 +110,7 @@ internal class BackdropTrait(
     private fun rememberActualBackgroundColor(metadata: AppcuesStepMetadata): Color {
         val isDark = isSystemInDarkTheme()
         return remember(metadata) {
-            (metadata.actual[METADATA_BACKGROUND_COLOR] as ComponentColor?).getColor(isDark) ?: Color.Transparent
+            (metadata.current[METADATA_BACKGROUND_COLOR] as ComponentColor?).getColor(isDark) ?: Color.Transparent
         }
     }
 }

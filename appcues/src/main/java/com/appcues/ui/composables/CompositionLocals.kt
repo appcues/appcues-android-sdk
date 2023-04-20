@@ -63,6 +63,7 @@ internal val LocalStackScope = compositionLocalOf<StackScope> { ColumnStackScope
 internal val LocalChromeClient = compositionLocalOf { AccompanistWebChromeClient() }
 
 internal val LocalAppcuesTraitExceptionHandler = compositionLocalOf { AppcuesTraitExceptionHandler {} }
+
 internal data class AppcuesTraitExceptionHandler(val onTraitException: (AppcuesTraitException) -> Unit)
 
 internal sealed class StackScope(private val childrenCount: Int) {
@@ -94,11 +95,23 @@ internal sealed class StackScope(private val childrenCount: Int) {
     class ColumnStackScope(val width: Double?, childrenCount: Int) : StackScope(childrenCount)
 }
 
+/**
+ * Use LocalAppcuesStepMetadata to access the shared information between steps
+ *
+ * Example usage:
+ * @sample com.appcues.trait.appcues.BackdropKeyholeTrait
+ */
 val LocalAppcuesStepMetadata = compositionLocalOf<AppcuesStepMetadata> { noLocalProvidedFor("LocalAppcuesStepMetadata") }
 
+/**
+ * AppcuesStepMetadata used to share trait information between traits, generated from produceMetadata.
+ *
+ * Previous and current refer to the previously generated metadata values and the current values.
+ * It may be desired to reference both values to support transitions between them.
+ */
 data class AppcuesStepMetadata(
     val previous: Map<String, Any?> = hashMapOf(),
-    val actual: Map<String, Any?> = hashMapOf()
+    val current: Map<String, Any?> = hashMapOf()
 )
 
 private fun noLocalProvidedFor(name: String): Nothing {

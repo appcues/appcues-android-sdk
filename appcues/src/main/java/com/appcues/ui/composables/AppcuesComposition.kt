@@ -170,7 +170,7 @@ private fun rememberMetadataSettingTraits(
     return remember(metadataSettingTraits.value) {
         try {
             val actual = hashMapOf<String, Any?>().apply { metadataSettingTraits.value.forEach { putAll(it.produceMetadata()) } }
-            mutableStateOf(AppcuesStepMetadata(previous = previousStepMetaData.value.actual, actual = actual)).also {
+            mutableStateOf(AppcuesStepMetadata(previous = previousStepMetaData.value.current, current = actual)).also {
                 previousStepMetaData.value = it.value
             }
         } catch (ex: AppcuesTraitException) {

@@ -26,7 +26,7 @@ import com.appcues.ui.utils.AppcuesWindowInfo
 
 @Composable
 internal fun rememberTargetRectangleInfo(metadata: AppcuesStepMetadata): TargetRectangleInfo? {
-    return metadata.actual[TARGET_RECTANGLE_METADATA] as TargetRectangleInfo?
+    return metadata.current[TARGET_RECTANGLE_METADATA] as TargetRectangleInfo?
 }
 
 internal fun TargetRectangleInfo?.getRect(windowInfo: AppcuesWindowInfo): Rect? {

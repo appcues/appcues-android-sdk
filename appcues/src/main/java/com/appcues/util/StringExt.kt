@@ -2,7 +2,7 @@ package com.appcues.util
 
 import java.util.Locale
 
-fun String.toSlug() = lowercase(Locale.getDefault())
+internal fun String.toSlug() = lowercase(Locale.getDefault())
     .replace("\n", " ")
     .replace("[^a-z\\d\\s]".toRegex(), " ")
     .split(" ")

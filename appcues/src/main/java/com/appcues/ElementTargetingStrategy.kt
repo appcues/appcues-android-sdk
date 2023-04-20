@@ -105,7 +105,7 @@ data class ViewElement(
     val children: List<ViewElement>?,
 )
 
-fun View.isAppcuesView(): Boolean {
+internal fun View.isAppcuesView(): Boolean {
     return this.id == R.id.appcues_debugger_view
 }
 
