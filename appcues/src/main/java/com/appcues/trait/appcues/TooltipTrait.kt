@@ -264,8 +264,8 @@ internal class TooltipTrait(
         val minPaddingStart = 0.dp
         val pointerLengthDp = with(LocalDensity.current) { pointerSettings.pointerLengthPx.toDp() }
         val pointerWidthDp = if (pointerSettings.tooltipPointerPosition.isVertical) 0.dp else pointerLengthDp
-        val maxPaddingStart =
-            (windowInfo.widthDp - contentDimens.widthDp - pointerWidthDp - (SCREEN_HORIZONTAL_PADDING * 2)).coerceAtLeast(0.dp)
+        val maxPaddingStart = (windowInfo.widthDp - contentDimens.widthDp - pointerWidthDp - (SCREEN_HORIZONTAL_PADDING * 2))
+            .coerceAtLeast(minPaddingStart)
 
         return animateDpAsState(
             targetValue = when (pointerSettings.tooltipPointerPosition) {
@@ -314,7 +314,11 @@ internal class TooltipTrait(
         animationSpec: FiniteAnimationSpec<Dp>
     ): State<Dp> {
         val minPaddingTop = 0.dp
-        val maxPaddingTop = (windowInfo.heightDp - contentDimens.heightDp - (SCREEN_VERTICAL_PADDING * 2)).coerceAtLeast(0.dp)
+        val pointerLengthDp = with(LocalDensity.current) { pointerSettings.pointerLengthPx.toDp() }
+        val pointerHeightDp = if (pointerSettings.tooltipPointerPosition.isVertical) pointerLengthDp else 0.dp
+        val maxPaddingTop = (windowInfo.heightDp - contentDimens.heightDp - pointerHeightDp - (SCREEN_VERTICAL_PADDING * 2))
+            .coerceAtLeast(minPaddingTop)
+
         return animateDpAsState(
             targetValue = when (pointerSettings.tooltipPointerPosition) {
                 Top -> {
@@ -324,7 +328,7 @@ internal class TooltipTrait(
                 }
                 Bottom -> {
                     val targetReference = (targetRect?.top?.dp ?: 0.dp) - SCREEN_VERTICAL_PADDING
-                    val padding = targetReference - pointerSettings.distance - contentDimens.heightDp
+                    val padding = targetReference - pointerSettings.distance - contentDimens.heightDp - pointerLengthDp
                     padding.coerceIn(minPaddingTop, maxPaddingTop)
                 }
                 None -> maxPaddingTop
