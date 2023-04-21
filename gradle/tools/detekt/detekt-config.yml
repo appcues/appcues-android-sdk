@@ -116,6 +116,7 @@ complexity:
   LongMethod:
     active: true
     threshold: 60
+    ignoreAnnotated: [ 'Composable' ]
     excludes: [ '**/*Koin.kt' ]
   LongParameterList:
     active: true
