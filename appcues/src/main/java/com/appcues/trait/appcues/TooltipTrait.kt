@@ -17,7 +17,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -122,13 +121,13 @@ internal class TooltipTrait(
         // problem, as contentDimens needs the tooltipPointerPosition to calculate, but to get that pointer
         // position in the first place, it needs contentDimens. So, it is set in onTooltipSizeChanged like
         // containerDimens
-        val contentDimens = remember(targetRectInfo) { mutableStateOf<TooltipContentDimens?>(null) }
+        val contentDimens = remember { mutableStateOf<TooltipContentDimens?>(null) }
 
         // This computed boolean indicates that content has been sized once, meaning the tooltip pointer
         // position can be calculated. It is then not recalculated again until the step changes. Once a pointer
         // position is decided for the given step rendering, it remains in that position to avoid extra
         // layout passes flipping the position.
-        val contentSized = remember(contentDimens) { derivedStateOf { contentDimens.value != null } }
+        val contentSized = remember(targetRectInfo) { mutableStateOf(false) }
 
         val floatAnimation = rememberFloatStepAnimation(metadata)
         val dpAnimation = rememberDpStepAnimation(metadata)
@@ -169,7 +168,11 @@ internal class TooltipTrait(
                     Box(
                         modifier = Modifier
                             .tooltipSize(style, windowInfo, tooltipSettings, targetRect == null)
-                            .onTooltipSizeChanged(style, containerDimens, contentDimens, tooltipPointerPosition, tooltipSettings)
+                            .onTooltipSizeChanged(style, containerDimens, contentDimens, tooltipPointerPosition, tooltipSettings) {
+                                // when tooltip is sized, set contentSized to true so the rest of the
+                                // composition can use sized information to place the tooltip.
+                                contentSized.value = true
+                            }
                             .styleShadowPath(style, tooltipPath, isSystemInDarkTheme())
                             .clipToPath(tooltipPath)
                             .styleBackground(style, isSystemInDarkTheme())
@@ -192,6 +195,7 @@ internal class TooltipTrait(
         contentDimens: MutableState<TooltipContentDimens?>,
         tooltipPointerPosition: TooltipPointerPosition,
         tooltipSettings: TooltipSettings,
+        onTooltipSized: () -> Unit = {},
     ) = composed {
         val density = LocalDensity.current
         then(
@@ -213,6 +217,8 @@ internal class TooltipTrait(
                         widthDp = it.width.toDp() - pointerWidth.toDp(),
                         heightDp = it.height.toDp() - pointerHeight.toDp(),
                     )
+
+                    onTooltipSized()
                 }
             }
         )
