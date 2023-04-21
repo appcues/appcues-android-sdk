@@ -189,18 +189,18 @@ internal fun calculatePointerXOffset(
         }
         // After this it means the position is either TOP or BOTTOM. - NONE is irrelevant here since the pointer is not drawn.
         // * pointer offset is between min and max, we coerceIn the value accounting for cornerRadius and set alignment to CENTER
-        pointerOffset > minPointerOffset && pointerOffset < maxPointerOffset -> {
+        pointerOffset >= minPointerOffset && pointerOffset <= maxPointerOffset -> {
             tooltipSettings.tooltipPointerPosition.horizontalAlignment(PointerHorizontalAlignment.CENTER)
             pointerOffset = pointerOffset.coerceIn(minPointerOffsetCornerRadius..maxPointerOffsetCornerRadius).toFloat()
         }
-        // * pointer is less or equal to the min, its anchored to the LEFT
-        pointerOffset <= minPointerOffset -> {
+        // * pointer is less than the min, its anchored to the LEFT
+        pointerOffset < minPointerOffset -> {
             pointerTipOffset = -tooltipSettings.pointerBaseCenterPx
             tooltipSettings.tooltipPointerPosition.horizontalAlignment(PointerHorizontalAlignment.LEFT)
             pointerOffset = minPointerOffset
         }
-        // * pointer is greater or equal the max, its anchored to the RIGHT
-        pointerOffset >= maxPointerOffset -> {
+        // * pointer is greater than the max, its anchored to the RIGHT
+        pointerOffset > maxPointerOffset -> {
             pointerTipOffset = tooltipSettings.pointerBaseCenterPx
             tooltipSettings.tooltipPointerPosition.horizontalAlignment(PointerHorizontalAlignment.RIGHT)
             pointerOffset = maxPointerOffset
@@ -244,18 +244,18 @@ internal fun calculatePointerYOffset(
         }
         // After this it means the position is either LEFT or RIGHT. - NONE is irrelevant here since the pointer is not drawn.
         // * pointer offset is between min and max, we coerceIn the value accounting for cornerRadius and set alignment to CENTER
-        pointerOffset > minPointerOffset && pointerOffset < maxPointerOffset -> {
+        pointerOffset >= minPointerOffset && pointerOffset <= maxPointerOffset -> {
             tooltipSettings.tooltipPointerPosition.verticalAlignment(PointerVerticalAlignment.CENTER)
             pointerOffset = pointerOffset.coerceIn(minPointerOffsetCornerRadius..maxPointerOffsetCornerRadius).toFloat()
         }
         // * pointer is less or equal to the min, its anchored to the TOP
-        pointerOffset <= minPointerOffset -> {
+        pointerOffset < minPointerOffset -> {
             pointerTipOffset = -tooltipSettings.pointerBaseCenterPx
             tooltipSettings.tooltipPointerPosition.verticalAlignment(PointerVerticalAlignment.TOP)
             pointerOffset = minPointerOffset
         }
         // * pointer is greater or equal the max, its anchored to the BOTTOM
-        pointerOffset >= maxPointerOffset -> {
+        pointerOffset > maxPointerOffset -> {
             pointerTipOffset = tooltipSettings.pointerBaseCenterPx
             tooltipSettings.tooltipPointerPosition.verticalAlignment(PointerVerticalAlignment.BOTTOM)
             pointerOffset = maxPointerOffset
