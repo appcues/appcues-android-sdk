@@ -128,13 +128,34 @@ private fun Path.TooltipVerticalPointerPath(
 
     // map points into a list and reverse the order in case vertical tooltip pointer is at bottom
     val points = arrayListOf(pt0, pt1, pt2, pt3, pt4).apply { if (tooltipSettings.tooltipPointerPosition is Bottom) reverse() }
-
+    // figures out if corner 1 and corner 3 should get rounded or not
+    val (shouldRound1, shouldRound3) = shouldRoundVerticalCorners(tooltipSettings)
     // from points, define corners to apply cornerRadius
-    val corner1 = getTooltipRoundedCorner(points[2], points[1], points[0], cornerRadius, shouldRound = tooltipSettings.isRoundingBase)
+    val corner1 = getTooltipRoundedCorner(points[2], points[1], points[0], cornerRadius, shouldRound = shouldRound1)
     val corner2 = getTooltipRoundedCorner(points[1], points[2], points[3], cornerRadius, clockWise = true)
-    val corner3 = getTooltipRoundedCorner(points[4], points[3], points[2], cornerRadius, shouldRound = tooltipSettings.isRoundingBase)
+    val corner3 = getTooltipRoundedCorner(points[4], points[3], points[2], cornerRadius, shouldRound = shouldRound3)
 
     drawTooltipPath(arrayListOf(corner1, corner2, corner3))
+}
+
+private fun shouldRoundVerticalCorners(tooltipSettings: TooltipSettings): Pair<Boolean, Boolean> {
+    return when (tooltipSettings.tooltipPointerPosition.alignment.value.horizontalAlignment) {
+        PointerHorizontalAlignment.LEFT -> {
+            if (tooltipSettings.tooltipPointerPosition is Bottom) {
+                true to false
+            } else {
+                false to true
+            }
+        }
+        PointerHorizontalAlignment.CENTER -> true to true
+        PointerHorizontalAlignment.RIGHT -> {
+            if (tooltipSettings.tooltipPointerPosition is Bottom) {
+                false to true
+            } else {
+                true to false
+            }
+        }
+    }.let { (it.first && tooltipSettings.isRoundingBase) to (it.second && tooltipSettings.isRoundingBase) }
 }
 
 @SuppressWarnings("MagicNumber")
@@ -156,13 +177,34 @@ private fun Path.TooltipHorizontalPointerPath(
 
     // map points into a list and reverse the order in case vertical tooltip pointer is at Right
     val points = arrayListOf(pt0, pt1, pt2, pt3, pt4).apply { if (tooltipSettings.tooltipPointerPosition is Right) reverse() }
-
+    // figures out if corner 1 and corner 3 should get rounded or not
+    val (shouldRound1, shouldRound3) = shouldRoundHorizontalCorners(tooltipSettings)
     // from points, define corners to apply cornerRadius
-    val corner1 = getTooltipRoundedCorner(points[2], points[1], points[0], cornerRadius, shouldRound = tooltipSettings.isRoundingBase)
+    val corner1 = getTooltipRoundedCorner(points[2], points[1], points[0], cornerRadius, shouldRound = shouldRound1)
     val corner2 = getTooltipRoundedCorner(points[1], points[2], points[3], cornerRadius, clockWise = true)
-    val corner3 = getTooltipRoundedCorner(points[4], points[3], points[2], cornerRadius, shouldRound = tooltipSettings.isRoundingBase)
+    val corner3 = getTooltipRoundedCorner(points[4], points[3], points[2], cornerRadius, shouldRound = shouldRound3)
 
     drawTooltipPath(arrayListOf(corner1, corner2, corner3))
+}
+
+private fun shouldRoundHorizontalCorners(tooltipSettings: TooltipSettings): Pair<Boolean, Boolean> {
+    return when (tooltipSettings.tooltipPointerPosition.alignment.value.verticalAlignment) {
+        PointerVerticalAlignment.TOP -> {
+            if (tooltipSettings.tooltipPointerPosition is Left) {
+                true to false
+            } else {
+                false to true
+            }
+        }
+        PointerVerticalAlignment.CENTER -> true to true
+        PointerVerticalAlignment.BOTTOM -> {
+            if (tooltipSettings.tooltipPointerPosition is Right) {
+                false to true
+            } else {
+                true to false
+            }
+        }
+    }.let { (it.first && tooltipSettings.isRoundingBase) to (it.second && tooltipSettings.isRoundingBase) }
 }
 
 private fun Path.drawTooltipPath(points: List<CornerPoint>) {
