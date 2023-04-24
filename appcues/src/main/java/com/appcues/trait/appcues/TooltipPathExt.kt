@@ -19,6 +19,9 @@ import kotlin.math.tan
 internal data class PointerAlignment(
     val verticalAlignment: PointerVerticalAlignment = PointerVerticalAlignment.CENTER,
     val horizontalAlignment: PointerHorizontalAlignment = PointerHorizontalAlignment.CENTER,
+    // instructs to not round the edge of container next to an edge aligned pointer
+    // only applies to a non-center aligned pointer
+    val ignoreRounding: Boolean = false,
 )
 
 internal enum class PointerVerticalAlignment {
@@ -42,12 +45,17 @@ internal sealed class TooltipPointerPosition {
 
     private val _alignment = mutableStateOf(PointerAlignment())
     val alignment: State<PointerAlignment> = _alignment
-    fun verticalAlignment(alignment: PointerVerticalAlignment) {
-        this._alignment.value = PointerAlignment(verticalAlignment = alignment)
+
+    // ignoreRounding is used to instruct the container to ignore the rounded edge of the container if the
+    // pointer is moved to be flush with one edge (pointing at an element edge of screen)
+    fun verticalAlignment(alignment: PointerVerticalAlignment, ignoreRounding: Boolean) {
+        this._alignment.value = PointerAlignment(verticalAlignment = alignment, ignoreRounding = ignoreRounding)
     }
 
-    fun horizontalAlignment(alignment: PointerHorizontalAlignment) {
-        this._alignment.value = PointerAlignment(horizontalAlignment = alignment)
+    // ignoreRounding is used to instruct the container to ignore the rounded edge of the container if the
+    // pointer is moved to be flush with one edge (pointing at an element edge of screen)
+    fun horizontalAlignment(alignment: PointerHorizontalAlignment, ignoreRounding: Boolean) {
+        this._alignment.value = PointerAlignment(horizontalAlignment = alignment, ignoreRounding = ignoreRounding)
     }
 
     /**
@@ -63,9 +71,11 @@ internal sealed class TooltipPointerPosition {
         override val isVertical = true
 
         override fun toContainerCornerRadius(cornerRadius: Dp): ContainerCornerRadius {
+            val ignoreRounding = alignment.value.ignoreRounding
+            val horizontalAlignment = alignment.value.horizontalAlignment
             return ContainerCornerRadius(
-                topStart = if (alignment.value.horizontalAlignment == PointerHorizontalAlignment.LEFT) 0.dp else cornerRadius,
-                topEnd = if (alignment.value.horizontalAlignment == PointerHorizontalAlignment.RIGHT) 0.dp else cornerRadius,
+                topStart = if (horizontalAlignment == PointerHorizontalAlignment.LEFT && ignoreRounding) 0.dp else cornerRadius,
+                topEnd = if (horizontalAlignment == PointerHorizontalAlignment.RIGHT && ignoreRounding) 0.dp else cornerRadius,
                 bottomEnd = cornerRadius,
                 bottomStart = cornerRadius
             )
@@ -77,11 +87,13 @@ internal sealed class TooltipPointerPosition {
         override val isVertical = true
 
         override fun toContainerCornerRadius(cornerRadius: Dp): ContainerCornerRadius {
+            val ignoreRounding = alignment.value.ignoreRounding
+            val horizontalAlignment = alignment.value.horizontalAlignment
             return ContainerCornerRadius(
                 topStart = cornerRadius,
                 topEnd = cornerRadius,
-                bottomStart = if (alignment.value.horizontalAlignment == PointerHorizontalAlignment.LEFT) 0.dp else cornerRadius,
-                bottomEnd = if (alignment.value.horizontalAlignment == PointerHorizontalAlignment.RIGHT) 0.dp else cornerRadius
+                bottomStart = if (horizontalAlignment == PointerHorizontalAlignment.LEFT && ignoreRounding) 0.dp else cornerRadius,
+                bottomEnd = if (horizontalAlignment == PointerHorizontalAlignment.RIGHT && ignoreRounding) 0.dp else cornerRadius
             )
         }
     }
@@ -91,11 +103,13 @@ internal sealed class TooltipPointerPosition {
         override val isVertical = false
 
         override fun toContainerCornerRadius(cornerRadius: Dp): ContainerCornerRadius {
+            val ignoreRounding = alignment.value.ignoreRounding
+            val verticalAlignment = alignment.value.verticalAlignment
             return ContainerCornerRadius(
-                topStart = if (alignment.value.verticalAlignment == PointerVerticalAlignment.TOP) 0.dp else cornerRadius,
+                topStart = if (verticalAlignment == PointerVerticalAlignment.TOP && ignoreRounding) 0.dp else cornerRadius,
                 topEnd = cornerRadius,
                 bottomEnd = cornerRadius,
-                bottomStart = if (alignment.value.verticalAlignment == PointerVerticalAlignment.BOTTOM) 0.dp else cornerRadius
+                bottomStart = if (verticalAlignment == PointerVerticalAlignment.BOTTOM && ignoreRounding) 0.dp else cornerRadius
             )
         }
     }
@@ -105,10 +119,12 @@ internal sealed class TooltipPointerPosition {
         override val isVertical = false
 
         override fun toContainerCornerRadius(cornerRadius: Dp): ContainerCornerRadius {
+            val ignoreRounding = alignment.value.ignoreRounding
+            val verticalAlignment = alignment.value.verticalAlignment
             return ContainerCornerRadius(
                 topStart = cornerRadius,
-                topEnd = if (alignment.value.verticalAlignment == PointerVerticalAlignment.TOP) 0.dp else cornerRadius,
-                bottomEnd = if (alignment.value.verticalAlignment == PointerVerticalAlignment.BOTTOM) 0.dp else cornerRadius,
+                topEnd = if (verticalAlignment == PointerVerticalAlignment.TOP && ignoreRounding) 0.dp else cornerRadius,
+                bottomEnd = if (verticalAlignment == PointerVerticalAlignment.BOTTOM && ignoreRounding) 0.dp else cornerRadius,
                 bottomStart = cornerRadius,
             )
         }
@@ -188,22 +204,50 @@ internal fun calculatePointerXOffset(
             pointerOffset = tooltipSettings.pointerLengthPx
         }
         // After this it means the position is either TOP or BOTTOM. - NONE is irrelevant here since the pointer is not drawn.
-        // * pointer offset is between min and max, we coerceIn the value accounting for cornerRadius and set alignment to CENTER
-        pointerOffset >= minPointerOffset && pointerOffset <= maxPointerOffset -> {
-            tooltipSettings.tooltipPointerPosition.horizontalAlignment(PointerHorizontalAlignment.CENTER)
-            pointerOffset = pointerOffset.coerceIn(minPointerOffsetCornerRadius..maxPointerOffsetCornerRadius).toFloat()
+        // * pointer offset is between min and max, use the value as-is, and set alignment to CENTER
+        pointerOffset >= minPointerOffsetCornerRadius && pointerOffset <= maxPointerOffsetCornerRadius -> {
+            tooltipSettings.tooltipPointerPosition.horizontalAlignment(PointerHorizontalAlignment.CENTER, false)
+            // no change to pointerOffset, already within acceptable bounds
         }
         // * pointer is less than the min, its anchored to the LEFT
-        pointerOffset < minPointerOffset -> {
+        pointerOffset < minPointerOffsetCornerRadius -> {
             pointerTipOffset = -tooltipSettings.pointerBaseCenterPx
-            tooltipSettings.tooltipPointerPosition.horizontalAlignment(PointerHorizontalAlignment.LEFT)
-            pointerOffset = minPointerOffset
+
+            // this is the desired center point of the pointer
+            val adjustedPointerOffset = pointerOffset + tooltipSettings.pointerBaseCenterPx
+
+            // if the desired center point is closer to the rounded edge than absolute, use that
+            val useRoundedEdge = adjustedPointerOffset >= (minPointerOffsetCornerRadius - minPointerOffset) / 2
+
+            if (useRoundedEdge) {
+                // it is closer to the rounded edge than the absolute edge, so use that
+                tooltipSettings.tooltipPointerPosition.horizontalAlignment(PointerHorizontalAlignment.LEFT, false)
+                pointerOffset = minPointerOffsetCornerRadius
+            } else {
+                // it is closer to the absolute edge, so move all the way to edge and ignore rounding
+                tooltipSettings.tooltipPointerPosition.horizontalAlignment(PointerHorizontalAlignment.LEFT, true)
+                pointerOffset = minPointerOffset
+            }
         }
         // * pointer is greater than the max, its anchored to the RIGHT
-        pointerOffset > maxPointerOffset -> {
+        pointerOffset > maxPointerOffsetCornerRadius -> {
             pointerTipOffset = tooltipSettings.pointerBaseCenterPx
-            tooltipSettings.tooltipPointerPosition.horizontalAlignment(PointerHorizontalAlignment.RIGHT)
-            pointerOffset = maxPointerOffset
+
+            // this is the desired center point of the pointer
+            val adjustedPointerOffset = pointerOffset - tooltipSettings.pointerBaseCenterPx
+
+            // if the desired center point is closer to the rounded edge than absolute, use that
+            val useRoundedEdge = adjustedPointerOffset <= maxPointerOffset - ((maxPointerOffset - maxPointerOffsetCornerRadius) / 2)
+
+            if (useRoundedEdge) {
+                // it is closer to the rounded edge than the absolute edge, so use that
+                tooltipSettings.tooltipPointerPosition.horizontalAlignment(PointerHorizontalAlignment.RIGHT, false)
+                pointerOffset = maxPointerOffsetCornerRadius
+            } else {
+                // it is closer to the absolute edge, so move all the way to edge and ignore rounding
+                tooltipSettings.tooltipPointerPosition.horizontalAlignment(PointerHorizontalAlignment.RIGHT, true)
+                pointerOffset = maxPointerOffset
+            }
         }
     }
 
@@ -243,22 +287,48 @@ internal fun calculatePointerYOffset(
             pointerOffset = tooltipSettings.pointerLengthPx
         }
         // After this it means the position is either LEFT or RIGHT. - NONE is irrelevant here since the pointer is not drawn.
-        // * pointer offset is between min and max, we coerceIn the value accounting for cornerRadius and set alignment to CENTER
-        pointerOffset >= minPointerOffset && pointerOffset <= maxPointerOffset -> {
-            tooltipSettings.tooltipPointerPosition.verticalAlignment(PointerVerticalAlignment.CENTER)
-            pointerOffset = pointerOffset.coerceIn(minPointerOffsetCornerRadius..maxPointerOffsetCornerRadius).toFloat()
+        // * pointer offset is between min and max, use the value as-is, and set alignment to CENTER
+        pointerOffset >= minPointerOffsetCornerRadius && pointerOffset <= maxPointerOffsetCornerRadius -> {
+            tooltipSettings.tooltipPointerPosition.verticalAlignment(PointerVerticalAlignment.CENTER, false)
+            // no change to pointerOffset, already within acceptable bounds
         }
         // * pointer is less or equal to the min, its anchored to the TOP
-        pointerOffset < minPointerOffset -> {
+        pointerOffset < minPointerOffsetCornerRadius -> {
             pointerTipOffset = -tooltipSettings.pointerBaseCenterPx
-            tooltipSettings.tooltipPointerPosition.verticalAlignment(PointerVerticalAlignment.TOP)
-            pointerOffset = minPointerOffset
+
+            // this is the desired center point of the pointer
+            val adjustedPointerOffset = pointerOffset + tooltipSettings.pointerBaseCenterPx
+
+            // if the desired center point is closer to the rounded edge than absolute, use that
+            val useRoundedEdge = adjustedPointerOffset >= (minPointerOffsetCornerRadius - minPointerOffset) / 2
+
+            if (useRoundedEdge) {
+                tooltipSettings.tooltipPointerPosition.verticalAlignment(PointerVerticalAlignment.TOP, false)
+                pointerOffset = minPointerOffsetCornerRadius
+            } else {
+                tooltipSettings.tooltipPointerPosition.verticalAlignment(PointerVerticalAlignment.TOP, true)
+                pointerOffset = minPointerOffset
+            }
         }
         // * pointer is greater or equal the max, its anchored to the BOTTOM
-        pointerOffset > maxPointerOffset -> {
+        pointerOffset > maxPointerOffsetCornerRadius -> {
             pointerTipOffset = tooltipSettings.pointerBaseCenterPx
-            tooltipSettings.tooltipPointerPosition.verticalAlignment(PointerVerticalAlignment.BOTTOM)
-            pointerOffset = maxPointerOffset
+
+            // this is the desired center point of the pointer
+            val adjustedPointerOffset = pointerOffset - tooltipSettings.pointerBaseCenterPx
+
+            // if the desired center point is closer to the rounded edge than absolute, use that
+            val useRoundedEdge = adjustedPointerOffset <= maxPointerOffset - ((maxPointerOffset - maxPointerOffsetCornerRadius) / 2)
+
+            if (useRoundedEdge) {
+                // it is closer to the rounded edge than the absolute edge, so use that
+                tooltipSettings.tooltipPointerPosition.verticalAlignment(PointerVerticalAlignment.BOTTOM, false)
+                pointerOffset = maxPointerOffsetCornerRadius
+            } else {
+                // it is closer to the absolute edge, so move all the way to edge and ignore rounding
+                tooltipSettings.tooltipPointerPosition.verticalAlignment(PointerVerticalAlignment.BOTTOM, true)
+                pointerOffset = maxPointerOffset
+            }
         }
     }
 
