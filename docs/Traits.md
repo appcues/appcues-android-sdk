@@ -4,9 +4,16 @@ Experiences displayed by the Appcues Android SDK are customizable and extensible
 
 ## Overview
 
-An ``ExperienceTrait`` modifies the how an entire experience, or a particular step in an experience is displayed. 
-Each type of ``ExperienceTrait`` has the capability to apply specific changes to the rendered content in an experience.
-Also, some traits are applied to the whole experience, some to a set of steps, and others are specific to a step.
+An `ExperienceTrait` modifies the how an entire experience, or a particular step in an experience is displayed. 
+A trait of a specific _type_ has _capabilities_ that modify the way an experience is displayed to the user. 
+Furthermore a trait can be applied at multiple _levels_ which determines which parts of the experience are impacted by the trait instance.
+
+## Trait Types
+
+Every trait has a `type` property that must be a unique name identifying the trait. 
+Best practice is to prefix the `type` with your organization name, resulting in the format `@org/name` (e.g. `@appcues/modal`).
+
+Attempting to register a trait for a type that exists already log an `AppcuesDuplicateTraitException`.
 
 ## Trait Capabilities
 
@@ -51,9 +58,13 @@ A ``StepDecoratingTrait`` draws content on top of the content in that particular
 
 A ``ContainerDecoratingTrait`` draws content on top of the content wrapper. It is used to overlay content on top of all steps within container, for example a close button.
 
-## Experience-Level, Group-Level, and Step-Level Traits
+## Trait Levels
 
-The Appcues mobile experience data model allows for traits to be specified at the experience level, at the step-group level, or at the step level. Experience-level traits modify the entire experience and are applied when any step of the experience is being displayed. Group-level traits apply when any of child steps of the group is being displayed. Step-level traits are scoped to be applied only when the specific step is being displayed.
+The Appcues mobile experience data model allows for traits to be specified at the experience level, at the step-group level, or at the step level.
+
+- Experience-level traits modify the entire experience and are applied when any step of the experience is being displayed.
+- Group-level traits apply when any of child steps of the group is being displayed.
+- Step-level `Decorating` traits are scoped to be applied only when the specific step is being displayed. A `Creating` or `Presenting` trait set at the step-level will be ignored because applying them would leak beyond the specific step an impact the display of any sibling steps.
 
 In practice this distinction looks like this in the experience data model:
 
@@ -62,12 +73,16 @@ In practice this distinction looks like this in the experience data model:
     ...
     "traits": [
         // Experience-level traits
+        // Presenting and Creating traits propagated to each group
+        // Decorating traits are propagated to every child step
     ],
     "steps": [
         {
             ...
             "traits": [
                 // Group-level traits
+                // Presenting and Creating traits are applied, taking precedence over traits of the same type at the experience-level
+                // Decorating traits are propagated to every child step in the group
             ],
             "children": [
                 {
@@ -75,6 +90,8 @@ In practice this distinction looks like this in the experience data model:
                     "content": { ... },
                     "traits": [
                         // Step-level traits for the first step
+                        // Presenting and Creating traits are ignored
+                        // Decorating traits only
                     ]
                 }
             ]
@@ -84,8 +101,52 @@ In practice this distinction looks like this in the experience data model:
             "content": { ... },
             "traits": [
                 // Step-level traits for the second step
+                // Presenting and Creating traits are ignored
+                // Decorating traits only
             ]
         }
     ]
 }
 ```
+
+Only a single instance of each trait type may be included in the `traits` array at any given level. If multiple traits with the same `type` are included in the same array, the experience is invalid, an error will be logged, and the experience will not display. 
+The most specific instance of a trait type will take precedence over a trait of the same type specified at a higher level.
+
+A trait is made aware of the level at which it is being applied by the `ExperienceTraitLevel` as its initially mapped from json into `LeveledTraitResponse`. 
+A trait can have different behavior depending on the `level` at which it is applied.
+
+For example, a trait might simultaneously conform to `ContainerDecoratingTrait` and `StepDecoratingTrait` and the choose to apply it's decoration in only one of those contexts:
+```kotlin
+@Composable
+override fun BoxScope.DecorateStep(
+    containerPadding: PaddingValues,
+    safeAreaInsets: PaddingValues,
+    stickyContentPadding: StickyContentPadding,
+) {
+    if (level == STEP) Decorate()
+}
+
+@Composable
+override fun BoxScope.DecorateContainer(
+    containerPadding: PaddingValues,
+    safeAreaInsets: PaddingValues,
+) {
+    if (level == GROUP) Decorate()
+}
+
+@Composable
+private fun BoxScope.Decorate() { ... }
+```
+
+## Sharing Data Across Traits
+
+There may be cases where values or data from one trait type are required for the successful rendering of another trait type. Similarly, there may be cases where you wish to coordinate a transition between traits of the same type applied at the step-level. 
+In both these cases, the `MetadataSettingTrait` provides a mechanism to share data across trait instances.
+
+on every configuration change, all `MetadataSettingTrait` will run `produceMetadata` adding mapped values to a shared dictionary that can later be retrieved by requesting `LocalAppcuesStepMetadata.current` on your trait composition.
+
+For example, there is a trait `@appcues/step-transition-animation` sets an object on key: `stepTransitionAnimation` that will later be used by various traits to sync up animation.
+
+## Error Handling
+
+There may be cases where a trait is unable to perform its intended capability. If this happens, it's preferred that a non-essential trait fail silently so that the experience can still be displayed to the user. However if a trait implementation is essential, it may throw a ``AppcuesTraitException`` that will prevent the experience from being displayed and log an error with the Appcues platform.
