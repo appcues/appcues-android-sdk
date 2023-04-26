@@ -18,6 +18,7 @@ internal class SubmitFormAction(
 ) : ExperienceActionQueueTransforming {
 
     companion object {
+
         const val TYPE = "@appcues/submit-form"
     }
 
@@ -46,7 +47,7 @@ internal class SubmitFormAction(
     }
 
     // reports analytics for step interaction, for the form submission
-    override suspend fun execute(appcues: Appcues) {
+    override suspend fun execute() {
         val experience = stateMachine.state.currentExperience
         val stepIndex = stateMachine.state.currentStepIndex
 

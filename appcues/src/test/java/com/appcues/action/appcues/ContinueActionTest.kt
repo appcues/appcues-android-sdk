@@ -34,7 +34,7 @@ internal class ContinueActionTest : AppcuesScopeTest {
         val action = ContinueAction(mapOf("index" to 1), stateMachine)
 
         // WHEN
-        action.execute(get())
+        action.execute()
 
         // THEN
         coVerify { stateMachine.handleAction(StartStep(StepIndex(1))) }
@@ -47,7 +47,7 @@ internal class ContinueActionTest : AppcuesScopeTest {
         val action = ContinueAction(mapOf("offset" to -1), stateMachine)
 
         // WHEN
-        action.execute(get())
+        action.execute()
 
         // THEN
         coVerify { stateMachine.handleAction(StartStep(StepOffset(-1))) }
@@ -61,7 +61,7 @@ internal class ContinueActionTest : AppcuesScopeTest {
         val action = ContinueAction(mapOf("stepID" to stepId.toString()), stateMachine)
 
         // WHEN
-        action.execute(get())
+        action.execute()
 
         // THEN
         coVerify { stateMachine.handleAction(StartStep(StepId(stepId))) }
@@ -74,7 +74,7 @@ internal class ContinueActionTest : AppcuesScopeTest {
         val action = ContinueAction(mapOf(), stateMachine)
 
         // WHEN
-        action.execute(get())
+        action.execute()
 
         // THEN
         coVerify { stateMachine.handleAction(StartStep(StepOffset(1))) }

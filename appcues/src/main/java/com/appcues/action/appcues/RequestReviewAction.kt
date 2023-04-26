@@ -1,7 +1,6 @@
 package com.appcues.action.appcues
 
 import android.content.Context
-import com.appcues.Appcues
 import com.appcues.action.ExperienceAction
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.ui.InAppReviewActivity
@@ -15,10 +14,11 @@ internal class RequestReviewAction(
 ) : ExperienceAction {
 
     companion object {
+
         const val TYPE = "@appcues/request-review"
     }
 
-    override suspend fun execute(appcues: Appcues) {
+    override suspend fun execute() {
 
         val completion = CompletableDeferred<Boolean>()
         InAppReviewActivity.completion = completion

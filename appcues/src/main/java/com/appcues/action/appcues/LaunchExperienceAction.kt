@@ -1,6 +1,5 @@
 package com.appcues.action.appcues
 
-import com.appcues.Appcues
 import com.appcues.action.ExperienceAction
 import com.appcues.action.MetadataSettingsAction
 import com.appcues.data.model.AppcuesConfigMap
@@ -33,6 +32,7 @@ internal class LaunchExperienceAction(
     )
 
     companion object {
+
         const val TYPE = "@appcues/launch-experience"
     }
 
@@ -43,7 +43,7 @@ internal class LaunchExperienceAction(
 
     override val destination = experienceId ?: String()
 
-    override suspend fun execute(appcues: Appcues) {
+    override suspend fun execute() {
         if (experienceId != null) {
             experienceRenderer.show(experienceId, getTrigger())
         }

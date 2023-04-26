@@ -147,7 +147,7 @@ class ActionProcessorTest : KoinTest {
         override val config: AppcuesConfigMap
             get() = emptyMap()
 
-        override suspend fun execute(appcues: Appcues) {
+        override suspend fun execute() {
             executeCount++
         }
     }
@@ -160,7 +160,7 @@ class ActionProcessorTest : KoinTest {
         override val config: AppcuesConfigMap
             get() = emptyMap()
 
-        override suspend fun execute(appcues: Appcues) {
+        override suspend fun execute() {
             // do nothing
         }
     }

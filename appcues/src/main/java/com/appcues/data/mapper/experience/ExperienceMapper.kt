@@ -35,6 +35,7 @@ internal class ExperienceMapper(
     private val actionsMapper: ActionsMapper,
     private val scope: Scope,
 ) {
+
     // this version is used to map all decoded response objects, which may represent real Experiences
     // or failed responses with minimal info for error reporting
     fun mapDecoded(
@@ -95,18 +96,23 @@ internal class ExperienceMapper(
             experiment = experiments?.getExperiment(from.id),
             completionActions = arrayListOf<ExperienceAction>().apply {
                 from.redirectUrl?.let {
-                    add(LinkAction(
-                        redirectUrl = it,
-                        linkOpener = scope.get()
-                    ))
+                    add(
+                        LinkAction(
+                            redirectUrl = it,
+                            linkOpener = scope.get(),
+                            appcues = scope.get(),
+                        )
+                    )
                 }
                 from.nextContentId?.let {
-                    add(LaunchExperienceAction(
-                        completedExperienceId = from.id.toString(),
-                        launchExperienceId = it,
-                        stateMachine = scope.get(),
-                        experienceRenderer = scope.get(),
-                    ))
+                    add(
+                        LaunchExperienceAction(
+                            completedExperienceId = from.id.toString(),
+                            launchExperienceId = it,
+                            stateMachine = scope.get(),
+                            experienceRenderer = scope.get(),
+                        )
+                    )
                 }
             },
             trigger = trigger,

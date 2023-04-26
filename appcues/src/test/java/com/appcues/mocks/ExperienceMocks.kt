@@ -52,7 +52,7 @@ internal fun mockExperience(onPresent: (() -> Unit)? = null) =
         priority = NORMAL,
         publishedAt = 1652895835000,
         experiment = null,
-        completionActions = arrayListOf(TrackEventAction(hashMapOf())),
+        completionActions = arrayListOf(TrackEventAction(hashMapOf(), appcues = mockk(relaxed = true))),
         trigger = ExperienceTrigger.ShowCall,
     )
 

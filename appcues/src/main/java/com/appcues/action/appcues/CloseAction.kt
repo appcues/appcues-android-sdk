@@ -1,6 +1,5 @@
 package com.appcues.action.appcues
 
-import com.appcues.Appcues
 import com.appcues.action.ExperienceAction
 import com.appcues.action.MetadataSettingsAction
 import com.appcues.data.model.AppcuesConfigMap
@@ -23,7 +22,7 @@ internal class CloseAction(
 
     override val destination = "end-experience"
 
-    override suspend fun execute(appcues: Appcues) {
+    override suspend fun execute() {
         experienceRenderer.dismissCurrentExperience(markComplete = markComplete, destroyed = false)
     }
 }
