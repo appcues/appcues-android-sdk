@@ -52,13 +52,13 @@ internal class LinkActionTest : AppcuesScopeTest {
         // GIVEN
         val uri: Uri = Uri.parse("https://test/path")
         val linkOpener: LinkOpener = get()
-        val action = LinkAction(mapOf("url" to uri.toString(), "openExternally" to true), linkOpener)
         val appcues = mockk<Appcues>(relaxed = true) {
             every { this@mockk.navigationHandler } returns null
         }
+        val action = LinkAction(mapOf("url" to uri.toString(), "openExternally" to true), linkOpener, appcues)
 
         // WHEN
-        action.execute(appcues)
+        action.execute()
 
         // THEN
         verify { linkOpener.startNewIntent(uri) }
@@ -69,17 +69,17 @@ internal class LinkActionTest : AppcuesScopeTest {
         // GIVEN
         val uri: Uri = Uri.parse("https://test/path")
         val linkOpener: LinkOpener = get()
-        val action = LinkAction(mapOf("url" to uri.toString(), "openExternally" to true), linkOpener)
-        val navigationHandler = mockk<NavigationHandler>(relaxed = true)
+        val mockkNavigationHandler = mockk<NavigationHandler>(relaxed = true)
         val appcues = mockk<Appcues>(relaxed = true) {
-            every { this@mockk.navigationHandler } returns navigationHandler
+            every { this@mockk.navigationHandler } returns mockkNavigationHandler
         }
+        val action = LinkAction(mapOf("url" to uri.toString(), "openExternally" to true), linkOpener, appcues)
 
         // WHEN
-        action.execute(appcues)
+        action.execute()
 
         // THEN
-        coVerify { navigationHandler.navigateTo(uri) }
+        coVerify { mockkNavigationHandler.navigateTo(uri) }
         verify { linkOpener wasNot Called }
     }
 
@@ -88,10 +88,10 @@ internal class LinkActionTest : AppcuesScopeTest {
         // GIVEN
         val uri: Uri = Uri.parse("https://test/path")
         val linkOpener: LinkOpener = get()
-        val action = LinkAction(mapOf("url" to uri.toString()), linkOpener)
+        val action = LinkAction(mapOf("url" to uri.toString()), linkOpener, get())
 
         // WHEN
-        action.execute(get())
+        action.execute()
 
         // THEN
         verify { linkOpener.openCustomTabs(uri) }
@@ -102,13 +102,13 @@ internal class LinkActionTest : AppcuesScopeTest {
         // GIVEN
         val uri: Uri = Uri.parse("myapp://test/path")
         val linkOpener: LinkOpener = get()
-        val action = LinkAction(mapOf("url" to uri.toString()), linkOpener)
         val appcues = mockk<Appcues>(relaxed = true) {
             every { this@mockk.navigationHandler } returns null
         }
+        val action = LinkAction(mapOf("url" to uri.toString()), linkOpener, appcues)
 
         // WHEN
-        action.execute(appcues)
+        action.execute()
 
         // THEN
         verify { linkOpener.startNewIntent(uri) }
@@ -119,17 +119,17 @@ internal class LinkActionTest : AppcuesScopeTest {
         // GIVEN
         val uri: Uri = Uri.parse("myapp://test/path")
         val linkOpener: LinkOpener = get()
-        val action = LinkAction(mapOf("url" to uri.toString()), linkOpener)
-        val navigationHandler = mockk<NavigationHandler>(relaxed = true)
+        val mockkNavigationHandler = mockk<NavigationHandler>(relaxed = true)
         val appcues = mockk<Appcues>(relaxed = true) {
-            every { this@mockk.navigationHandler } returns navigationHandler
+            every { this@mockk.navigationHandler } returns mockkNavigationHandler
         }
+        val action = LinkAction(mapOf("url" to uri.toString()), linkOpener, appcues)
 
         // WHEN
-        action.execute(appcues)
+        action.execute()
 
         // THEN
-        coVerify { navigationHandler.navigateTo(uri) }
+        coVerify { mockkNavigationHandler.navigateTo(uri) }
         verify { linkOpener wasNot Called }
     }
 }

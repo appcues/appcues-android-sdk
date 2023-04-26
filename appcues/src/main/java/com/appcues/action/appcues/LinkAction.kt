@@ -12,6 +12,7 @@ import com.appcues.util.LinkOpener
 internal class LinkAction(
     override val config: AppcuesConfigMap,
     private val linkOpener: LinkOpener,
+    private val appcues: Appcues,
 ) : ExperienceAction, MetadataSettingsAction {
 
     companion object {
@@ -19,10 +20,8 @@ internal class LinkAction(
         const val TYPE = "@appcues/link"
     }
 
-    constructor(redirectUrl: String, linkOpener: LinkOpener) : this(
-        hashMapOf<String, Any>("url" to redirectUrl),
-        linkOpener
-    )
+    constructor(redirectUrl: String, linkOpener: LinkOpener, appcues: Appcues) :
+        this(hashMapOf<String, Any>("url" to redirectUrl), linkOpener, appcues)
 
     private val url: String? = config.getConfig("url")
     private val openExternally = config.getConfigOrDefault("openExternally", false)
@@ -31,7 +30,7 @@ internal class LinkAction(
 
     override val destination: String = url ?: String()
 
-    override suspend fun execute(appcues: Appcues) {
+    override suspend fun execute() {
         // start web activity if url is not null
         if (url != null) {
             val uri = Uri.parse(url)

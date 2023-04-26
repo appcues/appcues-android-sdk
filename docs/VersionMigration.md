@@ -26,3 +26,4 @@ There are a number of breaking changes from 1.x to 2.0, mostly related to the ex
 - `StepDecoratingTrait` method `fun BoxScope.DecorateStep(stepDecoratingPadding: StepDecoratingPadding)` changed to `fun BoxScope.DecorateStep(containerPadding: PaddingValues, safeAreaInsets: PaddingValues, stickyContentPadding: StickyContentPadding)`.
 - `StepDecoratingPadding` renamed to `StickyContentPadding`.
 - `ModalTrait` is now `PresentingTrait`. it is responsible for presenting the container that will hold the modal type presentation (AppcuesActivity).
+- `ExperienceAction` method `suspend fun execute(appcues: Appcues)` changed to `suspend fun execute()`.

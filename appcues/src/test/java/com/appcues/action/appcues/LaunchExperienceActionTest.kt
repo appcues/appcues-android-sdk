@@ -1,6 +1,5 @@
 package com.appcues.action.appcues
 
-import com.appcues.Appcues
 import com.appcues.AppcuesScopeTest
 import com.appcues.data.model.ExperienceTrigger
 import com.appcues.mocks.mockExperience
@@ -36,7 +35,6 @@ internal class LaunchExperienceActionTest : AppcuesScopeTest {
         // GIVEN
         val experienceId = UUID.randomUUID()
         val experienceIdString = experienceId.toString()
-        val appcues: Appcues = get()
         val experienceRenderer: ExperienceRenderer = get()
         val currentExperience = mockExperience()
         val stateMachine = mockk<StateMachine>(relaxed = true) {
@@ -47,7 +45,7 @@ internal class LaunchExperienceActionTest : AppcuesScopeTest {
         val action = LaunchExperienceAction(mapOf("experienceID" to experienceIdString), stateMachine, get())
 
         // WHEN
-        action.execute(appcues)
+        action.execute()
 
         // THEN
         coVerify { experienceRenderer.show(experienceIdString, ExperienceTrigger.LaunchExperienceAction(currentExperience.id)) }
@@ -56,12 +54,11 @@ internal class LaunchExperienceActionTest : AppcuesScopeTest {
     @Test
     fun `launch experience SHOULD NOT call ExperienceRenderer show WHEN no experience ID is in config`() = runTest {
         // GIVEN
-        val appcues: Appcues = get()
         val experienceRenderer: ExperienceRenderer = get()
         val action = LaunchExperienceAction(mapOf(), get(), get())
 
         // WHEN
-        action.execute(appcues)
+        action.execute()
 
         // THEN
         coVerify { experienceRenderer wasNot Called }

@@ -28,10 +28,10 @@ internal class TrackEventActionTest : AppcuesScopeTest {
         // GIVEN
         val event = "track_event"
         val appcues: Appcues = get()
-        val action = TrackEventAction(mapOf("eventName" to event))
+        val action = TrackEventAction(mapOf("eventName" to event), appcues)
 
         // WHEN
-        action.execute(appcues)
+        action.execute()
 
         // THEN
         coVerify { appcues.track(event) }
@@ -41,10 +41,10 @@ internal class TrackEventActionTest : AppcuesScopeTest {
     fun `track event SHOULD NOT trigger Appcues track WHEN no eventName is in config`() = runTest {
         // GIVEN
         val appcues: Appcues = get()
-        val action = TrackEventAction(mapOf())
+        val action = TrackEventAction(mapOf(), appcues)
 
         // WHEN
-        action.execute(appcues)
+        action.execute()
 
         // THEN
         coVerify { appcues wasNot Called }

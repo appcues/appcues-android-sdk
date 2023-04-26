@@ -29,7 +29,7 @@ internal class CloseActionTest : AppcuesScopeTest {
         val action = CloseAction(mapOf(), experienceRenderer)
 
         // WHEN
-        action.execute(get())
+        action.execute()
 
         // THEN
         coVerify { experienceRenderer.dismissCurrentExperience(markComplete = false, destroyed = false) }
@@ -42,7 +42,7 @@ internal class CloseActionTest : AppcuesScopeTest {
         val action = CloseAction(mapOf("markComplete" to true), experienceRenderer)
 
         // WHEN
-        action.execute(get())
+        action.execute()
 
         // THEN
         coVerify { experienceRenderer.dismissCurrentExperience(markComplete = true, destroyed = false) }

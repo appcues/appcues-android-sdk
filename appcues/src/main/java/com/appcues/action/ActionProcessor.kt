@@ -25,7 +25,7 @@ internal class ActionProcessor(override val scope: Scope) : KoinScopeComponent {
     init {
         appcuesCoroutineScope.launch {
             for (action in actionQueue) {
-                action.execute(appcues)
+                action.execute()
             }
         }
     }
@@ -40,7 +40,7 @@ internal class ActionProcessor(override val scope: Scope) : KoinScopeComponent {
         // typically the Continue action moving to the next step. Since we need to be able to
         // make this a suspend function and wait on them, we cannot place them in the queue or
         // suspend the currently executing action at all, or the queue would become deadlocked.
-        transformQueue(actions).toMutableList().forEach { it.execute(appcues) }
+        transformQueue(actions).toMutableList().forEach { it.execute() }
     }
 
     // This version is used by the viewModel to process interactive actions from user input - button taps.

@@ -32,10 +32,10 @@ internal class UpdateProfileActionTest : AppcuesScopeTest {
         val userId = "test-user"
         storage.userId = userId
         val properties = mapOf("prop1" to 2, "prop2" to "ok")
-        val action = UpdateProfileAction(properties, storage)
+        val action = UpdateProfileAction(properties, storage, appcues)
 
         // WHEN
-        action.execute(appcues)
+        action.execute()
 
         // THEN
         coVerify { appcues.identify(userId, properties) }
@@ -45,10 +45,10 @@ internal class UpdateProfileActionTest : AppcuesScopeTest {
     fun `update profile SHOULD NOT trigger Appcues identify WHEN no props are in config`() = runTest {
         // GIVEN
         val appcues: Appcues = get()
-        val action = UpdateProfileAction(null, get())
+        val action = UpdateProfileAction(null, get(), appcues)
 
         // WHEN
-        action.execute(appcues)
+        action.execute()
 
         // THEN
         coVerify { appcues wasNot Called }

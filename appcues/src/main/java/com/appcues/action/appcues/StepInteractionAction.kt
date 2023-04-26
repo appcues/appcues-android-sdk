@@ -1,6 +1,5 @@
 package com.appcues.action.appcues
 
-import com.appcues.Appcues
 import com.appcues.action.ExperienceAction
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction
@@ -34,7 +33,7 @@ internal class StepInteractionAction(
         const val TYPE = "@appcues/step_interaction"
     }
 
-    override suspend fun execute(appcues: Appcues) {
+    override suspend fun execute() {
         val experience = stateMachine.state.currentExperience
         val stepIndex = stateMachine.state.currentStepIndex
 

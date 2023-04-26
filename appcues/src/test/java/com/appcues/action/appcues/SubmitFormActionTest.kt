@@ -22,7 +22,6 @@ import com.appcues.data.model.styling.ComponentSelectMode.MULTIPLE
 import com.appcues.rules.KoinScopeRule
 import com.appcues.statemachine.State
 import com.appcues.statemachine.StateMachine
-import com.google.common.truth.Truth
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
@@ -42,7 +41,7 @@ internal class SubmitFormActionTest : AppcuesScopeTest {
 
     @Test
     fun `submit-form SHOULD have expected type name`() {
-        Truth.assertThat(SubmitFormAction.TYPE).isEqualTo("@appcues/submit-form")
+        assertThat(SubmitFormAction.TYPE).isEqualTo("@appcues/submit-form")
     }
 
     @Test
@@ -60,14 +59,13 @@ internal class SubmitFormActionTest : AppcuesScopeTest {
             every { this@mockk.state } answers { state }
         }
         val analyticsTracker: AnalyticsTracker = mockk(relaxed = true)
-        val appcues: Appcues = mockk(relaxed = true)
         val action = SubmitFormAction(emptyMap(), stateMachine, analyticsTracker)
         val analyticEvent = StepInteraction(experience, 0, FORM_SUBMITTED)
 
         // WHEN
         formState.setValue(textInput, "text")
         formState.setValue(optionSelect, "0")
-        action.execute(appcues)
+        action.execute()
 
         // THEN
         assertThat(formState.isFormComplete).isTrue()
@@ -94,13 +92,11 @@ internal class SubmitFormActionTest : AppcuesScopeTest {
             every { this@mockk.state } answers { state }
         }
         val analyticsTracker: AnalyticsTracker = mockk(relaxed = true)
-        val appcues: Appcues = mockk(relaxed = true)
         val action = SubmitFormAction(emptyMap(), stateMachine, analyticsTracker)
-        val analyticEvent = StepInteraction(experience, 0, FORM_SUBMITTED)
 
         // WHEN
         formState.setValue(textInput, "text")
-        action.execute(appcues)
+        action.execute()
 
         // THEN
         verify { analyticsTracker.identify(mapOf("_appcuesForm_label" to "text", "myCustomAttribute" to "text"), interactive = false) }
@@ -126,12 +122,11 @@ internal class SubmitFormActionTest : AppcuesScopeTest {
             every { this@mockk.state } answers { state }
         }
         val analyticsTracker: AnalyticsTracker = mockk(relaxed = true)
-        val appcues: Appcues = mockk(relaxed = true)
         val action = SubmitFormAction(emptyMap(), stateMachine, analyticsTracker)
         val analyticEvent = StepInteraction(experience, 0, FORM_SUBMITTED)
 
         // WHEN
-        action.execute(appcues)
+        action.execute()
 
         // THEN
         assertThat(formState.isFormComplete).isFalse()
@@ -155,10 +150,10 @@ internal class SubmitFormActionTest : AppcuesScopeTest {
         }
         val analyticsTracker: AnalyticsTracker = mockk(relaxed = true)
         val appcues: Appcues = mockk(relaxed = true)
-        val action0 = TrackEventAction(mapOf("eventName" to "My Custom Event"))
+        val action0 = TrackEventAction(mapOf("eventName" to "My Custom Event"), appcues)
         val action = SubmitFormAction(emptyMap(), stateMachine, analyticsTracker)
-        val action1 = TrackEventAction(mapOf("eventName" to "My Custom Event"))
-        val action2 = TrackEventAction(mapOf("eventName" to "My Custom Event"))
+        val action1 = TrackEventAction(mapOf("eventName" to "My Custom Event"), appcues)
+        val action2 = TrackEventAction(mapOf("eventName" to "My Custom Event"), appcues)
         val initialQueue = listOf(action0, action, action1, action2)
 
         // WHEN
@@ -185,10 +180,10 @@ internal class SubmitFormActionTest : AppcuesScopeTest {
         }
         val analyticsTracker: AnalyticsTracker = mockk(relaxed = true)
         val appcues: Appcues = mockk(relaxed = true)
-        val action0 = TrackEventAction(mapOf("eventName" to "My Custom Event"))
+        val action0 = TrackEventAction(mapOf("eventName" to "My Custom Event"), appcues)
         val action = SubmitFormAction(emptyMap(), stateMachine, analyticsTracker)
-        val action1 = TrackEventAction(mapOf("eventName" to "My Custom Event"))
-        val action2 = TrackEventAction(mapOf("eventName" to "My Custom Event"))
+        val action1 = TrackEventAction(mapOf("eventName" to "My Custom Event"), appcues)
+        val action2 = TrackEventAction(mapOf("eventName" to "My Custom Event"), appcues)
         val initialQueue = listOf(action0, action, action1, action2)
 
         // WHEN
@@ -221,10 +216,10 @@ internal class SubmitFormActionTest : AppcuesScopeTest {
         }
         val analyticsTracker: AnalyticsTracker = mockk(relaxed = true)
         val appcues: Appcues = mockk(relaxed = true)
-        val action0 = TrackEventAction(mapOf("eventName" to "My Custom Event"))
+        val action0 = TrackEventAction(mapOf("eventName" to "My Custom Event"), appcues)
         val action = SubmitFormAction(mapOf("skipValidation" to true), stateMachine, analyticsTracker)
-        val action1 = TrackEventAction(mapOf("eventName" to "My Custom Event"))
-        val action2 = TrackEventAction(mapOf("eventName" to "My Custom Event"))
+        val action1 = TrackEventAction(mapOf("eventName" to "My Custom Event"), appcues)
+        val action2 = TrackEventAction(mapOf("eventName" to "My Custom Event"), appcues)
         val initialQueue = listOf(action0, action, action1, action2)
 
         // WHEN

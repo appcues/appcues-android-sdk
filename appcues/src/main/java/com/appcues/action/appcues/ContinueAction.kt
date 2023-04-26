@@ -1,6 +1,5 @@
 package com.appcues.action.appcues
 
-import com.appcues.Appcues
 import com.appcues.action.ExperienceAction
 import com.appcues.action.MetadataSettingsAction
 import com.appcues.data.model.AppcuesConfigMap
@@ -37,7 +36,7 @@ internal class ContinueAction(
 
     override val destination: String = stepReference.destination
 
-    override suspend fun execute(appcues: Appcues) {
+    override suspend fun execute() {
         stateMachine.handleAction(StartStep(stepReference))
     }
 }

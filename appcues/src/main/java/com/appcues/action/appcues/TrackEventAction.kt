@@ -7,14 +7,17 @@ import com.appcues.data.model.getConfigOrDefault
 
 internal class TrackEventAction(
     override val config: AppcuesConfigMap,
+    private val appcues: Appcues,
 ) : ExperienceAction {
+
     companion object {
+
         const val TYPE = "@appcues/track"
     }
 
     private val eventName = config.getConfigOrDefault<String?>("eventName", null)
 
-    override suspend fun execute(appcues: Appcues) {
+    override suspend fun execute() {
         if (!eventName.isNullOrEmpty()) {
             appcues.track(eventName)
         }
