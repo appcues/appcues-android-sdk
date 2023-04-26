@@ -3,6 +3,8 @@ package com.appcues.analytics
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType.BUTTON_LONG_PRESSED
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType.BUTTON_TAPPED
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType.FORM_SUBMITTED
+import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType.TARGET_LONG_PRESSED
+import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType.TARGET_TAPPED
 import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperienceStepFormState
 import com.appcues.statemachine.Error
@@ -21,6 +23,8 @@ internal sealed class ExperienceLifecycleEvent(
         const val FORM_SUBMITTED_INTERACTION_TYPE = "Form Submitted"
         const val BUTTON_TAPPED_INTERACTION_TYPE = "Button Tapped"
         const val BUTTON_LONG_PRESSED_INTERACTION_TYPE = "Button Long Pressed"
+        const val TARGET_TAPPED_INTERACTION_TYPE = "Target Tapped"
+        const val TARGET_LONG_PRESSED_INTERACTION_TYPE = "Target Long Pressed"
     }
 
     data class StepSeen(
@@ -36,7 +40,7 @@ internal sealed class ExperienceLifecycleEvent(
     ) : ExperienceLifecycleEvent(experience, AnalyticsEvent.ExperienceStepInteraction) {
 
         enum class InteractionType {
-            FORM_SUBMITTED, BUTTON_TAPPED, BUTTON_LONG_PRESSED
+            FORM_SUBMITTED, BUTTON_TAPPED, BUTTON_LONG_PRESSED, TARGET_TAPPED, TARGET_LONG_PRESSED
         }
     }
 
@@ -133,6 +137,8 @@ internal sealed class ExperienceLifecycleEvent(
                             FORM_SUBMITTED -> step.formState
                             BUTTON_TAPPED -> interactionProperties
                             BUTTON_LONG_PRESSED -> interactionProperties
+                            TARGET_TAPPED -> interactionProperties
+                            TARGET_LONG_PRESSED -> interactionProperties
                         },
                     )
                 }
@@ -145,6 +151,8 @@ internal sealed class ExperienceLifecycleEvent(
             FORM_SUBMITTED -> FORM_SUBMITTED_INTERACTION_TYPE
             BUTTON_TAPPED -> BUTTON_TAPPED_INTERACTION_TYPE
             BUTTON_LONG_PRESSED -> BUTTON_LONG_PRESSED_INTERACTION_TYPE
+            TARGET_TAPPED -> TARGET_TAPPED_INTERACTION_TYPE
+            TARGET_LONG_PRESSED -> TARGET_LONG_PRESSED_INTERACTION_TYPE
         }
 }
 

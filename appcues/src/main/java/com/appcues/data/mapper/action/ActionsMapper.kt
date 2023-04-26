@@ -13,7 +13,7 @@ internal class ActionsMapper(
     fun map(actions: Map<UUID, List<ActionResponse>>?, primitiveId: UUID): List<Action> {
         return arrayListOf<Action>().apply {
             // get possible action list based on id, then map to Action model
-            actions?.get(primitiveId)?.forEach { actionResponse -> actionResponse.toAction()?.let { add(it) } }
+            actions?.get(primitiveId)?.forEach { actionResponse -> actionResponse.toAction(actionRegistry)?.let { add(it) } }
         }
     }
 
@@ -22,22 +22,22 @@ internal class ActionsMapper(
 
         return hashMapOf<UUID, List<Action>>().apply {
             from.forEach { entry ->
-                entry.value.mapNotNull { actionResponse -> actionResponse.toAction() }.also { set(entry.key, it) }
+                entry.value.mapNotNull { actionResponse -> actionResponse.toAction(actionRegistry) }.also { set(entry.key, it) }
             }
         }
     }
+}
 
-    private fun ActionResponse.toAction(): Action? {
-        return actionRegistry[type]?.let {
-            Action(
-                on = when (on) {
-                    "tap" -> Action.Trigger.TAP
-                    "longPress" -> Action.Trigger.LONG_PRESS
-                    "navigate" -> Action.Trigger.NAVIGATE
-                    else -> throw AppcuesMappingException("on property $on is unknown")
-                },
-                experienceAction = it.invoke(config)
-            )
-        }
+internal fun ActionResponse.toAction(actionRegistry: ActionRegistry): Action? {
+    return actionRegistry[type]?.let {
+        Action(
+            on = when (on) {
+                "tap" -> Action.Trigger.TAP
+                "longPress" -> Action.Trigger.LONG_PRESS
+                "navigate" -> Action.Trigger.NAVIGATE
+                else -> throw AppcuesMappingException("on property $on is unknown")
+            },
+            experienceAction = it.invoke(config)
+        )
     }
 }
