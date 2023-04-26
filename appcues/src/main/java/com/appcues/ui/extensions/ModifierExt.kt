@@ -27,6 +27,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType.BUTTON_LONG_PRESSED
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType.BUTTON_TAPPED
 import com.appcues.data.model.Action
@@ -272,14 +273,15 @@ private fun Modifier.actions(
                 indication = gestureProperties.indication,
                 enabled = gestureProperties.enabled,
                 role = gestureProperties.role,
-                onLongClick = toLongPressMotionOrNull(gestureProperties.actionsDelegate, viewDescription),
-                onClick = toTapMotionOrEmpty(gestureProperties.actionsDelegate, viewDescription),
+                onLongClick = toLongPressMotionOrNull(gestureProperties.actionsDelegate, BUTTON_LONG_PRESSED, viewDescription),
+                onClick = toTapMotionOrEmpty(gestureProperties.actionsDelegate, BUTTON_TAPPED, viewDescription),
             )
     }
 )
 
-private fun List<Action>.toTapMotionOrEmpty(
+internal fun List<Action>.toTapMotionOrEmpty(
     actionsDelegate: AppcuesActionsDelegate,
+    interactionType: InteractionType,
     viewDescription: String?
 ): (() -> Unit) {
     // filter only TAP motions
@@ -294,15 +296,16 @@ private fun List<Action>.toTapMotionOrEmpty(
             {
                 actionsDelegate.onActions(
                     actions = this,
-                    interactionType = BUTTON_TAPPED,
+                    interactionType = interactionType,
                     viewDescription = viewDescription
                 )
             }
         } ?: { }
 }
 
-private fun List<Action>.toLongPressMotionOrNull(
+internal fun List<Action>.toLongPressMotionOrNull(
     actionsDelegate: AppcuesActionsDelegate,
+    interactionType: InteractionType,
     viewDescription: String?
 ): (() -> Unit)? {
     // filter only LONG_PRESS motions
@@ -317,7 +320,7 @@ private fun List<Action>.toLongPressMotionOrNull(
             {
                 actionsDelegate.onActions(
                     actions = this,
-                    interactionType = BUTTON_LONG_PRESSED,
+                    interactionType = interactionType,
                     viewDescription = viewDescription
                 )
             }

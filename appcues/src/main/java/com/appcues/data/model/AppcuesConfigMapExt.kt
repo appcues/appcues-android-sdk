@@ -1,11 +1,14 @@
 package com.appcues.data.model
 
+import com.appcues.action.ActionRegistry
 import com.appcues.data.MoshiConfiguration
+import com.appcues.data.mapper.action.toAction
 import com.appcues.data.mapper.step.primitives.mapPrimitive
 import com.appcues.data.mapper.styling.mapComponentColor
 import com.appcues.data.mapper.styling.mapComponentStyle
 import com.appcues.data.model.styling.ComponentColor
 import com.appcues.data.model.styling.ComponentStyle
+import com.appcues.data.remote.appcues.response.action.ActionResponse
 import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse
 import com.appcues.data.remote.appcues.response.styling.StyleColorResponse
 import com.appcues.data.remote.appcues.response.styling.StyleResponse
@@ -23,10 +26,7 @@ internal inline fun <reified T : Any?> AppcuesConfigMap.getConfig(key: String): 
     // if hash config is null, return default
     if (this == null) return null
     // get value by key else return default
-    return get(key)?.let {
-        // if is instance of T return it else return default
-        if (it is T) it else null
-    }
+    return get(key) as? T
 }
 
 internal fun AppcuesConfigMap.getConfigInt(key: String): Int? {
@@ -52,6 +52,11 @@ internal fun AppcuesConfigMap.getConfigPrimitive(key: String): ExperiencePrimiti
     return getConfig<Any>(key)?.let {
         MoshiConfiguration.fromAny<PrimitiveResponse>(it)?.mapPrimitive()
     }
+}
+
+internal fun AppcuesConfigMap.getConfigActions(key: String, actionRegistry: ActionRegistry): List<Action> {
+    return getConfig<List<Any>>(key)?.map { MoshiConfiguration.fromAny<ActionResponse>(it) }
+        ?.mapNotNull { response -> response?.toAction(actionRegistry) } ?: arrayListOf()
 }
 
 internal fun AppcuesConfigMap.getConfigColor(key: String): ComponentColor? {
