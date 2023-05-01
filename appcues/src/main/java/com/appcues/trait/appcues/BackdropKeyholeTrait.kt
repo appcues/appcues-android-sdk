@@ -22,41 +22,57 @@ import androidx.compose.ui.unit.dp
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.getConfig
 import com.appcues.trait.BackdropDecoratingTrait
+import com.appcues.trait.MetadataSettingTrait
 import com.appcues.trait.appcues.BackdropKeyholeTrait.ConfigShape.CIRCLE
 import com.appcues.trait.appcues.BackdropKeyholeTrait.ConfigShape.RECTANGLE
 import com.appcues.trait.extensions.getRect
+import com.appcues.trait.extensions.getRectEncompassesRadius
+import com.appcues.trait.extensions.inflateOrEmpty
 import com.appcues.trait.extensions.rememberFloatStepAnimation
 import com.appcues.trait.extensions.rememberTargetRectangleInfo
 import com.appcues.ui.composables.LocalAppcuesStepMetadata
 import com.appcues.ui.utils.rememberAppcuesWindowInfo
-import kotlin.math.max
-import kotlin.math.pow
-import kotlin.math.sqrt
 
 internal class BackdropKeyholeTrait(
     override val config: AppcuesConfigMap,
-) : BackdropDecoratingTrait {
+) : BackdropDecoratingTrait, MetadataSettingTrait {
 
     companion object {
 
         const val TYPE = "@appcues/backdrop-keyhole"
+
+        const val METADATA_KEYHOLE_SETTINGS = "keyholeSettings"
     }
 
-    private enum class ConfigShape {
+    enum class ConfigShape {
         RECTANGLE, CIRCLE
     }
 
-    private val shape = when (config.getConfig<String>("shape")) {
-        "circle" -> CIRCLE
-        "rectangle" -> RECTANGLE
-        else -> RECTANGLE
+    data class KeyholeSettings(
+        val cornerRadius: Double,
+        val spreadRadius: Double,
+        val blurRadius: Double,
+        val shape: ConfigShape,
+    )
+
+    private val keyholeSettings = KeyholeSettings(
+        cornerRadius = config.getConfig<Double>("cornerRadius") ?: 0.0,
+        spreadRadius = config.getConfig<Double>("spreadRadius") ?: 0.0,
+        blurRadius = config.getConfig<Double>("blurRadius") ?: 0.0,
+        shape = getConfigShape()
+    )
+
+    private fun getConfigShape(): ConfigShape {
+        return when (config.getConfig<String>("shape")) {
+            "circle" -> CIRCLE
+            "rectangle" -> RECTANGLE
+            else -> RECTANGLE
+        }
     }
 
-    private val configCornerRadius = config.getConfig<Double>("cornerRadius") ?: 0.0
-
-    private val configSpreadRadius = config.getConfig<Double>("spreadRadius") ?: 0.0
-
-    private val configBlurRadius = config.getConfig<Double>("blurRadius") ?: 0.0
+    override fun produceMetadata(): Map<String, Any?> {
+        return hashMapOf(METADATA_KEYHOLE_SETTINGS to keyholeSettings)
+    }
 
     @Composable
     override fun BoxScope.BackdropDecorate(content: @Composable BoxScope.() -> Unit) {
@@ -65,17 +81,17 @@ internal class BackdropKeyholeTrait(
 
         val targetRectInfo = rememberTargetRectangleInfo(metadata)
 
-        val shapeBlurRadius = if (shape == CIRCLE) configBlurRadius.toFloat() else 0.0f
-        val targetRect = targetRectInfo.getRect(rememberAppcuesWindowInfo()).inflateOrEmpty(configSpreadRadius)
+        val shapeBlurRadius = if (keyholeSettings.shape == CIRCLE) keyholeSettings.blurRadius.toFloat() else 0.0f
+        val targetRect = targetRectInfo.getRect(rememberAppcuesWindowInfo()).inflateOrEmpty(keyholeSettings.spreadRadius)
         val floatAnimation = rememberFloatStepAnimation(metadata)
-        val encompassesDiameter = getRectEncompassesRadius(targetRect.width, targetRect.height, shapeBlurRadius) * 2
+        val encompassesDiameter = targetRect.getRectEncompassesRadius(shapeBlurRadius) * 2
 
         // animated values
         val xPosition = animateXPositionAsState(targetRect, encompassesDiameter, floatAnimation)
         val yPosition = animateYPositionAsState(targetRect, encompassesDiameter, floatAnimation)
-        val width = animateFloatAsState(if (shape == RECTANGLE) targetRect.width else encompassesDiameter, floatAnimation)
-        val height = animateFloatAsState(if (shape == RECTANGLE) targetRect.height else encompassesDiameter, floatAnimation)
-        val cornerRadius = animateFloatAsState(getCornerRadius(targetRect.width, targetRect.height, shapeBlurRadius), floatAnimation)
+        val width = animateFloatAsState(if (keyholeSettings.shape == RECTANGLE) targetRect.width else encompassesDiameter, floatAnimation)
+        val height = animateFloatAsState(if (keyholeSettings.shape == RECTANGLE) targetRect.height else encompassesDiameter, floatAnimation)
+        val cornerRadius = animateFloatAsState(targetRect.getCornerRadius(shapeBlurRadius), floatAnimation)
         val blurRadius = animateFloatAsState(shapeBlurRadius, floatAnimation)
         val encompassesRadiusPx = animateFloatAsState(with(density) { encompassesDiameter.dp.toPx() / 2 }, floatAnimation)
 
@@ -120,7 +136,7 @@ internal class BackdropKeyholeTrait(
         val circleXOffset = (encompassesDiameter - rect.width) / 2
 
         return animateFloatAsState(
-            targetValue = if (shape == RECTANGLE) rect.left else rect.left - circleXOffset,
+            targetValue = if (keyholeSettings.shape == RECTANGLE) rect.left else rect.left - circleXOffset,
             animationSpec = animationSpec
         )
     }
@@ -130,25 +146,17 @@ internal class BackdropKeyholeTrait(
         val circleYOffset = (encompassesDiameter - rect.height) / 2
 
         return animateFloatAsState(
-            targetValue = if (shape == RECTANGLE) rect.top else rect.top - circleYOffset,
+            targetValue = if (keyholeSettings.shape == RECTANGLE) rect.top else rect.top - circleYOffset,
             animationSpec = animationSpec
         )
     }
 
-    private fun getCornerRadius(width: Float, height: Float, blurRadius: Float): Float {
-        return when (shape) {
-            RECTANGLE -> configCornerRadius.toFloat()
-            CIRCLE -> (getRectEncompassesRadius(width, height, blurRadius))
+    private fun Rect.getCornerRadius(blurRadius: Float): Float {
+        return when (keyholeSettings.shape) {
+            RECTANGLE -> keyholeSettings.cornerRadius.toFloat()
+            CIRCLE -> (getRectEncompassesRadius(blurRadius))
                 // calculate Radius that encompasses the rect
                 .let { ((it * Math.PI) / 2).toFloat() }
         }
-    }
-
-    private fun getRectEncompassesRadius(width: Float, height: Float, blurRadius: Float): Float {
-        return max((sqrt(width.pow(2) + height.pow(2)) / 2) + blurRadius, 0f)
-    }
-
-    private fun Rect?.inflateOrEmpty(spreadRadius: Double): Rect {
-        return this?.inflate(spreadRadius.toFloat()) ?: Rect(Offset(0f, 0f), Size(0f, 0f))
     }
 }
