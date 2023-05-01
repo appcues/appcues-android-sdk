@@ -17,6 +17,7 @@ import com.appcues.data.model.ExperienceStepFormState
 import com.appcues.data.model.ExperienceTrigger
 import com.appcues.data.remote.appcues.response.experience.ExperienceResponse
 import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse
+import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.StackPrimitiveResponse
 import com.appcues.data.remote.appcues.response.trait.TraitResponse
 import com.appcues.di.AppcuesKoinContext
 import com.appcues.logging.Logcues
@@ -30,6 +31,7 @@ import com.appcues.ui.composables.isBackdropVisible
 import com.appcues.ui.composables.isContentVisible
 import com.appcues.ui.primitive.Compose
 import com.appcues.ui.theme.AppcuesTheme
+import java.util.UUID
 
 // This helper supports testing a single experience primitive (can have nested children),
 // defined in the given json string.
@@ -54,7 +56,7 @@ fun ComposeContent(json: String, imageLoader: ImageLoader) {
 // It constructs a synthetic 1-step experience. The traits are applied at the experience level. The
 // optional content is injected into the single step, if present.
 @Composable
-fun ComposeContainer(context: Context, stepContentJson: String?, traitJson: List<String>, imageLoader: ImageLoader)
+fun ComposeContainer(context: Context, stepContentJson: List<String>?, traitJson: List<String>, imageLoader: ImageLoader)
 {
     // set up a Koin scope for testing - for experience/trait mapping, trait registry, etc
     val scope = AppcuesKoinContext.createAppcuesScope(context, AppcuesConfig("", ""))
@@ -67,9 +69,11 @@ fun ComposeContainer(context: Context, stepContentJson: String?, traitJson: List
     }
 
     // injecting content is optional, may only be testing a trait
-    val stepContent = stepContentJson?.let {
-        MoshiConfiguration.moshi.adapter(PrimitiveResponse::class.java).fromJson(it)!!
-    }
+    val stepContent = stepContentJson?.let {contentItems ->
+        contentItems.map { contentItem ->
+            MoshiConfiguration.moshi.adapter(PrimitiveResponse::class.java).fromJson(contentItem)!!
+        }
+    } ?: listOf()
 
     // update the experience to add the given traits at the experience level
      val updatedExperienceResponse = experienceResponse.copy(
@@ -79,7 +83,11 @@ fun ComposeContainer(context: Context, stepContentJson: String?, traitJson: List
                 children = stepContainerResponse.children.map { stepResponse ->
                     stepResponse.copy(
                         // optionally inject the step content
-                        content = stepContent ?: stepResponse.content
+                        content = StackPrimitiveResponse(
+                            id = UUID.randomUUID(),
+                            orientation = "vertical",
+                            items = stepContent,
+                        )
                     )
                 }
             )
