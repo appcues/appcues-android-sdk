@@ -12,8 +12,8 @@ appcues.identify(userId, properties)
 
 The inverse of identifying is resetting. For example, if a user logs out of your app. Calling `reset()` will disable tracking of screens and events until a user is identified again.
 
-### Sender Validation
-If your Appcues account is configured for sender validation, pass the user signature in the properties included on the `identify(userId, properties)` call. Use the key "appcues:user_id_signature" and the string value of the signature.
+### Identity Verification
+If your Appcues account is configured for identity verification, pass the user signature in the properties included on the `identify(userId, properties)` call. Use the key "appcues:user_id_signature" and the string value of the signature.
 
 ```kotlin
 appcues.identify(userId, mapOf("appcues:user_id_signature" to signature))
