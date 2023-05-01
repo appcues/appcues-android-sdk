@@ -8,12 +8,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.unit.DpOffset
-import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import com.appcues.action.ActionProcessor
 import com.appcues.action.ActionRegistry
@@ -24,9 +25,15 @@ import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.Interactio
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.getConfigActions
 import com.appcues.trait.BackdropDecoratingTrait
+import com.appcues.trait.appcues.BackdropKeyholeTrait.ConfigShape.CIRCLE
+import com.appcues.trait.appcues.BackdropKeyholeTrait.ConfigShape.RECTANGLE
+import com.appcues.trait.appcues.BackdropKeyholeTrait.KeyholeSettings
 import com.appcues.trait.extensions.getRect
+import com.appcues.trait.extensions.getRectEncompassesRadius
+import com.appcues.trait.extensions.inflateOrEmpty
 import com.appcues.trait.extensions.rememberTargetRectangleInfo
 import com.appcues.ui.composables.AppcuesActionsDelegate
+import com.appcues.ui.composables.AppcuesStepMetadata
 import com.appcues.ui.composables.LocalAppcuesStepMetadata
 import com.appcues.ui.extensions.toLongPressMotionOrNull
 import com.appcues.ui.extensions.toTapMotionOrEmpty
@@ -61,15 +68,23 @@ internal class TargetInteractionTrait(
         content()
 
         val targetRectInfo = rememberTargetRectangleInfo(LocalAppcuesStepMetadata.current)
+        val keyholeSettings = rememberKeyholeSettings(LocalAppcuesStepMetadata.current)
         // only draws when target rectangle info exists
-        targetRectInfo.getRect(rememberAppcuesWindowInfo())?.let { rect ->
-            val sizeDp = DpSize(rect.width.dp, rect.height.dp)
-            val offsetDp = DpOffset(rect.left.dp, rect.top.dp)
+        targetRectInfo.getRect(rememberAppcuesWindowInfo())?.let {
+            val rect = it.inflateOrEmpty(keyholeSettings.spreadRadius)
+            val shapeBlurRadius = if (keyholeSettings.shape == CIRCLE) keyholeSettings.blurRadius.toFloat() else 0.0f
+            val encompassesDiameter = rect.getRectEncompassesRadius(shapeBlurRadius) * 2
+            val width = if (keyholeSettings.shape == RECTANGLE) rect.width else encompassesDiameter
+            val height = if (keyholeSettings.shape == RECTANGLE) rect.height else encompassesDiameter
+            val offsetX = if (keyholeSettings.shape == RECTANGLE) rect.left else rect.left - ((encompassesDiameter - rect.width) / 2)
+            val offsetY = if (keyholeSettings.shape == RECTANGLE) rect.top else rect.top - ((encompassesDiameter - rect.height) / 2)
+            val clipShape = if (keyholeSettings.shape == RECTANGLE) RoundedCornerShape(keyholeSettings.cornerRadius.dp) else CircleShape
 
             Box(
                 modifier = Modifier
-                    .size(sizeDp)
-                    .offset(x = offsetDp.x, y = offsetDp.y)
+                    .size(width = width.dp, height = height.dp)
+                    .offset(x = offsetX.dp, y = offsetY.dp)
+                    .clip(clipShape)
                     // add click listener but without any ripple effect.
                     .then(
                         if (actions.isNotEmpty()) {
@@ -85,5 +100,11 @@ internal class TargetInteractionTrait(
                     )
             )
         }
+    }
+
+    @Composable
+    internal fun rememberKeyholeSettings(metadata: AppcuesStepMetadata): KeyholeSettings {
+        return (metadata.current[BackdropKeyholeTrait.METADATA_KEYHOLE_SETTINGS] as KeyholeSettings?)
+            ?: KeyholeSettings(0.0, 0.0, 0.0, RECTANGLE)
     }
 }
