@@ -18,7 +18,7 @@
         }
     }
     </script>
-<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<script src="https://unpkg.com/kotlin-playground@1"></script><script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
 <link href="../../../styles/style.css" rel="Stylesheet">
 <link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
 <link href="../../../styles/main.css" rel="Stylesheet">
@@ -51,12 +51,67 @@
         <div id="sideMenu"></div>
     </div>
     <div id="main">
-<div class="main-content" id="content" pageIds="appcues::com.appcues.trait/ContentWrappingTrait/WrapContent/#kotlin.Function2[kotlin.Boolean,androidx.compose.foundation.layout.PaddingValues?,kotlin.Unit]/PointingToDeclaration//1172753313">
+<div class="main-content" id="content" pageIds="appcues::com.appcues.trait/ContentWrappingTrait/WrapContent/#kotlin.Function3[androidx.compose.ui.Modifier,androidx.compose.foundation.layout.PaddingValues,androidx.compose.foundation.layout.PaddingValues,kotlin.Unit]/PointingToDeclaration//1172753313">
   <div class="breadcrumbs"><a href="../../../index.html">appcues</a><span class="delimiter">/</span><a href="../index.html">com.appcues.trait</a><span class="delimiter">/</span><a href="index.html">ContentWrappingTrait</a><span class="delimiter">/</span><span class="current">WrapContent</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Wrap</span><wbr></wbr><span><span>Content</span></span></h1>
   </div>
-  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":appcues:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">abstract </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="-wrap-content.html"><span class="token function">WrapContent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">content<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a> </span><span class="token punctuation">(</span><span class="token keyword"></span>hasFixedHeight<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span><span class="token keyword"></span>contentPadding<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/PaddingValues.html">PaddingValues</a><span class="token operator">?</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><p class="paragraph">Create a wrap of the content, the default wrap used by appcues is the modal with different types.</p><p class="paragraph">When creating a custom WrapContent is important to pass hasFixedHeight as true if you are defining the height constraint yourself. or else the SDK will consider the container with the same height as the content we will inflate within</p><p class="paragraph">contentPadding is passed from the WrapContent without applying it yourself so we can modify the correct container in order to keep the vertical scroll nicely at the edge or the container.</p></div></div>
+  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":appcues:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">abstract </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="-wrap-content.html"><span class="token function">WrapContent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">content<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a> </span><span class="token punctuation">(</span><span class="token keyword"></span>modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token punctuation">, </span><span class="token keyword"></span>containerPadding<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/PaddingValues.html">PaddingValues</a><span class="token punctuation">, </span><span class="token keyword"></span>safeAreaInsets<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/PaddingValues.html">PaddingValues</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><p class="paragraph">Creates a wrapper for the <a href="-wrap-content.html">content</a>.</p><p class="paragraph">Example usage:</p><h4 class="">Samples</h4><div class="sample-container"><pre><code class="runnablesample monospace block lang-kotlin" theme="idea">import android.content.Context
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import com.appcues.data.model.AppcuesConfigMap
+import com.appcues.data.model.getConfigOrDefault
+import com.appcues.data.model.getConfigStyle
+import com.appcues.trait.ContentWrappingTrait
+import com.appcues.trait.PresentingTrait
+import com.appcues.ui.AppcuesActivity
+import com.appcues.ui.modal.BottomSheetModal
+import com.appcues.ui.modal.DialogModal
+import com.appcues.ui.modal.ExpandedBottomSheetModal
+import com.appcues.ui.modal.FullScreenModal
+import com.appcues.ui.utils.rememberAppcuesWindowInfo
+import org.koin.core.scope.Scope
+fun main() { 
+   //sampleStart 
+   internal class ModalTrait(
+    override val config: AppcuesConfigMap,
+    private val scope: Scope,
+    private val context: Context,
+) : ContentWrappingTrait, PresentingTrait {
+
+    companion object {
+
+        const val TYPE = &quot;@appcues/modal&quot;
+    }
+
+    // should we have a default presentation style?
+    private val presentationStyle = config.getConfigOrDefault(&quot;presentationStyle&quot;, &quot;full&quot;)
+
+    private val style = config.getConfigStyle(&quot;style&quot;)
+
+    @Composable
+    override fun WrapContent(
+        content: @Composable (modifier: Modifier, containerPadding: PaddingValues, safeAreaInsets: PaddingValues) -&gt; Unit
+    ) {
+        val windowInfo = rememberAppcuesWindowInfo()
+
+        when (presentationStyle) {
+            &quot;dialog&quot; -&gt; DialogModal(style, content, windowInfo)
+            &quot;full&quot; -&gt; FullScreenModal(style, content, windowInfo)
+            &quot;sheet&quot; -&gt; ExpandedBottomSheetModal(style, content, windowInfo)
+            &quot;halfSheet&quot; -&gt; BottomSheetModal(style, content, windowInfo)
+            // what to do if presentationStyle is not valid?
+            else -&gt; Unit
+        }
+    }
+
+    override fun present() {
+        context.startActivity(AppcuesActivity.getIntent(context, scope.id))
+    }
+} 
+   //sampleEnd
+}</code></pre></div><h4 class="">Parameters</h4><div data-togglable="Parameters"><div class="table" data-togglable="Parameters"><div class="table-row" data-filterable-current=":appcues:dokkaHtml/release" data-filterable-set=":appcues:dokkaHtml/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><u><span><span>content</span></span></u></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">The content of the wrapper.     modifier gives flexibility of the content main box down the stream of composition.     containerPadding the padding defined in container style. The main content renders inside this padding.     safeAreaInsets defines safe area padding for the content inside.</p></div></div></div></div></div></div></div></div></div>
 </div>
       <div class="footer">
         <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2023 Copyright</span><span

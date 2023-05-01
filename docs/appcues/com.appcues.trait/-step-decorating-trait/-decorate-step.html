@@ -18,7 +18,7 @@
         }
     }
     </script>
-<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<script src="https://unpkg.com/kotlin-playground@1"></script><script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
 <link href="../../../styles/style.css" rel="Stylesheet">
 <link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
 <link href="../../../styles/main.css" rel="Stylesheet">
@@ -51,12 +51,81 @@
         <div id="sideMenu"></div>
     </div>
     <div id="main">
-<div class="main-content" id="content" pageIds="appcues::com.appcues.trait/StepDecoratingTrait/DecorateStep/androidx.compose.foundation.layout.BoxScope#com.appcues.trait.StepDecoratingPadding/PointingToDeclaration//1172753313">
+<div class="main-content" id="content" pageIds="appcues::com.appcues.trait/StepDecoratingTrait/DecorateStep/androidx.compose.foundation.layout.BoxScope#androidx.compose.foundation.layout.PaddingValues#androidx.compose.foundation.layout.PaddingValues#com.appcues.trait.StickyContentPadding/PointingToDeclaration//1172753313">
   <div class="breadcrumbs"><a href="../../../index.html">appcues</a><span class="delimiter">/</span><a href="../index.html">com.appcues.trait</a><span class="delimiter">/</span><a href="index.html">StepDecoratingTrait</a><span class="delimiter">/</span><span class="current">DecorateStep</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Decorate</span><wbr></wbr><span><span>Step</span></span></h1>
   </div>
-  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":appcues:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">abstract </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/BoxScope.html">BoxScope</a><span class="token punctuation">.</span><a href="-decorate-step.html"><span class="token function">DecorateStep</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">stepDecoratingPadding<span class="token operator">: </span><a href="../-step-decorating-padding/index.html">StepDecoratingPadding</a></span></span><span class="token punctuation">)</span></div></div></div>
+  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":appcues:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">abstract </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/BoxScope.html">BoxScope</a><span class="token punctuation">.</span><a href="-decorate-step.html"><span class="token function">DecorateStep</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">containerPadding<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/PaddingValues.html">PaddingValues</a><span class="token punctuation">, </span></span><span class="parameter ">safeAreaInsets<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/PaddingValues.html">PaddingValues</a><span class="token punctuation">, </span></span><span class="parameter ">stickyContentPadding<span class="token operator">: </span><a href="../-sticky-content-padding/index.html">StickyContentPadding</a></span></span><span class="token punctuation">)</span></div><p class="paragraph">Decorates Specific step</p><p class="paragraph">Example usage:</p><h4 class="">Samples</h4><div class="sample-container"><pre><code class="runnablesample monospace block lang-kotlin" theme="idea">import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.invisibleToUser
+import androidx.compose.ui.semantics.semantics
+import com.appcues.data.model.AppcuesConfigMap
+import com.appcues.data.model.getConfigPrimitive
+import com.appcues.trait.ContainerDecoratingTrait
+import com.appcues.trait.ContainerDecoratingTrait.ContainerDecoratingType
+import com.appcues.trait.ExperienceTraitLevel
+import com.appcues.trait.ExperienceTraitLevel.GROUP
+import com.appcues.trait.ExperienceTraitLevel.STEP
+import com.appcues.trait.StepDecoratingTrait
+import com.appcues.trait.StepDecoratingTrait.StepDecoratingType
+import com.appcues.trait.StickyContentPadding
+import com.appcues.ui.primitive.Compose
+fun main() { 
+   //sampleStart 
+   internal class BackgroundContentTrait(
+    override val config: AppcuesConfigMap,
+    private val level: ExperienceTraitLevel,
+) : ContainerDecoratingTrait, StepDecoratingTrait {
+
+    companion object {
+
+        const val TYPE = &quot;@appcues/background-content&quot;
+    }
+
+    override val stepComposeOrder = StepDecoratingType.UNDERLAY
+
+    override val containerComposeOrder = ContainerDecoratingType.UNDERLAY
+
+    private val content = config.getConfigPrimitive(&quot;content&quot;)
+
+    @Composable
+    override fun BoxScope.DecorateStep(
+        containerPadding: PaddingValues,
+        safeAreaInsets: PaddingValues,
+        stickyContentPadding: StickyContentPadding,
+    ) {
+        if (level == STEP) Decorate()
+    }
+
+    @Composable
+    override fun BoxScope.DecorateContainer(
+        containerPadding: PaddingValues,
+        safeAreaInsets: PaddingValues,
+    ) {
+        if (level == GROUP) Decorate()
+    }
+
+    @OptIn(ExperimentalComposeUiApi::class)
+    @Composable
+    private fun BoxScope.Decorate() {
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                // merge all children nodes to this one, and mark as invisibleToUser so talkback wont read.
+                // this is the same as old xml: importantForAccessibility = false
+                .semantics(true) { invisibleToUser() }
+        ) {
+            content?.Compose(this)
+        }
+    }
+} 
+   //sampleEnd
+}</code></pre></div><h4 class="">Parameters</h4><div data-togglable="Parameters"><div class="table" data-togglable="Parameters"><div class="table-row" data-filterable-current=":appcues:dokkaHtml/release" data-filterable-set=":appcues:dokkaHtml/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><u><span>container</span><wbr></wbr><span><span>Padding</span></span></u></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">The padding defined in the style of the container, to apply to main content within.</p></div></div></div></div></div><div class="table-row" data-filterable-current=":appcues:dokkaHtml/release" data-filterable-set=":appcues:dokkaHtml/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><u><span>safe</span><wbr></wbr><span>Area</span><wbr></wbr><span><span>Insets</span></span></u></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">The safe area information from the wrapper trait.</p></div></div></div></div></div><div class="table-row" data-filterable-current=":appcues:dokkaHtml/release" data-filterable-set=":appcues:dokkaHtml/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><u><span>sticky</span><wbr></wbr><span>Content</span><wbr></wbr><span><span>Padding</span></span></u></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">Padding amount defined by sticky content elements in this step</p></div></div></div></div></div></div></div></div></div>
 </div>
       <div class="footer">
         <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2023 Copyright</span><span

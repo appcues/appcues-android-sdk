@@ -18,7 +18,7 @@
         }
     }
     </script>
-<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<script src="https://unpkg.com/kotlin-playground@1"></script><script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
 <link href="../../../styles/style.css" rel="Stylesheet">
 <link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
 <link href="../../../styles/main.css" rel="Stylesheet">
@@ -56,7 +56,62 @@
   <div class="cover ">
     <h1 class="cover"><span><span>present</span></span></h1>
   </div>
-  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":appcues:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="present.html"><span class="token function">present</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":appcues:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="present.html"><span class="token function">present</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><p class="paragraph">Presents the experience.</p><p class="paragraph">If this method cannot properly apply the trait behavior, it may throw an AppcuesTraitException, ending the attempt to display the experience.</p><p class="paragraph">Example usage:</p><h4 class="">Samples</h4><div class="sample-container"><pre><code class="runnablesample monospace block lang-kotlin" theme="idea">import android.content.Context
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import com.appcues.data.model.AppcuesConfigMap
+import com.appcues.data.model.getConfigOrDefault
+import com.appcues.data.model.getConfigStyle
+import com.appcues.trait.ContentWrappingTrait
+import com.appcues.trait.PresentingTrait
+import com.appcues.ui.AppcuesActivity
+import com.appcues.ui.modal.BottomSheetModal
+import com.appcues.ui.modal.DialogModal
+import com.appcues.ui.modal.ExpandedBottomSheetModal
+import com.appcues.ui.modal.FullScreenModal
+import com.appcues.ui.utils.rememberAppcuesWindowInfo
+import org.koin.core.scope.Scope
+fun main() { 
+   //sampleStart 
+   internal class ModalTrait(
+    override val config: AppcuesConfigMap,
+    private val scope: Scope,
+    private val context: Context,
+) : ContentWrappingTrait, PresentingTrait {
+
+    companion object {
+
+        const val TYPE = &quot;@appcues/modal&quot;
+    }
+
+    // should we have a default presentation style?
+    private val presentationStyle = config.getConfigOrDefault(&quot;presentationStyle&quot;, &quot;full&quot;)
+
+    private val style = config.getConfigStyle(&quot;style&quot;)
+
+    @Composable
+    override fun WrapContent(
+        content: @Composable (modifier: Modifier, containerPadding: PaddingValues, safeAreaInsets: PaddingValues) -&gt; Unit
+    ) {
+        val windowInfo = rememberAppcuesWindowInfo()
+
+        when (presentationStyle) {
+            &quot;dialog&quot; -&gt; DialogModal(style, content, windowInfo)
+            &quot;full&quot; -&gt; FullScreenModal(style, content, windowInfo)
+            &quot;sheet&quot; -&gt; ExpandedBottomSheetModal(style, content, windowInfo)
+            &quot;halfSheet&quot; -&gt; BottomSheetModal(style, content, windowInfo)
+            // what to do if presentationStyle is not valid?
+            else -&gt; Unit
+        }
+    }
+
+    override fun present() {
+        context.startActivity(AppcuesActivity.getIntent(context, scope.id))
+    }
+} 
+   //sampleEnd
+}</code></pre></div></div></div>
 </div>
       <div class="footer">
         <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2023 Copyright</span><span

@@ -18,7 +18,7 @@
         }
     }
     </script>
-<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<script src="https://unpkg.com/kotlin-playground@1"></script><script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
 <link href="../../../styles/style.css" rel="Stylesheet">
 <link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
 <link href="../../../styles/main.css" rel="Stylesheet">
@@ -56,7 +56,155 @@
   <div class="cover ">
     <h1 class="cover"><span>Create</span><wbr></wbr><span>Content</span><wbr></wbr><span><span>Holder</span></span></h1>
   </div>
-  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":appcues:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">abstract </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/BoxScope.html">BoxScope</a><span class="token punctuation">.</span><a href="-create-content-holder.html"><span class="token function">CreateContentHolder</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">containerPages<span class="token operator">: </span><a href="-container-pages/index.html">ContentHolderTrait.ContainerPages</a></span></span><span class="token punctuation">)</span></div></div></div>
+  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":appcues:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">abstract </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/BoxScope.html">BoxScope</a><span class="token punctuation">.</span><a href="-create-content-holder.html"><span class="token function">CreateContentHolder</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">containerPages<span class="token operator">: </span><a href="-container-pages/index.html">ContentHolderTrait.ContainerPages</a></span></span><span class="token punctuation">)</span></div><p class="paragraph">Defines the content holder, usually used to support different kinds of pagination between steps that belong inside the same step group</p><p class="paragraph">Example usage:</p><h4 class="">Samples</h4><div class="sample-container"><pre><code class="runnablesample monospace block lang-kotlin" theme="idea">import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.layout.onSizeChanged
+import com.appcues.trait.ContentHolderTrait
+import com.appcues.trait.ContentHolderTrait.ContainerPages
+import com.appcues.ui.composables.AppcuesPaginationData
+import com.appcues.ui.composables.LocalAppcuesPaginationDelegate
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.PagerState
+import com.google.accompanist.pager.rememberPagerState
+import kotlinx.coroutines.flow.drop
+fun main() { 
+   //sampleStart 
+   internal class CarouselTrait(
+    override val config: Map&lt;String, Any&gt;?,
+) : ContentHolderTrait {
+
+    companion object {
+
+        const val TYPE = &quot;@appcues/carousel&quot;
+    }
+
+    @OptIn(ExperimentalPagerApi::class)
+    @Composable
+    override fun BoxScope.CreateContentHolder(containerPages: ContainerPages) {
+        val pagerState = rememberPagerState(containerPages.currentPage).also {
+            containerPages.setPaginationData(
+                AppcuesPaginationData(
+                    pageCount = it.pageCount,
+                    currentPage = it.currentPage,
+                    scrollOffset = it.currentPageOffset
+                )
+            )
+        }
+
+        val localPagination = LocalAppcuesPaginationDelegate.current
+
+        // keep track if programmatically scrolling to a page, so we don't raise
+        // page change events for intermediate pages during the scroll
+        val scrollingToPage = remember { mutableStateOf&lt;Int?&gt;(null) }
+
+        // state machine changed the page, so we animate to that page
+        LaunchedEffect(containerPages.currentPage) {
+            // only trigger the scroll if we are not already on the desired page
+            if (pagerState.currentPage != containerPages.currentPage) {
+                // store this value so we can guard against excess page change events below
+                scrollingToPage.value = containerPages.currentPage
+                pagerState.animateScrollToPage(containerPages.currentPage)
+            }
+        }
+
+        // we scrolled over to next page, so we notify the local pagination listener
+        LaunchedEffect(pagerState) {
+            snapshotFlow { pagerState.currentPage }
+                .collect {
+                    if (scrollingToPage.value != null) {
+                        // if we've reached the destination of a programmatic scroll, clear this value
+                        // and re-enable page change events for user interaction.
+                        // otherwise, leave value as-is, as we are still processing a programmatic scroll
+                        scrollingToPage.value = if (it == scrollingToPage.value) null else scrollingToPage.value
+                    } else {
+                        // normal user interaction has changed the page, update listener
+                        localPagination.onPageChanged(it)
+                    }
+                }
+        }
+
+        // this is a workaround a problem that was found with this HorizontalPager
+        // where sometimes the currentPageOffset number is bigger or smaller than the expected range of {-1.0f, 1.0f}
+        LaunchedEffect(pagerState.currentPageOffset) {
+            snapshotFlow { pagerState.currentPageOffset }
+                .drop(1)
+                .collect {
+                    when {
+                        it &lt; -1.0f -&gt; pagerState.scrollToPage(pagerState.currentPage - 1)
+                        it &gt; 1.0f -&gt; pagerState.scrollToPage(pagerState.currentPage + 1)
+                    }
+                }
+        }
+
+        val horizontalPagerSize = remember { HorizontalPagerSize(pagerState) }
+
+        HorizontalPager(
+            modifier = Modifier
+                // basically we are measuring the pager layout and if we do have a valid containerHeight we use onGloballyPositioned
+                // else we will go with the measured height from the HorizontalPager until we can calculate the container properly
+                .layout { measurable, constraints -&gt;
+                    val placeable = measurable.measure(constraints)
+                    val containerHeight = horizontalPagerSize.getContainerHeight()
+                    val calculatedHeight = if (containerHeight.isNaN()) placeable.height else containerHeight.toInt()
+
+                    layout(constraints.maxWidth, calculatedHeight) { placeable.place(0, 0) }
+                },
+            count = containerPages.pageCount,
+            state = pagerState,
+            verticalAlignment = Alignment.Top
+        ) { index -&gt;
+            Box(
+                // gets the size of each page and store it in a remembered state
+                modifier = Modifier.onSizeChanged { horizontalPagerSize.onHeightChanged(index, it.height) }
+            ) {
+                containerPages.composePage(index)
+            }
+        }
+    }
+
+    @ExperimentalPagerApi
+    private class HorizontalPagerSize constructor(private val pagerState: PagerState) {
+
+        val heightMap = mutableStateMapOf&lt;Int, Int&gt;()
+
+        fun getContainerHeight(): Float {
+            val currentPageSize = heightMap[pagerState.currentPage] ?: 0
+            val nextPageSize = when {
+                pagerState.currentPageOffset &gt; 0 -&gt; heightMap[pagerState.currentPage + 1] ?: 0
+                pagerState.currentPageOffset &lt; 0 -&gt; heightMap[pagerState.currentPage - 1] ?: 0
+                else -&gt; currentPageSize
+            }
+
+            val offsetNormalized = if (pagerState.currentPageOffset &lt; 0)
+                pagerState.currentPageOffset * -1 else pagerState.currentPageOffset
+
+            val pageSize = (nextPageSize - currentPageSize) * offsetNormalized + currentPageSize
+
+            // if pageSize is nan or zero we return it so does not restrict
+            // the size to whatever value is in containerSize
+            return if (pageSize.isNaN() || pageSize == 0f) Float.NaN
+            // when we do know whats the size of the page and the container size then we
+            // use whatever is bigger value
+            else pageSize
+        }
+
+        fun onHeightChanged(index: Int, height: Int) {
+            heightMap[index] = height
+        }
+    }
+} 
+   //sampleEnd
+}</code></pre></div><h4 class="">Parameters</h4><div data-togglable="Parameters"><div class="table" data-togglable="Parameters"><div class="table-row" data-filterable-current=":appcues:dokkaHtml/release" data-filterable-set=":appcues:dokkaHtml/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><u><span>countainer</span><wbr></wbr><span><span>Pages</span></span></u></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">current page information</p></div></div></div></div></div></div></div></div></div>
 </div>
       <div class="footer">
         <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2023 Copyright</span><span
