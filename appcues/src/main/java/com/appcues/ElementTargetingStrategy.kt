@@ -105,7 +105,12 @@ data class ViewElement(
     val children: List<ViewElement>?,
 )
 
-internal fun View.isAppcuesView(): Boolean {
+/**
+ * Determine if a View was created by the Appcues SDK, such as the Debugger View, for example.
+ *
+ * @return True if this view was created by the Appcues SDK.
+ */
+fun View.isAppcuesView(): Boolean {
     return this.id == R.id.appcues_debugger_view
 }
 
