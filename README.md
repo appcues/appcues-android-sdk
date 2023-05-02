@@ -1,5 +1,5 @@
 # Appcues Android SDK
-[![CircleCI](https://circleci.com/gh/appcues/appcues-android-sdk.svg?style=shield&circle-token=d80a6bd72e608b1b62c104c87bfcfe8ea3faa7c1)](https://circleci.com/gh/appcues/appcues-android-sdk)
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/appcues/appcues-android-sdk/tree/main.svg?style=shield)](https://dl.circleci.com/status-badge/redirect/gh/appcues/appcues-android-sdk/tree/main)
 [![maven](https://img.shields.io/maven-central/v/com.appcues/appcues)](https://repo1.maven.org/maven2/com/appcues/appcues/)
 [![](https://img.shields.io/badge/-documentation-informational)](https://appcues.github.io/appcues-android-sdk)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/appcues/appcues-android-sdk/blob/main/LICENSE)
