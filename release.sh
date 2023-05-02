@@ -112,13 +112,6 @@ case "$response" in
 		;;
 esac
 
-# get the commits since the last release, filtering ones that aren't relevant.
-changelog=$(git log --pretty=format:"- [%as] %s (%h)" $(git describe --tags --abbrev=0 @^)..@ --abbrev=7 | sed '/[🔧🎬⬆📸✅💡📝]/d')
-tempFile=$(mktemp)
-echo $changelog
-# write changelog to temp file.
-echo "$changelog" >> $tempFile
-
 # get the components of the version string for the properties file update
 newMajorVersion=$(echo $newVersion | cut -sd. -f1)
 newMinorVersion=$(echo $newVersion | cut -sd. -f2)
@@ -134,6 +127,14 @@ sed -i '' "/^VERSION_CLASSIFIER /s/=.*$/= $newVersionClassifier/" ./appcues/appc
 # commit the version change.
 git commit -am "🔖 Update version to $newVersion"
 git push
+
+# get the commits since the last release, filtering ones that aren't relevant.
+changelog=$(git log --pretty=format:"- [%as] %s (%h)" $(git describe --tags --abbrev=0 @^)..@ --abbrev=7 | sed '/[🔧🎬⬆📸✅💡📝]/d')
+tempFile=$(mktemp)
+echo $changelog
+# write changelog to temp file.
+echo "$changelog" >> $tempFile
+
 # gh release will make both the tag and the release itself.
 gh release create $newVersion -F $tempFile -t $newVersion --target $branch
 
