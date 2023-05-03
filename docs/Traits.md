@@ -27,7 +27,7 @@ Each trait type is applied to a specific part of the [composition](https://devel
 
 ### Presenting
 
-A ``PresentingTrait`` is the trait responsible for providing the view in which the experience will be shown. by default we are starting our `AppcuesActivity` that will orchestrate all other traits to ensure the proper order and placement of elements are correct.
+A ``PresentingTrait`` is the trait responsible for providing the view in which the experience will be shown.
 
 > Only a single ``PresentingTrait`` will be applied in the process of displaying an experience step even if multiple are defined.
 

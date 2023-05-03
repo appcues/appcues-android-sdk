@@ -25,5 +25,5 @@ Updating to this release will not require any code changes for most SDK installa
 - `ContentWrappingTrait` method `fun WrapContent(content: @Composable (hasFixedHeight: Boolean, contentPadding: PaddingValues?) -> Unit)` changed to `fun WrapContent(content: @Composable (modifier: Modifier, containerPadding: PaddingValues, safeAreaInsets: PaddingValues) -> Unit)`.
 - `StepDecoratingTrait` method `fun BoxScope.DecorateStep(stepDecoratingPadding: StepDecoratingPadding)` changed to `fun BoxScope.DecorateStep(containerPadding: PaddingValues, safeAreaInsets: PaddingValues, stickyContentPadding: StickyContentPadding)`.
 - `StepDecoratingPadding` renamed to `StickyContentPadding`.
-- `ModalTrait` is now `PresentingTrait`. it is responsible for presenting the container that will hold the modal type presentation (AppcuesActivity).
+- `ModalTrait` is now `PresentingTrait`. it is responsible for presenting the container that will hold the modal type presentation.
 - `ExperienceAction` method `suspend fun execute(appcues: Appcues)` changed to `suspend fun execute()`.
