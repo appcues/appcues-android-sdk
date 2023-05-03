@@ -19,7 +19,7 @@ import androidx.compose.ui.Modifier
  * before the ExperiencePresentingTrait is finished it will go over the exit animation as well.
  */
 @Composable
-fun AppcuesTraitAnimatedVisibility(
+internal fun AppcuesTraitAnimatedVisibility(
     visibleState: MutableTransitionState<Boolean>,
     modifier: Modifier = Modifier,
     enter: EnterTransition = fadeIn() + expandIn(),
