@@ -33,7 +33,7 @@ import java.util.Date
 import java.util.UUID
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class AppcuesRepositoryTest {
+internal class AppcuesRepositoryTest {
 
     @get:Rule
     val dispatcherRule = MainDispatcherRule()

@@ -15,7 +15,7 @@ import org.junit.Test
 import java.util.UUID
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class RetrofitAppcuesRemoteSourceTest {
+internal class RetrofitAppcuesRemoteSourceTest {
 
     private lateinit var appcuesService: AppcuesService
     private lateinit var sessionMonitor: SessionMonitor

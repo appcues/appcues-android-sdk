@@ -32,7 +32,7 @@ import org.koin.mp.KoinPlatformTools
 import java.util.UUID
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class ExperienceRendererTest {
+internal class ExperienceRendererTest {
     @After
     fun shutdown() {
         stopKoin()

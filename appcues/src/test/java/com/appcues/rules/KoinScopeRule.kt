@@ -31,7 +31,7 @@ import java.util.UUID
  * modeled after KoinTestRule, but adapted for our Scoped dependency concept
  * https://github.com/InsertKoinIO/koin/blob/main/core/koin-test-junit4/src/main/kotlin/org/koin/test/KoinTestRule.kt
  */
-class KoinScopeRule : TestWatcher() {
+internal class KoinScopeRule : TestWatcher() {
 
     lateinit var scope: Scope
 

@@ -17,7 +17,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
-class AutoPropertyDecoratorTest {
+internal class AutoPropertyDecoratorTest {
 
     @get:Rule
     val dispatcherRule = MainDispatcherRule()

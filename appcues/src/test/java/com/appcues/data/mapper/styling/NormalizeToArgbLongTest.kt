@@ -3,7 +3,7 @@ package com.appcues.data.mapper.styling
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 
-class NormalizeToArgbLongTest {
+internal class NormalizeToArgbLongTest {
 
     @Test
     fun `normalizeToArgbLong SHOULD properly convert following values`() {

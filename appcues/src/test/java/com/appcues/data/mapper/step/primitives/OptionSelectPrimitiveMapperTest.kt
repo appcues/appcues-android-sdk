@@ -7,7 +7,7 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import java.util.UUID
 
-class OptionSelectPrimitiveMapperTest {
+internal class OptionSelectPrimitiveMapperTest {
     @Test
     fun `optionSelect mapping SHOULD set minSelection equal to option count WHEN minSelection in data is greater than option count`() {
         // GIVEN

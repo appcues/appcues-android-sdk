@@ -11,7 +11,7 @@ import io.mockk.slot
 import io.mockk.verifySequence
 import org.junit.Test
 
-class ActivityRequestBuilderTest {
+internal class ActivityRequestBuilderTest {
 
     private val activityRequestSlot = slot<ActivityRequest>()
     private val eventRequestSlot = slot<EventRequest>()

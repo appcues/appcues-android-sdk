@@ -4,7 +4,7 @@ import com.appcues.data.remote.appcues.response.styling.StyleResponse
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 
-class StyleMapperTest {
+internal class StyleMapperTest {
 
     @Test
     fun `map SHOULD map from StyleResponse to StyleComponent`() {

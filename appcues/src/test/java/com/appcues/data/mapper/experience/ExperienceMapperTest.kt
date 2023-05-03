@@ -1,6 +1,6 @@
 package com.appcues.data.mapper.experience
 
-class ExperienceMapperTest {
+internal class ExperienceMapperTest {
 
     //    private val mapper = ExperienceMapper(
     //        traitMapper = traitMapper,

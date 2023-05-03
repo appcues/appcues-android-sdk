@@ -27,7 +27,7 @@ import io.mockk.slot
 import org.junit.Test
 import java.util.UUID
 
-class StepMapperTest {
+internal class StepMapperTest {
 
     @Test
     fun `map SHOULD extract top and bottom sticky content`() {
