@@ -1,6 +1,6 @@
 package com.appcues.trait
 
-interface MetadataSettingTrait : ExperienceTrait {
+public interface MetadataSettingTrait : ExperienceTrait {
 
     /**
      * produce a map of information that can be accessed from other traits
@@ -10,5 +10,5 @@ interface MetadataSettingTrait : ExperienceTrait {
      *
      * @return map of shared values
      */
-    fun produceMetadata(): Map<String, Any?>
+    public fun produceMetadata(): Map<String, Any?>
 }

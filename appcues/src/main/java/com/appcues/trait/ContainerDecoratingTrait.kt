@@ -4,16 +4,16 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 
-interface ContainerDecoratingTrait : ExperienceTrait {
+public interface ContainerDecoratingTrait : ExperienceTrait {
 
-    enum class ContainerDecoratingType {
+    public enum class ContainerDecoratingType {
         UNDERLAY, OVERLAY
     }
 
     /**
      * [containerComposeOrder] defines whether this trait will be rendered under or over the container's main layout (steps)
      */
-    val containerComposeOrder: ContainerDecoratingType
+    public val containerComposeOrder: ContainerDecoratingType
 
     /**
      * Decorates the container, it can decorate UNDER the content or OVER the content.
@@ -25,5 +25,5 @@ interface ContainerDecoratingTrait : ExperienceTrait {
      * @param safeAreaInsets The safe area information from the wrapper trait.
      */
     @Composable
-    fun BoxScope.DecorateContainer(containerPadding: PaddingValues, safeAreaInsets: PaddingValues)
+    public fun BoxScope.DecorateContainer(containerPadding: PaddingValues, safeAreaInsets: PaddingValues)
 }

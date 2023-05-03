@@ -34,7 +34,7 @@ internal fun rememberLastRenderingState(state: State<UIState>) = remember { muta
  * traits are supposed to react to stuff like page changes, horizontal scrolling
  * between pages, etc..
  */
-data class AppcuesPaginationData(
+public data class AppcuesPaginationData(
     val pageCount: Int,
     val currentPage: Int,
     val scrollOffset: Float

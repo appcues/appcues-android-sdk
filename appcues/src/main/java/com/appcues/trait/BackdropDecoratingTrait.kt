@@ -3,7 +3,7 @@ package com.appcues.trait
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.Composable
 
-interface BackdropDecoratingTrait : ExperienceTrait {
+public interface BackdropDecoratingTrait : ExperienceTrait {
 
     /**
      * Decorates the backdrop of the experience
@@ -15,5 +15,5 @@ interface BackdropDecoratingTrait : ExperienceTrait {
      *                Its important to call [content] if you want to apply every decoration on stack
      */
     @Composable
-    fun BoxScope.BackdropDecorate(content: @Composable BoxScope.() -> Unit)
+    public fun BoxScope.BackdropDecorate(content: @Composable BoxScope.() -> Unit)
 }

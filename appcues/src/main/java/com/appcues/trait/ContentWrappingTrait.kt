@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
-interface ContentWrappingTrait : ExperienceTrait {
+public interface ContentWrappingTrait : ExperienceTrait {
 
     /**
      * Creates a wrapper for the [content].
@@ -18,5 +18,7 @@ interface ContentWrappingTrait : ExperienceTrait {
      *                [safeAreaInsets] defines safe area padding for the content inside.
      */
     @Composable
-    fun WrapContent(content: @Composable (modifier: Modifier, containerPadding: PaddingValues, safeAreaInsets: PaddingValues) -> Unit)
+    public fun WrapContent(
+        content: @Composable (modifier: Modifier, containerPadding: PaddingValues, safeAreaInsets: PaddingValues) -> Unit
+    )
 }

@@ -36,7 +36,7 @@ import java.util.UUID
 // This helper supports testing a single experience primitive (can have nested children),
 // defined in the given json string.
 @Composable
-fun ComposeContent(json: String, imageLoader: ImageLoader) {
+public fun ComposeContent(json: String, imageLoader: ImageLoader) {
     val response = MoshiConfiguration.moshi.adapter(PrimitiveResponse::class.java).fromJson(json)
     val primitive = response!!.mapPrimitive()
 
@@ -56,7 +56,7 @@ fun ComposeContent(json: String, imageLoader: ImageLoader) {
 // It constructs a synthetic 1-step experience. The traits are applied at the experience level. The
 // optional content is injected into the single step, if present.
 @Composable
-fun ComposeContainer(context: Context, stepContentJson: List<String>?, traitJson: List<String>, imageLoader: ImageLoader)
+public fun ComposeContainer(context: Context, stepContentJson: List<String>?, traitJson: List<String>, imageLoader: ImageLoader)
 {
     // set up a Koin scope for testing - for experience/trait mapping, trait registry, etc
     val scope = AppcuesKoinContext.createAppcuesScope(context, AppcuesConfig("", ""))

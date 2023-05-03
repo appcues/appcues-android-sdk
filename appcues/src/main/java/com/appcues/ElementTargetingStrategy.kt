@@ -8,7 +8,7 @@ import java.util.UUID
  * Defines an element targeting strategy type, which can be used to capture view layout
  * information in the application UI as well as render element targeted experiences.
  */
-interface ElementTargetingStrategy {
+public interface ElementTargetingStrategy {
 
     /**
      * Capture the layout hierarchy in the currently rendered screen of the application.
@@ -16,7 +16,7 @@ interface ElementTargetingStrategy {
      * @return: Root view element for the current screen, or null if not available. The view element
      *          contains sub-views recursively in the `children` property.
      */
-    fun captureLayout(): ViewElement?
+    public fun captureLayout(): ViewElement?
 
     /**
      * Create and return a selector implementation from configuration properties.
@@ -24,20 +24,20 @@ interface ElementTargetingStrategy {
      * @return the ElementSelector implementation for this element targeting strategy, based on
      *         the given properties. If no applicable properties are found, the return value should be `nil`.
      */
-    fun inflateSelectorFrom(properties: Map<String, String>): ElementSelector?
+    public fun inflateSelectorFrom(properties: Map<String, String>): ElementSelector?
 }
 
 /**
  * Defines a type to identify view elements with a set of selector properties.
  */
-interface ElementSelector {
+public interface ElementSelector {
 
     /**
      * Exports the selector properties into a string mapping for serialization.
      *
      * @return Map of string key-value pairs for selector properties.
      */
-    fun toMap(): Map<String, String>
+    public fun toMap(): Map<String, String>
 
     /**
      * Evaluate how closely this selector matches with the given target selector.
@@ -48,7 +48,7 @@ interface ElementSelector {
      *
      * @return Value for the quality of selector match.
      */
-    fun evaluateMatch(target: ElementSelector): Int
+    public fun evaluateMatch(target: ElementSelector): Int
 }
 
 /**
@@ -60,7 +60,7 @@ interface ElementSelector {
  * position experience content relative to targeted elements.
  */
 @JsonClass(generateAdapter = true)
-data class ViewElement(
+public data class ViewElement(
     /**
      * Auto-generated unique ID for the view.
      */
@@ -110,7 +110,7 @@ data class ViewElement(
  *
  * @return True if this view was created by the Appcues SDK.
  */
-fun View.isAppcuesView(): Boolean {
+public fun View.isAppcuesView(): Boolean {
     return this.id == R.id.appcues_debugger_view
 }
 

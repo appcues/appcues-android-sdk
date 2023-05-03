@@ -15,5 +15,5 @@ public interface NavigationHandler {
      * @param uri the uri for the destination to navigate.
      * @return true if the navigation completed successfully, false if not.
      */
-    suspend fun navigateTo(uri: Uri): Boolean
+    public suspend fun navigateTo(uri: Uri): Boolean
 }

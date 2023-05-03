@@ -1,5 +1,5 @@
 package com.appcues.trait
 
-enum class ExperienceTraitLevel {
+public enum class ExperienceTraitLevel {
     EXPERIENCE, GROUP, STEP
 }
