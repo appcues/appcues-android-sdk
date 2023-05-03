@@ -44,7 +44,7 @@ import org.koin.test.KoinTest
 import java.util.UUID
 
 @ExperimentalCoroutinesApi
-class ExperienceLifecycleTrackerTest : KoinTest {
+internal class ExperienceLifecycleTrackerTest : KoinTest {
 
     @get:Rule
     val dispatcherRule = MainDispatcherRule()

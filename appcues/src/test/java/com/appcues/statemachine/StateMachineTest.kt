@@ -57,7 +57,7 @@ import java.util.UUID
 import kotlin.time.Duration.Companion.seconds
 
 @ExperimentalCoroutinesApi
-class StateMachineTest : AppcuesScopeTest {
+internal class StateMachineTest : AppcuesScopeTest {
 
     @get:Rule
     override val koinTestRule = KoinScopeRule()

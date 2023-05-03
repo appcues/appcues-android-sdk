@@ -4,7 +4,7 @@ import com.appcues.data.remote.appcues.response.styling.StyleSizeResponse
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 
-class SizeMapperTest {
+internal class SizeMapperTest {
 
     @Test
     fun `map SHOULD map from SizeResponse to ComponentSize`() {

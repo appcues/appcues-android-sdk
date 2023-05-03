@@ -10,7 +10,7 @@ import io.mockk.every
 import io.mockk.mockk
 import org.junit.Test
 
-class TraitsMapperTest {
+internal class TraitsMapperTest {
 
     private val traitRegistry = mockk<TraitRegistry>()
 

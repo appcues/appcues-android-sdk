@@ -30,7 +30,7 @@ import org.koin.mp.KoinPlatformTools
 import org.koin.test.KoinTest
 import java.util.UUID
 
-class ActionProcessorTest : KoinTest {
+internal class ActionProcessorTest : KoinTest {
 
     @get:Rule
     val dispatcherRule = MainDispatcherRule()

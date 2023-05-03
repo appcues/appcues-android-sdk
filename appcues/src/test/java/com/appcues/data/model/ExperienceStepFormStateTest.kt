@@ -13,7 +13,7 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import java.util.UUID
 
-class ExperienceStepFormStateTest {
+internal class ExperienceStepFormStateTest {
 
     private val label = TextPrimitive(id = UUID.randomUUID(), spans = listOf(TextSpanPrimitive("label")))
 

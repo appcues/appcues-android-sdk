@@ -18,7 +18,7 @@ import org.junit.Test
 import java.util.UUID
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class AppcuesServiceTest {
+internal class AppcuesServiceTest {
 
     private val mockWebServer = MockWebServer()
 

@@ -7,7 +7,7 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import java.util.UUID
 
-class TextPrimitiveMapperTest {
+internal class TextPrimitiveMapperTest {
 
     @Test
     fun `text primitive mapping SHOULD map all spans properly and also concatenate to the text label`() {

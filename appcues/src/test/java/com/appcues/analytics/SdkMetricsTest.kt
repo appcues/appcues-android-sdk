@@ -11,7 +11,7 @@ import java.util.Date
 import java.util.UUID
 import kotlin.math.floor
 
-class SdkMetricsTest {
+internal class SdkMetricsTest {
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test

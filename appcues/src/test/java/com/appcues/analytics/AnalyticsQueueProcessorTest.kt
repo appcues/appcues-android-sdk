@@ -20,7 +20,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
-class AnalyticsQueueProcessorTest {
+internal class AnalyticsQueueProcessorTest {
 
     @get:Rule
     val dispatcherRule = MainDispatcherRule()
