@@ -70,6 +70,7 @@ $dokka.location:com.appcues.ui.composables/AppcuesStepMetadata/current/#/Pointin
 $dokka.location:com.appcues.ui.composables/AppcuesStepMetadata/previous/#/PointingToDeclaration/appcues/com.appcues.ui.composables/-appcues-step-metadata/previous.html
 $dokka.location:com.appcues////PointingToDeclaration/appcues/com.appcues/index.html
 $dokka.location:com.appcues//Appcues/#android.content.Context#kotlin.String#kotlin.String#kotlin.Function1[com.appcues.AppcuesConfig,kotlin.Unit]?/PointingToDeclaration/appcues/com.appcues/-appcues.html
+$dokka.location:com.appcues//isAppcuesView/android.view.View#/PointingToDeclaration/appcues/com.appcues/is-appcues-view.html
 $dokka.location:com.appcues/AnalyticType.EVENT///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}appcues/com.appcues/-analytic-type/-e-v-e-n-t/index.html
 $dokka.location:com.appcues/AnalyticType.GROUP///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}appcues/com.appcues/-analytic-type/-g-r-o-u-p/index.html
 $dokka.location:com.appcues/AnalyticType.IDENTIFY///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}appcues/com.appcues/-analytic-type/-i-d-e-n-t-i-f-y/index.html
