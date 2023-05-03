@@ -35,8 +35,19 @@ internal fun rememberLastRenderingState(state: State<UIState>) = remember { muta
  * between pages, etc..
  */
 public data class AppcuesPaginationData(
+    /**
+     * The total number of pages.
+     */
     val pageCount: Int,
+
+    /**
+     * The current page.
+     */
     val currentPage: Int,
+
+    /**
+     * Current scroll offset from the start of currentPage, as a ratio of the page width.
+     */
     val scrollOffset: Float
 )
 

@@ -57,6 +57,11 @@ private object BlurHashDecoder {
     /**
      * Decode a blur hash into a new bitmap.
      *
+     * @param blurHash the hash value decode into a bitmap
+     * @param width the width of the resulting bitmap
+     * @param height the height of the resulting bitmap
+     * @param punch parameter that adjusts the contrast on the decoded image. 1 means normal, smaller values
+     *              will make the effect more subtle, larger values make it stronger.
      * @param useCache use in memory cache for the calculated math, reused by images with same size.
      *                 if the cache does not exist yet it will be created and populated with new calculations.
      *                 By default it is true.

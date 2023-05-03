@@ -1,10 +1,12 @@
 package com.appcues.trait
 
+/**
+ * A type that describes a trait of an Experience.
+ */
 public interface ExperienceTrait {
 
     /**
-     * [config] is a parameter most traits can have to include additional
-     * information that can be used by that trait.
+     * Additional information that can be used to control how the trait is applied.
      */
     public val config: Map<String, Any>?
 }
