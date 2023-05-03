@@ -5,7 +5,7 @@ import androidx.compose.runtime.Composable
 import com.appcues.ui.composables.AppcuesPaginationData
 import com.appcues.ui.composables.appcuesPaginationData
 
-interface ContentHolderTrait : ExperienceTrait {
+public interface ContentHolderTrait : ExperienceTrait {
 
     /**
      * Defines the content holder, usually used to support different kinds of pagination between steps
@@ -17,7 +17,7 @@ interface ContentHolderTrait : ExperienceTrait {
      * @param countainerPages current page information
      */
     @Composable
-    fun BoxScope.CreateContentHolder(containerPages: ContainerPages)
+    public fun BoxScope.CreateContentHolder(containerPages: ContainerPages)
 
     /**
      * Class used as a parameter for [CreateContentHolder]
@@ -25,7 +25,7 @@ interface ContentHolderTrait : ExperienceTrait {
      * [pages] the page compositions
      * [currentPage] current page index
      */
-    data class ContainerPages(
+    public data class ContainerPages(
         val pageCount: Int,
         val currentPage: Int,
         val composePage: @Composable (index: Int) -> Unit,
@@ -42,7 +42,7 @@ interface ContentHolderTrait : ExperienceTrait {
         /**
          * set the pagination data based on custom [CreateContentHolder] implementation
          */
-        fun setPaginationData(paginationData: AppcuesPaginationData) {
+        public fun setPaginationData(paginationData: AppcuesPaginationData) {
             appcuesPaginationData.value = paginationData
             customPaginationData = paginationData
         }

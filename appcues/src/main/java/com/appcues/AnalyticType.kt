@@ -3,7 +3,7 @@ package com.appcues
 /**
  * Represents the different types of analytics that can be reported.
  */
-enum class AnalyticType {
+public enum class AnalyticType {
 
     /**
      * Identified user.

@@ -3,7 +3,7 @@ package com.appcues
 /**
  * Determines the level of output from the Appcues to Logcat.
  */
-enum class LoggingLevel {
+public enum class LoggingLevel {
 
     /**
      * Silences all log output.

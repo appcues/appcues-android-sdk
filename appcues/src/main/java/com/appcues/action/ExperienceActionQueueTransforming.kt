@@ -5,7 +5,7 @@ import com.appcues.Appcues
 /**
  * An `ExperienceAction` that performs modifications of the action queue executed following an interaction in an experience.
  */
-interface ExperienceActionQueueTransforming : ExperienceAction {
+public interface ExperienceActionQueueTransforming : ExperienceAction {
 
     /**
      *  Modify the queue of actions executed in an experience.
@@ -16,5 +16,5 @@ interface ExperienceActionQueueTransforming : ExperienceAction {
      *
      * @return The updated queue.
      */
-    fun transformQueue(queue: List<ExperienceAction>, index: Int, appcues: Appcues): List<ExperienceAction>
+    public fun transformQueue(queue: List<ExperienceAction>, index: Int, appcues: Appcues): List<ExperienceAction>
 }

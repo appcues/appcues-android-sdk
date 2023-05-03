@@ -5,7 +5,7 @@ import com.appcues.LoggingLevel.NONE
 /**
  * A configuration object that defines the behavior and policies for Appcues.
  */
-data class AppcuesConfig internal constructor(
+public data class AppcuesConfig internal constructor(
     internal val accountId: String,
     internal val applicationId: String,
 ) {

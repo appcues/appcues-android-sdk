@@ -1,6 +1,6 @@
 package com.appcues.trait
 
-interface PresentingTrait : ExperienceTrait {
+public interface PresentingTrait : ExperienceTrait {
 
     /**
      * Presents the experience.
@@ -12,5 +12,5 @@ interface PresentingTrait : ExperienceTrait {
      * @sample com.appcues.trait.appcues.ModalTrait
      */
     @Throws(AppcuesTraitException::class)
-    fun present()
+    public fun present()
 }

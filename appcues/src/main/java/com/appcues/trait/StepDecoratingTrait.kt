@@ -4,16 +4,16 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 
-interface StepDecoratingTrait : ExperienceTrait {
+public interface StepDecoratingTrait : ExperienceTrait {
 
-    enum class StepDecoratingType {
+    public enum class StepDecoratingType {
         UNDERLAY, OVERLAY
     }
 
     /**
      * [stepComposeOrder] defines whether this trait will be rendered under or over the step's main content
      */
-    val stepComposeOrder: StepDecoratingType
+    public val stepComposeOrder: StepDecoratingType
 
     /**
      * Decorates Specific step
@@ -26,5 +26,9 @@ interface StepDecoratingTrait : ExperienceTrait {
      * @param stickyContentPadding Padding amount defined by sticky content elements in this step
      */
     @Composable
-    fun BoxScope.DecorateStep(containerPadding: PaddingValues, safeAreaInsets: PaddingValues, stickyContentPadding: StickyContentPadding)
+    public fun BoxScope.DecorateStep(
+        containerPadding: PaddingValues,
+        safeAreaInsets: PaddingValues,
+        stickyContentPadding: StickyContentPadding
+    )
 }

@@ -6,7 +6,7 @@ import java.util.UUID
  * An interceptor that can optionally be applied during initialization
  * to control Appcues behaviors at runtime.
  */
-interface AppcuesInterceptor {
+public interface AppcuesInterceptor {
 
     /**
      * Determines if the given Appcues experience can display.  Can be used to handle
@@ -16,5 +16,5 @@ interface AppcuesInterceptor {
      * @param experienceId the ID of the experience that is being requested to display.
      * @return true if the experience can be shown, false if not.
      */
-    suspend fun canDisplayExperience(experienceId: UUID): Boolean
+    public suspend fun canDisplayExperience(experienceId: UUID): Boolean
 }

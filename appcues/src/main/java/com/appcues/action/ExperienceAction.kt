@@ -5,15 +5,15 @@ import com.appcues.data.model.AppcuesConfigMap
 /**
  * A type that describes an action that can be triggered from an Experience.
  */
-interface ExperienceAction {
+public interface ExperienceAction {
 
     /**
      * Configuration options for this action.
      */
-    val config: AppcuesConfigMap
+    public val config: AppcuesConfigMap
 
     /**
      * Execute the action.
      */
-    suspend fun execute()
+    public suspend fun execute()
 }

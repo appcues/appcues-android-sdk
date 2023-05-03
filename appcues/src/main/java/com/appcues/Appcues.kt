@@ -29,7 +29,7 @@ import kotlin.DeprecationLevel.ERROR
  * @param [applicationId] The Appcues Application ID found in Studio settings.
  * @param [config] Optional, additional settings on AppcuesConfig to use when initializing the SDK.
  */
-fun Appcues(
+public fun Appcues(
     context: Context,
     accountId: String,
     applicationId: String,
@@ -43,14 +43,14 @@ fun Appcues(
  * The main entry point for using Appcues functionality in your application - tracking
  * analytics and rendering experiences.
  */
-class Appcues internal constructor(koinScope: Scope) {
+public class Appcues internal constructor(koinScope: Scope) {
 
-    companion object {
+    public companion object {
 
         /**
          * The current version of Appcues SDK.
          */
-        val version: String
+        public val version: String
             get() = BuildConfig.SDK_VERSION
 
         /**
@@ -58,7 +58,7 @@ class Appcues internal constructor(koinScope: Scope) {
          * and use in target element experiences, such as anchored tooltips. The default implementation
          * provided by the SDK is based on Android View layout information.
          */
-        var elementTargeting: ElementTargetingStrategy = AndroidTargetingStrategy()
+        public var elementTargeting: ElementTargetingStrategy = AndroidTargetingStrategy()
     }
 
     private val config by koinScope.inject<AppcuesConfig>()
@@ -78,22 +78,22 @@ class Appcues internal constructor(koinScope: Scope) {
     /**
      * Set the listener to be notified about the display of Experience content.
      */
-    var experienceListener: ExperienceListener? by config::experienceListener
+    public var experienceListener: ExperienceListener? by config::experienceListener
 
     /**
      * Sets the listener to be notified about published analytics.
      */
-    var analyticsListener: AnalyticsListener? by config::analyticsListener
+    public var analyticsListener: AnalyticsListener? by config::analyticsListener
 
     /**
      * Set the interceptor for additional control over SDK runtime behaviors.
      */
-    var interceptor: AppcuesInterceptor? by config::interceptor
+    public var interceptor: AppcuesInterceptor? by config::interceptor
 
     /**
      * Sets the handler to use for link navigation.
      */
-    var navigationHandler: NavigationHandler? by config::navigationHandler
+    public var navigationHandler: NavigationHandler? by config::navigationHandler
 
     init {
         sessionMonitor.start()
@@ -110,7 +110,7 @@ class Appcues internal constructor(koinScope: Scope) {
     /**
      * The current version of Appcues SDK.
      */
-    val version: String
+    public val version: String
         get() = Appcues.version
 
     /**
@@ -122,7 +122,7 @@ class Appcues internal constructor(koinScope: Scope) {
      * @param userId Unique value identifying the user.
      * @param properties Optional properties that provide additional context about the user.
      */
-    fun identify(userId: String, properties: Map<String, Any>? = null) {
+    public fun identify(userId: String, properties: Map<String, Any>? = null) {
         identify(false, userId, properties)
     }
 
@@ -132,7 +132,7 @@ class Appcues internal constructor(koinScope: Scope) {
      * @param groupId Unique value identifying the group.
      * @param properties Optional properties that provide additional context about the group.
      */
-    fun group(groupId: String?, properties: Map<String, Any>? = null) {
+    public fun group(groupId: String?, properties: Map<String, Any>? = null) {
         storage.groupId = groupId
 
         (if (groupId.isNullOrEmpty()) null else properties).also {
@@ -145,7 +145,7 @@ class Appcues internal constructor(koinScope: Scope) {
      * the {@link identity(String, Map<String, Any>) identity} call. This will cause the SDK
      * to begin tracking activity and checking for qualified content.
      */
-    fun anonymous() {
+    public fun anonymous() {
         // use the device ID as the default anonymous user ID, unless an override for generating
         // anonymous user IDs is supplied in the config builder
         val anonymousId = config.anonymousIdFactory?.invoke() ?: storage.deviceId
@@ -158,7 +158,7 @@ class Appcues internal constructor(koinScope: Scope) {
      */
     @Deprecated("properties are no longer supported for anonymous users.", level = ERROR)
     @Suppress("UnusedPrivateMember", "UNUSED_PARAMETER")
-    fun anonymous(properties: Map<String, Any>?) {
+    public fun anonymous(properties: Map<String, Any>?) {
         // removed
     }
 
@@ -166,7 +166,7 @@ class Appcues internal constructor(koinScope: Scope) {
      * Clears out the current user in this session.
      * Can be used when the user logs out of your application.
      */
-    fun reset() {
+    public fun reset() {
         sessionMonitor.reset()
         storage.userId = ""
         storage.userSignature = null
@@ -180,7 +180,7 @@ class Appcues internal constructor(koinScope: Scope) {
      * @param name Name of the event.
      * @param properties Optional properties that provide additional context about the event.
      */
-    fun track(name: String, properties: Map<String, Any>? = null) {
+    public fun track(name: String, properties: Map<String, Any>? = null) {
         analyticsTracker.track(name, properties)
     }
 
@@ -190,7 +190,7 @@ class Appcues internal constructor(koinScope: Scope) {
      * @param title Name of the screen
      * @param properties Optional properties that provide additional context about the screen.
      */
-    fun screen(title: String, properties: Map<String, Any>? = null) {
+    public fun screen(title: String, properties: Map<String, Any>? = null) {
         analyticsTracker.screen(title, properties)
     }
 
@@ -201,7 +201,7 @@ class Appcues internal constructor(koinScope: Scope) {
      *
      * @return True if experience content was able to be shown, false if not.
      */
-    suspend fun show(experienceId: String): Boolean {
+    public suspend fun show(experienceId: String): Boolean {
         return experienceRenderer.show(experienceId, ExperienceTrigger.ShowCall)
     }
 
@@ -217,7 +217,7 @@ class Appcues internal constructor(koinScope: Scope) {
      * usage:
      * registerTrait("my-trait") { MyCustomExperienceTrait() }
      */
-    fun registerTrait(type: String, traitFactory: (config: Map<String, Any>?, level: ExperienceTraitLevel) -> ExperienceTrait) {
+    public fun registerTrait(type: String, traitFactory: (config: Map<String, Any>?, level: ExperienceTraitLevel) -> ExperienceTrait) {
         traitRegistry.register(type, traitFactory)
     }
 
@@ -230,14 +230,14 @@ class Appcues internal constructor(koinScope: Scope) {
      * usage:
      * registerAction("my-action") { MyCustomExperienceAction() }
      */
-    fun registerAction(type: String, actionFactory: (config: Map<String, Any>?) -> ExperienceAction) {
+    public fun registerAction(type: String, actionFactory: (config: Map<String, Any>?) -> ExperienceAction) {
         actionRegistry.register(type, actionFactory)
     }
 
     /**
      * Enables automatic screen tracking for Activities.
      */
-    fun trackScreens() {
+    public fun trackScreens() {
         activityScreenTracking.trackScreens()
     }
 
@@ -246,7 +246,7 @@ class Appcues internal constructor(koinScope: Scope) {
      *
      * @param activity The Activity to launch the debugger over.
      */
-    fun debug(activity: Activity) {
+    public fun debug(activity: Activity) {
         debuggerManager.start(activity, Debugger(null))
     }
 
@@ -257,7 +257,7 @@ class Appcues internal constructor(koinScope: Scope) {
      * an Appcues SDK instance and create a new one. This is not normally an expected
      * behavior for most use cases of the SDK.
      */
-    fun stop() {
+    public fun stop() {
         debuggerManager.stop()
         activityScreenTracking.stop()
         experienceRenderer.stop()
@@ -272,7 +272,7 @@ class Appcues internal constructor(koinScope: Scope) {
      *
      * @return True if a deep link was handled by the Appcues SDK, false if not - meaning the host application should process.
      */
-    fun onNewIntent(activity: Activity, intent: Intent?): Boolean =
+    public fun onNewIntent(activity: Activity, intent: Intent?): Boolean =
         deepLinkHandler.handle(activity, intent)
 
     private fun identify(isAnonymous: Boolean, userId: String, properties: Map<String, Any>?) {

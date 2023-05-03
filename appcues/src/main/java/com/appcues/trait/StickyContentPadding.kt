@@ -1,42 +1,43 @@
 package com.appcues.trait
 
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.unit.Density
 
-class StickyContentPadding(private val density: Density) {
+public class StickyContentPadding(private val density: Density) {
 
     private val topPaddingPx = mutableStateOf(0)
     private val bottomPaddingPx = mutableStateOf(0)
     private val startPaddingPx = mutableStateOf(0)
     private val endPaddingPx = mutableStateOf(0)
 
-    fun setTopPadding(px: Int) {
+    public fun setTopPadding(px: Int) {
         if (topPaddingPx.value < px) {
             topPaddingPx.value = px
         }
     }
 
-    fun setBottomPadding(px: Int) {
+    public fun setBottomPadding(px: Int) {
         if (bottomPaddingPx.value < px) {
             bottomPaddingPx.value = px
         }
     }
 
-    fun setStartPadding(px: Int) {
+    public fun setStartPadding(px: Int) {
         if (startPaddingPx.value < px) {
             startPaddingPx.value = px
         }
     }
 
-    fun setEndPadding(px: Int) {
+    public fun setEndPadding(px: Int) {
         if (endPaddingPx.value < px) {
             endPaddingPx.value = px
         }
     }
 
-    val paddingValues = derivedStateOf {
+    public val paddingValues: State<PaddingValues> = derivedStateOf {
         with(density) {
             PaddingValues(
                 start = startPaddingPx.value.toDp(),

@@ -1,5 +1,6 @@
 package com.appcues.ui.composables
 
+import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.State
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.mutableStateOf
@@ -101,7 +102,8 @@ internal sealed class StackScope(private val childrenCount: Int) {
  * Example usage:
  * @sample com.appcues.trait.appcues.BackdropKeyholeTrait
  */
-val LocalAppcuesStepMetadata = compositionLocalOf<AppcuesStepMetadata> { noLocalProvidedFor("LocalAppcuesStepMetadata") }
+public val LocalAppcuesStepMetadata: ProvidableCompositionLocal<AppcuesStepMetadata> =
+    compositionLocalOf { noLocalProvidedFor("LocalAppcuesStepMetadata") }
 
 /**
  * AppcuesStepMetadata used to share trait information between traits, generated from produceMetadata.
@@ -109,7 +111,7 @@ val LocalAppcuesStepMetadata = compositionLocalOf<AppcuesStepMetadata> { noLocal
  * Previous and current refer to the previously generated metadata values and the current values.
  * It may be desired to reference both values to support transitions between them.
  */
-data class AppcuesStepMetadata(
+public data class AppcuesStepMetadata(
     val previous: Map<String, Any?> = hashMapOf(),
     val current: Map<String, Any?> = hashMapOf()
 )
