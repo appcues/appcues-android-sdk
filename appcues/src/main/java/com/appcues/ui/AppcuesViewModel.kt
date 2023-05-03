@@ -87,7 +87,7 @@ internal class AppcuesViewModel(
         }
     }
 
-    // handling the special case where the AppcuesActivity is removed by the OS from outside
+    // handling the special case where the hosting activity is removed by the OS from outside
     // normal experience interactions (i.e. a deep link)
     override fun onCleared() {
         super.onCleared()

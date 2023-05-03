@@ -55,7 +55,7 @@ internal class ExperienceRenderer(
         // supersede a "screen_view" triggered experience - per Appcues standard behavior
         val priorityOverride = experience.priority == NORMAL && stateMachine.state != Idling
         // additionally - if there is a current Experience running in the Paused state - this means
-        // that the AppcuesActivity has been covered up by another Activity in the foreground with priority,
+        // that the hosting Activity has been covered up by another Activity in the foreground with priority,
         // and whatever is now requesting to display on top should take precedence since the host application
         // has opened another activity on top of a previous Experience that is no longer visible.
         val isPaused = stateMachine.state is Paused

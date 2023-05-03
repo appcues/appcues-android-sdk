@@ -54,7 +54,7 @@ internal interface Transitions {
         // This is a safeguard against trying to load a step container that has zero steps.
         // We already guard against loading an experience with zero steps (groups) in the BeginningExperience
         // transition above. However, if a group exists, but has zero steps within - it will get here and
-        // fail, so that we don't launch an AppcuesActivity and then have no content to render
+        // fail, so that we don't launch an AppcuesComposition and then have no content to render
         experience.stepContainers.firstOrNull()?.let {
             if (it.steps.isEmpty()) {
                 return stepNotFoundErrorTransition(experience, 0, 0)
@@ -117,7 +117,7 @@ internal interface Transitions {
         continuation: suspend () -> ResultOf<State, Error>
     ): Transition {
         return if (action.destroyed) {
-            // this means the AppcuesActivity was destroyed externally (i.e. deep link) and we should
+            // this means the activity hosting the experience was destroyed externally (i.e. deep link) and we should
             // immediately transition to EndingExperience - not rely on the UI to do it for us (it's gone)
             Transition(
                 state = EndingStep(experience, flatStepIndex, action.markComplete, null),
