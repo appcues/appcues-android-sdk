@@ -25,7 +25,7 @@ internal object TraitKoin : KoinScopePlugin {
         factory { params -> TargetElementTrait(params.getOrNull()) }
         factory { params -> TargetRectangleTrait(params.getOrNull()) }
         factory { params -> BackdropKeyholeTrait(params.getOrNull()) }
-        factory { params -> ModalTrait(params.getOrNull(), get(), get()) }
+        factory { params -> ModalTrait(params.getOrNull(), get()) }
         factory { params -> TooltipTrait(params.getOrNull(), get()) }
         factory { params -> SkippableTrait(params.getOrNull(), get(), get()) }
         factory { params -> CarouselTrait(params.getOrNull()) }

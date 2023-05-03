@@ -9,12 +9,6 @@
 
     <application>
         <activity
-            android:name=".ui.AppcuesActivity"
-            android:configChanges="orientation|screenSize|screenLayout"
-            android:exported="false"
-            android:theme="@style/Appcues.AppcuesActivityTheme"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
             android:name=".ui.InAppReviewActivity"
             android:exported="false"
             android:theme="@style/Appcues.AppcuesActivityTheme" />
