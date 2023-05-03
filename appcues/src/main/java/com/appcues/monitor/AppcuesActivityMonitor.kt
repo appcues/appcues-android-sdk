@@ -3,7 +3,6 @@ package com.appcues.monitor
 import android.app.Activity
 import android.app.Application
 import android.os.Bundle
-import com.appcues.ui.AppcuesActivity
 import java.lang.ref.WeakReference
 
 internal object AppcuesActivityMonitor : Application.ActivityLifecycleCallbacks {
@@ -33,13 +32,11 @@ internal object AppcuesActivityMonitor : Application.ActivityLifecycleCallbacks 
     }
 
     override fun onActivityResumed(activity: Activity) {
-        if (activity !is AppcuesActivity) {
-            if (this.activity != activity) {
-                this.activityWeakReference = WeakReference(activity)
+        if (this.activity != activity) {
+            this.activityWeakReference = WeakReference(activity)
 
-                // notifies all subscribers that activity has changed
-                activityMonitorListener.forEach { it.onActivityChanged(activity) }
-            }
+            // notifies all subscribers that activity has changed
+            activityMonitorListener.forEach { it.onActivityChanged(activity) }
         }
     }
 
