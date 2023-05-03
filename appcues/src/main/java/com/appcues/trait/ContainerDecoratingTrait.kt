@@ -4,8 +4,15 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 
+/**
+ * A trait that decorates a container of one or more steps in an experience, to add content either underneath
+ * or on top of the main content of the step.
+ */
 public interface ContainerDecoratingTrait : ExperienceTrait {
 
+    /**
+     * Denotes whether a container decoration is rendered under or over the container's main content.
+     */
     public enum class ContainerDecoratingType {
         UNDERLAY, OVERLAY
     }

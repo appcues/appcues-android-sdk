@@ -112,7 +112,14 @@ public val LocalAppcuesStepMetadata: ProvidableCompositionLocal<AppcuesStepMetad
  * It may be desired to reference both values to support transitions between them.
  */
 public data class AppcuesStepMetadata(
+    /**
+     * Previously generated metadata values
+     */
     val previous: Map<String, Any?> = hashMapOf(),
+
+    /**
+     * Current metadata values
+     */
     val current: Map<String, Any?> = hashMapOf()
 )
 

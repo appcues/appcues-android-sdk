@@ -3,6 +3,9 @@ package com.appcues.trait
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.Composable
 
+/**
+ * A trait that modifies the backdrop of an experience.
+ */
 public interface BackdropDecoratingTrait : ExperienceTrait {
 
     /**
