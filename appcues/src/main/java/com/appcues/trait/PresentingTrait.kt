@@ -1,9 +1,12 @@
 package com.appcues.trait
 
+/**
+ * A trait that can show a container of one or more steps of an Experience.
+ */
 public interface PresentingTrait : ExperienceTrait {
 
     /**
-     * Presents the experience.
+     * Show the container for the applicable group of steps in the Experience.
      *
      * If this method cannot properly apply the trait behavior, it may throw an AppcuesTraitException,
      * ending the attempt to display the experience.

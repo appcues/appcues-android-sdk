@@ -4,6 +4,9 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
+/**
+ * A trait that builds a container composition, wrapping provided content.
+ */
 public interface ContentWrappingTrait : ExperienceTrait {
 
     /**

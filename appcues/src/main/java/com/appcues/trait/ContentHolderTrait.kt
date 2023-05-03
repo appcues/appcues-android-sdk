@@ -5,6 +5,10 @@ import androidx.compose.runtime.Composable
 import com.appcues.ui.composables.AppcuesPaginationData
 import com.appcues.ui.composables.appcuesPaginationData
 
+/**
+ * A trait that can hold one or more pages of content and control the paging behavior to navigate
+ * between them.
+ */
 public interface ContentHolderTrait : ExperienceTrait {
 
     /**
@@ -14,20 +18,28 @@ public interface ContentHolderTrait : ExperienceTrait {
      * Example usage:
      * @sample com.appcues.trait.appcues.CarouselTrait
      *
-     * @param countainerPages current page information
+     * @param containerPages current page information
      */
     @Composable
     public fun BoxScope.CreateContentHolder(containerPages: ContainerPages)
 
     /**
      * Class used as a parameter for [CreateContentHolder]
-     *
-     * [pages] the page compositions
-     * [currentPage] current page index
      */
     public data class ContainerPages(
+        /**
+         * The total number of pages in this container.
+         */
         val pageCount: Int,
+
+        /**
+         * The index of the current page.
+         */
         val currentPage: Int,
+
+        /**
+         * A function that produces the Composable for the given page index.
+         */
         val composePage: @Composable (index: Int) -> Unit,
     ) {
 
