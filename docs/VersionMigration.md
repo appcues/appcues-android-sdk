@@ -2,7 +2,7 @@
 
 ## Overview
 
-There are a number of breaking changes from 1.x to 2.0, mostly related to the experience trait system. If you haven't implemented any custom actions or traits, the migration will involve little or no changes in your code.
+Updating to this release will not require any code changes for most SDK installations.  Code changes would only be required if your app made anonymous calls with user properties, or if the app implemented custom experience traits or actions.
 
 ## General Changes
 
