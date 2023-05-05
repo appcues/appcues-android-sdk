@@ -30,8 +30,6 @@ internal sealed class State {
 
     data class EndingExperience(val experience: Experience, val flatStepIndex: Int, val markComplete: Boolean) : State()
 
-    data class Paused(val state: State) : State()
-
     val currentExperience: Experience?
         get() = when (this) {
             is Idling -> null
@@ -39,7 +37,6 @@ internal sealed class State {
             is BeginningStep -> this.experience
             is EndingExperience -> this.experience
             is EndingStep -> this.experience
-            is Paused -> this.state.currentExperience
             is RenderingStep -> this.experience
         }
 
@@ -50,7 +47,6 @@ internal sealed class State {
             is BeginningStep -> this.flatStepIndex
             is EndingExperience -> this.flatStepIndex
             is EndingStep -> this.flatStepIndex
-            is Paused -> this.state.currentStepIndex
             is RenderingStep -> this.flatStepIndex
         }
 }

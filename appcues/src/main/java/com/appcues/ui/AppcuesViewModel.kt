@@ -9,8 +9,6 @@ import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.Interactio
 import com.appcues.analytics.SdkMetrics
 import com.appcues.data.model.Experience
 import com.appcues.data.model.StepContainer
-import com.appcues.statemachine.Action.Pause
-import com.appcues.statemachine.Action.Resume
 import com.appcues.statemachine.Action.StartStep
 import com.appcues.statemachine.Error.StepError
 import com.appcues.statemachine.State.BeginningStep
@@ -164,20 +162,6 @@ internal class AppcuesViewModel(
 
     fun dismiss() {
         onDismiss()
-    }
-
-    fun onPause() {
-        if (uiState.value is Dismissing) return
-
-        viewModelScope.launch {
-            stateMachine.handleAction(Pause)
-        }
-    }
-
-    fun onResume() {
-        viewModelScope.launch {
-            stateMachine.handleAction(Resume)
-        }
     }
 
     fun refreshPreview() {

@@ -12,8 +12,11 @@ internal object AppcuesActivityMonitor : Application.ActivityLifecycleCallbacks 
         fun onActivityChanged(activity: Activity)
     }
 
-    private var activityWeakReference: WeakReference<Activity>? = null
+    private var _isPaused = false
+    val isPaused: Boolean
+        get() = _isPaused
 
+    private var activityWeakReference: WeakReference<Activity>? = null
     val activity: Activity?
         get() = activityWeakReference?.get()
 
@@ -32,6 +35,7 @@ internal object AppcuesActivityMonitor : Application.ActivityLifecycleCallbacks 
     }
 
     override fun onActivityResumed(activity: Activity) {
+        _isPaused = false
         if (this.activity != activity) {
             this.activityWeakReference = WeakReference(activity)
 
@@ -42,7 +46,9 @@ internal object AppcuesActivityMonitor : Application.ActivityLifecycleCallbacks 
 
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) = Unit
     override fun onActivityStarted(activity: Activity) = Unit
-    override fun onActivityPaused(activity: Activity) = Unit
+    override fun onActivityPaused(activity: Activity) {
+        _isPaused = true
+    }
     override fun onActivityStopped(activity: Activity) = Unit
     override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) = Unit
     override fun onActivityDestroyed(activity: Activity) = Unit

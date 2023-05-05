@@ -15,7 +15,6 @@ import com.appcues.statemachine.State.BeginningStep
 import com.appcues.statemachine.State.EndingExperience
 import com.appcues.statemachine.State.EndingStep
 import com.appcues.statemachine.State.Idling
-import com.appcues.statemachine.State.Paused
 import com.appcues.statemachine.State.RenderingStep
 import com.appcues.statemachine.StateMachine
 import kotlinx.coroutines.CoroutineDispatcher
@@ -101,7 +100,6 @@ internal class ExperienceLifecycleTracker(
             is EndingStep -> experience.published
             is Idling -> false
             is RenderingStep -> experience.published
-            is Paused -> false
         }
 
     private fun Error.shouldTrack(): Boolean =
