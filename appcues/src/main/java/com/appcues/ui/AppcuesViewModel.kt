@@ -75,7 +75,7 @@ internal class AppcuesViewModel(
                         }
                     }
                     is EndingStep -> {
-                        // dismiss will trigger exit animations and finish activity
+                        // dismiss will trigger exit animations and remove experience UI
                         if (result.dismissAndContinue != null) {
                             _uiState.value = Dismissing(result.dismissAndContinue)
                         }
@@ -87,11 +87,7 @@ internal class AppcuesViewModel(
         }
     }
 
-    // handling the special case where the hosting activity is removed by the OS from outside
-    // normal experience interactions (i.e. a deep link)
-    override fun onCleared() {
-        super.onCleared()
-
+    fun onActivityChanged() {
         uiState.value.let { state ->
             // if current state IS Rendering this means that the Activity was removed
             // from an external source (ex deep link) and we should end the experience
@@ -128,17 +124,6 @@ internal class AppcuesViewModel(
             if (state is Rendering && state.position != index) {
                 appcuesCoroutineScope.launch {
                     stateMachine.handleAction(StartStep(StepGroupPageIndex(index, state.flatStepIndex)))
-                }
-            }
-        }
-    }
-
-    fun onBackPressed() {
-        uiState.value.let { state ->
-            // if current state IS Rendering then we process the action
-            if (state is Rendering) {
-                appcuesCoroutineScope.launch {
-                    experienceRenderer.dismissCurrentExperience(markComplete = false, destroyed = false)
                 }
             }
         }

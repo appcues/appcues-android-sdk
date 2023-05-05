@@ -2,8 +2,6 @@ package com.appcues.ui
 
 import android.app.Activity
 import android.view.ViewGroup
-import androidx.activity.ComponentActivity
-import androidx.activity.OnBackPressedCallback
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ComposeView
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -28,14 +26,8 @@ internal class AppcuesOverlayViewManager(private val scope: Scope) : DefaultLife
 
     private var shakeGestureListener: ShakeGestureListener? = null
 
-    private val handleBackPress = object : OnBackPressedCallback(true) {
-        override fun handleOnBackPressed() {
-            viewModel?.onBackPressed()
-        }
-    }
-
     override fun onActivityChanged(activity: Activity) {
-        activity.addView()
+        viewModel?.onActivityChanged()
     }
 
     override fun onResume(owner: LifecycleOwner) {
@@ -52,26 +44,17 @@ internal class AppcuesOverlayViewManager(private val scope: Scope) : DefaultLife
 
     fun start() {
         AppcuesActivityMonitor.subscribe(this)
-
         AppcuesActivityMonitor.activity?.addView()
     }
 
-    fun stop() {
-        AppcuesActivityMonitor.unsubscribe(this)
-
-        AppcuesActivityMonitor.activity?.removeView()
-    }
-
     private fun onCompositionDismiss() {
-        stop()
-
+        AppcuesActivityMonitor.unsubscribe(this)
+        AppcuesActivityMonitor.activity?.removeView()
         viewModel?.onFinish()
     }
 
     private fun Activity?.addView() {
         if (this == null) return
-
-        tryRegisterOnBackDispatcher()
 
         val parentView = getParentView()
         parentView.findViewTreeLifecycleOwner()?.lifecycle?.addObserver(this@AppcuesOverlayViewManager)
@@ -110,8 +93,6 @@ internal class AppcuesOverlayViewManager(private val scope: Scope) : DefaultLife
     }
 
     private fun Activity?.removeView() {
-        handleBackPress.remove()
-
         if (this == null) return
 
         getParentView().also {
@@ -127,15 +108,5 @@ internal class AppcuesOverlayViewManager(private val scope: Scope) : DefaultLife
     private fun Activity.getParentView(): ViewGroup {
         // if there is any difference in API levels we can handle it here
         return window.decorView.rootView as ViewGroup
-    }
-
-    private fun Activity?.tryRegisterOnBackDispatcher() {
-        // add onBackPressedDispatcher to handle internally native android back press when debugger is expanded
-        if (this is ComponentActivity) {
-            handleBackPress.remove()
-
-            // attach to the new activity
-            onBackPressedDispatcher.addCallback(handleBackPress)
-        }
     }
 }
