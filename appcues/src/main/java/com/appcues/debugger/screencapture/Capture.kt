@@ -2,14 +2,12 @@ package com.appcues.debugger.screencapture
 
 import android.graphics.Bitmap
 import android.os.Build.VERSION
-import android.util.Log
 import android.view.View
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.appcues.BuildConfig
 import com.appcues.R
 import com.appcues.ViewElement
-import com.appcues.data.MoshiConfiguration
 import com.appcues.util.ContextResources
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
@@ -89,9 +87,3 @@ internal fun ContextResources.generateCaptureMetadata(rootView: View): Capture.M
 
 internal fun Int.toDp(density: Float) =
     (this / density).toInt()
-
-// TESTING - will be removed but output layout info to log for now
-internal fun Capture.prettyPrint() {
-    val json = MoshiConfiguration.moshi.adapter(Capture::class.java).indent("    ").toJson(this)
-    Log.i("Appcues", json)
-}
