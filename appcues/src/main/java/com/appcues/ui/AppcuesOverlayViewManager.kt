@@ -32,19 +32,25 @@ internal class AppcuesOverlayViewManager(private val scope: Scope) : DefaultLife
 
     override fun onResume(owner: LifecycleOwner) {
         super.onResume(owner)
-        viewModel?.onResume()
         shakeGestureListener?.start()
     }
 
     override fun onPause(owner: LifecycleOwner) {
         super.onPause(owner)
-        viewModel?.onPause()
         shakeGestureListener?.stop()
     }
 
-    fun start() {
+    fun start(): Boolean {
+        val activity = AppcuesActivityMonitor.activity
+
+        // inform the caller that we cannot currently add a view in the app
+        if (activity == null || AppcuesActivityMonitor.isPaused) {
+            return false
+        }
+        
         AppcuesActivityMonitor.subscribe(this)
-        AppcuesActivityMonitor.activity?.addView()
+        activity.addView()
+        return true
     }
 
     private fun onCompositionDismiss() {

@@ -37,6 +37,7 @@ import com.appcues.data.model.getConfigOrDefault
 import com.appcues.data.model.getConfigStyle
 import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.trait.AppcuesTraitAnimatedVisibility
+import com.appcues.trait.AppcuesTraitException
 import com.appcues.trait.ContentWrappingTrait
 import com.appcues.trait.PresentingTrait
 import com.appcues.trait.appcues.TooltipPointerPosition.Bottom
@@ -98,7 +99,11 @@ internal class TooltipTrait(
     }
 
     override fun present() {
-        AppcuesOverlayViewManager(scope = scope).start()
+        val success = AppcuesOverlayViewManager(scope = scope).start()
+
+        if (!success) {
+            throw AppcuesTraitException("unable to create tooltip overlay view")
+        }
     }
 
     @Composable

@@ -6,6 +6,7 @@ import androidx.compose.ui.Modifier
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.getConfigOrDefault
 import com.appcues.data.model.getConfigStyle
+import com.appcues.trait.AppcuesTraitException
 import com.appcues.trait.ContentWrappingTrait
 import com.appcues.trait.PresentingTrait
 import com.appcues.ui.AppcuesOverlayViewManager
@@ -48,6 +49,10 @@ internal class ModalTrait(
     }
 
     override fun present() {
-        AppcuesOverlayViewManager(scope = scope).start()
+        val success = AppcuesOverlayViewManager(scope = scope).start()
+
+        if (!success) {
+            throw AppcuesTraitException("unable to create modal overlay view")
+        }
     }
 }
