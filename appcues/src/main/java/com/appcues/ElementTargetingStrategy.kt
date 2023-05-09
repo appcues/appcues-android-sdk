@@ -1,6 +1,10 @@
 package com.appcues
 
 import android.view.View
+import androidx.compose.runtime.Stable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
+import com.appcues.debugger.screencapture.appcuesViewTagProperty
 import com.squareup.moshi.JsonClass
 import java.util.UUID
 
@@ -136,3 +140,15 @@ internal fun ViewElement.viewsMatching(target: ElementSelector): List<Pair<ViewE
 
     return views
 }
+
+/**
+ * Identify this composable as a view to be available to Appcues targeted element experiences.
+ *
+ * @param tag the view tag, which should uniquely identify this element within the full Composition being rendered.
+ */
+@Stable
+public fun Modifier.appcuesView(tag: String): Modifier = semantics(
+    properties = {
+        appcuesViewTagProperty = tag
+    }
+)
