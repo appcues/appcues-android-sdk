@@ -1,9 +1,14 @@
 package com.appcues.debugger.screencapture
 
+import android.content.Context
 import android.content.res.Resources.NotFoundException
 import android.graphics.Rect
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.ui.semantics.SemanticsNode
+import androidx.compose.ui.semantics.SemanticsOwner
+import androidx.compose.ui.semantics.SemanticsPropertyKey
+import androidx.compose.ui.semantics.SemanticsPropertyReceiver
 import androidx.core.view.children
 import com.appcues.ElementSelector
 import com.appcues.ElementTargetingStrategy
@@ -65,6 +70,8 @@ internal class AndroidTargetingStrategy : ElementTargetingStrategy {
     }
 }
 
+private const val ANDROID_COMPOSE_VIEW_CLASS_NAME = "androidx.compose.ui.platform.AndroidComposeView"
+
 private fun View.asCaptureView(): ViewElement? {
     val displayMetrics = context.resources.displayMetrics
     val density = displayMetrics.density
@@ -86,17 +93,43 @@ private fun View.asCaptureView(): ViewElement? {
         return null
     }
 
-    var children = (this as? ViewGroup)?.children?.mapNotNull {
-        if (!it.isShown) {
-            // discard hidden views and subviews within
-            null
-        } else {
-            it.asCaptureView()
-        }
-    }?.toList()
+    val children: MutableList<ViewElement> = mutableListOf()
 
-    if (children?.isEmpty() == true) {
-        children = null
+    // gather up child views for any ViewGroup
+    // note: AndroidComposeView (handled below) is also a ViewGroup, and can have
+    // additional View items within, when using Compose <--> View interop. Those
+    // will also be collected here
+    if (this is ViewGroup) {
+        val viewChildren = this.children.mapNotNull {
+            if (!it.isShown) {
+                // discard hidden views and subviews within
+                null
+            } else {
+                it.asCaptureView()
+            }
+        }.toList()
+        children.addAll(viewChildren)
+    }
+
+    // For an AndroidComposeView, we need to gather up the layout info for the Composables
+    // within. This is done by accessing the semanticsOwner through reflection. At this time
+    // there is no other way to access or create it (internal constructor). Using the
+    // SemanticsNodes within allows us to traverse the view info to find selectable elements
+    // very similar to how compose UI testing works.
+    if (this::class.java.name == ANDROID_COMPOSE_VIEW_CLASS_NAME) {
+        try {
+            val androidComposeViewClass = Class.forName(ANDROID_COMPOSE_VIEW_CLASS_NAME)
+            // use getDeclaredField instead of getField due to private access
+            val semanticsOwnerField = androidComposeViewClass.getDeclaredField("semanticsOwner")
+                .apply { isAccessible = true } // make private filed accessible
+            val semanticsOwner = semanticsOwnerField.get(this) as SemanticsOwner
+            val composeChildren = listOf(semanticsOwner.rootSemanticsNode.asCaptureView(context))
+            children.addAll(composeChildren)
+        } catch (_: Exception) { }
+        // Catching and swallowing exceptions here with the Compose view handling in case
+        // something changes in the future that breaks the expected structure being accessed
+        // through reflection here. If anything goes wrong within this block, prefer to continue
+        // processing the remainder of the view tree as best we can.
     }
 
     return ViewElement(
@@ -106,10 +139,10 @@ private fun View.asCaptureView(): ViewElement? {
         height = actualPosition.height().toDp(density),
         selector = selector(),
         type = this.javaClass.name,
-        children = children,
+        children = if (children.isEmpty()) null else children,
     )
 }
-internal fun View.selector(): ElementSelector? {
+private fun View.selector(): ElementSelector? {
     @Suppress("SwallowedException")
     val resourceName: String? = try {
         if (this.isClickable) resources.getResourceEntryName(id) else null
@@ -123,4 +156,53 @@ internal fun View.selector(): ElementSelector? {
     )
 
     return if (selector.isValid) selector else null
+}
+
+private fun SemanticsNode.asCaptureView(context: Context): ViewElement {
+    val displayMetrics = context.resources.displayMetrics
+    val density = displayMetrics.density
+
+    var childElements: List<ViewElement>? = children.map {
+        it.asCaptureView(context)
+    }
+
+    if (childElements?.isEmpty() == true) {
+        childElements = null
+    }
+
+    return ViewElement(
+        x = unclippedGlobalBounds.left.toDp(density),
+        y = unclippedGlobalBounds.top.toDp(density),
+        width = unclippedGlobalBounds.width().toDp(density),
+        height = unclippedGlobalBounds.height().toDp(density),
+        selector = selector(),
+        type = "Composable #$id",
+        children = childElements
+    )
+}
+
+private val SemanticsNode.unclippedGlobalBounds: Rect
+    get() {
+        return Rect(
+            positionInWindow.x.toInt(),
+            positionInWindow.y.toInt(),
+            positionInWindow.x.toInt() + size.width,
+            positionInWindow.y.toInt() + size.height
+        )
+    }
+
+private val AppcuesViewTagKey = SemanticsPropertyKey<String>("AppcuesViewTagKey")
+
+// used by the public appcuesViewTag Modifier in ElementTargetingStrategy.kt provided by SDK
+internal var SemanticsPropertyReceiver.appcuesViewTagProperty by AppcuesViewTagKey
+
+private fun SemanticsNode.selector(): ElementSelector? {
+    // we can look up the view tag set by the Modifier here and use it for
+    // our selector
+    if (config.contains(AppcuesViewTagKey)) {
+        return AndroidViewSelector(
+            tag = config[AppcuesViewTagKey]
+        )
+    }
+    return null
 }
