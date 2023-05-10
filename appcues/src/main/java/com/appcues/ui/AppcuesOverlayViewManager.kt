@@ -1,9 +1,11 @@
 package com.appcues.ui
 
 import android.app.Activity
+import android.view.View
 import android.view.ViewGroup
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ComposeView
+import androidx.core.view.children
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.findViewTreeLifecycleOwner
@@ -47,7 +49,7 @@ internal class AppcuesOverlayViewManager(private val scope: Scope) : DefaultLife
         if (activity == null || AppcuesActivityMonitor.isPaused) {
             return false
         }
-        
+
         AppcuesActivityMonitor.subscribe(this)
         activity.addView()
         return true
@@ -95,6 +97,9 @@ internal class AppcuesOverlayViewManager(private val scope: Scope) : DefaultLife
                     chromeClient = EmbedChromeClient(binding.appcuesOverlayCustomViewContainer),
                 )
             }
+
+            // remove customers view on accessibility stack
+            parentView.setAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS)
         }
     }
 
@@ -107,6 +112,9 @@ internal class AppcuesOverlayViewManager(private val scope: Scope) : DefaultLife
                 it.findViewById<ViewGroup?>(R.id.appcues_overlay_layout)?.run {
                     it.removeView(this)
                 }
+
+                // remove customers view on accessibility stack
+                it.setAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES)
             }
         }
     }
@@ -114,5 +122,12 @@ internal class AppcuesOverlayViewManager(private val scope: Scope) : DefaultLife
     private fun Activity.getParentView(): ViewGroup {
         // if there is any difference in API levels we can handle it here
         return window.decorView.rootView as ViewGroup
+    }
+
+    private fun ViewGroup.setAccessibility(accessibilityFlag: Int) {
+        children.forEach { child ->
+            if (child.id != R.id.appcues_overlay_layout && child.id != R.id.appcues_debugger_view)
+                child.importantForAccessibility = accessibilityFlag
+        }
     }
 }
