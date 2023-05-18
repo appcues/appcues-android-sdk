@@ -98,6 +98,11 @@ public data class ViewElement(
     val type: String,
 
     /**
+     * A value representing the display name of the view.
+     */
+    val displayName: String?,
+
+    /**
      * The element selector details that can be used to target content to this view. The selector structure
      * depends on the UI toolkit in use. If no identifiable properties exist for this view, this selector value should be null.
      */

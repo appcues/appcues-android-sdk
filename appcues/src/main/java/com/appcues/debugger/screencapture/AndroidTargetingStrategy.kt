@@ -21,8 +21,17 @@ internal data class AndroidViewSelector(
     var tag: String? = null,
     var resourceName: String? = null
 ) : ElementSelector {
+
     val isValid: Boolean
         get() = contentDescription != null || tag != null || resourceName != null
+
+    val displayName: String?
+        get() = when {
+            resourceName != null -> "RES/$resourceName"
+            tag != null -> "TAG/$tag"
+            contentDescription != null -> contentDescription
+            else -> null
+        }
 
     override fun toMap(): Map<String, String> {
         return mapOf(
@@ -125,37 +134,43 @@ private fun View.asCaptureView(): ViewElement? {
             val semanticsOwner = semanticsOwnerField.get(this) as SemanticsOwner
             val composeChildren = listOf(semanticsOwner.rootSemanticsNode.asCaptureView(context))
             children.addAll(composeChildren)
-        } catch (_: Exception) { }
-        // Catching and swallowing exceptions here with the Compose view handling in case
-        // something changes in the future that breaks the expected structure being accessed
-        // through reflection here. If anything goes wrong within this block, prefer to continue
-        // processing the remainder of the view tree as best we can.
+        } catch (_: Exception) {
+            // Catching and swallowing exceptions here with the Compose view handling in case
+            // something changes in the future that breaks the expected structure being accessed
+            // through reflection here. If anything goes wrong within this block, prefer to continue
+            // processing the remainder of the view tree as best we can.
+        }
     }
 
-    return ViewElement(
-        x = actualPosition.left.toDp(density),
-        y = actualPosition.top.toDp(density),
-        width = actualPosition.width().toDp(density),
-        height = actualPosition.height().toDp(density),
-        selector = selector(),
-        type = this.javaClass.name,
-        children = if (children.isEmpty()) null else children,
-    )
+    return selector().let {
+        ViewElement(
+            x = actualPosition.left.toDp(density),
+            y = actualPosition.top.toDp(density),
+            width = actualPosition.width().toDp(density),
+            height = actualPosition.height().toDp(density),
+            displayName = it?.displayName,
+            selector = it,
+            type = createAccessibilityNodeInfo().className.toString(),
+            children = if (children.isEmpty()) null else children,
+        )
+    }
 }
-private fun View.selector(): ElementSelector? {
-    @Suppress("SwallowedException")
-    val resourceName: String? = try {
+
+private fun View.selector(): AndroidViewSelector? {
+    return AndroidViewSelector(
+        contentDescription = contentDescription?.toString(),
+        tag = tag?.toString(),
+        resourceName = extractResourceName(),
+    ).let { if (it.isValid) it else null }
+}
+
+@Suppress("SwallowedException")
+private fun View.extractResourceName(): String? {
+    return try {
         if (this.isClickable) resources.getResourceEntryName(id) else null
-    } catch (ex: NotFoundException) {
+    } catch (_: NotFoundException) {
         null
     }
-    val selector = AndroidViewSelector(
-        contentDescription = this.contentDescription?.toString(),
-        tag = tag?.toString(),
-        resourceName = resourceName,
-    )
-
-    return if (selector.isValid) selector else null
 }
 
 private fun SemanticsNode.asCaptureView(context: Context): ViewElement {
@@ -170,15 +185,18 @@ private fun SemanticsNode.asCaptureView(context: Context): ViewElement {
         childElements = null
     }
 
-    return ViewElement(
-        x = unclippedGlobalBounds.left.toDp(density),
-        y = unclippedGlobalBounds.top.toDp(density),
-        width = unclippedGlobalBounds.width().toDp(density),
-        height = unclippedGlobalBounds.height().toDp(density),
-        selector = selector(),
-        type = "Composable #$id",
-        children = childElements
-    )
+    return selector().let {
+        ViewElement(
+            x = unclippedGlobalBounds.left.toDp(density),
+            y = unclippedGlobalBounds.top.toDp(density),
+            width = unclippedGlobalBounds.width().toDp(density),
+            height = unclippedGlobalBounds.height().toDp(density),
+            displayName = it?.displayName,
+            selector = it,
+            type = "Composable #$id",
+            children = childElements
+        )
+    }
 }
 
 private val SemanticsNode.unclippedGlobalBounds: Rect
@@ -196,7 +214,7 @@ private val AppcuesViewTagKey = SemanticsPropertyKey<String>("AppcuesViewTagKey"
 // used by the public appcuesViewTag Modifier in ElementTargetingStrategy.kt provided by SDK
 internal var SemanticsPropertyReceiver.appcuesViewTagProperty by AppcuesViewTagKey
 
-private fun SemanticsNode.selector(): ElementSelector? {
+private fun SemanticsNode.selector(): AndroidViewSelector? {
     // we can look up the view tag set by the Modifier here and use it for
     // our selector
     if (config.contains(AppcuesViewTagKey)) {
