@@ -28,6 +28,8 @@ android {
         buildConfigField "String", "APPCUES_APPLICATION_ID", "\"PLACEHOLDER_APPLICATION_ID\""
     }
 
+    namespace 'com.appcues.samples.kotlin'
+
     buildTypes {
         release {
             signingConfig signingConfigs.release
