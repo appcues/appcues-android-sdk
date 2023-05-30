@@ -74,8 +74,8 @@ private fun getTooltipPointerPath(
     // the value of length is the pointerLengthPx considering the direction it should
     val animatedVerticalLength = animateFloatAsState(
         when (tooltipSettings.tooltipPointerPosition) {
-            Top -> -tooltipSettings.pointerLengthPx
-            Bottom -> tooltipSettings.pointerLengthPx
+            is Top -> -tooltipSettings.pointerLengthPx
+            is Bottom -> tooltipSettings.pointerLengthPx
             else -> 0f
         },
         animationSpec
@@ -270,8 +270,8 @@ private fun getContainerPath(
         }
 
         val offset = when (tooltipSettings.tooltipPointerPosition) {
-            Top -> Offset(0f, tooltipSettings.pointerLengthPx)
-            Left -> Offset(tooltipSettings.pointerLengthPx, 0f)
+            is Top -> Offset(0f, tooltipSettings.pointerLengthPx)
+            is Left -> Offset(tooltipSettings.pointerLengthPx, 0f)
             else -> Offset(0f, 0f)
         }
 

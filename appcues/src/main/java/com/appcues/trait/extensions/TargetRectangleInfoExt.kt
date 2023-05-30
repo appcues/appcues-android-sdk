@@ -5,6 +5,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.coerceIn
 import androidx.compose.ui.unit.dp
 import com.appcues.trait.appcues.ContentPreferredPosition
 import com.appcues.trait.appcues.ContentPreferredPosition.BOTTOM
@@ -75,14 +76,21 @@ internal fun TargetRectangleInfo?.getTooltipPointerPosition(
     val canPositionVertically = excessSpaceTop > 0.dp || excessSpaceBottom > 0.dp
     val canPositionHorizontally = excessSpaceLeft > 0.dp || excessSpaceRight > 0.dp
 
+    // figures out the constraints of the screen, and calculate availableHeight for top and bottom, in case we need to pass it
+    // as part of the TooltipPointerPosition
+    val minHeight = 48.dp + pointerLength
+    val maxHeight = windowInfo.heightDp - (TooltipTrait.SCREEN_VERTICAL_PADDING * 2)
+    val availableHeightTop = (availableSpaceTop - distance - pointerLength).coerceIn(minHeight, maxHeight)
+    val availableHeightBottom = (availableSpaceBottom - distance - pointerLength).coerceIn(minHeight, maxHeight)
+
     return prefPosition.toPointerPosition(excessSpaceTop, excessSpaceBottom, excessSpaceLeft, excessSpaceRight) ?: when {
         // passed the preference positions we position the tooltip wherever is available.
-        canPositionVertically -> if (excessSpaceTop > excessSpaceBottom) Bottom else Top
+        canPositionVertically -> if (excessSpaceTop > excessSpaceBottom) Bottom() else Top()
         canPositionHorizontally -> if (excessSpaceLeft > excessSpaceRight) Right else Left
         // Doesn't fit anywhere so pick the top/bottom side that has the most space.
         // Allowing left/right here would mean the width gets compressed and that opens a can of worms.
-        excessSpaceTop > excessSpaceBottom -> Bottom
-        else -> Top
+        excessSpaceTop > excessSpaceBottom -> Bottom(availableHeightTop)
+        else -> Top(availableHeightBottom)
     }
 }
 
@@ -93,8 +101,8 @@ private fun ContentPreferredPosition?.toPointerPosition(
     excessSpaceRight: Dp
 ): TooltipPointerPosition? {
     return when {
-        this == TOP && excessSpaceTop > 0.dp -> Bottom
-        this == BOTTOM && excessSpaceBottom > 0.dp -> Top
+        this == TOP && excessSpaceTop > 0.dp -> Bottom()
+        this == BOTTOM && excessSpaceBottom > 0.dp -> Top()
         this == LEFT && excessSpaceLeft > 0.dp -> Right
         this == RIGHT && excessSpaceRight > 0.dp -> Left
         else -> null

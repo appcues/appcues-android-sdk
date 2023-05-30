@@ -6,6 +6,11 @@
         <option value="$PROJECT_DIR$/gradle/tools/detekt/detekt-config.yml" />
       </set>
     </option>
+    <option name="configurationFiles">
+      <list>
+        <option value="$PROJECT_DIR$/gradle/tools/detekt/detekt-config.yml" />
+      </list>
+    </option>
     <option name="enableAllRules" value="true" />
     <option name="enableFormatting" value="true" />
   </component>
