@@ -42,6 +42,7 @@ internal data class ContainerCornerRadius(
 internal sealed class TooltipPointerPosition {
 
     abstract val isVertical: Boolean
+    abstract val maxHeight: Dp?
 
     private val _alignment = mutableStateOf(PointerAlignment())
     val alignment: State<PointerAlignment> = _alignment
@@ -66,7 +67,7 @@ internal sealed class TooltipPointerPosition {
      */
     abstract fun toContainerCornerRadius(cornerRadius: Dp): ContainerCornerRadius
 
-    object Top : TooltipPointerPosition() {
+    class Top(override val maxHeight: Dp? = null) : TooltipPointerPosition() {
 
         override val isVertical = true
 
@@ -82,7 +83,7 @@ internal sealed class TooltipPointerPosition {
         }
     }
 
-    object Bottom : TooltipPointerPosition() {
+    class Bottom(override val maxHeight: Dp? = null) : TooltipPointerPosition() {
 
         override val isVertical = true
 
@@ -101,6 +102,7 @@ internal sealed class TooltipPointerPosition {
     object Left : TooltipPointerPosition() {
 
         override val isVertical = false
+        override val maxHeight: Dp? = null
 
         override fun toContainerCornerRadius(cornerRadius: Dp): ContainerCornerRadius {
             val ignoreRounding = alignment.value.ignoreRounding
@@ -117,6 +119,7 @@ internal sealed class TooltipPointerPosition {
     object Right : TooltipPointerPosition() {
 
         override val isVertical = false
+        override val maxHeight: Dp? = null
 
         override fun toContainerCornerRadius(cornerRadius: Dp): ContainerCornerRadius {
             val ignoreRounding = alignment.value.ignoreRounding
@@ -133,6 +136,7 @@ internal sealed class TooltipPointerPosition {
     object None : TooltipPointerPosition() {
 
         override val isVertical = false
+        override val maxHeight: Dp? = null
 
         override fun toContainerCornerRadius(cornerRadius: Dp): ContainerCornerRadius {
             return ContainerCornerRadius(

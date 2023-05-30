@@ -52,3 +52,4 @@ fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
 vendor/
+/.idea/kotlinc.xml

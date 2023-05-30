@@ -172,7 +172,7 @@ internal class TooltipTrait(
                 ) {
                     Box(
                         modifier = Modifier
-                            .tooltipSize(style, windowInfo, tooltipSettings, targetRect == null)
+                            .tooltipSize(style, windowInfo, tooltipSettings, targetRect == null, tooltipPointerPosition.maxHeight)
                             .onTooltipSizeChanged(style, containerDimens, contentDimens, tooltipPointerPosition, tooltipSettings) {
                                 // when tooltip is sized, set contentSized to true so the rest of the
                                 // composition can use sized information to place the tooltip.
@@ -332,17 +332,17 @@ internal class TooltipTrait(
 
         return animateDpAsState(
             targetValue = when (pointerSettings.tooltipPointerPosition) {
-                Top -> {
+                is Top -> {
                     val targetReference = (targetRect?.bottom?.dp ?: 0.dp) - SCREEN_VERTICAL_PADDING
                     val padding = targetReference + pointerSettings.distance
                     padding.coerceIn(minPaddingTop, maxPaddingTop)
                 }
-                Bottom -> {
+                is Bottom -> {
                     val targetReference = (targetRect?.top?.dp ?: 0.dp) - SCREEN_VERTICAL_PADDING
                     val padding = targetReference - pointerSettings.distance - contentDimens.heightDp - pointerLengthDp
                     padding.coerceIn(minPaddingTop, maxPaddingTop)
                 }
-                None -> maxPaddingTop
+                is None -> maxPaddingTop
                 else -> {
                     val targetReference = (targetRect?.center?.y?.dp ?: 0.dp) - SCREEN_VERTICAL_PADDING - (contentDimens.heightDp / 2)
 
@@ -361,11 +361,11 @@ internal class TooltipTrait(
 
     private fun TooltipSettings.getContentPaddingValues(): PaddingValues {
         return when (tooltipPointerPosition) {
-            Top -> PaddingValues(top = pointerLengthDp)
-            Bottom -> PaddingValues(bottom = pointerLengthDp)
-            Left -> PaddingValues(start = pointerLengthDp)
-            Right -> PaddingValues(end = pointerLengthDp)
-            None -> PaddingValues()
+            is Top -> PaddingValues(top = pointerLengthDp)
+            is Bottom -> PaddingValues(bottom = pointerLengthDp)
+            is Left -> PaddingValues(start = pointerLengthDp)
+            is Right -> PaddingValues(end = pointerLengthDp)
+            is None -> PaddingValues()
         }
     }
 
@@ -387,12 +387,13 @@ internal class TooltipTrait(
         windowInfo: AppcuesWindowInfo,
         tooltipSettings: TooltipSettings,
         useBottomToastStyle: Boolean,
+        maxHeight: Dp?,
     ): Modifier =
         composed {
             // keep containerMaxSize here as a rememberable so it force recomposition when value change
             val containerMaxSize = DpSize(
                 width = windowInfo.widthDp - (SCREEN_HORIZONTAL_PADDING * 2),
-                height = windowInfo.heightDp - (SCREEN_VERTICAL_PADDING * 2)
+                height = maxHeight ?: (windowInfo.heightDp - (SCREEN_VERTICAL_PADDING * 2))
             )
 
             // Note: when pointer position is None (un-targeted), we use "bottom toast style". We fall back
@@ -403,9 +404,9 @@ internal class TooltipTrait(
             val requiredHeight = if (tooltipSettings.tooltipPointerPosition.isVertical) pointerLengthDp else 0.dp
 
             val modifier = when (tooltipSettings.tooltipPointerPosition) {
-                Bottom, Top -> Modifier.width(min(width, containerMaxSize.width))
-                Left, Right -> Modifier.width(min(width + pointerLengthDp, containerMaxSize.width))
-                None -> Modifier.width(min(width, containerMaxSize.width))
+                is Bottom, is Top -> Modifier.width(min(width, containerMaxSize.width))
+                is Left, is Right -> Modifier.width(min(width + pointerLengthDp, containerMaxSize.width))
+                is None -> Modifier.width(min(width, containerMaxSize.width))
             }.requiredHeightIn(48.dp + requiredHeight, containerMaxSize.height)
 
             return@composed modifier
