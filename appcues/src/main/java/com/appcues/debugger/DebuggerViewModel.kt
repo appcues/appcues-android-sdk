@@ -3,6 +3,7 @@ package com.appcues.debugger
 import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.appcues.AppcuesCoroutineScope
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.debugger.DebugMode.Debugger
 import com.appcues.debugger.DebugMode.ScreenCapture
@@ -22,13 +23,17 @@ import com.appcues.debugger.model.EventType
 import com.appcues.debugger.model.TapActionType
 import com.appcues.debugger.screencapture.Capture
 import com.appcues.debugger.screencapture.ScreenCaptureProcessor
+import com.appcues.debugger.ui.MutableDebuggerState
+import com.appcues.ui.ExperienceRenderer
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectIndexed
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
@@ -46,6 +51,10 @@ internal class DebuggerViewModel(
     private val debuggerFontManager by inject<DebuggerFontManager>()
 
     private val screenCaptureProcessor by inject<ScreenCaptureProcessor>()
+
+    private val appcuesCoroutineScope by inject<AppcuesCoroutineScope>()
+
+    private val experienceRenderer by inject<ExperienceRenderer>()
 
     sealed class UIState {
         object Creating : UIState()
@@ -214,8 +223,23 @@ internal class DebuggerViewModel(
         }
     }
 
-    fun captureScreen() =
-        screenCaptureProcessor.captureScreen()
+    fun captureScreen(debuggerState: MutableDebuggerState) {
+        appcuesCoroutineScope.launch {
+            experienceRenderer.dismissCurrentExperience(markComplete = false, destroyed = false)
+
+            withContext(Dispatchers.Main) {
+                // capture screen
+                val capture = screenCaptureProcessor.captureScreen()
+
+                if (capture != null) {
+                    debuggerState.screenCapture.value = capture
+                } else {
+                    // go back to idle if for some reason we could not capture the screen
+                    closeExpandedView()
+                }
+            }
+        }
+    }
 
     fun onScreenCaptureConfirm(capture: Capture) {
         // return back to Idle for the current mode (ScreenCapture)
