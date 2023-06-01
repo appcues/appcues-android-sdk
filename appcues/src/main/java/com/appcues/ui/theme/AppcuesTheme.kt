@@ -10,11 +10,22 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.appcues.LoggingLevel.NONE
+import com.appcues.action.ExperienceAction
+import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType
 import com.appcues.data.model.ExperiencePrimitive
+import com.appcues.logging.Logcues
+import com.appcues.ui.ShakeGestureListener
+import com.appcues.ui.composables.AppcuesActionsDelegate
+import com.appcues.ui.composables.LocalAppcuesActionDelegate
+import com.appcues.ui.composables.LocalLogcues
+import com.appcues.ui.composables.LocalShakeGestureListener
 import com.appcues.ui.primitive.Compose
 
 /**
@@ -57,13 +68,27 @@ internal fun AppcuesPreviewPrimitive(
     primitiveBuilder: () -> ExperiencePrimitive
 ) {
     LocalConfiguration.current.uiMode = if (isDark) Configuration.UI_MODE_NIGHT_YES else Configuration.UI_MODE_NIGHT_NO
+    val context = LocalContext.current
 
     AppcuesTheme {
-        Column(
-            modifier = Modifier.background(MaterialTheme.colors.surface),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+        CompositionLocalProvider(
+            LocalShakeGestureListener provides ShakeGestureListener(context),
+            LocalLogcues provides Logcues(NONE),
+            LocalAppcuesActionDelegate provides PreviewAppcuesActionDelegate(),
         ) {
-            primitiveBuilder().Compose()
+            Column(
+                modifier = Modifier.background(MaterialTheme.colors.surface),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                primitiveBuilder().Compose()
+            }
         }
+    }
+}
+
+private class PreviewAppcuesActionDelegate : AppcuesActionsDelegate {
+
+    override fun onActions(actions: List<ExperienceAction>, interactionType: InteractionType, viewDescription: String?) {
+        // do nothing
     }
 }
