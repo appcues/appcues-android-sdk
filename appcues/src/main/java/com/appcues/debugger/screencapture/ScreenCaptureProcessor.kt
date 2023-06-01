@@ -2,8 +2,8 @@ package com.appcues.debugger.screencapture
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.text.format.DateFormat
 import android.view.View
+import androidx.core.view.isVisible
 import com.appcues.Appcues
 import com.appcues.AppcuesConfig
 import com.appcues.R
@@ -33,7 +33,7 @@ internal class ScreenCaptureProcessor(
             prepare(it)
 
             val timestamp = Date()
-            val displayName = it.screenCaptureDisplayName(timestamp)
+            val displayName = it.screenCaptureDisplayName()
             val screenshot = it.screenshot()
             val layout = Appcues.elementTargeting.captureLayout()
             val capture = if (screenshot != null && layout != null) {
@@ -96,7 +96,6 @@ internal class ScreenCaptureProcessor(
 
     // step 3 - upload the screenshot
     private suspend fun PreUploadScreenshotResponse.uploadImage(capture: Capture): Capture {
-
         val density = contextResources.displayMetrics.density
         val original = capture.screenshot
         val bitmap = Bitmap.createScaledBitmap(
@@ -122,22 +121,19 @@ internal class ScreenCaptureProcessor(
 
     private fun prepare(view: View) {
         // hide the debugger view for screen capture, if present
-        val debuggerView = view.findViewById<View>(R.id.appcues_debugger_view)
-        debuggerView?.let { it ->
-            it.visibility = View.GONE
+        view.findViewById<View>(R.id.appcues_debugger_view)?.apply {
+            isVisible = false
         }
     }
 
     private fun restore(view: View) {
-        // hide the debugger view for screen capture, if present
-        val debuggerView = view.findViewById<View>(R.id.appcues_debugger_view)
-        debuggerView?.let { it ->
-            it.visibility = View.VISIBLE
+        view.findViewById<View>(R.id.appcues_debugger_view)?.apply {
+            isVisible = true
         }
     }
 }
 
-private fun View.screenCaptureDisplayName(timestamp: Date): String {
+private fun View.screenCaptureDisplayName(): String {
     var name: String
     val activity = AppcuesActivityMonitor.activity
     if (activity != null) {
@@ -148,7 +144,7 @@ private fun View.screenCaptureDisplayName(timestamp: Date): String {
     } else {
         name = this.javaClass.simpleName
     }
-    return "$name (${DateFormat.format("yyyy-MM-dd_HH:mm:ss", timestamp)})"
+    return name
 }
 
 private fun View.screenshot() =
@@ -157,6 +153,8 @@ private fun View.screenshot() =
         val canvas = Canvas(bitmap)
         this.draw(canvas)
         bitmap
-    } else null
+    } else {
+        null
+    }
 
 private class ScreenCaptureSaveException(val error: RemoteError) : Exception("ScreenCaptureException: $error")

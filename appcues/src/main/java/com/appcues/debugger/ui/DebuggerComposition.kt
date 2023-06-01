@@ -184,14 +184,7 @@ private fun LaunchedUIStateEffect(
                             debuggerState.isVisible.targetState = false
 
                             // capture screen
-                            val capture = viewModel.captureScreen()
-
-                            if (capture != null) {
-                                debuggerState.screenCapture.value = capture
-                            } else {
-                                // go back to idle if for some reason we could not capture the screen
-                                viewModel.closeExpandedView()
-                            }
+                            viewModel.captureScreen(debuggerState)
                         }
                     }
                 }
