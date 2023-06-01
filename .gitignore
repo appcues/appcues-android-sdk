@@ -29,6 +29,8 @@ output.json
 /.idea/navEditor.xml
 /.idea/deploymentTargetDropDown.xml
 /.idea/assetWizardSettings.xml
+/.idea/kotlinc.xml
+vendor/
 
 # Keystore files
 *.jks
@@ -51,5 +53,3 @@ fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
-vendor/
-/.idea/kotlinc.xml
