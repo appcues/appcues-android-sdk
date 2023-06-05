@@ -7,38 +7,52 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.semantics.SemanticsOwner
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.SemanticsPropertyKey
 import androidx.compose.ui.semantics.SemanticsPropertyReceiver
 import androidx.core.view.children
 import com.appcues.ElementSelector
 import com.appcues.ElementTargetingStrategy
 import com.appcues.ViewElement
+import com.appcues.debugger.screencapture.AndroidViewSelector.Companion.SELECTOR_APPCUES_ID
+import com.appcues.debugger.screencapture.AndroidViewSelector.Companion.SELECTOR_CONTENT_DESCRIPTION
+import com.appcues.debugger.screencapture.AndroidViewSelector.Companion.SELECTOR_RESOURCE_NAME
+import com.appcues.debugger.screencapture.AndroidViewSelector.Companion.SELECTOR_TAG
 import com.appcues.isAppcuesView
 import com.appcues.monitor.AppcuesActivityMonitor
 
-internal data class AndroidViewSelector(
-    var contentDescription: String? = null,
-    var tag: String? = null,
-    var resourceName: String? = null
+internal class AndroidViewSelector(
+    private val properties: Map<String, String?>,
+    val type: String? = null,
 ) : ElementSelector {
+
+    companion object {
+
+        const val SELECTOR_CONTENT_DESCRIPTION = "contentDescription"
+        const val SELECTOR_TAG = "tag"
+        const val SELECTOR_RESOURCE_NAME = "resourceName"
+        const val SELECTOR_APPCUES_ID = "appcuesId"
+    }
+
+    private val contentDescription: String? = properties[SELECTOR_CONTENT_DESCRIPTION]
+    private val tag: String? = properties[SELECTOR_TAG]
+    private val resourceName: String? = properties[SELECTOR_RESOURCE_NAME]
+    private val appcuesId: String? = properties[SELECTOR_APPCUES_ID]
 
     val isValid: Boolean
         get() = contentDescription != null || tag != null || resourceName != null
 
     val displayName: String?
         get() = when {
-            resourceName != null -> "RES/$resourceName"
-            tag != null -> "TAG/$tag"
+            resourceName != null -> "$type ($resourceName)"
+            tag != null -> "$type (tag $tag)"
+            appcuesId != null -> appcuesId
             contentDescription != null -> contentDescription
             else -> null
         }
 
     override fun toMap(): Map<String, String> {
-        return mapOf(
-            "contentDescription" to contentDescription,
-            "tag" to tag,
-            "resourceName" to resourceName,
-        ).filterValues { it != null }.mapValues { it.value as String }
+        return properties.filterValues { it != null }.mapValues { it.value as String }
     }
 
     @Suppress("MagicNumber")
@@ -51,6 +65,10 @@ internal data class AndroidViewSelector(
             }
 
             if (it.tag != null && it.tag == tag) {
+                weight += 100
+            }
+
+            if (it.appcuesId != null && it.appcuesId == appcuesId) {
                 weight += 100
             }
 
@@ -70,12 +88,7 @@ internal class AndroidTargetingStrategy : ElementTargetingStrategy {
     }
 
     override fun inflateSelectorFrom(properties: Map<String, String>): ElementSelector? {
-        val selector = AndroidViewSelector(
-            contentDescription = properties["contentDescription"],
-            tag = properties["tag"],
-            resourceName = properties["resourceName"],
-        )
-        return if (selector.isValid) selector else null
+        return AndroidViewSelector(properties).let { if (it.isValid) it else null }
     }
 }
 
@@ -150,7 +163,7 @@ private fun View.asCaptureView(): ViewElement? {
             height = actualPosition.height().toDp(density),
             displayName = it?.displayName,
             selector = it,
-            type = createAccessibilityNodeInfo().className.toString(),
+            type = it?.type ?: this::class.java.simpleName,
             children = if (children.isEmpty()) null else children,
         )
     }
@@ -158,9 +171,12 @@ private fun View.asCaptureView(): ViewElement? {
 
 private fun View.selector(): AndroidViewSelector? {
     return AndroidViewSelector(
-        contentDescription = contentDescription?.toString(),
-        tag = tag?.toString(),
-        resourceName = extractResourceName(),
+        properties = mapOf(
+            SELECTOR_CONTENT_DESCRIPTION to contentDescription?.toString(),
+            SELECTOR_TAG to tag?.toString(),
+            SELECTOR_RESOURCE_NAME to extractResourceName()
+        ),
+        type = this::class.java.simpleName,
     ).let { if (it.isValid) it else null }
 }
 
@@ -193,7 +209,7 @@ private fun SemanticsNode.asCaptureView(context: Context): ViewElement {
             height = unclippedGlobalBounds.height().toDp(density),
             displayName = it?.displayName,
             selector = it,
-            type = "Composable #$id",
+            type = it?.type ?: "Composable #$id",
             children = childElements
         )
     }
@@ -215,11 +231,11 @@ private val AppcuesViewTagKey = SemanticsPropertyKey<String>("AppcuesViewTagKey"
 internal var SemanticsPropertyReceiver.appcuesViewTagProperty by AppcuesViewTagKey
 
 private fun SemanticsNode.selector(): AndroidViewSelector? {
-    // we can look up the view tag set by the Modifier here and use it for
-    // our selector
+    // we can look up the view tag set by the Modifier here and use it for our selector
     if (config.contains(AppcuesViewTagKey)) {
         return AndroidViewSelector(
-            tag = config[AppcuesViewTagKey]
+            properties = mapOf(SELECTOR_APPCUES_ID to config[AppcuesViewTagKey]),
+            type = config[SemanticsProperties.Role].toString()
         )
     }
     return null
