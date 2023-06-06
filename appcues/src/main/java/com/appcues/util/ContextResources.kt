@@ -6,10 +6,7 @@ import android.os.Build
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import android.util.DisplayMetrics
-import android.webkit.WebView
 import androidx.annotation.StringRes
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.util.Locale
 
 // class used to access resources from classes that are not
@@ -63,10 +60,7 @@ internal class ContextResources(private val context: Context) {
         return getCurrentLocale(context).language
     }
 
-    suspend fun getUserAgent(): String? = withContext(Dispatchers.Main) {
-        // this must be on main thread
-        return@withContext WebView(context).settings.userAgentString
-    }
+    fun getUserAgent(): String? = System.getProperty("http.agent")
 
     private fun getCurrentLocale(context: Context): Locale {
         return if (VERSION.SDK_INT >= VERSION_CODES.N) {

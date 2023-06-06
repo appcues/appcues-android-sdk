@@ -1,7 +1,6 @@
 package com.appcues.analytics
 
 import com.appcues.AppcuesConfig
-import com.appcues.AppcuesCoroutineScope
 import com.appcues.SessionMonitor
 import com.appcues.Storage
 import com.appcues.analytics.AnalyticsEvent.ScreenView
@@ -42,7 +41,6 @@ internal class AutoPropertyDecoratorTest {
     fun setup() {
         autoPropertyDecorator = AutoPropertyDecorator(
             config = config,
-            appcuesCoroutineScope = AppcuesCoroutineScope(mockk()),
             contextResources = contextResources,
             storage = storage,
             sessionMonitor = sessionMonitor,
@@ -222,7 +220,6 @@ internal class AutoPropertyDecoratorTest {
         }
         autoPropertyDecorator = AutoPropertyDecorator(
             config = config,
-            appcuesCoroutineScope = AppcuesCoroutineScope(mockk()),
             contextResources = contextResources,
             storage = storage,
             sessionMonitor = sessionMonitor,
