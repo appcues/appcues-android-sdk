@@ -17,7 +17,6 @@ internal object AnalyticsKoin : KoinScopePlugin {
                 config = get(),
                 storage = get(),
                 sessionMonitor = get(),
-                appcuesCoroutineScope = get(),
                 sessionRandomizer = get(),
             )
         }
