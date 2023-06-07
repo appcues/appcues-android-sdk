@@ -23,6 +23,7 @@ internal class AutoPropertyDecorator(
 ) {
 
     companion object {
+
         const val IDENTITY_PROPERTY = "_identity"
         const val UPDATED_AT_PROPERTY = "_updatedAt"
     }
@@ -32,6 +33,7 @@ internal class AutoPropertyDecorator(
     private var previousScreen: String? = null
     private var sessionPageviews = 0
     private var sessionRandomId: Int = 0
+    private var sessionLatestUserProperties: Map<String, Any> = mapOf()
 
     private val contextProperties = hashMapOf<String, Any>(
         "app_id" to config.applicationId,
@@ -69,6 +71,7 @@ internal class AutoPropertyDecorator(
 
     val autoProperties: Map<String, Any>
         get() = hashMapOf<String, Any>().apply {
+            putAll(sessionLatestUserProperties)
             putAll(applicationProperties)
             // add userAgent if exists (userAgent is a mutable property loaded asynchronously) and can be null
             userAgent?.let { put("_userAgent", it) }
@@ -107,7 +110,9 @@ internal class AutoPropertyDecorator(
     }
 
     fun decorateIdentify(activity: ActivityRequest) = activity.copy(
-        profileUpdate = (activity.profileUpdate ?: hashMapOf()).apply {
+        profileUpdate = (activity.profileUpdate ?: hashMapOf()).also {
+            sessionLatestUserProperties = it
+        }.apply {
             putAll(autoProperties)
         }
     )
