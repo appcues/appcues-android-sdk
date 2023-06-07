@@ -196,6 +196,25 @@ internal class AutoPropertyDecoratorTest {
     }
 
     @Test
+    fun `decorateIdentity SHOULD add session properties and send on other requests`() {
+        // given
+        val activityRequest = ActivityRequest(
+            userId = "test userId",
+            accountId = "test accountId",
+            profileUpdate = hashMapOf("test_property" to "test_value")
+        )
+        // when
+        with(autoPropertyDecorator.decorateIdentify(activityRequest)) {
+            // then
+            assertThat(profileUpdate).hasSize(22)
+        }
+        // then when
+        with(autoPropertyDecorator.decorateTrack(EventRequest(name = SessionStarted.eventName))) {
+            assertThat(attributes["_identity"] as HashMap<*, *>).containsEntry("test_property", "test_value")
+        }
+    }
+
+    @Test
     fun `decorateIdentity SHOULD put custom properties into profileUpdate map`() {
         // given
         val activityRequest = ActivityRequest(

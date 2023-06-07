@@ -10,6 +10,8 @@ In order to target content to the right users at the right time, you need to ide
 appcues.identify(userId, properties)
 ```
 
+It is recommended that the application identify a user at moments such as sign in, and also when the app starts up on a cold launch with existing log in credentials. This will ensure that any user properties tied to this user can be kept accurately up to date.
+
 The inverse of identifying is resetting. For example, if a user logs out of your app. Calling `reset()` will disable tracking of screens and events until a user is identified again.
 
 ### Identity Verification
