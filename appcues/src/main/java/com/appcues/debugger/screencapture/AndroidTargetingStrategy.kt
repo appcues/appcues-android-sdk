@@ -40,14 +40,14 @@ internal class AndroidViewSelector(
     private val appcuesId: String? = properties[SELECTOR_APPCUES_ID]
 
     val isValid: Boolean
-        get() = contentDescription != null || tag != null || resourceName != null
+        get() = contentDescription != null || tag != null || resourceName != null || appcuesId != null
 
     val displayName: String?
         get() = when {
-            resourceName != null -> "$type ($resourceName)"
-            tag != null -> "$type (tag $tag)"
+            resourceName != null -> resourceName
             appcuesId != null -> appcuesId
-            contentDescription != null -> contentDescription
+            tag != null -> "$type (tag $tag)"
+            contentDescription != null -> "$type ($contentDescription)"
             else -> null
         }
 
@@ -64,11 +64,11 @@ internal class AndroidViewSelector(
                 weight += 1_000
             }
 
-            if (it.tag != null && it.tag == tag) {
-                weight += 100
+            if (it.appcuesId != null && it.appcuesId == appcuesId) {
+                weight += 1_000
             }
 
-            if (it.appcuesId != null && it.appcuesId == appcuesId) {
+            if (it.tag != null && it.tag == tag) {
                 weight += 100
             }
 
