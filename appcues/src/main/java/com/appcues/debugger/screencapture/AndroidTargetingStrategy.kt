@@ -31,7 +31,7 @@ internal class AndroidViewSelector(
         const val SELECTOR_CONTENT_DESCRIPTION = "contentDescription"
         const val SELECTOR_TAG = "tag"
         const val SELECTOR_RESOURCE_NAME = "resourceName"
-        const val SELECTOR_APPCUES_ID = "appcuesId"
+        const val SELECTOR_APPCUES_ID = "appcuesID"
     }
 
     private val contentDescription: String? = properties[SELECTOR_CONTENT_DESCRIPTION]
