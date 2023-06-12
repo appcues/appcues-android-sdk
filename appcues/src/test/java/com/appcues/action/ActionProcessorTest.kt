@@ -14,9 +14,11 @@ import com.appcues.statemachine.State
 import com.appcues.statemachine.State.RenderingStep
 import com.appcues.statemachine.StateMachine
 import com.google.common.truth.Truth.assertThat
+import io.mockk.Called
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Rule
@@ -30,6 +32,7 @@ import org.koin.mp.KoinPlatformTools
 import org.koin.test.KoinTest
 import java.util.UUID
 
+@OptIn(ExperimentalCoroutinesApi::class)
 internal class ActionProcessorTest : KoinTest {
 
     @get:Rule
@@ -96,6 +99,28 @@ internal class ActionProcessorTest : KoinTest {
             assertThat(this["text"]).isEqualTo("Button 1")
             assertThat(this["category"]).isEqualTo("test")
         }
+    }
+
+    @Test
+    fun `unpublished experience SHOULD NOT send stepInteraction analytics`() = runTest {
+
+        // GIVEN
+        val experience = mockExperience().copy(published = false)
+        val initialState = RenderingStep(experience, 0, true)
+        val scope = initScope(initialState)
+        val actionProcessor = scope.get<ActionProcessor>()
+        val analyticsTracker: AnalyticsTracker = scope.get()
+        val stepAction1 = TestStepInteractionAction("test", "a")
+
+        // WHEN
+        actionProcessor.process(
+            listOf(stepAction1),
+            BUTTON_TAPPED,
+            "Button 1"
+        )
+
+        // THEN
+        verify { analyticsTracker wasNot Called }
     }
 
     // Helpers
