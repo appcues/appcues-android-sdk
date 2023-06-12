@@ -37,7 +37,7 @@ internal class StepInteractionAction(
         val experience = stateMachine.state.currentExperience
         val stepIndex = stateMachine.state.currentStepIndex
 
-        if (experience != null && stepIndex != null) {
+        if (experience != null && stepIndex != null && experience.published) {
             val interactionEvent = StepInteraction(
                 experience = experience,
                 stepIndex = stepIndex,
