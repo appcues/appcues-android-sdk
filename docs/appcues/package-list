@@ -70,6 +70,7 @@ $dokka.location:com.appcues.ui.composables/AppcuesStepMetadata/current/#/Pointin
 $dokka.location:com.appcues.ui.composables/AppcuesStepMetadata/previous/#/PointingToDeclaration/appcues/com.appcues.ui.composables/-appcues-step-metadata/previous.html
 $dokka.location:com.appcues////PointingToDeclaration/appcues/com.appcues/index.html
 $dokka.location:com.appcues//Appcues/#android.content.Context#kotlin.String#kotlin.String#kotlin.Function1[com.appcues.AppcuesConfig,kotlin.Unit]?/PointingToDeclaration/appcues/com.appcues/-appcues.html
+$dokka.location:com.appcues//appcuesView/androidx.compose.ui.Modifier#kotlin.String/PointingToDeclaration/appcues/com.appcues/appcues-view.html
 $dokka.location:com.appcues//isAppcuesView/android.view.View#/PointingToDeclaration/appcues/com.appcues/is-appcues-view.html
 $dokka.location:com.appcues/AnalyticType.EVENT///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}appcues/com.appcues/-analytic-type/-e-v-e-n-t/index.html
 $dokka.location:com.appcues/AnalyticType.GROUP///PointingToDeclaration/{"org.jetbrains.dokka.links.EnumEntryDRIExtra":{"key":"org.jetbrains.dokka.links.EnumEntryDRIExtra"}}appcues/com.appcues/-analytic-type/-g-r-o-u-p/index.html
@@ -135,8 +136,9 @@ $dokka.location:com.appcues/LoggingLevel/values/#/PointingToDeclaration/appcues
 $dokka.location:com.appcues/NavigationHandler///PointingToDeclaration/appcues/com.appcues/-navigation-handler/index.html
 $dokka.location:com.appcues/NavigationHandler/navigateTo/#android.net.Uri/PointingToDeclaration/appcues/com.appcues/-navigation-handler/navigate-to.html
 $dokka.location:com.appcues/ViewElement///PointingToDeclaration/appcues/com.appcues/-view-element/index.html
-$dokka.location:com.appcues/ViewElement/ViewElement/#java.util.UUID#kotlin.Int#kotlin.Int#kotlin.Int#kotlin.Int#kotlin.String#com.appcues.ElementSelector?#kotlin.collections.List[com.appcues.ViewElement]?/PointingToDeclaration/appcues/com.appcues/-view-element/-view-element.html
+$dokka.location:com.appcues/ViewElement/ViewElement/#java.util.UUID#kotlin.Int#kotlin.Int#kotlin.Int#kotlin.Int#kotlin.String#kotlin.String?#com.appcues.ElementSelector?#kotlin.collections.List[com.appcues.ViewElement]?/PointingToDeclaration/appcues/com.appcues/-view-element/-view-element.html
 $dokka.location:com.appcues/ViewElement/children/#/PointingToDeclaration/appcues/com.appcues/-view-element/children.html
+$dokka.location:com.appcues/ViewElement/displayName/#/PointingToDeclaration/appcues/com.appcues/-view-element/display-name.html
 $dokka.location:com.appcues/ViewElement/height/#/PointingToDeclaration/appcues/com.appcues/-view-element/height.html
 $dokka.location:com.appcues/ViewElement/id/#/PointingToDeclaration/appcues/com.appcues/-view-element/id.html
 $dokka.location:com.appcues/ViewElement/selector/#/PointingToDeclaration/appcues/com.appcues/-view-element/selector.html
