@@ -10,6 +10,7 @@ import androidx.compose.ui.semantics.SemanticsOwner
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.SemanticsPropertyKey
 import androidx.compose.ui.semantics.SemanticsPropertyReceiver
+import androidx.compose.ui.semantics.getOrNull
 import androidx.core.view.children
 import com.appcues.ElementSelector
 import com.appcues.ElementTargetingStrategy
@@ -235,7 +236,7 @@ private fun SemanticsNode.selector(): AndroidViewSelector? {
     if (config.contains(AppcuesViewTagKey)) {
         return AndroidViewSelector(
             properties = mapOf(SELECTOR_APPCUES_ID to config[AppcuesViewTagKey]),
-            type = config[SemanticsProperties.Role].toString()
+            type = config.getOrNull(SemanticsProperties.Role)?.toString()
         )
     }
     return null
