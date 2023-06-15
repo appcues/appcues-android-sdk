@@ -10,13 +10,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import androidx.compose.material.MaterialTheme
 import androidx.compose.ui.platform.ComposeView
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.viewModelScope
 import com.appcues.R
 import com.appcues.debugger.DebuggerViewModel.UIState.Expanded
 import com.appcues.debugger.ui.DebuggerComposition
-import com.appcues.util.getNavigationBarHeight
-import com.appcues.util.getStatusBarHeight
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -107,7 +107,9 @@ internal class AppcuesDebuggerManager(context: Context, private val koinScope: S
 
                         layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT).apply {
                             // adds margin top and bottom according to visible status and navigation bar
-                            setMargins(0, context.getStatusBarHeight(), 0, context.getNavigationBarHeight())
+                            ViewCompat.getRootWindowInsets(it)?.getInsets(WindowInsetsCompat.Type.systemBars())?.let { insets ->
+                                setMargins(insets.left, insets.top, insets.right, insets.bottom)
+                            }
                         }
 
                         setContent {

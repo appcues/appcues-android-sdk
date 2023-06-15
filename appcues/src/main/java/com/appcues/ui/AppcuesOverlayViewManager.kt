@@ -5,6 +5,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ComposeView
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.children
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -16,8 +18,6 @@ import com.appcues.monitor.AppcuesActivityMonitor
 import com.appcues.monitor.AppcuesActivityMonitor.ActivityMonitorListener
 import com.appcues.ui.composables.AppcuesComposition
 import com.appcues.ui.primitive.EmbedChromeClient
-import com.appcues.util.getNavigationBarHeight
-import com.appcues.util.getStatusBarHeight
 import org.koin.core.scope.Scope
 
 internal class AppcuesOverlayViewManager(private val scope: Scope) : DefaultLifecycleObserver, ActivityMonitorListener {
@@ -80,13 +80,17 @@ internal class AppcuesOverlayViewManager(private val scope: Scope) : DefaultLife
                 parentView.addView(binding.root)
             }
 
+            val insets = ViewCompat.getRootWindowInsets(parentView)?.getInsets(WindowInsetsCompat.Type.systemBars())
+
             binding.root.layoutParams =
                 android.widget.FrameLayout.LayoutParams(
                     android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
                     android.widget.FrameLayout.LayoutParams.MATCH_PARENT
                 ).apply {
                     // adds margin top and bottom according to visible status and navigation bar
-                    setMargins(0, getStatusBarHeight(), 0, getNavigationBarHeight())
+                    ViewCompat.getRootWindowInsets(parentView)?.getInsets(WindowInsetsCompat.Type.systemBars())?.let { insets ->
+                        setMargins(insets.left, insets.top, insets.right, insets.bottom)
+                    }
                 }
 
             binding.appcuesOverlayComposeView.setContent {
