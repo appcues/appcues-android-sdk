@@ -95,6 +95,7 @@ dependencies {
     implementation "androidx.room:room-runtime:$room_version"
     implementation "androidx.room:room-ktx:$room_version"
     kapt "androidx.room:room-compiler:$room_version"
+    implementation "androidx.savedstate:savedstate:1.2.0"
     // Image Loader
     implementation "io.coil-kt:coil-compose:$coil_version"
     implementation "io.coil-kt:coil-gif:$coil_version"

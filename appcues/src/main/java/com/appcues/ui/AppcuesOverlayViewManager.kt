@@ -1,8 +1,11 @@
 package com.appcues.ui
 
 import android.app.Activity
+import android.os.Build.VERSION
+import android.os.Build.VERSION_CODES
 import android.view.View
 import android.view.ViewGroup
+import android.view.inspector.WindowInspector
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ComposeView
 import androidx.core.view.ViewCompat
@@ -10,7 +13,12 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.children
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ViewTreeLifecycleOwner
+import androidx.lifecycle.ViewTreeViewModelStoreOwner
 import androidx.lifecycle.findViewTreeLifecycleOwner
+import androidx.lifecycle.findViewTreeViewModelStoreOwner
+import androidx.savedstate.findViewTreeSavedStateRegistryOwner
+import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.appcues.R
 import com.appcues.databinding.AppcuesOverlayLayoutBinding
 import com.appcues.logging.Logcues
@@ -123,15 +131,42 @@ internal class AppcuesOverlayViewManager(private val scope: Scope) : DefaultLife
         }
     }
 
-    private fun Activity.getParentView(): ViewGroup {
-        // if there is any difference in API levels we can handle it here
-        return window.decorView.rootView as ViewGroup
-    }
-
     private fun ViewGroup.setAccessibility(accessibilityFlag: Int) {
         children.forEach { child ->
             if (child.id != R.id.appcues_overlay_layout && child.id != R.id.appcues_debugger_view)
                 child.importantForAccessibility = accessibilityFlag
         }
+    }
+}
+
+internal fun Activity.getParentView(): ViewGroup {
+    // if there is any difference in API levels we can handle it here
+    if (VERSION.SDK_INT >= VERSION_CODES.Q) {
+        val views = WindowInspector.getGlobalWindowViews()
+
+        val decorView = views.last()
+        if (decorView != window.decorView) {
+            // This is the case of some other decorView showing on top - like a modal
+            // dialog. In this case, we need to apply the fixups below to ensure that our
+            // content can render correctly inside of this other view
+            if (ViewTreeLifecycleOwner.get(decorView) == null) {
+                val lifecycleOwner = window.decorView.findViewTreeLifecycleOwner()
+                ViewTreeLifecycleOwner.set(decorView, lifecycleOwner)
+            }
+
+            if (ViewTreeViewModelStoreOwner.get(decorView) == null) {
+                val viewModelStoreOwner = window.decorView.findViewTreeViewModelStoreOwner()
+                ViewTreeViewModelStoreOwner.set(decorView, viewModelStoreOwner)
+            }
+
+            if (decorView.findViewTreeSavedStateRegistryOwner() == null) {
+                val savedStateRegistryOwner = window.decorView.findViewTreeSavedStateRegistryOwner()
+                decorView.setViewTreeSavedStateRegistryOwner(savedStateRegistryOwner)
+            }
+        }
+
+        return decorView.rootView as ViewGroup
+    } else {
+        return window.decorView.rootView as ViewGroup
     }
 }

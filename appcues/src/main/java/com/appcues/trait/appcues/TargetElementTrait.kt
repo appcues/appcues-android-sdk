@@ -13,6 +13,7 @@ import com.appcues.findMatches
 import com.appcues.monitor.AppcuesActivityMonitor
 import com.appcues.trait.AppcuesTraitException
 import com.appcues.trait.MetadataSettingTrait
+import com.appcues.ui.getParentView
 
 internal class TargetElementTrait(
     override val config: AppcuesConfigMap,
@@ -29,7 +30,7 @@ internal class TargetElementTrait(
     override fun produceMetadata(): Map<String, Any?> {
         val view = viewMatchingSelector()
 
-        val rootView = AppcuesActivityMonitor.activity?.window?.decorView?.rootView
+        val rootView = AppcuesActivityMonitor.activity?.getParentView()
             ?: throw AppcuesTraitException("could not find root view")
 
         val displayMetrics = rootView.context.resources.displayMetrics
