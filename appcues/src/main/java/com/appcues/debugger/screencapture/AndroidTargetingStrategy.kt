@@ -21,6 +21,7 @@ import com.appcues.debugger.screencapture.AndroidViewSelector.Companion.SELECTOR
 import com.appcues.debugger.screencapture.AndroidViewSelector.Companion.SELECTOR_TAG
 import com.appcues.isAppcuesView
 import com.appcues.monitor.AppcuesActivityMonitor
+import com.appcues.ui.getParentView
 
 internal class AndroidViewSelector(
     private val properties: Map<String, String?>,
@@ -85,7 +86,7 @@ internal class AndroidViewSelector(
 internal class AndroidTargetingStrategy : ElementTargetingStrategy {
 
     override fun captureLayout(): ViewElement? {
-        return AppcuesActivityMonitor.activity?.window?.decorView?.rootView?.asCaptureView()
+        return AppcuesActivityMonitor.activity?.getParentView()?.asCaptureView()
     }
 
     override fun inflateSelectorFrom(properties: Map<String, String>): ElementSelector? {
