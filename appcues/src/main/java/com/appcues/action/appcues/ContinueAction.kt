@@ -5,14 +5,13 @@ import com.appcues.action.MetadataSettingsAction
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.getConfig
 import com.appcues.data.model.getConfigInt
-import com.appcues.statemachine.Action.StartStep
-import com.appcues.statemachine.StateMachine
 import com.appcues.statemachine.StepReference
+import com.appcues.ui.ExperienceRenderer
 import java.util.UUID
 
 internal class ContinueAction(
     override val config: AppcuesConfigMap,
-    private val stateMachine: StateMachine
+    private val experienceRenderer: ExperienceRenderer,
 ) : ExperienceAction, MetadataSettingsAction {
 
     companion object {
@@ -37,6 +36,6 @@ internal class ContinueAction(
     override val destination: String = stepReference.destination
 
     override suspend fun execute() {
-        stateMachine.handleAction(StartStep(stepReference))
+        experienceRenderer.show(stepReference)
     }
 }

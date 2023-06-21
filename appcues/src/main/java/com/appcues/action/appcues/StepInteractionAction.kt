@@ -5,13 +5,13 @@ import com.appcues.analytics.AnalyticsTracker
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType
 import com.appcues.data.model.AppcuesConfigMap
-import com.appcues.statemachine.StateMachine
+import com.appcues.ui.ExperienceRenderer
 
 internal class StepInteractionAction(
     override val config: AppcuesConfigMap,
     val interaction: StepInteractionData,
     private val analyticsTracker: AnalyticsTracker,
-    private val stateMachine: StateMachine,
+    private val experienceRenderer: ExperienceRenderer,
 ) : ExperienceAction {
 
     class StepInteractionData(
@@ -34,9 +34,7 @@ internal class StepInteractionAction(
     }
 
     override suspend fun execute() {
-        val experience = stateMachine.state.currentExperience
-        val stepIndex = stateMachine.state.currentStepIndex
-
+        val (experience, stepIndex) = experienceRenderer.getState().let { Pair(it.currentExperience, it.currentStepIndex) }
         if (experience != null && stepIndex != null && experience.published) {
             val interactionEvent = StepInteraction(
                 experience = experience,

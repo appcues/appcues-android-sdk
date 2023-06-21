@@ -1,4 +1,4 @@
-@file:Suppress("unused", "UNUSED_PARAMETER")
+@file:Suppress("unused")
 
 package com.appcues.statemachine
 
@@ -57,7 +57,7 @@ internal interface Transitions {
         // fail, so that we don't launch an AppcuesComposition and then have no content to render
         experience.stepContainers.firstOrNull()?.let {
             if (it.steps.isEmpty()) {
-                return stepNotFoundErrorTransition(experience, 0, 0)
+                return stepNotFoundErrorTransition(experience, experience.stepContainers.indexOf(it))
             }
         }
 
@@ -230,11 +230,11 @@ private fun errorTransition(experience: Experience, currentStepIndex: Int, messa
     )
 }
 
-private fun stepNotFoundErrorTransition(experience: Experience, groupIndex: Int, stepIndex: Int): Transition {
+private fun stepNotFoundErrorTransition(experience: Experience, groupIndex: Int): Transition {
     return Transition(
         state = Idling,
         sideEffect = ReportErrorEffect(
-            error = StepError(experience, 0, "step group $groupIndex doesn't contain a child step at index $stepIndex")
+            error = StepError(experience, 0, "step group $groupIndex has no child step")
         )
     )
 }

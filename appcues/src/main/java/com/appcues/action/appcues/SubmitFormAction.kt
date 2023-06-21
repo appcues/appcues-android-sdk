@@ -9,11 +9,11 @@ import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.Interactio
 import com.appcues.analytics.formattedAsProfileUpdate
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.getConfigOrDefault
-import com.appcues.statemachine.StateMachine
+import com.appcues.ui.ExperienceRenderer
 
 internal class SubmitFormAction(
     override val config: AppcuesConfigMap,
-    private val stateMachine: StateMachine,
+    private val experienceRenderer: ExperienceRenderer,
     private val analyticsTracker: AnalyticsTracker,
 ) : ExperienceActionQueueTransforming {
 
@@ -30,9 +30,7 @@ internal class SubmitFormAction(
             return queue
         }
 
-        val experience = stateMachine.state.currentExperience
-        val stepIndex = stateMachine.state.currentStepIndex
-
+        val (experience, stepIndex) = experienceRenderer.getState().let { Pair(it.currentExperience, it.currentStepIndex) }
         if (experience != null && stepIndex != null) {
             val formState = experience.flatSteps[stepIndex].formState
 
@@ -48,9 +46,7 @@ internal class SubmitFormAction(
 
     // reports analytics for step interaction, for the form submission
     override suspend fun execute() {
-        val experience = stateMachine.state.currentExperience
-        val stepIndex = stateMachine.state.currentStepIndex
-
+        val (experience, stepIndex) = experienceRenderer.getState().let { Pair(it.currentExperience, it.currentStepIndex) }
         if (experience != null && stepIndex != null) {
             val formState = experience.flatSteps[stepIndex].formState
 

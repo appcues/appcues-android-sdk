@@ -1,6 +1,5 @@
 package com.appcues.statemachine
 
-import com.appcues.AppcuesConfig
 import com.appcues.AppcuesCoroutineScope
 import com.appcues.action.ActionProcessor
 import com.appcues.statemachine.Action.EndExperience
@@ -31,44 +30,28 @@ import com.appcues.trait.AppcuesTraitException
 import com.appcues.util.ResultOf
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 internal class StateMachine(
     private val appcuesCoroutineScope: AppcuesCoroutineScope,
-    private val config: AppcuesConfig,
     private val actionProcessor: ActionProcessor,
     initialState: State = Idling
 ) {
 
-    private val _stateFlow = MutableSharedFlow<State>(1)
-    val stateFlow: SharedFlow<State>
-        get() = _stateFlow
+    interface StateMachineListener {
 
-    private val _errorFlow = MutableSharedFlow<Error>(1)
-    val errorFlow: SharedFlow<Error>
-        get() = _errorFlow
+        suspend fun onState(state: State)
+        suspend fun onError(error: Error)
+    }
+
+    var listener: StateMachineListener? = null
 
     private var _state: State = initialState
     val state: State
         get() = _state
 
     private var mutex = Mutex()
-
-    init {
-        appcuesCoroutineScope.launch {
-            stateFlow.collect {
-                when (it) {
-                    is BeginningExperience -> config.experienceListener?.experienceStarted(it.experience.id)
-                    is EndingExperience -> config.experienceListener?.experienceFinished(it.experience.id)
-                    else -> Unit
-                }
-            }
-        }
-    }
 
     suspend fun handleAction(action: Action): ResultOf<State, Error> = mutex.withLock {
         return handleActionInternal(action)
@@ -85,7 +68,7 @@ internal class StateMachine(
 
             if (transition.emitStateChange) {
                 // emit state change to all listeners via flow
-                _stateFlow.emit(state)
+                listener?.onState(state)
             }
         }
 
@@ -96,7 +79,7 @@ internal class StateMachine(
                     handleActionInternal(sideEffect.action)
                 }
                 is ReportErrorEffect -> {
-                    _errorFlow.emit(sideEffect.error)
+                    listener?.onError(sideEffect.error)
                     // return a failure if this call to `handleAction` ended with a reported error
                     Failure(sideEffect.error)
                 }
@@ -205,12 +188,6 @@ internal class StateMachine(
         // default behavior, attempt to start the requested step
         return state.fromRenderingStepToEndingStep(action, appcuesCoroutineScope) {
             handleActionInternal(StartStep(action.stepReference))
-        }
-    }
-
-    fun stop() {
-        appcuesCoroutineScope.launch {
-            handleAction(EndExperience(markComplete = false, destroyed = true))
         }
     }
 }

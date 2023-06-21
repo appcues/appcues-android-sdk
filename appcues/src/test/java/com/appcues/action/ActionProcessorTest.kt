@@ -6,6 +6,7 @@ import com.appcues.AppcuesCoroutineScope
 import com.appcues.action.appcues.StepInteractionAction
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType.BUTTON_TAPPED
+import com.appcues.analytics.ExperienceLifecycleTracker
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.logging.Logcues
 import com.appcues.mocks.mockExperience
@@ -13,6 +14,7 @@ import com.appcues.rules.MainDispatcherRule
 import com.appcues.statemachine.State
 import com.appcues.statemachine.State.RenderingStep
 import com.appcues.statemachine.StateMachine
+import com.appcues.ui.ExperienceRenderer
 import com.google.common.truth.Truth.assertThat
 import io.mockk.Called
 import io.mockk.mockk
@@ -140,15 +142,17 @@ internal class ActionProcessorTest : KoinTest {
                         scoped { AppcuesCoroutineScope(get()) }
                         scoped { mockk<AnalyticsTracker>(relaxed = true) }
                         scoped { ActionProcessor(get()) }
+                        scoped { mockk<ExperienceLifecycleTracker>(relaxed = true) }
                         scoped { params ->
                             StepInteractionAction(
                                 config = params.getOrNull(),
                                 interaction = params.get(),
                                 analyticsTracker = get(),
-                                stateMachine = get(),
+                                experienceRenderer = get(),
                             )
                         }
-                        scoped { StateMachine(get(), get(), get(), initState) }
+                        scoped { ExperienceRenderer(get(), get(), get()) }
+                        scoped { StateMachine(get(), get(), initState) }
                     }
                 }
             )

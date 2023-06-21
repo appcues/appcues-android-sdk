@@ -14,7 +14,6 @@ import kotlinx.coroutines.launch
 internal class AnalyticsTracker(
     private val appcuesCoroutineScope: AppcuesCoroutineScope,
     private val activityBuilder: ActivityRequestBuilder,
-    private val experienceLifecycleTracker: ExperienceLifecycleTracker,
     private val analyticsPolicy: AnalyticsPolicy,
     private val analyticsQueueProcessor: AnalyticsQueueProcessor,
 ) {
@@ -22,12 +21,6 @@ internal class AnalyticsTracker(
     private val _analyticsFlow = MutableSharedFlow<TrackingData>(1)
     val analyticsFlow: SharedFlow<TrackingData>
         get() = _analyticsFlow
-
-    init {
-        appcuesCoroutineScope.launch {
-            experienceLifecycleTracker.start()
-        }
-    }
 
     fun identify(properties: Map<String, Any>? = null, interactive: Boolean = true) {
         if (!analyticsPolicy.canIdentify()) return
@@ -63,7 +56,7 @@ internal class AnalyticsTracker(
     }
 
     fun screen(title: String, properties: Map<String, Any>? = null, isInternal: Boolean = false) {
-        if (!analyticsPolicy.canTrackScreen(title)) return
+        if (!analyticsPolicy.canTrackScreen()) return
 
         activityBuilder.screen(title, properties?.toMutableMap()).let { activityRequest ->
             updateAnalyticsFlow(SCREEN, isInternal, activityRequest)

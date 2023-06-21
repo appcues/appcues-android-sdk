@@ -28,6 +28,7 @@ import com.appcues.statemachine.State.EndingExperience
 import com.appcues.statemachine.State.EndingStep
 import com.appcues.statemachine.State.Idling
 import com.appcues.statemachine.State.RenderingStep
+import com.appcues.statemachine.StateMachine.StateMachineListener
 import com.appcues.statemachine.StepReference.StepId
 import com.appcues.statemachine.StepReference.StepIndex
 import com.appcues.statemachine.StepReference.StepOffset
@@ -43,8 +44,6 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeout
 import org.junit.Rule
@@ -65,7 +64,7 @@ internal class StateMachineTest : AppcuesScopeTest {
     @Test
     fun `initial state SHOULD be Idling`() {
         // GIVEN
-        val stateMachine = StateMachine(get(), get(), get())
+        val stateMachine = StateMachine(get(), get())
 
         // THEN
         assertThat(stateMachine.state).isEqualTo(Idling)
@@ -701,78 +700,33 @@ internal class StateMachineTest : AppcuesScopeTest {
         coVerify { koinTestRule.scope.get<ActionProcessor>() wasNot Called }
     }
 
-    @Test
-    fun `stop SHOULD call handleAction with EndExperience`() = runTest {
-        // GIVEN
-        val experience = mockExperience()
-        val stateMachine = initMachine(RenderingStep(experience, 2, false))
-
-        // WHEN
-        stateMachine.stop()
-
-        // THEN
-        assertThat(stateMachine.state).isEqualTo(Idling)
-    }
-
-    @Test
-    fun `stop SHOULD NOT mark complete WHEN on last step of experience`() = runTest {
-        // GIVEN
-        val experience = mockExperience()
-        val completion: CompletableDeferred<Boolean> = CompletableDeferred()
-        val stateMachine = initMachine(
-            state = RenderingStep(experience, 3, false),
-            onStateChange = {
-                if (it is EndingExperience) {
-                    completion.complete(it.markComplete)
-                }
-            },
-            onError = null
-        )
-
-        // WHEN
-        stateMachine.stop()
-
-        // THEN
-        assertThat(completion.await(1.seconds)).isFalse()
-    }
-
     // Helpers
     private suspend fun initMachine(
         state: State,
         onStateChange: ((State) -> Unit)? = null,
         onError: ((Error) -> Unit)? = null
     ): StateMachine {
-        val stateFlowCompletion: CompletableDeferred<Boolean> = CompletableDeferred()
-        val errorFlowCompletion: CompletableDeferred<Boolean> = CompletableDeferred()
         val scope: AppcuesCoroutineScope = get()
-        val machine = StateMachine(scope, get(), get(), state)
-        // this collect on the stateFlow simulates the function of the UI
-        // that is required to progress the state machine forward on UI present/dismiss
-        scope.launch {
-            stateFlowCompletion.complete(true)
-            machine.stateFlow.collect {
-                onStateChange?.invoke(it)
-                when (it) {
+        val machine = StateMachine(scope, get(), state)
+        machine.listener = object : StateMachineListener {
+            override suspend fun onState(state: State) {
+                onStateChange?.invoke(state)
+                when (state) {
                     is BeginningStep -> {
-                        it.presentationComplete.invoke(Success(Unit))
+                        state.presentationComplete.invoke(Success(Unit))
                     }
                     is EndingStep -> {
-                        it.dismissAndContinue?.invoke()
+                        state.dismissAndContinue?.invoke()
                     }
                     // ignore other state changes
                     else -> Unit
                 }
             }
-        }
-        scope.launch {
-            errorFlowCompletion.complete(true)
-            machine.errorFlow.collect {
-                onError?.invoke((it))
+
+            override suspend fun onError(error: Error) {
+                onError?.invoke((error))
             }
         }
-        // this await is to try to ensure that the collect handlers inside the coroutine launches above execute
-        // before the test that relies on them gets the state machine instance and tries to validate flows
-        awaitAll(stateFlowCompletion, errorFlowCompletion)
         return machine
     }
 

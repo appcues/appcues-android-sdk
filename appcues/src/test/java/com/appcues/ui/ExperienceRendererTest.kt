@@ -1,8 +1,10 @@
 package com.appcues.ui
 
 import com.appcues.AppcuesConfig
+import com.appcues.AppcuesCoroutineScope
 import com.appcues.analytics.AnalyticsEvent
 import com.appcues.analytics.AnalyticsTracker
+import com.appcues.analytics.ExperienceLifecycleTracker
 import com.appcues.data.model.Experiment
 import com.appcues.mocks.mockExperience
 import com.appcues.mocks.mockExperienceExperiment
@@ -33,6 +35,7 @@ import java.util.UUID
 
 @OptIn(ExperimentalCoroutinesApi::class)
 internal class ExperienceRendererTest {
+
     @After
     fun shutdown() {
         stopKoin()
@@ -46,7 +49,7 @@ internal class ExperienceRendererTest {
             every { this@mockk.state } answers { state }
         }
         val scope = initScope(stateMachine)
-        val experienceRenderer = ExperienceRenderer(scope)
+        val experienceRenderer = ExperienceRenderer(scope, scope.get(), scope.get())
 
         // WHEN
         experienceRenderer.dismissCurrentExperience(markComplete = false, destroyed = false)
@@ -63,7 +66,7 @@ internal class ExperienceRendererTest {
             every { this@mockk.state } answers { state }
         }
         val scope = initScope(stateMachine)
-        val experienceRenderer = ExperienceRenderer(scope)
+        val experienceRenderer = ExperienceRenderer(scope, scope.get(), scope.get())
 
         // WHEN
         experienceRenderer.dismissCurrentExperience(markComplete = false, destroyed = false)
@@ -88,7 +91,7 @@ internal class ExperienceRendererTest {
             coEvery { this@mockk.handleAction(any()) } answers { Success(Idling) }
         }
         val scope = initScope(stateMachine)
-        val experienceRenderer = ExperienceRenderer(scope)
+        val experienceRenderer = ExperienceRenderer(scope, scope.get(), scope.get())
 
         // WHEN
         val showResult = experienceRenderer.show(experience)
@@ -114,8 +117,7 @@ internal class ExperienceRendererTest {
             coEvery { this@mockk.handleAction(any()) } answers { Success(Idling) }
         }
         val scope = initScope(stateMachine)
-        val analyticsTracker: AnalyticsTracker = scope.get()
-        val experienceRenderer = ExperienceRenderer(scope)
+        val experienceRenderer = ExperienceRenderer(scope, scope.get(), scope.get())
 
         // WHEN
         val showResult = experienceRenderer.show(experience)
@@ -142,7 +144,7 @@ internal class ExperienceRendererTest {
         }
         val scope = initScope(stateMachine)
         val analyticsTracker: AnalyticsTracker = scope.get()
-        val experienceRenderer = ExperienceRenderer(scope)
+        val experienceRenderer = ExperienceRenderer(scope, scope.get(), scope.get())
 
         // WHEN
         experienceRenderer.show(experience)
@@ -180,7 +182,7 @@ internal class ExperienceRendererTest {
         }
         val scope = initScope(stateMachine)
         val analyticsTracker: AnalyticsTracker = scope.get()
-        val experienceRenderer = ExperienceRenderer(scope)
+        val experienceRenderer = ExperienceRenderer(scope, scope.get(), scope.get())
 
         // WHEN
         experienceRenderer.show(experience)
@@ -196,7 +198,8 @@ internal class ExperienceRendererTest {
                     "experimentGoalId" to "my-goal",
                     "experimentContentType" to "my-content-type",
                 ),
-                false)
+                false
+            )
         }
     }
 
@@ -212,6 +215,8 @@ internal class ExperienceRendererTest {
                         scoped { stateMachine }
                         scoped { AppcuesConfig("abc", "123") }
                         scoped { mockk<AnalyticsTracker>(relaxed = true) }
+                        scoped { mockk<ExperienceLifecycleTracker>(relaxed = true) }
+                        scoped { mockk<AppcuesCoroutineScope>(relaxed = true) }
                     }
                 }
             )

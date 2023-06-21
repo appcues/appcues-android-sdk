@@ -109,7 +109,6 @@ internal class ExperienceMapper(
                         LaunchExperienceAction(
                             completedExperienceId = from.id.toString(),
                             launchExperienceId = it,
-                            stateMachine = scope.get(),
                             experienceRenderer = scope.get(),
                         )
                     )

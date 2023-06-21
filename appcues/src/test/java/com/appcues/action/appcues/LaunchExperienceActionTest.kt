@@ -5,7 +5,6 @@ import com.appcues.data.model.ExperienceTrigger
 import com.appcues.mocks.mockExperience
 import com.appcues.rules.KoinScopeRule
 import com.appcues.statemachine.State.RenderingStep
-import com.appcues.statemachine.StateMachine
 import com.appcues.ui.ExperienceRenderer
 import com.google.common.truth.Truth
 import io.mockk.Called
@@ -35,14 +34,11 @@ internal class LaunchExperienceActionTest : AppcuesScopeTest {
         // GIVEN
         val experienceId = UUID.randomUUID()
         val experienceIdString = experienceId.toString()
-        val experienceRenderer: ExperienceRenderer = get()
         val currentExperience = mockExperience()
-        val stateMachine = mockk<StateMachine>(relaxed = true) {
-            // this is so we can validate the launch trigger matches the fromExperienceID for the current experience
-            // that executed the action
-            every { this@mockk.state } returns RenderingStep(currentExperience, 0, true)
+        val experienceRenderer = mockk<ExperienceRenderer>(relaxed = true) {
+            every { getState() } returns RenderingStep(currentExperience, 0, true)
         }
-        val action = LaunchExperienceAction(mapOf("experienceID" to experienceIdString), stateMachine, get())
+        val action = LaunchExperienceAction(mapOf("experienceID" to experienceIdString), experienceRenderer)
 
         // WHEN
         action.execute()
@@ -55,7 +51,7 @@ internal class LaunchExperienceActionTest : AppcuesScopeTest {
     fun `launch experience SHOULD NOT call ExperienceRenderer show WHEN no experience ID is in config`() = runTest {
         // GIVEN
         val experienceRenderer: ExperienceRenderer = get()
-        val action = LaunchExperienceAction(mapOf(), get(), get())
+        val action = LaunchExperienceAction(mapOf(), experienceRenderer)
 
         // WHEN
         action.execute()

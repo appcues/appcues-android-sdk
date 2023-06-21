@@ -9,11 +9,9 @@ import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.Interactio
 import com.appcues.analytics.SdkMetrics
 import com.appcues.data.model.Experience
 import com.appcues.data.model.StepContainer
-import com.appcues.statemachine.Action.StartStep
 import com.appcues.statemachine.Error.StepError
 import com.appcues.statemachine.State.BeginningStep
 import com.appcues.statemachine.State.EndingStep
-import com.appcues.statemachine.StateMachine
 import com.appcues.statemachine.StepReference.StepGroupPageIndex
 import com.appcues.trait.AppcuesTraitException
 import com.appcues.ui.AppcuesViewModel.UIState.Dismissing
@@ -46,10 +44,9 @@ internal class AppcuesViewModel(
             val presentationComplete: ((ResultOf<Unit, com.appcues.statemachine.Error>) -> Unit),
         ) : UIState()
 
-        data class Dismissing(val continueAction: () -> Unit) : UIState()
+        data class Dismissing(val continueAction: suspend () -> Unit) : UIState()
     }
 
-    private val stateMachine by inject<StateMachine>()
     private val actionProcessor by inject<ActionProcessor>()
     private val appcuesCoroutineScope by inject<AppcuesCoroutineScope>()
     private val experienceRenderer by inject<ExperienceRenderer>()
@@ -61,7 +58,7 @@ internal class AppcuesViewModel(
 
     init {
         viewModelScope.launch {
-            stateMachine.stateFlow.collectLatest { result ->
+            experienceRenderer.stateFlow.collectLatest { result ->
                 // don't collect if we are Dismissing
                 if (uiState.value is Dismissing) return@collectLatest
 
@@ -121,7 +118,7 @@ internal class AppcuesViewModel(
             // then we report new position to state machine
             if (state is Rendering && state.position != index) {
                 appcuesCoroutineScope.launch {
-                    stateMachine.handleAction(StartStep(StepGroupPageIndex(index, state.flatStepIndex)))
+                    experienceRenderer.show(StepGroupPageIndex(index, state.flatStepIndex))
                 }
             }
         }
@@ -131,7 +128,9 @@ internal class AppcuesViewModel(
         uiState.value.let { state ->
             // if current state IS dismissing we send the continueAction from EndingStep
             if (state is Dismissing) {
-                state.continueAction()
+                appcuesCoroutineScope.launch {
+                    state.continueAction()
+                }
             }
         }
     }

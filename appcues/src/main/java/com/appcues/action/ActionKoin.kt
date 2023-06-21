@@ -21,11 +21,18 @@ internal object ActionKoin : KoinScopePlugin {
         factory { CloseAction(config = it.getOrNull(), experienceRenderer = get()) }
         factory { LinkAction(config = it.getOrNull(), linkOpener = get(), appcues = get()) }
         factory { TrackEventAction(config = it.getOrNull(), appcues = get()) }
-        factory { ContinueAction(config = it.getOrNull(), stateMachine = get()) }
-        factory { LaunchExperienceAction(config = it.getOrNull(), stateMachine = get(), experienceRenderer = get()) }
+        factory { ContinueAction(config = it.getOrNull(), experienceRenderer = get()) }
+        factory { LaunchExperienceAction(config = it.getOrNull(), experienceRenderer = get()) }
         factory { UpdateProfileAction(config = it.getOrNull(), storage = get(), appcues = get()) }
-        factory { SubmitFormAction(config = it.getOrNull(), analyticsTracker = get(), stateMachine = get()) }
-        factory { StepInteractionAction(config = it.getOrNull(), interaction = it.get(), analyticsTracker = get(), stateMachine = get()) }
+        factory { SubmitFormAction(config = it.getOrNull(), analyticsTracker = get(), experienceRenderer = get()) }
+        factory {
+            StepInteractionAction(
+                config = it.getOrNull(),
+                interaction = it.get(),
+                analyticsTracker = get(),
+                experienceRenderer = get()
+            )
+        }
         factory { RequestReviewAction(config = it.getOrNull(), context = get(), koinScope = get()) }
     }
 }

@@ -9,7 +9,6 @@ import com.appcues.logging.Logcues
 import com.appcues.rules.MainDispatcherRule
 import com.google.common.truth.Truth.assertThat
 import io.mockk.Called
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -25,7 +24,6 @@ internal class AnalyticsTrackerTest {
 
     private val coroutineScope = AppcuesCoroutineScope(Logcues(NONE))
     private val activityBuilder: ActivityRequestBuilder = mockk()
-    private val experienceLifecycleTracker: ExperienceLifecycleTracker = mockk(relaxed = true)
     private val analyticsPolicy: AnalyticsPolicy = mockk()
     private val analyticsQueueProcessor: AnalyticsQueueProcessor = mockk(relaxed = true)
 
@@ -38,7 +36,6 @@ internal class AnalyticsTrackerTest {
         analyticsTracker = AnalyticsTracker(
             appcuesCoroutineScope = coroutineScope,
             activityBuilder = activityBuilder,
-            experienceLifecycleTracker = experienceLifecycleTracker,
             analyticsPolicy = analyticsPolicy,
             analyticsQueueProcessor = analyticsQueueProcessor,
         )
@@ -48,12 +45,6 @@ internal class AnalyticsTrackerTest {
                 analyticsFlowUpdates.add(it)
             }
         }
-    }
-
-    @Test
-    fun `init SHOULD trigger experienceLifecycleTracker start`() {
-        // then
-        coVerify { experienceLifecycleTracker.start(any()) }
     }
 
     @Test
@@ -127,7 +118,7 @@ internal class AnalyticsTrackerTest {
     @Test
     fun `screen SHOULD do nothing WHEN canTrackScreen is false`() {
         // given
-        every { analyticsPolicy.canTrackScreen("title") } returns false
+        every { analyticsPolicy.canTrackScreen() } returns false
         // when
         analyticsTracker.screen("title")
         // then
@@ -137,7 +128,7 @@ internal class AnalyticsTrackerTest {
     @Test
     fun `screen SHOULD update analyticsFlow AND queueThenFlush`() {
         // given
-        every { analyticsPolicy.canTrackScreen("title") } returns true
+        every { analyticsPolicy.canTrackScreen() } returns true
         val activity: ActivityRequest = mockk(relaxed = true)
         every { activityBuilder.screen(any()) } returns activity
         // when

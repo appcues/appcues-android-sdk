@@ -1,9 +1,11 @@
 package com.appcues.ui
 
 import com.appcues.AppcuesConfig
+import com.appcues.AppcuesCoroutineScope
 import com.appcues.SessionMonitor
 import com.appcues.analytics.AnalyticsEvent
 import com.appcues.analytics.AnalyticsTracker
+import com.appcues.analytics.ExperienceLifecycleTracker
 import com.appcues.data.AppcuesRepository
 import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperiencePriority.NORMAL
@@ -11,29 +13,66 @@ import com.appcues.data.model.ExperienceTrigger
 import com.appcues.data.model.Experiment
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.StartExperience
+import com.appcues.statemachine.Action.StartStep
 import com.appcues.statemachine.Error
 import com.appcues.statemachine.State
 import com.appcues.statemachine.State.Idling
 import com.appcues.statemachine.StateMachine
+import com.appcues.statemachine.StateMachine.StateMachineListener
+import com.appcues.statemachine.StepReference
 import com.appcues.util.ResultOf
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
 import com.appcues.util.appcuesFormatted
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 
 internal class ExperienceRenderer(
     override val scope: Scope,
-) : KoinScopeComponent {
+    private val appcuesCoroutineScope: AppcuesCoroutineScope,
+    private val experienceLifecycleTracker: ExperienceLifecycleTracker,
+) : KoinScopeComponent, StateMachineListener {
 
-    // lazy prop inject here to avoid circular dependency with AnalyticsTracker
-    // AnalyticsTracker > AnalyticsQueueProcessor > ExperienceRenderer(this) > AnalyticsTracker
     private val repository by inject<AppcuesRepository>()
     private val stateMachine by inject<StateMachine>()
     private val sessionMonitor by inject<SessionMonitor>()
     private val config by inject<AppcuesConfig>()
+
+    // lazy prop inject here to avoid circular dependency with AnalyticsTracker
+    // AnalyticsTracker > AnalyticsQueueProcessor > ExperienceRenderer(this) > AnalyticsTracker
     private val analyticsTracker by inject<AnalyticsTracker>()
+
+    private val _stateFlow = MutableSharedFlow<State>(1)
+    val stateFlow: SharedFlow<State>
+        get() = _stateFlow
+
+    private val _errorFlow = MutableSharedFlow<Error>(1)
+    val errorFlow: SharedFlow<Error>
+        get() = _errorFlow
+
+    init {
+        stateMachine.listener = this
+    }
+
+    override suspend fun onState(state: State) {
+        experienceLifecycleTracker.onState(state)
+
+        _stateFlow.emit(state)
+    }
+
+    override suspend fun onError(error: Error) {
+        experienceLifecycleTracker.onError(error)
+
+        _errorFlow.emit(error)
+    }
+
+    fun getState(): State {
+        return stateMachine.state
+    }
 
     suspend fun show(experience: Experience): Boolean {
         var canShow = config.interceptor?.canDisplayExperience(experience.id) ?: true
@@ -110,7 +149,9 @@ internal class ExperienceRenderer(
     }
 
     fun stop() {
-        stateMachine.stop()
+        appcuesCoroutineScope.launch {
+            stateMachine.handleAction(EndExperience(markComplete = false, destroyed = true))
+        }
     }
 
     suspend fun dismissCurrentExperience(markComplete: Boolean, destroyed: Boolean): ResultOf<State, Error> =
@@ -132,5 +173,9 @@ internal class ExperienceRenderer(
             ),
             interactive = false
         )
+    }
+
+    suspend fun show(stepReference: StepReference) {
+        stateMachine.handleAction(StartStep(stepReference))
     }
 }
