@@ -16,6 +16,7 @@ import com.appcues.data.model.ExperiencePrimitive.TextSpanPrimitive
 import com.appcues.data.model.ExperiencePriority.NORMAL
 import com.appcues.data.model.ExperienceStepFormState
 import com.appcues.data.model.ExperienceTrigger
+import com.appcues.data.model.RenderContext
 import com.appcues.data.model.Step
 import com.appcues.data.model.StepContainer
 import com.appcues.data.model.styling.ComponentSelectMode.MULTIPLE
@@ -51,15 +52,16 @@ internal class SubmitFormActionTest : AppcuesScopeTest {
         val textInput = textInput()
         val formState = formState(optionSelect, textInput)
         val experience = experience(formState)
+        val renderContext = RenderContext.Modal
         val state = mockk<State>(relaxed = true) {
             every { this@mockk.currentExperience } answers { experience }
             every { this@mockk.currentStepIndex } answers { 0 }
         }
         val experienceRenderer: ExperienceRenderer = mockk(relaxed = true) {
-            every { getState() } returns state
+            every { getState(renderContext) } returns state
         }
         val analyticsTracker: AnalyticsTracker = mockk(relaxed = true)
-        val action = SubmitFormAction(emptyMap(), experienceRenderer, analyticsTracker)
+        val action = SubmitFormAction(emptyMap(), renderContext, experienceRenderer, analyticsTracker)
         val analyticEvent = StepInteraction(experience, 0, FORM_SUBMITTED)
 
         // WHEN
@@ -84,15 +86,16 @@ internal class SubmitFormActionTest : AppcuesScopeTest {
         )
         val formState = formState(textInput)
         val experience = experience(formState)
+        val renderContext = RenderContext.Modal
         val state = mockk<State>(relaxed = true) {
             every { this@mockk.currentExperience } answers { experience }
             every { this@mockk.currentStepIndex } answers { 0 }
         }
         val experienceRenderer: ExperienceRenderer = mockk(relaxed = true) {
-            every { getState() } returns state
+            every { getState(renderContext) } returns state
         }
         val analyticsTracker: AnalyticsTracker = mockk(relaxed = true)
-        val action = SubmitFormAction(emptyMap(), experienceRenderer, analyticsTracker)
+        val action = SubmitFormAction(emptyMap(), renderContext, experienceRenderer, analyticsTracker)
 
         // WHEN
         formState.setValue(textInput, "text")
@@ -114,15 +117,16 @@ internal class SubmitFormActionTest : AppcuesScopeTest {
         val textInput = textInput()
         val formState = formState(optionSelect, textInput)
         val experience = experience(formState)
+        val renderContext = RenderContext.Modal
         val state = mockk<State>(relaxed = true) {
             every { this@mockk.currentExperience } answers { experience }
             every { this@mockk.currentStepIndex } answers { 0 }
         }
         val experienceRenderer: ExperienceRenderer = mockk(relaxed = true) {
-            every { getState() } returns state
+            every { getState(renderContext) } returns state
         }
         val analyticsTracker: AnalyticsTracker = mockk(relaxed = true)
-        val action = SubmitFormAction(emptyMap(), experienceRenderer, analyticsTracker)
+        val action = SubmitFormAction(emptyMap(), renderContext, experienceRenderer, analyticsTracker)
         val analyticEvent = StepInteraction(experience, 0, FORM_SUBMITTED)
 
         // WHEN
@@ -141,17 +145,18 @@ internal class SubmitFormActionTest : AppcuesScopeTest {
         val textInput = textInput()
         val formState = formState(optionSelect, textInput)
         val experience = experience(formState)
+        val renderContext = RenderContext.Modal
         val state = mockk<State>(relaxed = true) {
             every { this@mockk.currentExperience } answers { experience }
             every { this@mockk.currentStepIndex } answers { 0 }
         }
         val experienceRenderer: ExperienceRenderer = mockk(relaxed = true) {
-            every { getState() } returns state
+            every { getState(renderContext) } returns state
         }
         val analyticsTracker: AnalyticsTracker = mockk(relaxed = true)
         val appcues: Appcues = mockk(relaxed = true)
         val action0 = TrackEventAction(mapOf("eventName" to "My Custom Event"), appcues)
-        val action = SubmitFormAction(emptyMap(), experienceRenderer, analyticsTracker)
+        val action = SubmitFormAction(emptyMap(), renderContext, experienceRenderer, analyticsTracker)
         val action1 = TrackEventAction(mapOf("eventName" to "My Custom Event"), appcues)
         val action2 = TrackEventAction(mapOf("eventName" to "My Custom Event"), appcues)
         val initialQueue = listOf(action0, action, action1, action2)
@@ -171,17 +176,18 @@ internal class SubmitFormActionTest : AppcuesScopeTest {
         val textInput = textInput()
         val formState = formState(optionSelect, textInput)
         val experience = experience(formState)
+        val renderContext = RenderContext.Modal
         val state = mockk<State>(relaxed = true) {
             every { this@mockk.currentExperience } answers { experience }
             every { this@mockk.currentStepIndex } answers { 0 }
         }
         val experienceRenderer: ExperienceRenderer = mockk(relaxed = true) {
-            every { getState() } returns state
+            every { getState(renderContext) } returns state
         }
         val analyticsTracker: AnalyticsTracker = mockk(relaxed = true)
         val appcues: Appcues = mockk(relaxed = true)
         val action0 = TrackEventAction(mapOf("eventName" to "My Custom Event"), appcues)
-        val action = SubmitFormAction(emptyMap(), experienceRenderer, analyticsTracker)
+        val action = SubmitFormAction(emptyMap(), renderContext, experienceRenderer, analyticsTracker)
         val action1 = TrackEventAction(mapOf("eventName" to "My Custom Event"), appcues)
         val action2 = TrackEventAction(mapOf("eventName" to "My Custom Event"), appcues)
         val initialQueue = listOf(action0, action, action1, action2)
@@ -207,17 +213,18 @@ internal class SubmitFormActionTest : AppcuesScopeTest {
         val textInput = textInput()
         val formState = formState(optionSelect, textInput)
         val experience = experience(formState)
+        val renderContext = RenderContext.Modal
         val state = mockk<State>(relaxed = true) {
             every { this@mockk.currentExperience } answers { experience }
             every { this@mockk.currentStepIndex } answers { 0 }
         }
         val experienceRenderer: ExperienceRenderer = mockk(relaxed = true) {
-            every { getState() } returns state
+            every { getState(renderContext) } returns state
         }
         val analyticsTracker: AnalyticsTracker = mockk(relaxed = true)
         val appcues: Appcues = mockk(relaxed = true)
         val action0 = TrackEventAction(mapOf("eventName" to "My Custom Event"), appcues)
-        val action = SubmitFormAction(mapOf("skipValidation" to true), experienceRenderer, analyticsTracker)
+        val action = SubmitFormAction(mapOf("skipValidation" to true), renderContext, experienceRenderer, analyticsTracker)
         val action1 = TrackEventAction(mapOf("eventName" to "My Custom Event"), appcues)
         val action2 = TrackEventAction(mapOf("eventName" to "My Custom Event"), appcues)
         val initialQueue = listOf(action0, action, action1, action2)
@@ -281,7 +288,7 @@ internal class SubmitFormActionTest : AppcuesScopeTest {
         ),
         published = true,
         priority = NORMAL,
-        type = "mobile",
+        renderContext = RenderContext.Modal,
         publishedAt = Date().time,
         completionActions = listOf(),
         trigger = ExperienceTrigger.ShowCall,

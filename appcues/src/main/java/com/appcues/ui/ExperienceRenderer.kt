@@ -1,50 +1,42 @@
 package com.appcues.ui
 
 import com.appcues.AppcuesConfig
-import com.appcues.AppcuesCoroutineScope
 import com.appcues.SessionMonitor
-import com.appcues.analytics.AnalyticsEvent
-import com.appcues.analytics.AnalyticsTracker
+import com.appcues.action.ExperienceAction
+import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType
 import com.appcues.analytics.ExperienceLifecycleTracker
 import com.appcues.data.AppcuesRepository
 import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperiencePriority.NORMAL
 import com.appcues.data.model.ExperienceTrigger
-import com.appcues.data.model.Experiment
+import com.appcues.data.model.RenderContext
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.StartExperience
 import com.appcues.statemachine.Action.StartStep
 import com.appcues.statemachine.Error
+import com.appcues.statemachine.Error.NoActiveStateMachine
 import com.appcues.statemachine.State
 import com.appcues.statemachine.State.Idling
 import com.appcues.statemachine.StateMachine
 import com.appcues.statemachine.StateMachine.StateMachineListener
+import com.appcues.statemachine.StateMachineFactory
 import com.appcues.statemachine.StepReference
 import com.appcues.util.ResultOf
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
-import com.appcues.util.appcuesFormatted
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.launch
-import org.koin.core.component.KoinScopeComponent
-import org.koin.core.component.inject
-import org.koin.core.scope.Scope
+import kotlin.collections.set
 
 internal class ExperienceRenderer(
-    override val scope: Scope,
-    private val appcuesCoroutineScope: AppcuesCoroutineScope,
+    private val config: AppcuesConfig,
     private val experienceLifecycleTracker: ExperienceLifecycleTracker,
-) : KoinScopeComponent, StateMachineListener {
+    private val repository: AppcuesRepository,
+    private val sessionMonitor: SessionMonitor,
+    private val stateMachineFactory: StateMachineFactory,
+) : StateMachineListener {
 
-    private val repository by inject<AppcuesRepository>()
-    private val stateMachine by inject<StateMachine>()
-    private val sessionMonitor by inject<SessionMonitor>()
-    private val config by inject<AppcuesConfig>()
-
-    // lazy prop inject here to avoid circular dependency with AnalyticsTracker
-    // AnalyticsTracker > AnalyticsQueueProcessor > ExperienceRenderer(this) > AnalyticsTracker
-    private val analyticsTracker by inject<AnalyticsTracker>()
+    private val stateMachines: HashMap<RenderContext, StateMachine> = hashMapOf()
 
     private val _stateFlow = MutableSharedFlow<State>(1)
     val stateFlow: SharedFlow<State>
@@ -53,10 +45,6 @@ internal class ExperienceRenderer(
     private val _errorFlow = MutableSharedFlow<Error>(1)
     val errorFlow: SharedFlow<Error>
         get() = _errorFlow
-
-    init {
-        stateMachine.listener = this
-    }
 
     override suspend fun onState(state: State) {
         experienceLifecycleTracker.onState(state)
@@ -70,64 +58,51 @@ internal class ExperienceRenderer(
         _errorFlow.emit(error)
     }
 
-    fun getState(): State {
-        return stateMachine.state
+    fun getState(renderContext: RenderContext): State? {
+        return stateMachines[renderContext]?.state
+    }
+
+    fun process(renderContext: RenderContext, actions: List<ExperienceAction>, interactionType: InteractionType, viewDescription: String?) {
+        stateMachines[renderContext]?.process(actions, interactionType, viewDescription)
     }
 
     suspend fun show(experience: Experience): Boolean {
-        var canShow = config.interceptor?.canDisplayExperience(experience.id) ?: true
+        with(experience) {
+            if (shouldDisplay().not()) return false
 
-        // if there is an active experiment, and we should not show this experience (control group), then
-        // track the analytics for experiment_entered, but ensure we exit early. This should be checked before
-        // we dismiss any current experience below.
-        if (experience.experiment != null && !experience.experiment.shouldExecute()) {
-            experience.experiment.track(analyticsTracker)
-            canShow = false
+            if (hasConflictingExperience()) return false
+
+            return start()
         }
+    }
 
-        if (!canShow) return false
+    private suspend fun Experience.hasConflictingExperience(): Boolean {
+        stateMachines[renderContext]?.let {
+            val hasActiveStateMachine = it.state != Idling
+            val isHighPriority = priority == NORMAL
 
-        // "event_trigger" or "forced" experience priority is NORMAL, "screen_view" is low -
-        // if an experience is currently showing and the new experience coming in is normal priority
-        // then it replaces whatever is currently showing - i.e. an "event_trigger" experience will
-        // supersede a "screen_view" triggered experience - per Appcues standard behavior
-        val priorityOverride = experience.priority == NORMAL && stateMachine.state != Idling
-        if (priorityOverride) {
-            return dismissCurrentExperience(markComplete = false, destroyed = false).run {
-                when (this) {
-                    is Success -> show(experience) // re-invoke show on the new experience now after dismiss
-                    is Failure -> false // dismiss failed - can't continue
+            if (hasActiveStateMachine && isHighPriority) {
+                return when (it.dismiss(markComplete = false, destroyed = false)) {
+                    is Success -> false
+                    is Failure -> true
                 }
             }
         }
 
-        // track an experiment_entered analytic, if exists, since we know it is not in the control group at this point
-        experience.experiment?.track(analyticsTracker)
+        return false
+    }
 
-        return stateMachine.handleAction(StartExperience(experience)).run {
-            when (this) {
-                is Success -> true
+    private suspend fun Experience.start(): Boolean {
+        val stateMachine = stateMachineFactory.create(renderContext, this@ExperienceRenderer)
+        return stateMachine.handleAction(StartExperience(this)).let { result ->
+            when (result) {
+                is Success -> {
+                    stateMachines[renderContext] = stateMachine
+                    true
+                }
                 is Failure -> false
             }
         }
-    }
-
-    suspend fun show(qualifiedExperiences: List<Experience>): Boolean {
-        if (qualifiedExperiences.isEmpty()) {
-            // If given an empty list of qualified experiences, complete with a success because this function has completed without error.
-            // This function only recurses on a non-empty case, so this block only applies to the initial external call.
-            return true
-        }
-
-        val success = show(qualifiedExperiences.first())
-        if (!success) {
-            val remainingExperiences = qualifiedExperiences.drop(1)
-            if (remainingExperiences.isNotEmpty()) {
-                // fallback logic - try the next remaining experience, if available
-                return show(remainingExperiences)
-            }
-        }
-        return success
     }
 
     suspend fun show(experienceId: String, trigger: ExperienceTrigger): Boolean {
@@ -148,34 +123,25 @@ internal class ExperienceRenderer(
         return false
     }
 
-    fun stop() {
-        appcuesCoroutineScope.launch {
-            stateMachine.handleAction(EndExperience(markComplete = false, destroyed = true))
+    suspend fun stop() {
+        stateMachines.forEach {
+            it.value.dismiss(markComplete = false, destroyed = true)
         }
     }
 
-    suspend fun dismissCurrentExperience(markComplete: Boolean, destroyed: Boolean): ResultOf<State, Error> =
-        stateMachine.handleAction(EndExperience(markComplete, destroyed))
+    suspend fun dismiss(renderContext: RenderContext, markComplete: Boolean, destroyed: Boolean): ResultOf<State, Error> =
+        stateMachines[renderContext]?.dismiss(markComplete, destroyed) ?: Failure(NoActiveStateMachine(renderContext))
 
-    private fun Experiment.shouldExecute() =
-        group != "control"
-
-    private fun Experiment.track(analyticsTracker: AnalyticsTracker) {
-        // send analytics
-        analyticsTracker.track(
-            event = AnalyticsEvent.ExperimentEntered,
-            properties = mapOf(
-                "experimentId" to id.appcuesFormatted(),
-                "experimentGroup" to group,
-                "experimentExperienceId" to experienceId.appcuesFormatted(),
-                "experimentGoalId" to goalId,
-                "experimentContentType" to contentType,
-            ),
-            interactive = false
-        )
+    private suspend fun StateMachine.dismiss(markComplete: Boolean, destroyed: Boolean): ResultOf<State, Error> {
+        return handleAction(EndExperience(markComplete, destroyed))
     }
 
-    suspend fun show(stepReference: StepReference) {
-        stateMachine.handleAction(StartStep(stepReference))
+    suspend fun show(renderContext: RenderContext, stepReference: StepReference) {
+        stateMachines[renderContext]?.handleAction(StartStep(stepReference))
+    }
+
+    private suspend fun Experience.shouldDisplay(): Boolean {
+        val canDisplayInterceptor = config.interceptor?.canDisplayExperience(id) ?: true
+        return if (experiment == null) canDisplayInterceptor else experiment.group != "control"
     }
 }

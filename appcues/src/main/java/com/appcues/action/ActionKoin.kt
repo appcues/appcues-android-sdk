@@ -15,24 +15,20 @@ import org.koin.dsl.ScopeDSL
 internal object ActionKoin : KoinScopePlugin {
 
     override fun ScopeDSL.install() {
-        scoped { ActionRegistry(scope = get()) }
-        scoped { ActionProcessor(scope = get()) }
+        scoped { ActionRegistry(get()) }
+        scoped { ActionProcessor(get()) }
 
-        factory { CloseAction(config = it.getOrNull(), experienceRenderer = get()) }
-        factory { LinkAction(config = it.getOrNull(), linkOpener = get(), appcues = get()) }
-        factory { TrackEventAction(config = it.getOrNull(), appcues = get()) }
-        factory { ContinueAction(config = it.getOrNull(), experienceRenderer = get()) }
-        factory { LaunchExperienceAction(config = it.getOrNull(), experienceRenderer = get()) }
-        factory { UpdateProfileAction(config = it.getOrNull(), storage = get(), appcues = get()) }
-        factory { SubmitFormAction(config = it.getOrNull(), analyticsTracker = get(), experienceRenderer = get()) }
-        factory {
-            StepInteractionAction(
-                config = it.getOrNull(),
-                interaction = it.get(),
-                analyticsTracker = get(),
-                experienceRenderer = get()
-            )
-        }
-        factory { RequestReviewAction(config = it.getOrNull(), context = get(), koinScope = get()) }
+        // access to internal in context actions
+        factory { CloseAction(it.getOrNull(), it.get(), get()) }
+        factory { ContinueAction(it.getOrNull(), it.get(), get()) }
+        factory { LaunchExperienceAction(it.getOrNull(), it.get(), get()) }
+        factory { StepInteractionAction(it.getOrNull(), it.get(), it.get(), get(), get()) }
+        factory { SubmitFormAction(it.getOrNull(), it.get(), get(), get()) }
+
+        // other
+        factory { LinkAction(it.getOrNull(), get(), get()) }
+        factory { TrackEventAction(it.getOrNull(), get()) }
+        factory { UpdateProfileAction(it.getOrNull(), get(), get()) }
+        factory { RequestReviewAction(it.getOrNull(), get(), get()) }
     }
 }

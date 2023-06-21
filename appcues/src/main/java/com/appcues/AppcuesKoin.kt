@@ -4,7 +4,7 @@ import com.appcues.data.AppcuesRepository
 import com.appcues.debugger.AppcuesDebuggerManager
 import com.appcues.di.KoinScopePlugin
 import com.appcues.logging.Logcues
-import com.appcues.statemachine.StateMachine
+import com.appcues.statemachine.StateMachineFactory
 import com.appcues.ui.ExperienceRenderer
 import com.appcues.util.ContextResources
 import com.appcues.util.LinkOpener
@@ -14,11 +14,8 @@ internal object AppcuesKoin : KoinScopePlugin {
 
     override fun ScopeDSL.install() {
         scoped { AppcuesCoroutineScope(logcues = get()) }
-        scoped {
-            val config: AppcuesConfig = get()
-            Logcues(config.loggingLevel)
-        }
-        scoped { StateMachine(appcuesCoroutineScope = get(), actionProcessor = get()) }
+        scoped { Logcues(loggingLevel = get<AppcuesConfig>().loggingLevel) }
+        scoped { StateMachineFactory(appcuesCoroutineScope = get(), actionProcessor = get()) }
         scoped { Storage(context = get(), config = get()) }
         scoped {
             DeepLinkHandler(
@@ -30,7 +27,17 @@ internal object AppcuesKoin : KoinScopePlugin {
         }
         scoped { AppcuesDebuggerManager(context = get(), koinScope = this) }
         scoped { ContextResources(context = get()) }
-        scoped { ExperienceRenderer(scope = get(), appcuesCoroutineScope = get(), experienceLifecycleTracker = get()) }
+
+        scoped {
+            ExperienceRenderer(
+                config = get(),
+                experienceLifecycleTracker = get(),
+                repository = get(),
+                sessionMonitor = get(),
+                stateMachineFactory = get()
+            )
+        }
+
         scoped {
             AppcuesRepository(
                 appcuesRemoteSource = get(),

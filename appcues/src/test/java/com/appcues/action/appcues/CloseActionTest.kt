@@ -1,6 +1,7 @@
 package com.appcues.action.appcues
 
 import com.appcues.AppcuesScopeTest
+import com.appcues.data.model.RenderContext
 import com.appcues.rules.KoinScopeRule
 import com.appcues.ui.ExperienceRenderer
 import com.google.common.truth.Truth.assertThat
@@ -26,25 +27,27 @@ internal class CloseActionTest : AppcuesScopeTest {
     fun `close SHOULD call ExperienceRenderer to dismiss current experience`() = runTest {
         // GIVEN
         val experienceRenderer: ExperienceRenderer = get()
-        val action = CloseAction(mapOf(), experienceRenderer)
+        val renderContext = RenderContext.Modal
+        val action = CloseAction(mapOf(), renderContext, experienceRenderer)
 
         // WHEN
         action.execute()
 
         // THEN
-        coVerify { experienceRenderer.dismissCurrentExperience(markComplete = false, destroyed = false) }
+        coVerify { experienceRenderer.dismiss(renderContext, markComplete = false, destroyed = false) }
     }
 
     @Test
     fun `close SHOULD call ExperienceRenderer to dismiss current experience with markComplete true WHEN config is true`() = runTest {
         // GIVEN
         val experienceRenderer: ExperienceRenderer = get()
-        val action = CloseAction(mapOf("markComplete" to true), experienceRenderer)
+        val renderContext = RenderContext.Modal
+        val action = CloseAction(mapOf("markComplete" to true), renderContext, experienceRenderer)
 
         // WHEN
         action.execute()
 
         // THEN
-        coVerify { experienceRenderer.dismissCurrentExperience(markComplete = true, destroyed = false) }
+        coVerify { experienceRenderer.dismiss(renderContext, markComplete = true, destroyed = false) }
     }
 }

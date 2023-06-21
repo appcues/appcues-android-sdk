@@ -146,7 +146,7 @@ complexity:
     ignoreStringsRegex: '$^'
   TooManyFunctions:
     active: true
-    excludes: [ '**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**', '**/Appcues.kt', '**/*Ext.kt' ]
+    excludes: [ '**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**', '**/Appcues.kt', '**/*Ext.kt', '**/*Factories.kt' ]
     thresholdInFiles: 11
     thresholdInClasses: 15
     thresholdInInterfaces: 11

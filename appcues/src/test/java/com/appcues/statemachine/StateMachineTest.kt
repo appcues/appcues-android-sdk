@@ -1,6 +1,5 @@
 package com.appcues.statemachine
 
-import com.appcues.AppcuesCoroutineScope
 import com.appcues.AppcuesScopeTest
 import com.appcues.action.ActionProcessor
 import com.appcues.action.ExperienceAction
@@ -9,6 +8,7 @@ import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperiencePriority.NORMAL
 import com.appcues.data.model.ExperienceTrigger
 import com.appcues.data.model.ExperienceTrigger.Qualification
+import com.appcues.data.model.RenderContext
 import com.appcues.mocks.mockExperience
 import com.appcues.mocks.mockExperienceNavigateActions
 import com.appcues.rules.KoinScopeRule
@@ -64,7 +64,7 @@ internal class StateMachineTest : AppcuesScopeTest {
     @Test
     fun `initial state SHOULD be Idling`() {
         // GIVEN
-        val stateMachine = StateMachine(get(), get())
+        val stateMachine = StateMachine(RenderContext.Modal, get(), get())
 
         // THEN
         assertThat(stateMachine.state).isEqualTo(Idling)
@@ -334,7 +334,7 @@ internal class StateMachineTest : AppcuesScopeTest {
             stepContainers = listOf(),
             published = true,
             priority = NORMAL,
-            type = "mobile",
+            renderContext = RenderContext.Modal,
             publishedAt = 1652895835000,
             completionActions = arrayListOf(),
             experiment = null,
@@ -361,7 +361,7 @@ internal class StateMachineTest : AppcuesScopeTest {
             stepContainers = listOf(),
             published = true,
             priority = NORMAL,
-            type = "mobile",
+            renderContext = RenderContext.Modal,
             publishedAt = 1652895835000,
             completionActions = arrayListOf(),
             experiment = null,
@@ -706,8 +706,7 @@ internal class StateMachineTest : AppcuesScopeTest {
         onStateChange: ((State) -> Unit)? = null,
         onError: ((Error) -> Unit)? = null
     ): StateMachine {
-        val scope: AppcuesCoroutineScope = get()
-        val machine = StateMachine(scope, get(), state)
+        val machine = StateMachine(RenderContext.Modal, get(), get(), state)
         machine.listener = object : StateMachineListener {
             override suspend fun onState(state: State) {
                 onStateChange?.invoke(state)

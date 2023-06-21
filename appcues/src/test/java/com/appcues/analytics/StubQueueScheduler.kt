@@ -1,6 +1,6 @@
 package com.appcues.analytics
 
-import com.appcues.analytics.AnalyticsQueueProcessor.QueueScheduler
+import com.appcues.analytics.AnalyticsQueue.QueueScheduler
 import io.mockk.mockk
 
 internal class StubQueueScheduler : QueueScheduler {

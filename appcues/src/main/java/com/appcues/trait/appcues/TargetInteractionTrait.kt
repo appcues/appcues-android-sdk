@@ -16,13 +16,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
-import com.appcues.action.ActionProcessor
 import com.appcues.action.ActionRegistry
 import com.appcues.action.ExperienceAction
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType.TARGET_LONG_PRESSED
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType.TARGET_TAPPED
 import com.appcues.data.model.AppcuesConfigMap
+import com.appcues.data.model.RenderContext
 import com.appcues.data.model.getConfigActions
 import com.appcues.trait.BackdropDecoratingTrait
 import com.appcues.trait.appcues.BackdropKeyholeTrait.ConfigShape.CIRCLE
@@ -32,6 +32,7 @@ import com.appcues.trait.extensions.getRect
 import com.appcues.trait.extensions.getRectEncompassesRadius
 import com.appcues.trait.extensions.inflateOrEmpty
 import com.appcues.trait.extensions.rememberTargetRectangleInfo
+import com.appcues.ui.ExperienceRenderer
 import com.appcues.ui.composables.AppcuesActionsDelegate
 import com.appcues.ui.composables.AppcuesStepMetadata
 import com.appcues.ui.composables.LocalAppcuesStepMetadata
@@ -41,7 +42,8 @@ import com.appcues.ui.utils.rememberAppcuesWindowInfo
 
 internal class TargetInteractionTrait(
     override val config: AppcuesConfigMap,
-    private val actionProcessor: ActionProcessor,
+    private val renderContext: RenderContext,
+    private val experienceRenderer: ExperienceRenderer,
     actionRegistry: ActionRegistry,
 ) : BackdropDecoratingTrait {
 
@@ -52,11 +54,11 @@ internal class TargetInteractionTrait(
         private const val VIEW_DESCRIPTION = "Target Rectangle"
     }
 
-    private val actions = config.getConfigActions("actions", actionRegistry)
+    private val actions = config.getConfigActions("actions", actionRegistry, renderContext)
 
     private val actionDelegate = object : AppcuesActionsDelegate {
         override fun onActions(actions: List<ExperienceAction>, interactionType: InteractionType, viewDescription: String?) {
-            actionProcessor.process(actions, interactionType, viewDescription)
+            experienceRenderer.process(renderContext, actions, interactionType, viewDescription)
         }
     }
 

@@ -9,7 +9,7 @@ internal data class Experience(
     val stepContainers: List<StepContainer>,
     val published: Boolean,
     val priority: ExperiencePriority,
-    val type: String?,
+    val renderContext: RenderContext,
     val publishedAt: Long?,
     val experiment: Experiment?,
     val completionActions: List<ExperienceAction>,

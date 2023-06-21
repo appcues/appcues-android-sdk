@@ -13,6 +13,7 @@ import com.appcues.data.model.ExperiencePriority
 import com.appcues.data.model.ExperiencePriority.NORMAL
 import com.appcues.data.model.ExperienceTrigger
 import com.appcues.data.model.Experiment
+import com.appcues.data.model.RenderContext
 import com.appcues.data.model.StepContainer
 import com.appcues.data.remote.appcues.response.ExperimentResponse
 import com.appcues.data.remote.appcues.response.experience.ExperienceResponse
@@ -66,7 +67,7 @@ internal class ExperienceMapper(
             stepContainers = emptyList(),
             published = true,
             priority = priority,
-            type = from.type ?: "",
+            renderContext = from.getRenderContext(),
             publishedAt = from.publishedAt,
             experiment = experiments?.getExperiment(from.id),
             completionActions = emptyList(),
@@ -84,14 +85,15 @@ internal class ExperienceMapper(
         experiments: List<ExperimentResponse>? = null,
         requestId: UUID? = null,
     ): Experience {
+        val renderContext = from.getRenderContext()
         val experienceTraits = from.traits.map { it to EXPERIENCE }
         return Experience(
             id = from.id,
             name = from.name,
-            stepContainers = from.steps.mapToStepContainer(experienceTraits),
+            stepContainers = from.steps.mapToStepContainer(experienceTraits, renderContext),
             published = from.state != "DRAFT", // "DRAFT" is used for experience preview in builder
             priority = priority,
-            type = from.type,
+            renderContext = renderContext,
             publishedAt = from.publishedAt,
             experiment = experiments?.getExperiment(from.id),
             completionActions = arrayListOf<ExperienceAction>().apply {
@@ -110,6 +112,7 @@ internal class ExperienceMapper(
                             completedExperienceId = from.id.toString(),
                             launchExperienceId = it,
                             experienceRenderer = scope.get(),
+                            renderContext = renderContext,
                         )
                     )
                 }
@@ -121,17 +124,18 @@ internal class ExperienceMapper(
 
     private fun List<StepContainerResponse>.mapToStepContainer(
         experienceTraits: List<LeveledTraitResponse>,
+        renderContext: RenderContext,
     ) = map { stepContainerResponse ->
         val containerTraits = stepContainerResponse.traits.map { it to GROUP }
         val mergedTraits = containerTraits.mergeTraits(experienceTraits)
-        val mappedTraits = traitsMapper.map(mergedTraits)
+        val mappedTraits = traitsMapper.map(mergedTraits, renderContext)
 
         // this is where we will use groups to organize steps into stepContainers
         // also merge all necessary traits for each step
         StepContainer(
             id = stepContainerResponse.id,
-            steps = stepContainerResponse.children.map { step -> stepMapper.map(step, mergedTraits) },
-            actions = actionsMapper.map(stepContainerResponse.actions),
+            steps = stepContainerResponse.children.map { step -> stepMapper.map(step, mergedTraits, renderContext) },
+            actions = actionsMapper.map(stepContainerResponse.actions, renderContext),
             presentingTrait = mappedTraits.getExperiencePresentingTraitOrThrow(),
             contentHolderTrait = mappedTraits.getContainerCreatingTraitOrDefault(),
             // what should we do if no content wrapping trait is found?
@@ -159,4 +163,26 @@ internal class ExperienceMapper(
                 contentType = experimentResponse.contentType
             )
         }
+
+    private fun LossyExperienceResponse.getRenderContext(): RenderContext {
+        return when (this) {
+            is ExperienceResponse -> {
+                when (type) {
+                    "mobile-embed" -> {
+                        // TODO find the frameId
+                        RenderContext.Embed("")
+                    }
+                    else -> RenderContext.Modal
+                }
+            }
+            is FailedExperienceResponse -> {
+                when (type) {
+                    "mobile-embed" -> {
+                        RenderContext.Embed("")
+                    }
+                    else -> RenderContext.Modal
+                }
+            }
+        }
+    }
 }

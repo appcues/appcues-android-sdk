@@ -8,11 +8,13 @@ import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType.FORM_SUBMITTED
 import com.appcues.analytics.formattedAsProfileUpdate
 import com.appcues.data.model.AppcuesConfigMap
+import com.appcues.data.model.RenderContext
 import com.appcues.data.model.getConfigOrDefault
 import com.appcues.ui.ExperienceRenderer
 
 internal class SubmitFormAction(
     override val config: AppcuesConfigMap,
+    private val renderContext: RenderContext,
     private val experienceRenderer: ExperienceRenderer,
     private val analyticsTracker: AnalyticsTracker,
 ) : ExperienceActionQueueTransforming {
@@ -30,7 +32,9 @@ internal class SubmitFormAction(
             return queue
         }
 
-        val (experience, stepIndex) = experienceRenderer.getState().let { Pair(it.currentExperience, it.currentStepIndex) }
+        val (experience, stepIndex) = experienceRenderer.getState(renderContext)
+            ?.let { (it.currentExperience to it.currentStepIndex) } ?: (null to null)
+
         if (experience != null && stepIndex != null) {
             val formState = experience.flatSteps[stepIndex].formState
 
@@ -46,7 +50,9 @@ internal class SubmitFormAction(
 
     // reports analytics for step interaction, for the form submission
     override suspend fun execute() {
-        val (experience, stepIndex) = experienceRenderer.getState().let { Pair(it.currentExperience, it.currentStepIndex) }
+        val (experience, stepIndex) = experienceRenderer.getState(renderContext)
+            ?.let { (it.currentExperience to it.currentStepIndex) } ?: (null to null)
+
         if (experience != null && stepIndex != null) {
             val formState = experience.flatSteps[stepIndex].formState
 

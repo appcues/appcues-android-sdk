@@ -3,7 +3,6 @@ package com.appcues.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.appcues.AppcuesCoroutineScope
-import com.appcues.action.ActionProcessor
 import com.appcues.action.ExperienceAction
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType
 import com.appcues.analytics.SdkMetrics
@@ -47,7 +46,6 @@ internal class AppcuesViewModel(
         data class Dismissing(val continueAction: suspend () -> Unit) : UIState()
     }
 
-    private val actionProcessor by inject<ActionProcessor>()
     private val appcuesCoroutineScope by inject<AppcuesCoroutineScope>()
     private val experienceRenderer by inject<ExperienceRenderer>()
 
@@ -88,7 +86,7 @@ internal class AppcuesViewModel(
             // from an external source (ex deep link) and we should end the experience
             if (state is Rendering) {
                 appcuesCoroutineScope.launch {
-                    experienceRenderer.dismissCurrentExperience(markComplete = false, destroyed = true)
+                    experienceRenderer.dismiss(state.experience.renderContext, markComplete = false, destroyed = true)
                 }
             }
         }
@@ -109,7 +107,11 @@ internal class AppcuesViewModel(
     }
 
     fun onActions(actions: List<ExperienceAction>, interactionType: InteractionType, viewDescription: String?) {
-        actionProcessor.process(actions, interactionType, viewDescription)
+        uiState.value.let { state ->
+            if (state is Rendering) {
+                experienceRenderer.process(state.experience.renderContext, actions, interactionType, viewDescription)
+            }
+        }
     }
 
     fun onPageChanged(index: Int) {
@@ -118,7 +120,7 @@ internal class AppcuesViewModel(
             // then we report new position to state machine
             if (state is Rendering && state.position != index) {
                 appcuesCoroutineScope.launch {
-                    experienceRenderer.show(StepGroupPageIndex(index, state.flatStepIndex))
+                    experienceRenderer.show(state.experience.renderContext, StepGroupPageIndex(index, state.flatStepIndex))
                 }
             }
         }

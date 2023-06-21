@@ -258,9 +258,11 @@ public class Appcues internal constructor(koinScope: Scope) {
      * behavior for most use cases of the SDK.
      */
     public fun stop() {
-        debuggerManager.stop()
-        activityScreenTracking.stop()
-        experienceRenderer.stop()
+        appcuesCoroutineScope.launch {
+            debuggerManager.stop()
+            activityScreenTracking.stop()
+            experienceRenderer.stop()
+        }
     }
 
     /**

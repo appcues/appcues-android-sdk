@@ -1,22 +1,14 @@
 package com.appcues.analytics
 
 import androidx.annotation.VisibleForTesting
-import com.appcues.AppcuesCoroutineScope
-import com.appcues.data.AppcuesRepository
 import com.appcues.data.remote.appcues.request.ActivityRequest
 import com.appcues.data.remote.appcues.request.EventRequest
-import com.appcues.ui.ExperienceRenderer
-import kotlinx.coroutines.launch
-import java.util.Date
 import java.util.Timer
 import java.util.TimerTask
 import kotlin.concurrent.schedule
 
-internal class AnalyticsQueueProcessor(
-    private val appcuesCoroutineScope: AppcuesCoroutineScope,
-    private val repository: AppcuesRepository,
-    private val experienceRenderer: ExperienceRenderer,
-    private val analyticsQueueScheduler: QueueScheduler,
+internal class AnalyticsQueue(
+    private val scheduler: QueueScheduler,
 ) {
 
     interface QueueScheduler {
@@ -25,7 +17,18 @@ internal class AnalyticsQueueProcessor(
         fun cancel()
     }
 
+    interface QueueProcessor {
+
+        fun process(activity: ActivityRequest)
+    }
+
     private val pendingActivity = mutableListOf<ActivityRequest>()
+
+    private var processor: QueueProcessor? = null
+
+    fun setProcessor(processor: QueueProcessor) {
+        this.processor = processor
+    }
 
     @VisibleForTesting
     fun queueForTesting(activity: ActivityRequest) {
@@ -37,7 +40,7 @@ internal class AnalyticsQueueProcessor(
             // add activity to pending activities
             pendingActivity.add(activity)
             // and schedule the flush task
-            analyticsQueueScheduler.schedule {
+            scheduler.schedule {
                 synchronized(this) {
                     flushPendingActivity()
                 }
@@ -47,20 +50,20 @@ internal class AnalyticsQueueProcessor(
 
     fun queueThenFlush(activity: ActivityRequest) {
         synchronized(this) {
-            analyticsQueueScheduler.cancel()
+            scheduler.cancel()
             // add new activity to pending activities and try to send all as a merged activity request
             pendingActivity.add(activity)
-            flushPendingActivity(activity.timestamp)
+            flushPendingActivity()
         }
     }
 
     fun flushThenSend(activity: ActivityRequest) {
         synchronized(this) {
-            analyticsQueueScheduler.cancel()
+            scheduler.cancel()
             // send all pending activities as a merged activity request
             flushPendingActivity()
-            // then send another one for our newer activity
-            send(activity, activity.timestamp)
+            // process activity
+            processor?.process(activity)
         }
     }
 
@@ -72,10 +75,10 @@ internal class AnalyticsQueueProcessor(
         }
     }
 
-    private fun flushPendingActivity(time: Date? = null) {
+    private fun flushPendingActivity() {
         pendingActivity.merge()
             .let {
-                if (it != null) send(it, time)
+                if (it != null) processor?.process(it)
             }.also {
                 pendingActivity.clear()
             }
@@ -97,23 +100,6 @@ internal class AnalyticsQueueProcessor(
             }
         }
         return activity.copy(events = events, profileUpdate = profileUpdate)
-    }
-
-    private fun send(activity: ActivityRequest, time: Date?) {
-        SdkMetrics.tracked(activity.requestId, time)
-        appcuesCoroutineScope.launch {
-            // this will respond with qualified experiences, if applicable
-            repository.trackActivity(activity).also {
-                // we will try to show an experience from this list
-                if (it.isNotEmpty()) {
-                    experienceRenderer.show(it)
-                } else {
-                    // we know we are not rendering any experiences, so no metrics needed
-                    // can proactively clear this request out
-                    SdkMetrics.remove(activity.requestId)
-                }
-            }
-        }
     }
 
     class AnalyticsQueueScheduler : QueueScheduler {

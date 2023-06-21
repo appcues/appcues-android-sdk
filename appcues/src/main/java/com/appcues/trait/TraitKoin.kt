@@ -27,10 +27,10 @@ internal object TraitKoin : KoinScopePlugin {
         factory { params -> BackdropKeyholeTrait(params.getOrNull()) }
         factory { params -> ModalTrait(params.getOrNull(), get()) }
         factory { params -> TooltipTrait(params.getOrNull(), get()) }
-        factory { params -> SkippableTrait(params.getOrNull(), get(), get()) }
+        factory { params -> SkippableTrait(params.getOrNull(), params.get(), get(), get()) }
         factory { params -> CarouselTrait(params.getOrNull()) }
         factory { params -> PagingDotsTrait(params.getOrNull()) }
-        factory { params -> TargetInteractionTrait(params.getOrNull(), get(), get()) }
+        factory { params -> TargetInteractionTrait(params.getOrNull(), params.get(), get(), get()) }
         factory { params -> BackgroundContentTrait(params.getOrNull(), params.get()) }
     }
 }

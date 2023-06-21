@@ -2,6 +2,7 @@ package com.appcues.action.appcues
 
 import com.appcues.AppcuesScopeTest
 import com.appcues.data.model.ExperienceTrigger
+import com.appcues.data.model.RenderContext
 import com.appcues.mocks.mockExperience
 import com.appcues.rules.KoinScopeRule
 import com.appcues.statemachine.State.RenderingStep
@@ -35,10 +36,11 @@ internal class LaunchExperienceActionTest : AppcuesScopeTest {
         val experienceId = UUID.randomUUID()
         val experienceIdString = experienceId.toString()
         val currentExperience = mockExperience()
+        val renderContext = RenderContext.Modal
         val experienceRenderer = mockk<ExperienceRenderer>(relaxed = true) {
-            every { getState() } returns RenderingStep(currentExperience, 0, true)
+            every { getState(renderContext) } returns RenderingStep(currentExperience, 0, true)
         }
-        val action = LaunchExperienceAction(mapOf("experienceID" to experienceIdString), experienceRenderer)
+        val action = LaunchExperienceAction(mapOf("experienceID" to experienceIdString), renderContext, experienceRenderer)
 
         // WHEN
         action.execute()
@@ -51,7 +53,8 @@ internal class LaunchExperienceActionTest : AppcuesScopeTest {
     fun `launch experience SHOULD NOT call ExperienceRenderer show WHEN no experience ID is in config`() = runTest {
         // GIVEN
         val experienceRenderer: ExperienceRenderer = get()
-        val action = LaunchExperienceAction(mapOf(), experienceRenderer)
+        val renderContext = RenderContext.Modal
+        val action = LaunchExperienceAction(mapOf(), renderContext, experienceRenderer)
 
         // WHEN
         action.execute()

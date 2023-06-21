@@ -4,12 +4,14 @@ import com.appcues.action.ExperienceAction
 import com.appcues.action.MetadataSettingsAction
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.ExperienceTrigger
+import com.appcues.data.model.RenderContext
 import com.appcues.data.model.getConfig
 import com.appcues.ui.ExperienceRenderer
 import java.util.UUID
 
 internal class LaunchExperienceAction(
     override val config: AppcuesConfigMap,
+    private val renderContext: RenderContext,
     private val experienceRenderer: ExperienceRenderer,
 ) : ExperienceAction, MetadataSettingsAction {
 
@@ -19,11 +21,13 @@ internal class LaunchExperienceAction(
         completedExperienceId: String,
         launchExperienceId: String,
         experienceRenderer: ExperienceRenderer,
+        renderContext: RenderContext,
     ) : this(
         config = hashMapOf<String, Any>(
             "completedExperienceID" to completedExperienceId,
             "experienceID" to launchExperienceId,
         ),
+        renderContext = renderContext,
         experienceRenderer = experienceRenderer
     )
 
@@ -55,6 +59,6 @@ internal class LaunchExperienceAction(
             // flow - capture the current experience from the state machine as the experience that is launching the new flow.
             // note: it's possible that the current experience was closed out before this triggered, in which case this
             // fromExperience ID value would be null.
-            ExperienceTrigger.LaunchExperienceAction(experienceRenderer.getState().currentExperience?.id)
+            ExperienceTrigger.LaunchExperienceAction(experienceRenderer.getState(renderContext)?.currentExperience?.id)
         }
 }

@@ -4,9 +4,11 @@ import com.appcues.AnalyticType
 import com.appcues.AppcuesCoroutineScope
 import com.appcues.LoggingLevel.NONE
 import com.appcues.analytics.AnalyticsEvent.SessionStarted
+import com.appcues.data.AppcuesRepository
 import com.appcues.data.remote.appcues.request.ActivityRequest
 import com.appcues.logging.Logcues
 import com.appcues.rules.MainDispatcherRule
+import com.appcues.ui.ExperienceRenderer
 import com.google.common.truth.Truth.assertThat
 import io.mockk.Called
 import io.mockk.every
@@ -25,7 +27,9 @@ internal class AnalyticsTrackerTest {
     private val coroutineScope = AppcuesCoroutineScope(Logcues(NONE))
     private val activityBuilder: ActivityRequestBuilder = mockk()
     private val analyticsPolicy: AnalyticsPolicy = mockk()
-    private val analyticsQueueProcessor: AnalyticsQueueProcessor = mockk(relaxed = true)
+    private val analyticsQueue: AnalyticsQueue = mockk(relaxed = true)
+    private val repository: AppcuesRepository = mockk(relaxed = true)
+    private val experienceRenderer: ExperienceRenderer = mockk(relaxed = true)
 
     private val analyticsFlowUpdates: ArrayList<TrackingData> = arrayListOf()
 
@@ -33,11 +37,14 @@ internal class AnalyticsTrackerTest {
 
     @Before
     fun setup() {
+
         analyticsTracker = AnalyticsTracker(
             appcuesCoroutineScope = coroutineScope,
             activityBuilder = activityBuilder,
             analyticsPolicy = analyticsPolicy,
-            analyticsQueueProcessor = analyticsQueueProcessor,
+            analyticsQueue = analyticsQueue,
+            repository = repository,
+            experienceRenderer = experienceRenderer,
         )
 
         coroutineScope.launch {
@@ -54,7 +61,7 @@ internal class AnalyticsTrackerTest {
         // when
         analyticsTracker.identify()
         // then
-        verify { analyticsQueueProcessor wasNot Called }
+        verify { activityBuilder wasNot Called }
     }
 
     @Test
@@ -67,7 +74,7 @@ internal class AnalyticsTrackerTest {
         analyticsTracker.identify()
         // then
         assertThat(analyticsFlowUpdates).hasSize(1)
-        verify { analyticsQueueProcessor.flushThenSend(activity) }
+        verify { analyticsQueue.flushThenSend(activity) }
         assertThat(analyticsFlowUpdates.first().type).isEqualTo(AnalyticType.IDENTIFY)
         assertThat(analyticsFlowUpdates.first().isInternal).isFalse()
         assertThat(analyticsFlowUpdates.first().request).isEqualTo(activity)
@@ -80,7 +87,7 @@ internal class AnalyticsTrackerTest {
         // when
         analyticsTracker.track("event1")
         // then
-        verify { analyticsQueueProcessor wasNot Called }
+        verify { activityBuilder wasNot Called }
     }
 
     @Test
@@ -93,7 +100,7 @@ internal class AnalyticsTrackerTest {
         analyticsTracker.track("event1", interactive = true)
         // then
         assertThat(analyticsFlowUpdates).hasSize(1)
-        verify { analyticsQueueProcessor.queueThenFlush(activity) }
+        verify { analyticsQueue.queueThenFlush(activity) }
         assertThat(analyticsFlowUpdates.first().type).isEqualTo(AnalyticType.EVENT)
         assertThat(analyticsFlowUpdates.first().isInternal).isFalse()
         assertThat(analyticsFlowUpdates.first().request).isEqualTo(activity)
@@ -109,7 +116,7 @@ internal class AnalyticsTrackerTest {
         analyticsTracker.track("event1", interactive = false)
         // then
         assertThat(analyticsFlowUpdates).hasSize(1)
-        verify { analyticsQueueProcessor.queue(activity) }
+        verify { analyticsQueue.queue(activity) }
         assertThat(analyticsFlowUpdates.first().type).isEqualTo(AnalyticType.EVENT)
         assertThat(analyticsFlowUpdates.first().isInternal).isFalse()
         assertThat(analyticsFlowUpdates.first().request).isEqualTo(activity)
@@ -122,7 +129,7 @@ internal class AnalyticsTrackerTest {
         // when
         analyticsTracker.screen("title")
         // then
-        verify { analyticsQueueProcessor wasNot Called }
+        verify { activityBuilder wasNot Called }
     }
 
     @Test
@@ -135,7 +142,7 @@ internal class AnalyticsTrackerTest {
         analyticsTracker.screen("title")
         // then
         assertThat(analyticsFlowUpdates).hasSize(1)
-        verify { analyticsQueueProcessor.queueThenFlush(activity) }
+        verify { analyticsQueue.queueThenFlush(activity) }
         assertThat(analyticsFlowUpdates.first().type).isEqualTo(AnalyticType.SCREEN)
         assertThat(analyticsFlowUpdates.first().isInternal).isFalse()
         assertThat(analyticsFlowUpdates.first().request).isEqualTo(activity)
@@ -148,7 +155,7 @@ internal class AnalyticsTrackerTest {
         // when
         analyticsTracker.group()
         // then
-        verify { analyticsQueueProcessor wasNot Called }
+        verify { activityBuilder wasNot Called }
     }
 
     @Test
@@ -161,7 +168,7 @@ internal class AnalyticsTrackerTest {
         analyticsTracker.group()
         // then
         assertThat(analyticsFlowUpdates).hasSize(1)
-        verify { analyticsQueueProcessor.flushThenSend(activity) }
+        verify { analyticsQueue.flushThenSend(activity) }
         assertThat(analyticsFlowUpdates.first().type).isEqualTo(AnalyticType.GROUP)
         assertThat(analyticsFlowUpdates.first().isInternal).isFalse()
         assertThat(analyticsFlowUpdates.first().request).isEqualTo(activity)
@@ -172,7 +179,7 @@ internal class AnalyticsTrackerTest {
         // when
         analyticsTracker.flushPendingActivity()
         // then
-        verify { analyticsQueueProcessor.flushAsync() }
+        verify { analyticsQueue.flushAsync() }
     }
 
     @Test

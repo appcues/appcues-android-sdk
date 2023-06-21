@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import com.appcues.AppcuesCoroutineScope
 import com.appcues.R
 import com.appcues.data.model.AppcuesConfigMap
+import com.appcues.data.model.RenderContext
 import com.appcues.data.model.getConfig
 import com.appcues.data.model.getConfigOrDefault
 import com.appcues.data.model.getConfigStyle
@@ -59,11 +60,13 @@ import kotlin.math.min
 
 internal class SkippableTrait(
     override val config: AppcuesConfigMap,
+    private val renderContext: RenderContext,
     private val experienceRenderer: ExperienceRenderer,
     private val appcuesCoroutineScope: AppcuesCoroutineScope,
 ) : ContainerDecoratingTrait, BackdropDecoratingTrait {
 
     companion object {
+
         const val TYPE = "@appcues/skippable"
 
         private const val CONFIG_BUTTON_APPEARANCE = "buttonAppearance"
@@ -153,7 +156,7 @@ internal class SkippableTrait(
                     .pointerInput(Unit) {
                         detectTapGestures {
                             appcuesCoroutineScope.launch {
-                                experienceRenderer.dismissCurrentExperience(markComplete = false, destroyed = false)
+                                experienceRenderer.dismiss(renderContext, markComplete = false, destroyed = false)
                             }
                         }
                     },
@@ -293,7 +296,7 @@ internal class SkippableTrait(
                 clickable(
                     onClick = {
                         appcuesCoroutineScope.launch {
-                            experienceRenderer.dismissCurrentExperience(markComplete = false, destroyed = false)
+                            experienceRenderer.dismiss(renderContext, markComplete = false, destroyed = false)
                         }
                     },
                     role = Role.Button,

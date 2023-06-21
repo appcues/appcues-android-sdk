@@ -225,7 +225,7 @@ internal class DebuggerViewModel(
 
     fun captureScreen(debuggerState: MutableDebuggerState) {
         appcuesCoroutineScope.launch {
-            experienceRenderer.dismissCurrentExperience(markComplete = false, destroyed = false)
+            experienceRenderer.stop()
 
             withContext(Dispatchers.Main) {
                 // capture screen

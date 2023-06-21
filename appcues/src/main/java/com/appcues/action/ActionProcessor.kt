@@ -5,6 +5,7 @@ import com.appcues.AppcuesCoroutineScope
 import com.appcues.action.appcues.StepInteractionAction
 import com.appcues.action.appcues.StepInteractionAction.StepInteractionData
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType
+import com.appcues.data.model.RenderContext
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
@@ -46,11 +47,11 @@ internal class ActionProcessor(override val scope: Scope) : KoinScopeComponent {
     // This version is used by the viewModel to process interactive actions from user input - button taps.
     // It includes relevant information about the user interaction that can be used in the auto generated
     // step_interaction event.
-    fun process(actions: List<ExperienceAction>, interactionType: InteractionType, viewDescription: String?) {
+    fun process(renderContext: RenderContext, actions: List<ExperienceAction>, interactionType: InteractionType, viewDescription: String?) {
         if (actions.isEmpty()) return
 
         // find step interaction action if there is any
-        val stepInteraction = getStepInteractionAction(actions, interactionType, viewDescription)
+        val stepInteraction = getStepInteractionAction(renderContext, actions, interactionType, viewDescription)
 
         appcuesCoroutineScope.launch {
             // the stepInteraction is not included in the transform, and is inserted at the front of queue
@@ -72,9 +73,10 @@ internal class ActionProcessor(override val scope: Scope) : KoinScopeComponent {
     }
 
     private fun getStepInteractionAction(
+        renderContext: RenderContext,
         actions: List<ExperienceAction>,
         interactionType: InteractionType,
-        viewDescription: String?
+        viewDescription: String?,
     ): StepInteractionAction {
         // reverse the action list to get the first from back to front
         val primaryAction = actions.reversed().firstOrNull { it is MetadataSettingsAction } as? MetadataSettingsAction
@@ -88,7 +90,8 @@ internal class ActionProcessor(override val scope: Scope) : KoinScopeComponent {
                     viewDescription = viewDescription,
                     category = primaryAction?.category ?: "",
                     destination = primaryAction?.destination ?: "",
-                )
+                ),
+                renderContext
             )
         }
     }

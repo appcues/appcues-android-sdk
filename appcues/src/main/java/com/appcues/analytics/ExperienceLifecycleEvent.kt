@@ -84,7 +84,7 @@ internal sealed class ExperienceLifecycleEvent(
         get() = hashMapOf<String, Any?>(
             "experienceId" to experience.id.appcuesFormatted(),
             "experienceName" to experience.name,
-            "experienceType" to experience.type,
+            "experienceType" to experience.renderContext.toString(),
             "version" to experience.publishedAt,
             // items in the spec that we are not ready for yet:
             // "version" to experience.version -- not included in response?

@@ -1,6 +1,7 @@
 package com.appcues.action.appcues
 
 import com.appcues.AppcuesScopeTest
+import com.appcues.data.model.RenderContext
 import com.appcues.rules.KoinScopeRule
 import com.appcues.statemachine.StepReference.StepId
 import com.appcues.statemachine.StepReference.StepIndex
@@ -30,26 +31,28 @@ internal class ContinueActionTest : AppcuesScopeTest {
     fun `continue SHOULD trigger StateMachine StartStep with index WHEN config has index`() = runTest {
         // GIVEN
         val experienceRenderer: ExperienceRenderer = get()
-        val action = ContinueAction(mapOf("index" to 1), experienceRenderer)
+        val renderContext = RenderContext.Modal
+        val action = ContinueAction(mapOf("index" to 1), renderContext, experienceRenderer)
 
         // WHEN
         action.execute()
 
         // THEN
-        coVerify { experienceRenderer.show(StepIndex(1)) }
+        coVerify { experienceRenderer.show(renderContext, StepIndex(1)) }
     }
 
     @Test
     fun `continue SHOULD trigger StateMachine StartStep with offset WHEN config has offset`() = runTest {
         // GIVEN
         val experienceRenderer: ExperienceRenderer = get()
-        val action = ContinueAction(mapOf("offset" to -1), experienceRenderer)
+        val renderContext = RenderContext.Modal
+        val action = ContinueAction(mapOf("offset" to -1), renderContext, experienceRenderer)
 
         // WHEN
         action.execute()
 
         // THEN
-        coVerify { experienceRenderer.show(StepOffset(-1)) }
+        coVerify { experienceRenderer.show(renderContext, StepOffset(-1)) }
     }
 
     @Test
@@ -57,25 +60,27 @@ internal class ContinueActionTest : AppcuesScopeTest {
         // GIVEN
         val stepId = UUID.randomUUID()
         val experienceRenderer: ExperienceRenderer = get()
-        val action = ContinueAction(mapOf("stepID" to stepId.toString()), experienceRenderer)
+        val renderContext = RenderContext.Modal
+        val action = ContinueAction(mapOf("stepID" to stepId.toString()), renderContext, experienceRenderer)
 
         // WHEN
         action.execute()
 
         // THEN
-        coVerify { experienceRenderer.show(StepId(stepId)) }
+        coVerify { experienceRenderer.show(renderContext, StepId(stepId)) }
     }
 
     @Test
     fun `continue SHOULD trigger StateMachine StartStep with offset 1 by default`() = runTest {
         // GIVEN
         val experienceRenderer: ExperienceRenderer = get()
-        val action = ContinueAction(mapOf(), experienceRenderer)
+        val renderContext = RenderContext.Modal
+        val action = ContinueAction(mapOf(), renderContext, experienceRenderer)
 
         // WHEN
         action.execute()
 
         // THEN
-        coVerify { experienceRenderer.show(StepOffset(1)) }
+        coVerify { experienceRenderer.show(renderContext, StepOffset(1)) }
     }
 }

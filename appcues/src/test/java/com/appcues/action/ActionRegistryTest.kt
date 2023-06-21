@@ -1,6 +1,7 @@
 package com.appcues.action
 
 import com.appcues.AppcuesScopeTest
+import com.appcues.data.model.RenderContext
 import com.appcues.logging.Logcues
 import com.appcues.rules.KoinScopeRule
 import com.google.common.truth.Truth.assertThat
@@ -20,11 +21,12 @@ internal class ActionRegistryTest : AppcuesScopeTest {
         // GIVEN
         val type = "myAction"
         val action: ExperienceAction = mockk()
+        val renderContext = RenderContext.Modal
         val registry = ActionRegistry(get())
         registry.register(type) { action }
 
         // WHEN
-        val actionFromRegistry = registry[type]?.invoke(null)
+        val actionFromRegistry = registry[type]?.invoke(null, renderContext)
 
         // THEN
         assertThat(action).isEqualTo(actionFromRegistry)
@@ -37,12 +39,13 @@ internal class ActionRegistryTest : AppcuesScopeTest {
         val action: ExperienceAction = mockk()
         val actionDupe: ExperienceAction = mockk()
         val registry = ActionRegistry(get())
+        val renderContext = RenderContext.Modal
         val logcues: Logcues = get()
         registry.register(type) { action }
         registry.register(type) { actionDupe }
 
         // WHEN
-        val actionFromRegistry = registry[type]?.invoke(null)
+        val actionFromRegistry = registry[type]?.invoke(null, renderContext)
 
         // THEN
         assertThat(action).isEqualTo(actionFromRegistry)

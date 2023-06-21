@@ -2,6 +2,9 @@ package com.appcues.statemachine
 
 import com.appcues.AppcuesCoroutineScope
 import com.appcues.action.ActionProcessor
+import com.appcues.action.ExperienceAction
+import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType
+import com.appcues.data.model.RenderContext
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.RenderStep
 import com.appcues.statemachine.Action.ReportError
@@ -34,6 +37,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 internal class StateMachine(
+    private val renderContext: RenderContext,
     private val appcuesCoroutineScope: AppcuesCoroutineScope,
     private val actionProcessor: ActionProcessor,
     initialState: State = Idling
@@ -52,6 +56,10 @@ internal class StateMachine(
         get() = _state
 
     private var mutex = Mutex()
+
+    fun process(actions: List<ExperienceAction>, interactionType: InteractionType, viewDescription: String?) {
+        actionProcessor.process(renderContext, actions, interactionType, viewDescription)
+    }
 
     suspend fun handleAction(action: Action): ResultOf<State, Error> = mutex.withLock {
         return handleActionInternal(action)
