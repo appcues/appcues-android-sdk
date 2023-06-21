@@ -161,7 +161,7 @@ internal fun Activity.getParentView(): ViewGroup {
             val rootViewNames = getViewRootNames.invoke(windowManager) as Array<Any?>
             val rootViews = rootViewNames.map { getRootView(windowManager, it) as View }
             rootViews.last()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             // if all else fails, use the decorView on the window, which is typically the only one
             window.decorView
         }
