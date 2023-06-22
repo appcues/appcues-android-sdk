@@ -52,22 +52,22 @@ internal class MutableDebuggerState(
     private var fabRect = Rect(Offset(0f, 0f), Size(0f, 0f))
 
     fun initFabOffsets(size: IntSize) {
-        boxSize = size
-
-        with(density) {
-            // if we are creating (meaning the debugger was started) we calculate the initial position,
-            // else we just use the last known position we have
-            if (isCreating) {
+        if (size != boxSize) {
+            // if we have a size change (meaning the debugger was started or the orienation or size changed otherwise)
+            // we calculate the initial position.
+            boxSize = size
+            with(density) {
                 updatePosition(
                     x = size.width.toFloat() - fabSize.toPx(),
                     y = ((size.height.toFloat() / GRID_SCREEN_COUNT) * GRID_FAB_POSITION) - fabSize.toPx()
                 )
-            } else {
-                updatePosition(
-                    x = lastAnchoredPosition.x,
-                    y = lastAnchoredPosition.y
-                )
             }
+        } else {
+            // else we just use the last known position we have
+            updatePosition(
+                x = lastAnchoredPosition.x,
+                y = lastAnchoredPosition.y
+            )
         }
     }
 
