@@ -33,7 +33,7 @@ internal class SubmitFormAction(
         }
 
         val (experience, stepIndex) = experienceRenderer.getState(renderContext)
-            ?.let { (it.currentExperience to it.currentStepIndex) } ?: (null to null)
+            ?.let { (it.experience to it.currentStepIndex) } ?: (null to null)
 
         if (experience != null && stepIndex != null) {
             val formState = experience.flatSteps[stepIndex].formState
@@ -51,7 +51,7 @@ internal class SubmitFormAction(
     // reports analytics for step interaction, for the form submission
     override suspend fun execute() {
         val (experience, stepIndex) = experienceRenderer.getState(renderContext)
-            ?.let { (it.currentExperience to it.currentStepIndex) } ?: (null to null)
+            ?.let { (it.experience to it.currentStepIndex) } ?: (null to null)
 
         if (experience != null && stepIndex != null) {
             val formState = experience.flatSteps[stepIndex].formState

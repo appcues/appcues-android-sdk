@@ -20,6 +20,7 @@ import androidx.lifecycle.findViewTreeViewModelStoreOwner
 import androidx.savedstate.findViewTreeSavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.appcues.R
+import com.appcues.data.model.RenderContext
 import com.appcues.databinding.AppcuesOverlayLayoutBinding
 import com.appcues.logging.Logcues
 import com.appcues.monitor.AppcuesActivityMonitor
@@ -29,7 +30,10 @@ import com.appcues.ui.primitive.EmbedChromeClient
 import org.koin.core.scope.Scope
 import java.lang.reflect.Method
 
-internal class AppcuesOverlayViewManager(private val scope: Scope) : DefaultLifecycleObserver, ActivityMonitorListener {
+internal class AppcuesOverlayViewManager(
+    private val scope: Scope,
+    private val renderContext: RenderContext
+) : DefaultLifecycleObserver, ActivityMonitorListener {
 
     private val logcues: Logcues by lazy { scope.get() }
 
@@ -79,7 +83,7 @@ internal class AppcuesOverlayViewManager(private val scope: Scope) : DefaultLife
         if (parentView.findViewById<ComposeView>(R.id.appcues_overlay_layout) == null) {
             // then we add
             val binding = AppcuesOverlayLayoutBinding.inflate(layoutInflater)
-            if (viewModel == null) viewModel = AppcuesViewModel(scope, ::onCompositionDismiss)
+            if (viewModel == null) viewModel = AppcuesViewModel(scope, renderContext, ::onCompositionDismiss)
             shakeGestureListener = ShakeGestureListener(this)
 
             // ensures it always comes before appcues_debugger_view
@@ -88,8 +92,6 @@ internal class AppcuesOverlayViewManager(private val scope: Scope) : DefaultLife
             } ?: run {
                 parentView.addView(binding.root)
             }
-
-            val insets = ViewCompat.getRootWindowInsets(parentView)?.getInsets(WindowInsetsCompat.Type.systemBars())
 
             binding.root.layoutParams =
                 android.widget.FrameLayout.LayoutParams(

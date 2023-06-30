@@ -35,14 +35,6 @@ internal fun Scope.backdropKeyholeTraitFactory(): TraitFactoryBlock {
     return { config, _, _ -> get<BackdropKeyholeTrait> { parametersOf(config) } }
 }
 
-internal fun Scope.modalTraitFactory(): TraitFactoryBlock {
-    return { config, _, _ -> get<ModalTrait> { parametersOf(config) } }
-}
-
-internal fun Scope.tooltipTraitFactory(): TraitFactoryBlock {
-    return { config, _, _ -> get<TooltipTrait> { parametersOf(config) } }
-}
-
 internal fun Scope.carouselTraitFactory(): TraitFactoryBlock {
     return { config, _, _ -> get<CarouselTrait> { parametersOf(config) } }
 }
@@ -53,6 +45,14 @@ internal fun Scope.pagingDotsTraitFactory(): TraitFactoryBlock {
 
 internal fun Scope.backgroundContentTraitFactory(): TraitFactoryBlock {
     return { config, level, _ -> get<BackgroundContentTrait> { parametersOf(config, level) } }
+}
+
+internal fun Scope.modalTraitFactory(): TraitFactoryBlock {
+    return { config, _, renderContext -> get<ModalTrait> { parametersOf(config, renderContext) } }
+}
+
+internal fun Scope.tooltipTraitFactory(): TraitFactoryBlock {
+    return { config, _, renderContext -> get<TooltipTrait> { parametersOf(config, renderContext) } }
 }
 
 internal fun Scope.skippableTraitFactory(): TraitFactoryBlock {

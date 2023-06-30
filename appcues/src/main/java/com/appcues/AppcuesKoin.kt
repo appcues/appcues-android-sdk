@@ -31,6 +31,7 @@ internal object AppcuesKoin : KoinScopePlugin {
         scoped {
             ExperienceRenderer(
                 config = get(),
+                appcuesCoroutineScope = get(),
                 experienceLifecycleTracker = get(),
                 repository = get(),
                 sessionMonitor = get(),

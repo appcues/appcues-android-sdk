@@ -72,7 +72,6 @@ internal class ExperienceLifecycleTracker(
             is Error.ExperienceError -> trackLifecycleEvent(ExperienceError(this))
             is Error.StepError -> trackLifecycleEvent(StepError(this))
             is Error.ExperienceAlreadyActive -> Unit
-            is Error.NoActiveStateMachine -> Unit
         }
     }
 
@@ -97,6 +96,5 @@ internal class ExperienceLifecycleTracker(
             is Error.ExperienceError -> experience.published
             is Error.StepError -> experience.published
             is Error.ExperienceAlreadyActive -> false
-            is Error.NoActiveStateMachine -> false
         }
 }

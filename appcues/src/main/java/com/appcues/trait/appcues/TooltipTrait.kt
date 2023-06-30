@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.coerceIn
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
 import com.appcues.data.model.AppcuesConfigMap
+import com.appcues.data.model.RenderContext
 import com.appcues.data.model.getConfigOrDefault
 import com.appcues.data.model.getConfigStyle
 import com.appcues.data.model.styling.ComponentStyle
@@ -67,6 +68,7 @@ import org.koin.core.scope.Scope
 
 internal class TooltipTrait(
     override val config: AppcuesConfigMap,
+    private val renderContext: RenderContext,
     val scope: Scope,
 ) : PresentingTrait, ContentWrappingTrait {
 
@@ -99,7 +101,7 @@ internal class TooltipTrait(
     }
 
     override fun present() {
-        val success = AppcuesOverlayViewManager(scope = scope).start()
+        val success = AppcuesOverlayViewManager(scope, renderContext).start()
 
         if (!success) {
             throw AppcuesTraitException("unable to create tooltip overlay view")

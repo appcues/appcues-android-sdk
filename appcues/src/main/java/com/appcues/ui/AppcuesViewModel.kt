@@ -7,6 +7,7 @@ import com.appcues.action.ExperienceAction
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType
 import com.appcues.analytics.SdkMetrics
 import com.appcues.data.model.Experience
+import com.appcues.data.model.RenderContext
 import com.appcues.data.model.StepContainer
 import com.appcues.statemachine.Error.StepError
 import com.appcues.statemachine.State.BeginningStep
@@ -20,7 +21,6 @@ import com.appcues.util.ResultOf
 import com.appcues.util.ResultOf.Failure
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
@@ -28,6 +28,7 @@ import org.koin.core.scope.Scope
 
 internal class AppcuesViewModel(
     override val scope: Scope,
+    private val renderContext: RenderContext,
     private val onDismiss: () -> Unit,
 ) : ViewModel(), KoinScopeComponent {
 
@@ -56,9 +57,9 @@ internal class AppcuesViewModel(
 
     init {
         viewModelScope.launch {
-            experienceRenderer.stateFlow.collectLatest { result ->
+            experienceRenderer.collectState(renderContext) { result ->
                 // don't collect if we are Dismissing
-                if (uiState.value is Dismissing) return@collectLatest
+                if (uiState.value is Dismissing) return@collectState
 
                 when (result) {
                     is BeginningStep -> {

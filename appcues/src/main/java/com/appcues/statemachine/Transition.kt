@@ -8,6 +8,9 @@ internal open class Transition(
     val sideEffect: SideEffect? = null,
     val emitStateChange: Boolean = true,
 ) {
-    class ErrorLoggingTransition(error: Error, fatal: Boolean) : Transition(if (fatal) Idling else null, ReportErrorEffect(error))
+
+    class ErrorLoggingTransition(error: Error, fatal: Boolean) :
+        Transition(if (fatal) Idling(error.experience) else null, ReportErrorEffect(error))
+
     class EmptyTransition : Transition(null, null)
 }

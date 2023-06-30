@@ -4,7 +4,7 @@ import com.appcues.AppcuesCoroutineScope
 import com.appcues.action.ActionProcessor
 import com.appcues.action.ExperienceAction
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType
-import com.appcues.data.model.RenderContext
+import com.appcues.data.model.Experience
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.RenderStep
 import com.appcues.statemachine.Action.ReportError
@@ -33,23 +33,25 @@ import com.appcues.trait.AppcuesTraitException
 import com.appcues.util.ResultOf
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 internal class StateMachine(
-    private val renderContext: RenderContext,
     private val appcuesCoroutineScope: AppcuesCoroutineScope,
     private val actionProcessor: ActionProcessor,
-    initialState: State = Idling
+    private val experience: Experience,
+    initialState: State = Idling(experience)
 ) {
 
-    interface StateMachineListener {
+    private val _stateFlow = MutableSharedFlow<State>(1)
+    val stateFlow: SharedFlow<State>
+        get() = _stateFlow
 
-        suspend fun onState(state: State)
-        suspend fun onError(error: Error)
-    }
-
-    var listener: StateMachineListener? = null
+    private val _errorFlow = MutableSharedFlow<Error>(1)
+    val errorFlow: SharedFlow<Error>
+        get() = _errorFlow
 
     private var _state: State = initialState
     val state: State
@@ -58,7 +60,11 @@ internal class StateMachine(
     private var mutex = Mutex()
 
     fun process(actions: List<ExperienceAction>, interactionType: InteractionType, viewDescription: String?) {
-        actionProcessor.process(renderContext, actions, interactionType, viewDescription)
+        actionProcessor.process(experience.renderContext, actions, interactionType, viewDescription)
+    }
+
+    suspend fun start(): ResultOf<State, Error> {
+        return handleAction(StartExperience(experience))
     }
 
     suspend fun handleAction(action: Action): ResultOf<State, Error> = mutex.withLock {
@@ -76,7 +82,7 @@ internal class StateMachine(
 
             if (transition.emitStateChange) {
                 // emit state change to all listeners via flow
-                listener?.onState(state)
+                _stateFlow.emit(state)
             }
         }
 
@@ -87,7 +93,7 @@ internal class StateMachine(
                     handleActionInternal(sideEffect.action)
                 }
                 is ReportErrorEffect -> {
-                    listener?.onError(sideEffect.error)
+                    _errorFlow.emit(sideEffect.error)
                     // return a failure if this call to `handleAction` ended with a reported error
                     Failure(sideEffect.error)
                 }

@@ -37,7 +37,7 @@ internal class StepInteractionAction(
 
     override suspend fun execute() {
         val (experience, stepIndex) = experienceRenderer.getState(renderContext)
-            ?.let { (it.currentExperience to it.currentStepIndex) } ?: (null to null)
+            ?.let { (it.experience to it.currentStepIndex) } ?: (null to null)
 
         if (experience != null && stepIndex != null && experience.published) {
             val interactionEvent = StepInteraction(

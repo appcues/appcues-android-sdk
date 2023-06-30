@@ -164,7 +164,7 @@ internal interface Transitions {
     }
 
     fun EndingExperience.fromEndingExperienceToIdling(action: Reset): Transition {
-        return Transition(Idling, if (markComplete) ProcessActions(experience.completionActions) else null)
+        return Transition(Idling(experience), if (markComplete) ProcessActions(experience.completionActions) else null)
     }
 
     companion object : Transitions
@@ -232,7 +232,7 @@ private fun errorTransition(experience: Experience, currentStepIndex: Int, messa
 
 private fun stepNotFoundErrorTransition(experience: Experience, groupIndex: Int): Transition {
     return Transition(
-        state = Idling,
+        state = Idling(experience),
         sideEffect = ReportErrorEffect(
             error = StepError(experience, 0, "step group $groupIndex has no child step")
         )

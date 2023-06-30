@@ -38,11 +38,13 @@ internal class TraitRegistry(
         register(TargetRectangleTrait.TYPE, scope.targetRectangleTraitFactory())
         register(BackdropTrait.TYPE, scope.backdropTraitFactory())
         register(BackdropKeyholeTrait.TYPE, scope.backdropKeyholeTraitFactory())
-        register(ModalTrait.TYPE, scope.modalTraitFactory())
-        register(TooltipTrait.TYPE, scope.tooltipTraitFactory())
         register(CarouselTrait.TYPE, scope.carouselTraitFactory())
         register(PagingDotsTrait.TYPE, scope.pagingDotsTraitFactory())
+
         register(BackgroundContentTrait.TYPE, scope.backgroundContentTraitFactory())
+
+        register(ModalTrait.TYPE, scope.modalTraitFactory())
+        register(TooltipTrait.TYPE, scope.tooltipTraitFactory())
         register(SkippableTrait.TYPE, scope.skippableTraitFactory())
         register(TargetInteractionTrait.TYPE, scope.targetInteractionTraitFactory())
     }

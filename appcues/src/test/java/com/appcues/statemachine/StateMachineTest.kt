@@ -1,5 +1,6 @@
 package com.appcues.statemachine
 
+import com.appcues.AppcuesCoroutineScope
 import com.appcues.AppcuesScopeTest
 import com.appcues.action.ActionProcessor
 import com.appcues.action.ExperienceAction
@@ -28,7 +29,6 @@ import com.appcues.statemachine.State.EndingExperience
 import com.appcues.statemachine.State.EndingStep
 import com.appcues.statemachine.State.Idling
 import com.appcues.statemachine.State.RenderingStep
-import com.appcues.statemachine.StateMachine.StateMachineListener
 import com.appcues.statemachine.StepReference.StepId
 import com.appcues.statemachine.StepReference.StepIndex
 import com.appcues.statemachine.StepReference.StepOffset
@@ -44,6 +44,8 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeout
 import org.junit.Rule
@@ -64,10 +66,11 @@ internal class StateMachineTest : AppcuesScopeTest {
     @Test
     fun `initial state SHOULD be Idling`() {
         // GIVEN
-        val stateMachine = StateMachine(RenderContext.Modal, get(), get())
+        val experience = mockExperience { }
+        val stateMachine = StateMachine(get(), get(), experience)
 
         // THEN
-        assertThat(stateMachine.state).isEqualTo(Idling)
+        assertThat(stateMachine.state).isEqualTo(Idling(experience))
     }
 
     // Standard Transitions
@@ -77,7 +80,7 @@ internal class StateMachineTest : AppcuesScopeTest {
         // GIVEN
         var presented = false
         val experience = mockExperience { presented = true }
-        val initialState = Idling
+        val initialState = Idling(experience)
         val stateMachine = initMachine(initialState)
         val action = StartExperience(experience)
         val targetState = RenderingStep(experience, 0, true)
@@ -154,8 +157,8 @@ internal class StateMachineTest : AppcuesScopeTest {
 
         // GIVEN
         val experience = mockExperience { throw AppcuesTraitException("test trait exception") }
-        val initialState = Idling
-        val targetState = Idling
+        val initialState = Idling(experience)
+        val targetState = Idling(experience)
         val stateMachine = initMachine(initialState)
         val action = StartExperience(experience)
 
@@ -179,7 +182,7 @@ internal class StateMachineTest : AppcuesScopeTest {
         val initialState = RenderingStep(experience, 1, false)
         val stateMachine = initMachine(initialState)
         val action = EndExperience(destroyed = false, markComplete = false)
-        val targetState = Idling
+        val targetState = Idling(experience)
 
         // WHEN
         val result = stateMachine.handleAction(action)
@@ -198,7 +201,7 @@ internal class StateMachineTest : AppcuesScopeTest {
         val initialState = RenderingStep(experience, 1, false)
         val stateMachine = initMachine(initialState)
         val action = EndExperience(destroyed = true, markComplete = false)
-        val targetState = Idling
+        val targetState = Idling(experience)
 
         // WHEN
         val result = stateMachine.handleAction(action)
@@ -217,7 +220,7 @@ internal class StateMachineTest : AppcuesScopeTest {
         val initialState = RenderingStep(experience, 3, false)
         val stateMachine = initMachine(initialState)
         val action = StartStep(StepOffset(1))
-        val targetState = Idling
+        val targetState = Idling(experience)
 
         // WHEN
         val result = stateMachine.handleAction(action)
@@ -273,7 +276,7 @@ internal class StateMachineTest : AppcuesScopeTest {
             com.appcues.data.model.Action(NAVIGATE, experienceAction2),
         )
         val experience = mockExperienceNavigateActions(navigationActions, presentingTrait, Qualification("screen_view"))
-        val initialState = Idling
+        val initialState = Idling(experience)
         val stateMachine = initMachine(initialState)
         val action = StartExperience(experience)
         val targetState = RenderingStep(experience, 0, true)
@@ -303,7 +306,7 @@ internal class StateMachineTest : AppcuesScopeTest {
             com.appcues.data.model.Action(NAVIGATE, experienceAction2),
         )
         val experience = mockExperienceNavigateActions(navigationActions, presentingTrait, ExperienceTrigger.Preview)
-        val initialState = Idling
+        val initialState = Idling(experience)
         val stateMachine = initMachine(initialState)
         val action = StartExperience(experience)
         val targetState = RenderingStep(experience, 0, true)
@@ -340,7 +343,7 @@ internal class StateMachineTest : AppcuesScopeTest {
             experiment = null,
             trigger = ExperienceTrigger.ShowCall,
         )
-        val initialState = Idling
+        val initialState = Idling(experience)
         val stateMachine = initMachine(initialState)
         val action = StartExperience(experience)
 
@@ -368,7 +371,7 @@ internal class StateMachineTest : AppcuesScopeTest {
             error = "Failed decode",
             trigger = ExperienceTrigger.ShowCall,
         )
-        val initialState = Idling
+        val initialState = Idling(experience)
         val stateMachine = initMachine(initialState)
         val action = StartExperience(experience)
 
@@ -493,7 +496,7 @@ internal class StateMachineTest : AppcuesScopeTest {
 
         // THEN
         assertThat(result.failureReason()).isEqualTo(error)
-        assertThat(stateMachine.state).isEqualTo(Idling)
+        assertThat(stateMachine.state).isEqualTo(Idling(experience))
     }
 
     @Test
@@ -537,7 +540,7 @@ internal class StateMachineTest : AppcuesScopeTest {
     fun `Idling SHOULD emit three state updates to shared flow WHEN action is StartExperience`() = runTest {
         // GIVEN
         val experience = mockExperience()
-        val initialState = Idling
+        val initialState = Idling(experience)
         val transitions = mutableListOf(BeginningExperience::class.java, BeginningStep::class.java, RenderingStep::class.java)
         val completion: CompletableDeferred<Boolean> = CompletableDeferred()
         val stateMachine = initMachine(initialState, onStateChange = { confirmTransitions(it, transitions, completion) })
@@ -588,7 +591,7 @@ internal class StateMachineTest : AppcuesScopeTest {
     @Test
     fun `Idling SHOULD NOT transition WHEN action is something other than StartExperience or Pause`() = runTest {
         // GIVEN
-        val initialState = Idling
+        val initialState = Idling(mockExperience())
         val stateMachine = initMachine(initialState)
         val action = Reset
 
@@ -676,8 +679,8 @@ internal class StateMachineTest : AppcuesScopeTest {
         val result = stateMachine.handleAction(action)
 
         // THEN
-        assertThat(result.successValue()).isEqualTo(Idling)
-        assertThat(stateMachine.state).isEqualTo(Idling)
+        assertThat(result.successValue()).isEqualTo(Idling(experience))
+        assertThat(stateMachine.state).isEqualTo(Idling(experience))
         coVerify {
             koinTestRule.scope.get<ActionProcessor>().process(experience.completionActions)
         }
@@ -695,8 +698,8 @@ internal class StateMachineTest : AppcuesScopeTest {
         val result = stateMachine.handleAction(action)
 
         // THEN
-        assertThat(result.successValue()).isEqualTo(Idling)
-        assertThat(stateMachine.state).isEqualTo(Idling)
+        assertThat(result.successValue()).isEqualTo(Idling(experience))
+        assertThat(stateMachine.state).isEqualTo(Idling(experience))
         coVerify { koinTestRule.scope.get<ActionProcessor>() wasNot Called }
     }
 
@@ -706,26 +709,37 @@ internal class StateMachineTest : AppcuesScopeTest {
         onStateChange: ((State) -> Unit)? = null,
         onError: ((Error) -> Unit)? = null
     ): StateMachine {
-        val machine = StateMachine(RenderContext.Modal, get(), get(), state)
-        machine.listener = object : StateMachineListener {
-            override suspend fun onState(state: State) {
-                onStateChange?.invoke(state)
-                when (state) {
+        val stateFlowCompletion: CompletableDeferred<Boolean> = CompletableDeferred()
+        val errorFlowCompletion: CompletableDeferred<Boolean> = CompletableDeferred()
+        val scope: AppcuesCoroutineScope = get()
+        val machine = StateMachine(scope, get(), state.experience, state)
+        // this collect on the stateFlow simulates the function of the UI
+        // that is required to progress the state machine forward on UI present/dismiss
+        scope.launch {
+            stateFlowCompletion.complete(true)
+            machine.stateFlow.collect {
+                onStateChange?.invoke(it)
+                when (it) {
                     is BeginningStep -> {
-                        state.presentationComplete.invoke(Success(Unit))
+                        it.presentationComplete.invoke(Success(Unit))
                     }
                     is EndingStep -> {
-                        state.dismissAndContinue?.invoke()
+                        it.dismissAndContinue?.invoke()
                     }
                     // ignore other state changes
                     else -> Unit
                 }
             }
-
-            override suspend fun onError(error: Error) {
-                onError?.invoke((error))
+        }
+        scope.launch {
+            errorFlowCompletion.complete(true)
+            machine.errorFlow.collect {
+                onError?.invoke((it))
             }
         }
+        // this await is to try to ensure that the collect handlers inside the coroutine launches above execute
+        // before the test that relies on them gets the state machine instance and tries to validate flows
+        awaitAll(stateFlowCompletion, errorFlowCompletion)
         return machine
     }
 

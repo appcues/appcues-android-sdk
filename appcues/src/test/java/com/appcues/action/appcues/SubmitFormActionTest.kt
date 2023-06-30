@@ -54,7 +54,7 @@ internal class SubmitFormActionTest : AppcuesScopeTest {
         val experience = experience(formState)
         val renderContext = RenderContext.Modal
         val state = mockk<State>(relaxed = true) {
-            every { this@mockk.currentExperience } answers { experience }
+            every { this@mockk.experience } answers { experience }
             every { this@mockk.currentStepIndex } answers { 0 }
         }
         val experienceRenderer: ExperienceRenderer = mockk(relaxed = true) {
@@ -88,7 +88,7 @@ internal class SubmitFormActionTest : AppcuesScopeTest {
         val experience = experience(formState)
         val renderContext = RenderContext.Modal
         val state = mockk<State>(relaxed = true) {
-            every { this@mockk.currentExperience } answers { experience }
+            every { this@mockk.experience } answers { experience }
             every { this@mockk.currentStepIndex } answers { 0 }
         }
         val experienceRenderer: ExperienceRenderer = mockk(relaxed = true) {
@@ -119,7 +119,7 @@ internal class SubmitFormActionTest : AppcuesScopeTest {
         val experience = experience(formState)
         val renderContext = RenderContext.Modal
         val state = mockk<State>(relaxed = true) {
-            every { this@mockk.currentExperience } answers { experience }
+            every { this@mockk.experience } answers { experience }
             every { this@mockk.currentStepIndex } answers { 0 }
         }
         val experienceRenderer: ExperienceRenderer = mockk(relaxed = true) {
@@ -147,7 +147,7 @@ internal class SubmitFormActionTest : AppcuesScopeTest {
         val experience = experience(formState)
         val renderContext = RenderContext.Modal
         val state = mockk<State>(relaxed = true) {
-            every { this@mockk.currentExperience } answers { experience }
+            every { this@mockk.experience } answers { experience }
             every { this@mockk.currentStepIndex } answers { 0 }
         }
         val experienceRenderer: ExperienceRenderer = mockk(relaxed = true) {
@@ -178,7 +178,7 @@ internal class SubmitFormActionTest : AppcuesScopeTest {
         val experience = experience(formState)
         val renderContext = RenderContext.Modal
         val state = mockk<State>(relaxed = true) {
-            every { this@mockk.currentExperience } answers { experience }
+            every { this@mockk.experience } answers { experience }
             every { this@mockk.currentStepIndex } answers { 0 }
         }
         val experienceRenderer: ExperienceRenderer = mockk(relaxed = true) {
@@ -215,7 +215,7 @@ internal class SubmitFormActionTest : AppcuesScopeTest {
         val experience = experience(formState)
         val renderContext = RenderContext.Modal
         val state = mockk<State>(relaxed = true) {
-            every { this@mockk.currentExperience } answers { experience }
+            every { this@mockk.experience } answers { experience }
             every { this@mockk.currentStepIndex } answers { 0 }
         }
         val experienceRenderer: ExperienceRenderer = mockk(relaxed = true) {
