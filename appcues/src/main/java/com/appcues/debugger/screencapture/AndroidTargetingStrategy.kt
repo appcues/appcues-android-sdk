@@ -86,7 +86,11 @@ internal class AndroidViewSelector(
 internal class AndroidTargetingStrategy : ElementTargetingStrategy {
 
     override fun captureLayout(): ViewElement? {
-        return AppcuesActivityMonitor.activity?.getParentView()?.asCaptureView()
+        return AppcuesActivityMonitor.activity?.getParentView()?.let {
+            val screenBounds = Rect()
+            it.getGlobalVisibleRect(screenBounds)
+            it.asCaptureView(screenBounds)
+        }
     }
 
     override fun inflateSelectorFrom(properties: Map<String, String>): ElementSelector? {
@@ -96,7 +100,7 @@ internal class AndroidTargetingStrategy : ElementTargetingStrategy {
 
 private const val ANDROID_COMPOSE_VIEW_CLASS_NAME = "androidx.compose.ui.platform.AndroidComposeView"
 
-private fun View.asCaptureView(): ViewElement? {
+private fun View.asCaptureView(screenBounds: Rect): ViewElement? {
     val displayMetrics = context.resources.displayMetrics
     val density = displayMetrics.density
 
@@ -104,11 +108,8 @@ private fun View.asCaptureView(): ViewElement? {
     val actualPosition = Rect()
     getGlobalVisibleRect(actualPosition)
 
-    // the bounds of the screen
-    val screenRect = Rect(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels)
-
     // if the view is not currently in the screenshot image (scrolled away), ignore
-    if (Rect.intersects(actualPosition, screenRect).not()) {
+    if (Rect.intersects(actualPosition, screenBounds).not()) {
         return null
     }
 
@@ -129,7 +130,7 @@ private fun View.asCaptureView(): ViewElement? {
                 // discard hidden views and subviews within
                 null
             } else {
-                it.asCaptureView()
+                it.asCaptureView(screenBounds)
             }
         }.toList()
         children.addAll(viewChildren)
