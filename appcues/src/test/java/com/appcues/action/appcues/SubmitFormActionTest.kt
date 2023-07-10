@@ -16,6 +16,7 @@ import com.appcues.data.model.ExperiencePrimitive.TextSpanPrimitive
 import com.appcues.data.model.ExperiencePriority.NORMAL
 import com.appcues.data.model.ExperienceStepFormState
 import com.appcues.data.model.ExperienceTrigger
+import com.appcues.data.model.RenderContext
 import com.appcues.data.model.Step
 import com.appcues.data.model.StepContainer
 import com.appcues.data.model.styling.ComponentSelectMode.MULTIPLE
@@ -282,6 +283,7 @@ internal class SubmitFormActionTest : AppcuesScopeTest {
         published = true,
         priority = NORMAL,
         type = "mobile",
+        renderContext = RenderContext.Modal,
         publishedAt = Date().time,
         completionActions = listOf(),
         trigger = ExperienceTrigger.ShowCall,

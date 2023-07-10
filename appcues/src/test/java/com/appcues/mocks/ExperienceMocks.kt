@@ -7,6 +7,7 @@ import com.appcues.data.model.ExperiencePrimitive.TextPrimitive
 import com.appcues.data.model.ExperiencePriority.NORMAL
 import com.appcues.data.model.ExperienceTrigger
 import com.appcues.data.model.Experiment
+import com.appcues.data.model.RenderContext
 import com.appcues.data.model.Step
 import com.appcues.data.model.StepContainer
 import com.appcues.trait.PresentingTrait
@@ -24,6 +25,7 @@ internal fun mockExperience(onPresent: (() -> Unit)? = null) =
         id = UUID.fromString("d84c9d01-aa27-4cbb-b832-ee03720e04fc"),
         name = "Mock Experience",
         type = "mobile",
+        renderContext = RenderContext.Modal,
         stepContainers = listOf(
             StepContainer(
                 id = UUID.fromString("e062bd81-b736-44c4-abba-633dfff966aa"),
@@ -76,6 +78,7 @@ internal fun mockExperienceExperiment(experiment: Experiment) =
         id = UUID.fromString("d84c9d01-aa27-4cbb-b832-ee03720e04fc"),
         name = "Mock Experience with Experiment",
         type = "mobile",
+        renderContext = RenderContext.Modal,
         stepContainers = listOf(
             StepContainer(
                 id = UUID.fromString("60b49c12-c49b-47ac-8ed3-ba4e9a55e694"),
@@ -104,6 +107,7 @@ internal fun mockExperienceNavigateActions(actions: List<Action>, presentingTrai
         id = UUID.fromString("d84c9d01-aa27-4cbb-b832-ee03720e04fc"),
         name = "Mock Experience with Experiment",
         type = "mobile",
+        renderContext = RenderContext.Modal,
         stepContainers = listOf(
             StepContainer(
                 id = UUID.fromString("60b49c12-c49b-47ac-8ed3-ba4e9a55e694"),
