@@ -10,6 +10,7 @@ internal data class Experience(
     val published: Boolean,
     val priority: ExperiencePriority,
     val type: String?,
+    val renderContext: RenderContext,
     val publishedAt: Long?,
     val experiment: Experiment?,
     val completionActions: List<ExperienceAction>,

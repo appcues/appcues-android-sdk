@@ -13,6 +13,7 @@ import com.appcues.data.model.ExperiencePriority
 import com.appcues.data.model.ExperiencePriority.NORMAL
 import com.appcues.data.model.ExperienceTrigger
 import com.appcues.data.model.Experiment
+import com.appcues.data.model.RenderContext
 import com.appcues.data.model.StepContainer
 import com.appcues.data.remote.appcues.response.ExperimentResponse
 import com.appcues.data.remote.appcues.response.experience.ExperienceResponse
@@ -67,6 +68,7 @@ internal class ExperienceMapper(
             published = true,
             priority = priority,
             type = from.type ?: "",
+            renderContext = from.getRenderContext(),
             publishedAt = from.publishedAt,
             experiment = experiments?.getExperiment(from.id),
             completionActions = emptyList(),
@@ -92,6 +94,7 @@ internal class ExperienceMapper(
             published = from.state != "DRAFT", // "DRAFT" is used for experience preview in builder
             priority = priority,
             type = from.type,
+            renderContext = from.getRenderContext(),
             publishedAt = from.publishedAt,
             experiment = experiments?.getExperiment(from.id),
             completionActions = arrayListOf<ExperienceAction>().apply {
@@ -160,4 +163,13 @@ internal class ExperienceMapper(
                 contentType = experimentResponse.contentType
             )
         }
+
+    private fun LossyExperienceResponse.getRenderContext(): RenderContext {
+        return when (this) {
+            is ExperienceResponse -> traits.firstOrNull { it.type == "@appcues/embedded" }
+                ?.let { (it.config?.get("frameID") as? String)?.let { frameId -> RenderContext.Embed(frameId) } }
+                ?: RenderContext.Modal
+            is FailedExperienceResponse -> RenderContext.Modal
+        }
+    }
 }

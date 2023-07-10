@@ -9,6 +9,7 @@ import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperiencePriority.NORMAL
 import com.appcues.data.model.ExperienceTrigger
 import com.appcues.data.model.ExperienceTrigger.Qualification
+import com.appcues.data.model.RenderContext
 import com.appcues.mocks.mockExperience
 import com.appcues.mocks.mockExperienceNavigateActions
 import com.appcues.rules.KoinScopeRule
@@ -336,6 +337,7 @@ internal class StateMachineTest : AppcuesScopeTest {
             published = true,
             priority = NORMAL,
             type = "mobile",
+            renderContext = RenderContext.Modal,
             publishedAt = 1652895835000,
             completionActions = arrayListOf(),
             experiment = null,
@@ -363,6 +365,7 @@ internal class StateMachineTest : AppcuesScopeTest {
             published = true,
             priority = NORMAL,
             type = "mobile",
+            renderContext = RenderContext.Modal,
             publishedAt = 1652895835000,
             completionActions = arrayListOf(),
             experiment = null,
