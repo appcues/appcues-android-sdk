@@ -31,7 +31,7 @@ internal class ContinueActionTest : AppcuesScopeTest {
     fun `continue SHOULD trigger StateMachine StartStep with index WHEN config has index`() = runTest {
         // GIVEN
         val experienceRenderer: ExperienceRenderer = mockk(relaxed = true)
-        val action = ContinueAction(mapOf("index" to 1), experienceRenderer)
+        val action = ContinueAction(mapOf("index" to 1), RenderContext.Modal, experienceRenderer)
 
         // WHEN
         action.execute()
@@ -44,7 +44,7 @@ internal class ContinueActionTest : AppcuesScopeTest {
     fun `continue SHOULD trigger StateMachine StartStep with offset WHEN config has offset`() = runTest {
         // GIVEN
         val experienceRenderer: ExperienceRenderer = mockk(relaxed = true)
-        val action = ContinueAction(mapOf("offset" to -1), experienceRenderer)
+        val action = ContinueAction(mapOf("offset" to -1), RenderContext.Modal, experienceRenderer)
 
         // WHEN
         action.execute()
@@ -58,7 +58,7 @@ internal class ContinueActionTest : AppcuesScopeTest {
         // GIVEN
         val stepId = UUID.randomUUID()
         val experienceRenderer: ExperienceRenderer = mockk(relaxed = true)
-        val action = ContinueAction(mapOf("stepID" to stepId.toString()), experienceRenderer)
+        val action = ContinueAction(mapOf("stepID" to stepId.toString()), RenderContext.Modal, experienceRenderer)
 
         // WHEN
         action.execute()
@@ -71,7 +71,7 @@ internal class ContinueActionTest : AppcuesScopeTest {
     fun `continue SHOULD trigger StateMachine StartStep with offset 1 by default`() = runTest {
         // GIVEN
         val experienceRenderer: ExperienceRenderer = mockk(relaxed = true)
-        val action = ContinueAction(mapOf(), experienceRenderer)
+        val action = ContinueAction(mapOf(), RenderContext.Modal, experienceRenderer)
 
         // WHEN
         action.execute()

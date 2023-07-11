@@ -54,9 +54,9 @@ internal fun AppcuesConfigMap.getConfigPrimitive(key: String): ExperiencePrimiti
     }
 }
 
-internal fun AppcuesConfigMap.getConfigActions(key: String, actionRegistry: ActionRegistry): List<Action> {
+internal fun AppcuesConfigMap.getConfigActions(key: String, renderContext: RenderContext, actionRegistry: ActionRegistry): List<Action> {
     return getConfig<List<Any>>(key)?.map { MoshiConfiguration.fromAny<ActionResponse>(it) }
-        ?.mapNotNull { response -> response?.toAction(actionRegistry) } ?: arrayListOf()
+        ?.mapNotNull { response -> response?.toAction(renderContext, actionRegistry) } ?: arrayListOf()
 }
 
 internal fun AppcuesConfigMap.getConfigColor(key: String): ComponentColor? {

@@ -12,6 +12,7 @@ import java.util.UUID
 
 internal class ContinueAction(
     override val config: AppcuesConfigMap,
+    private val renderContext: RenderContext,
     private val experienceRenderer: ExperienceRenderer,
 ) : ExperienceAction, MetadataSettingsAction {
 
@@ -37,6 +38,6 @@ internal class ContinueAction(
     override val destination: String = stepReference.destination
 
     override suspend fun execute() {
-        experienceRenderer.show(RenderContext.Modal, stepReference)
+        experienceRenderer.show(renderContext, stepReference)
     }
 }

@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.appcues.data.model.AppcuesConfigMap
+import com.appcues.data.model.RenderContext
 import com.appcues.data.model.getConfigOrDefault
 import com.appcues.data.model.getConfigStyle
 import com.appcues.trait.AppcuesTraitException
@@ -19,6 +20,7 @@ import org.koin.core.scope.Scope
 
 internal class ModalTrait(
     override val config: AppcuesConfigMap,
+    private val renderContext: RenderContext,
     private val scope: Scope,
 ) : ContentWrappingTrait, PresentingTrait {
 
@@ -49,7 +51,7 @@ internal class ModalTrait(
     }
 
     override fun present() {
-        val success = AppcuesOverlayViewManager(scope = scope).start()
+        val success = AppcuesOverlayViewManager(scope, renderContext).start()
 
         if (!success) {
             throw AppcuesTraitException("unable to create modal overlay view")

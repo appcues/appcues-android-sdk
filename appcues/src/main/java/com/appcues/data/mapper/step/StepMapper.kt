@@ -7,6 +7,7 @@ import com.appcues.data.mapper.step.primitives.mapPrimitive
 import com.appcues.data.mapper.trait.TraitsMapper
 import com.appcues.data.model.ExperiencePrimitive
 import com.appcues.data.model.ExperiencePrimitive.VerticalStackPrimitive
+import com.appcues.data.model.RenderContext
 import com.appcues.data.model.Step
 import com.appcues.data.remote.appcues.response.step.StepResponse
 import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse
@@ -23,13 +24,15 @@ internal class StepMapper(
     private val traitsMapper: TraitsMapper,
     private val actionsMapper: ActionsMapper,
 ) {
+
     fun map(
+        renderContext: RenderContext,
         from: StepResponse,
         stepContainerTraits: List<LeveledTraitResponse>,
     ): Step {
         val stepTraits = from.traits.map { it to STEP }
         val mergedTraits = stepTraits.mergeTraits(stepContainerTraits)
-        val mappedTraits = traitsMapper.map(mergedTraits)
+        val mappedTraits = traitsMapper.map(renderContext, mergedTraits)
 
         val topStickyItems = mutableListOf<PrimitiveResponse>()
         val bottomStickyItems = mutableListOf<PrimitiveResponse>()
@@ -42,7 +45,7 @@ internal class StepMapper(
             backdropDecoratingTraits = mappedTraits.filterIsInstance<BackdropDecoratingTrait>(),
             containerDecoratingTraits = mappedTraits.filterIsInstance<ContainerDecoratingTrait>(),
             metadataSettingTraits = mappedTraits.filterIsInstance<MetadataSettingTrait>(),
-            actions = actionsMapper.map(from.actions),
+            actions = actionsMapper.map(renderContext, from.actions),
             type = from.type,
             topStickyContent = topStickyItems.toWrappedStickyContent(),
             bottomStickyContent = bottomStickyItems.toWrappedStickyContent(),

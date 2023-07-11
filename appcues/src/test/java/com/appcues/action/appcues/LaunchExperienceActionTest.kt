@@ -39,7 +39,7 @@ internal class LaunchExperienceActionTest : AppcuesScopeTest {
         val experienceRenderer: ExperienceRenderer = mockk(relaxed = true) {
             every { this@mockk.getState(RenderContext.Modal) } returns RenderingStep(currentExperience, 0, true)
         }
-        val action = LaunchExperienceAction(mapOf("experienceID" to experienceIdString), experienceRenderer)
+        val action = LaunchExperienceAction(mapOf("experienceID" to experienceIdString), RenderContext.Modal, experienceRenderer)
 
         // WHEN
         action.execute()
@@ -52,7 +52,7 @@ internal class LaunchExperienceActionTest : AppcuesScopeTest {
     fun `launch experience SHOULD NOT call ExperienceRenderer show WHEN no experience ID is in config`() = runTest {
         // GIVEN
         val experienceRenderer: ExperienceRenderer = get()
-        val action = LaunchExperienceAction(mapOf(), experienceRenderer)
+        val action = LaunchExperienceAction(mapOf(), RenderContext.Modal, experienceRenderer)
 
         // WHEN
         action.execute()

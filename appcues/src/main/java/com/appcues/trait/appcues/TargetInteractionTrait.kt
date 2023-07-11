@@ -23,6 +23,7 @@ import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.Interactio
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType.TARGET_LONG_PRESSED
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType.TARGET_TAPPED
 import com.appcues.data.model.AppcuesConfigMap
+import com.appcues.data.model.RenderContext
 import com.appcues.data.model.getConfigActions
 import com.appcues.trait.BackdropDecoratingTrait
 import com.appcues.trait.appcues.BackdropKeyholeTrait.ConfigShape.CIRCLE
@@ -42,6 +43,7 @@ import com.appcues.ui.utils.rememberAppcuesWindowInfo
 internal class TargetInteractionTrait(
     override val config: AppcuesConfigMap,
     private val actionProcessor: ActionProcessor,
+    private val renderContext: RenderContext,
     actionRegistry: ActionRegistry,
 ) : BackdropDecoratingTrait {
 
@@ -52,11 +54,11 @@ internal class TargetInteractionTrait(
         private const val VIEW_DESCRIPTION = "Target Rectangle"
     }
 
-    private val actions = config.getConfigActions("actions", actionRegistry)
+    private val actions = config.getConfigActions("actions", renderContext, actionRegistry)
 
     private val actionDelegate = object : AppcuesActionsDelegate {
         override fun onActions(actions: List<ExperienceAction>, interactionType: InteractionType, viewDescription: String?) {
-            actionProcessor.process(actions, interactionType, viewDescription)
+            actionProcessor.process(renderContext, actions, interactionType, viewDescription)
         }
     }
 

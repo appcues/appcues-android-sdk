@@ -1,5 +1,6 @@
 package com.appcues.ui
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
@@ -20,6 +21,7 @@ import androidx.lifecycle.findViewTreeViewModelStoreOwner
 import androidx.savedstate.findViewTreeSavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.appcues.R
+import com.appcues.data.model.RenderContext
 import com.appcues.databinding.AppcuesOverlayLayoutBinding
 import com.appcues.logging.Logcues
 import com.appcues.monitor.AppcuesActivityMonitor
@@ -29,7 +31,10 @@ import com.appcues.ui.primitive.EmbedChromeClient
 import org.koin.core.scope.Scope
 import java.lang.reflect.Method
 
-internal class AppcuesOverlayViewManager(private val scope: Scope) : DefaultLifecycleObserver, ActivityMonitorListener {
+internal class AppcuesOverlayViewManager(
+    private val scope: Scope,
+    private val renderContext: RenderContext
+) : DefaultLifecycleObserver, ActivityMonitorListener {
 
     private val logcues: Logcues by lazy { scope.get() }
 
@@ -79,7 +84,7 @@ internal class AppcuesOverlayViewManager(private val scope: Scope) : DefaultLife
         if (parentView.findViewById<ComposeView>(R.id.appcues_overlay_layout) == null) {
             // then we add
             val binding = AppcuesOverlayLayoutBinding.inflate(layoutInflater)
-            if (viewModel == null) viewModel = AppcuesViewModel(scope, ::onCompositionDismiss)
+            if (viewModel == null) viewModel = AppcuesViewModel(scope, renderContext, ::onCompositionDismiss)
             shakeGestureListener = ShakeGestureListener(this)
 
             // ensures it always comes before appcues_debugger_view
@@ -140,13 +145,15 @@ internal class AppcuesOverlayViewManager(private val scope: Scope) : DefaultLife
     }
 }
 
+@Suppress("UNCHECKED_CAST")
+@SuppressLint("PrivateApi")
 internal fun Activity.getParentView(): ViewGroup {
 
     // try to find the most applicable decorView to inject Appcues content into. Typically there is just a single
     // decorView on the Activity window. However, if something like a dialog modal has been shown, this can add another
     // window with another decorView on top of the Activity. If we want to support showing content above that layer, we need
     // to find the top most decorView like below.
-    
+
     val decorView = if (VERSION.SDK_INT >= VERSION_CODES.Q) {
         // this is the preferred method on API 29+ with the new WindowInspector function
         WindowInspector.getGlobalWindowViews().last()

@@ -3,7 +3,6 @@ package com.appcues.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.appcues.AppcuesCoroutineScope
-import com.appcues.action.ActionProcessor
 import com.appcues.action.ExperienceAction
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType
 import com.appcues.analytics.SdkMetrics
@@ -30,6 +29,7 @@ import org.koin.core.scope.Scope
 
 internal class AppcuesViewModel(
     override val scope: Scope,
+    private val renderContext: RenderContext,
     private val onDismiss: () -> Unit,
 ) : ViewModel(), KoinScopeComponent {
 
@@ -48,7 +48,6 @@ internal class AppcuesViewModel(
         data class Dismissing(val continueAction: () -> Unit) : UIState()
     }
 
-    private val actionProcessor by inject<ActionProcessor>()
     private val appcuesCoroutineScope by inject<AppcuesCoroutineScope>()
     private val experienceRenderer by inject<ExperienceRenderer>()
 
@@ -59,7 +58,7 @@ internal class AppcuesViewModel(
 
     init {
         viewModelScope.launch {
-            experienceRenderer.getStateFlow(RenderContext.Modal).collectLatest { result ->
+            experienceRenderer.getStateFlow(renderContext).collectLatest { result ->
                 // don't collect if we are Dismissing
                 if (uiState.value is Dismissing) return@collectLatest
 
@@ -89,7 +88,7 @@ internal class AppcuesViewModel(
             // from an external source (ex deep link) and we should end the experience
             if (state is Rendering) {
                 appcuesCoroutineScope.launch {
-                    experienceRenderer.dismiss(RenderContext.Modal, markComplete = false, destroyed = true)
+                    experienceRenderer.dismiss(renderContext, markComplete = false, destroyed = true)
                 }
             }
         }
@@ -110,7 +109,11 @@ internal class AppcuesViewModel(
     }
 
     fun onActions(actions: List<ExperienceAction>, interactionType: InteractionType, viewDescription: String?) {
-        actionProcessor.process(actions, interactionType, viewDescription)
+        uiState.value.let { state ->
+            if (state is Rendering) {
+                experienceRenderer.process(state.experience.renderContext, actions, interactionType, viewDescription)
+            }
+        }
     }
 
     fun onPageChanged(index: Int) {
@@ -119,7 +122,7 @@ internal class AppcuesViewModel(
             // then we report new position to state machine
             if (state is Rendering && state.position != index) {
                 appcuesCoroutineScope.launch {
-                    experienceRenderer.show(RenderContext.Modal, StepGroupPageIndex(index, state.flatStepIndex))
+                    experienceRenderer.show(renderContext, StepGroupPageIndex(index, state.flatStepIndex))
                 }
             }
         }

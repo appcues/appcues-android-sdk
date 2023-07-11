@@ -14,6 +14,7 @@ import com.appcues.ui.ExperienceRenderer
 
 internal class SubmitFormAction(
     override val config: AppcuesConfigMap,
+    private val renderContext: RenderContext,
     private val experienceRenderer: ExperienceRenderer,
     private val analyticsTracker: AnalyticsTracker,
 ) : ExperienceActionQueueTransforming {
@@ -31,7 +32,7 @@ internal class SubmitFormAction(
             return queue
         }
 
-        val state = experienceRenderer.getState(RenderContext.Modal)
+        val state = experienceRenderer.getState(renderContext)
         val experience = state.currentExperience
         val stepIndex = state.currentStepIndex
 
@@ -50,7 +51,7 @@ internal class SubmitFormAction(
 
     // reports analytics for step interaction, for the form submission
     override suspend fun execute() {
-        val state = experienceRenderer.getState(RenderContext.Modal)
+        val state = experienceRenderer.getState(renderContext)
         val experience = state.currentExperience
         val stepIndex = state.currentStepIndex
 

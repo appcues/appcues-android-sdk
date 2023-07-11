@@ -10,7 +10,8 @@ import com.appcues.ui.ExperienceRenderer
 
 internal class StepInteractionAction(
     override val config: AppcuesConfigMap,
-    val interaction: StepInteractionData,
+    private val renderContext: RenderContext,
+    private val interaction: StepInteractionData,
     private val analyticsTracker: AnalyticsTracker,
     private val experienceRenderer: ExperienceRenderer,
 ) : ExperienceAction {
@@ -35,7 +36,7 @@ internal class StepInteractionAction(
     }
 
     override suspend fun execute() {
-        val state = experienceRenderer.getState(RenderContext.Modal)
+        val state = experienceRenderer.getState(renderContext)
         val experience = state.currentExperience
         val stepIndex = state.currentStepIndex
 

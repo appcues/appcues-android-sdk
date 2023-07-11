@@ -9,6 +9,7 @@ import com.appcues.ui.ExperienceRenderer
 
 internal class CloseAction(
     override val config: AppcuesConfigMap,
+    private val renderContext: RenderContext,
     private val experienceRenderer: ExperienceRenderer,
 ) : ExperienceAction, MetadataSettingsAction {
 
@@ -24,6 +25,6 @@ internal class CloseAction(
     override val destination = "end-experience"
 
     override suspend fun execute() {
-        experienceRenderer.dismiss(RenderContext.Modal, markComplete = markComplete, destroyed = false)
+        experienceRenderer.dismiss(renderContext, markComplete = markComplete, destroyed = false)
     }
 }

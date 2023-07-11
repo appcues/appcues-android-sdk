@@ -11,12 +11,14 @@ import java.util.UUID
 
 internal class LaunchExperienceAction(
     override val config: AppcuesConfigMap,
+    private val renderContext: RenderContext,
     private val experienceRenderer: ExperienceRenderer,
 ) : ExperienceAction, MetadataSettingsAction {
 
     // this constructor is called to create an instance of this action from the post-flow-completion
     // actions that are defined in flow settings, that execute after the flow (not a button action)
     constructor(
+        renderContext: RenderContext,
         completedExperienceId: String,
         launchExperienceId: String,
         experienceRenderer: ExperienceRenderer,
@@ -25,6 +27,7 @@ internal class LaunchExperienceAction(
             "completedExperienceID" to completedExperienceId,
             "experienceID" to launchExperienceId,
         ),
+        renderContext = renderContext,
         experienceRenderer = experienceRenderer
     )
 
@@ -56,7 +59,7 @@ internal class LaunchExperienceAction(
             // flow - capture the current experience from the state machine as the experience that is launching the new flow.
             // note: it's possible that the current experience was closed out before this triggered, in which case this
             // fromExperience ID value would be null.
-            val fromExperience = experienceRenderer.getState(RenderContext.Modal).currentExperience
+            val fromExperience = experienceRenderer.getState(renderContext).currentExperience
             ExperienceTrigger.LaunchExperienceAction(fromExperience?.id)
         }
 }
