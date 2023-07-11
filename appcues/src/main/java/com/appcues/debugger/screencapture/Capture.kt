@@ -2,11 +2,9 @@ package com.appcues.debugger.screencapture
 
 import android.graphics.Bitmap
 import android.os.Build.VERSION
-import android.view.View
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.appcues.BuildConfig
 import com.appcues.R
+import com.appcues.Screenshot
 import com.appcues.ViewElement
 import com.appcues.util.ContextResources
 import com.squareup.moshi.Json
@@ -56,19 +54,14 @@ internal data class Capture(
     )
 }
 
-internal fun ContextResources.generateCaptureMetadata(rootView: View): Capture.Metadata {
-    val density = displayMetrics.density
-    val width = rootView.width.toDp(density)
-    val height = rootView.height.toDp(density)
-    val insets = ViewCompat.getRootWindowInsets(rootView)?.getInsets(WindowInsetsCompat.Type.systemBars())
-
+internal fun ContextResources.generateCaptureMetadata(screenshot: Screenshot): Capture.Metadata {
     return Capture.Metadata(
         appName = getAppName(),
         appBuild = getAppBuild().toString(),
         appVersion = getAppVersion(),
         deviceModel = getDeviceName(),
-        deviceWidth = width,
-        deviceHeight = height,
+        deviceWidth = screenshot.size.width,
+        deviceHeight = screenshot.size.height,
         deviceOrientation = orientation,
         deviceType = getString(R.string.appcues_device_type),
         bundlePackageId = getPackageName(),
@@ -77,10 +70,10 @@ internal fun ContextResources.generateCaptureMetadata(rootView: View): Capture.M
         osName = "android",
         osVersion = "${VERSION.SDK_INT}",
         insets = Capture.Insets(
-            left = insets?.left?.toDp(density) ?: 0,
-            right = insets?.right?.toDp(density) ?: 0,
-            top = insets?.top?.toDp(density) ?: 0,
-            bottom = insets?.bottom?.toDp(density) ?: 0,
+            left = screenshot.insets.left,
+            right = screenshot.insets.right,
+            top = screenshot.insets.top,
+            bottom = screenshot.insets.bottom,
         )
     )
 }
