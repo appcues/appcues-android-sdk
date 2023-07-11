@@ -7,6 +7,7 @@ import com.appcues.data.mapper.LeveledTraitResponse
 import com.appcues.data.mapper.trait.TraitsMapper
 import com.appcues.data.model.ExperiencePrimitive.HorizontalStackPrimitive
 import com.appcues.data.model.ExperiencePrimitive.VerticalStackPrimitive
+import com.appcues.data.model.RenderContext
 import com.appcues.data.remote.appcues.response.step.StepResponse
 import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.BoxPrimitiveResponse
 import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.ButtonPrimitiveResponse
@@ -39,7 +40,7 @@ internal class StepMapperTest {
         val stepResponse = mockStickyContentStepResponse(listOf(topItem1, topItem2), listOf(bottomItem1))
 
         // When
-        val step = mapper.map(stepResponse, listOf())
+        val step = mapper.map(RenderContext.Modal, stepResponse, listOf())
 
         // Then
         with(step) {
@@ -65,7 +66,7 @@ internal class StepMapperTest {
         val stepResponse = mockStickyContentStepResponse(listOf(), listOf(bottomItem1))
 
         // When
-        val step = mapper.map(stepResponse, listOf())
+        val step = mapper.map(RenderContext.Modal, stepResponse, listOf())
 
         // Then
         with(step) {
@@ -80,13 +81,13 @@ internal class StepMapperTest {
         val stepContainerTraits = listOf(decoratingTrait to ExperienceTraitLevel.GROUP)
         val mappedGroupTrait = mockk<StepDecoratingTrait>(relaxed = true)
         val traitMapper = mockk<TraitsMapper>(relaxed = true) {
-            every { map(stepContainerTraits) } returns listOf(mappedGroupTrait)
+            every { map(RenderContext.Modal, stepContainerTraits) } returns listOf(mappedGroupTrait)
         }
         val mapper = StepMapper(traitMapper, mockk(relaxed = true))
         val stepResponse = mockBasicStepResponse(listOf())
 
         // When
-        val step = mapper.map(stepResponse, stepContainerTraits)
+        val step = mapper.map(RenderContext.Modal, stepResponse, stepContainerTraits)
 
         // Then
         with(step) {
@@ -102,13 +103,13 @@ internal class StepMapperTest {
         val stepContainerTraits = listOf(decoratingTrait to ExperienceTraitLevel.GROUP)
         val mappedGroupTrait = mockk<PresentingTrait>(relaxed = true)
         val traitMapper = mockk<TraitsMapper>(relaxed = true) {
-            every { map(stepContainerTraits) } returns listOf(mappedGroupTrait)
+            every { map(RenderContext.Modal, stepContainerTraits) } returns listOf(mappedGroupTrait)
         }
         val mapper = StepMapper(traitMapper, mockk(relaxed = true))
         val stepResponse = mockBasicStepResponse(listOf())
 
         // When
-        val step = mapper.map(stepResponse, stepContainerTraits)
+        val step = mapper.map(RenderContext.Modal, stepResponse, stepContainerTraits)
 
         // Then
         with(step) {
@@ -130,7 +131,7 @@ internal class StepMapperTest {
 
         val slot = slot<List<LeveledTraitResponse>>()
         val traitMapper = mockk<TraitsMapper>(relaxed = true) {
-            every { map(capture(slot)) } answers {
+            every { map(RenderContext.Modal, capture(slot)) } answers {
                 slot.captured.map { leveledTrait ->
                     mockk<TestStepDecoratingTrait>(relaxed = true) {
                         every { this@mockk.type } answers { leveledTrait.first.type }
@@ -143,7 +144,7 @@ internal class StepMapperTest {
         val stepResponse = mockBasicStepResponse(listOf(stepDecoratingTrait))
 
         // When
-        val step = mapper.map(stepResponse, groupTraits)
+        val step = mapper.map(RenderContext.Modal, stepResponse, groupTraits)
 
         // Then
         with(step) {
@@ -167,7 +168,7 @@ internal class StepMapperTest {
 
         val slot = slot<List<LeveledTraitResponse>>()
         val traitMapper = mockk<TraitsMapper>(relaxed = true) {
-            every { map(capture(slot)) } answers {
+            every { map(RenderContext.Modal, capture(slot)) } answers {
                 slot.captured.map { leveledTrait ->
                     mockk<TestStepDecoratingTrait>(relaxed = true) {
                         every { this@mockk.level } answers { leveledTrait.second }
@@ -180,7 +181,7 @@ internal class StepMapperTest {
         val stepResponse = mockBasicStepResponse(listOf(stepDecoratingTrait))
 
         // When
-        val step = mapper.map(stepResponse, groupTraits)
+        val step = mapper.map(RenderContext.Modal, stepResponse, groupTraits)
 
         // Then
         with(step) {

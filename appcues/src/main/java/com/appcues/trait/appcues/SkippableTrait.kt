@@ -60,6 +60,7 @@ import kotlin.math.min
 
 internal class SkippableTrait(
     override val config: AppcuesConfigMap,
+    private val renderContext: RenderContext,
     private val experienceRenderer: ExperienceRenderer,
     private val appcuesCoroutineScope: AppcuesCoroutineScope,
 ) : ContainerDecoratingTrait, BackdropDecoratingTrait {
@@ -155,7 +156,7 @@ internal class SkippableTrait(
                     .pointerInput(Unit) {
                         detectTapGestures {
                             appcuesCoroutineScope.launch {
-                                experienceRenderer.dismiss(RenderContext.Modal, markComplete = false, destroyed = false)
+                                experienceRenderer.dismiss(renderContext, markComplete = false, destroyed = false)
                             }
                         }
                     },
@@ -295,7 +296,7 @@ internal class SkippableTrait(
                 clickable(
                     onClick = {
                         appcuesCoroutineScope.launch {
-                            experienceRenderer.dismiss(RenderContext.Modal, markComplete = false, destroyed = false)
+                            experienceRenderer.dismiss(renderContext, markComplete = false, destroyed = false)
                         }
                     },
                     role = Role.Button,

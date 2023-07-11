@@ -1,5 +1,6 @@
 package com.appcues.data.mapper.trait
 
+import com.appcues.data.model.RenderContext
 import com.appcues.data.remote.appcues.response.trait.TraitResponse
 import com.appcues.trait.ExperienceTrait
 import com.appcues.trait.ExperienceTraitLevel
@@ -30,10 +31,10 @@ internal class TraitsMapperTest {
         )
         val experienceTrait: ExperienceTrait = mockk()
         val traitFactoryBlock = mockk<TraitFactoryBlock>()
-        every { traitFactoryBlock.invoke(config, level) } returns experienceTrait
+        every { traitFactoryBlock.invoke(config, level, RenderContext.Modal) } returns experienceTrait
         every { traitRegistry[type] } returns traitFactoryBlock
         // When
-        val result = mapper.map(from)
+        val result = mapper.map(RenderContext.Modal, from)
         // Then
         with(result) {
             assertThat(this).hasSize(1)

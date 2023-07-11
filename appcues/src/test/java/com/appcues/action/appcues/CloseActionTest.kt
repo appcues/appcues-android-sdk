@@ -27,7 +27,7 @@ internal class CloseActionTest : AppcuesScopeTest {
     fun `close SHOULD call ExperienceRenderer to dismiss current experience`() = runTest {
         // GIVEN
         val experienceRenderer: ExperienceRenderer = get()
-        val action = CloseAction(mapOf(), experienceRenderer)
+        val action = CloseAction(mapOf(), RenderContext.Modal, experienceRenderer)
 
         // WHEN
         action.execute()
@@ -40,7 +40,7 @@ internal class CloseActionTest : AppcuesScopeTest {
     fun `close SHOULD call ExperienceRenderer to dismiss current experience with markComplete true WHEN config is true`() = runTest {
         // GIVEN
         val experienceRenderer: ExperienceRenderer = get()
-        val action = CloseAction(mapOf("markComplete" to true), experienceRenderer)
+        val action = CloseAction(mapOf("markComplete" to true), RenderContext.Modal, experienceRenderer)
 
         // WHEN
         action.execute()

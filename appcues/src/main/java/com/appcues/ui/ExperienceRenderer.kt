@@ -2,8 +2,11 @@ package com.appcues.ui
 
 import com.appcues.AppcuesConfig
 import com.appcues.SessionMonitor
+import com.appcues.action.ActionProcessor
+import com.appcues.action.ExperienceAction
 import com.appcues.analytics.AnalyticsEvent
 import com.appcues.analytics.AnalyticsTracker
+import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType
 import com.appcues.data.AppcuesRepository
 import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperiencePriority.NORMAL
@@ -39,9 +42,14 @@ internal class ExperienceRenderer(
     private val sessionMonitor by inject<SessionMonitor>()
     private val config by inject<AppcuesConfig>()
     private val analyticsTracker by inject<AnalyticsTracker>()
+    private val actionProcessor by inject<ActionProcessor>()
 
     fun getStateFlow(renderContext: RenderContext): SharedFlow<State> {
         return stateMachine.stateFlow
+    }
+
+    fun process(renderContext: RenderContext, actions: List<ExperienceAction>, interactionType: InteractionType, viewDescription: String?) {
+        actionProcessor.process(renderContext, actions, interactionType, viewDescription)
     }
 
     suspend fun show(experience: Experience): Boolean {

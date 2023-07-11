@@ -87,14 +87,15 @@ internal class ExperienceMapper(
         requestId: UUID? = null,
     ): Experience {
         val experienceTraits = from.traits.map { it to EXPERIENCE }
+        val renderContext = from.getRenderContext()
         return Experience(
             id = from.id,
             name = from.name,
-            stepContainers = from.steps.mapToStepContainer(experienceTraits),
+            stepContainers = from.steps.mapToStepContainer(renderContext, experienceTraits),
             published = from.state != "DRAFT", // "DRAFT" is used for experience preview in builder
             priority = priority,
             type = from.type,
-            renderContext = from.getRenderContext(),
+            renderContext = renderContext,
             publishedAt = from.publishedAt,
             experiment = experiments?.getExperiment(from.id),
             completionActions = arrayListOf<ExperienceAction>().apply {
@@ -110,6 +111,7 @@ internal class ExperienceMapper(
                 from.nextContentId?.let {
                     add(
                         LaunchExperienceAction(
+                            renderContext = renderContext,
                             completedExperienceId = from.id.toString(),
                             launchExperienceId = it,
                             experienceRenderer = scope.get(),
@@ -123,18 +125,19 @@ internal class ExperienceMapper(
     }
 
     private fun List<StepContainerResponse>.mapToStepContainer(
+        renderContext: RenderContext,
         experienceTraits: List<LeveledTraitResponse>,
     ) = map { stepContainerResponse ->
         val containerTraits = stepContainerResponse.traits.map { it to GROUP }
         val mergedTraits = containerTraits.mergeTraits(experienceTraits)
-        val mappedTraits = traitsMapper.map(mergedTraits)
+        val mappedTraits = traitsMapper.map(renderContext, mergedTraits)
 
         // this is where we will use groups to organize steps into stepContainers
         // also merge all necessary traits for each step
         StepContainer(
             id = stepContainerResponse.id,
-            steps = stepContainerResponse.children.map { step -> stepMapper.map(step, mergedTraits) },
-            actions = actionsMapper.map(stepContainerResponse.actions),
+            steps = stepContainerResponse.children.map { step -> stepMapper.map(renderContext, step, mergedTraits) },
+            actions = actionsMapper.map(renderContext, stepContainerResponse.actions),
             presentingTrait = mappedTraits.getExperiencePresentingTraitOrThrow(),
             contentHolderTrait = mappedTraits.getContainerCreatingTraitOrDefault(),
             // what should we do if no content wrapping trait is found?

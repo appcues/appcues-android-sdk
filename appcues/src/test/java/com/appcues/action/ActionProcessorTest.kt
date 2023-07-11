@@ -7,6 +7,7 @@ import com.appcues.action.appcues.StepInteractionAction
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType.BUTTON_TAPPED
 import com.appcues.data.model.AppcuesConfigMap
+import com.appcues.data.model.RenderContext
 import com.appcues.logging.Logcues
 import com.appcues.mocks.mockExperience
 import com.appcues.rules.MainDispatcherRule
@@ -87,6 +88,7 @@ internal class ActionProcessorTest : KoinTest {
 
         // WHEN
         actionProcessor.process(
+            RenderContext.Modal,
             listOf(action1, stepAction1, action2, stepAction2, action3, action4, stepAction3, action5),
             BUTTON_TAPPED,
             "Button 1"
@@ -115,6 +117,7 @@ internal class ActionProcessorTest : KoinTest {
 
         // WHEN
         actionProcessor.process(
+            RenderContext.Modal,
             listOf(stepAction1),
             BUTTON_TAPPED,
             "Button 1"
@@ -144,6 +147,7 @@ internal class ActionProcessorTest : KoinTest {
                         scoped { params ->
                             StepInteractionAction(
                                 config = params.getOrNull(),
+                                renderContext = RenderContext.Modal,
                                 interaction = params.get(),
                                 analyticsTracker = get(),
                                 experienceRenderer = get(),
