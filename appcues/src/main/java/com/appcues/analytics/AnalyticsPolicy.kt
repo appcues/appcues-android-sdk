@@ -5,16 +5,17 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.appcues.AppcuesCoroutineScope
 import com.appcues.SessionMonitor
+import com.appcues.data.model.RenderContext
 import com.appcues.logging.Logcues
 import com.appcues.statemachine.State.BeginningExperience
 import com.appcues.statemachine.State.EndingExperience
-import com.appcues.statemachine.StateMachine
+import com.appcues.ui.ExperienceRenderer
 import kotlinx.coroutines.launch
 
 internal class AnalyticsPolicy(
     private val sessionMonitor: SessionMonitor,
     appcuesCoroutineScope: AppcuesCoroutineScope,
-    private val stateMachine: StateMachine,
+    private val experienceRenderer: ExperienceRenderer,
     private val logcues: Logcues,
 ) : DefaultLifecycleObserver {
 
@@ -28,7 +29,7 @@ internal class AnalyticsPolicy(
     init {
         appcuesCoroutineScope.launch {
             ProcessLifecycleOwner.get().lifecycle.addObserver(this@AnalyticsPolicy)
-            stateMachine.stateFlow.collect {
+            experienceRenderer.getStateFlow(RenderContext.Modal).collect {
                 when (it) {
                     is BeginningExperience -> {
                         experienceActiveCount++

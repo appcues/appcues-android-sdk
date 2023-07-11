@@ -1,6 +1,7 @@
 package com.appcues.action.appcues
 
 import com.appcues.AppcuesScopeTest
+import com.appcues.data.model.RenderContext
 import com.appcues.rules.KoinScopeRule
 import com.appcues.ui.ExperienceRenderer
 import com.google.common.truth.Truth.assertThat
@@ -32,7 +33,7 @@ internal class CloseActionTest : AppcuesScopeTest {
         action.execute()
 
         // THEN
-        coVerify { experienceRenderer.dismissCurrentExperience(markComplete = false, destroyed = false) }
+        coVerify { experienceRenderer.dismiss(RenderContext.Modal, markComplete = false, destroyed = false) }
     }
 
     @Test
@@ -45,6 +46,6 @@ internal class CloseActionTest : AppcuesScopeTest {
         action.execute()
 
         // THEN
-        coVerify { experienceRenderer.dismissCurrentExperience(markComplete = true, destroyed = false) }
+        coVerify { experienceRenderer.dismiss(RenderContext.Modal, markComplete = true, destroyed = false) }
     }
 }

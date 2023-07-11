@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.appcues.AppcuesCoroutineScope
 import com.appcues.analytics.AnalyticsTracker
+import com.appcues.data.model.RenderContext
 import com.appcues.debugger.DebugMode.Debugger
 import com.appcues.debugger.DebugMode.ScreenCapture
 import com.appcues.debugger.DebuggerViewModel.ToastState.Rendering
@@ -225,7 +226,7 @@ internal class DebuggerViewModel(
 
     fun captureScreen(debuggerState: MutableDebuggerState) {
         appcuesCoroutineScope.launch {
-            experienceRenderer.dismissCurrentExperience(markComplete = false, destroyed = false)
+            experienceRenderer.dismiss(RenderContext.Modal, markComplete = false, destroyed = false)
 
             withContext(Dispatchers.Main) {
                 // capture screen
