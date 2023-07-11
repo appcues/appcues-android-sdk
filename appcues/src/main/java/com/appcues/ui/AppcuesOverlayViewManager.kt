@@ -94,8 +94,6 @@ internal class AppcuesOverlayViewManager(
                 parentView.addView(binding.root)
             }
 
-            val insets = ViewCompat.getRootWindowInsets(parentView)?.getInsets(WindowInsetsCompat.Type.systemBars())
-
             binding.root.layoutParams =
                 android.widget.FrameLayout.LayoutParams(
                     android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
