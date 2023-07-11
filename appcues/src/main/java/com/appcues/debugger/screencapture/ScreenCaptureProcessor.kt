@@ -2,11 +2,16 @@ package com.appcues.debugger.screencapture
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.util.Size
 import android.view.View
+import androidx.core.graphics.Insets
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import com.appcues.Appcues
 import com.appcues.AppcuesConfig
 import com.appcues.R
+import com.appcues.Screenshot
 import com.appcues.data.remote.RemoteError
 import com.appcues.data.remote.customerapi.CustomerApiBaseUrlInterceptor
 import com.appcues.data.remote.customerapi.CustomerApiRemoteSource
@@ -35,7 +40,7 @@ internal class ScreenCaptureProcessor(
 
             val timestamp = Date()
             val displayName = it.screenCaptureDisplayName()
-            val screenshot = it.screenshot()
+            val screenshot = Appcues.elementTargeting.captureScreenshot() ?: it.screenshot()
             val layout = Appcues.elementTargeting.captureLayout()
             val capture = if (screenshot != null && layout != null) {
                 Capture(
@@ -43,10 +48,10 @@ internal class ScreenCaptureProcessor(
                     displayName = displayName,
                     screenshotImageUrl = null,
                     layout = layout,
-                    metadata = contextResources.generateCaptureMetadata(it),
+                    metadata = contextResources.generateCaptureMetadata(screenshot),
                     timestamp = timestamp,
                 ).apply {
-                    this.screenshot = screenshot
+                    this.screenshot = screenshot.bitmap
                 }
             } else null
 
@@ -153,7 +158,23 @@ private fun View.screenshot() =
         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         this.draw(canvas)
-        bitmap
+
+        val density = context.resources.displayMetrics.density
+        val width = width.toDp(density)
+        val height = height.toDp(density)
+        val insets = ViewCompat.getRootWindowInsets(this)?.getInsets(WindowInsetsCompat.Type.systemBars())
+            ?: Insets.NONE
+
+        Screenshot(
+            bitmap = bitmap,
+            size = Size(width, height),
+            insets = Insets.of(
+                insets.left.toDp(density),
+                insets.top.toDp(density),
+                insets.right.toDp(density),
+                insets.bottom.toDp(density),
+            )
+        )
     } else {
         null
     }

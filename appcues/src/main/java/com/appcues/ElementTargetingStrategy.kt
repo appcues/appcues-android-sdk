@@ -1,12 +1,36 @@
 package com.appcues
 
+import android.graphics.Bitmap
+import android.util.Size
 import android.view.View
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.semantics
+import androidx.core.graphics.Insets
 import com.appcues.debugger.screencapture.appcuesViewTagProperty
 import com.squareup.moshi.JsonClass
 import java.util.UUID
+
+/**
+ * Contains the information about the screenshot image capture.
+ */
+public data class Screenshot(
+    /**
+     * The image data for the screenshot.
+     */
+    val bitmap: Bitmap,
+
+    /**
+     * The size of the screenshot image in Dp, including any visible system bars.
+     */
+    val size: Size,
+
+    /**
+     * The insets in Dp to apply for any visible system bars, used to define the area
+     * eligible for targeting content.
+     */
+    val insets: Insets,
+)
 
 /**
  * Defines an element targeting strategy type, which can be used to capture view layout
@@ -29,6 +53,18 @@ public interface ElementTargetingStrategy {
      *         the given properties. If no applicable properties are found, the return value should be `nil`.
      */
     public fun inflateSelectorFrom(properties: Map<String, String>): ElementSelector?
+
+    /**
+     * Capture the screenshot image for the currently rendered screen of the application.
+     *
+     * This is an optional override to support specialized screen capture from plugins, if needed.
+     * However, normally the default screenshot capturing the root view of the application will suffice,
+     * in which case this function can be omitted.
+     *
+     * @return: The screenshot data for the current screen, or null if not available. If null, the
+     *          default screenshot of the current root view of the application will be used.
+     */
+    public fun captureScreenshot(): Screenshot? = null
 }
 
 /**
