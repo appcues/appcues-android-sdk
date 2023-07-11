@@ -13,6 +13,7 @@ import com.appcues.rules.MainDispatcherRule
 import com.appcues.statemachine.State
 import com.appcues.statemachine.State.RenderingStep
 import com.appcues.statemachine.StateMachine
+import com.appcues.ui.ExperienceRenderer
 import com.google.common.truth.Truth.assertThat
 import io.mockk.Called
 import io.mockk.mockk
@@ -145,10 +146,11 @@ internal class ActionProcessorTest : KoinTest {
                                 config = params.getOrNull(),
                                 interaction = params.get(),
                                 analyticsTracker = get(),
-                                stateMachine = get(),
+                                experienceRenderer = get(),
                             )
                         }
                         scoped { StateMachine(get(), get(), get(), initState) }
+                        scoped { ExperienceRenderer(scope) }
                     }
                 }
             )

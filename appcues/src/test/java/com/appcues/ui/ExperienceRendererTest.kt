@@ -4,6 +4,7 @@ import com.appcues.AppcuesConfig
 import com.appcues.analytics.AnalyticsEvent
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.data.model.Experiment
+import com.appcues.data.model.RenderContext
 import com.appcues.mocks.mockExperience
 import com.appcues.mocks.mockExperienceExperiment
 import com.appcues.statemachine.Action.EndExperience
@@ -33,6 +34,7 @@ import java.util.UUID
 
 @OptIn(ExperimentalCoroutinesApi::class)
 internal class ExperienceRendererTest {
+
     @After
     fun shutdown() {
         stopKoin()
@@ -49,7 +51,7 @@ internal class ExperienceRendererTest {
         val experienceRenderer = ExperienceRenderer(scope)
 
         // WHEN
-        experienceRenderer.dismissCurrentExperience(markComplete = false, destroyed = false)
+        experienceRenderer.dismiss(RenderContext.Modal, markComplete = false, destroyed = false)
 
         // THEN
         coVerify { stateMachine.handleAction(EndExperience(markComplete = false, destroyed = false)) }
@@ -66,7 +68,7 @@ internal class ExperienceRendererTest {
         val experienceRenderer = ExperienceRenderer(scope)
 
         // WHEN
-        experienceRenderer.dismissCurrentExperience(markComplete = false, destroyed = false)
+        experienceRenderer.dismiss(RenderContext.Modal, markComplete = false, destroyed = false)
 
         // THEN
         coVerify { stateMachine.handleAction(EndExperience(markComplete = false, destroyed = false)) }
@@ -114,7 +116,6 @@ internal class ExperienceRendererTest {
             coEvery { this@mockk.handleAction(any()) } answers { Success(Idling) }
         }
         val scope = initScope(stateMachine)
-        val analyticsTracker: AnalyticsTracker = scope.get()
         val experienceRenderer = ExperienceRenderer(scope)
 
         // WHEN
@@ -196,7 +197,8 @@ internal class ExperienceRendererTest {
                     "experimentGoalId" to "my-goal",
                     "experimentContentType" to "my-content-type",
                 ),
-                false)
+                false
+            )
         }
     }
 
@@ -205,7 +207,7 @@ internal class ExperienceRendererTest {
         KoinPlatformTools.defaultContext().getOrNull()?.close()
         val scopeId = UUID.randomUUID().toString()
         return startKoin {
-            val scope = koin.getOrCreateScope(scopeId = scopeId, qualifier = named(scopeId))
+            koin.getOrCreateScope(scopeId = scopeId, qualifier = named(scopeId))
             modules(
                 module {
                     scope(named(scopeId)) {

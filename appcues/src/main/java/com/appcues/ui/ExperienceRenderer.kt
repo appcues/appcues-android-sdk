@@ -9,20 +9,25 @@ import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperiencePriority.NORMAL
 import com.appcues.data.model.ExperienceTrigger
 import com.appcues.data.model.Experiment
+import com.appcues.data.model.RenderContext
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.StartExperience
+import com.appcues.statemachine.Action.StartStep
 import com.appcues.statemachine.Error
 import com.appcues.statemachine.State
 import com.appcues.statemachine.State.Idling
 import com.appcues.statemachine.StateMachine
+import com.appcues.statemachine.StepReference
 import com.appcues.util.ResultOf
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
 import com.appcues.util.appcuesFormatted
+import kotlinx.coroutines.flow.SharedFlow
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 
+@Suppress("UNUSED_PARAMETER")
 internal class ExperienceRenderer(
     override val scope: Scope,
 ) : KoinScopeComponent {
@@ -34,6 +39,10 @@ internal class ExperienceRenderer(
     private val sessionMonitor by inject<SessionMonitor>()
     private val config by inject<AppcuesConfig>()
     private val analyticsTracker by inject<AnalyticsTracker>()
+
+    fun getStateFlow(renderContext: RenderContext): SharedFlow<State> {
+        return stateMachine.stateFlow
+    }
 
     suspend fun show(experience: Experience): Boolean {
         var canShow = config.interceptor?.canDisplayExperience(experience.id) ?: true
@@ -54,7 +63,7 @@ internal class ExperienceRenderer(
         // supersede a "screen_view" triggered experience - per Appcues standard behavior
         val priorityOverride = experience.priority == NORMAL && stateMachine.state != Idling
         if (priorityOverride) {
-            return dismissCurrentExperience(markComplete = false, destroyed = false).run {
+            return dismiss(RenderContext.Modal, markComplete = false, destroyed = false).run {
                 when (this) {
                     is Success -> show(experience) // re-invoke show on the new experience now after dismiss
                     is Failure -> false // dismiss failed - can't continue
@@ -101,6 +110,10 @@ internal class ExperienceRenderer(
         return false
     }
 
+    suspend fun show(renderContext: RenderContext, stepReference: StepReference) {
+        stateMachine.handleAction(StartStep(stepReference))
+    }
+
     suspend fun preview(experienceId: String): Boolean {
         repository.getExperiencePreview(experienceId)?.let {
             return show(it)
@@ -113,8 +126,9 @@ internal class ExperienceRenderer(
         stateMachine.stop()
     }
 
-    suspend fun dismissCurrentExperience(markComplete: Boolean, destroyed: Boolean): ResultOf<State, Error> =
-        stateMachine.handleAction(EndExperience(markComplete, destroyed))
+    suspend fun dismiss(renderContext: RenderContext, markComplete: Boolean, destroyed: Boolean): ResultOf<State, Error> {
+        return stateMachine.handleAction(EndExperience(markComplete, destroyed))
+    }
 
     private fun Experiment.shouldExecute() =
         group != "control"
@@ -132,5 +146,9 @@ internal class ExperienceRenderer(
             ),
             interactive = false
         )
+    }
+
+    fun getState(renderContext: RenderContext): State {
+        return stateMachine.state
     }
 }
