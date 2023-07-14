@@ -37,7 +37,6 @@ internal object AnalyticsKoin : KoinScopePlugin {
             AnalyticsTracker(
                 appcuesCoroutineScope = get(),
                 activityBuilder = get(),
-                experienceLifecycleTracker = get(),
                 analyticsPolicy = get(),
                 analyticsQueueProcessor = get(),
             )

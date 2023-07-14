@@ -29,7 +29,7 @@ internal class AnalyticsPolicy(
     init {
         appcuesCoroutineScope.launch {
             ProcessLifecycleOwner.get().lifecycle.addObserver(this@AnalyticsPolicy)
-            experienceRenderer.getStateFlow(RenderContext.Modal).collect {
+            experienceRenderer.getStateFlow(RenderContext.Modal)?.collect {
                 when (it) {
                     is BeginningExperience -> {
                         experienceActiveCount++

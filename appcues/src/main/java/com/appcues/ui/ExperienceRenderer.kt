@@ -2,21 +2,19 @@ package com.appcues.ui
 
 import com.appcues.AppcuesConfig
 import com.appcues.SessionMonitor
-import com.appcues.action.ActionProcessor
-import com.appcues.action.ExperienceAction
-import com.appcues.analytics.AnalyticsEvent
 import com.appcues.analytics.AnalyticsTracker
-import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType
+import com.appcues.analytics.ExperienceLifecycleTracker
+import com.appcues.analytics.track
 import com.appcues.data.AppcuesRepository
 import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperiencePriority.NORMAL
 import com.appcues.data.model.ExperienceTrigger
-import com.appcues.data.model.Experiment
 import com.appcues.data.model.RenderContext
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.StartExperience
 import com.appcues.statemachine.Action.StartStep
 import com.appcues.statemachine.Error
+import com.appcues.statemachine.Error.RenderContextNotActive
 import com.appcues.statemachine.State
 import com.appcues.statemachine.State.Idling
 import com.appcues.statemachine.StateMachine
@@ -24,13 +22,12 @@ import com.appcues.statemachine.StepReference
 import com.appcues.util.ResultOf
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
-import com.appcues.util.appcuesFormatted
 import kotlinx.coroutines.flow.SharedFlow
 import org.koin.core.component.KoinScopeComponent
+import org.koin.core.component.get
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 
-@Suppress("UNUSED_PARAMETER")
 internal class ExperienceRenderer(
     override val scope: Scope,
 ) : KoinScopeComponent {
@@ -38,56 +35,69 @@ internal class ExperienceRenderer(
     // lazy prop inject here to avoid circular dependency with AnalyticsTracker
     // AnalyticsTracker > AnalyticsQueueProcessor > ExperienceRenderer(this) > AnalyticsTracker
     private val repository by inject<AppcuesRepository>()
-    private val stateMachine by inject<StateMachine>()
     private val sessionMonitor by inject<SessionMonitor>()
     private val config by inject<AppcuesConfig>()
     private val analyticsTracker by inject<AnalyticsTracker>()
-    private val actionProcessor by inject<ActionProcessor>()
+    private val experienceTracker by inject<ExperienceLifecycleTracker>()
 
-    fun getStateFlow(renderContext: RenderContext): SharedFlow<State> {
-        return stateMachine.stateFlow
+    private val slots: HashMap<RenderContext, StateMachine> = hashMapOf()
+
+    fun getStateFlow(renderContext: RenderContext): SharedFlow<State>? {
+        return slots[renderContext]?.stateFlow
     }
 
-    fun process(renderContext: RenderContext, actions: List<ExperienceAction>, interactionType: InteractionType, viewDescription: String?) {
-        actionProcessor.process(renderContext, actions, interactionType, viewDescription)
+    fun getState(renderContext: RenderContext): State? {
+        return slots[renderContext]?.state
     }
 
-    suspend fun show(experience: Experience): Boolean {
+    /**
+     * returns true/false whether the experience is was started
+     */
+    suspend fun show(experience: Experience): Boolean = with(experience) {
         var canShow = config.interceptor?.canDisplayExperience(experience.id) ?: true
 
         // if there is an active experiment, and we should not show this experience (control group), then
         // track the analytics for experiment_entered, but ensure we exit early. This should be checked before
         // we dismiss any current experience below.
-        if (experience.experiment != null && !experience.experiment.shouldExecute()) {
-            experience.experiment.track(analyticsTracker)
+        if (experiment?.group == "control") {
+            analyticsTracker.track(experiment)
             canShow = false
         }
 
         if (!canShow) return false
 
-        // "event_trigger" or "forced" experience priority is NORMAL, "screen_view" is low -
-        // if an experience is currently showing and the new experience coming in is normal priority
-        // then it replaces whatever is currently showing - i.e. an "event_trigger" experience will
-        // supersede a "screen_view" triggered experience - per Appcues standard behavior
-        val priorityOverride = experience.priority == NORMAL && stateMachine.state != Idling
-        if (priorityOverride) {
-            return dismiss(RenderContext.Modal, markComplete = false, destroyed = false).run {
-                when (this) {
-                    is Success -> show(experience) // re-invoke show on the new experience now after dismiss
-                    is Failure -> false // dismiss failed - can't continue
-                }
+        val stateMachine = slots.getOrCreateStateMachine(renderContext)
+
+        if (stateMachine.checkPriority(this)) {
+            return when (stateMachine.handleAction(EndExperience(markComplete = false, destroyed = false))) {
+                is Success -> show(this) // re-invoke show on the new experience now after dismiss
+                is Failure -> false // dismiss failed - can't continue
             }
         }
 
         // track an experiment_entered analytic, if exists, since we know it is not in the control group at this point
-        experience.experiment?.track(analyticsTracker)
+        experiment?.let { analyticsTracker.track(it) }
 
-        return stateMachine.handleAction(StartExperience(experience)).run {
-            when (this) {
-                is Success -> true
-                is Failure -> false
-            }
+        when (stateMachine.handleAction(StartExperience(this))) {
+            is Success -> true
+            is Failure -> false
         }
+    }
+
+    private fun HashMap<RenderContext, StateMachine>.getOrCreateStateMachine(renderContext: RenderContext): StateMachine {
+        return get(renderContext) ?: run {
+            get<StateMachine>()
+                .also { put(renderContext, it) }
+                .also { experienceTracker.start(it) }
+        }
+    }
+
+    private fun StateMachine.checkPriority(newExperience: Experience): Boolean {
+        // "event_trigger" or "forced" experience priority is NORMAL, "screen_view" is low -
+        // if an experience is currently showing and the new experience coming in is normal priority
+        // then it replaces whatever is currently showing - i.e. an "event_trigger" experience will
+        // supersede a "screen_view" triggered experience - per Appcues standard behavior
+        return newExperience.priority == NORMAL && state != Idling
     }
 
     suspend fun show(qualifiedExperiences: List<Experience>): Boolean {
@@ -119,7 +129,7 @@ internal class ExperienceRenderer(
     }
 
     suspend fun show(renderContext: RenderContext, stepReference: StepReference) {
-        stateMachine.handleAction(StartStep(stepReference))
+        slots[renderContext]?.handleAction(StartStep(stepReference))
     }
 
     suspend fun preview(experienceId: String): Boolean {
@@ -131,32 +141,10 @@ internal class ExperienceRenderer(
     }
 
     fun stop() {
-        stateMachine.stop()
+        slots.values.forEach { it.stop() }
     }
 
     suspend fun dismiss(renderContext: RenderContext, markComplete: Boolean, destroyed: Boolean): ResultOf<State, Error> {
-        return stateMachine.handleAction(EndExperience(markComplete, destroyed))
-    }
-
-    private fun Experiment.shouldExecute() =
-        group != "control"
-
-    private fun Experiment.track(analyticsTracker: AnalyticsTracker) {
-        // send analytics
-        analyticsTracker.track(
-            event = AnalyticsEvent.ExperimentEntered,
-            properties = mapOf(
-                "experimentId" to id.appcuesFormatted(),
-                "experimentGroup" to group,
-                "experimentExperienceId" to experienceId.appcuesFormatted(),
-                "experimentGoalId" to goalId,
-                "experimentContentType" to contentType,
-            ),
-            interactive = false
-        )
-    }
-
-    fun getState(renderContext: RenderContext): State {
-        return stateMachine.state
+        return slots[renderContext]?.handleAction(EndExperience(markComplete, destroyed)) ?: Failure(RenderContextNotActive(renderContext))
     }
 }

@@ -59,7 +59,7 @@ internal class LaunchExperienceAction(
             // flow - capture the current experience from the state machine as the experience that is launching the new flow.
             // note: it's possible that the current experience was closed out before this triggered, in which case this
             // fromExperience ID value would be null.
-            val fromExperience = experienceRenderer.getState(renderContext).currentExperience
+            val fromExperience = experienceRenderer.getState(renderContext)?.currentExperience
             ExperienceTrigger.LaunchExperienceAction(fromExperience?.id)
         }
 }

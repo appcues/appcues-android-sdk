@@ -1,8 +1,10 @@
 package com.appcues.ui
 
 import com.appcues.AppcuesConfig
-import com.appcues.analytics.AnalyticsEvent
 import com.appcues.analytics.AnalyticsTracker
+import com.appcues.analytics.ExperienceLifecycleTracker
+import com.appcues.analytics.track
+import com.appcues.data.model.Experience
 import com.appcues.data.model.Experiment
 import com.appcues.data.model.RenderContext
 import com.appcues.mocks.mockExperience
@@ -46,10 +48,14 @@ internal class ExperienceRendererTest {
         val state = RenderingStep(mockExperience(), 3, false)
         val stateMachine = mockk<StateMachine>(relaxed = true) {
             every { this@mockk.state } answers { state }
+            coEvery { this@mockk.handleAction(any()) } returns Success(Idling)
         }
         val scope = initScope(stateMachine)
         val experienceRenderer = ExperienceRenderer(scope)
-
+        val experience = mockk<Experience>(relaxed = true) {
+            every { this@mockk.renderContext } answers { RenderContext.Modal }
+        }
+        experienceRenderer.show(experience)
         // WHEN
         experienceRenderer.dismiss(RenderContext.Modal, markComplete = false, destroyed = false)
 
@@ -63,9 +69,14 @@ internal class ExperienceRendererTest {
         val state = RenderingStep(mockExperience(), 2, false)
         val stateMachine = mockk<StateMachine>(relaxed = true) {
             every { this@mockk.state } answers { state }
+            coEvery { this@mockk.handleAction(any()) } returns Success(Idling)
         }
         val scope = initScope(stateMachine)
         val experienceRenderer = ExperienceRenderer(scope)
+        val experience = mockk<Experience>(relaxed = true) {
+            every { this@mockk.renderContext } answers { RenderContext.Modal }
+        }
+        experienceRenderer.show(experience)
 
         // WHEN
         experienceRenderer.dismiss(RenderContext.Modal, markComplete = false, destroyed = false)
@@ -149,19 +160,7 @@ internal class ExperienceRendererTest {
         experienceRenderer.show(experience)
 
         // THEN
-        verify {
-            analyticsTracker.track(
-                AnalyticsEvent.ExperimentEntered,
-                mapOf(
-                    "experimentId" to "06f9bf87-1921-4919-be55-429b278bf578",
-                    "experimentGroup" to "control",
-                    "experimentExperienceId" to "d84c9d01-aa27-4cbb-b832-ee03720e04fc",
-                    "experimentGoalId" to "my-goal",
-                    "experimentContentType" to "my-content-type",
-                ),
-                false
-            )
-        }
+        verify { analyticsTracker.track(experiment) }
     }
 
     @Test
@@ -187,19 +186,7 @@ internal class ExperienceRendererTest {
         experienceRenderer.show(experience)
 
         // THEN
-        verify {
-            analyticsTracker.track(
-                AnalyticsEvent.ExperimentEntered,
-                mapOf(
-                    "experimentId" to "06f9bf87-1921-4919-be55-429b278bf578",
-                    "experimentGroup" to "exposed",
-                    "experimentExperienceId" to "d84c9d01-aa27-4cbb-b832-ee03720e04fc",
-                    "experimentGoalId" to "my-goal",
-                    "experimentContentType" to "my-content-type",
-                ),
-                false
-            )
-        }
+        verify { analyticsTracker.track(experiment) }
     }
 
     private fun initScope(stateMachine: StateMachine): Scope {
@@ -211,9 +198,10 @@ internal class ExperienceRendererTest {
             modules(
                 module {
                     scope(named(scopeId)) {
-                        scoped { stateMachine }
+                        factory { stateMachine }
                         scoped { AppcuesConfig("abc", "123") }
                         scoped { mockk<AnalyticsTracker>(relaxed = true) }
+                        scoped { mockk<ExperienceLifecycleTracker>(relaxed = true) }
                     }
                 }
             )

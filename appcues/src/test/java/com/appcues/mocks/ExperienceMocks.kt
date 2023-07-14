@@ -4,6 +4,7 @@ import com.appcues.action.appcues.TrackEventAction
 import com.appcues.data.model.Action
 import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperiencePrimitive.TextPrimitive
+import com.appcues.data.model.ExperiencePriority.LOW
 import com.appcues.data.model.ExperiencePriority.NORMAL
 import com.appcues.data.model.ExperienceTrigger
 import com.appcues.data.model.Experiment
@@ -51,7 +52,7 @@ internal fun mockExperience(onPresent: (() -> Unit)? = null) =
             )
         ),
         published = true,
-        priority = NORMAL,
+        priority = LOW,
         publishedAt = 1652895835000,
         experiment = null,
         completionActions = arrayListOf(TrackEventAction(hashMapOf(), appcues = mockk(relaxed = true))),

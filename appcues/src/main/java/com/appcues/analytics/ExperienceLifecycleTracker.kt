@@ -1,5 +1,6 @@
 package com.appcues.analytics
 
+import com.appcues.AppcuesCoroutineScope
 import com.appcues.Storage
 import com.appcues.analytics.ExperienceLifecycleEvent.ExperienceCompleted
 import com.appcues.analytics.ExperienceLifecycleEvent.ExperienceDismissed
@@ -9,6 +10,8 @@ import com.appcues.analytics.ExperienceLifecycleEvent.StepCompleted
 import com.appcues.analytics.ExperienceLifecycleEvent.StepError
 import com.appcues.analytics.ExperienceLifecycleEvent.StepSeen
 import com.appcues.statemachine.Error
+import com.appcues.statemachine.Error.ExperienceAlreadyActive
+import com.appcues.statemachine.Error.RenderContextNotActive
 import com.appcues.statemachine.State
 import com.appcues.statemachine.State.BeginningExperience
 import com.appcues.statemachine.State.BeginningStep
@@ -20,29 +23,28 @@ import com.appcues.statemachine.StateMachine
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import java.util.Date
 
 internal class ExperienceLifecycleTracker(
-    override val scope: Scope
+    override val scope: Scope,
 ) : KoinScopeComponent {
 
     // lazy property injection to avoid circular DI reference in constructor
     // AnalyticsTracker -> this <- Analytics Tracker
     private val analyticsTracker: AnalyticsTracker by inject()
-    private val stateMachine: StateMachine by inject()
     private val storage: Storage by inject()
+    private val appcuesCoroutineScope: AppcuesCoroutineScope by inject()
 
-    suspend fun start(dispatcher: CoroutineDispatcher = Dispatchers.IO): Unit = withContext(dispatcher) {
-        launch { observeState() }
-        launch { observeErrors() }
+    fun start(stateMachine: StateMachine, dispatcher: CoroutineDispatcher = Dispatchers.IO) {
+        appcuesCoroutineScope.launch(dispatcher) { stateMachine.observeState() }
+        appcuesCoroutineScope.launch(dispatcher) { stateMachine.observeErrors() }
     }
 
-    private suspend fun observeState() {
-        stateMachine.stateFlow.collect {
+    private suspend fun StateMachine.observeState() {
+        stateFlow.collect {
             if (it.shouldTrack()) { // will not track for unpublished (preview) experiences
                 when (it) {
                     is RenderingStep -> {
@@ -74,13 +76,14 @@ internal class ExperienceLifecycleTracker(
         }
     }
 
-    private suspend fun observeErrors() {
-        stateMachine.errorFlow.collect {
+    private suspend fun StateMachine.observeErrors() {
+        errorFlow.collect {
             if (it.shouldTrack()) { // will not track for unpublished (preview) experiences
                 when (it) {
                     is Error.ExperienceError -> trackLifecycleEvent(ExperienceError(it))
                     is Error.StepError -> trackLifecycleEvent(StepError(it))
-                    is Error.ExperienceAlreadyActive -> Unit
+                    is ExperienceAlreadyActive -> Unit
+                    is RenderContextNotActive -> Unit
                 }
             }
         }
@@ -106,6 +109,7 @@ internal class ExperienceLifecycleTracker(
         when (this) {
             is Error.ExperienceError -> experience.published
             is Error.StepError -> experience.published
-            is Error.ExperienceAlreadyActive -> false
+            is ExperienceAlreadyActive -> false
+            is RenderContextNotActive -> false
         }
 }

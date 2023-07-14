@@ -6,6 +6,7 @@ import com.appcues.AppcuesCoroutineScope
 import com.appcues.action.appcues.StepInteractionAction
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType.BUTTON_TAPPED
+import com.appcues.analytics.ExperienceLifecycleTracker
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.RenderContext
 import com.appcues.logging.Logcues
@@ -74,8 +75,11 @@ internal class ActionProcessorTest : KoinTest {
         val experience = mockExperience()
         val initialState = RenderingStep(experience, 0, true)
         val scope = initScope(initialState)
+        val experienceRenderer = scope.get<ExperienceRenderer>()
         val actionProcessor = scope.get<ActionProcessor>()
         val analyticsTracker: AnalyticsTracker = scope.get()
+
+        experienceRenderer.show(experience)
 
         val action1 = TestAction(false)
         val stepAction1 = TestStepInteractionAction("test", "a")
@@ -153,8 +157,10 @@ internal class ActionProcessorTest : KoinTest {
                                 experienceRenderer = get(),
                             )
                         }
-                        scoped { StateMachine(get(), get(), get(), initState) }
+                        factory { StateMachine(get(), get(), get(), initState) }
                         scoped { ExperienceRenderer(scope) }
+                        scoped { RenderContext.Modal }
+                        scoped { mockk<ExperienceLifecycleTracker>(relaxed = true) }
                     }
                 }
             )
