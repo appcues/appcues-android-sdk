@@ -18,7 +18,6 @@ internal object AppcuesKoin : KoinScopePlugin {
             val config: AppcuesConfig = get()
             Logcues(config.loggingLevel)
         }
-        scoped { StateMachine(appcuesCoroutineScope = get(), config = get(), actionProcessor = get()) }
         scoped { Storage(context = get(), config = get()) }
         scoped {
             DeepLinkHandler(
@@ -42,10 +41,8 @@ internal object AppcuesKoin : KoinScopePlugin {
             )
         }
         scoped { LinkOpener(get()) }
-        scoped {
-            AnalyticsPublisher(
-                storage = get()
-            )
-        }
+        scoped { AnalyticsPublisher(storage = get()) }
+
+        factory { StateMachine(appcuesCoroutineScope = get(), config = get(), actionProcessor = get()) }
     }
 }

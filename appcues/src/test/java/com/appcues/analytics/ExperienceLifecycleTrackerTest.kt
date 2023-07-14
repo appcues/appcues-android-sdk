@@ -148,7 +148,7 @@ internal class ExperienceLifecycleTrackerTest : KoinTest {
         }
 
         coroutineScope.launch {
-            scope.get<ExperienceLifecycleTracker>().start(UnconfinedTestDispatcher())
+            scope.get<ExperienceLifecycleTracker>().start(machine, UnconfinedTestDispatcher())
         }
 
         return scope

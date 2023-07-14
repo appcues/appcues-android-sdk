@@ -3,6 +3,7 @@ package com.appcues.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.appcues.AppcuesCoroutineScope
+import com.appcues.action.ActionProcessor
 import com.appcues.action.ExperienceAction
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType
 import com.appcues.analytics.SdkMetrics
@@ -50,6 +51,7 @@ internal class AppcuesViewModel(
 
     private val appcuesCoroutineScope by inject<AppcuesCoroutineScope>()
     private val experienceRenderer by inject<ExperienceRenderer>()
+    private val actionProcessor by inject<ActionProcessor>()
 
     private val _uiState = MutableStateFlow<UIState>(Idle)
 
@@ -58,7 +60,7 @@ internal class AppcuesViewModel(
 
     init {
         viewModelScope.launch {
-            experienceRenderer.getStateFlow(renderContext).collectLatest { result ->
+            experienceRenderer.getStateFlow(renderContext)?.collectLatest { result ->
                 // don't collect if we are Dismissing
                 if (uiState.value is Dismissing) return@collectLatest
 
@@ -109,11 +111,7 @@ internal class AppcuesViewModel(
     }
 
     fun onActions(actions: List<ExperienceAction>, interactionType: InteractionType, viewDescription: String?) {
-        uiState.value.let { state ->
-            if (state is Rendering) {
-                experienceRenderer.process(state.experience.renderContext, actions, interactionType, viewDescription)
-            }
-        }
+        actionProcessor.process(renderContext, actions, interactionType, viewDescription)
     }
 
     fun onPageChanged(index: Int) {

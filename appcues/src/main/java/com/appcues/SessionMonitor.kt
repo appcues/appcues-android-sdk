@@ -6,6 +6,7 @@ import androidx.lifecycle.ProcessLifecycleOwner
 import com.appcues.analytics.AnalyticsEvent
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.analytics.SdkMetrics
+import com.appcues.analytics.track
 import com.appcues.logging.Logcues
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent

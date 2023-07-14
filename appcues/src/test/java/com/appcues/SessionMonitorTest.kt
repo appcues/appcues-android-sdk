@@ -5,6 +5,7 @@ import com.appcues.analytics.AnalyticsEvent.SessionResumed
 import com.appcues.analytics.AnalyticsEvent.SessionStarted
 import com.appcues.analytics.AnalyticsEvent.SessionSuspended
 import com.appcues.analytics.AnalyticsTracker
+import com.appcues.analytics.track
 import com.appcues.logging.Logcues
 import com.appcues.rules.KoinScopeRule
 import com.appcues.rules.MainDispatcherRule

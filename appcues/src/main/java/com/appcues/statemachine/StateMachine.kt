@@ -95,11 +95,13 @@ internal class StateMachine(
                     // recursive call on continuations to get the final return value
                     handleActionInternal(sideEffect.action)
                 }
+
                 is ReportErrorEffect -> {
                     _errorFlow.emit(sideEffect.error)
                     // return a failure if this call to `handleAction` ended with a reported error
                     Failure(sideEffect.error)
                 }
+
                 is PresentContainerEffect -> {
                     // first, process any pre-step actions that need to be handled before the container is presented.
                     // for example - navigating to another screen in the app
@@ -115,9 +117,11 @@ internal class StateMachine(
                         handleActionInternal(ReportError(ExperienceError(sideEffect.experience, message), true))
                     }
                 }
+
                 is AwaitEffect -> {
                     sideEffect.completion.await()
                 }
+
                 is ProcessActions -> {
                     actionProcessor.process(sideEffect.actions)
                     Success(_state)
@@ -132,7 +136,7 @@ internal class StateMachine(
     private fun State.take(action: Action): Transition {
         return takeValidStateTransitions(this, action) ?: when (action) {
             // start experience action when experience is already active
-            is StartExperience -> ErrorLoggingTransition(ExperienceAlreadyActive(action.experience, "Experience already active"), false)
+            is StartExperience -> ErrorLoggingTransition(ExperienceAlreadyActive, false)
             // report error action
             is ReportError -> ErrorLoggingTransition(action.error, action.fatal)
             // undefined transition - no-op

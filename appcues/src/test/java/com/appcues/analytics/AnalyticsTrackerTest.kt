@@ -3,13 +3,11 @@ package com.appcues.analytics
 import com.appcues.AnalyticType
 import com.appcues.AppcuesCoroutineScope
 import com.appcues.LoggingLevel.NONE
-import com.appcues.analytics.AnalyticsEvent.SessionStarted
 import com.appcues.data.remote.appcues.request.ActivityRequest
 import com.appcues.logging.Logcues
 import com.appcues.rules.MainDispatcherRule
 import com.google.common.truth.Truth.assertThat
 import io.mockk.Called
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -25,7 +23,6 @@ internal class AnalyticsTrackerTest {
 
     private val coroutineScope = AppcuesCoroutineScope(Logcues(NONE))
     private val activityBuilder: ActivityRequestBuilder = mockk()
-    private val experienceLifecycleTracker: ExperienceLifecycleTracker = mockk(relaxed = true)
     private val analyticsPolicy: AnalyticsPolicy = mockk()
     private val analyticsQueueProcessor: AnalyticsQueueProcessor = mockk(relaxed = true)
 
@@ -38,7 +35,6 @@ internal class AnalyticsTrackerTest {
         analyticsTracker = AnalyticsTracker(
             appcuesCoroutineScope = coroutineScope,
             activityBuilder = activityBuilder,
-            experienceLifecycleTracker = experienceLifecycleTracker,
             analyticsPolicy = analyticsPolicy,
             analyticsQueueProcessor = analyticsQueueProcessor,
         )
@@ -48,12 +44,6 @@ internal class AnalyticsTrackerTest {
                 analyticsFlowUpdates.add(it)
             }
         }
-    }
-
-    @Test
-    fun `init SHOULD trigger experienceLifecycleTracker start`() {
-        // then
-        coVerify { experienceLifecycleTracker.start(any()) }
     }
 
     @Test
@@ -182,19 +172,5 @@ internal class AnalyticsTrackerTest {
         analyticsTracker.flushPendingActivity()
         // then
         verify { analyticsQueueProcessor.flushAsync() }
-    }
-
-    @Test
-    fun `track internal event SHOULD update analyticsFlow with internal event`() {
-        // given
-        every { analyticsPolicy.canTrackEvent() } returns true
-        val activity: ActivityRequest = mockk(relaxed = true)
-        every { activityBuilder.track(any(), any()) } returns activity
-        // when
-        analyticsTracker.track(SessionStarted)
-        // then
-        assertThat(analyticsFlowUpdates.first().isInternal).isTrue()
-        assertThat(analyticsFlowUpdates.first().type).isEqualTo(AnalyticType.EVENT)
-        assertThat(analyticsFlowUpdates.first().request).isEqualTo(activity)
     }
 }
