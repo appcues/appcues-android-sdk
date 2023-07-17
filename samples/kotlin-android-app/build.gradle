@@ -6,6 +6,8 @@ plugins {
 android {
     compileSdk 33
 
+    namespace "com.appcues.samples.kotlin"
+
     signingConfigs {
         release {
             keyAlias System.getenv("KEYSTORE_ALIAS")
@@ -46,6 +48,7 @@ android {
     }
 
     buildFeatures {
+        buildConfig true
         viewBinding true
     }
 }

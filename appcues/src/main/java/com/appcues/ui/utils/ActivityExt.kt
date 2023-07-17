@@ -7,10 +7,10 @@ import android.os.Build.VERSION_CODES
 import android.view.View
 import android.view.ViewGroup
 import android.view.inspector.WindowInspector
-import androidx.lifecycle.ViewTreeLifecycleOwner
-import androidx.lifecycle.ViewTreeViewModelStoreOwner
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.findViewTreeViewModelStoreOwner
+import androidx.lifecycle.setViewTreeLifecycleOwner
+import androidx.lifecycle.setViewTreeViewModelStoreOwner
 import androidx.savedstate.findViewTreeSavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import java.lang.reflect.Method
@@ -48,14 +48,14 @@ internal fun Activity.getParentView(): ViewGroup {
     // dialog. In this case, we need to apply the fix-ups below to ensure that our
     // content can render correctly inside of this other view. In each case, we use
     // the applicable value from the Activity default window.
-    if (ViewTreeLifecycleOwner.get(decorView) == null) {
+    if (decorView.findViewTreeLifecycleOwner() == null) {
         val lifecycleOwner = window.decorView.findViewTreeLifecycleOwner()
-        ViewTreeLifecycleOwner.set(decorView, lifecycleOwner)
+        decorView.setViewTreeLifecycleOwner(lifecycleOwner)
     }
 
-    if (ViewTreeViewModelStoreOwner.get(decorView) == null) {
+    if (decorView.findViewTreeViewModelStoreOwner() == null) {
         val viewModelStoreOwner = window.decorView.findViewTreeViewModelStoreOwner()
-        ViewTreeViewModelStoreOwner.set(decorView, viewModelStoreOwner)
+        decorView.setViewTreeViewModelStoreOwner(viewModelStoreOwner)
     }
 
     if (decorView.findViewTreeSavedStateRegistryOwner() == null) {
