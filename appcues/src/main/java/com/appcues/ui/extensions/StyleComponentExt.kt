@@ -96,7 +96,10 @@ private fun FontFamily.Companion.getFontResource(context: Context, fontName: Str
                 // and we can progress with the creation of the Font and FontFamily
                 context.resources.getFont(fontId)
                 FontFamily(Font(fontId))
-            } catch (ex: NotFoundException) {
+            } catch (_: NotFoundException) {
+                null
+            } catch (_: NullPointerException) {
+                // this can happen in our snapshot unit tests when the font is not available
                 null
             }
         }
