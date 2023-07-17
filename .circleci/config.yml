@@ -77,7 +77,7 @@ jobs:
     executor:
       name: android/android-machine
       resource-class: large
-      tag: 2022.04.1 # https://circleci.com/developer/machine/image/android
+      tag: 2023.07.1 # https://circleci.com/developer/machine/image/android
     steps:
       - install_with_cache      
       - run:
