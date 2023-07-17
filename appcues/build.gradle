@@ -114,8 +114,6 @@ dependencies {
     // Dependency Injection
     implementation "io.insert-koin:koin-core:$koin_version"
     implementation "io.insert-koin:koin-android:$koin_version"
-    // View Pager
-    implementation "com.google.accompanist:accompanist-pager:$accompanist_version"
     // Webview
     implementation "com.google.accompanist:accompanist-webview:$accompanist_version"
     // Navigation Animated

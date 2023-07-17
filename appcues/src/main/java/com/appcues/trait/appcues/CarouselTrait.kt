@@ -1,7 +1,11 @@
 package com.appcues.trait.appcues
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateMapOf
@@ -16,10 +20,6 @@ import com.appcues.trait.ContentHolderTrait
 import com.appcues.trait.ContentHolderTrait.ContainerPages
 import com.appcues.ui.composables.AppcuesPaginationData
 import com.appcues.ui.composables.LocalAppcuesPaginationDelegate
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.HorizontalPager
-import com.google.accompanist.pager.PagerState
-import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.flow.drop
 
 internal class CarouselTrait(
@@ -31,15 +31,15 @@ internal class CarouselTrait(
         const val TYPE = "@appcues/carousel"
     }
 
-    @OptIn(ExperimentalPagerApi::class)
+    @OptIn(ExperimentalFoundationApi::class)
     @Composable
     override fun BoxScope.CreateContentHolder(containerPages: ContainerPages) {
-        val pagerState = rememberPagerState(containerPages.currentPage).also {
+        val pagerState = rememberPagerState(initialPage = containerPages.currentPage).also {
             containerPages.setPaginationData(
                 AppcuesPaginationData(
-                    pageCount = it.pageCount,
+                    pageCount = containerPages.pageCount,
                     currentPage = it.currentPage,
-                    scrollOffset = it.currentPageOffset
+                    scrollOffset = it.currentPageOffsetFraction
                 )
             )
         }
@@ -78,8 +78,8 @@ internal class CarouselTrait(
 
         // this is a workaround a problem that was found with this HorizontalPager
         // where sometimes the currentPageOffset number is bigger or smaller than the expected range of {-1.0f, 1.0f}
-        LaunchedEffect(pagerState.currentPageOffset) {
-            snapshotFlow { pagerState.currentPageOffset }
+        LaunchedEffect(pagerState.currentPageOffsetFraction) {
+            snapshotFlow { pagerState.currentPageOffsetFraction }
                 .drop(1)
                 .collect {
                     when {
@@ -102,7 +102,7 @@ internal class CarouselTrait(
 
                     layout(constraints.maxWidth, calculatedHeight) { placeable.place(0, 0) }
                 },
-            count = containerPages.pageCount,
+            pageCount = containerPages.pageCount,
             state = pagerState,
             verticalAlignment = Alignment.Top
         ) { index ->
@@ -115,7 +115,7 @@ internal class CarouselTrait(
         }
     }
 
-    @ExperimentalPagerApi
+    @ExperimentalFoundationApi
     private class HorizontalPagerSize constructor(private val pagerState: PagerState) {
 
         val heightMap = mutableStateMapOf<Int, Int>()
@@ -123,13 +123,13 @@ internal class CarouselTrait(
         fun getContainerHeight(): Float {
             val currentPageSize = heightMap[pagerState.currentPage] ?: 0
             val nextPageSize = when {
-                pagerState.currentPageOffset > 0 -> heightMap[pagerState.currentPage + 1] ?: 0
-                pagerState.currentPageOffset < 0 -> heightMap[pagerState.currentPage - 1] ?: 0
+                pagerState.currentPageOffsetFraction > 0 -> heightMap[pagerState.currentPage + 1] ?: 0
+                pagerState.currentPageOffsetFraction < 0 -> heightMap[pagerState.currentPage - 1] ?: 0
                 else -> currentPageSize
             }
 
-            val offsetNormalized = if (pagerState.currentPageOffset < 0)
-                pagerState.currentPageOffset * -1 else pagerState.currentPageOffset
+            val offsetNormalized = if (pagerState.currentPageOffsetFraction < 0)
+                pagerState.currentPageOffsetFraction * -1 else pagerState.currentPageOffsetFraction
 
             val pageSize = (nextPageSize - currentPageSize) * offsetNormalized + currentPageSize
 
