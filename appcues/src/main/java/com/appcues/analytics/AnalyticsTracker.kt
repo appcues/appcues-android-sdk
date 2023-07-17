@@ -6,6 +6,7 @@ import com.appcues.AnalyticType.GROUP
 import com.appcues.AnalyticType.IDENTIFY
 import com.appcues.AnalyticType.SCREEN
 import com.appcues.AppcuesCoroutineScope
+import com.appcues.SessionMonitor
 import com.appcues.data.remote.appcues.request.ActivityRequest
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -14,7 +15,7 @@ import kotlinx.coroutines.launch
 internal class AnalyticsTracker(
     private val appcuesCoroutineScope: AppcuesCoroutineScope,
     private val activityBuilder: ActivityRequestBuilder,
-    private val analyticsPolicy: AnalyticsPolicy,
+    private val sessionMonitor: SessionMonitor,
     private val analyticsQueueProcessor: AnalyticsQueueProcessor,
 ) {
 
@@ -23,7 +24,7 @@ internal class AnalyticsTracker(
         get() = _analyticsFlow
 
     fun identify(properties: Map<String, Any>? = null, interactive: Boolean = true) {
-        if (!analyticsPolicy.canIdentify()) return
+        if (!sessionMonitor.checkSession("unable to track user")) return
 
         activityBuilder.identify(properties).let {
             updateAnalyticsFlow(IDENTIFY, false, it)
@@ -37,7 +38,7 @@ internal class AnalyticsTracker(
     }
 
     fun track(name: String, properties: Map<String, Any>? = null, interactive: Boolean = true, isInternal: Boolean = false) {
-        if (!analyticsPolicy.canTrackEvent()) return
+        if (!sessionMonitor.checkSession("unable to track event")) return
 
         activityBuilder.track(name, properties).let { activityRequest ->
             updateAnalyticsFlow(EVENT, isInternal, activityRequest)
@@ -51,7 +52,7 @@ internal class AnalyticsTracker(
     }
 
     fun screen(title: String, properties: Map<String, Any>? = null, isInternal: Boolean = false) {
-        if (!analyticsPolicy.canTrackScreen(title)) return
+        if (!sessionMonitor.checkSession("unable to track screen")) return
 
         activityBuilder.screen(title, properties?.toMutableMap()).let { activityRequest ->
             updateAnalyticsFlow(SCREEN, isInternal, activityRequest)
@@ -60,7 +61,7 @@ internal class AnalyticsTracker(
     }
 
     fun group(properties: Map<String, Any>? = null) {
-        if (!analyticsPolicy.canTrackGroup()) return
+        if (!sessionMonitor.checkSession("unable to track group")) return
 
         activityBuilder.group(properties).let {
             updateAnalyticsFlow(GROUP, false, it)

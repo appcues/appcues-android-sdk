@@ -22,7 +22,6 @@ internal object AnalyticsKoin : KoinScopePlugin {
         }
         scoped { ActivityRequestBuilder(config = get(), storage = get(), decorator = get()) }
         scoped { ExperienceLifecycleTracker(scope = this) }
-        scoped { AnalyticsPolicy(sessionMonitor = get(), appcuesCoroutineScope = get(), experienceRenderer = get(), logcues = get()) }
         scoped { ActivityScreenTracking(context = get(), analyticsTracker = get(), logcues = get()) }
         scoped<QueueScheduler> { AnalyticsQueueScheduler() }
         scoped {
@@ -37,7 +36,7 @@ internal object AnalyticsKoin : KoinScopePlugin {
             AnalyticsTracker(
                 appcuesCoroutineScope = get(),
                 activityBuilder = get(),
-                analyticsPolicy = get(),
+                sessionMonitor = get(),
                 analyticsQueueProcessor = get(),
             )
         }

@@ -3,6 +3,7 @@ package com.appcues.analytics
 import com.appcues.AnalyticType
 import com.appcues.AppcuesCoroutineScope
 import com.appcues.LoggingLevel.NONE
+import com.appcues.SessionMonitor
 import com.appcues.analytics.AnalyticsEvent.SessionStarted
 import com.appcues.data.model.Experiment
 import com.appcues.data.remote.appcues.request.ActivityRequest
@@ -25,7 +26,7 @@ internal class AnalyticsTrackerExtTest {
 
     private val coroutineScope = AppcuesCoroutineScope(Logcues(NONE))
     private val activityBuilder: ActivityRequestBuilder = mockk()
-    private val analyticsPolicy: AnalyticsPolicy = mockk()
+    private val sessionMonitor: SessionMonitor = mockk()
     private val analyticsQueueProcessor: AnalyticsQueueProcessor = mockk(relaxed = true)
 
     private val analyticsFlowUpdates: ArrayList<TrackingData> = arrayListOf()
@@ -37,7 +38,7 @@ internal class AnalyticsTrackerExtTest {
         analyticsTracker = AnalyticsTracker(
             appcuesCoroutineScope = coroutineScope,
             activityBuilder = activityBuilder,
-            analyticsPolicy = analyticsPolicy,
+            sessionMonitor = sessionMonitor,
             analyticsQueueProcessor = analyticsQueueProcessor,
         )
 
@@ -51,7 +52,7 @@ internal class AnalyticsTrackerExtTest {
     @Test
     fun `track internal event SHOULD update analyticsFlow with internal event`() {
         // given
-        every { analyticsPolicy.canTrackEvent() } returns true
+        every { sessionMonitor.checkSession(any()) } returns true
         val activity: ActivityRequest = mockk(relaxed = true)
         every { activityBuilder.track(any(), any()) } returns activity
         // when
@@ -67,7 +68,7 @@ internal class AnalyticsTrackerExtTest {
         // GIVEN
         val activity: ActivityRequest = mockk(relaxed = true)
         every { activityBuilder.track(any(), any()) } returns activity
-        every { analyticsPolicy.canTrackEvent() } returns true
+        every { sessionMonitor.checkSession(any()) } returns true
         val experiment = Experiment(
             id = UUID.fromString("06f9bf87-1921-4919-be55-429b278bf578"),
             group = "control",
