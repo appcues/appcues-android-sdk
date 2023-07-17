@@ -3,6 +3,7 @@ package com.appcues.analytics
 import com.appcues.AnalyticType
 import com.appcues.AppcuesCoroutineScope
 import com.appcues.LoggingLevel.NONE
+import com.appcues.SessionMonitor
 import com.appcues.data.remote.appcues.request.ActivityRequest
 import com.appcues.logging.Logcues
 import com.appcues.rules.MainDispatcherRule
@@ -23,7 +24,7 @@ internal class AnalyticsTrackerTest {
 
     private val coroutineScope = AppcuesCoroutineScope(Logcues(NONE))
     private val activityBuilder: ActivityRequestBuilder = mockk()
-    private val analyticsPolicy: AnalyticsPolicy = mockk()
+    private val sessionMonitor: SessionMonitor = mockk()
     private val analyticsQueueProcessor: AnalyticsQueueProcessor = mockk(relaxed = true)
 
     private val analyticsFlowUpdates: ArrayList<TrackingData> = arrayListOf()
@@ -35,7 +36,7 @@ internal class AnalyticsTrackerTest {
         analyticsTracker = AnalyticsTracker(
             appcuesCoroutineScope = coroutineScope,
             activityBuilder = activityBuilder,
-            analyticsPolicy = analyticsPolicy,
+            sessionMonitor = sessionMonitor,
             analyticsQueueProcessor = analyticsQueueProcessor,
         )
 
@@ -49,7 +50,7 @@ internal class AnalyticsTrackerTest {
     @Test
     fun `identify SHOULD do nothing WHEN canIdentify is false`() {
         // given
-        every { analyticsPolicy.canIdentify() } returns false
+        every { sessionMonitor.checkSession(any()) } returns false
         // when
         analyticsTracker.identify()
         // then
@@ -59,7 +60,7 @@ internal class AnalyticsTrackerTest {
     @Test
     fun `identify SHOULD update analyticsFlow AND flushThenSend`() {
         // given
-        every { analyticsPolicy.canIdentify() } returns true
+        every { sessionMonitor.checkSession(any()) } returns true
         val activity: ActivityRequest = mockk(relaxed = true)
         every { activityBuilder.identify(any()) } returns activity
         // when
@@ -75,7 +76,7 @@ internal class AnalyticsTrackerTest {
     @Test
     fun `track SHOULD do nothing WHEN canTrackEvent is false`() {
         // given
-        every { analyticsPolicy.canTrackEvent() } returns false
+        every { sessionMonitor.checkSession(any()) } returns false
         // when
         analyticsTracker.track("event1")
         // then
@@ -85,7 +86,7 @@ internal class AnalyticsTrackerTest {
     @Test
     fun `track SHOULD update analyticsFlow AND queueThenFlush WHEN interactive is true`() {
         // given
-        every { analyticsPolicy.canTrackEvent() } returns true
+        every { sessionMonitor.checkSession(any()) } returns true
         val activity: ActivityRequest = mockk(relaxed = true)
         every { activityBuilder.track(any()) } returns activity
         // when
@@ -101,7 +102,7 @@ internal class AnalyticsTrackerTest {
     @Test
     fun `track SHOULD update analyticsFlow AND queue WHEN interactive is false`() {
         // given
-        every { analyticsPolicy.canTrackEvent() } returns true
+        every { sessionMonitor.checkSession(any()) } returns true
         val activity: ActivityRequest = mockk(relaxed = true)
         every { activityBuilder.track(any()) } returns activity
         // when
@@ -117,7 +118,7 @@ internal class AnalyticsTrackerTest {
     @Test
     fun `screen SHOULD do nothing WHEN canTrackScreen is false`() {
         // given
-        every { analyticsPolicy.canTrackScreen("title") } returns false
+        every { sessionMonitor.checkSession(any()) } returns false
         // when
         analyticsTracker.screen("title")
         // then
@@ -127,7 +128,7 @@ internal class AnalyticsTrackerTest {
     @Test
     fun `screen SHOULD update analyticsFlow AND queueThenFlush`() {
         // given
-        every { analyticsPolicy.canTrackScreen("title") } returns true
+        every { sessionMonitor.checkSession(any()) } returns true
         val activity: ActivityRequest = mockk(relaxed = true)
         every { activityBuilder.screen(any()) } returns activity
         // when
@@ -143,7 +144,7 @@ internal class AnalyticsTrackerTest {
     @Test
     fun `group SHOULD do nothing WHEN canTrackGroup is false`() {
         // given
-        every { analyticsPolicy.canTrackGroup() } returns false
+        every { sessionMonitor.checkSession(any()) } returns false
         // when
         analyticsTracker.group()
         // then
@@ -153,7 +154,7 @@ internal class AnalyticsTrackerTest {
     @Test
     fun `group SHOULD update analyticsFlow AND flushThenSend`() {
         // given
-        every { analyticsPolicy.canTrackGroup() } returns true
+        every { sessionMonitor.checkSession(any()) } returns true
         val activity: ActivityRequest = mockk(relaxed = true)
         every { activityBuilder.group() } returns activity
         // when
