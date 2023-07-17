@@ -140,6 +140,10 @@ internal class AppcuesRepositoryTest {
         val activityStorage = ActivityStorage(UUID.randomUUID(), "123", "userId", "data", null)
         coEvery { appcuesLocalSource.getAllActivity() } returns listOf(activityStorage)
 
+        // two lines below added related to https://github.com/mockk/mockk/issues/321
+        coEvery { appcuesRemoteSource.postActivity(any(), any(), any()) } returns Success(mockk(relaxed = true))
+        coEvery { appcuesRemoteSource.qualify(any(), any(), any(), any()) } returns Success(mockk(relaxed = true))
+
         // WHEN
         repository.trackActivity(request)
 
@@ -183,6 +187,9 @@ internal class AppcuesRepositoryTest {
         coEvery { appcuesLocalSource.getAllActivity() } returns listOf(activityStorage)
         coEvery { appcuesRemoteSource.postActivity("userId", null, "data") } returns Failure(NetworkError())
 
+        // line below added related to https://github.com/mockk/mockk/issues/321
+        coEvery { appcuesRemoteSource.qualify(any(), any(), any(), any()) } returns Success(mockk(relaxed = true))
+
         // WHEN
         repository.trackActivity(request)
 
@@ -197,6 +204,9 @@ internal class AppcuesRepositoryTest {
         val activityStorage = ActivityStorage(UUID.randomUUID(), "123", "userId", "data", null)
         coEvery { appcuesLocalSource.getAllActivity() } returns listOf(activityStorage)
         coEvery { appcuesRemoteSource.postActivity("userId", null, "data") } returns Failure(HttpError())
+
+        // line below added related to https://github.com/mockk/mockk/issues/321
+        coEvery { appcuesRemoteSource.qualify(any(), any(), any(), any()) } returns Success(mockk(relaxed = true))
 
         // WHEN
         repository.trackActivity(request)
@@ -214,6 +224,10 @@ internal class AppcuesRepositoryTest {
         val activityStorage3 = ActivityStorage(UUID.randomUUID(), "123", "userId", "data3", null)
         coEvery { appcuesLocalSource.getAllActivity() } returns listOf(activityStorage1, activityStorage2, activityStorage3)
         config.activityStorageMaxSize = 2
+
+        // two lines below added related to https://github.com/mockk/mockk/issues/321
+        coEvery { appcuesRemoteSource.postActivity(any(), any(), any()) } returns Success(mockk(relaxed = true))
+        coEvery { appcuesRemoteSource.qualify(any(), any(), any(), any()) } returns Success(mockk(relaxed = true))
 
         // WHEN
         repository.trackActivity(request)
@@ -235,6 +249,10 @@ internal class AppcuesRepositoryTest {
         val activityStorage3 = ActivityStorage(UUID.randomUUID(), "123", "userId", "data3", null)
         coEvery { appcuesLocalSource.getAllActivity() } returns listOf(activityStorage1, activityStorage2, activityStorage3)
         config.activityStorageMaxAge = 3
+
+        // two lines below added related to https://github.com/mockk/mockk/issues/321
+        coEvery { appcuesRemoteSource.postActivity(any(), any(), any()) } returns Success(mockk(relaxed = true))
+        coEvery { appcuesRemoteSource.qualify(any(), any(), any(), any()) } returns Success(mockk(relaxed = true))
 
         // WHEN
         repository.trackActivity(request)
@@ -298,6 +316,10 @@ internal class AppcuesRepositoryTest {
         val request = ActivityRequest(accountId = "123", userId = "userId", userSignature = "user-signature")
         val cacheItem = ActivityStorage(UUID.randomUUID(), "123", "userId", "data1", "user-signature-cache")
         coEvery { appcuesLocalSource.getAllActivity() } returns listOf(cacheItem)
+
+        // two lines below added related to https://github.com/mockk/mockk/issues/321
+        coEvery { appcuesRemoteSource.postActivity(any(), any(), any()) } returns Success(mockk(relaxed = true))
+        coEvery { appcuesRemoteSource.qualify(any(), any(), any(), any()) } returns Success(mockk(relaxed = true))
 
         // WHEN
         repository.trackActivity(request)
