@@ -1,7 +1,7 @@
 apply plugin: 'jacoco'
 
 jacoco {
-    toolVersion = "0.8.7"
+    toolVersion = "0.8.9"
 }
 
 // https://medium.com/jamf-engineering/android-kotlin-code-coverage-with-jacoco-sonar-and-gradle-plugin-6-x-3933ed503a6e
