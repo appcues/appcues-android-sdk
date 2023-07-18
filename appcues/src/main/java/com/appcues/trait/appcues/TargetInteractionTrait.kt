@@ -42,8 +42,8 @@ import com.appcues.ui.utils.rememberAppcuesWindowInfo
 
 internal class TargetInteractionTrait(
     override val config: AppcuesConfigMap,
-    private val actionProcessor: ActionProcessor,
     private val renderContext: RenderContext,
+    private val actionProcessor: ActionProcessor,
     actionRegistry: ActionRegistry,
 ) : BackdropDecoratingTrait {
 
