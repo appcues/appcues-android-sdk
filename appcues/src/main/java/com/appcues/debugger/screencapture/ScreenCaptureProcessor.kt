@@ -19,7 +19,7 @@ import com.appcues.data.remote.customerapi.response.PreUploadScreenshotResponse
 import com.appcues.data.remote.imageupload.ImageUploadRemoteSource
 import com.appcues.data.remote.sdksettings.SdkSettingsRemoteSource
 import com.appcues.monitor.AppcuesActivityMonitor
-import com.appcues.ui.getParentView
+import com.appcues.ui.utils.getParentView
 import com.appcues.util.ContextResources
 import com.appcues.util.ResultOf
 import com.appcues.util.ResultOf.Failure
@@ -34,6 +34,7 @@ internal class ScreenCaptureProcessor(
     private val customerApiRemoteSource: CustomerApiRemoteSource,
     private val imageUploadRemoteSource: ImageUploadRemoteSource,
 ) {
+
     fun captureScreen(): Capture? {
         return AppcuesActivityMonitor.activity?.getParentView()?.let {
             prepare(it)

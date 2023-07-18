@@ -13,13 +13,14 @@ import com.appcues.findMatches
 import com.appcues.monitor.AppcuesActivityMonitor
 import com.appcues.trait.AppcuesTraitException
 import com.appcues.trait.MetadataSettingTrait
-import com.appcues.ui.getParentView
+import com.appcues.ui.utils.getParentView
 
 internal class TargetElementTrait(
     override val config: AppcuesConfigMap,
 ) : MetadataSettingTrait {
 
     companion object {
+
         const val TYPE = "@appcues/target-element"
     }
 
