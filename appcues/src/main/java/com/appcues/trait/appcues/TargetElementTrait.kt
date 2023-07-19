@@ -13,13 +13,14 @@ import com.appcues.findMatches
 import com.appcues.monitor.AppcuesActivityMonitor
 import com.appcues.trait.AppcuesTraitException
 import com.appcues.trait.MetadataSettingTrait
-import com.appcues.ui.getParentView
+import com.appcues.ui.utils.getParentView
 
 internal class TargetElementTrait(
     override val config: AppcuesConfigMap,
 ) : MetadataSettingTrait {
 
     companion object {
+
         const val TYPE = "@appcues/target-element"
     }
 
@@ -61,9 +62,8 @@ internal class TargetElementTrait(
         val selector = strategy.inflateSelectorFrom(selectorProperties)
             ?: throw AppcuesTraitException("invalid selector $selectorProperties")
 
-        val weightedViews = strategy.findMatches(selector)
-            // if the result is null (not just empty) - that means the UI layout was not available at all
-            ?: throw AppcuesTraitException("could not read application layout information")
+        // if the result is null (not just empty) - that means the UI layout was not available at all
+        val weightedViews = strategy.findMatches(selector) ?: throw AppcuesTraitException("could not read application layout information")
 
         if (weightedViews.isEmpty()) {
             throw AppcuesTraitException("no view matching selector ${selector.toMap()}")
