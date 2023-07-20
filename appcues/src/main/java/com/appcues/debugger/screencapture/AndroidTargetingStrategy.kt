@@ -21,7 +21,7 @@ import com.appcues.debugger.screencapture.AndroidViewSelector.Companion.SELECTOR
 import com.appcues.debugger.screencapture.AndroidViewSelector.Companion.SELECTOR_TAG
 import com.appcues.isAppcuesView
 import com.appcues.monitor.AppcuesActivityMonitor
-import com.appcues.ui.getParentView
+import com.appcues.ui.utils.getParentView
 
 internal class AndroidViewSelector(
     private val properties: Map<String, String?>,
