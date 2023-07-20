@@ -32,6 +32,12 @@ android {
     defaultConfig {
         buildConfigField "String", "SDK_VERSION", "\"${versionName}\""
     }
+    publishing {
+        singleVariant('release') {
+            withSourcesJar()
+            withJavadocJar()
+        }
+    }
 }
 
 // Because the components are created only during the afterEvaluate phase, you must
@@ -48,9 +54,6 @@ afterEvaluate {
                 groupId = appcuesProperties.getProperty("GROUP_ID")
                 artifactId = appcuesProperties.getProperty("ARTIFACT_ID")
                 version = versionName
-
-                artifact sourcesJar
-                artifact javadocJar
 
                 pom {
                     name = appcuesProperties.getProperty("NAME")
