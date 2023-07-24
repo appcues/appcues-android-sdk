@@ -48,8 +48,9 @@ internal fun AppcuesComposition(
             LocalChromeClient provides chromeClient,
             LocalAppcuesActionDelegate provides DefaultAppcuesActionsDelegate(viewModel),
             LocalAppcuesPaginationDelegate provides AppcuesPagination { viewModel.onPageChanged(it) },
-            LocalAppcuesTraitExceptionHandler provides AppcuesTraitExceptionHandler { viewModel.onTraitException(it) },
             LocalAppcuesExperienceVisibility provides AppcuesExperienceVisibility { viewModel.updateViewVisibility(it) },
+            LocalTraitExceptionHandler provides AppcuesTraitExceptionHandler { viewModel.onTraitException(it) },
+            LocalExperienceCompositionState provides ExperienceCompositionState()
         ) {
             MainSurface()
         }
@@ -137,7 +138,7 @@ internal fun BoxScope.ComposeContainer(stepContainer: StepContainer, stepIndex: 
         val containerDecoratingTraits = remember(stepIndex) { mutableStateOf(steps[stepIndex].containerDecoratingTraits) }
         val metadataSettingTraits = remember(stepIndex) { mutableStateOf(steps[stepIndex].metadataSettingTraits) }
 
-        val traitExceptionHandler = LocalAppcuesTraitExceptionHandler.current
+        val traitExceptionHandler = LocalTraitExceptionHandler.current
         val experienceVisibility = LocalAppcuesExperienceVisibility.current
         val stepMetadata = remember { mutableStateOf<AppcuesStepMetadata?>(null) }
         val previousStepMetaData = remember { mutableStateOf(AppcuesStepMetadata()) }
@@ -180,7 +181,7 @@ internal fun BoxScope.ComposeContainer(stepContainer: StepContainer, stepIndex: 
                                 // create content holder
                                 CreateContentHolder(it)
                                 // sync pagination data in case content holder didn't update it
-                                it.syncPaginationData()
+                                it.SyncPaginationData()
                             }
                         }
 
