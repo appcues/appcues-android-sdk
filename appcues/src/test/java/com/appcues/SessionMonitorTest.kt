@@ -152,6 +152,25 @@ internal class SessionMonitorTest : AppcuesScopeTest {
     }
 
     @Test
+    fun `onStart SHOULD not change session ID WHEN session timeout not expired`() {
+        // GIVEN
+        val tracker: AnalyticsTracker = get()
+        val sessionMonitor = SessionMonitor(scope)
+        val storage: Storage = get()
+        storage.userId = "userId"
+        sessionMonitor.start()
+        val sessionId = sessionMonitor.sessionId
+        sessionMonitor.onStop(mockk())
+
+        // WHEN
+        sessionMonitor.onStart(mockk())
+
+        // THEN
+        assertThat(sessionId).isNotNull()
+        assertThat(sessionId).isEqualTo(sessionMonitor.sessionId)
+    }
+
+    @Test
     fun `onStart SHOULD track session started WHEN session timeout has expired`() {
         // GIVEN
         val tracker: AnalyticsTracker = get()
@@ -169,6 +188,28 @@ internal class SessionMonitorTest : AppcuesScopeTest {
         // THEN
         verify(exactly = 2) { tracker.track(SessionStarted, any(), any()) }
         verify(exactly = 0) { tracker.track(SessionResumed, any(), any()) }
+    }
+
+    @Test
+    fun `onStart SHOULD generate new session ID WHEN session timeout has expired`() {
+        // GIVEN
+        val tracker: AnalyticsTracker = get()
+        val storage: Storage = get()
+        storage.userId = "userId"
+        val config: AppcuesConfig = get()
+        config.sessionTimeout = -1
+        val sessionMonitor = SessionMonitor(scope)
+        sessionMonitor.start()
+        val sessionId = sessionMonitor.sessionId
+        sessionMonitor.onStop(mockk())
+
+        // WHEN
+        sessionMonitor.onStart(mockk())
+
+        // THEN
+        assertThat(sessionId).isNotNull()
+        assertThat(sessionMonitor.sessionId).isNotNull()
+        assertThat(sessionId).isNotEqualTo(sessionMonitor.sessionId)
     }
 
     @Test
