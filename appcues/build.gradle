@@ -15,7 +15,7 @@ ext.room_version = '2.4.3'
 ext.compose_version = '1.4.3'
 ext.compose_compiler_version = '1.4.7'
 ext.accompanist_version = '0.30.1'
-ext.koin_version = '3.4.0'
+ext.koin_version = '3.4.2'
 ext.coil_version = '2.2.2'
 ext.moshi_version = '1.14.0'
 

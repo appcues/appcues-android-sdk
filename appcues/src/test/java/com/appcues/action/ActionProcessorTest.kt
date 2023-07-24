@@ -150,9 +150,8 @@ internal class ActionProcessorTest : KoinTest {
                         scoped { ActionProcessor(get()) }
                         scoped { params ->
                             StepInteractionAction(
-                                config = params.getOrNull(),
                                 renderContext = RenderContext.Modal,
-                                interaction = params.get(),
+                                interaction = params[1],
                                 analyticsTracker = get(),
                                 experienceRenderer = get(),
                             )
