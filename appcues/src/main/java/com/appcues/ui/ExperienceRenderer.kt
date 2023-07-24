@@ -1,5 +1,6 @@
 package com.appcues.ui
 
+import android.util.Log
 import com.appcues.AppcuesConfig
 import com.appcues.SessionMonitor
 import com.appcues.analytics.AnalyticsTracker
@@ -107,15 +108,20 @@ internal class ExperienceRenderer(
             return true
         }
 
-        val success = show(qualifiedExperiences.first())
-        if (!success) {
+        qualifiedExperiences.filter { it.renderContext is RenderContext.Embed }.forEach {
+            // TODO what to do here
+            show(it)
+        }
+
+        val modalSuccess = show(qualifiedExperiences.first { it.renderContext is RenderContext.Modal })
+        if (!modalSuccess) {
             val remainingExperiences = qualifiedExperiences.drop(1)
             if (remainingExperiences.isNotEmpty()) {
                 // fallback logic - try the next remaining experience, if available
                 return show(remainingExperiences)
             }
         }
-        return success
+        return modalSuccess
     }
 
     suspend fun show(experienceId: String, trigger: ExperienceTrigger): Boolean {
@@ -145,6 +151,7 @@ internal class ExperienceRenderer(
     }
 
     suspend fun dismiss(renderContext: RenderContext, markComplete: Boolean, destroyed: Boolean): ResultOf<State, Error> {
+        Log.i("Logcues", "dismissing for render context $renderContext")
         return slots[renderContext]?.handleAction(EndExperience(markComplete, destroyed)) ?: Failure(RenderContextNotActive(renderContext))
     }
 }
