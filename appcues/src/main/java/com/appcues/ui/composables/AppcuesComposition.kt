@@ -49,7 +49,7 @@ internal fun AppcuesComposition(
             LocalAppcuesActionDelegate provides DefaultAppcuesActionsDelegate(viewModel),
             LocalAppcuesPaginationDelegate provides AppcuesPagination { viewModel.onPageChanged(it) },
             LocalAppcuesTraitExceptionHandler provides AppcuesTraitExceptionHandler { viewModel.onTraitException(it) },
-            LocalAppcuesOverlayVisibility provides AppcuesOverlayVisibility { viewModel.updateOverlayVisibility(it) },
+            LocalAppcuesExperienceVisibility provides AppcuesExperienceVisibility { viewModel.updateViewVisibility(it) },
         ) {
             MainSurface()
         }
@@ -112,17 +112,17 @@ private fun BoxScope.ComposeLastRenderingState(state: Rendering) {
 private suspend fun produceMetadata(
     metadataSettingTraits: List<MetadataSettingTrait>,
     traitExceptionHandler: AppcuesTraitExceptionHandler,
-    overlayVisibility: AppcuesOverlayVisibility,
+    experienceVisibility: AppcuesExperienceVisibility,
 ): HashMap<String, Any?>? {
     return try {
         hashMapOf<String, Any?>().apply { metadataSettingTraits.forEach { putAll(it.produceMetadata()) } }.also {
-            overlayVisibility.setVisible(true)
+            experienceVisibility.setVisible(true)
         }
     } catch (ex: AppcuesTraitException) {
         if (ex.retryMilliseconds != null) {
-            overlayVisibility.setVisible(false)
+            experienceVisibility.setVisible(false)
             delay(ex.retryMilliseconds.toLong())
-            produceMetadata(metadataSettingTraits, traitExceptionHandler, overlayVisibility)
+            produceMetadata(metadataSettingTraits, traitExceptionHandler, experienceVisibility)
         } else {
             traitExceptionHandler.onTraitException(ex)
             null
@@ -138,12 +138,12 @@ internal fun BoxScope.ComposeContainer(stepContainer: StepContainer, stepIndex: 
         val metadataSettingTraits = remember(stepIndex) { mutableStateOf(steps[stepIndex].metadataSettingTraits) }
 
         val traitExceptionHandler = LocalAppcuesTraitExceptionHandler.current
-        val overlayVisibility = LocalAppcuesOverlayVisibility.current
+        val experienceVisibility = LocalAppcuesExperienceVisibility.current
         val stepMetadata = remember { mutableStateOf<AppcuesStepMetadata?>(null) }
         val previousStepMetaData = remember { mutableStateOf(AppcuesStepMetadata()) }
 
         LaunchedEffect(metadataSettingTraits) {
-            val actual = produceMetadata(metadataSettingTraits.value, traitExceptionHandler, overlayVisibility)
+            val actual = produceMetadata(metadataSettingTraits.value, traitExceptionHandler, experienceVisibility)
             if (actual != null) {
                 stepMetadata.value = AppcuesStepMetadata(previous = previousStepMetaData.value.current, current = actual).also {
                     previousStepMetaData.value = it

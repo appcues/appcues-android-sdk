@@ -35,7 +35,7 @@ internal class AppcuesViewModel(
     override val scope: Scope,
     private val renderContext: RenderContext,
     private val onDismiss: () -> Unit,
-    private val setOverlayVisible: (Boolean) -> Unit,
+    private val setViewVisible: (Boolean) -> Unit,
 ) : ViewModel(), KoinScopeComponent {
 
     sealed class UIState {
@@ -190,8 +190,8 @@ internal class AppcuesViewModel(
         }
     }
 
-    fun updateOverlayVisibility(isVisible: Boolean) {
-        setOverlayVisible(isVisible)
+    fun updateViewVisibility(isVisible: Boolean) {
+        setViewVisible(isVisible)
     }
 
     fun onTraitException(exception: AppcuesTraitException) {
