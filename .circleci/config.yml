@@ -22,6 +22,16 @@ orbs:
   codecov: codecov/codecov@3.1.1
 
 # -------------------------
+#        EXECUTORS
+# -------------------------
+executors:
+  android_compatible:
+    machine: 
+      image: android:2023.07.1 #https://circleci.com/developer/machine/image/android
+    resource_class: large
+    working_directory: ~/code
+
+# -------------------------
 #        REFERENCES
 # -------------------------
 references:
@@ -73,11 +83,7 @@ commands:
 # --------------------------
 jobs:
   validate_code:
-    working_directory: ~/code
-    executor:
-      name: android/android-machine
-      resource-class: large
-      tag: 2023.07.1 # https://circleci.com/developer/machine/image/android
+    executor: android_compatible
     steps:
       - install_with_cache      
       - run:
@@ -98,11 +104,7 @@ jobs:
           channel: team-mobile-bots
 
   deploy_sample:
-    working_directory: ~/code
-    executor:
-      name: android/android-machine
-      resource-class: large
-      tag: 2022.04.1 # https://circleci.com/developer/machine/image/android
+    executor: android_compatible
     steps:
       - install_with_cache      
       - run:
@@ -176,11 +178,7 @@ jobs:
           channel: team-mobile-bots  
 
   update_code_coverage:
-    working_directory: ~/code
-    executor:
-      name: android/android-machine
-      resource-class: large
-      tag: 2022.04.1 # https://circleci.com/developer/machine/image/android
+    executor: android_compatible
     steps:
       - install_with_cache      
       - run:
