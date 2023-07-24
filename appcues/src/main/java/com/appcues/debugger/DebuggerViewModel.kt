@@ -1,6 +1,5 @@
 package com.appcues.debugger
 
-import android.util.Log
 import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -227,7 +226,6 @@ internal class DebuggerViewModel(
 
     fun captureScreen(debuggerState: MutableDebuggerState) {
         appcuesCoroutineScope.launch {
-            Log.i("Logcues", "capture screen dismiss")
             experienceRenderer.dismiss(RenderContext.Modal, markComplete = false, destroyed = false)
 
             withContext(Dispatchers.Main) {

@@ -3,7 +3,7 @@ package com.appcues.trait
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.Composable
 import com.appcues.ui.composables.AppcuesPaginationData
-import com.appcues.ui.composables.appcuesPaginationData
+import com.appcues.ui.composables.LocalExperienceCompositionState
 
 /**
  * A trait that can hold one or more pages of content and control the paging behavior to navigate
@@ -54,19 +54,22 @@ public interface ContentHolderTrait : ExperienceTrait {
         /**
          * set the pagination data based on custom [CreateContentHolder] implementation
          */
-        public fun setPaginationData(paginationData: AppcuesPaginationData) {
-            appcuesPaginationData.value = paginationData
+        @Composable
+        public fun UpdatePaginationData(paginationData: AppcuesPaginationData) {
+            LocalExperienceCompositionState.current.paginationData.value = paginationData
+
             customPaginationData = paginationData
         }
 
         /**
          * the SDK will invoke this function to ensure we have the minimum
          * required [AppcuesPaginationData] that can be used by other traits
-         * in case no [setPaginationData] was called during [CreateContentHolder]
+         * in case no [UpdatePaginationData] was called during [CreateContentHolder]
          */
-        internal fun syncPaginationData() {
+        @Composable
+        internal fun SyncPaginationData() {
             if (customPaginationData == null) {
-                appcuesPaginationData.value = defaultPaginationData
+                LocalExperienceCompositionState.current.paginationData.value = defaultPaginationData
             }
         }
     }
