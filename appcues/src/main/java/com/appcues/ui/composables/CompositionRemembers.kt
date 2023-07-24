@@ -2,29 +2,12 @@ package com.appcues.ui.composables
 
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import com.appcues.ui.AppcuesViewModel.UIState
 import com.appcues.ui.AppcuesViewModel.UIState.Rendering
-
-@Composable
-internal fun rememberLastRenderingState(state: State<UIState>) = remember { mutableStateOf<Rendering?>(null) }
-    .apply {
-        value = state.value.let { uiState ->
-            if (uiState is Rendering) {
-                // if UIState is rendering then we set new value and show content
-                isContentVisible.targetState = true
-                isBackdropVisible.targetState = true
-                uiState
-            } else {
-                // else we keep the same value and hide content to trigger dismissing animation
-                isContentVisible.targetState = false
-                isBackdropVisible.targetState = false
-                value
-            }
-        }
-    }
 
 /**
  * AppcuesPaginationData is used to communicate between different traits
@@ -51,22 +34,18 @@ public data class AppcuesPaginationData(
     val scrollOffset: Float
 )
 
-internal val appcuesPaginationData = mutableStateOf(AppcuesPaginationData(1, 0, 0.0f))
+internal class ExperienceCompositionState {
 
-/**
- * rememberAppcuesPaginationState is used by traits that wants to know updates about pagination data
- * returns a State of AppcuesPaginationData containing pageCount, currentPage index and scrollingOffset
- * that can be used to sync animations
- */
-@Composable
-internal fun rememberAppcuesPaginationState() = remember<State<AppcuesPaginationData>> { appcuesPaginationData }
+    internal val paginationData = mutableStateOf(AppcuesPaginationData(1, 0, 0.0f))
 
-internal val isContentVisible = MutableTransitionState(false)
+    internal val isContentVisible = MutableTransitionState(false)
 
-internal val isBackdropVisible = MutableTransitionState(false)
+    internal val isBackdropVisible = MutableTransitionState(false)
+}
 
 @Composable
 internal fun LaunchOnHideAnimationCompleted(block: () -> Unit) {
+    val isContentVisible = LocalExperienceCompositionState.current.isContentVisible
     with(remember { mutableStateOf(isContentVisible) }.value) {
         // if hide animation is completed
         if (isIdle && currentState.not()) {
@@ -77,6 +56,7 @@ internal fun LaunchOnHideAnimationCompleted(block: () -> Unit) {
 
 @Composable
 internal fun LaunchOnShowAnimationCompleted(block: () -> Unit) {
+    val isContentVisible = LocalExperienceCompositionState.current.isContentVisible
     with(remember { mutableStateOf(isContentVisible) }.value) {
         // if show animation is completed
         if (isIdle && currentState) {
@@ -87,7 +67,38 @@ internal fun LaunchOnShowAnimationCompleted(block: () -> Unit) {
 
 // we could make this public to give more flexibility in the future
 @Composable
-internal fun rememberAppcuesContentVisibility() = remember { isContentVisible }
+internal fun rememberAppcuesContentVisibility() = LocalExperienceCompositionState.current.let { remember { it.isContentVisible } }
 
 @Composable
-internal fun rememberAppcuesBackdropVisibility() = remember { isBackdropVisible }
+internal fun rememberAppcuesBackdropVisibility() = LocalExperienceCompositionState.current.let { remember { it.isBackdropVisible } }
+
+/**
+ * rememberAppcuesPaginationState is used by traits that wants to know updates about pagination data
+ * returns a State of AppcuesPaginationData containing pageCount, currentPage index and scrollingOffset
+ * that can be used to sync animations
+ */
+@Composable
+internal fun rememberAppcuesPaginationState() = LocalExperienceCompositionState.current.let {
+    remember<State<AppcuesPaginationData>> { it.paginationData }
+}
+
+@Composable
+internal fun rememberLastRenderingState(state: State<UIState>): MutableState<Rendering?> {
+    val experienceState = LocalExperienceCompositionState.current
+    return remember { mutableStateOf<Rendering?>(null) }
+        .apply {
+            value = state.value.let { uiState ->
+                if (uiState is Rendering) {
+                    // if UIState is rendering then we set new value and show content
+                    experienceState.isContentVisible.targetState = true
+                    experienceState.isBackdropVisible.targetState = true
+                    uiState
+                } else {
+                    // else we keep the same value and hide content to trigger dismissing animation
+                    experienceState.isContentVisible.targetState = false
+                    experienceState.isBackdropVisible.targetState = false
+                    value
+                }
+            }
+        }
+}

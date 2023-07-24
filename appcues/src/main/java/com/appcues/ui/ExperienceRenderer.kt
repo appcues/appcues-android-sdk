@@ -1,6 +1,5 @@
 package com.appcues.ui
 
-import android.util.Log
 import com.appcues.AppcuesConfig
 import com.appcues.SessionMonitor
 import com.appcues.analytics.AnalyticsTracker
@@ -151,7 +150,6 @@ internal class ExperienceRenderer(
     }
 
     suspend fun dismiss(renderContext: RenderContext, markComplete: Boolean, destroyed: Boolean): ResultOf<State, Error> {
-        Log.i("Logcues", "dismissing for render context $renderContext")
         return slots[renderContext]?.handleAction(EndExperience(markComplete, destroyed)) ?: Failure(RenderContextNotActive(renderContext))
     }
 }
