@@ -1,6 +1,5 @@
 package com.appcues.trait.appcues
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -157,7 +156,6 @@ internal class SkippableTrait(
                     .pointerInput(Unit) {
                         detectTapGestures {
                             appcuesCoroutineScope.launch {
-                                Log.i("Logcues", "skippable backdrop tap $renderContext")
                                 experienceRenderer.dismiss(renderContext, markComplete = false, destroyed = false)
                             }
                         }
@@ -298,7 +296,6 @@ internal class SkippableTrait(
                 clickable(
                     onClick = {
                         appcuesCoroutineScope.launch {
-                            Log.i("Logcues", "skippable close click $renderContext")
                             experienceRenderer.dismiss(renderContext, markComplete = false, destroyed = false)
                         }
                     },
