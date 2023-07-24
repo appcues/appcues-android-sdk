@@ -71,6 +71,7 @@ internal class SessionMonitor(
         applicationBackgrounded = null
 
         if (elapsed >= sessionTimeout) {
+            _sessionId = UUID.randomUUID()
             analyticsTracker.track(AnalyticsEvent.SessionStarted, null, true)
         } else {
             analyticsTracker.track(AnalyticsEvent.SessionResumed, null, false)
