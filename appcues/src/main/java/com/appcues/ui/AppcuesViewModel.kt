@@ -1,5 +1,6 @@
 package com.appcues.ui
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.appcues.AppcuesCoroutineScope
@@ -90,6 +91,7 @@ internal class AppcuesViewModel(
             // from an external source (ex deep link) and we should end the experience
             if (state is Rendering) {
                 appcuesCoroutineScope.launch {
+                    Log.i("Logcues", "activity changed $renderContext")
                     experienceRenderer.dismiss(renderContext, markComplete = false, destroyed = true)
                 }
             }
