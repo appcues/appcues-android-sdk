@@ -24,11 +24,10 @@ import com.appcues.logging.Logcues
 import com.appcues.ui.composables.AppcuesActionsDelegate
 import com.appcues.ui.composables.ComposeContainer
 import com.appcues.ui.composables.LocalAppcuesActionDelegate
+import com.appcues.ui.composables.LocalExperienceCompositionState
 import com.appcues.ui.composables.LocalExperienceStepFormStateDelegate
 import com.appcues.ui.composables.LocalImageLoader
 import com.appcues.ui.composables.LocalLogcues
-import com.appcues.ui.composables.isBackdropVisible
-import com.appcues.ui.composables.isContentVisible
 import com.appcues.ui.primitive.Compose
 import com.appcues.ui.theme.AppcuesTheme
 import java.util.UUID
@@ -56,8 +55,7 @@ public fun ComposeContent(json: String, imageLoader: ImageLoader) {
 // It constructs a synthetic 1-step experience. The traits are applied at the experience level. The
 // optional content is injected into the single step, if present.
 @Composable
-public fun ComposeContainer(context: Context, stepContentJson: List<String>?, traitJson: List<String>, imageLoader: ImageLoader)
-{
+public fun ComposeContainer(context: Context, stepContentJson: List<String>?, traitJson: List<String>, imageLoader: ImageLoader) {
     // set up a Koin scope for testing - for experience/trait mapping, trait registry, etc
     val scope = AppcuesKoinContext.createAppcuesScope(context, AppcuesConfig("", ""))
 
@@ -69,16 +67,16 @@ public fun ComposeContainer(context: Context, stepContentJson: List<String>?, tr
     }
 
     // injecting content is optional, may only be testing a trait
-    val stepContent = stepContentJson?.let {contentItems ->
+    val stepContent = stepContentJson?.let { contentItems ->
         contentItems.map { contentItem ->
             MoshiConfiguration.moshi.adapter(PrimitiveResponse::class.java).fromJson(contentItem)!!
         }
     } ?: listOf()
 
     // update the experience to add the given traits at the experience level
-     val updatedExperienceResponse = experienceResponse.copy(
-         traits = traitResponses,
-         steps = experienceResponse.steps.map { stepContainerResponse ->
+    val updatedExperienceResponse = experienceResponse.copy(
+        traits = traitResponses,
+        steps = experienceResponse.steps.map { stepContainerResponse ->
             stepContainerResponse.copy(
                 children = stepContainerResponse.children.map { stepResponse ->
                     stepResponse.copy(
@@ -100,8 +98,11 @@ public fun ComposeContainer(context: Context, stepContentJson: List<String>?, tr
     val container = experience.stepContainers[0]
 
     // render the step container on the desired step
-    isContentVisible.targetState = true // so animated visibility works
-    isBackdropVisible.targetState = true // so animated visibility works
+    LocalExperienceCompositionState.current.let {
+        it.isContentVisible.targetState = true // so animated visibility works
+        it.isBackdropVisible.targetState = true // so animated visibility works
+    }
+
     AppcuesTheme {
         CompositionLocalProvider(
             LocalImageLoader provides imageLoader,

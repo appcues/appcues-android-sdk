@@ -50,9 +50,15 @@ internal data class AppcuesPagination(val onPageChanged: (Int) -> Unit)
 
 internal val LocalViewModel = staticCompositionLocalOf<AppcuesViewModel> { noLocalProvidedFor("AppcuesViewModel") }
 
-internal val LocalShakeGestureListener = staticCompositionLocalOf<ShakeGestureListener> { noLocalProvidedFor("ShakeGestureListener") }
+internal val LocalShakeGestureListener = staticCompositionLocalOf<ShakeGestureListener> {
+    noLocalProvidedFor("ShakeGestureListener")
+}
 
 internal val LocalLogcues = staticCompositionLocalOf<Logcues> { noLocalProvidedFor("LocalLogcues") }
+
+internal val LocalExperienceCompositionState = staticCompositionLocalOf<ExperienceCompositionState> {
+    noLocalProvidedFor("LocalExperienceCompositionState")
+}
 
 internal val LocalExperienceStepFormStateDelegate = compositionLocalOf { ExperienceStepFormState() }
 
@@ -60,7 +66,7 @@ internal val LocalStackScope = compositionLocalOf { StackScope.COLUMN }
 
 internal val LocalChromeClient = compositionLocalOf { AccompanistWebChromeClient() }
 
-internal val LocalAppcuesTraitExceptionHandler = compositionLocalOf { AppcuesTraitExceptionHandler {} }
+internal val LocalTraitExceptionHandler = compositionLocalOf { AppcuesTraitExceptionHandler {} }
 
 internal data class AppcuesTraitExceptionHandler(val onTraitException: (AppcuesTraitException) -> Unit)
 
