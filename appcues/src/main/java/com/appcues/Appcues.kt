@@ -3,6 +3,7 @@ package com.appcues
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.view.ViewGroup
 import com.appcues.action.ActionRegistry
 import com.appcues.action.ExperienceAction
 import com.appcues.analytics.ActivityScreenTracking
@@ -74,6 +75,7 @@ public class Appcues internal constructor(koinScope: Scope) {
     private val debuggerManager by koinScope.inject<AppcuesDebuggerManager>()
     private val appcuesCoroutineScope by koinScope.inject<AppcuesCoroutineScope>()
     private val analyticsPublisher by koinScope.inject<AnalyticsPublisher>()
+    private val renderContextManager by koinScope.inject<RenderContextManager>()
 
     /**
      * Set the listener to be notified about the display of Experience content.
@@ -232,6 +234,16 @@ public class Appcues internal constructor(koinScope: Scope) {
      */
     public fun registerAction(type: String, actionFactory: (config: Map<String, Any>?) -> ExperienceAction) {
         actionRegistry.register(type, actionFactory)
+    }
+
+    /**
+     * register an embed view for given frameId.
+     *
+     * @param frameId unique string set in builder that is used to identify this embed view with qualified experiences
+     * @param view frame used to inflate the embedded experience
+     */
+    public fun registerEmbed(frameId: String, view: ViewGroup) {
+        renderContextManager.registerEmbedFrame(frameId, view)
     }
 
     /**
