@@ -9,12 +9,14 @@ import com.appcues.data.model.RenderContext
 import com.appcues.ui.ExperienceRenderer
 
 internal class StepInteractionAction(
-    override val config: AppcuesConfigMap,
     private val renderContext: RenderContext,
     private val interaction: StepInteractionData,
     private val analyticsTracker: AnalyticsTracker,
     private val experienceRenderer: ExperienceRenderer,
 ) : ExperienceAction {
+
+    // required in ExperienceAction interface but not used in this action
+    override val config: AppcuesConfigMap = null
 
     class StepInteractionData(
         val interactionType: InteractionType,

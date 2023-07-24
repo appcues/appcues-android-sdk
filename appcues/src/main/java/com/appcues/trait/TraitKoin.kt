@@ -20,17 +20,17 @@ internal object TraitKoin : KoinScopePlugin {
     override fun ScopeDSL.install() {
         scoped { TraitRegistry(get(), get()) }
 
-        factory { params -> BackdropTrait(params.getOrNull()) }
-        factory { params -> StepAnimationTrait(params.getOrNull()) }
-        factory { params -> TargetElementTrait(params.getOrNull()) }
-        factory { params -> TargetRectangleTrait(params.getOrNull()) }
-        factory { params -> BackdropKeyholeTrait(params.getOrNull()) }
-        factory { params -> ModalTrait(params.getOrNull(), params.get(), get()) }
-        factory { params -> TooltipTrait(params.getOrNull(), params.get(), get()) }
-        factory { params -> SkippableTrait(params.getOrNull(), params.get(), get(), get()) }
-        factory { params -> CarouselTrait(params.getOrNull()) }
-        factory { params -> PagingDotsTrait(params.getOrNull()) }
-        factory { params -> TargetInteractionTrait(params.getOrNull(), params.get(), get(), get()) }
-        factory { params -> BackgroundContentTrait(params.getOrNull(), params.get()) }
+        factory { BackdropTrait(it[0]) }
+        factory { StepAnimationTrait(it[0]) }
+        factory { TargetElementTrait(it[0]) }
+        factory { TargetRectangleTrait(it[0]) }
+        factory { BackdropKeyholeTrait(it[0]) }
+        factory { ModalTrait(it[0], it[1], get()) }
+        factory { TooltipTrait(it[0], it[1], get()) }
+        factory { SkippableTrait(it[0], it[1], get(), get()) }
+        factory { CarouselTrait(it[0]) }
+        factory { PagingDotsTrait(it[0]) }
+        factory { TargetInteractionTrait(it[0], it[1], get(), get()) }
+        factory { BackgroundContentTrait(it[0], it[1]) }
     }
 }

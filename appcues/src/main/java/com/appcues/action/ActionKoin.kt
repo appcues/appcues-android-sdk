@@ -19,16 +19,16 @@ internal object ActionKoin : KoinScopePlugin {
         scoped { ActionProcessor(get()) }
 
         // access to internal in context actions
-        factory { CloseAction(it.getOrNull(), it.get(), get()) }
-        factory { ContinueAction(it.getOrNull(), it.get(), get()) }
-        factory { LaunchExperienceAction(it.getOrNull(), it.get(), get()) }
-        factory { StepInteractionAction(it.getOrNull(), it.get(), it.get(), get(), get()) }
-        factory { SubmitFormAction(it.getOrNull(), it.get(), get(), get()) }
+        factory { CloseAction(it[0], it[1], get()) }
+        factory { ContinueAction(it[0], it[1], get()) }
+        factory { LaunchExperienceAction(it[0], it[1], get()) }
+        factory { StepInteractionAction(it[0], it[1], get(), get()) }
+        factory { SubmitFormAction(it[0], it[1], get(), get()) }
 
         // other
-        factory { LinkAction(it.getOrNull(), get(), get()) }
-        factory { TrackEventAction(it.getOrNull(), get()) }
-        factory { UpdateProfileAction(it.getOrNull(), get(), get()) }
-        factory { RequestReviewAction(it.getOrNull(), get(), get()) }
+        factory { LinkAction(config = it[0], get(), get()) }
+        factory { TrackEventAction(it[0], get()) }
+        factory { UpdateProfileAction(it[0], get(), get()) }
+        factory { RequestReviewAction(it[0], get(), get()) }
     }
 }
