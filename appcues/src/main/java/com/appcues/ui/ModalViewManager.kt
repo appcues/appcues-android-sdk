@@ -21,16 +21,18 @@ import com.appcues.ui.primitive.EmbedChromeClient
 import com.appcues.ui.utils.getParentView
 import org.koin.core.scope.Scope
 
-internal class AppcuesOverlayViewManager(
+internal class ModalViewManager(
     private val scope: Scope,
     private val renderContext: RenderContext
-) : DefaultLifecycleObserver, ActivityMonitorListener {
+) : DefaultLifecycleObserver {
 
     private lateinit var viewModel: AppcuesViewModel
     private lateinit var gestureListener: ShakeGestureListener
 
-    override fun onActivityChanged(activity: Activity) {
-        viewModel.onActivityChanged()
+    private val activityMonitorListener = object : ActivityMonitorListener {
+        override fun onActivityChanged(activity: Activity) {
+            viewModel.onActivityChanged()
+        }
     }
 
     override fun onResume(owner: LifecycleOwner) {
@@ -49,23 +51,23 @@ internal class AppcuesOverlayViewManager(
         // inform the caller that we cannot currently add a view in the app
         if (activity == null || AppcuesActivityMonitor.isPaused) return false
 
-        AppcuesActivityMonitor.subscribe(this)
-
-        return activity.addOverlayView()
+        return activity.setupView()
     }
 
     private fun onCompositionDismiss() {
-        AppcuesActivityMonitor.unsubscribe(this)
+        AppcuesActivityMonitor.unsubscribe(activityMonitorListener)
 
-        AppcuesActivityMonitor.activity?.removeOverlayView()
+        AppcuesActivityMonitor.activity?.removeView()
     }
 
-    private fun Activity.addOverlayView(): Boolean {
+    private fun Activity.setupView(): Boolean {
+        AppcuesActivityMonitor.subscribe(activityMonitorListener)
+
         viewModel = AppcuesViewModel(scope, renderContext, ::onCompositionDismiss)
         gestureListener = ShakeGestureListener(this)
 
         val parentView = getParentView()
-        parentView.findViewTreeLifecycleOwner()?.lifecycle?.addObserver(this@AppcuesOverlayViewManager)
+        parentView.findViewTreeLifecycleOwner()?.lifecycle?.addObserver(this@ModalViewManager)
 
         val overlayView = if (parentView.findViewById<View>(R.id.appcues_overlay_view) == null) {
             // then we add
@@ -105,9 +107,9 @@ internal class AppcuesOverlayViewManager(
         return true
     }
 
-    private fun Activity.removeOverlayView() {
+    private fun Activity.removeView() {
         getParentView().let {
-            it.findViewTreeLifecycleOwner()?.lifecycle?.removeObserver(this@AppcuesOverlayViewManager)
+            it.findViewTreeLifecycleOwner()?.lifecycle?.removeObserver(this@ModalViewManager)
 
             it.post {
                 it.removeView(findViewById(R.id.appcues_overlay_view))

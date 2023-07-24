@@ -52,7 +52,7 @@ import com.appcues.trait.extensions.getTooltipPointerPosition
 import com.appcues.trait.extensions.rememberDpStepAnimation
 import com.appcues.trait.extensions.rememberFloatStepAnimation
 import com.appcues.trait.extensions.rememberTargetRectangleInfo
-import com.appcues.ui.AppcuesOverlayViewManager
+import com.appcues.ui.ModalViewManager
 import com.appcues.ui.composables.LocalAppcuesStepMetadata
 import com.appcues.ui.composables.rememberAppcuesContentVisibility
 import com.appcues.ui.extensions.coloredShadowPath
@@ -101,7 +101,7 @@ internal class TooltipTrait(
     }
 
     override fun present() {
-        val success = AppcuesOverlayViewManager(scope, renderContext).start()
+        val success = ModalViewManager(scope, renderContext).start()
 
         if (!success) {
             throw AppcuesTraitException("unable to create tooltip overlay view")
