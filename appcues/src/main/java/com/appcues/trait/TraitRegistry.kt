@@ -7,6 +7,7 @@ import com.appcues.trait.appcues.BackdropKeyholeTrait
 import com.appcues.trait.appcues.BackdropTrait
 import com.appcues.trait.appcues.BackgroundContentTrait
 import com.appcues.trait.appcues.CarouselTrait
+import com.appcues.trait.appcues.EmbedTrait
 import com.appcues.trait.appcues.ModalTrait
 import com.appcues.trait.appcues.PagingDotsTrait
 import com.appcues.trait.appcues.SkippableTrait
@@ -37,6 +38,7 @@ internal class TraitRegistry(
     init {
         register(ModalTrait.TYPE) { config, _, context -> get<ModalTrait> { parametersOf(config, context) } }
         register(TooltipTrait.TYPE) { config, _, context -> get<TooltipTrait> { parametersOf(config, context) } }
+        register(EmbedTrait.TYPE) { config, _, context -> get<EmbedTrait> { parametersOf(config, context) } }
         register(TargetInteractionTrait.TYPE) { config, _, context -> get<TargetInteractionTrait> { parametersOf(config, context) } }
         register(SkippableTrait.TYPE) { config, _, context -> get<SkippableTrait> { parametersOf(config, context) } }
 

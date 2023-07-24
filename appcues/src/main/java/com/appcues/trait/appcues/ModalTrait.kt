@@ -10,7 +10,7 @@ import com.appcues.data.model.getConfigStyle
 import com.appcues.trait.AppcuesTraitException
 import com.appcues.trait.ContentWrappingTrait
 import com.appcues.trait.PresentingTrait
-import com.appcues.ui.AppcuesOverlayViewManager
+import com.appcues.ui.ModalViewManager
 import com.appcues.ui.modal.BottomSheetModal
 import com.appcues.ui.modal.DialogModal
 import com.appcues.ui.modal.ExpandedBottomSheetModal
@@ -51,7 +51,7 @@ internal class ModalTrait(
     }
 
     override fun present() {
-        val success = AppcuesOverlayViewManager(scope, renderContext).start()
+        val success = ModalViewManager(scope, renderContext).start()
 
         if (!success) {
             throw AppcuesTraitException("unable to create modal overlay view")
