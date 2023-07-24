@@ -28,6 +28,7 @@ internal object AppcuesKoin : KoinScopePlugin {
             )
         }
         scoped { AppcuesDebuggerManager(context = get(), koinScope = this) }
+        scoped { RenderContextManager() }
         scoped { ContextResources(context = get()) }
         scoped { ExperienceRenderer(scope = get()) }
         scoped {
