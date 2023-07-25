@@ -1,4 +1,4 @@
-package com.appcues.ui
+package com.appcues.ui.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -15,9 +15,10 @@ import com.appcues.statemachine.State.BeginningStep
 import com.appcues.statemachine.State.EndingStep
 import com.appcues.statemachine.StepReference.StepGroupPageIndex
 import com.appcues.trait.AppcuesTraitException
-import com.appcues.ui.AppcuesViewModel.UIState.Dismissing
-import com.appcues.ui.AppcuesViewModel.UIState.Idle
-import com.appcues.ui.AppcuesViewModel.UIState.Rendering
+import com.appcues.ui.ExperienceRenderer
+import com.appcues.ui.presentation.AppcuesViewModel.UIState.Dismissing
+import com.appcues.ui.presentation.AppcuesViewModel.UIState.Idle
+import com.appcues.ui.presentation.AppcuesViewModel.UIState.Rendering
 import com.appcues.util.ResultOf
 import com.appcues.util.ResultOf.Failure
 import kotlinx.coroutines.flow.MutableStateFlow
