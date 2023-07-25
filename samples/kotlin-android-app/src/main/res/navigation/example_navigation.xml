@@ -22,4 +22,10 @@
         android:name="com.appcues.samples.kotlin.main.GroupFragment"
         android:label="@string/fragment_group"
         tools:layout="@layout/fragment_group" />
+
+    <fragment
+        android:id="@+id/navigation_embed"
+        android:name="com.appcues.samples.kotlin.main.EmbedFragment"
+        android:label="@string/fragment_embed"
+        tools:layout="@layout/fragment_embed" />
 </navigation>

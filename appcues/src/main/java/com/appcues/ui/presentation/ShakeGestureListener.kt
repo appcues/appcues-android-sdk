@@ -1,4 +1,4 @@
-package com.appcues.ui
+package com.appcues.ui.presentation
 
 import android.content.Context
 import android.content.Context.SENSOR_SERVICE

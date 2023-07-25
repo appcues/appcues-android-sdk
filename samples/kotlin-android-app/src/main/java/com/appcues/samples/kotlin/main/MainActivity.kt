@@ -34,6 +34,7 @@ class MainActivity : AppCompatActivity() {
                 id.navigation_events,
                 id.navigation_profile,
                 id.navigation_group,
+                id.navigation_embed
             )
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
@@ -43,9 +44,11 @@ class MainActivity : AppCompatActivity() {
         val eventsTab = menu.findItem(id.navigation_events)
         val profileTab = menu.findItem(id.navigation_profile)
         val groupTab = menu.findItem(id.navigation_group)
+        val embedTab = menu.findItem(id.navigation_embed)
         MenuItemCompat.setContentDescription(eventsTab, resources.getString(R.string.content_description_tab_events))
         MenuItemCompat.setContentDescription(profileTab, resources.getString(R.string.content_description_tab_profile))
         MenuItemCompat.setContentDescription(groupTab, resources.getString(R.string.content_description_tab_group))
+        MenuItemCompat.setContentDescription(embedTab, resources.getString(R.string.content_description_tab_group))
 
         handleLinkIntent(intent)
     }
@@ -67,6 +70,7 @@ class MainActivity : AppCompatActivity() {
                     "events" -> binding.navView.selectedItemId = id.navigation_events
                     "profile" -> binding.navView.selectedItemId = id.navigation_profile
                     "group" -> binding.navView.selectedItemId = id.navigation_group
+                    "embeds" -> binding.navView.selectedItemId = id.navigation_embed
                 }
             }
         }

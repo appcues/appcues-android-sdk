@@ -13,7 +13,12 @@
 
     <item
         android:id="@+id/navigation_group"
-        android:icon="@drawable/appcues_ic_group"
+        android:icon="@drawable/ic_group"
         android:title="@string/tab_group" />
+
+    <item
+        android:id="@+id/navigation_embed"
+        android:icon="@drawable/ic_embeds"
+        android:title="@string/tab_embed" />
 
 </menu>
