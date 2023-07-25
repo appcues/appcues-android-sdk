@@ -100,27 +100,26 @@ internal class ExperienceRenderer(
         return newExperience.priority == NORMAL && state != Idling
     }
 
-    suspend fun show(qualifiedExperiences: List<Experience>): Boolean {
-        if (qualifiedExperiences.isEmpty()) {
-            // If given an empty list of qualified experiences, complete with a success because this function has completed without error.
-            // This function only recurses on a non-empty case, so this block only applies to the initial external call.
-            return true
-        }
+    suspend fun show(experiences: List<Experience>) {
+        showEmbeds(experiences.filter { it.renderContext is RenderContext.Embed })
+        showModal(experiences.filter { it.renderContext is RenderContext.Modal })
+    }
 
-        qualifiedExperiences.filter { it.renderContext is RenderContext.Embed }.forEach {
-            // TODO what to do here
+    private suspend fun showModal(experiences: List<Experience>) {
+        // ensure list is not empty, after that we get the first experience and try to show it.
+        // If it does not show we drop that experience and recursively call this again
+        if (experiences.isEmpty()) return
+
+        if (!show(experiences.first())) {
+            showModal(experiences.drop(1))
+        }
+    }
+
+    private suspend fun showEmbeds(experiences: List<Experience>) {
+        experiences.forEach {
+            // TODO what to do hereª
             show(it)
         }
-
-        val modalSuccess = show(qualifiedExperiences.first { it.renderContext is RenderContext.Modal })
-        if (!modalSuccess) {
-            val remainingExperiences = qualifiedExperiences.drop(1)
-            if (remainingExperiences.isNotEmpty()) {
-                // fallback logic - try the next remaining experience, if available
-                return show(remainingExperiences)
-            }
-        }
-        return modalSuccess
     }
 
     suspend fun show(experienceId: String, trigger: ExperienceTrigger): Boolean {
