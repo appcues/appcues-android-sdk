@@ -123,6 +123,7 @@ $dokka.location:com.appcues/ElementSelector/evaluateMatch/#com.appcues.ElementSe
 $dokka.location:com.appcues/ElementSelector/toMap/#/PointingToDeclaration/appcues/com.appcues/-element-selector/to-map.html
 $dokka.location:com.appcues/ElementTargetingStrategy///PointingToDeclaration/appcues/com.appcues/-element-targeting-strategy/index.html
 $dokka.location:com.appcues/ElementTargetingStrategy/captureLayout/#/PointingToDeclaration/appcues/com.appcues/-element-targeting-strategy/capture-layout.html
+$dokka.location:com.appcues/ElementTargetingStrategy/captureScreenshot/#/PointingToDeclaration/appcues/com.appcues/-element-targeting-strategy/capture-screenshot.html
 $dokka.location:com.appcues/ElementTargetingStrategy/inflateSelectorFrom/#kotlin.collections.Map[kotlin.String,kotlin.String]/PointingToDeclaration/appcues/com.appcues/-element-targeting-strategy/inflate-selector-from.html
 $dokka.location:com.appcues/ExperienceListener///PointingToDeclaration/appcues/com.appcues/-experience-listener/index.html
 $dokka.location:com.appcues/ExperienceListener/experienceFinished/#java.util.UUID/PointingToDeclaration/appcues/com.appcues/-experience-listener/experience-finished.html
@@ -135,6 +136,11 @@ $dokka.location:com.appcues/LoggingLevel/valueOf/#kotlin.String/PointingToDeclar
 $dokka.location:com.appcues/LoggingLevel/values/#/PointingToDeclaration/appcues/com.appcues/-logging-level/values.html
 $dokka.location:com.appcues/NavigationHandler///PointingToDeclaration/appcues/com.appcues/-navigation-handler/index.html
 $dokka.location:com.appcues/NavigationHandler/navigateTo/#android.net.Uri/PointingToDeclaration/appcues/com.appcues/-navigation-handler/navigate-to.html
+$dokka.location:com.appcues/Screenshot///PointingToDeclaration/appcues/com.appcues/-screenshot/index.html
+$dokka.location:com.appcues/Screenshot/Screenshot/#android.graphics.Bitmap#android.util.Size#androidx.core.graphics.Insets/PointingToDeclaration/appcues/com.appcues/-screenshot/-screenshot.html
+$dokka.location:com.appcues/Screenshot/bitmap/#/PointingToDeclaration/appcues/com.appcues/-screenshot/bitmap.html
+$dokka.location:com.appcues/Screenshot/insets/#/PointingToDeclaration/appcues/com.appcues/-screenshot/insets.html
+$dokka.location:com.appcues/Screenshot/size/#/PointingToDeclaration/appcues/com.appcues/-screenshot/size.html
 $dokka.location:com.appcues/ViewElement///PointingToDeclaration/appcues/com.appcues/-view-element/index.html
 $dokka.location:com.appcues/ViewElement/ViewElement/#java.util.UUID#kotlin.Int#kotlin.Int#kotlin.Int#kotlin.Int#kotlin.String#kotlin.String?#com.appcues.ElementSelector?#kotlin.collections.List[com.appcues.ViewElement]?/PointingToDeclaration/appcues/com.appcues/-view-element/-view-element.html
 $dokka.location:com.appcues/ViewElement/children/#/PointingToDeclaration/appcues/com.appcues/-view-element/children.html

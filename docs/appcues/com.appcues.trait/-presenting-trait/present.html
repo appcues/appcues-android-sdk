@@ -42,6 +42,9 @@
     <div>
     </div>
     <div class="pull-right d-flex">
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":appcues:dokkaHtml/release">androidJvm</button>
+        </div>
         <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
         <div id="searchBar"></div>
     </div>
@@ -51,7 +54,7 @@
         <div id="sideMenu"></div>
     </div>
     <div id="main">
-<div class="main-content" id="content" pageIds="appcues::com.appcues.trait/PresentingTrait/present/#/PointingToDeclaration//1172753313">
+<div class="main-content" data-page-type="member" id="content" pageIds="appcues::com.appcues.trait/PresentingTrait/present/#/PointingToDeclaration//1172753313">
   <div class="breadcrumbs"><a href="../../../index.html">appcues</a><span class="delimiter">/</span><a href="../index.html">com.appcues.trait</a><span class="delimiter">/</span><a href="index.html">PresentingTrait</a><span class="delimiter">/</span><span class="current">present</span></div>
   <div class="cover ">
     <h1 class="cover"><span><span>present</span></span></h1>
@@ -60,6 +63,7 @@
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.appcues.data.model.AppcuesConfigMap
+import com.appcues.data.model.RenderContext
 import com.appcues.data.model.getConfigOrDefault
 import com.appcues.data.model.getConfigStyle
 import com.appcues.trait.AppcuesTraitException
@@ -76,6 +80,7 @@ fun main() {
    //sampleStart 
    internal class ModalTrait(
     override val config: AppcuesConfigMap,
+    private val renderContext: RenderContext,
     private val scope: Scope,
 ) : ContentWrappingTrait, PresentingTrait {
 
@@ -106,7 +111,7 @@ fun main() {
     }
 
     override fun present() {
-        val success = AppcuesOverlayViewManager(scope = scope).start()
+        val success = AppcuesOverlayViewManager(scope, renderContext).start()
 
         if (!success) {
             throw AppcuesTraitException(&quot;unable to create modal overlay view&quot;)

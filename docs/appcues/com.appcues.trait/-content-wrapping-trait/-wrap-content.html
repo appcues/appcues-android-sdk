@@ -42,6 +42,9 @@
     <div>
     </div>
     <div class="pull-right d-flex">
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":appcues:dokkaHtml/release">androidJvm</button>
+        </div>
         <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
         <div id="searchBar"></div>
     </div>
@@ -51,15 +54,16 @@
         <div id="sideMenu"></div>
     </div>
     <div id="main">
-<div class="main-content" id="content" pageIds="appcues::com.appcues.trait/ContentWrappingTrait/WrapContent/#kotlin.Function3[androidx.compose.ui.Modifier,androidx.compose.foundation.layout.PaddingValues,androidx.compose.foundation.layout.PaddingValues,kotlin.Unit]/PointingToDeclaration//1172753313">
+<div class="main-content" data-page-type="member" id="content" pageIds="appcues::com.appcues.trait/ContentWrappingTrait/WrapContent/#kotlin.Function3[androidx.compose.ui.Modifier,androidx.compose.foundation.layout.PaddingValues,androidx.compose.foundation.layout.PaddingValues,kotlin.Unit]/PointingToDeclaration//1172753313">
   <div class="breadcrumbs"><a href="../../../index.html">appcues</a><span class="delimiter">/</span><a href="../index.html">com.appcues.trait</a><span class="delimiter">/</span><a href="index.html">ContentWrappingTrait</a><span class="delimiter">/</span><span class="current">WrapContent</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Wrap</span><wbr></wbr><span><span>Content</span></span></h1>
   </div>
-  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":appcues:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">abstract </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="-wrap-content.html"><span class="token function">WrapContent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">content<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a> </span><span class="token punctuation">(</span><span class="token keyword"></span>modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token punctuation">, </span><span class="token keyword"></span>containerPadding<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/PaddingValues.html">PaddingValues</a><span class="token punctuation">, </span><span class="token keyword"></span>safeAreaInsets<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/PaddingValues.html">PaddingValues</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><p class="paragraph">Creates a wrapper for the <a href="-wrap-content.html">content</a>.</p><p class="paragraph">Example usage:</p><h4 class="">Samples</h4><div class="sample-container"><pre><code class="runnablesample monospace block lang-kotlin" theme="idea">import androidx.compose.foundation.layout.PaddingValues
+  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":appcues:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">abstract </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="-wrap-content.html"><span class="token function">WrapContent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">content<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a> </span><span class="token punctuation">(</span><span class="token keyword"></span>modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token punctuation">, </span><span class="token keyword"></span>containerPadding<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/PaddingValues.html">PaddingValues</a><span class="token punctuation">, </span><span class="token keyword"></span>safeAreaInsets<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/PaddingValues.html">PaddingValues</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><p class="paragraph">Creates a wrapper for the <a href="-wrap-content.html">content</a>.</p><p class="paragraph">Example usage:</p><h4 class="">Parameters</h4><div class="table"><div class="table-row" data-filterable-current=":appcues:dokkaHtml/release" data-filterable-set=":appcues:dokkaHtml/release"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span><span>content</span></span></u></div></span></div><div><div class="title"><p class="paragraph">The content of the wrapper.     modifier gives flexibility of the content main box down the stream of composition.     containerPadding the padding defined in container style. The main content renders inside this padding.     safeAreaInsets defines safe area padding for the content inside.</p></div></div></div></div></div><h4 class="">Samples</h4><div class="sample-container"><pre><code class="runnablesample monospace block lang-kotlin" theme="idea">import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.appcues.data.model.AppcuesConfigMap
+import com.appcues.data.model.RenderContext
 import com.appcues.data.model.getConfigOrDefault
 import com.appcues.data.model.getConfigStyle
 import com.appcues.trait.AppcuesTraitException
@@ -76,6 +80,7 @@ fun main() {
    //sampleStart 
    internal class ModalTrait(
     override val config: AppcuesConfigMap,
+    private val renderContext: RenderContext,
     private val scope: Scope,
 ) : ContentWrappingTrait, PresentingTrait {
 
@@ -106,7 +111,7 @@ fun main() {
     }
 
     override fun present() {
-        val success = AppcuesOverlayViewManager(scope = scope).start()
+        val success = AppcuesOverlayViewManager(scope, renderContext).start()
 
         if (!success) {
             throw AppcuesTraitException(&quot;unable to create modal overlay view&quot;)
@@ -114,7 +119,7 @@ fun main() {
     }
 } 
    //sampleEnd
-}</code></pre></div><h4 class="">Parameters</h4><div data-togglable="Parameters"><div class="table" data-togglable="Parameters"><div class="table-row" data-filterable-current=":appcues:dokkaHtml/release" data-filterable-set=":appcues:dokkaHtml/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><u><span><span>content</span></span></u></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">The content of the wrapper.     modifier gives flexibility of the content main box down the stream of composition.     containerPadding the padding defined in container style. The main content renders inside this padding.     safeAreaInsets defines safe area padding for the content inside.</p></div></div></div></div></div></div></div></div></div>
+}</code></pre></div></div></div>
 </div>
       <div class="footer">
         <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2023 Copyright</span><span
