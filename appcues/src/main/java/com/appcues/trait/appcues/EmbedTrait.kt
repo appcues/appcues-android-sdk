@@ -24,12 +24,12 @@ import com.appcues.trait.AppcuesTraitAnimatedVisibility
 import com.appcues.trait.AppcuesTraitException
 import com.appcues.trait.ContentWrappingTrait
 import com.appcues.trait.PresentingTrait
-import com.appcues.ui.EmbedViewManager
 import com.appcues.ui.composables.rememberAppcuesContentVisibility
 import com.appcues.ui.extensions.getBoxAlignment
 import com.appcues.ui.extensions.getPaddings
 import com.appcues.ui.extensions.modalStyle
 import com.appcues.ui.modal.dialogModifier
+import com.appcues.ui.presentation.EmbedViewPresenter
 import org.koin.core.scope.Scope
 
 internal class EmbedTrait(
@@ -65,7 +65,7 @@ internal class EmbedTrait(
                     modifier = Modifier
                         .align(style.getBoxAlignment())
                         .fillMaxWidth()
-                        // default modal style modifiers
+                        // Embeds works well using the modifier set for modal (presentationStyle = dialog) for now.
                         .modalStyle(style, isDark) { Modifier.dialogModifier(it, isDark) },
                     content = {
                         content(
@@ -90,12 +90,10 @@ internal class EmbedTrait(
     }
 
     override fun present() {
-        val success = if (renderContext is RenderContext.Embed) {
-            EmbedViewManager(scope, renderContext, scope.get()).start()
-        } else false
+        val success = EmbedViewPresenter(scope, renderContext, scope.get()).present()
 
         if (!success) {
-            throw AppcuesTraitException("unable to create embed view")
+            throw AppcuesTraitException("unable to create embed view for $renderContext")
         }
     }
 }

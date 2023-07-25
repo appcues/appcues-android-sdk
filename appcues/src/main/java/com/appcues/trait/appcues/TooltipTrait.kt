@@ -52,7 +52,6 @@ import com.appcues.trait.extensions.getTooltipPointerPosition
 import com.appcues.trait.extensions.rememberDpStepAnimation
 import com.appcues.trait.extensions.rememberFloatStepAnimation
 import com.appcues.trait.extensions.rememberTargetRectangleInfo
-import com.appcues.ui.ModalViewManager
 import com.appcues.ui.composables.LocalAppcuesStepMetadata
 import com.appcues.ui.composables.rememberAppcuesContentVisibility
 import com.appcues.ui.extensions.coloredShadowPath
@@ -61,6 +60,7 @@ import com.appcues.ui.extensions.getPaddings
 import com.appcues.ui.extensions.styleBackground
 import com.appcues.ui.modal.dialogEnterTransition
 import com.appcues.ui.modal.dialogExitTransition
+import com.appcues.ui.presentation.OverlayViewPresenter
 import com.appcues.ui.utils.AppcuesWindowInfo
 import com.appcues.ui.utils.rememberAppcuesWindowInfo
 import com.appcues.util.ne
@@ -101,7 +101,7 @@ internal class TooltipTrait(
     }
 
     override fun present() {
-        val success = ModalViewManager(scope, renderContext).start()
+        val success = OverlayViewPresenter(scope, renderContext).present()
 
         if (!success) {
             throw AppcuesTraitException("unable to create tooltip overlay view")
@@ -110,7 +110,11 @@ internal class TooltipTrait(
 
     @Composable
     override fun WrapContent(
-        content: @Composable (modifier: Modifier, containerPadding: PaddingValues, safeAreaInsets: PaddingValues) -> Unit
+        content: @Composable (
+            modifier: Modifier,
+            containerPadding: PaddingValues,
+            safeAreaInsets: PaddingValues
+        ) -> Unit
     ) {
         val metadata = LocalAppcuesStepMetadata.current
         val targetRectInfo = rememberTargetRectangleInfo(metadata)

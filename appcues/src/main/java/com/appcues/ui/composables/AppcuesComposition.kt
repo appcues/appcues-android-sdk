@@ -23,10 +23,10 @@ import com.appcues.trait.ContainerDecoratingTrait
 import com.appcues.trait.ContainerDecoratingTrait.ContainerDecoratingType
 import com.appcues.trait.ContentHolderTrait.ContainerPages
 import com.appcues.trait.MetadataSettingTrait
-import com.appcues.ui.AppcuesViewModel
-import com.appcues.ui.AppcuesViewModel.UIState.Dismissing
-import com.appcues.ui.AppcuesViewModel.UIState.Rendering
-import com.appcues.ui.ShakeGestureListener
+import com.appcues.ui.presentation.AppcuesViewModel
+import com.appcues.ui.presentation.AppcuesViewModel.UIState.Dismissing
+import com.appcues.ui.presentation.AppcuesViewModel.UIState.Rendering
+import com.appcues.ui.presentation.ShakeGestureListener
 import com.appcues.ui.theme.AppcuesTheme
 import com.google.accompanist.web.AccompanistWebChromeClient
 import kotlinx.coroutines.delay
