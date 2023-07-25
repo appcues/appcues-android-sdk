@@ -21,11 +21,11 @@ import com.appcues.action.ExperienceAction
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType
 import com.appcues.data.model.ExperiencePrimitive
 import com.appcues.logging.Logcues
-import com.appcues.ui.ShakeGestureListener
 import com.appcues.ui.composables.AppcuesActionsDelegate
 import com.appcues.ui.composables.LocalAppcuesActionDelegate
 import com.appcues.ui.composables.LocalLogcues
 import com.appcues.ui.composables.LocalShakeGestureListener
+import com.appcues.ui.presentation.ShakeGestureListener
 import com.appcues.ui.primitive.Compose
 
 /**

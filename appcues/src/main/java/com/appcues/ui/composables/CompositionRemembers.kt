@@ -6,8 +6,8 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import com.appcues.ui.AppcuesViewModel.UIState
-import com.appcues.ui.AppcuesViewModel.UIState.Rendering
+import com.appcues.ui.presentation.AppcuesViewModel.UIState
+import com.appcues.ui.presentation.AppcuesViewModel.UIState.Rendering
 
 /**
  * AppcuesPaginationData is used to communicate between different traits
