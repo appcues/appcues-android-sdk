@@ -11,9 +11,11 @@
     <string name="tab_events">Events</string>
     <string name="tab_profile">Profile</string>
     <string name="tab_group">Group</string>
+    <string name="tab_embed">Embed</string>
     <string name="fragment_events">Trigger Events</string>
     <string name="fragment_profile">Update Profile</string>
     <string name="fragment_group">Update Group</string>
+    <string name="fragment_embed">Embed Experiences</string>
     <string name="trigger_event_1_button">Trigger Event 1</string>
     <string name="trigger_event_2_button">Trigger Event 2</string>
     <string name="launch_modal_button">Launch Modal</string>
@@ -29,4 +31,5 @@
     <string name="content_description_tab_events">Events Tab</string>
     <string name="content_description_tab_profile">Profile Tab</string>
     <string name="content_description_tab_group">Group Tab</string>
+    <string name="content_description_tab_embed">Embed Tab</string>
 </resources>
