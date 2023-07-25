@@ -40,9 +40,6 @@ class EventsFragment : Fragment() {
             appcues.track("event2")
         }
 
-        appcues.registerEmbed("frame1", binding.embedFrame1)
-        appcues.registerEmbed("frame2", binding.embedFrame2)
-
         return binding.root
     }
 

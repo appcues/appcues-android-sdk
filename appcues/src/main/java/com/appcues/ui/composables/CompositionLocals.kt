@@ -12,9 +12,9 @@ import com.appcues.data.model.Action
 import com.appcues.data.model.ExperienceStepFormState
 import com.appcues.logging.Logcues
 import com.appcues.trait.AppcuesTraitException
-import com.appcues.ui.AppcuesViewModel
-import com.appcues.ui.ShakeGestureListener
 import com.appcues.ui.composables.StackScope.ColumnStackScope
+import com.appcues.ui.presentation.AppcuesViewModel
+import com.appcues.ui.presentation.ShakeGestureListener
 import com.google.accompanist.web.AccompanistWebChromeClient
 import java.util.UUID
 
