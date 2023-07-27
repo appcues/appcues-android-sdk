@@ -2,7 +2,6 @@ package com.appcues.ui.presentation
 
 import android.app.Activity
 import android.view.ViewGroup
-import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ComposeView
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -58,8 +57,8 @@ internal abstract class ViewPresenter(
 
             composeView.setContent {
                 AppcuesComposition(
-                    viewModel = remember { viewModel },
-                    shakeGestureListener = remember { gestureListener },
+                    viewModel = viewModel,
+                    shakeGestureListener = gestureListener,
                     logcues = scope.get(),
                     chromeClient = EmbedChromeClient(this),
                 )
