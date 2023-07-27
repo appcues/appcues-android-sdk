@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <FrameLayout
+        <com.appcues.AppcuesFrameView
             android:id="@+id/embedFrame1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -19,7 +19,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <FrameLayout
+        <com.appcues.AppcuesFrameView
             android:id="@+id/embedFrame2"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -28,7 +28,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/embedFrame1" />
 
-        <FrameLayout
+        <com.appcues.AppcuesFrameView
             android:id="@+id/embedFrame3"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -37,7 +37,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/embedFrame2" />
 
-        <FrameLayout
+        <com.appcues.AppcuesFrameView
             android:id="@+id/embedFrame4"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
