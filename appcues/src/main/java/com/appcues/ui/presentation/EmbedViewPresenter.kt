@@ -14,16 +14,12 @@ internal class EmbedViewPresenter(
 ) : ViewPresenter(scope, renderContext) {
 
     override fun ViewGroup.setupView(): ComposeView? {
-        val embedView = renderContextManager.getEmbedView(renderContext) ?: return null
-
-        return ComposeView(context).also {
-            embedView.addView(it)
-        }
+        return renderContextManager.getEmbedFrame(renderContext)?.setupComposeView()
     }
 
     override fun ViewGroup.removeView() {
         post {
-            renderContextManager.getEmbedView(renderContext)?.removeAllViews()
+            renderContextManager.getEmbedFrame(renderContext)?.clearComposition()
         }
     }
 
@@ -31,6 +27,6 @@ internal class EmbedViewPresenter(
         // adhering to requirement for the AppcuesViewModel constructor on line 71 below
         // would got called during any trait error/retry flow - which is not applicable here
         // for embeds, as it is only used for tooltips in flows, currently.
-        renderContextManager.getEmbedView(renderContext)?.isVisible = isVisible
+        renderContextManager.getEmbedFrame(renderContext)?.isVisible = isVisible
     }
 }
