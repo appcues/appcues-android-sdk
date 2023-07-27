@@ -3,7 +3,6 @@ package com.appcues
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.view.ViewGroup
 import com.appcues.action.ActionRegistry
 import com.appcues.action.ExperienceAction
 import com.appcues.analytics.ActivityScreenTracking
@@ -237,13 +236,13 @@ public class Appcues internal constructor(koinScope: Scope) {
     }
 
     /**
-     * register an embed view for given frameId.
+     * Register an AppcuesFrameView for a given frameId.
      *
-     * @param frameId unique string set in builder that is used to identify this embed view with qualified experiences
-     * @param view frame used to inflate the embedded experience
+     * @param frameId unique string set in builder that is used to identify this AppcuesFrameView with qualified experiences
+     * @param frame frame used to inflate the embedded experience
      */
-    public fun registerEmbed(frameId: String, view: ViewGroup) {
-        renderContextManager.registerEmbedFrame(frameId, view)
+    public fun registerEmbed(frameId: String, frame: AppcuesFrameView) {
+        renderContextManager.registerEmbedFrame(frameId, frame)
     }
 
     /**

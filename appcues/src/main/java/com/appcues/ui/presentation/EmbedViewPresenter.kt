@@ -13,16 +13,12 @@ internal class EmbedViewPresenter(
 ) : ViewPresenter(scope, renderContext) {
 
     override fun ViewGroup.setupView(): ComposeView? {
-        val embedView = renderContextManager.getEmbedView(renderContext) ?: return null
-
-        return ComposeView(context).also {
-            embedView.addView(it)
-        }
+        return renderContextManager.getEmbedFrame(renderContext)?.setupComposeView()
     }
 
     override fun ViewGroup.removeView() {
         post {
-            renderContextManager.getEmbedView(renderContext)?.removeAllViews()
+            renderContextManager.getEmbedFrame(renderContext)?.clearComposition()
         }
     }
 }
