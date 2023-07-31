@@ -36,10 +36,10 @@ internal class AndroidViewSelector(
         const val SELECTOR_APPCUES_ID = "appcuesID"
     }
 
-    private val contentDescription: String? = properties[SELECTOR_CONTENT_DESCRIPTION]
-    private val tag: String? = properties[SELECTOR_TAG]
-    private val resourceName: String? = properties[SELECTOR_RESOURCE_NAME]
-    private val appcuesId: String? = properties[SELECTOR_APPCUES_ID]
+    private val contentDescription: String? = properties[SELECTOR_CONTENT_DESCRIPTION]?.ifEmpty { null }
+    private val tag: String? = properties[SELECTOR_TAG]?.ifEmpty { null }
+    private val resourceName: String? = properties[SELECTOR_RESOURCE_NAME]?.ifEmpty { null }
+    private val appcuesId: String? = properties[SELECTOR_APPCUES_ID]?.ifEmpty { null }
 
     val isValid: Boolean
         get() = contentDescription != null || tag != null || resourceName != null || appcuesId != null
@@ -54,7 +54,7 @@ internal class AndroidViewSelector(
         }
 
     override fun toMap(): Map<String, String> {
-        return properties.filterValues { it != null }.mapValues { it.value as String }
+        return properties.filterValues { !it.isNullOrEmpty() }.mapValues { it.value as String }
     }
 
     @Suppress("MagicNumber")
