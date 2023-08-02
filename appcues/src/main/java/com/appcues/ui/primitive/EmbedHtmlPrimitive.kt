@@ -7,9 +7,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import com.appcues.data.model.ExperiencePrimitive.EmbedHtmlPrimitive
+import com.appcues.data.model.styling.ComponentContentMode.FILL
 import com.appcues.ui.composables.LocalChromeClient
-import com.appcues.ui.composables.LocalStackScope
-import com.appcues.ui.extensions.imageAspectRatio
+import com.appcues.ui.extensions.aspectRatio
 import com.google.accompanist.web.AccompanistWebChromeClient
 import com.google.accompanist.web.WebView
 import com.google.accompanist.web.rememberWebViewStateWithHTMLData
@@ -17,7 +17,6 @@ import com.google.accompanist.web.rememberWebViewStateWithHTMLData
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
 internal fun EmbedHtmlPrimitive.Compose(modifier: Modifier) {
-    val stackScope = LocalStackScope.current
     val chromeClient = LocalChromeClient.current
     val webViewState = rememberWebViewStateWithHTMLData(
         data = """
@@ -34,7 +33,7 @@ internal fun EmbedHtmlPrimitive.Compose(modifier: Modifier) {
 
     WebView(
         modifier = modifier.then(
-            Modifier.imageAspectRatio(intrinsicSize, stackScope, style, LocalDensity.current)
+            Modifier.aspectRatio(FILL, intrinsicSize, style, LocalDensity.current)
         ),
         state = webViewState,
         onCreated = {

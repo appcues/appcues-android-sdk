@@ -37,12 +37,12 @@ import com.appcues.data.model.styling.ComponentContentMode
 import com.appcues.data.model.styling.ComponentSize
 import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.ui.composables.AppcuesActionsDelegate
-import com.appcues.ui.composables.StackScope
-import com.appcues.ui.utils.AppcuesAspectRatioModifier
+import com.appcues.ui.utils.AspectRatioContentModeModifier
 import com.appcues.ui.utils.margin
 import com.appcues.util.eq
 import com.appcues.util.ne
 import java.util.UUID
+import kotlin.math.roundToInt
 
 /**
  * Used by ExperiencePrimitive Compose
@@ -327,53 +327,38 @@ internal fun List<Action>.toLongPressMotionOrNull(
         }
 }
 
-internal fun Modifier.imageAspectRatio(
-    intrinsicSize: ComponentSize?,
-    stackScope: StackScope,
-    style: ComponentStyle,
-    density: Density,
-    contentMode: ComponentContentMode = ComponentContentMode.FILL
-) = this.then(
-    // apply aspectRatio only when intrinsicSize is not null or any values is bigger than 0
-    if (intrinsicSize != null && (intrinsicSize.width > 0 && intrinsicSize.height > 0)) {
-        Modifier.appcuesAspectRatio(
-            ratio = intrinsicSize.width.toFloat() / intrinsicSize.height.toFloat(),
-            contentMode = contentMode,
-            stackScope = stackScope,
-            // when we have size we should subtract the padding to know image's true size
-            widthPixels = style.getImageWidthPixels(density),
-            heightPixels = style.getImageHeightPixels(density),
-        )
-    } else Modifier
-)
-
-private fun ComponentStyle.getImageWidthPixels(density: Density) = with(density) {
-    // get true image width by subtracting current width with existing
-    // padding (leading and trailing) and borderWidth times 2 (as it applies on both sides)
-    val horizontalPadding = (paddingLeading ?: 0.0) + (paddingTrailing ?: 0.0)
-    width?.let { (it - (horizontalPadding + (borderWidth ?: 0.0) * 2)).dp.toPx() }
+private fun ComponentStyle.getWidthPixels(density: Density) = with(density) {
+    if (width != null && width eq -1.0) {
+        // width -1.0 just means full width, not an actual width value
+        null
+    } else {
+        // get true image width by subtracting current width with existing
+        // padding (leading and trailing) and borderWidth times 2 (as it applies on both sides)
+        val horizontalPadding = (paddingLeading ?: 0.0) + (paddingTrailing ?: 0.0)
+        width?.let { (it - (horizontalPadding + (borderWidth ?: 0.0) * 2)).dp.toPx().roundToInt() }
+    }
 }
 
-private fun ComponentStyle.getImageHeightPixels(density: Density) = with(density) {
+private fun ComponentStyle.getHeightPixels(density: Density) = with(density) {
     // get true image height by subtracting current height with existing
     // padding (top and bottom) and borderWidth times 2 (as it applies on both sides)
     val verticalPadding = (paddingTop ?: 0.0) + (paddingBottom ?: 0.0)
-    height?.let { (it - (verticalPadding + (borderWidth ?: 0.0) * 2)).dp.toPx() }
+    height?.let { (it - (verticalPadding + (borderWidth ?: 0.0) * 2)).dp.toPx().roundToInt() }
 }
 
-internal fun Modifier.appcuesAspectRatio(
-    ratio: Float,
+internal fun Modifier.aspectRatio(
     contentMode: ComponentContentMode,
-    stackScope: StackScope,
-    widthPixels: Float?,
-    heightPixels: Float?,
-) =
-    this.then(
-        AppcuesAspectRatioModifier(
-            originalAspectRatio = ratio,
+    intrinsicSize: ComponentSize?,
+    style: ComponentStyle,
+    density: Density,
+) = then(
+    if (intrinsicSize != null) {
+        AspectRatioContentModeModifier(
             contentMode = contentMode,
-            stackScope = stackScope,
-            widthPixels = widthPixels,
-            heightPixels = heightPixels,
+            ratioWidth = intrinsicSize.width.toFloat(),
+            ratioHeight = intrinsicSize.height.toFloat(),
+            fixedWidth = style.getWidthPixels(density),
+            fixedHeight = style.getHeightPixels(density),
         )
-    )
+    } else Modifier
+)

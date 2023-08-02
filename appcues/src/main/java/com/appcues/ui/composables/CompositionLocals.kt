@@ -1,9 +1,7 @@
 package com.appcues.ui.composables
 
 import androidx.compose.runtime.ProvidableCompositionLocal
-import androidx.compose.runtime.State
 import androidx.compose.runtime.compositionLocalOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.staticCompositionLocalOf
 import coil.ImageLoader
 import com.appcues.action.ExperienceAction
@@ -14,7 +12,6 @@ import com.appcues.logging.Logcues
 import com.appcues.trait.AppcuesTraitException
 import com.appcues.ui.AppcuesViewModel
 import com.appcues.ui.ShakeGestureListener
-import com.appcues.ui.composables.StackScope.ColumnStackScope
 import com.google.accompanist.web.AccompanistWebChromeClient
 import java.util.UUID
 
@@ -59,7 +56,7 @@ internal val LocalLogcues = staticCompositionLocalOf<Logcues> { noLocalProvidedF
 
 internal val LocalExperienceStepFormStateDelegate = compositionLocalOf { ExperienceStepFormState() }
 
-internal val LocalStackScope = compositionLocalOf<StackScope> { ColumnStackScope(null, 0) }
+internal val LocalStackScope = compositionLocalOf { StackScope.COLUMN }
 
 internal val LocalChromeClient = compositionLocalOf { AccompanistWebChromeClient() }
 
@@ -67,33 +64,8 @@ internal val LocalAppcuesTraitExceptionHandler = compositionLocalOf { AppcuesTra
 
 internal data class AppcuesTraitExceptionHandler(val onTraitException: (AppcuesTraitException) -> Unit)
 
-internal sealed class StackScope(private val childrenCount: Int) {
-
-    private var childrenSizes = hashMapOf<UUID, Int>()
-    private val _greaterSize = mutableStateOf<Float?>(null)
-    val greaterSize: State<Float?> = _greaterSize
-
-    fun updateChildSize(id: UUID, size: Int) {
-        // if there is only one child we don't collect size
-        if (childrenCount <= 1) {
-            // negative value means no size will be set
-            _greaterSize.value = -1.0f
-            return
-        }
-
-        // collect size once per each child
-        if (!childrenSizes.containsKey(id)) {
-            childrenSizes[id] = size
-        }
-
-        // when all children have reported its size, update the greaterSize value
-        if (childrenSizes.size == childrenCount) {
-            _greaterSize.value = childrenSizes.maxOf { it.value.toFloat() }
-        }
-    }
-
-    class RowStackScope(val height: Double?, childrenCount: Int) : StackScope(childrenCount)
-    class ColumnStackScope(val width: Double?, childrenCount: Int) : StackScope(childrenCount)
+internal enum class StackScope {
+    ROW, COLUMN
 }
 
 /**
