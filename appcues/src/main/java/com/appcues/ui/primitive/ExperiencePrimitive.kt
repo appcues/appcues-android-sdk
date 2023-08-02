@@ -9,7 +9,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import coil.compose.AsyncImage
@@ -29,10 +28,6 @@ import com.appcues.ui.composables.LocalAppcuesActionDelegate
 import com.appcues.ui.composables.LocalAppcuesActions
 import com.appcues.ui.composables.LocalImageLoader
 import com.appcues.ui.composables.LocalLogcues
-import com.appcues.ui.composables.LocalStackScope
-import com.appcues.ui.composables.StackScope
-import com.appcues.ui.composables.StackScope.ColumnStackScope
-import com.appcues.ui.composables.StackScope.RowStackScope
 import com.appcues.ui.extensions.PrimitiveGestureProperties
 import com.appcues.ui.extensions.blurHashPlaceholder
 import com.appcues.ui.extensions.getBoxAlignment
@@ -42,13 +37,11 @@ import com.appcues.ui.extensions.innerPrimitiveStyle
 import com.appcues.ui.extensions.outerPrimitiveStyle
 import com.appcues.ui.extensions.toImageAsyncContentScale
 import com.appcues.ui.utils.rememberBlurHashDecoded
-import java.util.UUID
 
 // the given `modifier` is chained onto the end of the new composable, allowing a capability to apply
 // additional behaviors to those specified in the primitive configuration.
 @Composable
 internal fun ExperiencePrimitive.Compose(matchParentBox: BoxScope? = null, modifier: Modifier = Modifier) {
-    val stackScope = LocalStackScope.current
     Box(
         modifier = Modifier
             .outerPrimitiveStyle(
@@ -64,7 +57,6 @@ internal fun ExperiencePrimitive.Compose(matchParentBox: BoxScope? = null, modif
                 isDark = isSystemInDarkTheme(),
                 matchParentBox = matchParentBox,
             )
-            .updateStackScope(stackScope, id)
             .then(modifier),
         contentAlignment = Alignment.Center
     ) {
@@ -87,15 +79,6 @@ internal fun ExperiencePrimitive.Compose(matchParentBox: BoxScope? = null, modif
         }
     }
 }
-
-private fun Modifier.updateStackScope(stackScope: StackScope, id: UUID) = this.then(
-    Modifier.onSizeChanged {
-        when (stackScope) {
-            is ColumnStackScope -> stackScope.updateChildSize(id, it.width)
-            is RowStackScope -> stackScope.updateChildSize(id, it.height)
-        }
-    }
-)
 
 private fun ExperiencePrimitive.getRole(): Role {
     // This is for any tap actions in the experience which currently only

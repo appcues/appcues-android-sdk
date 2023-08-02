@@ -4,8 +4,10 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.height
 import androidx.compose.material.ProvideTextStyle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -26,7 +28,7 @@ import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.data.model.styling.ComponentStyle.ComponentHorizontalAlignment
 import com.appcues.data.model.styling.ComponentStyle.ComponentVerticalAlignment
 import com.appcues.ui.composables.LocalStackScope
-import com.appcues.ui.composables.StackScope.RowStackScope
+import com.appcues.ui.composables.StackScope
 import com.appcues.ui.extensions.getTextStyle
 import com.appcues.ui.extensions.getVerticalAlignment
 import com.appcues.ui.theme.AppcuesPreviewPrimitive
@@ -39,11 +41,11 @@ internal fun HorizontalStackPrimitive.Compose(modifier: Modifier) {
 
     val verticalAlignment = style.getVerticalAlignment(CenterVertically)
     Row(
-        modifier = modifier,
+        modifier = modifier.height(IntrinsicSize.Min),
         horizontalArrangement = distribution.toHorizontalArrangement(spacing),
         verticalAlignment = verticalAlignment
     ) {
-        CompositionLocalProvider(LocalStackScope provides RowStackScope(style.height, items.size)) {
+        CompositionLocalProvider(LocalStackScope provides StackScope.ROW) {
             ProvideTextStyle(style.getTextStyle(LocalContext.current, isSystemInDarkTheme())) {
                 items.forEach {
                     ItemBox(distribution = distribution, primitive = it, parentVerticalAlignment = verticalAlignment) {
