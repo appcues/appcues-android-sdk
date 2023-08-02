@@ -15,7 +15,7 @@ The SDK is a Kotlin library for sending user properties and events to the Appcue
       - [Segment](#segment)
     - [One Time Setup](#one-time-setup)
       - [Initializing the SDK](#initializing-the-sdk)
-      - [Supporting Debugging and Experience Previewing](#supporting-debugging-and-experience-previewing)
+      - [Supporting Builder Preview and Screen Capture](#supporting-builder-preview-and-screen-capture)
     - [Identifying Users](#identifying-users)
     - [Tracking Screens and Events](#tracking-screens-and-events)
     - [Anchored Tooltips](#anchored-tooltips)
@@ -67,9 +67,9 @@ override fun onCreate() {
 
 Initializing the SDK requires you to provide two values: `APPCUES_ACCOUNT_ID` and `APPCUES_APPLICATION_ID`. These values can be obtained from your [Appcues settings](https://studio.appcues.com/settings/account). Refer to the help documentation on [Registering your mobile app in Studio](https://docs.appcues.com/article/848-registering-your-mobile-app-in-studio) for more information.
 
-#### Supporting Debugging and Experience Previewing
+#### Supporting Builder Preview and Screen Capture
 
-During installation, follow the steps outlined in [Configuring the Appcues URL Scheme](https://github.com/appcues/appcues-android-sdk/blob/main/docs/URLSchemeConfiguring.md). This is necessary for the optimal Appcues builder experience, to support debugging and experience preview. Refer to the [Debug Guide](https://github.com/appcues/appcues-android-sdk/blob/main/docs/Debugging.md) for details about using the Appcues debugger.
+During installation, follow the steps outlined in [Configuring the Appcues URL Scheme](https://github.com/appcues/appcues-android-sdk/blob/main/docs/URLSchemeConfiguring.md). This is necessary for the complete Appcues builder experience, supporting experience preview, screen capture and debugging. Refer to the [Debug Guide](https://github.com/appcues/appcues-android-sdk/blob/main/docs/Debugging.md) for details about using the Appcues debugger.
 
 ### Identifying Users
 
