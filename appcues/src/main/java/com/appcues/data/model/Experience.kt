@@ -17,6 +17,7 @@ internal data class Experience(
     val trigger: ExperienceTrigger,
     val requestId: UUID? = null,
     val error: String? = null,
+    var renderErrorId: UUID? = null,
 ) {
 
     // a unique identifier for this instance of the Experience, for comparison purposes, in the
