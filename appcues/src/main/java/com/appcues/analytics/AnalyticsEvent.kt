@@ -15,5 +15,6 @@ internal enum class AnalyticsEvent(val eventName: String) {
     ExperienceCompleted("appcues:v2:experience_completed"),
     ExperienceDismissed("appcues:v2:experience_dismissed"),
     ExperienceError("appcues:v2:experience_error"),
+    ExperienceRecovery("appcues:v2:experience_recovered"),
     ExperimentEntered("appcues:experiment_entered"),
 }
