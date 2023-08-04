@@ -1,7 +1,9 @@
 package com.appcues.analytics
 
+import com.appcues.data.model.Experience
 import com.appcues.data.model.Experiment
 import com.appcues.util.appcuesFormatted
+import java.util.UUID
 
 internal fun AnalyticsTracker.track(event: AnalyticsEvent, properties: Map<String, Any>? = null, interactive: Boolean = true) {
     track(event.eventName, properties, interactive, true)
@@ -19,4 +21,34 @@ internal fun AnalyticsTracker.track(experiment: Experiment) {
         ),
         interactive = false
     )
+}
+
+internal fun AnalyticsTracker.trackExperienceError(experience: Experience) {
+    val errorId = UUID.randomUUID()
+
+    track(
+        event = AnalyticsEvent.ExperienceError,
+        properties = mapOf(
+            "Id" to errorId.toString(),
+        ),
+        interactive = false
+    )
+
+    experience.renderErrorId = errorId
+}
+
+internal fun AnalyticsTracker.trackExperienceRecovery(experience: Experience) {
+    if (experience.renderErrorId == null) return
+
+    val errorId = experience.renderErrorId
+
+    track(
+        event = AnalyticsEvent.ExperienceRecovery,
+        properties = mapOf(
+            "Id" to errorId.toString(),
+        ),
+        interactive = false
+    )
+
+    experience.renderErrorId = null
 }

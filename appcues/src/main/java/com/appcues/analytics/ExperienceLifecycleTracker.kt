@@ -9,6 +9,7 @@ import com.appcues.analytics.ExperienceLifecycleEvent.ExperienceStarted
 import com.appcues.analytics.ExperienceLifecycleEvent.StepCompleted
 import com.appcues.analytics.ExperienceLifecycleEvent.StepError
 import com.appcues.analytics.ExperienceLifecycleEvent.StepSeen
+import com.appcues.data.model.Experience
 import com.appcues.statemachine.Error
 import com.appcues.statemachine.Error.ExperienceAlreadyActive
 import com.appcues.statemachine.Error.RenderContextNotActive
@@ -38,12 +39,12 @@ internal class ExperienceLifecycleTracker(
     private val storage: Storage by inject()
     private val appcuesCoroutineScope: AppcuesCoroutineScope by inject()
 
-    fun start(stateMachine: StateMachine, dispatcher: CoroutineDispatcher = Dispatchers.IO) {
-        appcuesCoroutineScope.launch(dispatcher) { stateMachine.observeState() }
+    fun start(stateMachine: StateMachine, onEndedExperience: (Experience) -> Unit, dispatcher: CoroutineDispatcher = Dispatchers.IO) {
+        appcuesCoroutineScope.launch(dispatcher) { stateMachine.observeState(onEndedExperience) }
         appcuesCoroutineScope.launch(dispatcher) { stateMachine.observeErrors() }
     }
 
-    private suspend fun StateMachine.observeState() {
+    private suspend fun StateMachine.observeState(onEndedExperience: (Experience) -> Unit) {
         stateFlow.collect {
             if (it.shouldTrack()) { // will not track for unpublished (preview) experiences
                 when (it) {
@@ -69,6 +70,8 @@ internal class ExperienceLifecycleTracker(
                             // otherwise its considered experience_dismissed (not completed)
                             trackLifecycleEvent(ExperienceDismissed(it.experience, it.flatStepIndex))
                         }
+
+                        onEndedExperience(it.experience)
                     }
                     else -> Unit
                 }
