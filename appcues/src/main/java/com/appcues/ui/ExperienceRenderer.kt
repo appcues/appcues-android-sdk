@@ -1,10 +1,13 @@
 package com.appcues.ui
 
 import com.appcues.AppcuesConfig
+import com.appcues.AppcuesFrameView
+import com.appcues.RenderContextManager
 import com.appcues.SessionMonitor
 import com.appcues.analytics.AnalyticsTracker
-import com.appcues.analytics.ExperienceLifecycleTracker
 import com.appcues.analytics.track
+import com.appcues.analytics.trackExperienceError
+import com.appcues.analytics.trackExperienceRecovery
 import com.appcues.data.AppcuesRepository
 import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperiencePriority.NORMAL
@@ -24,7 +27,6 @@ import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
 import kotlinx.coroutines.flow.SharedFlow
 import org.koin.core.component.KoinScopeComponent
-import org.koin.core.component.get
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 
@@ -38,16 +40,14 @@ internal class ExperienceRenderer(
     private val sessionMonitor by inject<SessionMonitor>()
     private val config by inject<AppcuesConfig>()
     private val analyticsTracker by inject<AnalyticsTracker>()
-    private val experienceTracker by inject<ExperienceLifecycleTracker>()
-
-    private val slots: HashMap<RenderContext, StateMachine> = hashMapOf()
+    private val renderContextManager by inject<RenderContextManager>()
 
     fun getStateFlow(renderContext: RenderContext): SharedFlow<State>? {
-        return slots[renderContext]?.stateFlow
+        return renderContextManager.getStateMachine(renderContext)?.stateFlow
     }
 
     fun getState(renderContext: RenderContext): State? {
-        return slots[renderContext]?.state
+        return renderContextManager.getStateMachine(renderContext)?.state
     }
 
     /**
@@ -66,7 +66,7 @@ internal class ExperienceRenderer(
 
         if (!canShow) return false
 
-        val stateMachine = slots.getOrCreateStateMachine(renderContext)
+        val stateMachine = renderContextManager.getOrCreateStateMachines(renderContext)
 
         if (stateMachine.checkPriority(this)) {
             return when (stateMachine.handleAction(EndExperience(markComplete = false, destroyed = false))) {
@@ -84,14 +84,6 @@ internal class ExperienceRenderer(
         }
     }
 
-    private fun HashMap<RenderContext, StateMachine>.getOrCreateStateMachine(renderContext: RenderContext): StateMachine {
-        return get(renderContext) ?: run {
-            get<StateMachine>()
-                .also { put(renderContext, it) }
-                .also { experienceTracker.start(it) }
-        }
-    }
-
     private fun StateMachine.checkPriority(newExperience: Experience): Boolean {
         // "event_trigger" or "forced" experience priority is NORMAL, "screen_view" is low -
         // if an experience is currently showing and the new experience coming in is normal priority
@@ -101,25 +93,37 @@ internal class ExperienceRenderer(
     }
 
     suspend fun show(experiences: List<Experience>) {
-        showEmbeds(experiences.filter { it.renderContext is RenderContext.Embed })
-        showModal(experiences.filter { it.renderContext is RenderContext.Modal })
+        experiences.firstOrNull()?.let {
+            renderContextManager.putExperiences(experiences, it.trigger)
+        }
+
+        // attempt to show for each individual render context
+        experiences.groupBy { it.renderContext }.forEach { attemptToShow(it.value) }
     }
 
-    private suspend fun showModal(experiences: List<Experience>) {
+    private suspend fun attemptToShow(experiences: List<Experience>) {
         // ensure list is not empty, after that we get the first experience and try to show it.
         // If it does not show we drop that experience and recursively call this again
         if (experiences.isEmpty()) return
 
-        if (!show(experiences.first())) {
-            showModal(experiences.drop(1))
+        val experience = experiences.first()
+        if (!show(experience)) {
+            analyticsTracker.trackExperienceError(experience)
+
+            attemptToShow(experiences.drop(1))
+        } else {
+            analyticsTracker.trackExperienceRecovery(experience)
         }
     }
 
-    private suspend fun showEmbeds(experiences: List<Experience>) {
-        experiences.forEach {
-            // TODO what to do hereª
-            show(it)
-        }
+    suspend fun startFrame(frameId: String, frame: AppcuesFrameView) {
+        renderContextManager.registerEmbedFrame(frameId, frame)
+
+        show(RenderContext.Embed(frameId))
+    }
+
+    suspend fun show(renderContext: RenderContext) {
+        attemptToShow(renderContextManager.getPotentialExperiences(renderContext))
     }
 
     suspend fun show(experienceId: String, trigger: ExperienceTrigger): Boolean {
@@ -133,7 +137,7 @@ internal class ExperienceRenderer(
     }
 
     suspend fun show(renderContext: RenderContext, stepReference: StepReference) {
-        slots[renderContext]?.handleAction(StartStep(stepReference))
+        renderContextManager.getStateMachine(renderContext)?.handleAction(StartStep(stepReference))
     }
 
     suspend fun preview(experienceId: String): Boolean {
@@ -145,10 +149,11 @@ internal class ExperienceRenderer(
     }
 
     fun stop() {
-        slots.values.forEach { it.stop() }
+        renderContextManager.stop()
     }
 
     suspend fun dismiss(renderContext: RenderContext, markComplete: Boolean, destroyed: Boolean): ResultOf<State, Error> {
-        return slots[renderContext]?.handleAction(EndExperience(markComplete, destroyed)) ?: Failure(RenderContextNotActive(renderContext))
+        return renderContextManager.getStateMachine(renderContext)?.handleAction(EndExperience(markComplete, destroyed))
+            ?: Failure(RenderContextNotActive(renderContext))
     }
 }
