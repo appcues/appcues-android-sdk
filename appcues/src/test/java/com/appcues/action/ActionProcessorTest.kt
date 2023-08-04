@@ -3,6 +3,7 @@ package com.appcues.action
 import com.appcues.Appcues
 import com.appcues.AppcuesConfig
 import com.appcues.AppcuesCoroutineScope
+import com.appcues.RenderContextManager
 import com.appcues.action.appcues.StepInteractionAction
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType.BUTTON_TAPPED
@@ -160,6 +161,7 @@ internal class ActionProcessorTest : KoinTest {
                         scoped { ExperienceRenderer(scope) }
                         scoped { RenderContext.Modal }
                         scoped { mockk<ExperienceLifecycleTracker>(relaxed = true) }
+                        scoped { RenderContextManager(scope = scope) }
                     }
                 }
             )

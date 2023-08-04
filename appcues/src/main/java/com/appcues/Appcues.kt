@@ -74,7 +74,6 @@ public class Appcues internal constructor(koinScope: Scope) {
     private val debuggerManager by koinScope.inject<AppcuesDebuggerManager>()
     private val appcuesCoroutineScope by koinScope.inject<AppcuesCoroutineScope>()
     private val analyticsPublisher by koinScope.inject<AnalyticsPublisher>()
-    private val renderContextManager by koinScope.inject<RenderContextManager>()
 
     /**
      * Set the listener to be notified about the display of Experience content.
@@ -242,7 +241,9 @@ public class Appcues internal constructor(koinScope: Scope) {
      * @param frame frame used to inflate the embedded experience
      */
     public fun registerEmbed(frameId: String, frame: AppcuesFrameView) {
-        renderContextManager.registerEmbedFrame(frameId, frame)
+        appcuesCoroutineScope.launch {
+            experienceRenderer.startFrame(frameId, frame)
+        }
     }
 
     /**

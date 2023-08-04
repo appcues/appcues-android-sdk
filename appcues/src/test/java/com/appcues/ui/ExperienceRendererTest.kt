@@ -1,6 +1,7 @@
 package com.appcues.ui
 
 import com.appcues.AppcuesConfig
+import com.appcues.RenderContextManager
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.analytics.ExperienceLifecycleTracker
 import com.appcues.analytics.track
@@ -194,14 +195,16 @@ internal class ExperienceRendererTest {
         KoinPlatformTools.defaultContext().getOrNull()?.close()
         val scopeId = UUID.randomUUID().toString()
         return startKoin {
-            koin.getOrCreateScope(scopeId = scopeId, qualifier = named(scopeId))
+            val scope = koin.getOrCreateScope(scopeId = scopeId, qualifier = named(scopeId))
             modules(
                 module {
                     scope(named(scopeId)) {
+                        scoped { scope }
                         factory { stateMachine }
                         scoped { AppcuesConfig("abc", "123") }
                         scoped { mockk<AnalyticsTracker>(relaxed = true) }
                         scoped { mockk<ExperienceLifecycleTracker>(relaxed = true) }
+                        scoped { RenderContextManager(scope) }
                     }
                 }
             )
