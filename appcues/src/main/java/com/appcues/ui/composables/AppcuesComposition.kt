@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,8 +28,8 @@ import com.appcues.ui.AppcuesViewModel.UIState.Dismissing
 import com.appcues.ui.AppcuesViewModel.UIState.Rendering
 import com.appcues.ui.ShakeGestureListener
 import com.appcues.ui.theme.AppcuesTheme
-import com.appcues.util.ResultOf.Success
 import com.google.accompanist.web.AccompanistWebChromeClient
+import kotlinx.coroutines.delay
 
 @Composable
 internal fun AppcuesComposition(
@@ -50,6 +49,7 @@ internal fun AppcuesComposition(
             LocalAppcuesActionDelegate provides DefaultAppcuesActionsDelegate(viewModel),
             LocalAppcuesPaginationDelegate provides AppcuesPagination { viewModel.onPageChanged(it) },
             LocalAppcuesTraitExceptionHandler provides AppcuesTraitExceptionHandler { viewModel.onTraitException(it) },
+            LocalAppcuesOverlayVisibility provides AppcuesOverlayVisibility { viewModel.updateOverlayVisibility(it) },
         ) {
             MainSurface()
         }
@@ -72,10 +72,7 @@ private fun MainSurface() {
             }
 
             LaunchOnShowAnimationCompleted {
-                val currentState = state.value
-                if (currentState is Rendering) {
-                    currentState.presentationComplete.invoke(Success(Unit))
-                }
+                viewModel.onPresentationComplete()
             }
 
             // will run when transition from visible to gone is completed
@@ -112,16 +109,50 @@ private fun BoxScope.ComposeLastRenderingState(state: Rendering) {
     ComposeContainer(state.stepContainer, state.position)
 }
 
+private suspend fun produceMetadata(
+    metadataSettingTraits: List<MetadataSettingTrait>,
+    traitExceptionHandler: AppcuesTraitExceptionHandler,
+    overlayVisibility: AppcuesOverlayVisibility,
+): HashMap<String, Any?>? {
+    return try {
+        hashMapOf<String, Any?>().apply { metadataSettingTraits.forEach { putAll(it.produceMetadata()) } }.also {
+            overlayVisibility.setVisible(true)
+        }
+    } catch (ex: AppcuesTraitException) {
+        if (ex.retryMilliseconds != null) {
+            overlayVisibility.setVisible(false)
+            delay(ex.retryMilliseconds.toLong())
+            produceMetadata(metadataSettingTraits, traitExceptionHandler, overlayVisibility)
+        } else {
+            traitExceptionHandler.onTraitException(ex)
+            null
+        }
+    }
+}
+
 @Composable
 internal fun BoxScope.ComposeContainer(stepContainer: StepContainer, stepIndex: Int) {
     with(stepContainer) {
         val backdropDecoratingTraits = remember(stepIndex) { mutableStateOf(steps[stepIndex].backdropDecoratingTraits) }
         val containerDecoratingTraits = remember(stepIndex) { mutableStateOf(steps[stepIndex].containerDecoratingTraits) }
         val metadataSettingTraits = remember(stepIndex) { mutableStateOf(steps[stepIndex].metadataSettingTraits) }
-        val stepMetadata = rememberMetadataSettingTraits(metadataSettingTraits)
 
-        if (stepMetadata != null) {
-            CompositionLocalProvider(LocalAppcuesStepMetadata provides stepMetadata.value) {
+        val traitExceptionHandler = LocalAppcuesTraitExceptionHandler.current
+        val overlayVisibility = LocalAppcuesOverlayVisibility.current
+        val stepMetadata = remember { mutableStateOf<AppcuesStepMetadata?>(null) }
+        val previousStepMetaData = remember { mutableStateOf(AppcuesStepMetadata()) }
+
+        LaunchedEffect(metadataSettingTraits) {
+            val actual = produceMetadata(metadataSettingTraits.value, traitExceptionHandler, overlayVisibility)
+            if (actual != null) {
+                stepMetadata.value = AppcuesStepMetadata(previous = previousStepMetaData.value.current, current = actual).also {
+                    previousStepMetaData.value = it
+                }
+            }
+        }
+
+        stepMetadata.value?.let { metadata ->
+            CompositionLocalProvider(LocalAppcuesStepMetadata provides metadata) {
                 // apply backdrop traits
                 ApplyBackgroundDecoratingTraits(backdropDecoratingTraits.value)
 
@@ -157,25 +188,6 @@ internal fun BoxScope.ComposeContainer(stepContainer: StepContainer, stepIndex: 
                     }
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun rememberMetadataSettingTraits(
-    metadataSettingTraits: MutableState<List<MetadataSettingTrait>>,
-): MutableState<AppcuesStepMetadata>? {
-    val traitExceptionHandler = LocalAppcuesTraitExceptionHandler.current
-    val previousStepMetaData = remember { mutableStateOf(AppcuesStepMetadata()) }
-    return remember(metadataSettingTraits.value) {
-        try {
-            val actual = hashMapOf<String, Any?>().apply { metadataSettingTraits.value.forEach { putAll(it.produceMetadata()) } }
-            mutableStateOf(AppcuesStepMetadata(previous = previousStepMetaData.value.current, current = actual)).also {
-                previousStepMetaData.value = it.value
-            }
-        } catch (ex: AppcuesTraitException) {
-            traitExceptionHandler.onTraitException(ex)
-            null
         }
     }
 }

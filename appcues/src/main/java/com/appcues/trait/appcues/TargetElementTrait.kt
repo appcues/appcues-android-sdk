@@ -27,6 +27,12 @@ internal class TargetElementTrait(
     private val contentDistance = config.getConfigOrDefault("contentDistanceFromTarget", 0.0)
     private val preferredPosition = config.getConfig<String>("contentPreferredPosition").toPosition()
 
+    @Suppress("MagicNumber")
+    private val retryIntervals = (config.getConfig<List<Int>>("retryIntervals") ?: listOf(300, 600, 900, 1_200)).toMutableList()
+
+    private val retryMilliseconds: Int?
+        get() = if (retryIntervals.isNotEmpty()) retryIntervals.removeFirst() else null
+
     override fun produceMetadata(): Map<String, Any?> {
         val view = viewMatchingSelector()
 
@@ -63,10 +69,16 @@ internal class TargetElementTrait(
 
         val weightedViews = strategy.findMatches(selector)
             // if the result is null (not just empty) - that means the UI layout was not available at all
-            ?: throw AppcuesTraitException("could not read application layout information")
+            ?: throw AppcuesTraitException(
+                message = "could not read application layout information",
+                retryMilliseconds = retryMilliseconds,
+            )
 
         if (weightedViews.isEmpty()) {
-            throw AppcuesTraitException("no view matching selector ${selector.toMap()}")
+            throw AppcuesTraitException(
+                message = "no view matching selector ${selector.toMap()}",
+                retryMilliseconds = retryMilliseconds,
+            )
         }
 
         // views contains an array of Pairs, each item being the view and its integer match value
@@ -99,6 +111,9 @@ internal class TargetElementTrait(
             return maxWeightViews[0]
         }
 
-        throw AppcuesTraitException("multiple non-distinct views (${weightedViews.count()}) matched selector ${selector.toMap()}")
+        throw AppcuesTraitException(
+            message = "multiple non-distinct views (${weightedViews.count()}) matched selector ${selector.toMap()}",
+            retryMilliseconds = retryMilliseconds,
+        )
     }
 }

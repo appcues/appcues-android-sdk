@@ -60,8 +60,12 @@ internal class AppcuesOverlayViewManager(
         AppcuesActivityMonitor.activity?.removeOverlayView()
     }
 
+    private fun setOverlayVisible(isVisible: Boolean) {
+        AppcuesActivityMonitor.activity?.updateOverlayVisibility(isVisible)
+    }
+
     private fun Activity.addOverlayView(): Boolean {
-        viewModel = AppcuesViewModel(scope, renderContext, ::onCompositionDismiss)
+        viewModel = AppcuesViewModel(scope, renderContext, ::onCompositionDismiss, ::setOverlayVisible)
         gestureListener = ShakeGestureListener(this)
 
         val parentView = getParentView()
@@ -116,6 +120,24 @@ internal class AppcuesOverlayViewManager(
                 viewModel.onFinish()
 
                 it.setAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES)
+            }
+        }
+    }
+
+    private fun Activity.updateOverlayVisibility(isVisible: Boolean) {
+        getParentView().let { parentView ->
+            parentView.post {
+                findViewById<ComposeView>(R.id.appcues_overlay_view)?.let {
+                    it.visibility = if (isVisible) ViewGroup.VISIBLE else ViewGroup.GONE
+                }
+                parentView.setAccessibility(
+                    if (isVisible) {
+                        // when our view is visible, the parent view is removed from the accessibility stack
+                        View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
+                    } else {
+                        View.IMPORTANT_FOR_ACCESSIBILITY_YES
+                    }
+                )
             }
         }
     }

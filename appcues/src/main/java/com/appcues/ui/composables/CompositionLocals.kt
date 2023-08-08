@@ -62,7 +62,11 @@ internal val LocalChromeClient = compositionLocalOf { AccompanistWebChromeClient
 
 internal val LocalAppcuesTraitExceptionHandler = compositionLocalOf { AppcuesTraitExceptionHandler {} }
 
+internal val LocalAppcuesOverlayVisibility = compositionLocalOf { AppcuesOverlayVisibility {} }
+
 internal data class AppcuesTraitExceptionHandler(val onTraitException: (AppcuesTraitException) -> Unit)
+
+internal data class AppcuesOverlayVisibility(val setVisible: (Boolean) -> Unit)
 
 internal enum class StackScope {
     ROW, COLUMN
