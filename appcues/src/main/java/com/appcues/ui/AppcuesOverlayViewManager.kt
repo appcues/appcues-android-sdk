@@ -9,6 +9,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.children
+import androidx.core.view.isVisible
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.findViewTreeLifecycleOwner
@@ -128,7 +129,7 @@ internal class AppcuesOverlayViewManager(
         getParentView().let { parentView ->
             parentView.post {
                 findViewById<ComposeView>(R.id.appcues_overlay_view)?.let {
-                    it.visibility = if (isVisible) ViewGroup.VISIBLE else ViewGroup.GONE
+                    it.isVisible = isVisible
                 }
                 parentView.setAccessibility(
                     if (isVisible) {
