@@ -84,7 +84,7 @@ internal enum class StackScope {
  * Example usage:
  * @sample com.appcues.trait.appcues.BackdropKeyholeTrait
  */
-public val LocalAppcuesStepMetadata: ProvidableCompositionLocal<AppcuesStepMetadata> =
+internal val LocalAppcuesStepMetadata: ProvidableCompositionLocal<AppcuesStepMetadata> =
     compositionLocalOf { noLocalProvidedFor("LocalAppcuesStepMetadata") }
 
 /**
@@ -93,7 +93,7 @@ public val LocalAppcuesStepMetadata: ProvidableCompositionLocal<AppcuesStepMetad
  * Previous and current refer to the previously generated metadata values and the current values.
  * It may be desired to reference both values to support transitions between them.
  */
-public data class AppcuesStepMetadata(
+internal data class AppcuesStepMetadata(
     /**
      * Previously generated metadata values
      */

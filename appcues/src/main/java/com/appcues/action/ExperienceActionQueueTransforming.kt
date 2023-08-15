@@ -5,7 +5,7 @@ import com.appcues.Appcues
 /**
  * An `ExperienceAction` that performs modifications of the action queue executed following an interaction in an experience.
  */
-public interface ExperienceActionQueueTransforming : ExperienceAction {
+internal interface ExperienceActionQueueTransforming : ExperienceAction {
 
     /**
      *  Modify the queue of actions executed in an experience.
