@@ -26,7 +26,7 @@ internal class AnalyticsTrackerExtTest {
 
     private val coroutineScope = AppcuesCoroutineScope(Logcues(NONE))
     private val activityBuilder: ActivityRequestBuilder = mockk()
-    private val sessionMonitor: SessionMonitor = mockk()
+    private val sessionMonitor: SessionMonitor = mockk(relaxed = true)
     private val analyticsQueueProcessor: AnalyticsQueueProcessor = mockk(relaxed = true)
 
     private val analyticsFlowUpdates: ArrayList<TrackingData> = arrayListOf()
@@ -52,7 +52,8 @@ internal class AnalyticsTrackerExtTest {
     @Test
     fun `track internal event SHOULD update analyticsFlow with internal event`() {
         // given
-        every { sessionMonitor.checkSession(any()) } returns true
+        every { sessionMonitor.sessionId } returns UUID.randomUUID()
+        every { sessionMonitor.isExpired } returns false
         val activity: ActivityRequest = mockk(relaxed = true)
         every { activityBuilder.track(any(), any()) } returns activity
         // when
@@ -68,7 +69,8 @@ internal class AnalyticsTrackerExtTest {
         // GIVEN
         val activity: ActivityRequest = mockk(relaxed = true)
         every { activityBuilder.track(any(), any()) } returns activity
-        every { sessionMonitor.checkSession(any()) } returns true
+        every { sessionMonitor.sessionId } returns UUID.randomUUID()
+        every { sessionMonitor.isExpired } returns false
         val experiment = Experiment(
             id = UUID.fromString("06f9bf87-1921-4919-be55-429b278bf578"),
             group = "control",
@@ -80,17 +82,18 @@ internal class AnalyticsTrackerExtTest {
         analyticsTracker.track(experiment)
         // THEN
         verify {
-            analyticsTracker.track(
-                AnalyticsEvent.ExperimentEntered,
-                mapOf(
+            activityBuilder.track(
+                name = "appcues:experiment_entered",
+                properties = mapOf(
                     "experimentId" to "06f9bf87-1921-4919-be55-429b278bf578",
                     "experimentGroup" to "control",
                     "experimentExperienceId" to "d84c9d01-aa27-4cbb-b832-ee03720e04fc",
                     "experimentGoalId" to "my-goal",
                     "experimentContentType" to "my-content-type",
                 ),
-                false
             )
         }
+        verify { analyticsQueueProcessor.queue(activity) }
+        assertThat(analyticsFlowUpdates.first().isInternal).isTrue()
     }
 }

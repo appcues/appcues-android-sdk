@@ -16,6 +16,7 @@ import kotlinx.coroutines.launch
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import java.util.UUID
 
 internal class AnalyticsTrackerTest {
 
@@ -24,7 +25,7 @@ internal class AnalyticsTrackerTest {
 
     private val coroutineScope = AppcuesCoroutineScope(Logcues(NONE))
     private val activityBuilder: ActivityRequestBuilder = mockk()
-    private val sessionMonitor: SessionMonitor = mockk()
+    private val sessionMonitor: SessionMonitor = mockk(relaxed = true)
     private val analyticsQueueProcessor: AnalyticsQueueProcessor = mockk(relaxed = true)
 
     private val analyticsFlowUpdates: ArrayList<TrackingData> = arrayListOf()
@@ -48,9 +49,10 @@ internal class AnalyticsTrackerTest {
     }
 
     @Test
-    fun `identify SHOULD do nothing WHEN canIdentify is false`() {
+    fun `identify SHOULD do nothing WHEN no active session available`() {
         // given
-        every { sessionMonitor.checkSession(any()) } returns false
+        every { sessionMonitor.sessionId } returns null
+        every { sessionMonitor.startNewSession() } returns false
         // when
         analyticsTracker.identify()
         // then
@@ -60,12 +62,14 @@ internal class AnalyticsTrackerTest {
     @Test
     fun `identify SHOULD update analyticsFlow AND flushThenSend`() {
         // given
-        every { sessionMonitor.checkSession(any()) } returns true
+        every { sessionMonitor.sessionId } returns UUID.randomUUID()
+        every { sessionMonitor.startNewSession() } returns true
         val activity: ActivityRequest = mockk(relaxed = true)
         every { activityBuilder.identify(any()) } returns activity
         // when
         analyticsTracker.identify()
         // then
+        verify { sessionMonitor.updateLastActivity() }
         assertThat(analyticsFlowUpdates).hasSize(1)
         verify { analyticsQueueProcessor.flushThenSend(activity) }
         assertThat(analyticsFlowUpdates.first().type).isEqualTo(AnalyticType.IDENTIFY)
@@ -74,9 +78,10 @@ internal class AnalyticsTrackerTest {
     }
 
     @Test
-    fun `track SHOULD do nothing WHEN canTrackEvent is false`() {
+    fun `track SHOULD do nothing WHEN no active session available`() {
         // given
-        every { sessionMonitor.checkSession(any()) } returns false
+        every { sessionMonitor.sessionId } returns null
+        every { sessionMonitor.startNewSession() } returns false
         // when
         analyticsTracker.track("event1")
         // then
@@ -86,12 +91,14 @@ internal class AnalyticsTrackerTest {
     @Test
     fun `track SHOULD update analyticsFlow AND queueThenFlush WHEN interactive is true`() {
         // given
-        every { sessionMonitor.checkSession(any()) } returns true
+        every { sessionMonitor.sessionId } returns UUID.randomUUID()
+        every { sessionMonitor.isExpired } returns false
         val activity: ActivityRequest = mockk(relaxed = true)
         every { activityBuilder.track(any()) } returns activity
         // when
         analyticsTracker.track("event1", interactive = true)
         // then
+        verify { sessionMonitor.updateLastActivity() }
         assertThat(analyticsFlowUpdates).hasSize(1)
         verify { analyticsQueueProcessor.queueThenFlush(activity) }
         assertThat(analyticsFlowUpdates.first().type).isEqualTo(AnalyticType.EVENT)
@@ -102,12 +109,14 @@ internal class AnalyticsTrackerTest {
     @Test
     fun `track SHOULD update analyticsFlow AND queue WHEN interactive is false`() {
         // given
-        every { sessionMonitor.checkSession(any()) } returns true
+        every { sessionMonitor.sessionId } returns UUID.randomUUID()
+        every { sessionMonitor.isExpired } returns false
         val activity: ActivityRequest = mockk(relaxed = true)
         every { activityBuilder.track(any()) } returns activity
         // when
         analyticsTracker.track("event1", interactive = false)
         // then
+        verify { sessionMonitor.updateLastActivity() }
         assertThat(analyticsFlowUpdates).hasSize(1)
         verify { analyticsQueueProcessor.queue(activity) }
         assertThat(analyticsFlowUpdates.first().type).isEqualTo(AnalyticType.EVENT)
@@ -116,9 +125,10 @@ internal class AnalyticsTrackerTest {
     }
 
     @Test
-    fun `screen SHOULD do nothing WHEN canTrackScreen is false`() {
+    fun `screen SHOULD do nothing WHEN no active session available`() {
         // given
-        every { sessionMonitor.checkSession(any()) } returns false
+        every { sessionMonitor.sessionId } returns null
+        every { sessionMonitor.startNewSession() } returns false
         // when
         analyticsTracker.screen("title")
         // then
@@ -128,12 +138,14 @@ internal class AnalyticsTrackerTest {
     @Test
     fun `screen SHOULD update analyticsFlow AND queueThenFlush`() {
         // given
-        every { sessionMonitor.checkSession(any()) } returns true
+        every { sessionMonitor.sessionId } returns UUID.randomUUID()
+        every { sessionMonitor.isExpired } returns false
         val activity: ActivityRequest = mockk(relaxed = true)
         every { activityBuilder.screen(any()) } returns activity
         // when
         analyticsTracker.screen("title")
         // then
+        verify { sessionMonitor.updateLastActivity() }
         assertThat(analyticsFlowUpdates).hasSize(1)
         verify { analyticsQueueProcessor.queueThenFlush(activity) }
         assertThat(analyticsFlowUpdates.first().type).isEqualTo(AnalyticType.SCREEN)
@@ -142,9 +154,10 @@ internal class AnalyticsTrackerTest {
     }
 
     @Test
-    fun `group SHOULD do nothing WHEN canTrackGroup is false`() {
+    fun `group SHOULD do nothing WHEN no active session available`() {
         // given
-        every { sessionMonitor.checkSession(any()) } returns false
+        every { sessionMonitor.sessionId } returns null
+        every { sessionMonitor.startNewSession() } returns false
         // when
         analyticsTracker.group()
         // then
@@ -154,12 +167,14 @@ internal class AnalyticsTrackerTest {
     @Test
     fun `group SHOULD update analyticsFlow AND flushThenSend`() {
         // given
-        every { sessionMonitor.checkSession(any()) } returns true
+        every { sessionMonitor.sessionId } returns UUID.randomUUID()
+        every { sessionMonitor.isExpired } returns false
         val activity: ActivityRequest = mockk(relaxed = true)
         every { activityBuilder.group() } returns activity
         // when
         analyticsTracker.group()
         // then
+        verify { sessionMonitor.updateLastActivity() }
         assertThat(analyticsFlowUpdates).hasSize(1)
         verify { analyticsQueueProcessor.flushThenSend(activity) }
         assertThat(analyticsFlowUpdates.first().type).isEqualTo(AnalyticType.GROUP)
