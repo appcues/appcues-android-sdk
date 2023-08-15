@@ -8,19 +8,19 @@ import androidx.compose.runtime.Composable
  * A trait that decorates a container of one or more steps in an experience, to add content either underneath
  * or on top of the main content of the step.
  */
-public interface ContainerDecoratingTrait : ExperienceTrait {
+internal interface ContainerDecoratingTrait : ExperienceTrait {
 
     /**
      * Denotes whether a container decoration is rendered under or over the container's main content.
      */
-    public enum class ContainerDecoratingType {
+    enum class ContainerDecoratingType {
         UNDERLAY, OVERLAY
     }
 
     /**
      * [containerComposeOrder] defines whether this trait will be rendered under or over the container's main layout (steps)
      */
-    public val containerComposeOrder: ContainerDecoratingType
+    val containerComposeOrder: ContainerDecoratingType
 
     /**
      * Decorates the container, it can decorate UNDER the content or OVER the content.
@@ -32,5 +32,5 @@ public interface ContainerDecoratingTrait : ExperienceTrait {
      * @param safeAreaInsets The safe area information from the wrapper trait.
      */
     @Composable
-    public fun BoxScope.DecorateContainer(containerPadding: PaddingValues, safeAreaInsets: PaddingValues)
+    fun BoxScope.DecorateContainer(containerPadding: PaddingValues, safeAreaInsets: PaddingValues)
 }
