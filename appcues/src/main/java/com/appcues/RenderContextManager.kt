@@ -26,10 +26,15 @@ internal class RenderContextManager(override val scope: Scope) : KoinScopeCompon
     fun registerEmbedFrame(frameId: String, frame: AppcuesFrameView) {
         val renderContext = Embed(frameId)
 
+        // clearing the composition to ensure there is no previous composition set.
+        // maybe coming from a recycler view item
+        frame.clearComposition()
+        // also clears the last reference if it exists
+        frameSlots[renderContext]?.get()?.clearComposition()
         // silently removing the existing state machine to ensure we get a new one when trying
         // to start an experience for this render context
         stateMachineSlots.remove(renderContext)
-        frameSlots[Embed(frameId)] = WeakReference(frame)
+        frameSlots[renderContext] = WeakReference(frame)
     }
 
     fun getEmbedFrame(renderContext: RenderContext): AppcuesFrameView? {
