@@ -35,7 +35,6 @@ internal class RetrofitAppcuesRemoteSourceTest {
             service = appcuesService,
             config = config,
             storage = storage,
-            sessionMonitor = sessionMonitor,
         )
     }
 
@@ -58,9 +57,9 @@ internal class RetrofitAppcuesRemoteSourceTest {
     }
 
     @Test
-    fun `getExperiencePreview SHOULD add Bearer token auth WHEN userSignature is not null AND session is active`() = runTest {
+    fun `getExperiencePreview SHOULD add Bearer token auth WHEN userSignature is not null AND userId exists`() = runTest {
         // Given
-        every { sessionMonitor.isActive } returns true
+        // userId set in storage in setUp()
 
         // When
         retrofitAppcuesRemoteSource.getExperiencePreview("test-experience", "abc")
@@ -70,28 +69,15 @@ internal class RetrofitAppcuesRemoteSourceTest {
     }
 
     @Test
-    fun `getExperiencePreview SHOULD NOT add Bearer token auth WHEN userSignature is null AND session is active`() = runTest {
+    fun `getExperiencePreview SHOULD NOT add Bearer token auth WHEN userSignature is null AND userId exists`() = runTest {
         // Given
-        every { sessionMonitor.isActive } returns true
+        // userId set in storage in setUp()
 
         // When
         retrofitAppcuesRemoteSource.getExperiencePreview("test-experience", null)
 
         // Then
         coVerify { appcuesService.experiencePreview("123", "test-user", "test-experience", null) }
-    }
-
-    @Test
-    fun `getExperiencePreview SHOULD NOT add Bearer token auth WHEN userSignature is not null AND session is not active`() = runTest {
-        // Given
-        every { sessionMonitor.isActive } returns false
-
-        // When
-        retrofitAppcuesRemoteSource.getExperiencePreview("test-experience", "abc")
-
-        // Then
-        coVerify { appcuesService.experiencePreview("123", "test-experience") }
-        coVerify(exactly = 0) { appcuesService.experiencePreview("123", any(), "test-experience", "Bearer abc") }
     }
 
     @Test

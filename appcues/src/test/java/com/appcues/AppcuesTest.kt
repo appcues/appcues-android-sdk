@@ -56,8 +56,6 @@ internal class AppcuesTest : AppcuesScopeTest {
 
         // THEN
         verify(exactly = 0) { tracker.identify(any()) }
-        // called once at startup automatically, which is ignored, but not again since no valid user
-        verify(exactly = 1) { sessionMonitor.start() }
     }
 
     @Test
@@ -75,8 +73,6 @@ internal class AppcuesTest : AppcuesScopeTest {
         // THEN
         assertThat(storage.userId).isEqualTo(userId)
         verify { tracker.identify(properties) }
-        // called once at startup automatically, which is ignored, then again for the new valid user/session
-        verify(exactly = 2) { sessionMonitor.start() }
     }
 
     @Test
@@ -217,8 +213,6 @@ internal class AppcuesTest : AppcuesScopeTest {
         // THEN
         assertThat(storage.userId).isEqualTo("anon:${storage.deviceId}")
         assertThat(storage.isAnonymous).isTrue()
-        // called once at startup automatically, which is ignored, then again for the new valid user/session
-        verify(exactly = 2) { sessionMonitor.start() }
         verify { tracker.identify(null) }
     }
 
