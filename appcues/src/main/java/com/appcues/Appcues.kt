@@ -220,7 +220,7 @@ public class Appcues internal constructor(koinScope: Scope) {
      * usage:
      * registerTrait("my-trait") { MyCustomExperienceTrait() }
      */
-    public fun registerTrait(type: String, traitFactory: (config: Map<String, Any>?, level: ExperienceTraitLevel) -> ExperienceTrait) {
+    internal fun registerTrait(type: String, traitFactory: (config: Map<String, Any>?, level: ExperienceTraitLevel) -> ExperienceTrait) {
         traitRegistry.register(type, traitFactory)
     }
 
@@ -233,7 +233,7 @@ public class Appcues internal constructor(koinScope: Scope) {
      * usage:
      * registerAction("my-action") { MyCustomExperienceAction() }
      */
-    public fun registerAction(type: String, actionFactory: (config: Map<String, Any>?) -> ExperienceAction) {
+    internal fun registerAction(type: String, actionFactory: (config: Map<String, Any>?) -> ExperienceAction) {
         actionRegistry.register(type, actionFactory)
     }
 
