@@ -6,7 +6,7 @@ import androidx.compose.runtime.Composable
 /**
  * A trait that modifies the backdrop of an experience.
  */
-public interface BackdropDecoratingTrait : ExperienceTrait {
+internal interface BackdropDecoratingTrait : ExperienceTrait {
 
     /**
      * Decorates the backdrop of the experience
@@ -18,5 +18,5 @@ public interface BackdropDecoratingTrait : ExperienceTrait {
      *                Its important to call [content] if you want to apply every decoration on stack
      */
     @Composable
-    public fun BoxScope.BackdropDecorate(content: @Composable BoxScope.() -> Unit)
+    fun BoxScope.BackdropDecorate(content: @Composable BoxScope.() -> Unit)
 }
