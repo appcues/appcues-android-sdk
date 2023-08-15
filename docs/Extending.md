@@ -2,21 +2,6 @@
 
 Appcues Experiences are designed to be flexible and powerful without requiring any customization. However, customization is possible as part of the following patterns.
 
-## Custom Experience Actions
-
-An [`ExperienceAction`](https://github.com/appcues/appcues-android-sdk/blob/main/appcues/src/main/java/com/appcues/action/ExperienceAction.kt) is a behavior triggered from an interaction with an experience, for example tapping a button.
-
-An action can be registered with `appcues.registerAction(type, factory)`.
-
-## Custom Experience Traits
-
-An [`ExperienceTrait`](https://github.com/appcues/appcues-android-sdk/blob/main/appcues/src/main/java/com/appcues/trait/ExperienceTrait.kt) modifies the how an entire experience, or a particular step in an experience is displayed. A trait has capabilities that modify the way an experience is displayed to the user.
-
-A trait can be registered with `appcues.registerTrait(type, factory)`.
-
-For more information about traits, [`click here`](https://github.com/appcues/appcues-android-sdk/blob/main/docs/Traits.md)
-
-
 ## Listening and Intercepting Experiences
 
 An [`ExperienceListener`](https://github.com/appcues/appcues-android-sdk/blob/main/appcues/src/main/java/com/appcues/ExperienceListener.kt) can be registered with an `Appcues` instance, using the `AppcuesConfig` property `experienceListener(listener)`.  This listener will be informed whenever an experience will start or when an experience finishes.
