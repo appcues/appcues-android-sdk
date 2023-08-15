@@ -31,7 +31,6 @@ internal object DataRemoteKoin : KoinScopePlugin {
                 ).create(AppcuesService::class),
                 config = config,
                 storage = get(),
-                sessionMonitor = get(),
             )
         }
 

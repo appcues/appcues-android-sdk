@@ -293,6 +293,13 @@ internal class DebuggerViewModel(
         }
     }
 
+    fun reset() {
+        viewModelScope.launch {
+            debuggerStatusManager.reset()
+            debuggerRecentEventsManager.reset()
+        }
+    }
+
     private fun List<DebuggerEventItem>.hideEventsForFab(): List<DebuggerEventItem> {
         return toMutableList().onEach { it.showOnFab = false }
     }

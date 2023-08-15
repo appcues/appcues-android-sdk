@@ -96,8 +96,6 @@ public class Appcues internal constructor(koinScope: Scope) {
     public var navigationHandler: NavigationHandler? by config::navigationHandler
 
     init {
-        sessionMonitor.start()
-
         logcues.info("Appcues SDK $version initialized")
 
         appcuesCoroutineScope.launch {
@@ -167,11 +165,16 @@ public class Appcues internal constructor(koinScope: Scope) {
      * Can be used when the user logs out of your application.
      */
     public fun reset() {
+        // flush any pending analytics for the previous user, prior to reset
+        analyticsTracker.flushPendingActivity()
+
         sessionMonitor.reset()
         storage.userId = ""
         storage.userSignature = null
         storage.isAnonymous = true
         storage.groupId = null
+
+        debuggerManager.reset()
     }
 
     /**
@@ -287,8 +290,9 @@ public class Appcues internal constructor(koinScope: Scope) {
         storage.isAnonymous = isAnonymous
         storage.userSignature = mutableProperties?.remove("appcues:user_id_signature") as? String
         if (userChanged) {
-            // when the identified user changes from last known value, we must start a new session
-            sessionMonitor.start()
+            // when the user changes, reset the session monitor and a new session will
+            // be created the first time analytics are tracked for the new user (the identify)
+            sessionMonitor.reset()
 
             // group info is reset on new user
             storage.groupId = null

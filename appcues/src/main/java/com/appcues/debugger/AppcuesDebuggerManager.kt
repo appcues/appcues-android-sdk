@@ -26,6 +26,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.scope.Scope
 import kotlin.coroutines.CoroutineContext
 
+@Suppress("TooManyFunctions")
 internal class AppcuesDebuggerManager(context: Context, private val koinScope: Scope) : Application.ActivityLifecycleCallbacks {
 
     private val coroutineScope: CoroutineScope = object : CoroutineScope {
@@ -70,6 +71,10 @@ internal class AppcuesDebuggerManager(context: Context, private val koinScope: S
         application.unregisterActivityLifecycleCallbacks(this)
         onBackPressCallback.remove()
         debuggerViewModel = null // remove the reference to the current VM - new one will be made on next start()
+    }
+
+    fun reset() {
+        debuggerViewModel?.reset()
     }
 
     override fun onActivityResumed(activity: Activity) {

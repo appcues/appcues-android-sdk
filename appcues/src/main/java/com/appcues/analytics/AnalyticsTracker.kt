@@ -24,7 +24,7 @@ internal class AnalyticsTracker(
         get() = _analyticsFlow
 
     fun identify(properties: Map<String, Any>? = null, interactive: Boolean = true) {
-        if (!sessionMonitor.checkSession("unable to track user")) return
+        if (!checkSession()) return
 
         activityBuilder.identify(properties).let {
             updateAnalyticsFlow(IDENTIFY, false, it)
@@ -38,7 +38,7 @@ internal class AnalyticsTracker(
     }
 
     fun track(name: String, properties: Map<String, Any>? = null, interactive: Boolean = true, isInternal: Boolean = false) {
-        if (!sessionMonitor.checkSession("unable to track event")) return
+        if (!checkSession()) return
 
         activityBuilder.track(name, properties).let { activityRequest ->
             updateAnalyticsFlow(EVENT, isInternal, activityRequest)
@@ -52,7 +52,7 @@ internal class AnalyticsTracker(
     }
 
     fun screen(title: String, properties: Map<String, Any>? = null, isInternal: Boolean = false) {
-        if (!sessionMonitor.checkSession("unable to track screen")) return
+        if (!checkSession()) return
 
         activityBuilder.screen(title, properties?.toMutableMap()).let { activityRequest ->
             updateAnalyticsFlow(SCREEN, isInternal, activityRequest)
@@ -61,7 +61,7 @@ internal class AnalyticsTracker(
     }
 
     fun group(properties: Map<String, Any>? = null) {
-        if (!sessionMonitor.checkSession("unable to track group")) return
+        if (!checkSession()) return
 
         activityBuilder.group(properties).let {
             updateAnalyticsFlow(GROUP, false, it)
@@ -73,6 +73,31 @@ internal class AnalyticsTracker(
     // i.e. app going to background / being killed
     fun flushPendingActivity() {
         analyticsQueueProcessor.flushAsync()
+    }
+
+    // return true if we have a valid session and can track analytics, false if not.
+    private fun checkSession(): Boolean {
+
+        if (sessionMonitor.sessionId == null || sessionMonitor.isExpired) {
+
+            // if no existing session, or expired, start a new one
+            if (sessionMonitor.startNewSession()) {
+                // immediately track the session_started analytic, before any
+                // subsequent analytics for the session are queued
+                val activityRequest = activityBuilder.track(AnalyticsEvent.SessionStarted.eventName, null)
+                updateAnalyticsFlow(EVENT, true, activityRequest)
+                analyticsQueueProcessor.queueThenFlush(activityRequest)
+            } else {
+                // this means no session could be started (no user) and we cannot track
+                // anything - return false to caller
+                return false
+            }
+        } else {
+            // we have a valid session, update its last activity timestamp to push out the timeout
+            sessionMonitor.updateLastActivity()
+        }
+
+        return true
     }
 
     private fun updateAnalyticsFlow(type: AnalyticType, isInternal: Boolean, activity: ActivityRequest) {

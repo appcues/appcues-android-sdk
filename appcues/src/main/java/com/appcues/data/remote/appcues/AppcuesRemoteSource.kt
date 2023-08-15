@@ -1,7 +1,6 @@
 package com.appcues.data.remote.appcues
 
 import com.appcues.AppcuesConfig
-import com.appcues.SessionMonitor
 import com.appcues.Storage
 import com.appcues.analytics.SdkMetrics
 import com.appcues.data.remote.NetworkRequest
@@ -21,7 +20,6 @@ internal class AppcuesRemoteSource(
     private val service: AppcuesService,
     private val config: AppcuesConfig,
     private val storage: Storage,
-    private val sessionMonitor: SessionMonitor,
 ) {
     companion object {
         const val BASE_URL = "https://api.appcues.net/"
@@ -43,8 +41,8 @@ internal class AppcuesRemoteSource(
         experienceId: String,
         userSignature: String?,
     ): ResultOf<ExperienceResponse, RemoteError> =
-        // preview _can_ be personalized, so attempt to use the user info, if a valid session exists
-        if (sessionMonitor.isActive) {
+        // preview _can_ be personalized, so attempt to use the user info, if a valid userId exists
+        if (storage.userId.isNotEmpty()) {
             NetworkRequest.execute {
                 service.experiencePreview(config.accountId, storage.userId, experienceId, userSignature?.let { "Bearer $it" })
             }

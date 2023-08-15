@@ -6,7 +6,6 @@ import com.appcues.AnalyticType.IDENTIFY
 import com.appcues.AnalyticType.SCREEN
 import com.appcues.R
 import com.appcues.analytics.ActivityRequestBuilder
-import com.appcues.analytics.AnalyticsEvent
 import com.appcues.analytics.AutoPropertyDecorator
 import com.appcues.analytics.ExperienceLifecycleEvent
 import com.appcues.analytics.SdkMetrics
@@ -105,8 +104,6 @@ internal class DebuggerRecentEventsManager(
             val title = event.name.toEventTitle()?.let { contextResources.getString(it) }
             val displayName = getEventDisplayName(event, type, title)
 
-            clearEventsOnSessionReset(event)
-
             events.addFirst(
                 DebuggerEventItem(
                     id = lastEventId,
@@ -155,11 +152,8 @@ internal class DebuggerRecentEventsManager(
         }
     }
 
-    private fun clearEventsOnSessionReset(event: EventRequest) {
-        // When session reset we clear the current list and start a new one
-        if (event.name == AnalyticsEvent.SessionReset.eventName) {
-            events.clear()
-        }
+    fun reset() {
+        events.clear()
     }
 
     private fun getEventDisplayName(

@@ -36,10 +36,7 @@ internal fun EventType?.toResourceId(): Int {
 
 internal fun String.toEventType(): EventType = when (this) {
     AnalyticsEvent.ScreenView.eventName -> SCREEN
-    AnalyticsEvent.SessionStarted.eventName,
-    AnalyticsEvent.SessionSuspended.eventName,
-    AnalyticsEvent.SessionResumed.eventName,
-    AnalyticsEvent.SessionReset.eventName -> SESSION
+    AnalyticsEvent.SessionStarted.eventName -> SESSION
     AnalyticsEvent.ExperienceStepSeen.eventName,
     AnalyticsEvent.ExperienceStepInteraction.eventName,
     AnalyticsEvent.ExperienceStepCompleted.eventName,
@@ -54,9 +51,6 @@ internal fun String.toEventType(): EventType = when (this) {
 
 internal fun String.toEventTitle(): Int? = when (this) {
     AnalyticsEvent.SessionStarted.eventName -> R.string.appcues_debugger_event_type_session_started_title
-    AnalyticsEvent.SessionSuspended.eventName -> R.string.appcues_debugger_event_type_session_suspended_title
-    AnalyticsEvent.SessionResumed.eventName -> R.string.appcues_debugger_event_type_session_resumed_title
-    AnalyticsEvent.SessionReset.eventName -> R.string.appcues_debugger_event_type_session_reset_title
     AnalyticsEvent.ExperienceStepSeen.eventName -> R.string.appcues_debugger_event_type_step_seen_title
     AnalyticsEvent.ExperienceStepInteraction.eventName -> R.string.appcues_debugger_event_type_step_interaction_title
     AnalyticsEvent.ExperienceStepCompleted.eventName -> R.string.appcues_debugger_event_type_step_completed_title
