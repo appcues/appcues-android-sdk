@@ -9,7 +9,7 @@ import androidx.compose.ui.unit.Density
 /**
  * Type that defines the padding values necessary to account for sticky content elements when composing the step.
  */
-public class StickyContentPadding(private val density: Density) {
+internal class StickyContentPadding(private val density: Density) {
 
     private val topPaddingPx = mutableStateOf(0)
     private val bottomPaddingPx = mutableStateOf(0)
@@ -22,7 +22,7 @@ public class StickyContentPadding(private val density: Density) {
      *
      * @param px the updated top padding value, in pixels.
      */
-    public fun setTopPadding(px: Int) {
+    fun setTopPadding(px: Int) {
         if (topPaddingPx.value < px) {
             topPaddingPx.value = px
         }
@@ -34,7 +34,7 @@ public class StickyContentPadding(private val density: Density) {
      *
      * @param px the updated bottom padding value, in pixels.
      */
-    public fun setBottomPadding(px: Int) {
+    fun setBottomPadding(px: Int) {
         if (bottomPaddingPx.value < px) {
             bottomPaddingPx.value = px
         }
@@ -46,7 +46,7 @@ public class StickyContentPadding(private val density: Density) {
      *
      * @param px the updated start padding value, in pixels.
      */
-    public fun setStartPadding(px: Int) {
+    fun setStartPadding(px: Int) {
         if (startPaddingPx.value < px) {
             startPaddingPx.value = px
         }
@@ -58,7 +58,7 @@ public class StickyContentPadding(private val density: Density) {
      *
      * @param px the updated end padding value, in pixels.
      */
-    public fun setEndPadding(px: Int) {
+    fun setEndPadding(px: Int) {
         if (endPaddingPx.value < px) {
             endPaddingPx.value = px
         }
@@ -68,7 +68,7 @@ public class StickyContentPadding(private val density: Density) {
      * The PaddingValues that represent the current state of this
      * StickyContentPadding instance, converted to Dp.
      */
-    public val paddingValues: State<PaddingValues> = derivedStateOf {
+    val paddingValues: State<PaddingValues> = derivedStateOf {
         with(density) {
             PaddingValues(
                 start = startPaddingPx.value.toDp(),

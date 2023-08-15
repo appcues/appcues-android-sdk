@@ -17,7 +17,7 @@ import com.appcues.ui.presentation.AppcuesViewModel.UIState.Rendering
  * traits are supposed to react to stuff like page changes, horizontal scrolling
  * between pages, etc..
  */
-public data class AppcuesPaginationData(
+internal data class AppcuesPaginationData(
     /**
      * The total number of pages.
      */

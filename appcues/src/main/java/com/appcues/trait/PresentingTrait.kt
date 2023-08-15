@@ -3,7 +3,7 @@ package com.appcues.trait
 /**
  * A trait that can show a container of one or more steps of an Experience.
  */
-public interface PresentingTrait : ExperienceTrait {
+internal interface PresentingTrait : ExperienceTrait {
 
     /**
      * Show the container for the applicable group of steps in the Experience.
@@ -15,5 +15,5 @@ public interface PresentingTrait : ExperienceTrait {
      * @sample com.appcues.trait.appcues.ModalTrait
      */
     @Throws(AppcuesTraitException::class)
-    public fun present()
+    fun present()
 }

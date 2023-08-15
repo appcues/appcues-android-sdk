@@ -9,7 +9,7 @@ import com.appcues.ui.composables.LocalExperienceCompositionState
  * A trait that can hold one or more pages of content and control the paging behavior to navigate
  * between them.
  */
-public interface ContentHolderTrait : ExperienceTrait {
+internal interface ContentHolderTrait : ExperienceTrait {
 
     /**
      * Defines the content holder, usually used to support different kinds of pagination between steps
@@ -21,12 +21,12 @@ public interface ContentHolderTrait : ExperienceTrait {
      * @param containerPages current page information
      */
     @Composable
-    public fun BoxScope.CreateContentHolder(containerPages: ContainerPages)
+    fun BoxScope.CreateContentHolder(containerPages: ContainerPages)
 
     /**
      * Class used as a parameter for [CreateContentHolder]
      */
-    public data class ContainerPages(
+    data class ContainerPages(
         /**
          * The total number of pages in this container.
          */
@@ -55,7 +55,7 @@ public interface ContentHolderTrait : ExperienceTrait {
          * set the pagination data based on custom [CreateContentHolder] implementation
          */
         @Composable
-        public fun UpdatePaginationData(paginationData: AppcuesPaginationData) {
+        fun UpdatePaginationData(paginationData: AppcuesPaginationData) {
             LocalExperienceCompositionState.current.paginationData.value = paginationData
 
             customPaginationData = paginationData
