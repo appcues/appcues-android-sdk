@@ -3,9 +3,6 @@ package com.appcues.analytics
 internal enum class AnalyticsEvent(val eventName: String) {
     ScreenView("appcues:screen_view"),
     SessionStarted("appcues:session_started"),
-    SessionSuspended("appcues:session_suspended"),
-    SessionResumed("appcues:session_resumed"),
-    SessionReset("appcues:session_reset"),
     ExperienceStepSeen("appcues:v2:step_seen"),
     ExperienceStepInteraction("appcues:v2:step_interaction"),
     ExperienceStepCompleted("appcues:v2:step_completed"),

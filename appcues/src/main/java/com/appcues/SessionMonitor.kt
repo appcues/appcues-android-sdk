@@ -3,11 +3,8 @@ package com.appcues
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
-import com.appcues.analytics.AnalyticsEvent
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.analytics.SdkMetrics
-import com.appcues.analytics.track
-import com.appcues.logging.Logcues
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
@@ -24,17 +21,18 @@ internal class SessionMonitor(
     private val analyticsTracker by inject<AnalyticsTracker>()
     private val storage by inject<Storage>()
     private val config by inject<AppcuesConfig>()
-    private val logcues by inject<Logcues>()
     private val appcuesCoroutineScope by inject<AppcuesCoroutineScope>()
 
     private var _sessionId: UUID? = null
     val sessionId: UUID?
         get() = _sessionId
 
-    val isActive: Boolean
-        get() = _sessionId != null
+    val isExpired: Boolean
+        get() = lastActivityAt?.let {
+            TimeUnit.MILLISECONDS.toSeconds(Date().time - it.time) >= sessionTimeout
+        } ?: false
 
-    private var applicationBackgrounded: Date? = null
+    private var lastActivityAt: Date? = null
     private val sessionTimeout: Int = config.sessionTimeout
 
     init {
@@ -43,46 +41,23 @@ internal class SessionMonitor(
         }
     }
 
-    fun start() {
-        if (storage.userId.isEmpty()) return
+    fun startNewSession(): Boolean {
+        if (storage.userId.isEmpty()) return false
         _sessionId = UUID.randomUUID()
-        analyticsTracker.track(AnalyticsEvent.SessionStarted, null, true)
+        updateLastActivity()
+        return true
+    }
+
+    fun updateLastActivity() {
+        lastActivityAt = Date()
     }
 
     fun reset() {
-        // this is interactive: true since a reset should flush to network immediately (with previous user ID)
-        // and the next session start will be sent in a new request, with the new user ID
-        analyticsTracker.track(AnalyticsEvent.SessionReset, null, true)
         _sessionId = null
-    }
-
-    fun checkSession(errorMessage: String): Boolean {
-        if (isActive) return true
-
-        logcues.info("No active session - $errorMessage")
-        return false
-    }
-
-    override fun onStart(owner: LifecycleOwner) {
-        val backgroundTime = applicationBackgrounded?.time
-        if (_sessionId == null || backgroundTime == null) return
-
-        val elapsed = TimeUnit.MILLISECONDS.toSeconds(Date().time - backgroundTime)
-        applicationBackgrounded = null
-
-        if (elapsed >= sessionTimeout) {
-            _sessionId = UUID.randomUUID()
-            analyticsTracker.track(AnalyticsEvent.SessionStarted, null, true)
-        } else {
-            analyticsTracker.track(AnalyticsEvent.SessionResumed, null, false)
-        }
+        lastActivityAt = null
     }
 
     override fun onStop(owner: LifecycleOwner) {
-        if (_sessionId == null) return
-        applicationBackgrounded = Date()
-        analyticsTracker.track(AnalyticsEvent.SessionSuspended, null, false)
-
         // ensure any pending in-memory analytics get processed asap
         analyticsTracker.flushPendingActivity()
 

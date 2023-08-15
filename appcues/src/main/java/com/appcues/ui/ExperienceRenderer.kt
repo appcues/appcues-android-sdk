@@ -119,7 +119,7 @@ internal class ExperienceRenderer(
     }
 
     suspend fun show(experienceId: String, trigger: ExperienceTrigger): Boolean {
-        if (!sessionMonitor.checkSession("cannot show Experience $experienceId")) return false
+        if (sessionMonitor.sessionId == null) return false
 
         repository.getExperienceContent(experienceId, trigger)?.let {
             return show(it)

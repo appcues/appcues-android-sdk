@@ -33,6 +33,7 @@ import kotlinx.coroutines.withContext
 import java.util.UUID
 import kotlin.time.Duration.Companion.seconds
 
+@Suppress("TooManyFunctions")
 internal class DebuggerStatusManager(
     storage: Storage,
     private val appcuesConfig: AppcuesConfig,
@@ -87,13 +88,15 @@ internal class DebuggerStatusManager(
                     experienceName = null
                     experienceShowingStep = null
                 }
-                AnalyticsEvent.SessionReset.eventName -> {
-                    userIdentified = null
-                }
                 else -> Unit
             }
         }
 
+        updateData()
+    }
+
+    suspend fun reset() {
+        userIdentified = null
         updateData()
     }
 

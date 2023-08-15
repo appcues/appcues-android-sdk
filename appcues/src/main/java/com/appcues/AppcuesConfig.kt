@@ -10,7 +10,7 @@ public data class AppcuesConfig internal constructor(
     internal val applicationId: String,
 ) {
     internal companion object {
-        const val SESSION_TIMEOUT_DEFAULT = 1800 // 30 minutes by default
+        const val SESSION_TIMEOUT_DEFAULT = 300 // 5 minutes by default
         const val ACTIVITY_STORAGE_MAX_SIZE = 25
     }
 
@@ -32,7 +32,7 @@ public data class AppcuesConfig internal constructor(
 
     /**
      *  Set the session timeout for the configuration, in seconds. This timeout value is used to determine if a new session is started
-     *  upon the application returning to the foreground. The default value is 1800 seconds (30 minutes).
+     *  after a period of inactivity, or upon the application returning to the foreground. The default value is 300 seconds (5 minutes).
      */
     var sessionTimeout: Int = SESSION_TIMEOUT_DEFAULT
         set(value) {
