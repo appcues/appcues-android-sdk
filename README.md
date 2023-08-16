@@ -19,6 +19,7 @@ The SDK is a Kotlin library for sending user properties and events to the Appcue
     - [Identifying Users](#identifying-users)
     - [Tracking Screens and Events](#tracking-screens-and-events)
     - [Anchored Tooltips](#anchored-tooltips)
+    - [Embedded Experiences](#embedded-experiences)
   - [🛠 Customization](#-customization)
   - [📝 Documentation](#-documentation)
   - [🎬 Samples](#-samples)
@@ -87,6 +88,10 @@ Events are the “actions” your users take in your application, which can be a
 ### Anchored Tooltips
 
 Anchored tooltips use element targeting to point directly at specific views in your application. For more information about how to configure your application's views for element targeting, refer to the [Anchored Tooltips Guide](https://github.com/appcues/appcues-android-sdk/blob/main/docs/AnchoredTooltips.md).
+
+### Embedded Experiences
+
+Add `AppcuesFrameView` instances in your application layouts to support embedded experience content, with a non-modal presentation. For more information about how to configure your application layouts to use frame views, refer to the guide on [Configuring an AppcuesFrameView](https://github.com/appcues/appcues-android-sdk/blob/main/docs/AppcuesFrameViewConfiguring.md).
 
 Refer to the full [Getting Started Guide](https://github.com/appcues/appcues-android-sdk/blob/main/docs/GettingStarted.md) for more details.
 
