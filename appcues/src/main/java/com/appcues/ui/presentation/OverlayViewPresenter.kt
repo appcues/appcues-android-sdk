@@ -28,7 +28,7 @@ internal class OverlayViewPresenter(scope: Scope, renderContext: RenderContext) 
                 id = R.id.appcues_overlay_view
                 layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT).also {
                     // adds margin top and bottom according to visible status and navigation bar
-                    ViewCompat.getRootWindowInsets(this)?.getInsets(WindowInsetsCompat.Type.systemBars())
+                    ViewCompat.getRootWindowInsets(this@setupView)?.getInsets(WindowInsetsCompat.Type.systemBars())
                         ?.let { insets -> it.setMargins(insets.left, insets.top, insets.right, insets.bottom) }
                 }
             }.also { overlayView ->
@@ -66,7 +66,7 @@ internal class OverlayViewPresenter(scope: Scope, renderContext: RenderContext) 
     private fun Activity.updateOverlayVisibility(isVisible: Boolean) {
         getParentView().let { parentView ->
             parentView.post {
-                findViewById<ComposeView>(R.id.appcues_overlay_view)?.let {
+                findViewById<AppcuesOverlayView>(R.id.appcues_overlay_view)?.let {
                     it.isVisible = isVisible
                 }
                 parentView.setAccessibility(

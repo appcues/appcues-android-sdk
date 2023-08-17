@@ -46,6 +46,8 @@ internal abstract class ViewPresenter(
         // inform the caller that we cannot currently add a view in the app
         if (activity == null || AppcuesActivityMonitor.isPaused) return false
 
+        AppcuesActivityMonitor.subscribe(activityMonitorListener)
+
         activity.getParentView().run {
             // grab composeView or exit with false
             val composeView = setupView() ?: return false
