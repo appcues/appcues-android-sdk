@@ -14,37 +14,84 @@
             android:id="@+id/embedFrame1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/embedViewText1"/>
+
+        <TextView
+            android:id="@+id/embedViewText1"
+            android:text="@string/embed_text_1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="5dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/embedFrame1"
+            app:layout_constraintBottom_toTopOf="@+id/embedFrame2" />
 
         <com.appcues.AppcuesFrameView
             android:id="@+id/embedFrame2"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/embedFrame1" />
+            app:layout_constraintTop_toBottomOf="@+id/embedViewText1"
+            app:layout_constraintBottom_toTopOf="@+id/embedViewText2" />
+
+        <TextView
+            android:id="@+id/embedViewText2"
+            android:text="@string/embed_text_2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/embedFrame2"
+            app:layout_constraintBottom_toTopOf="@+id/embedFrame3"/>
 
         <com.appcues.AppcuesFrameView
             android:id="@+id/embedFrame3"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/embedFrame2" />
+            app:layout_constraintTop_toBottomOf="@+id/embedViewText2"
+            app:layout_constraintBottom_toTopOf="@+id/embedViewText3"/>
+
+        <TextView
+            android:id="@+id/embedViewText3"
+            android:text="@string/embed_text_3"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/embedFrame3"
+            app:layout_constraintBottom_toTopOf="@+id/embedFrame4"/>
 
         <com.appcues.AppcuesFrameView
             android:id="@+id/embedFrame4"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/embedFrame3" />
+            app:layout_constraintTop_toBottomOf="@+id/embedViewText3" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
