@@ -60,13 +60,7 @@ internal class RenderContextManager(override val scope: Scope) : KoinScopeCompon
         if (trigger is Qualification && trigger.reason == "screen_view") {
             // clear list in case this was a screen_view qualification
             potentiallyRenderableExperiences.clear()
-
-            stateMachineSlots.forEach { map ->
-                val renderContext = map.key
-                if (renderContext is Embed && getEmbedFrame(map.key) == null) {
-                    stateMachineSlots.remove(map.key)
-                }
-            }
+            stateMachineSlots.keys.removeAll { it is Embed && getEmbedFrame(it) == null }
         }
 
         // populate new experiences into the dictionary
