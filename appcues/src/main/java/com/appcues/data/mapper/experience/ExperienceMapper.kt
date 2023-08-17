@@ -168,9 +168,13 @@ internal class ExperienceMapper(
 
     private fun LossyExperienceResponse.getRenderContext(): RenderContext {
         return when (this) {
-            is ExperienceResponse -> traits.firstOrNull { it.type == "@appcues/embedded" }
-                ?.let { (it.config?.get("frameID") as? String)?.let { frameId -> RenderContext.Embed(frameId) } }
-                ?: RenderContext.Modal
+            is ExperienceResponse -> {
+                // check for experience-level or first group-level embed trait
+                val eligibleTraits = traits + ((steps.firstOrNull()?.traits) ?: listOf())
+                eligibleTraits.firstOrNull { it.type == "@appcues/embedded" }?.let {
+                    (it.config?.get("frameID") as? String)?.let { frameId -> RenderContext.Embed(frameId) }
+                } ?: RenderContext.Modal
+            }
             is FailedExperienceResponse -> RenderContext.Modal
         }
     }
