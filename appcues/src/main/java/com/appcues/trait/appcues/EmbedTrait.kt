@@ -3,6 +3,7 @@ package com.appcues.trait.appcues
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -19,11 +20,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.RenderContext
+import com.appcues.data.model.getConfigOrDefault
 import com.appcues.data.model.getConfigStyle
 import com.appcues.trait.AppcuesTraitAnimatedVisibility
 import com.appcues.trait.AppcuesTraitException
 import com.appcues.trait.ContentWrappingTrait
 import com.appcues.trait.PresentingTrait
+import com.appcues.trait.appcues.EmbedTrait.TransitionType.FADE
+import com.appcues.trait.appcues.EmbedTrait.TransitionType.NONE
 import com.appcues.ui.composables.rememberAppcuesContentVisibility
 import com.appcues.ui.extensions.getBoxAlignment
 import com.appcues.ui.extensions.getPaddings
@@ -41,9 +45,22 @@ internal class EmbedTrait(
     companion object {
 
         const val TYPE = "@appcues/embedded"
+
+        private const val DURATION_DEFAULT = 300
+    }
+
+    private enum class TransitionType {
+        NONE, FADE
     }
 
     private val style = config.getConfigStyle("style")
+
+    private val transition = config.getConfigOrDefault("transition", "none").let {
+        when (it) {
+            "fade" -> FADE
+            else -> NONE
+        }
+    }
 
     @Composable
     override fun WrapContent(
@@ -81,12 +98,22 @@ internal class EmbedTrait(
 
     @OptIn(ExperimentalAnimationApi::class)
     private fun enterTransition(): EnterTransition {
-        return scaleIn(tween(durationMillis = 200), initialScale = 0.95f) + fadeIn(tween(durationMillis = 200))
+        val animationSpec: FiniteAnimationSpec<Float> = when (transition) {
+            NONE -> tween(durationMillis = 0)
+            FADE -> tween(durationMillis = DURATION_DEFAULT)
+        }
+
+        return scaleIn(animationSpec, initialScale = 0.95f) + fadeIn(animationSpec)
     }
 
     @OptIn(ExperimentalAnimationApi::class)
     private fun exitTransition(): ExitTransition {
-        return scaleOut(tween(durationMillis = 250), targetScale = 0.85f) + fadeOut(tween(durationMillis = 200))
+        val animationSpec: FiniteAnimationSpec<Float> = when (transition) {
+            NONE -> tween(durationMillis = 0)
+            FADE -> tween(durationMillis = DURATION_DEFAULT)
+        }
+
+        return scaleOut(animationSpec, targetScale = 0.85f) + fadeOut(animationSpec)
     }
 
     override fun present() {
