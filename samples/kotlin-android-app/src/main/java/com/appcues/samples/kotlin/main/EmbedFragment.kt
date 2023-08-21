@@ -35,7 +35,7 @@ class EmbedFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        appcues.screen("Embed Harness")
+        appcues.screen("Embed Container")
     }
 
     override fun onDestroyView() {
