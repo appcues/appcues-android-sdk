@@ -20,11 +20,7 @@ internal class EmbedViewPresenter(
     }
 
     override fun ViewGroup.removeView() {
-        stateMachines.getFrame(renderContext)?.let {
-            post {
-                it.reset()
-            }
-        }
+        stateMachines.getFrame(renderContext)?.reset()
     }
 
     override fun setViewVisible(isVisible: Boolean) {
