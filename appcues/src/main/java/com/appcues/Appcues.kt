@@ -8,6 +8,7 @@ import com.appcues.action.ExperienceAction
 import com.appcues.analytics.ActivityScreenTracking
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.data.model.ExperienceTrigger
+import com.appcues.data.model.RenderContext
 import com.appcues.debugger.AppcuesDebuggerManager
 import com.appcues.debugger.DebugMode.Debugger
 import com.appcues.debugger.screencapture.AndroidTargetingStrategy
@@ -16,6 +17,7 @@ import com.appcues.logging.Logcues
 import com.appcues.trait.ExperienceTrait
 import com.appcues.trait.ExperienceTraitLevel
 import com.appcues.trait.TraitRegistry
+import com.appcues.ui.AppcuesFrameStateMachineOwner
 import com.appcues.ui.ExperienceRenderer
 import kotlinx.coroutines.launch
 import org.koin.core.scope.Scope
@@ -245,7 +247,7 @@ public class Appcues internal constructor(koinScope: Scope) {
      */
     public fun registerEmbed(frameId: String, frame: AppcuesFrameView) {
         appcuesCoroutineScope.launch {
-            experienceRenderer.startFrame(frameId, frame)
+            experienceRenderer.start(AppcuesFrameStateMachineOwner(frame), RenderContext.Embed(frameId))
         }
     }
 

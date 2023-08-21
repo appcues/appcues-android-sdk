@@ -1,7 +1,6 @@
 package com.appcues.ui
 
 import com.appcues.AppcuesConfig
-import com.appcues.RenderContextManager
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.analytics.ExperienceLifecycleTracker
 import com.appcues.analytics.track
@@ -204,7 +203,7 @@ internal class ExperienceRendererTest {
                         scoped { AppcuesConfig("abc", "123") }
                         scoped { mockk<AnalyticsTracker>(relaxed = true) }
                         scoped { mockk<ExperienceLifecycleTracker>(relaxed = true) }
-                        scoped { RenderContextManager(scope) }
+                        scoped { StateMachineDirectory() }
                     }
                 }
             )

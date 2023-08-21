@@ -23,13 +23,14 @@ internal fun AnalyticsTracker.track(experiment: Experiment) {
     )
 }
 
-internal fun AnalyticsTracker.trackExperienceError(experience: Experience) {
+internal fun AnalyticsTracker.trackExperienceError(experience: Experience, message: String) {
     val errorId = UUID.randomUUID()
 
     track(
         event = AnalyticsEvent.ExperienceError,
         properties = mapOf(
-            "Id" to errorId.toString(),
+            "message" to message,
+            "errorId" to errorId.toString(),
         ),
         interactive = false
     )
@@ -45,7 +46,7 @@ internal fun AnalyticsTracker.trackExperienceRecovery(experience: Experience) {
     track(
         event = AnalyticsEvent.ExperienceRecovery,
         properties = mapOf(
-            "Id" to errorId.toString(),
+            "errorId" to errorId.toString(),
         ),
         interactive = false
     )
