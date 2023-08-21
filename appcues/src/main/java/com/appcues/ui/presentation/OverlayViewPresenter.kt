@@ -47,16 +47,13 @@ internal class OverlayViewPresenter(scope: Scope, renderContext: RenderContext) 
     }
 
     override fun ViewGroup.removeView() {
-        post {
-            findViewById<AppcuesOverlayView?>(R.id.appcues_overlay_view)?.let {
-                it.clearComposition()
-
-                removeView(it)
-            }
-
-            // add customers view back to accessibility stack
-            setAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES)
+        findViewById<AppcuesOverlayView?>(R.id.appcues_overlay_view)?.let {
+            it.clearComposition()
+            removeView(it)
         }
+
+        // add customers view back to accessibility stack
+        setAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES)
     }
 
     override fun setViewVisible(isVisible: Boolean) {

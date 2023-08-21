@@ -76,9 +76,11 @@ internal abstract class ViewPresenter(
         AppcuesActivityMonitor.activity?.getParentView()?.run {
             findViewTreeLifecycleOwner()?.lifecycle?.removeObserver(lifecycleObserver)
 
-            viewModel.onFinish()
+            post {
+                removeView()
 
-            removeView()
+                viewModel.onFinish()
+            }
         }
     }
 
