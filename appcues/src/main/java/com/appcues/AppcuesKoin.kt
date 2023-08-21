@@ -6,6 +6,7 @@ import com.appcues.di.KoinScopePlugin
 import com.appcues.logging.Logcues
 import com.appcues.statemachine.StateMachine
 import com.appcues.ui.ExperienceRenderer
+import com.appcues.ui.StateMachineDirectory
 import com.appcues.util.ContextResources
 import com.appcues.util.LinkOpener
 import org.koin.dsl.ScopeDSL
@@ -28,7 +29,7 @@ internal object AppcuesKoin : KoinScopePlugin {
             )
         }
         scoped { AppcuesDebuggerManager(context = get(), koinScope = this) }
-        scoped { RenderContextManager(scope = get()) }
+        scoped { StateMachineDirectory() }
         scoped { ContextResources(context = get()) }
         scoped { ExperienceRenderer(scope = get()) }
         scoped {

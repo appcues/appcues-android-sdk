@@ -29,7 +29,7 @@ public class AppcuesFrameView @JvmOverloads constructor(
         return composeView
     }
 
-    internal fun clearComposition() {
+    internal fun reset() {
         removeView(composeView)
         composeView.setContent { }
     }
