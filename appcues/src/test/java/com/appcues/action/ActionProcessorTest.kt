@@ -3,7 +3,6 @@ package com.appcues.action
 import com.appcues.Appcues
 import com.appcues.AppcuesConfig
 import com.appcues.AppcuesCoroutineScope
-import com.appcues.RenderContextManager
 import com.appcues.action.appcues.StepInteractionAction
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType.BUTTON_TAPPED
@@ -17,6 +16,7 @@ import com.appcues.statemachine.State
 import com.appcues.statemachine.State.RenderingStep
 import com.appcues.statemachine.StateMachine
 import com.appcues.ui.ExperienceRenderer
+import com.appcues.ui.StateMachineDirectory
 import com.google.common.truth.Truth.assertThat
 import io.mockk.Called
 import io.mockk.mockk
@@ -161,7 +161,7 @@ internal class ActionProcessorTest : KoinTest {
                         scoped { ExperienceRenderer(scope) }
                         scoped { RenderContext.Modal }
                         scoped { mockk<ExperienceLifecycleTracker>(relaxed = true) }
-                        scoped { RenderContextManager(scope = scope) }
+                        scoped { StateMachineDirectory() }
                     }
                 }
             )

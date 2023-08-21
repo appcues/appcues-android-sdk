@@ -63,6 +63,7 @@
     <string name="appcues_debugger_event_type_experience_completed_title">Experience Completed</string>
     <string name="appcues_debugger_event_type_experience_dismissed_title">Experience Dismissed</string>
     <string name="appcues_debugger_event_type_experience_error_title">Experience Error</string>
+    <string name="appcues_debugger_event_type_experience_recover_title">Experience Recovered</string>
 
     <string name="appcues_debugger_back_description">Back</string>
     <string name="appcues_debugger_event_details_title">Event details</string>
