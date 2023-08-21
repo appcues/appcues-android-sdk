@@ -70,7 +70,7 @@ class MainActivity : AppCompatActivity() {
                     "events" -> binding.navView.selectedItemId = id.navigation_events
                     "profile" -> binding.navView.selectedItemId = id.navigation_profile
                     "group" -> binding.navView.selectedItemId = id.navigation_group
-                    "embeds" -> binding.navView.selectedItemId = id.navigation_embed
+                    "embed" -> binding.navView.selectedItemId = id.navigation_embed
                 }
             }
         }
