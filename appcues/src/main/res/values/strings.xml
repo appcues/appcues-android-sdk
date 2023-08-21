@@ -2,6 +2,10 @@
 <resources>
     <!-- SDK -->
     <string name="appcues_skippable_trait_dismiss">dismiss</string>
+    <string name="appcues_preview_embed_message">Please navigate to the screen with frame %1$s to preview %2$s.</string>
+    <string name="appcues_preview_flow_not_found">Mobile flow not found.</string>
+    <string name="appcues_preview_flow_failed">Mobile flow preview failed.</string>
+    <string name="appcues_preview_flow_failed_reason">Preview of %1$s failed: %2$s</string>
 
     <!-- Debugger Fab -->
     <string name="appcues_debugger_fab_on_debugger_click_label">Appcues debugger details</string>
@@ -46,7 +50,7 @@
     <string name="appcues_debugger_recent_events_filter_screen">Screen</string>
     <string name="appcues_debugger_recent_events_filter_session">Session</string>
     <string name="appcues_debugger_recent_events_filter_all">All</string>
-    
+
     <string name="appcues_debugger_event_type_group_update_title">Group Update</string>
     <string name="appcues_debugger_event_type_profile_update_title">Profile Update</string>
 
