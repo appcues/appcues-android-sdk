@@ -14,6 +14,8 @@ import com.appcues.data.model.ExperienceTrigger
 import com.appcues.data.model.ExperienceTrigger.Qualification
 import com.appcues.data.model.RenderContext
 import com.appcues.data.model.RenderContext.Modal
+import com.appcues.data.model.getFrameId
+import com.appcues.data.remote.RemoteError.HttpError
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.StartExperience
 import com.appcues.statemachine.Action.StartStep
@@ -23,6 +25,9 @@ import com.appcues.statemachine.State
 import com.appcues.statemachine.State.Idling
 import com.appcues.statemachine.StateMachine
 import com.appcues.statemachine.StepReference
+import com.appcues.ui.ExperienceRenderer.RenderingResult.NoRenderContext
+import com.appcues.ui.ExperienceRenderer.RenderingResult.StateMachineError
+import com.appcues.ui.ExperienceRenderer.RenderingResult.WontDisplay
 import com.appcues.util.ResultOf
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
@@ -36,8 +41,14 @@ internal class ExperienceRenderer(
     override val scope: Scope,
 ) : KoinScopeComponent, StateMachineOwning {
 
+    companion object {
+
+        private const val HTTP_CODE_NOT_FOUND = 404
+    }
+
     // Conformance to `StateMachineOwning`.
     override var renderContext: RenderContext? = null
+
     // State machine for `RenderContext.modal`
     override var stateMachine: StateMachine? = null
 
@@ -51,6 +62,7 @@ internal class ExperienceRenderer(
     private val lifecycleTracker by inject<ExperienceLifecycleTracker>()
 
     private val potentiallyRenderableExperiences = hashMapOf<RenderContext, List<Experience>>()
+    private val previewExperiences = hashMapOf<RenderContext, Experience>()
 
     init {
         // sets up the single state machine used for modal experiences (mobile flows, not embeds)
@@ -69,10 +81,17 @@ internal class ExperienceRenderer(
         return stateMachines.getOwner(renderContext)?.stateMachine?.state
     }
 
+    internal sealed class RenderingResult {
+        object Success : RenderingResult()
+        object WontDisplay : RenderingResult()
+        data class NoRenderContext(val experience: Experience, val renderContext: RenderContext) : RenderingResult()
+        data class StateMachineError(val experience: Experience, val error: Error) : RenderingResult()
+    }
+
     /**
      * returns true/false whether the experience is was started
      */
-    suspend fun show(experience: Experience): Boolean = with(experience) {
+    suspend fun show(experience: Experience): RenderingResult = with(experience) {
         var canShow = config.interceptor?.canDisplayExperience(experience.id) ?: true
 
         // if there is an active experiment, and we should not show this experience (control group), then
@@ -83,28 +102,24 @@ internal class ExperienceRenderer(
             canShow = false
         }
 
-        if (!canShow) return false
+        if (!canShow) return WontDisplay
 
-        val stateMachine = stateMachines.getOwner(renderContext)?.stateMachine
-
-        if (stateMachine == null) {
-            analyticsTracker.trackExperienceError(experience, "no render context $renderContext")
-            return false
-        }
+        val stateMachine = stateMachines.getOwner(renderContext)?.stateMachine ?: return NoRenderContext(experience, renderContext)
+            .also { analyticsTracker.trackExperienceError(experience, "no render context $renderContext") }
 
         if (stateMachine.checkPriority(this)) {
-            return when (stateMachine.handleAction(EndExperience(markComplete = false, destroyed = false))) {
-                is Success -> show(this) // re-invoke show on the new experience now after dismiss
-                is Failure -> false // dismiss failed - can't continue
+            return when (val result = stateMachine.handleAction(EndExperience(markComplete = false, destroyed = false))) {
+                is Success -> show(this)
+                is Failure -> StateMachineError(experience, result.reason)
             }
         }
 
         // track an experiment_entered analytic, if exists, since we know it is not in the control group at this point
         experiment?.let { analyticsTracker.track(it) }
 
-        when (stateMachine.handleAction(StartExperience(this))) {
-            is Success -> true
-            is Failure -> false
+        return when (val result = stateMachine.handleAction(StartExperience(this))) {
+            is Success -> RenderingResult.Success.also { previewExperiences.remove(renderContext) }
+            is Failure -> StateMachineError(experience, result.reason)
         }
     }
 
@@ -145,7 +160,7 @@ internal class ExperienceRenderer(
         if (experiences.isEmpty()) return
 
         val experience = experiences.first()
-        if (!show(experience)) {
+        if (show(experience) != RenderingResult.Success) {
             attemptToShow(experiences.drop(1))
         } else {
             analyticsTracker.trackExperienceRecovery(experience)
@@ -178,16 +193,19 @@ internal class ExperienceRenderer(
     }
 
     suspend fun show(renderContext: RenderContext) {
-        potentiallyRenderableExperiences[renderContext]?.let {
-            attemptToShow(it)
-        }
+        // shows preview if exist or else show possible experiences from qualification
+        previewExperiences[renderContext]?.let { show(it) }
+            ?: potentiallyRenderableExperiences[renderContext]?.let { attemptToShow(it) }
     }
 
     suspend fun show(experienceId: String, trigger: ExperienceTrigger): Boolean {
         if (sessionMonitor.sessionId == null) return false
 
         repository.getExperienceContent(experienceId, trigger)?.let {
-            return show(it)
+            return when (show(it)) {
+                RenderingResult.Success -> true
+                else -> false
+            }
         }
 
         return false
@@ -197,12 +215,30 @@ internal class ExperienceRenderer(
         stateMachines.getOwner(renderContext)?.stateMachine?.handleAction(StartStep(stepReference))
     }
 
-    suspend fun preview(experienceId: String): Boolean {
-        repository.getExperiencePreview(experienceId)?.let {
-            return show(it)
-        }
+    sealed class PreviewResponse {
+        object Success : PreviewResponse()
+        object ExperienceNotFound : PreviewResponse()
+        object Failed : PreviewResponse()
+        data class PreviewDeferred(val experience: Experience, val frameId: String) : PreviewResponse()
+        data class StateMachineError(val experience: Experience, val error: Error) : PreviewResponse()
+    }
 
-        return false
+    suspend fun preview(experienceId: String): PreviewResponse {
+        repository.getExperiencePreview(experienceId).run {
+            return when (this) {
+                is Success -> {
+                    previewExperiences[value.renderContext] = value
+
+                    when (val result = show(value)) {
+                        is NoRenderContext -> PreviewResponse.PreviewDeferred(result.experience, result.renderContext.getFrameId())
+                        is StateMachineError -> PreviewResponse.StateMachineError(result.experience, result.error)
+                        else -> PreviewResponse.Success
+                    }
+                }
+                is Failure -> if (reason is HttpError && reason.code == HTTP_CODE_NOT_FOUND)
+                    PreviewResponse.ExperienceNotFound else PreviewResponse.Failed
+            }
+        }
     }
 
     fun stop() {

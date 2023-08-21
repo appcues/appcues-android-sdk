@@ -10,10 +10,12 @@ import com.appcues.data.model.ExperiencePriority
 import com.appcues.data.model.ExperiencePriority.LOW
 import com.appcues.data.model.ExperiencePriority.NORMAL
 import com.appcues.data.model.ExperienceTrigger
+import com.appcues.data.remote.RemoteError
 import com.appcues.data.remote.RemoteError.NetworkError
 import com.appcues.data.remote.appcues.AppcuesRemoteSource
 import com.appcues.data.remote.appcues.request.ActivityRequest
 import com.appcues.logging.Logcues
+import com.appcues.util.ResultOf
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
 import com.appcues.util.doIfFailure
@@ -35,6 +37,7 @@ internal class AppcuesRepository(
     private val logcues: Logcues,
     private val storage: Storage,
 ) {
+
     private val processingActivity: HashSet<UUID> = hashSetOf()
     private val mutex = Mutex()
 
@@ -50,14 +53,11 @@ internal class AppcuesRepository(
         }
     }
 
-    suspend fun getExperiencePreview(experienceId: String): Experience? = withContext(Dispatchers.IO) {
-        appcuesRemoteSource.getExperiencePreview(experienceId, storage.userSignature).let {
+    suspend fun getExperiencePreview(experienceId: String): ResultOf<Experience, RemoteError> = withContext(Dispatchers.IO) {
+        return@withContext appcuesRemoteSource.getExperiencePreview(experienceId, storage.userSignature).let {
             when (it) {
-                is Success -> experienceMapper.map(it.value, ExperienceTrigger.Preview)
-                is Failure -> {
-                    logcues.info("Experience preview request failed, reason: ${it.reason}")
-                    null
-                }
+                is Success -> Success(experienceMapper.map(it.value, ExperienceTrigger.Preview))
+                is Failure -> it.also { logcues.info("Experience preview request failed, reason: ${it.reason}") }
             }
         }
     }

@@ -93,17 +93,17 @@ internal class AppcuesRepositoryTest {
         // WHEN
         val result = repository.getExperiencePreview("1234")
         // THEN
-        assertThat(result).isEqualTo(mappedExperience)
+        assertThat(result).isInstanceOf(Success::class.java)
     }
 
     @Test
-    fun `getExperiencePreview SHOULD return null WHEN appcuesRemoteSource fails`() = runTest {
+    fun `getExperiencePreview SHOULD return PreviewError WHEN appcuesRemoteSource fails`() = runTest {
         // GIVEN
         coEvery { appcuesRemoteSource.getExperiencePreview("1234", any()) } returns Failure(HttpError())
         // WHEN
         val result = repository.getExperiencePreview("1234")
         // THEN
-        assertThat(result).isNull()
+        assertThat(result).isInstanceOf(Failure::class.java)
     }
 
     @Test

@@ -3,11 +3,18 @@ package com.appcues
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
+import android.widget.Toast
 import com.appcues.data.model.ExperienceTrigger.DeepLink
 import com.appcues.debugger.AppcuesDebuggerManager
 import com.appcues.debugger.DebugMode.Debugger
 import com.appcues.debugger.DebugMode.ScreenCapture
 import com.appcues.ui.ExperienceRenderer
+import com.appcues.ui.ExperienceRenderer.PreviewResponse.ExperienceNotFound
+import com.appcues.ui.ExperienceRenderer.PreviewResponse.Failed
+import com.appcues.ui.ExperienceRenderer.PreviewResponse.PreviewDeferred
+import com.appcues.ui.ExperienceRenderer.PreviewResponse.StateMachineError
+import com.appcues.ui.ExperienceRenderer.PreviewResponse.Success
 import kotlinx.coroutines.launch
 
 internal class DeepLinkHandler(
@@ -39,7 +46,7 @@ internal class DeepLinkHandler(
         return when {
             segments.count() == 2 && segments[0] == "experience_preview" -> {
                 appcuesCoroutineScope.launch {
-                    experienceRenderer.preview(segments[1])
+                    previewExperience(segments[1], activity)
                 }
                 true
             }
@@ -64,6 +71,22 @@ internal class DeepLinkHandler(
                 }
             }
             else -> false
+        }
+    }
+
+    private suspend fun previewExperience(experienceId: String, activity: Activity) {
+        experienceRenderer.preview(experienceId).run {
+            val resources = activity.resources
+
+            Log.i("Logcues", "Preview response $this")
+            when (this) {
+                is Failed -> resources.getString(R.string.appcues_preview_flow_failed)
+                is PreviewDeferred -> resources.getString(R.string.appcues_preview_embed_message, frameId, experience.name)
+                is StateMachineError -> resources.getString(R.string.appcues_preview_flow_failed_reason, experience.name, error.message)
+                is ExperienceNotFound -> resources.getString(R.string.appcues_preview_flow_not_found)
+                // do nothing. previewing experience
+                is Success -> null
+            }?.let { errorMessage -> Toast.makeText(activity, errorMessage, Toast.LENGTH_LONG).show() }
         }
     }
 }

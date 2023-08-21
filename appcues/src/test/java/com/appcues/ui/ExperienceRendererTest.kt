@@ -14,6 +14,7 @@ import com.appcues.statemachine.Action.StartExperience
 import com.appcues.statemachine.State.Idling
 import com.appcues.statemachine.State.RenderingStep
 import com.appcues.statemachine.StateMachine
+import com.appcues.ui.ExperienceRenderer.RenderingResult
 import com.appcues.util.ResultOf.Success
 import com.google.common.truth.Truth.assertThat
 import io.mockk.Called
@@ -107,7 +108,7 @@ internal class ExperienceRendererTest {
         val showResult = experienceRenderer.show(experience)
 
         // THEN
-        assertThat(showResult).isFalse()
+        assertThat(showResult).isInstanceOf(RenderingResult.WontDisplay::class.java)
         coVerify { stateMachine.handleAction(StartExperience(experience)) wasNot Called }
     }
 
@@ -133,7 +134,7 @@ internal class ExperienceRendererTest {
         val showResult = experienceRenderer.show(experience)
 
         // THEN
-        assertThat(showResult).isTrue()
+        assertThat(showResult).isInstanceOf(RenderingResult.Success::class.java)
         coVerify { stateMachine.handleAction(StartExperience(experience)) }
     }
 
