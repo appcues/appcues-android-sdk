@@ -206,8 +206,7 @@ internal class ExperienceRenderer(
     }
 
     fun stop() {
-        stateMachine?.stop() // modal
-        stateMachines.stop() // non-modals
+        stateMachines.stop()
     }
 
     suspend fun dismiss(renderContext: RenderContext, markComplete: Boolean, destroyed: Boolean): ResultOf<State, Error> {
