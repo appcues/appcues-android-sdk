@@ -34,4 +34,19 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/buttonEvent1" />
 
+    <Button
+        android:id="@+id/buttonEvent3"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="24dp"
+        android:contentDescription="@string/content_description_event_3"
+        android:tag="btnEvent3"
+        android:text="@string/trigger_event_3_button"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/buttonEvent2" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
