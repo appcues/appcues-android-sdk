@@ -9,11 +9,15 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
 import com.appcues.samples.kotlin.ExampleApplication
 import com.appcues.samples.kotlin.R
 import com.appcues.samples.kotlin.databinding.FragmentEventsBinding
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class EventsFragment : Fragment() {
 
@@ -38,6 +42,10 @@ class EventsFragment : Fragment() {
 
         binding.buttonEvent2.setOnClickListener {
             appcues.track("event2")
+        }
+
+        binding.buttonEvent3.setOnClickListener {
+            appcues.track("event3")
         }
 
         return binding.root
@@ -69,7 +77,14 @@ class EventsFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        binding.buttonEvent3.isVisible = false
         appcues.screen("Trigger Events")
+
+        lifecycleScope.launch {
+            @Suppress("MagicNumber")
+            delay(2_000)
+            binding.buttonEvent3.isVisible = true
+        }
     }
 
     override fun onDestroyView() {
