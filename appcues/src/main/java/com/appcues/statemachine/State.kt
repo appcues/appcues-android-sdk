@@ -28,7 +28,12 @@ internal sealed class State {
         val dismissAndContinue: (() -> Unit)?,
     ) : State()
 
-    data class EndingExperience(val experience: Experience, val flatStepIndex: Int, val markComplete: Boolean) : State()
+    data class EndingExperience(
+        val experience: Experience,
+        val flatStepIndex: Int,
+        val markComplete: Boolean,
+        val trackAnalytics: Boolean, // to disable analytics on force stop
+    ) : State()
 
     val currentExperience: Experience?
         get() = when (this) {

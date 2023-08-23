@@ -62,13 +62,15 @@ internal class ExperienceLifecycleTracker(
                         }
                     }
                     is EndingExperience -> {
-                        if (it.markComplete) {
-                            // if ending on the last step OR an action requested it be considered complete explicitly,
-                            // track the experience_completed event
-                            trackLifecycleEvent(ExperienceCompleted(it.experience))
-                        } else {
-                            // otherwise its considered experience_dismissed (not completed)
-                            trackLifecycleEvent(ExperienceDismissed(it.experience, it.flatStepIndex))
+                        if (it.trackAnalytics) {
+                            if (it.markComplete) {
+                                // if ending on the last step OR an action requested it be considered complete explicitly,
+                                // track the experience_completed event
+                                trackLifecycleEvent(ExperienceCompleted(it.experience))
+                            } else {
+                                // otherwise its considered experience_dismissed (not completed)
+                                trackLifecycleEvent(ExperienceDismissed(it.experience, it.flatStepIndex))
+                            }
                         }
 
                         onEndedExperience(it.experience)

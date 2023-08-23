@@ -169,24 +169,18 @@ internal class ExperienceRenderer(
 
     suspend fun start(owner: StateMachineOwning, context: RenderContext) {
         // If there's already a frame for the context, reset it back to its unregistered state.
-        val existingOwner = stateMachines.getOwner(context) as? AppcuesFrameStateMachineOwner
-        if (existingOwner != null) {
-            existingOwner.frame.get()?.reset()
-            existingOwner.stateMachine = null
-        }
+        stateMachines.getOwner(context)?.reset()
 
         // If the machine being started is already registered for a different context,
         // reset it back to its unregistered state before potentially showing new content.
-        if (owner.stateMachine != null) {
-            (owner as? AppcuesFrameStateMachineOwner)?.let {
-                it.frame.get()?.reset()
-                it.stateMachine = null
-            }
-        }
+        owner.reset()
 
+        // do we need to unhook any existing listeners to owner.stateMachine, if not null, before
+        // re-assigning a new one here?
         owner.stateMachine = get<StateMachine>().also {
             lifecycleTracker.start(it, { potentiallyRenderableExperiences.remove(renderContext) })
         }
+
         stateMachines.setOwner(context, owner)
 
         show(context)
@@ -241,12 +235,19 @@ internal class ExperienceRenderer(
         }
     }
 
-    fun stop() {
-        stateMachines.stop()
-    }
-
     suspend fun dismiss(renderContext: RenderContext, markComplete: Boolean, destroyed: Boolean): ResultOf<State, Error> {
         return stateMachines.getOwner(renderContext)?.stateMachine?.handleAction(EndExperience(markComplete, destroyed))
             ?: Failure(RenderContextNotActive(renderContext))
+    }
+
+    fun resetAll() {
+        previewExperiences.clear()
+        potentiallyRenderableExperiences.clear()
+        stateMachines.resetAll()
+    }
+
+    // Reset only the owned `stateMachine` instance in conformance to `StateMachineOwning`.
+    override fun reset() {
+        stateMachine?.stop(true)
     }
 }

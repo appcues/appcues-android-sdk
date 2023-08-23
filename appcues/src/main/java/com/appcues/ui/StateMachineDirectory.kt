@@ -8,12 +8,18 @@ import java.lang.ref.WeakReference
 internal interface StateMachineOwning {
     var renderContext: RenderContext?
     var stateMachine: StateMachine?
+    fun reset()
 }
 
 internal class AppcuesFrameStateMachineOwner(frame: AppcuesFrameView) : StateMachineOwning {
     val frame: WeakReference<AppcuesFrameView> = WeakReference(frame)
     override var renderContext: RenderContext? = null
     override var stateMachine: StateMachine? = null
+    override fun reset() {
+        frame.get()?.reset()
+        // do not need to dismiss here, as the frame UI is already removed for embed
+        stateMachine?.stop(false)
+    }
 }
 
 internal class StateMachineDirectory {
@@ -48,9 +54,9 @@ internal class StateMachineDirectory {
         owner.renderContext = context
     }
 
-    fun stop() {
+    fun resetAll() {
         stateMachines.values.forEach {
-            it.stateMachine?.stop()
+            it.reset()
         }
     }
 }
