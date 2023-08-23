@@ -176,6 +176,7 @@ public class Appcues internal constructor(koinScope: Scope) {
         storage.isAnonymous = true
         storage.groupId = null
 
+        experienceRenderer.resetAll()
         debuggerManager.reset()
     }
 
@@ -277,7 +278,7 @@ public class Appcues internal constructor(koinScope: Scope) {
     public fun stop() {
         debuggerManager.stop()
         activityScreenTracking.stop()
-        experienceRenderer.stop()
+        experienceRenderer.resetAll()
     }
 
     /**
@@ -300,18 +301,12 @@ public class Appcues internal constructor(koinScope: Scope) {
 
         val mutableProperties = properties?.toMutableMap()
         val userChanged = storage.userId != userId
+        if (userChanged) {
+            reset()
+        }
         storage.userId = userId
         storage.isAnonymous = isAnonymous
         storage.userSignature = mutableProperties?.remove("appcues:user_id_signature") as? String
-        if (userChanged) {
-            // when the user changes, reset the session monitor and a new session will
-            // be created the first time analytics are tracked for the new user (the identify)
-            sessionMonitor.reset()
-
-            // group info is reset on new user
-            storage.groupId = null
-        }
-
         analyticsTracker.identify(mutableProperties)
     }
 }

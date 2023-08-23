@@ -656,7 +656,7 @@ internal class StateMachineTest : AppcuesScopeTest {
     fun `EndingExperience SHOULD NOT transition WHEN action is something other than Reset or Pause`() = runTest {
         // GIVEN
         val experience = mockExperience()
-        val initialState = EndingExperience(experience, 1, false)
+        val initialState = EndingExperience(experience, 1, false, true)
         val stateMachine = initMachine(initialState)
         val action = RenderStep
 
@@ -672,7 +672,7 @@ internal class StateMachineTest : AppcuesScopeTest {
     fun `EndingExperience SHOULD call action processor WHEN experience is completed`() = runTest {
         // GIVEN
         val experience = mockExperience()
-        val initialState = EndingExperience(experience, 1, true)
+        val initialState = EndingExperience(experience, 1, true, true)
         val stateMachine = initMachine(initialState)
         val action = Reset
 
@@ -691,7 +691,7 @@ internal class StateMachineTest : AppcuesScopeTest {
     fun `EndingExperience SHOULD NOT call action processor WHEN experience is NOT completed`() = runTest {
         // GIVEN
         val experience = mockExperience()
-        val initialState = EndingExperience(experience, 1, false)
+        val initialState = EndingExperience(experience, 1, false, true)
         val stateMachine = initMachine(initialState)
         val action = Reset
 
@@ -711,7 +711,7 @@ internal class StateMachineTest : AppcuesScopeTest {
         val stateMachine = initMachine(RenderingStep(experience, 2, false))
 
         // WHEN
-        stateMachine.stop()
+        stateMachine.stop(true)
 
         // THEN
         assertThat(stateMachine.state).isEqualTo(Idling)
@@ -733,7 +733,7 @@ internal class StateMachineTest : AppcuesScopeTest {
         )
 
         // WHEN
-        stateMachine.stop()
+        stateMachine.stop(true)
 
         // THEN
         assertThat(completion.await(1.seconds)).isFalse()
