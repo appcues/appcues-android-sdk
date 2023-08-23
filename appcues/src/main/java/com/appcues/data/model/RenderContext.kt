@@ -8,9 +8,9 @@ internal sealed class RenderContext {
     object Modal : RenderContext()
 }
 
-internal fun RenderContext.getFrameId(): String {
+internal fun RenderContext.getFrameId(): String? {
     return when (this) {
         is Embed -> frameId
-        Modal -> String()
+        Modal -> null
     }
 }

@@ -52,9 +52,13 @@ internal class DebuggerStatusManager(
 
     private var userIdentified: String? = storage.userId.ifEmpty { null }
 
-    private var experienceName: String? = null
+    private data class DisplayingExperience(
+        val name: String,
+        val frameId: String? = null,
+        var step: String? = null
+    )
 
-    private var experienceShowingStep: String? = null
+    private val displayingExperiences = hashMapOf<String, DisplayingExperience>()
 
     private val _data = MutableStateFlow<List<DebuggerStatusItem>>(arrayListOf())
 
@@ -74,19 +78,30 @@ internal class DebuggerStatusManager(
                     trackingScreens = true
                 }
                 AnalyticsEvent.ExperienceStarted.eventName -> {
-                    experienceName = event.attributes["experienceName"] as String
+                    val id = event.attributes["experienceId"] as String
+                    displayingExperiences[id] = DisplayingExperience(
+                        name = contextResources.getString(
+                            R.string.appcues_debugger_status_experience_name,
+                            event.attributes["experienceName"] as String
+                        ),
+                        frameId = event.attributes["frameId"] as String?,
+                    )
                 }
                 AnalyticsEvent.ExperienceStepSeen.eventName -> {
-                    (event.attributes["stepIndex"] as String).split(",").also {
+                    val id = event.attributes["experienceId"] as String
+                    val step = (event.attributes["stepIndex"] as String).split(",").let {
                         val group = it.first().toInt() + 1
                         val step = it.last().toInt() + 1
 
-                        experienceShowingStep = contextResources.getString(R.string.appcues_debugger_status_experience_line1, group, step)
+                        contextResources.getString(R.string.appcues_debugger_status_experience_step, group, step)
                     }
+
+                    displayingExperiences[id]?.step = step
                 }
                 AnalyticsEvent.ExperienceCompleted.eventName, AnalyticsEvent.ExperienceDismissed.eventName -> {
-                    experienceName = null
-                    experienceShowingStep = null
+                    val id = event.attributes["experienceId"] as String
+
+                    displayingExperiences.remove(id)
                 }
                 else -> Unit
             }
@@ -198,11 +213,11 @@ internal class DebuggerStatusManager(
     }
 
     private fun ArrayList<DebuggerStatusItem>.appendExperienceIfAny() = apply {
-        experienceName?.also {
+        displayingExperiences.values.forEach {
             add(
                 DebuggerStatusItem(
-                    title = it,
-                    line1 = experienceShowingStep,
+                    title = it.name,
+                    line1 = it.step + (it.frameId?.let { frame -> " ($frame)" } ?: String()),
                     statusType = EXPERIENCE
                 )
             )

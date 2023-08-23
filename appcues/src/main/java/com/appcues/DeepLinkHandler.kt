@@ -3,7 +3,6 @@ package com.appcues
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
-import android.util.Log
 import android.widget.Toast
 import com.appcues.data.model.ExperienceTrigger.DeepLink
 import com.appcues.debugger.AppcuesDebuggerManager
@@ -78,10 +77,15 @@ internal class DeepLinkHandler(
         experienceRenderer.preview(experienceId).run {
             val resources = activity.resources
 
-            Log.i("Logcues", "Preview response $this")
             when (this) {
                 is Failed -> resources.getString(R.string.appcues_preview_flow_failed)
-                is PreviewDeferred -> resources.getString(R.string.appcues_preview_embed_message, frameId, experience.name)
+                is PreviewDeferred -> {
+                    if (frameId != null) {
+                        resources.getString(R.string.appcues_preview_embed_message, frameId, experience.name)
+                    } else {
+                        resources.getString(R.string.appcues_preview_flow_failed)
+                    }
+                }
                 is StateMachineError -> resources.getString(R.string.appcues_preview_flow_failed_reason, experience.name, error.message)
                 is ExperienceNotFound -> resources.getString(R.string.appcues_preview_flow_not_found)
                 // do nothing. previewing experience

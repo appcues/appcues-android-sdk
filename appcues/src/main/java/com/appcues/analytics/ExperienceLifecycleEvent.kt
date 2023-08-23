@@ -7,6 +7,7 @@ import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.Interactio
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType.TARGET_TAPPED
 import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperienceStepFormState
+import com.appcues.data.model.getFrameId
 import com.appcues.statemachine.Error
 import com.appcues.util.appcuesFormatted
 import com.appcues.util.toSlug
@@ -85,6 +86,7 @@ internal sealed class ExperienceLifecycleEvent(
             "experienceId" to experience.id.appcuesFormatted(),
             "experienceName" to experience.name,
             "experienceType" to experience.type,
+            "frameId" to experience.renderContext.getFrameId(),
             "version" to experience.publishedAt,
             // items in the spec that we are not ready for yet:
             // "version" to experience.version -- not included in response?
