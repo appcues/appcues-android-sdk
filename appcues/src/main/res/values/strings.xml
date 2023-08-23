@@ -18,7 +18,8 @@
     <string name="appcues_debugger_status_item_icon_content_description">%1$s icon</string>
     <string name="appcues_debugger_status_reload_icon_content_description">reload icon</string>
     <string name="appcues_debugger_status_device_title">"%1$s Android %2$s</string>
-    <string name="appcues_debugger_status_experience_line1">"Showing group %1$s step %2$s"</string>
+    <string name="appcues_debugger_status_experience_name">Showing %1$s</string>
+    <string name="appcues_debugger_status_experience_step">Group %1$s step %2$s</string>
     <string name="appcues_debugger_status_sdk_title">Installed SDK %1$s</string>
     <string name="appcues_debugger_status_sdk_line1">Account ID: %1$s</string>
     <string name="appcues_debugger_status_sdk_line2">Application ID: %1$s</string>

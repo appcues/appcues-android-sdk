@@ -24,6 +24,8 @@ import com.appcues.statemachine.State
 import com.appcues.statemachine.State.Idling
 import com.appcues.statemachine.StateMachine
 import com.appcues.statemachine.StepReference
+import com.appcues.ui.ExperienceRenderer.PreviewResponse.Failed
+import com.appcues.ui.ExperienceRenderer.PreviewResponse.PreviewDeferred
 import com.appcues.ui.ExperienceRenderer.RenderingResult.NoRenderContext
 import com.appcues.ui.ExperienceRenderer.RenderingResult.StateMachineError
 import com.appcues.ui.ExperienceRenderer.RenderingResult.WontDisplay
@@ -213,7 +215,7 @@ internal class ExperienceRenderer(
         object Success : PreviewResponse()
         object ExperienceNotFound : PreviewResponse()
         object Failed : PreviewResponse()
-        data class PreviewDeferred(val experience: Experience, val frameId: String) : PreviewResponse()
+        data class PreviewDeferred(val experience: Experience, val frameId: String?) : PreviewResponse()
         data class StateMachineError(val experience: Experience, val error: Error) : PreviewResponse()
     }
 
@@ -223,14 +225,14 @@ internal class ExperienceRenderer(
                 is Success -> {
                     previewExperiences[value.renderContext] = value
 
-                    when (val result = show(value)) {
-                        is NoRenderContext -> PreviewResponse.PreviewDeferred(result.experience, result.renderContext.getFrameId())
+                    return when (val result = show(value)) {
+                        is NoRenderContext -> PreviewDeferred(result.experience, result.renderContext.getFrameId())
                         is StateMachineError -> PreviewResponse.StateMachineError(result.experience, result.error)
                         else -> PreviewResponse.Success
                     }
                 }
                 is Failure -> if (reason is HttpError && reason.code == HTTP_CODE_NOT_FOUND)
-                    PreviewResponse.ExperienceNotFound else PreviewResponse.Failed
+                    PreviewResponse.ExperienceNotFound else Failed
             }
         }
     }
