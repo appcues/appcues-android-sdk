@@ -3,7 +3,6 @@ package com.appcues.ui.composables
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -57,10 +56,11 @@ internal fun AppcuesComposition(
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun MainSurface() {
     Box(
-        modifier = Modifier.consumeAllTouchEvents(),
+        modifier = Modifier.pointerInteropFilter { false },
         contentAlignment = Alignment.Center
     ) {
         val viewModel = LocalViewModel.current
@@ -86,13 +86,6 @@ private fun MainSurface() {
         }
     }
 }
-
-@OptIn(ExperimentalComposeUiApi::class)
-private fun Modifier.consumeAllTouchEvents(): Modifier = then(
-    Modifier
-        .fillMaxSize()
-        .pointerInteropFilter { false }
-)
 
 @Composable
 private fun BoxScope.ComposeLastRenderingState(state: Rendering) {
