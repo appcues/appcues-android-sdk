@@ -1,6 +1,5 @@
 package com.appcues
 
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
@@ -11,7 +10,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 @Composable
 public fun AppcuesFrame(modifier: Modifier = Modifier, appcues: Appcues, frameId: String) {
     AndroidView(
-        modifier = modifier.then(Modifier.wrapContentHeight(unbounded = true)),
+        modifier = modifier,
         factory = { context ->
             AppcuesFrameView(context).apply {
                 appcues.registerEmbed(frameId, this)
