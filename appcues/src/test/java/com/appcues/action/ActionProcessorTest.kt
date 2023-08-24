@@ -157,10 +157,10 @@ internal class ActionProcessorTest : KoinTest {
                                 experienceRenderer = get(),
                             )
                         }
-                        factory { StateMachine(get(), get(), get(), initState) }
+                        factory { StateMachine(get(), get(), get(), get(), initState) }
                         scoped { ExperienceRenderer(scope) }
                         scoped { RenderContext.Modal }
-                        scoped { mockk<ExperienceLifecycleTracker>(relaxed = true) }
+                        factory { mockk<ExperienceLifecycleTracker>(relaxed = true) }
                         scoped { StateMachineDirectory() }
                     }
                 }

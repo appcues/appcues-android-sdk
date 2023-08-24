@@ -66,7 +66,7 @@ internal class StateMachineTest : AppcuesScopeTest {
     @Test
     fun `initial state SHOULD be Idling`() {
         // GIVEN
-        val stateMachine = StateMachine(get(), get(), get())
+        val stateMachine = StateMachine(get(), get(), get(), get())
 
         // THEN
         assertThat(stateMachine.state).isEqualTo(Idling)
@@ -748,7 +748,7 @@ internal class StateMachineTest : AppcuesScopeTest {
         val stateFlowCompletion: CompletableDeferred<Boolean> = CompletableDeferred()
         val errorFlowCompletion: CompletableDeferred<Boolean> = CompletableDeferred()
         val scope: AppcuesCoroutineScope = get()
-        val machine = StateMachine(scope, get(), get(), state)
+        val machine = StateMachine(scope, get(), get(), get(), state)
         // this collect on the stateFlow simulates the function of the UI
         // that is required to progress the state machine forward on UI present/dismiss
         scope.launch {

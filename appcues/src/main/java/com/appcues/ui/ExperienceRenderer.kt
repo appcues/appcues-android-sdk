@@ -3,7 +3,6 @@ package com.appcues.ui
 import com.appcues.AppcuesConfig
 import com.appcues.SessionMonitor
 import com.appcues.analytics.AnalyticsTracker
-import com.appcues.analytics.ExperienceLifecycleTracker
 import com.appcues.analytics.track
 import com.appcues.analytics.trackExperienceError
 import com.appcues.analytics.trackExperienceRecovery
@@ -59,7 +58,6 @@ internal class ExperienceRenderer(
     private val config by inject<AppcuesConfig>()
     private val analyticsTracker by inject<AnalyticsTracker>()
     private val stateMachines by inject<StateMachineDirectory>()
-    private val lifecycleTracker by inject<ExperienceLifecycleTracker>()
 
     private val potentiallyRenderableExperiences = hashMapOf<RenderContext, List<Experience>>()
     private val previewExperiences = hashMapOf<RenderContext, Experience>()
@@ -67,9 +65,7 @@ internal class ExperienceRenderer(
     init {
         // sets up the single state machine used for modal experiences (mobile flows, not embeds)
         // that lives indefinitely and handles one experience at a time
-        stateMachine = get<StateMachine>().also {
-            lifecycleTracker.start(it, { /* no action needed on end of modal experience */ })
-        }
+        stateMachine = get()
         stateMachines.setOwner(Modal, this)
     }
 
@@ -175,10 +171,14 @@ internal class ExperienceRenderer(
         // reset it back to its unregistered state before potentially showing new content.
         owner.reset()
 
-        // do we need to unhook any existing listeners to owner.stateMachine, if not null, before
-        // re-assigning a new one here?
+        // if the owner already has a state machine, make sure it's lifecycle tracking is stopped before
+        // we replace it with a new one
+        owner.stateMachine?.stopLifecycleTracking()
+
         owner.stateMachine = get<StateMachine>().also {
-            lifecycleTracker.start(it, { potentiallyRenderableExperiences.remove(renderContext) })
+            // when an embed completes, remove this render context from the cache, until a new set of
+            // qualified experiences is processed
+            it.onEndedExperience = { potentiallyRenderableExperiences.remove(renderContext) }
         }
 
         stateMachines.setOwner(context, owner)

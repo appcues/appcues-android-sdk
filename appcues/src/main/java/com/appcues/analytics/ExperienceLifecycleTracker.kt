@@ -23,6 +23,7 @@ import com.appcues.statemachine.State.RenderingStep
 import com.appcues.statemachine.StateMachine
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
@@ -39,9 +40,23 @@ internal class ExperienceLifecycleTracker(
     private val storage: Storage by inject()
     private val appcuesCoroutineScope: AppcuesCoroutineScope by inject()
 
+    private var stateJob: Job? = null
+    private var errorJob: Job? = null
+
     fun start(stateMachine: StateMachine, onEndedExperience: (Experience) -> Unit, dispatcher: CoroutineDispatcher = Dispatchers.IO) {
-        appcuesCoroutineScope.launch(dispatcher) { stateMachine.observeState(onEndedExperience) }
-        appcuesCoroutineScope.launch(dispatcher) { stateMachine.observeErrors() }
+        // ensure any existing observers are stopped before starting new ones
+        stop()
+
+        stateJob = appcuesCoroutineScope.launch(dispatcher) { stateMachine.observeState(onEndedExperience) }
+        errorJob = appcuesCoroutineScope.launch(dispatcher) { stateMachine.observeErrors() }
+    }
+
+    fun stop() {
+        stateJob?.cancel()
+        errorJob?.cancel()
+
+        stateJob = null
+        errorJob = null
     }
 
     private suspend fun StateMachine.observeState(onEndedExperience: (Experience) -> Unit) {
