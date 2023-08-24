@@ -83,7 +83,9 @@ class EventsFragment : Fragment() {
         lifecycleScope.launch {
             @Suppress("MagicNumber")
             delay(2_000)
-            binding.buttonEvent3.isVisible = true
+            // the view may have been destroyed during the 2 seconds
+            // so do a null safe check on the view binding
+            _binding?.let { it.buttonEvent3.isVisible = true }
         }
     }
 
