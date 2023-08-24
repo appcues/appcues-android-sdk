@@ -9,6 +9,7 @@ import com.appcues.action.ActionProcessor
 import com.appcues.action.ActionRegistry
 import com.appcues.analytics.ActivityScreenTracking
 import com.appcues.analytics.AnalyticsTracker
+import com.appcues.analytics.ExperienceLifecycleTracker
 import com.appcues.debugger.AppcuesDebuggerManager
 import com.appcues.logging.Logcues
 import com.appcues.mocks.storageMockk
@@ -62,6 +63,7 @@ internal class KoinScopeRule : TestWatcher() {
                         scoped { storageMockk() }
                         scoped { mockk<Appcues>(relaxed = true) }
                         scoped { mockk<ActionProcessor>(relaxed = true) }
+                        factory { mockk<ExperienceLifecycleTracker>(relaxed = true) }
                     }
                 }
             )

@@ -179,8 +179,8 @@ internal class ExperienceLifecycleTrackerTest : KoinTest {
                         scoped { storageMockk() }
                         scoped { mockk<Appcues>(relaxed = true) }
                         scoped { mockk<ActionProcessor>(relaxed = true) }
-                        scoped { ExperienceLifecycleTracker(scope) }
-                        scoped { StateMachine(get(), get(), get(), state) }
+                        factory { ExperienceLifecycleTracker(scope) }
+                        scoped { StateMachine(get(), get(), get(), get(), state) }
                     }
                 }
             )

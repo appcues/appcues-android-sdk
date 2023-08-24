@@ -3,6 +3,8 @@ package com.appcues.statemachine
 import com.appcues.AppcuesConfig
 import com.appcues.AppcuesCoroutineScope
 import com.appcues.action.ActionProcessor
+import com.appcues.analytics.ExperienceLifecycleTracker
+import com.appcues.data.model.Experience
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.RenderStep
 import com.appcues.statemachine.Action.ReportError
@@ -41,6 +43,7 @@ internal class StateMachine(
     private val appcuesCoroutineScope: AppcuesCoroutineScope,
     private val config: AppcuesConfig,
     private val actionProcessor: ActionProcessor,
+    private val lifecycleTracker: ExperienceLifecycleTracker,
     initialState: State = Idling
 ) {
 
@@ -58,6 +61,8 @@ internal class StateMachine(
 
     private var mutex = Mutex()
 
+    var onEndedExperience: ((Experience) -> Unit)? = null
+
     init {
         appcuesCoroutineScope.launch {
             stateFlow.collect {
@@ -68,6 +73,12 @@ internal class StateMachine(
                 }
             }
         }
+
+        lifecycleTracker.start(this, { onEndedExperience?.invoke(it) })
+    }
+
+    fun stopLifecycleTracking() {
+        lifecycleTracker.stop()
     }
 
     suspend fun handleAction(action: Action): ResultOf<State, Error> = mutex.withLock {
