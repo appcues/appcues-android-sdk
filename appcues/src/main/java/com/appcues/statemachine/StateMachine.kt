@@ -223,19 +223,17 @@ internal class StateMachine(
         }
     }
 
-    fun stop(dismiss: Boolean) {
-        appcuesCoroutineScope.launch {
-            handleAction(
-                EndExperience(
-                    markComplete = false,
-                    // destroyed means the UI was already dismissed, so invert the dismiss direction passed in
-                    // for this use case - when !destroyed, the state machine will wait on the UI to dismiss and
-                    // signal to move to next step
-                    destroyed = !dismiss,
-                    // special case - no complete/dismiss analytics tracked on a force stop
-                    trackAnalytics = false
-                )
+    suspend fun stop(dismiss: Boolean) {
+        handleAction(
+            EndExperience(
+                markComplete = false,
+                // destroyed means the UI was already dismissed, so invert the dismiss direction passed in
+                // for this use case - when !destroyed, the state machine will wait on the UI to dismiss and
+                // signal to move to next step
+                destroyed = !dismiss,
+                // special case - no complete/dismiss analytics tracked on a force stop
+                trackAnalytics = false
             )
-        }
+        )
     }
 }

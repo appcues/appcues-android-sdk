@@ -242,14 +242,14 @@ internal class ExperienceRenderer(
             ?: Failure(RenderContextNotActive(renderContext))
     }
 
-    fun resetAll() {
+    suspend fun resetAll() {
         previewExperiences.clear()
         potentiallyRenderableExperiences.clear()
         stateMachines.resetAll()
     }
 
     // Reset only the owned `stateMachine` instance in conformance to `StateMachineOwning`.
-    override fun reset() {
+    override suspend fun reset() {
         stateMachine?.stop(true)
     }
 }

@@ -176,8 +176,12 @@ public class Appcues internal constructor(koinScope: Scope) {
         storage.isAnonymous = true
         storage.groupId = null
 
-        experienceRenderer.resetAll()
         debuggerManager.reset()
+
+        appcuesCoroutineScope.launch {
+            // stopping running experiences runs async, as it may require dismissal of UI.
+            experienceRenderer.resetAll()
+        }
     }
 
     /**
@@ -278,7 +282,10 @@ public class Appcues internal constructor(koinScope: Scope) {
     public fun stop() {
         debuggerManager.stop()
         activityScreenTracking.stop()
-        experienceRenderer.resetAll()
+        appcuesCoroutineScope.launch {
+            // stopping running experiences runs async, as it may require dismissal of UI.
+            experienceRenderer.resetAll()
+        }
     }
 
     /**

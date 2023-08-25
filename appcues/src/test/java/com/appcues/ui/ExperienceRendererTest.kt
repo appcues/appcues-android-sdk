@@ -1,12 +1,20 @@
 package com.appcues.ui
 
 import com.appcues.AppcuesConfig
+import com.appcues.analytics.AnalyticsEvent
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.analytics.ExperienceLifecycleTracker
 import com.appcues.analytics.track
 import com.appcues.data.model.Experience
+import com.appcues.data.model.ExperienceTrigger.DeepLink
+import com.appcues.data.model.ExperienceTrigger.ExperienceCompletionAction
+import com.appcues.data.model.ExperienceTrigger.LaunchExperienceAction
+import com.appcues.data.model.ExperienceTrigger.Preview
+import com.appcues.data.model.ExperienceTrigger.Qualification
+import com.appcues.data.model.ExperienceTrigger.ShowCall
 import com.appcues.data.model.Experiment
 import com.appcues.data.model.RenderContext
+import com.appcues.mocks.mockEmbedExperiment
 import com.appcues.mocks.mockExperience
 import com.appcues.mocks.mockExperienceExperiment
 import com.appcues.statemachine.Action.EndExperience
@@ -22,6 +30,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -51,7 +60,7 @@ internal class ExperienceRendererTest {
             every { this@mockk.state } answers { state }
             coEvery { this@mockk.handleAction(any()) } returns Success(Idling)
         }
-        val scope = initScope(stateMachine)
+        val scope = initScope { stateMachine }
         val experienceRenderer = ExperienceRenderer(scope)
         val experience = mockk<Experience>(relaxed = true) {
             every { this@mockk.renderContext } answers { RenderContext.Modal }
@@ -72,7 +81,7 @@ internal class ExperienceRendererTest {
             every { this@mockk.state } answers { state }
             coEvery { this@mockk.handleAction(any()) } returns Success(Idling)
         }
-        val scope = initScope(stateMachine)
+        val scope = initScope { stateMachine }
         val experienceRenderer = ExperienceRenderer(scope)
         val experience = mockk<Experience>(relaxed = true) {
             every { this@mockk.renderContext } answers { RenderContext.Modal }
@@ -101,7 +110,7 @@ internal class ExperienceRendererTest {
             every { this@mockk.state } answers { Idling }
             coEvery { this@mockk.handleAction(any()) } answers { Success(Idling) }
         }
-        val scope = initScope(stateMachine)
+        val scope = initScope { stateMachine }
         val experienceRenderer = ExperienceRenderer(scope)
 
         // WHEN
@@ -127,7 +136,7 @@ internal class ExperienceRendererTest {
             every { this@mockk.state } answers { Idling }
             coEvery { this@mockk.handleAction(any()) } answers { Success(Idling) }
         }
-        val scope = initScope(stateMachine)
+        val scope = initScope { stateMachine }
         val experienceRenderer = ExperienceRenderer(scope)
 
         // WHEN
@@ -153,7 +162,7 @@ internal class ExperienceRendererTest {
             every { this@mockk.state } answers { Idling }
             coEvery { this@mockk.handleAction(any()) } answers { Success(Idling) }
         }
-        val scope = initScope(stateMachine)
+        val scope = initScope { stateMachine }
         val analyticsTracker: AnalyticsTracker = scope.get()
         val experienceRenderer = ExperienceRenderer(scope)
 
@@ -179,7 +188,7 @@ internal class ExperienceRendererTest {
             every { this@mockk.state } answers { Idling }
             coEvery { this@mockk.handleAction(any()) } answers { Success(Idling) }
         }
-        val scope = initScope(stateMachine)
+        val scope = initScope { stateMachine }
         val analyticsTracker: AnalyticsTracker = scope.get()
         val experienceRenderer = ExperienceRenderer(scope)
 
@@ -190,7 +199,157 @@ internal class ExperienceRendererTest {
         verify { analyticsTracker.track(experiment) }
     }
 
-    private fun initScope(stateMachine: StateMachine): Scope {
+    // Embeds
+    @Test
+    fun `qualify SHOULD start experience WHEN frame already exists`() = runTest {
+        // GIVEN
+        val experience = mockEmbedExperiment("frame1")
+        val stateMachine = mockk<StateMachine>(relaxed = true) {
+            every { this@mockk.state } answers { Idling }
+            coEvery { this@mockk.handleAction(any()) } answers { Success(Idling) }
+        }
+        val scope = initScope { stateMachine }
+        val experienceRenderer = ExperienceRenderer(scope)
+        val owner = AppcuesFrameStateMachineOwner(mockk(relaxed = true))
+        val context = RenderContext.Embed("frame1")
+        experienceRenderer.start(owner, context)
+
+        // WHEN
+        experienceRenderer.show(listOf(experience))
+
+        // THEN
+        coVerify { stateMachine.handleAction(StartExperience(experience)) }
+    }
+
+    @Test
+    fun `qualify SHOULD start experience WHEN a matching frame is registered`() = runTest {
+        // GIVEN
+        val experience = mockEmbedExperiment("frame1")
+        val stateMachine = mockk<StateMachine>(relaxed = true) {
+            every { this@mockk.state } answers { Idling }
+            coEvery { this@mockk.handleAction(any()) } answers { Success(Idling) }
+        }
+        val scope = initScope { stateMachine }
+        val analyticsTracker: AnalyticsTracker = scope.get()
+        val experienceRenderer = ExperienceRenderer(scope)
+        val owner = AppcuesFrameStateMachineOwner(mockk(relaxed = true))
+        val context = RenderContext.Embed("frame1")
+        experienceRenderer.show(listOf(experience))
+
+        // WHEN
+        experienceRenderer.start(owner, context)
+
+        // THEN
+        val slot = slot<Map<String, Any>>()
+        verify {
+            analyticsTracker.track(
+                AnalyticsEvent.ExperienceError,
+                capture(slot),
+                false
+            )
+        }
+        coVerify { stateMachine.handleAction(StartExperience(experience)) }
+        val errorId = slot.captured["errorId"] as String
+        verify {
+            analyticsTracker.track(
+                AnalyticsEvent.ExperienceRecovery,
+                mapOf(
+                    "errorId" to errorId,
+                ),
+                false
+            )
+        }
+    }
+
+    @Test
+    fun `non screen view triggers SHOULD NOT clear the embed cache`() = runTest {
+        // GIVEN
+        val experience = mockEmbedExperiment("frame1")
+        val stateMachine = mockk<StateMachine>(relaxed = true) {
+            every { this@mockk.state } answers { Idling }
+            coEvery { this@mockk.handleAction(any()) } answers { Success(Idling) }
+        }
+        val scope = initScope { stateMachine }
+        val experienceRenderer = ExperienceRenderer(scope)
+        val owner = AppcuesFrameStateMachineOwner(mockk(relaxed = true))
+        val context = RenderContext.Embed("frame1")
+        experienceRenderer.show(listOf(experience))
+
+        // WHEN
+        // all of these will process through but the embed will remain in cache and still start after this
+        experienceRenderer.show(listOf(mockExperience(trigger = Qualification("event_trigger"))))
+        experienceRenderer.show(listOf(mockExperience(trigger = ShowCall)))
+        experienceRenderer.show(listOf(mockExperience(trigger = Preview)))
+        experienceRenderer.show(listOf(mockExperience(trigger = DeepLink)))
+        experienceRenderer.show(listOf(mockExperience(trigger = LaunchExperienceAction(UUID.randomUUID()))))
+        experienceRenderer.show(listOf(mockExperience(trigger = ExperienceCompletionAction(UUID.randomUUID()))))
+
+        experienceRenderer.start(owner, context)
+
+        // THEN
+        coVerify { stateMachine.handleAction(StartExperience(experience)) }
+    }
+
+    @Test
+    fun `screen view triggers SHOULD clear the embed cache`() = runTest {
+        // GIVEN
+        val experience = mockEmbedExperiment("frame1")
+        val stateMachine = mockk<StateMachine>(relaxed = true) {
+            every { this@mockk.state } answers { Idling }
+            coEvery { this@mockk.handleAction(any()) } answers { Success(Idling) }
+        }
+        val scope = initScope { stateMachine }
+        val experienceRenderer = ExperienceRenderer(scope)
+        val owner = AppcuesFrameStateMachineOwner(mockk(relaxed = true))
+        val context = RenderContext.Embed("frame1")
+        experienceRenderer.show(listOf(experience))
+
+        // WHEN
+        experienceRenderer.show(listOf(mockExperience(trigger = Qualification("screen_view"))))
+        experienceRenderer.start(owner, context)
+
+        // THEN
+        coVerify { stateMachine.handleAction(StartExperience(experience)) wasNot Called }
+    }
+
+    // tests a recycler view like case, where the same frame gets re-registered
+    @Test
+    fun `frame re-register SHOULD restart the experience again`() = runTest {
+        // GIVEN
+        val experience = mockEmbedExperiment("frame1")
+        val stateMachine = mockk<StateMachine>(relaxed = true) {
+            every { this@mockk.state } answers { Idling }
+            coEvery { this@mockk.handleAction(any()) } answers { Success(Idling) }
+        }
+        val scope = initScope { stateMachine }
+        val experienceRenderer = ExperienceRenderer(scope)
+        val owner = mockk<AppcuesFrameStateMachineOwner>(relaxed = true) {
+            every { this@mockk.stateMachine } answers { stateMachine }
+        }
+        val context = RenderContext.Embed("frame1")
+        experienceRenderer.show(listOf(experience))
+
+        // WHEN
+        experienceRenderer.start(owner, context)
+        experienceRenderer.start(owner, context)
+
+        // THEN
+        // reset is called 3 times. The very first time, the context is not in the state machine directory, so only
+        // owner.reset() is called on start(). The second time, the context is already in the directory, so it is found
+        // and reset plus the owner.reset() call - see ExperienceRenderer start implementation for reference:
+        //
+        //        If there's already a frame for the context, reset it back to its unregistered state.
+        //        stateMachines.getOwner(context)?.reset()
+        //
+        //        // If the machine being started is already registered for a different context,
+        //        // reset it back to its unregistered state before potentially showing new content.
+        //        owner.reset()
+        //
+        coVerify(exactly = 3) { owner.reset() }
+        coVerify(exactly = 2) { stateMachine.handleAction(StartExperience(experience)) }
+    }
+
+    private fun initScope(stateMachine: () -> StateMachine): Scope {
         // close any existing instance
         KoinPlatformTools.defaultContext().getOrNull()?.close()
         val scopeId = UUID.randomUUID().toString()
@@ -200,7 +359,7 @@ internal class ExperienceRendererTest {
                 module {
                     scope(named(scopeId)) {
                         scoped { scope }
-                        factory { stateMachine }
+                        factory { stateMachine() }
                         scoped { AppcuesConfig("abc", "123") }
                         scoped { mockk<AnalyticsTracker>(relaxed = true) }
                         scoped { mockk<ExperienceLifecycleTracker>(relaxed = true) }
