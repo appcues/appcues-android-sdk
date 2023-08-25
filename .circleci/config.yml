@@ -186,6 +186,7 @@ jobs:
           command: bundle exec fastlane code_coverage
       - codecov/upload:
           file: "./appcues/build/reports/jacoco/debugUnitTestCoverage/debugUnitTestCoverage.xml"
+          token: CODECOV_TOKEN_APPCUES_ANDROID_SDK
       # not saving gradle cache on this job since it is SDK only
       - slack/notify:
           event: fail
