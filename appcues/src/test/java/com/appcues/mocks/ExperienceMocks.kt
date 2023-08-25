@@ -7,6 +7,7 @@ import com.appcues.data.model.ExperiencePrimitive.TextPrimitive
 import com.appcues.data.model.ExperiencePriority.LOW
 import com.appcues.data.model.ExperiencePriority.NORMAL
 import com.appcues.data.model.ExperienceTrigger
+import com.appcues.data.model.ExperienceTrigger.ShowCall
 import com.appcues.data.model.Experiment
 import com.appcues.data.model.RenderContext
 import com.appcues.data.model.Step
@@ -21,7 +22,7 @@ internal fun mockPresentingTrait(onPresent: (() -> Unit)? = null): PresentingTra
 }
 
 // an experience with a group having 3 steps, then a single step group
-internal fun mockExperience(onPresent: (() -> Unit)? = null) =
+internal fun mockExperience(trigger: ExperienceTrigger = ShowCall, onPresent: (() -> Unit)? = null) =
     Experience(
         id = UUID.fromString("d84c9d01-aa27-4cbb-b832-ee03720e04fc"),
         name = "Mock Experience",
@@ -56,7 +57,7 @@ internal fun mockExperience(onPresent: (() -> Unit)? = null) =
         publishedAt = 1652895835000,
         experiment = null,
         completionActions = arrayListOf(TrackEventAction(hashMapOf(), appcues = mockk(relaxed = true))),
-        trigger = ExperienceTrigger.ShowCall,
+        trigger = trigger,
     )
 
 internal fun mockStep(id: UUID) =
@@ -98,6 +99,32 @@ internal fun mockExperienceExperiment(experiment: Experiment) =
         experiment = experiment,
         completionActions = emptyList(),
         trigger = ExperienceTrigger.ShowCall,
+    )
+
+internal fun mockEmbedExperiment(frameId: String, onPresent: (() -> Unit)? = null) =
+    Experience(
+        id = UUID.fromString("15d713ce-5a8f-42d0-9f2c-85b6f1327f45"),
+        name = "Mock Embed Experience",
+        type = "mobile",
+        renderContext = RenderContext.Embed(frameId),
+        stepContainers = listOf(
+            StepContainer(
+                id = UUID.fromString("60b49c12-c49b-47ac-8ed3-ba4e9a55e694"),
+                steps = listOf(
+                    mockStep(UUID.fromString("01d8a05a-3a55-4ecc-872d-d140cd628902")),
+                ),
+                presentingTrait = mockPresentingTrait(onPresent),
+                contentHolderTrait = mockk(relaxed = true),
+                contentWrappingTrait = mockk(relaxed = true),
+                actions = emptyMap(),
+            )
+        ),
+        published = true,
+        priority = NORMAL,
+        publishedAt = 1652895835000,
+        experiment = null,
+        completionActions = emptyList(),
+        trigger = ExperienceTrigger.Qualification("screen_view"),
     )
 
 // An experience with two step containers, each with one step. The given list of actions are applied to both

@@ -271,7 +271,7 @@ internal class AppcuesTest : AppcuesScopeTest {
         // THEN
         verify { debuggerManager.stop() }
         verify { activityScreenTracking.stop() }
-        verify { experienceRenderer.resetAll() }
+        coVerify { experienceRenderer.resetAll() }
     }
 
     @Test
