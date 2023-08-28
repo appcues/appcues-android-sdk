@@ -14,7 +14,7 @@ import com.appcues.data.model.ExperienceTrigger.Qualification
 import com.appcues.data.model.ExperienceTrigger.ShowCall
 import com.appcues.data.model.Experiment
 import com.appcues.data.model.RenderContext
-import com.appcues.mocks.mockEmbedExperiment
+import com.appcues.mocks.mockEmbedExperience
 import com.appcues.mocks.mockExperience
 import com.appcues.mocks.mockExperienceExperiment
 import com.appcues.statemachine.Action.EndExperience
@@ -203,7 +203,7 @@ internal class ExperienceRendererTest {
     @Test
     fun `qualify SHOULD start experience WHEN frame already exists`() = runTest {
         // GIVEN
-        val experience = mockEmbedExperiment("frame1")
+        val experience = mockEmbedExperience("frame1")
         val stateMachine = mockk<StateMachine>(relaxed = true) {
             every { this@mockk.state } answers { Idling }
             coEvery { this@mockk.handleAction(any()) } answers { Success(Idling) }
@@ -224,7 +224,7 @@ internal class ExperienceRendererTest {
     @Test
     fun `qualify SHOULD start experience WHEN a matching frame is registered`() = runTest {
         // GIVEN
-        val experience = mockEmbedExperiment("frame1")
+        val experience = mockEmbedExperience("frame1")
         val stateMachine = mockk<StateMachine>(relaxed = true) {
             every { this@mockk.state } answers { Idling }
             coEvery { this@mockk.handleAction(any()) } answers { Success(Idling) }
@@ -264,7 +264,7 @@ internal class ExperienceRendererTest {
     @Test
     fun `non screen view triggers SHOULD NOT clear the embed cache`() = runTest {
         // GIVEN
-        val experience = mockEmbedExperiment("frame1")
+        val experience = mockEmbedExperience("frame1")
         val stateMachine = mockk<StateMachine>(relaxed = true) {
             every { this@mockk.state } answers { Idling }
             coEvery { this@mockk.handleAction(any()) } answers { Success(Idling) }
@@ -293,7 +293,7 @@ internal class ExperienceRendererTest {
     @Test
     fun `screen view triggers SHOULD clear the embed cache`() = runTest {
         // GIVEN
-        val experience = mockEmbedExperiment("frame1")
+        val experience = mockEmbedExperience("frame1")
         val stateMachine = mockk<StateMachine>(relaxed = true) {
             every { this@mockk.state } answers { Idling }
             coEvery { this@mockk.handleAction(any()) } answers { Success(Idling) }
@@ -316,7 +316,7 @@ internal class ExperienceRendererTest {
     @Test
     fun `frame re-register SHOULD restart the experience again`() = runTest {
         // GIVEN
-        val experience = mockEmbedExperiment("frame1")
+        val experience = mockEmbedExperience("frame1")
         val stateMachine = mockk<StateMachine>(relaxed = true) {
             every { this@mockk.state } answers { Idling }
             coEvery { this@mockk.handleAction(any()) } answers { Success(Idling) }

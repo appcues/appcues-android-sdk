@@ -101,7 +101,7 @@ internal fun mockExperienceExperiment(experiment: Experiment) =
         trigger = ExperienceTrigger.ShowCall,
     )
 
-internal fun mockEmbedExperiment(frameId: String, onPresent: (() -> Unit)? = null) =
+internal fun mockEmbedExperience(frameId: String, onPresent: (() -> Unit)? = null) =
     Experience(
         id = UUID.fromString("15d713ce-5a8f-42d0-9f2c-85b6f1327f45"),
         name = "Mock Embed Experience",
