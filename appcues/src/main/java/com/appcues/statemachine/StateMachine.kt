@@ -13,6 +13,7 @@ import com.appcues.statemachine.Action.StartExperience
 import com.appcues.statemachine.Action.StartStep
 import com.appcues.statemachine.Error.ExperienceAlreadyActive
 import com.appcues.statemachine.Error.ExperienceError
+import com.appcues.statemachine.Error.StepError
 import com.appcues.statemachine.SideEffect.AwaitEffect
 import com.appcues.statemachine.SideEffect.ContinuationEffect
 import com.appcues.statemachine.SideEffect.PresentContainerEffect
@@ -224,6 +225,21 @@ internal class StateMachine(
     }
 
     suspend fun stop(dismiss: Boolean) {
+        // special case - the state machine may be paused waiting on a callback
+        // from a step attempting to render. We need to cancel that wait at this point so
+        // we can transition the machine back to idling
+        (state as? BeginningStep)?.let {
+            it.presentationComplete(
+                Failure(
+                    StepError(
+                        it.experience,
+                        it.flatStepIndex,
+                        "Step render canceled"
+                    )
+                )
+            )
+        }
+
         handleAction(
             EndExperience(
                 markComplete = false,
