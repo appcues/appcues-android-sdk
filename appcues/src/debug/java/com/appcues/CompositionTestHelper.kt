@@ -23,6 +23,7 @@ import com.appcues.di.AppcuesKoinContext
 import com.appcues.logging.Logcues
 import com.appcues.ui.composables.AppcuesActionsDelegate
 import com.appcues.ui.composables.ComposeContainer
+import com.appcues.ui.composables.ExperienceCompositionState
 import com.appcues.ui.composables.LocalAppcuesActionDelegate
 import com.appcues.ui.composables.LocalExperienceCompositionState
 import com.appcues.ui.composables.LocalExperienceStepFormStateDelegate
@@ -44,7 +45,8 @@ public fun ComposeContent(json: String, imageLoader: ImageLoader) {
             LocalImageLoader provides imageLoader,
             LocalLogcues provides Logcues(LoggingLevel.DEBUG),
             LocalExperienceStepFormStateDelegate provides ExperienceStepFormState(),
-            LocalAppcuesActionDelegate provides FakeAppcuesActionDelegate()
+            LocalAppcuesActionDelegate provides FakeAppcuesActionDelegate(),
+            LocalExperienceCompositionState provides ExperienceCompositionState(),
         ) {
             primitive.Compose()
         }
@@ -97,19 +99,20 @@ public fun ComposeContainer(context: Context, stepContentJson: List<String>?, tr
     val experience = experienceMapper.map(updatedExperienceResponse, ExperienceTrigger.Preview)
     val container = experience.stepContainers[0]
 
-    // render the step container on the desired step
-    LocalExperienceCompositionState.current.let {
-        it.isContentVisible.targetState = true // so animated visibility works
-        it.isBackdropVisible.targetState = true // so animated visibility works
-    }
-
     AppcuesTheme {
         CompositionLocalProvider(
             LocalImageLoader provides imageLoader,
             LocalLogcues provides Logcues(LoggingLevel.DEBUG),
             LocalExperienceStepFormStateDelegate provides ExperienceStepFormState(),
-            LocalAppcuesActionDelegate provides FakeAppcuesActionDelegate()
+            LocalAppcuesActionDelegate provides FakeAppcuesActionDelegate(),
+            LocalExperienceCompositionState provides ExperienceCompositionState()
         ) {
+            // render the step container on the desired step
+            LocalExperienceCompositionState.current.let {
+                it.isContentVisible.targetState = true // so animated visibility works
+                it.isBackdropVisible.targetState = true // so animated visibility works
+            }
+
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center

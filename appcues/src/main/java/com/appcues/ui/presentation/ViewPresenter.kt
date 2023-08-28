@@ -50,7 +50,7 @@ internal abstract class ViewPresenter(
 
         activity.getParentView().run {
             // grab composeView or exit with false
-            val composeView = setupView() ?: return false
+            val composeView = setupView(activity) ?: return false
 
             viewModel = AppcuesViewModel(scope, renderContext, ::onCompositionDismiss, ::setViewVisible)
             gestureListener = ShakeGestureListener(activity)
@@ -84,7 +84,7 @@ internal abstract class ViewPresenter(
         }
     }
 
-    abstract fun ViewGroup.setupView(): ComposeView?
+    abstract fun ViewGroup.setupView(activity: Activity): ComposeView?
 
     abstract fun ViewGroup.removeView()
 
