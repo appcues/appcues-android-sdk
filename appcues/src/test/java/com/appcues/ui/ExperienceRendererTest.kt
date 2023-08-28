@@ -6,13 +6,9 @@ import com.appcues.analytics.AnalyticsTracker
 import com.appcues.analytics.ExperienceLifecycleTracker
 import com.appcues.analytics.track
 import com.appcues.data.model.Experience
-import com.appcues.data.model.ExperienceTrigger.DeepLink
-import com.appcues.data.model.ExperienceTrigger.ExperienceCompletionAction
-import com.appcues.data.model.ExperienceTrigger.LaunchExperienceAction
-import com.appcues.data.model.ExperienceTrigger.Preview
 import com.appcues.data.model.ExperienceTrigger.Qualification
-import com.appcues.data.model.ExperienceTrigger.ShowCall
 import com.appcues.data.model.Experiment
+import com.appcues.data.model.QualificationResult
 import com.appcues.data.model.RenderContext
 import com.appcues.mocks.mockEmbedExperience
 import com.appcues.mocks.mockExperience
@@ -215,7 +211,7 @@ internal class ExperienceRendererTest {
         experienceRenderer.start(owner, context)
 
         // WHEN
-        experienceRenderer.show(listOf(experience))
+        experienceRenderer.show(QualificationResult(Qualification("screen_view"), listOf(experience)))
 
         // THEN
         coVerify { stateMachine.handleAction(StartExperience(experience)) }
@@ -234,7 +230,7 @@ internal class ExperienceRendererTest {
         val experienceRenderer = ExperienceRenderer(scope)
         val owner = AppcuesFrameStateMachineOwner(mockk(relaxed = true))
         val context = RenderContext.Embed("frame1")
-        experienceRenderer.show(listOf(experience))
+        experienceRenderer.show(QualificationResult(Qualification("screen_view"), listOf(experience)))
 
         // WHEN
         experienceRenderer.start(owner, context)
@@ -273,16 +269,12 @@ internal class ExperienceRendererTest {
         val experienceRenderer = ExperienceRenderer(scope)
         val owner = AppcuesFrameStateMachineOwner(mockk(relaxed = true))
         val context = RenderContext.Embed("frame1")
-        experienceRenderer.show(listOf(experience))
+        experienceRenderer.show(QualificationResult(Qualification("screen_view"), listOf(experience)))
 
         // WHEN
         // all of these will process through but the embed will remain in cache and still start after this
-        experienceRenderer.show(listOf(mockExperience(trigger = Qualification("event_trigger"))))
-        experienceRenderer.show(listOf(mockExperience(trigger = ShowCall)))
-        experienceRenderer.show(listOf(mockExperience(trigger = Preview)))
-        experienceRenderer.show(listOf(mockExperience(trigger = DeepLink)))
-        experienceRenderer.show(listOf(mockExperience(trigger = LaunchExperienceAction(UUID.randomUUID()))))
-        experienceRenderer.show(listOf(mockExperience(trigger = ExperienceCompletionAction(UUID.randomUUID()))))
+        experienceRenderer.show(QualificationResult(Qualification("event_trigger"), listOf()))
+        experienceRenderer.show(QualificationResult(Qualification("unknown_value"), listOf()))
 
         experienceRenderer.start(owner, context)
 
@@ -302,10 +294,10 @@ internal class ExperienceRendererTest {
         val experienceRenderer = ExperienceRenderer(scope)
         val owner = AppcuesFrameStateMachineOwner(mockk(relaxed = true))
         val context = RenderContext.Embed("frame1")
-        experienceRenderer.show(listOf(experience))
+        experienceRenderer.show(QualificationResult(Qualification("screen_view"), listOf(experience)))
 
         // WHEN
-        experienceRenderer.show(listOf(mockExperience(trigger = Qualification("screen_view"))))
+        experienceRenderer.show(QualificationResult(Qualification("screen_view"), listOf()))
         experienceRenderer.start(owner, context)
 
         // THEN
@@ -327,7 +319,7 @@ internal class ExperienceRendererTest {
             every { this@mockk.stateMachine } answers { stateMachine }
         }
         val context = RenderContext.Embed("frame1")
-        experienceRenderer.show(listOf(experience))
+        experienceRenderer.show(QualificationResult(Qualification("screen_view"), listOf(experience)))
 
         // WHEN
         experienceRenderer.start(owner, context)

@@ -10,7 +10,7 @@ import com.appcues.data.AppcuesRepository
 import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperiencePriority.NORMAL
 import com.appcues.data.model.ExperienceTrigger
-import com.appcues.data.model.ExperienceTrigger.Qualification
+import com.appcues.data.model.QualificationResult
 import com.appcues.data.model.RenderContext
 import com.appcues.data.model.RenderContext.Modal
 import com.appcues.data.model.getFrameId
@@ -129,17 +129,15 @@ internal class ExperienceRenderer(
         return newExperience.priority == NORMAL && state != Idling
     }
 
-    suspend fun show(experiences: List<Experience>) {
-        val trigger = experiences.firstOrNull()?.trigger
-
-        if (trigger is Qualification && trigger.reason == "screen_view") {
+    suspend fun show(qualificationResult: QualificationResult) {
+        if (qualificationResult.trigger.reason == "screen_view") {
             // clear list in case this was a screen_view qualification
             potentiallyRenderableExperiences.clear()
             stateMachines.cleanup()
         }
 
         // Add new experiences, replacing any existing ones
-        potentiallyRenderableExperiences.putAll(experiences.groupBy { it.renderContext })
+        potentiallyRenderableExperiences.putAll(qualificationResult.experiences.groupBy { it.renderContext })
 
         // make a copy while we try to show them, so anything else editing the
         // main mapping won't hit a concurrent modification exception

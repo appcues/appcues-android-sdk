@@ -22,7 +22,7 @@ internal fun mockPresentingTrait(onPresent: (() -> Unit)? = null): PresentingTra
 }
 
 // an experience with a group having 3 steps, then a single step group
-internal fun mockExperience(trigger: ExperienceTrigger = ShowCall, onPresent: (() -> Unit)? = null) =
+internal fun mockExperience(onPresent: (() -> Unit)? = null) =
     Experience(
         id = UUID.fromString("d84c9d01-aa27-4cbb-b832-ee03720e04fc"),
         name = "Mock Experience",
@@ -57,7 +57,7 @@ internal fun mockExperience(trigger: ExperienceTrigger = ShowCall, onPresent: ((
         publishedAt = 1652895835000,
         experiment = null,
         completionActions = arrayListOf(TrackEventAction(hashMapOf(), appcues = mockk(relaxed = true))),
-        trigger = trigger,
+        trigger = ShowCall,
     )
 
 internal fun mockStep(id: UUID) =

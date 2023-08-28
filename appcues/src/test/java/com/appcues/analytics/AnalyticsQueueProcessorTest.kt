@@ -3,7 +3,8 @@ package com.appcues.analytics
 import com.appcues.AppcuesCoroutineScope
 import com.appcues.LoggingLevel.NONE
 import com.appcues.data.AppcuesRepository
-import com.appcues.data.model.Experience
+import com.appcues.data.model.ExperienceTrigger.Qualification
+import com.appcues.data.model.QualificationResult
 import com.appcues.data.remote.appcues.request.ActivityRequest
 import com.appcues.data.remote.appcues.request.EventRequest
 import com.appcues.logging.Logcues
@@ -27,12 +28,13 @@ internal class AnalyticsQueueProcessorTest {
 
     private val mockkEvent: EventRequest = mockk()
     private val mockkActivity: ActivityRequest = ActivityRequest(userId = "222", accountId = "111", events = listOf(mockkEvent))
-    private val mockkExperiences: List<Experience> = arrayListOf(mockk())
+    private val mockkQualificationResult: QualificationResult =
+        QualificationResult(Qualification("screen_view"), arrayListOf(mockk()))
 
     private val coroutineScope = AppcuesCoroutineScope(Logcues(NONE))
     private val experienceRenderer: ExperienceRenderer = mockk()
     private val repository: AppcuesRepository = mockk<AppcuesRepository>().apply {
-        coEvery { trackActivity(any()) } returns mockkExperiences
+        coEvery { trackActivity(any()) } returns mockkQualificationResult
     }
 
     private val queueScheduler = StubQueueScheduler()
@@ -58,7 +60,7 @@ internal class AnalyticsQueueProcessorTest {
         // then
         verify { queueScheduler.mockkScheduler.schedule(any()) }
         coVerify { repository.trackActivity(capture(activitySlot)) }
-        coVerify { experienceRenderer.show(mockkExperiences) }
+        coVerify { experienceRenderer.show(mockkQualificationResult) }
         assertThat(activitySlot.captured.events).hasSize(1)
         assertThat(activitySlot.captured.events!![0]).isEqualTo(mockkEvent)
     }
@@ -72,7 +74,7 @@ internal class AnalyticsQueueProcessorTest {
         // then
         verify { queueScheduler.mockkScheduler.cancel() }
         coVerify { repository.trackActivity(capture(activitySlot)) }
-        coVerify { experienceRenderer.show(mockkExperiences) }
+        coVerify { experienceRenderer.show(mockkQualificationResult) }
     }
 
     @Test
@@ -89,9 +91,9 @@ internal class AnalyticsQueueProcessorTest {
         coVerifySequence {
             queueScheduler.mockkScheduler.cancel()
             repository.trackActivity(capture(queuedActivitySlot))
-            experienceRenderer.show(mockkExperiences)
+            experienceRenderer.show(mockkQualificationResult)
             repository.trackActivity(capture(activitySlot))
-            experienceRenderer.show(mockkExperiences)
+            experienceRenderer.show(mockkQualificationResult)
         }
 
         // check that correct events where captured by mockk
@@ -113,7 +115,7 @@ internal class AnalyticsQueueProcessorTest {
         // then
         coVerifySequence {
             repository.trackActivity(capture(queuedActivitySlot))
-            experienceRenderer.show(mockkExperiences)
+            experienceRenderer.show(mockkQualificationResult)
         }
     }
 }
