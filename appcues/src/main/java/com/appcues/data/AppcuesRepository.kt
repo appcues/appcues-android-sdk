@@ -10,6 +10,7 @@ import com.appcues.data.model.ExperiencePriority
 import com.appcues.data.model.ExperiencePriority.LOW
 import com.appcues.data.model.ExperiencePriority.NORMAL
 import com.appcues.data.model.ExperienceTrigger
+import com.appcues.data.model.QualificationResult
 import com.appcues.data.remote.RemoteError
 import com.appcues.data.remote.RemoteError.NetworkError
 import com.appcues.data.remote.appcues.AppcuesRemoteSource
@@ -62,7 +63,7 @@ internal class AppcuesRepository(
         }
     }
 
-    suspend fun trackActivity(activity: ActivityRequest): List<Experience> = withContext(Dispatchers.IO) {
+    suspend fun trackActivity(activity: ActivityRequest): QualificationResult? = withContext(Dispatchers.IO) {
 
         val activityStorage = ActivityStorage(
             requestId = activity.requestId,
@@ -134,17 +135,17 @@ internal class AppcuesRepository(
         return eligible
     }
 
-    private suspend fun post(queue: MutableList<ActivityStorage>, current: ActivityStorage): List<Experience> {
+    private suspend fun post(queue: MutableList<ActivityStorage>, current: ActivityStorage): QualificationResult? {
         // pop the next activity off the current queue to process
         // the list is processed in chronological order
-        val activity = queue.removeFirstOrNull() ?: return listOf()
+        val activity = queue.removeFirstOrNull() ?: return null
 
         // `current` is the activity that triggered this processing, and may be qualifying
         // it will be the last activity in the queue
         val isCurrent = activity == current
 
         var successful = true
-        val experiences = mutableListOf<Experience>()
+        var qualificationResult: QualificationResult? = null
 
         if (isCurrent) {
             // if we are processing the current item (last item in queue) - then use the /qualify
@@ -154,9 +155,12 @@ internal class AppcuesRepository(
             qualifyResult.doIfSuccess { response ->
                 val priority: ExperiencePriority = if (response.qualificationReason == "screen_view") LOW else NORMAL
                 val trigger = ExperienceTrigger.Qualification(response.qualificationReason)
-                experiences += response.experiences.map {
-                    experienceMapper.mapDecoded(it, trigger, priority, response.experiments, activity.requestId)
-                }
+                qualificationResult = QualificationResult(
+                    trigger = trigger,
+                    experiences = response.experiences.map {
+                        experienceMapper.mapDecoded(it, trigger, priority, response.experiments, activity.requestId)
+                    }
+                )
             }
 
             qualifyResult.doIfFailure {
@@ -197,8 +201,8 @@ internal class AppcuesRepository(
         }
 
         return if (isCurrent) {
-            // processed the qualify and should return the experiences
-            experiences
+            // processed the qualify and should return the qualification result
+            qualificationResult
         } else {
             // continue to process the queue until we get to current item
             post(queue, current)

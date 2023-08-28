@@ -128,8 +128,8 @@ internal class AppcuesRepositoryTest {
         // THEN
         coVerify { appcuesLocalSource.saveActivity(any()) }
         coVerify { appcuesRemoteSource.qualify("userId", any(), request.requestId, any()) }
-        assertThat(result.count()).isEqualTo(2)
-        assertThat(result.first()).isEqualTo(mappedExperience)
+        assertThat(result?.experiences?.count()).isEqualTo(2)
+        assertThat(result?.experiences?.first()).isEqualTo(mappedExperience)
         coVerify { appcuesLocalSource.removeActivity(any()) }
     }
 

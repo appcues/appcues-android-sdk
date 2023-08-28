@@ -104,13 +104,15 @@ internal class AnalyticsQueueProcessor(
         appcuesCoroutineScope.launch {
             // this will respond with qualified experiences, if applicable
             repository.trackActivity(activity).also {
-                // we will try to show an experience from this list
-                if (it.isNotEmpty()) {
-                    experienceRenderer.show(it)
-                } else {
-                    // we know we are not rendering any experiences, so no metrics needed
-                    // can proactively clear this request out
-                    SdkMetrics.remove(activity.requestId)
+                it?.let { qualificationResult ->
+                    // we will try to show experience from this list
+                    experienceRenderer.show(qualificationResult)
+
+                    if (qualificationResult.experiences.isEmpty()) {
+                        // we know we are not rendering any experiences, so no metrics needed
+                        // can proactively clear this request out
+                        SdkMetrics.remove(activity.requestId)
+                    }
                 }
             }
         }
