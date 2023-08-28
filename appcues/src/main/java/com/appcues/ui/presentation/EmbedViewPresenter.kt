@@ -1,5 +1,6 @@
 package com.appcues.ui.presentation
 
+import android.app.Activity
 import android.view.ViewGroup
 import androidx.compose.ui.platform.ComposeView
 import androidx.core.view.isVisible
@@ -15,7 +16,7 @@ internal class EmbedViewPresenter(
     private val stateMachines: StateMachineDirectory,
 ) : ViewPresenter(scope, renderContext) {
 
-    override fun ViewGroup.setupView(): ComposeView? {
+    override fun ViewGroup.setupView(activity: Activity): ComposeView? {
         return stateMachines.getFrame(renderContext)?.setupComposeView()
     }
 

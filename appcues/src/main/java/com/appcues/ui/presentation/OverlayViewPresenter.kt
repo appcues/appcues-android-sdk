@@ -18,13 +18,13 @@ import org.koin.core.scope.Scope
 
 internal class OverlayViewPresenter(scope: Scope, renderContext: RenderContext) : ViewPresenter(scope, renderContext) {
 
-    override fun ViewGroup.setupView(): ComposeView {
+    override fun ViewGroup.setupView(activity: Activity): ComposeView {
         // remove customers view on accessibility stack
         setAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS)
 
         val overlayView = if (findViewById<View>(R.id.appcues_overlay_view) == null) {
             // create and add the view
-            AppcuesOverlayView(context).apply {
+            AppcuesOverlayView(activity).apply {
                 id = R.id.appcues_overlay_view
                 layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT).also {
                     // adds margin top and bottom according to visible status and navigation bar
