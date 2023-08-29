@@ -67,31 +67,37 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/embedViewText2"
-            app:layout_constraintBottom_toTopOf="@+id/embedViewText3"/>
+            app:layout_constraintBottom_toTopOf="@+id/frame4Layout"/>
 
-        <TextView
-            android:id="@+id/embedViewText3"
-            android:text="@string/embed_text_3"
+        <LinearLayout
+            android:id="@+id/frame4Layout"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:orientation="horizontal"
             android:layout_marginTop="5dp"
             android:layout_marginBottom="5dp"
             android:layout_marginStart="20dp"
-            android:layout_marginEnd="20dp"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/embedFrame3"
-            app:layout_constraintBottom_toTopOf="@+id/embedFrame4"/>
+            >
 
-        <com.appcues.AppcuesFrameView
-            android:id="@+id/embedFrame4"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="5dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/embedViewText3" />
+            <TextView
+                android:id="@+id/embedViewText3"
+                android:text="@string/embed_text_3"
+                android:layout_weight="1"
+                android:layout_marginEnd="20dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <com.appcues.AppcuesFrameView
+                android:id="@+id/embedFrame4"
+                android:layout_weight="1"
+                android:layout_marginEnd="20dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
