@@ -11,7 +11,6 @@ import com.appcues.data.model.ExperienceStepFormState
 import com.appcues.logging.Logcues
 import com.appcues.trait.AppcuesTraitException
 import com.appcues.ui.presentation.AppcuesViewModel
-import com.appcues.ui.presentation.ShakeGestureListener
 import com.google.accompanist.web.AccompanistWebChromeClient
 import java.util.UUID
 
@@ -49,10 +48,6 @@ internal val LocalAppcuesPaginationDelegate = compositionLocalOf { AppcuesPagina
 internal data class AppcuesPagination(val onPageChanged: (Int) -> Unit)
 
 internal val LocalViewModel = staticCompositionLocalOf<AppcuesViewModel> { noLocalProvidedFor("AppcuesViewModel") }
-
-internal val LocalShakeGestureListener = staticCompositionLocalOf<ShakeGestureListener> {
-    noLocalProvidedFor("ShakeGestureListener")
-}
 
 internal val LocalLogcues = staticCompositionLocalOf<Logcues> { noLocalProvidedFor("LocalLogcues") }
 

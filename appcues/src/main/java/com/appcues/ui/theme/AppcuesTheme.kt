@@ -14,7 +14,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.appcues.LoggingLevel.NONE
 import com.appcues.action.ExperienceAction
@@ -24,8 +23,6 @@ import com.appcues.logging.Logcues
 import com.appcues.ui.composables.AppcuesActionsDelegate
 import com.appcues.ui.composables.LocalAppcuesActionDelegate
 import com.appcues.ui.composables.LocalLogcues
-import com.appcues.ui.composables.LocalShakeGestureListener
-import com.appcues.ui.presentation.ShakeGestureListener
 import com.appcues.ui.primitive.Compose
 
 /**
@@ -68,11 +65,9 @@ internal fun AppcuesPreviewPrimitive(
     primitiveBuilder: () -> ExperiencePrimitive
 ) {
     LocalConfiguration.current.uiMode = if (isDark) Configuration.UI_MODE_NIGHT_YES else Configuration.UI_MODE_NIGHT_NO
-    val context = LocalContext.current
 
     AppcuesTheme {
         CompositionLocalProvider(
-            LocalShakeGestureListener provides ShakeGestureListener(context),
             LocalLogcues provides Logcues(NONE),
             LocalAppcuesActionDelegate provides PreviewAppcuesActionDelegate(),
         ) {

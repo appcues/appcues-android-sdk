@@ -6,12 +6,17 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.findViewTreeLifecycleOwner
+import com.appcues.AppcuesCoroutineScope
+import com.appcues.data.model.Experience
+import com.appcues.data.model.ExperienceTrigger.Preview
 import com.appcues.data.model.RenderContext
 import com.appcues.monitor.AppcuesActivityMonitor
 import com.appcues.monitor.AppcuesActivityMonitor.ActivityMonitorListener
+import com.appcues.ui.ExperienceRenderer
 import com.appcues.ui.composables.AppcuesComposition
 import com.appcues.ui.primitive.EmbedChromeClient
 import com.appcues.ui.utils.getParentView
+import kotlinx.coroutines.launch
 import org.koin.core.scope.Scope
 
 internal abstract class ViewPresenter(
@@ -20,7 +25,14 @@ internal abstract class ViewPresenter(
 ) : DefaultLifecycleObserver {
 
     private lateinit var viewModel: AppcuesViewModel
-    private lateinit var gestureListener: ShakeGestureListener
+
+    private val experienceRenderer: ExperienceRenderer = scope.get()
+    private val appcuesCoroutineScope: AppcuesCoroutineScope = scope.get()
+
+    private var gestureListener: ShakeGestureListener? = null
+
+    private val currentExperience: Experience?
+        get() = experienceRenderer.getState(renderContext)?.currentExperience
 
     private val activityMonitorListener = object : ActivityMonitorListener {
         override fun onActivityChanged(activity: Activity) {
@@ -31,12 +43,12 @@ internal abstract class ViewPresenter(
     private val lifecycleObserver = object : DefaultLifecycleObserver {
         override fun onResume(owner: LifecycleOwner) {
             super.onResume(owner)
-            gestureListener.start()
+            gestureListener?.start()
         }
 
         override fun onPause(owner: LifecycleOwner) {
             super.onPause(owner)
-            gestureListener.stop()
+            gestureListener?.stop()
         }
     }
 
@@ -53,14 +65,18 @@ internal abstract class ViewPresenter(
             val composeView = setupView(activity) ?: return false
 
             viewModel = AppcuesViewModel(scope, renderContext, ::onCompositionDismiss, ::setViewVisible)
-            gestureListener = ShakeGestureListener(activity)
+
+            if (currentExperience?.trigger == Preview) {
+                gestureListener = ShakeGestureListener(activity).also {
+                    it.addListener(true) { refreshPreview() }
+                }
+            }
 
             findViewTreeLifecycleOwner()?.lifecycle?.addObserver(lifecycleObserver)
 
             composeView.setContent {
                 AppcuesComposition(
                     viewModel = viewModel,
-                    shakeGestureListener = gestureListener,
                     logcues = scope.get(),
                     chromeClient = EmbedChromeClient(this),
                 )
@@ -72,6 +88,9 @@ internal abstract class ViewPresenter(
 
     private fun onCompositionDismiss() {
         AppcuesActivityMonitor.unsubscribe(activityMonitorListener)
+
+        gestureListener?.clearListener()
+        gestureListener = null
 
         AppcuesActivityMonitor.activity?.getParentView()?.run {
             findViewTreeLifecycleOwner()?.lifecycle?.removeObserver(lifecycleObserver)
@@ -89,4 +108,12 @@ internal abstract class ViewPresenter(
     abstract fun ViewGroup.removeView()
 
     abstract fun setViewVisible(isVisible: Boolean)
+
+    private fun refreshPreview() {
+        currentExperience?.let {
+            appcuesCoroutineScope.launch {
+                experienceRenderer.preview(it.id.toString())
+            }
+        }
+    }
 }

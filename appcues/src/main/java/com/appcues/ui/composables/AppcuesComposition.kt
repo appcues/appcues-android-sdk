@@ -24,8 +24,6 @@ import com.appcues.trait.ContentHolderTrait.ContainerPages
 import com.appcues.trait.MetadataSettingTrait
 import com.appcues.ui.presentation.AppcuesViewModel
 import com.appcues.ui.presentation.AppcuesViewModel.UIState.Dismissing
-import com.appcues.ui.presentation.AppcuesViewModel.UIState.Rendering
-import com.appcues.ui.presentation.ShakeGestureListener
 import com.appcues.ui.theme.AppcuesTheme
 import com.google.accompanist.web.AccompanistWebChromeClient
 import kotlinx.coroutines.delay
@@ -33,7 +31,6 @@ import kotlinx.coroutines.delay
 @Composable
 internal fun AppcuesComposition(
     viewModel: AppcuesViewModel,
-    shakeGestureListener: ShakeGestureListener,
     logcues: Logcues,
     chromeClient: AccompanistWebChromeClient,
 ) {
@@ -42,7 +39,6 @@ internal fun AppcuesComposition(
         // define composition local provided dependencies
         CompositionLocalProvider(
             LocalViewModel provides viewModel,
-            LocalShakeGestureListener provides shakeGestureListener,
             LocalLogcues provides logcues,
             LocalChromeClient provides chromeClient,
             LocalAppcuesActionDelegate provides DefaultAppcuesActionsDelegate(viewModel),
@@ -69,7 +65,7 @@ private fun MainSurface() {
             // update last rendering state based on new state
             rememberLastRenderingState(state).run {
                 // render last known rendering state
-                value?.let { ComposeLastRenderingState(it) }
+                value?.let { ComposeContainer(it.stepContainer, it.position) }
             }
 
             LaunchOnShowAnimationCompleted {
@@ -85,22 +81,6 @@ private fun MainSurface() {
             }
         }
     }
-}
-
-@Composable
-private fun BoxScope.ComposeLastRenderingState(state: Rendering) {
-    val shakeGestureListener = LocalShakeGestureListener.current
-    val viewModel = LocalViewModel.current
-
-    LaunchedEffect(state.isPreview) {
-        if (state.isPreview) {
-            shakeGestureListener.addListener(true) { viewModel.refreshPreview() }
-        } else {
-            shakeGestureListener.clearListener()
-        }
-    }
-
-    ComposeContainer(state.stepContainer, state.position)
 }
 
 private suspend fun produceMetadata(

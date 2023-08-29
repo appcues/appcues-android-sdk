@@ -224,15 +224,4 @@ internal class AppcuesViewModel(
     fun dismiss() {
         onDismiss()
     }
-
-    fun refreshPreview() {
-        uiState.value.let { state ->
-            // if current state IS Rendering and we are Previewing then we refresh
-            if (state is Rendering && state.isPreview) {
-                appcuesCoroutineScope.launch {
-                    experienceRenderer.preview(state.experience.id.toString())
-                }
-            }
-        }
-    }
 }
