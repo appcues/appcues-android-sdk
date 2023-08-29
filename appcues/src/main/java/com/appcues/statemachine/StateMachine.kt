@@ -13,7 +13,6 @@ import com.appcues.statemachine.Action.StartExperience
 import com.appcues.statemachine.Action.StartStep
 import com.appcues.statemachine.Error.ExperienceAlreadyActive
 import com.appcues.statemachine.Error.ExperienceError
-import com.appcues.statemachine.Error.StepError
 import com.appcues.statemachine.SideEffect.AwaitEffect
 import com.appcues.statemachine.SideEffect.ContinuationEffect
 import com.appcues.statemachine.SideEffect.PresentContainerEffect
@@ -122,8 +121,8 @@ internal class StateMachine(
                     try {
                         // kick off UI
                         sideEffect.experience.stepContainers[sideEffect.containerIndex].presentingTrait.present()
-                        // wait on the RenderingStep state to flow in from the UI, return that result
-                        sideEffect.completion.await()
+
+                        handleActionInternal(RenderStep)
                     } catch (exception: AppcuesTraitException) {
                         val message = exception.message ?: "Presenting trait failed to present for index ${sideEffect.containerIndex}"
                         handleActionInternal(ReportError(ExperienceError(sideEffect.experience, message), true))
@@ -167,7 +166,7 @@ internal class StateMachine(
 
             // BeginningExperience
             state is BeginningExperience && action is StartStep ->
-                state.fromBeginningExperienceToBeginningStep(action, appcuesCoroutineScope) { handleRenderResult(it) }
+                state.fromBeginningExperienceToBeginningStep(action, appcuesCoroutineScope)
 
             // BeginningStep
             state is BeginningStep && action is RenderStep ->
@@ -185,7 +184,7 @@ internal class StateMachine(
                 state.fromEndingStepToEndingExperience(action)
 
             state is EndingStep && action is StartStep ->
-                state.fromEndingStepToBeginningStep(action, appcuesCoroutineScope) { handleRenderResult(it) }
+                state.fromEndingStepToBeginningStep(action, appcuesCoroutineScope)
 
             // EndingExperience
             state is EndingExperience && action is Reset ->
@@ -195,14 +194,6 @@ internal class StateMachine(
             else -> null
         }
     }
-
-    private suspend fun handleRenderResult(result: ResultOf<Unit, Error>) =
-        when (result) {
-            // presentation completed successfully
-            is Success -> handleActionInternal(RenderStep)
-            // failed to present, this will bubble up the error and reset to Idling
-            is Failure -> handleActionInternal(ReportError(result.reason, true))
-        }
 
     // helper to determine if StartStep should try to resolve and start the next step, or shortcut
     // to end the experience, if a continue action is executed while already on the last step
@@ -225,21 +216,6 @@ internal class StateMachine(
     }
 
     suspend fun stop(dismiss: Boolean) {
-        // special case - the state machine may be paused waiting on a callback
-        // from a step attempting to render. We need to cancel that wait at this point so
-        // we can transition the machine back to idling
-        (state as? BeginningStep)?.let {
-            it.presentationComplete(
-                Failure(
-                    StepError(
-                        it.experience,
-                        it.flatStepIndex,
-                        "Step render canceled"
-                    )
-                )
-            )
-        }
-
         handleAction(
             EndExperience(
                 markComplete = false,

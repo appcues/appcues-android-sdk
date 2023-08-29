@@ -11,9 +11,6 @@ internal sealed class State {
         val experience: Experience,
         val flatStepIndex: Int,
         val isFirst: Boolean,
-        // this is how the UI communicates success/failure in presentation
-        // back to the state machine
-        val presentationComplete: ((ResultOf<Unit, Error>) -> Unit),
     ) : State()
 
     data class RenderingStep(val experience: Experience, val flatStepIndex: Int, val isFirst: Boolean) : State()

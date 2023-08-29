@@ -16,6 +16,7 @@ import com.appcues.data.model.RenderContext.Modal
 import com.appcues.data.model.getFrameId
 import com.appcues.data.remote.RemoteError.HttpError
 import com.appcues.statemachine.Action.EndExperience
+import com.appcues.statemachine.Action.ReportError
 import com.appcues.statemachine.Action.StartExperience
 import com.appcues.statemachine.Action.StartStep
 import com.appcues.statemachine.Error
@@ -238,6 +239,10 @@ internal class ExperienceRenderer(
     suspend fun dismiss(renderContext: RenderContext, markComplete: Boolean, destroyed: Boolean): ResultOf<State, Error> {
         return stateMachines.getOwner(renderContext)?.stateMachine?.handleAction(EndExperience(markComplete, destroyed))
             ?: Failure(RenderContextNotActive(renderContext))
+    }
+
+    suspend fun reportError(renderContext: RenderContext, error: Error) {
+        stateMachines.getOwner(renderContext)?.stateMachine?.handleAction(ReportError(error, true))
     }
 
     suspend fun resetAll() {
