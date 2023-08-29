@@ -5,6 +5,7 @@ import android.util.AttributeSet
 import android.view.View
 import android.widget.FrameLayout
 import androidx.compose.ui.platform.ComposeView
+import androidx.core.view.isVisible
 
 /**
  * AppcuesFrameView should is used when customers want to define a specific place for inflating Embed content
@@ -19,6 +20,12 @@ public class AppcuesFrameView @JvmOverloads constructor(
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
     private val composeView = ComposeView(context)
+
+    init {
+        // frame view will start GONE and the EmbedViewPresenter
+        // will make VISIBLE as needed, when content is rendering into frame
+        isVisible = false
+    }
 
     internal fun setupComposeView(): ComposeView {
         // when index is -1 it means the view is not added yet

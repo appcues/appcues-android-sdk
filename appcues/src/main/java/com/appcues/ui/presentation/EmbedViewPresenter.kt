@@ -17,11 +17,17 @@ internal class EmbedViewPresenter(
 ) : ViewPresenter(scope, renderContext) {
 
     override fun ViewGroup.setupView(activity: Activity): ComposeView? {
-        return stateMachines.getFrame(renderContext)?.setupComposeView()
+        return stateMachines.getFrame(renderContext)?.let {
+            it.isVisible = true
+            it.setupComposeView()
+        }
     }
 
     override fun ViewGroup.removeView() {
-        stateMachines.getFrame(renderContext)?.reset()
+        stateMachines.getFrame(renderContext)?.let {
+            it.isVisible = false
+            it.reset()
+        }
     }
 
     override fun setViewVisible(isVisible: Boolean) {
