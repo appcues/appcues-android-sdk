@@ -68,10 +68,6 @@ private fun MainSurface() {
                 value?.let { ComposeContainer(it.stepContainer, it.position) }
             }
 
-            LaunchOnShowAnimationCompleted {
-                viewModel.onPresentationComplete()
-            }
-
             // will run when transition from visible to gone is completed
             LaunchOnHideAnimationCompleted {
                 // if state is dismissing then finish activity

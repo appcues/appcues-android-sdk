@@ -46,11 +46,8 @@ internal interface Transitions {
 
     fun BeginningExperience.fromBeginningExperienceToBeginningStep(
         action: StartStep,
-        coroutineScope: CoroutineScope,
-        continuation: suspend (ResultOf<Unit, Error>) -> ResultOf<State, Error>
+        coroutineScope: CoroutineScope
     ): Transition {
-        val completion: CompletableDeferred<ResultOf<State, Error>> = CompletableDeferred()
-
         // This is a safeguard against trying to load a step container that has zero steps.
         // We already guard against loading an experience with zero steps (groups) in the BeginningExperience
         // transition above. However, if a group exists, but has zero steps within - it will get here and
@@ -68,10 +65,8 @@ internal interface Transitions {
         val actions = if (experience.trigger is Qualification) emptyList() else experience.getNavigationActions(0)
 
         return Transition(
-            state = BeginningStep(experience, 0, true) {
-                coroutineScope.launch { completion.complete(continuation(it)) }
-            },
-            sideEffect = PresentContainerEffect(experience, 0, completion, actions)
+            state = BeginningStep(experience, 0, true),
+            sideEffect = PresentContainerEffect(experience, 0, actions)
         )
     }
 
@@ -150,14 +145,13 @@ internal interface Transitions {
     fun EndingStep.fromEndingStepToBeginningStep(
         action: StartStep,
         coroutineScope: CoroutineScope,
-        continuation: suspend (ResultOf<Unit, Error>) -> ResultOf<State, Error>
     ): Transition {
         // get next step index
         return action.stepReference.getIndex(experience, flatStepIndex).let { nextStepIndex ->
             // check if next step index is valid for this experience
             if (isValidStepIndex(nextStepIndex, experience)) {
                 // check if current step and next step are from different step container
-                transitionsToBeginningStep(coroutineScope, experience, flatStepIndex, nextStepIndex, continuation)
+                transitionsToBeginningStep(coroutineScope, experience, flatStepIndex, nextStepIndex)
             } else {
                 // next step index is out of bounds error
                 errorTransition(experience, flatStepIndex, "Step at ${action.stepReference} does not exist")
@@ -185,32 +179,24 @@ private fun transitionsToBeginningStep(
     coroutineScope: CoroutineScope,
     experience: Experience,
     currentStepIndex: Int,
-    nextStepIndex: Int,
-    continuation: suspend (ResultOf<Unit, Error>) -> ResultOf<State, Error>,
+    nextStepIndex: Int
 ) = if (experience.areStepsFromDifferentGroup(currentStepIndex, nextStepIndex)) {
     // given that steps are from different container, we now get step container index to present
     experience.groupLookup[nextStepIndex]?.let { stepContainerIndex ->
         val actions = experience.getNavigationActions(stepContainerIndex)
-        val completion: CompletableDeferred<ResultOf<State, Error>> = CompletableDeferred()
         Transition(
-            state = BeginningStep(experience, nextStepIndex, false) {
-                coroutineScope.launch { completion.complete(continuation(it)) }
-            },
-            sideEffect = PresentContainerEffect(experience, stepContainerIndex, completion, actions)
+            state = BeginningStep(experience, nextStepIndex, false),
+            sideEffect = PresentContainerEffect(experience, stepContainerIndex, actions)
         )
     } ?: run {
         // this should never happen at this point. but better to safe guard anyways
         errorTransition(experience, currentStepIndex, "StepContainer for nextStepIndex $nextStepIndex not found")
     }
 } else {
-    // else we just transition to BeginningStep, and the UI will invoke the continuation
-    // once render is complete
-    val completion: CompletableDeferred<ResultOf<State, Error>> = CompletableDeferred()
+    // else we just transition to BeginningStep
     Transition(
-        state = BeginningStep(experience, nextStepIndex, false) {
-            coroutineScope.launch { completion.complete(continuation(it)) }
-        },
-        sideEffect = AwaitEffect(completion)
+        state = BeginningStep(experience, nextStepIndex, false),
+        sideEffect = ContinuationEffect(RenderStep)
     )
 }
 

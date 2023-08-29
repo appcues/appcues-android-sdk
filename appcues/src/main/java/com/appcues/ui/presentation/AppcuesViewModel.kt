@@ -19,15 +19,10 @@ import com.appcues.ui.ExperienceRenderer
 import com.appcues.ui.presentation.AppcuesViewModel.UIState.Dismissing
 import com.appcues.ui.presentation.AppcuesViewModel.UIState.Idle
 import com.appcues.ui.presentation.AppcuesViewModel.UIState.Rendering
-import com.appcues.util.ResultOf
-import com.appcues.util.ResultOf.Failure
-import com.appcues.util.ResultOf.Success
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
@@ -48,32 +43,7 @@ internal class AppcuesViewModel(
             val position: Int,
             val flatStepIndex: Int,
             val isPreview: Boolean,
-            private val completionHandler: ((ResultOf<Unit, com.appcues.statemachine.Error>) -> Unit),
-        ) : UIState() {
-            // used to track presentation state, to avoid calling the completion multiple times
-            private var presented: Boolean = false
-            private val mutex = Mutex()
-
-            // returns true if the completion handler was invoked, false if not (already presented)
-            suspend fun presentationComplete(result: ResultOf<Unit, com.appcues.statemachine.Error>): Boolean = mutex.withLock {
-                // this is to guard against the completionHandler being called multiple times, which
-                // could happen in the rare edge case of the Activity being removed out from under
-                // the experience.
-                //
-                // If this happens, post-render - it will flow through the normal dismiss, and
-                // this handler will not be called (since already presented).
-                //
-                // If this happens pre-render, it will trigger an error, flowing through this handler
-                // to notify the state machine that the render never completed.
-                if (!presented) {
-                    presented = true
-                    completionHandler(result)
-                    return true
-                } else {
-                    return false
-                }
-            }
-        }
+        ) : UIState()
 
         data class Dismissing(val continueAction: () -> Unit) : UIState()
     }
@@ -113,40 +83,13 @@ internal class AppcuesViewModel(
         }
     }
 
-    fun onPresentationComplete() {
-        uiState.value.let { state ->
-            if (state is Rendering) {
-                appcuesCoroutineScope.launch {
-                    state.presentationComplete(Success(Unit))
-                }
-            }
-        }
-    }
-
     fun onActivityChanged() {
         uiState.value.let { state ->
             // if current state IS Rendering this means that the Activity was removed
             // from an external source (ex deep link) and we should end the experience
             if (state is Rendering) {
                 appcuesCoroutineScope.launch {
-                    // this is to avoid any state machine hang waiting for this callback, if, the experience
-                    // was destroyed before presentation completed. Normally, the presentation complete callback
-                    // will have already been triggered during first render, and this will do nothing.
-                    val handled = state.presentationComplete(
-                        Failure(
-                            StepError(
-                                experience = state.experience,
-                                stepIndex = state.flatStepIndex,
-                                message = "Activity changed during render of step ${state.flatStepIndex}",
-                            )
-                        )
-                    )
-
-                    // this means that the failure above was not processed, since the presentation had already
-                    // completed. In this case, all we need to do is dismiss the experience as destroyed.
-                    if (!handled) {
-                        experienceRenderer.dismiss(renderContext, markComplete = false, destroyed = true)
-                    }
+                    experienceRenderer.dismiss(renderContext, markComplete = false, destroyed = true)
                 }
             }
         }
@@ -161,7 +104,7 @@ internal class AppcuesViewModel(
             // if both are valid ids we return Rendering else null
             if (containerId != null && stepIndexInContainer != null) {
                 // returns rendering state
-                Rendering(this, stepContainers[containerId], stepIndexInContainer, flatStepIndex, published.not(), presentationComplete)
+                Rendering(this, stepContainers[containerId], stepIndexInContainer, flatStepIndex, published.not())
             } else null
         }
     }
@@ -202,15 +145,14 @@ internal class AppcuesViewModel(
                 // the render complete (even on fail) and then continue to report
                 // error and reset
                 if (state is Rendering) {
-                    state.presentationComplete(
-                        Failure(
-                            StepError(
-                                experience = state.experience,
-                                stepIndex = state.flatStepIndex,
-                                // this message cannot be null in AppcuesTraitException, but the parent Exception class
-                                // has it optional. Thus, this fallback message should never actually be used.
-                                message = exception.message ?: "Unable to render step ${state.flatStepIndex}",
-                            )
+                    experienceRenderer.reportError(
+                        renderContext,
+                        StepError(
+                            experience = state.experience,
+                            stepIndex = state.flatStepIndex,
+                            // this message cannot be null in AppcuesTraitException, but the parent Exception class
+                            // has it optional. Thus, this fallback message should never actually be used.
+                            message = exception.message ?: "Unable to render step ${state.flatStepIndex}",
                         )
                     )
                 }

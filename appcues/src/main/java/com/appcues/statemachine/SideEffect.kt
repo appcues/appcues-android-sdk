@@ -10,7 +10,6 @@ internal sealed class SideEffect {
     data class PresentContainerEffect(
         val experience: Experience,
         val containerIndex: Int,
-        val completion: CompletableDeferred<ResultOf<State, Error>>,
         val actions: List<ExperienceAction>,
     ) : SideEffect()
 
