@@ -115,32 +115,6 @@ internal class StateMachine(
                     // this will execute the presentation, asynchronously, and return
                     // the subsequent action to take - either continue to Rendering, or report Error
                     handleActionInternal(sideEffect.presentContainer(actionProcessor))
-
-//                    // first, process any pre-step actions that need to be handled before the container is presented.
-//                    // for example - navigating to another screen in the app
-//                    actionProcessor.process(sideEffect.actions)
-//
-//                    try {
-//                        // this could throw an exception on trait failure, handled below
-//                        sideEffect.produceMetadata()
-//
-//                        // kick off UI
-//                        sideEffect.experience.stepContainers[sideEffect.containerIndex].presentingTrait.present()
-//
-//                        handleActionInternal(RenderStep)
-//                    } catch (exception: AppcuesTraitException) {
-//                        val message = exception.message ?: "Presenting trait failed to present for index ${sideEffect.containerIndex}"
-//                        handleActionInternal(
-//                            ReportError(
-//                                error = StepError(
-//                                    experience = sideEffect.experience,
-//                                    stepIndex = sideEffect.flatStepIndex,
-//                                    message = message
-//                                ),
-//                                fatal = true
-//                            )
-//                        )
-//                    }
                 }
 
                 is AwaitEffect -> {
