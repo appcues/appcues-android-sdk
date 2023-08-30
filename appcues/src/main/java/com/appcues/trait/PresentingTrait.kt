@@ -16,4 +16,9 @@ internal interface PresentingTrait : ExperienceTrait {
      */
     @Throws(AppcuesTraitException::class)
     fun present()
+
+    /**
+     * Remove the container for the applicable group of steps in the Experience.
+     */
+    fun remove()
 }

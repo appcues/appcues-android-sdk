@@ -34,6 +34,8 @@ internal class ModalTrait(
 
     private val style = config.getConfigStyle("style")
 
+    private val presenter = OverlayViewPresenter(scope, renderContext)
+
     @Composable
     override fun WrapContent(
         content: @Composable (
@@ -55,10 +57,14 @@ internal class ModalTrait(
     }
 
     override fun present() {
-        val success = OverlayViewPresenter(scope, renderContext).present()
+        val success = presenter.present()
 
         if (!success) {
             throw AppcuesTraitException("unable to create modal overlay view")
         }
+    }
+
+    override fun remove() {
+        presenter.remove()
     }
 }

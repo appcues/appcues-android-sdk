@@ -12,7 +12,6 @@ import com.appcues.statemachine.Action.Reset
 import com.appcues.statemachine.Action.StartExperience
 import com.appcues.statemachine.Action.StartStep
 import com.appcues.statemachine.Error.ExperienceAlreadyActive
-import com.appcues.statemachine.Error.StepError
 import com.appcues.statemachine.SideEffect.AwaitEffect
 import com.appcues.statemachine.SideEffect.ContinuationEffect
 import com.appcues.statemachine.SideEffect.PresentContainerEffect
@@ -29,7 +28,6 @@ import com.appcues.statemachine.Transition.EmptyTransition
 import com.appcues.statemachine.Transition.ErrorLoggingTransition
 import com.appcues.statemachine.Transitions.Companion.fromRenderingStepToEndingExperience
 import com.appcues.statemachine.Transitions.Companion.fromRenderingStepToEndingStep
-import com.appcues.trait.AppcuesTraitException
 import com.appcues.util.ResultOf
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
@@ -114,31 +112,35 @@ internal class StateMachine(
                 }
 
                 is PresentContainerEffect -> {
-                    // first, process any pre-step actions that need to be handled before the container is presented.
-                    // for example - navigating to another screen in the app
-                    actionProcessor.process(sideEffect.actions)
+                    // this will execute the presentation, asynchronously, and return
+                    // the subsequent action to take - either continue to Rendering, or report Error
+                    handleActionInternal(sideEffect.presentContainer(actionProcessor))
 
-                    try {
-                        // this could throw an exception on trait failure, handled below
-                        sideEffect.produceMetadata()
-
-                        // kick off UI
-                        sideEffect.experience.stepContainers[sideEffect.containerIndex].presentingTrait.present()
-
-                        handleActionInternal(RenderStep)
-                    } catch (exception: AppcuesTraitException) {
-                        val message = exception.message ?: "Presenting trait failed to present for index ${sideEffect.containerIndex}"
-                        handleActionInternal(
-                            ReportError(
-                                error = StepError(
-                                    experience = sideEffect.experience,
-                                    stepIndex = sideEffect.flatStepIndex,
-                                    message = message
-                                ),
-                                fatal = true
-                            )
-                        )
-                    }
+//                    // first, process any pre-step actions that need to be handled before the container is presented.
+//                    // for example - navigating to another screen in the app
+//                    actionProcessor.process(sideEffect.actions)
+//
+//                    try {
+//                        // this could throw an exception on trait failure, handled below
+//                        sideEffect.produceMetadata()
+//
+//                        // kick off UI
+//                        sideEffect.experience.stepContainers[sideEffect.containerIndex].presentingTrait.present()
+//
+//                        handleActionInternal(RenderStep)
+//                    } catch (exception: AppcuesTraitException) {
+//                        val message = exception.message ?: "Presenting trait failed to present for index ${sideEffect.containerIndex}"
+//                        handleActionInternal(
+//                            ReportError(
+//                                error = StepError(
+//                                    experience = sideEffect.experience,
+//                                    stepIndex = sideEffect.flatStepIndex,
+//                                    message = message
+//                                ),
+//                                fatal = true
+//                            )
+//                        )
+//                    }
                 }
 
                 is AwaitEffect -> {
@@ -178,7 +180,7 @@ internal class StateMachine(
 
             // BeginningExperience
             state is BeginningExperience && action is StartStep ->
-                state.fromBeginningExperienceToBeginningStep(action, appcuesCoroutineScope)
+                state.fromBeginningExperienceToBeginningStep(action)
 
             // BeginningStep
             state is BeginningStep && action is RenderStep ->
@@ -196,7 +198,7 @@ internal class StateMachine(
                 state.fromEndingStepToEndingExperience(action)
 
             state is EndingStep && action is StartStep ->
-                state.fromEndingStepToBeginningStep(action, appcuesCoroutineScope)
+                state.fromEndingStepToBeginningStep(action)
 
             // EndingExperience
             state is EndingExperience && action is Reset ->
