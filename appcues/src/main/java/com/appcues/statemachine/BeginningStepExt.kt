@@ -24,9 +24,12 @@ internal suspend fun BeginningStep.presentContainer(
         produceMetadataWithRetry()
 
         // kick off UI
-        presentingTrait()?.present()
-
-        RenderStep
+        presentingTrait()?.run {
+            present()
+            RenderStep
+        } ?: ReportError(toStepError(AppcuesTraitException("Unable to present step $flatStepIndex")), true)
+        // the exception above would only happen if the step index was not a valid step in the experience and
+        // we could not find the group for that step - should never really happen
     } catch (exception: AppcuesTraitException) {
         ReportError(toStepError(exception), true)
     }
