@@ -17,7 +17,6 @@ import com.appcues.logging.Logcues
 import com.appcues.trait.ExperienceTrait
 import com.appcues.trait.ExperienceTraitLevel
 import com.appcues.trait.TraitRegistry
-import com.appcues.ui.AppcuesFrameStateMachineOwner
 import com.appcues.ui.ExperienceRenderer
 import kotlinx.coroutines.launch
 import org.koin.core.scope.Scope
@@ -252,7 +251,7 @@ public class Appcues internal constructor(koinScope: Scope) {
      */
     public fun registerEmbed(frameId: String, frame: AppcuesFrameView) {
         appcuesCoroutineScope.launch {
-            experienceRenderer.start(AppcuesFrameStateMachineOwner(frame), RenderContext.Embed(frameId))
+            experienceRenderer.start(frame, RenderContext.Embed(frameId))
         }
     }
 

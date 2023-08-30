@@ -2,23 +2,36 @@ package com.appcues.ui
 
 import com.appcues.AppcuesFrameView
 import com.appcues.data.model.RenderContext
+import com.appcues.data.model.RenderContext.Modal
 import com.appcues.statemachine.StateMachine
 import java.lang.ref.WeakReference
 
 internal interface StateMachineOwning {
-    var renderContext: RenderContext?
-    var stateMachine: StateMachine?
+    val renderContext: RenderContext
+    val stateMachine: StateMachine
     suspend fun reset()
 }
 
-internal class AppcuesFrameStateMachineOwner(frame: AppcuesFrameView) : StateMachineOwning {
+internal class AppcuesFrameStateMachineOwner(
+    frame: AppcuesFrameView,
+    override val renderContext: RenderContext,
+    override val stateMachine: StateMachine
+) : StateMachineOwning {
     val frame: WeakReference<AppcuesFrameView> = WeakReference(frame)
-    override var renderContext: RenderContext? = null
-    override var stateMachine: StateMachine? = null
+
     override suspend fun reset() {
         frame.get()?.reset()
         // do not need to dismiss here, as the frame UI is already removed for embed
-        stateMachine?.stop(false)
+        stateMachine.stop(false)
+    }
+}
+
+internal class ModalStateMachineOwner(override val stateMachine: StateMachine) : StateMachineOwning {
+
+    override val renderContext: RenderContext = Modal
+
+    override suspend fun reset() {
+        stateMachine.stop(true)
     }
 }
 
@@ -41,17 +54,15 @@ internal class StateMachineDirectory {
     fun getOwner(context: RenderContext): StateMachineOwning? =
         stateMachines[context]
 
-    fun setOwner(context: RenderContext, owner: StateMachineOwning) {
-        // enforce uniqueness (a StateMachineOwning may only be registered for a single RenderContext)
-        val oldRenderContext = owner.renderContext
-        if (oldRenderContext != null && oldRenderContext != context) {
-            stateMachines.remove(oldRenderContext)
-        }
+    fun getOwner(frame: AppcuesFrameView): StateMachineOwning? =
+        stateMachines.values
+            .filterIsInstance(AppcuesFrameStateMachineOwner::class.java)
+            .firstOrNull {
+                it.frame.get() == frame
+            }
 
-        stateMachines[context] = owner
-
-        // Save the current renderContext so it can be easily removed in the above uniqueness check.
-        owner.renderContext = context
+    fun setOwner(owner: StateMachineOwning) {
+        stateMachines[owner.renderContext] = owner
     }
 
     suspend fun resetAll() {

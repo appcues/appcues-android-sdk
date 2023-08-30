@@ -1,6 +1,7 @@
 package com.appcues.ui
 
 import com.appcues.AppcuesConfig
+import com.appcues.AppcuesFrameView
 import com.appcues.SessionMonitor
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.analytics.track
@@ -38,20 +39,12 @@ import org.koin.core.component.get
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 
-internal class ExperienceRenderer(
-    override val scope: Scope,
-) : KoinScopeComponent, StateMachineOwning {
+internal class ExperienceRenderer(override val scope: Scope) : KoinScopeComponent {
 
     companion object {
 
         private const val HTTP_CODE_NOT_FOUND = 404
     }
-
-    // Conformance to `StateMachineOwning`.
-    override var renderContext: RenderContext? = null
-
-    // State machine for `RenderContext.modal`
-    override var stateMachine: StateMachine? = null
 
     // lazy prop inject here to avoid circular dependency with AnalyticsTracker
     // AnalyticsTracker > AnalyticsQueueProcessor > ExperienceRenderer(this) > AnalyticsTracker
@@ -67,8 +60,7 @@ internal class ExperienceRenderer(
     init {
         // sets up the single state machine used for modal experiences (mobile flows, not embeds)
         // that lives indefinitely and handles one experience at a time
-        stateMachine = get()
-        stateMachines.setOwner(Modal, this)
+        stateMachines.setOwner(ModalStateMachineOwner(get()))
     }
 
     fun getStateFlow(renderContext: RenderContext): SharedFlow<State>? {
@@ -163,25 +155,27 @@ internal class ExperienceRenderer(
         }
     }
 
-    suspend fun start(owner: StateMachineOwning, context: RenderContext) {
+    suspend fun start(frame: AppcuesFrameView, context: RenderContext) {
         // If there's already a frame for the context, reset it back to its unregistered state.
         stateMachines.getOwner(context)?.reset()
 
-        // If the machine being started is already registered for a different context,
-        // reset it back to its unregistered state before potentially showing new content.
-        owner.reset()
-
-        // if the owner already has a state machine, make sure it's lifecycle tracking is stopped before
-        // we replace it with a new one
-        owner.stateMachine?.stopLifecycleTracking()
-
-        owner.stateMachine = get<StateMachine>().also {
-            // when an embed completes, remove this render context from the cache, until a new set of
-            // qualified experiences is processed
-            it.onEndedExperience = { potentiallyRenderableExperiences.remove(renderContext) }
+        // if this frame is already registered for a different context, reset it back - a frame
+        // can only be registered to a single RenderContext
+        stateMachines.getOwner(frame)?.let {
+            if (it.renderContext != context) {
+                it.reset()
+            }
         }
 
-        stateMachines.setOwner(context, owner)
+        val stateMachine = get<StateMachine>().also {
+            // when an embed completes, remove this render context from the cache, until a new set of
+            // qualified experiences is processed
+            it.onEndedExperience = { potentiallyRenderableExperiences.remove(context) }
+        }
+
+        val owner = AppcuesFrameStateMachineOwner(frame, context, stateMachine)
+
+        stateMachines.setOwner(owner)
 
         show(context)
     }
@@ -244,10 +238,5 @@ internal class ExperienceRenderer(
         previewExperiences.clear()
         potentiallyRenderableExperiences.clear()
         stateMachines.resetAll()
-    }
-
-    // Reset only the owned `stateMachine` instance in conformance to `StateMachineOwning`.
-    override suspend fun reset() {
-        stateMachine?.stop(true)
     }
 }
