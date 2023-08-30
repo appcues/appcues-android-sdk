@@ -1,6 +1,7 @@
 package com.appcues.ui
 
 import com.appcues.AppcuesConfig
+import com.appcues.AppcuesFrameView
 import com.appcues.analytics.AnalyticsEvent
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.analytics.ExperienceLifecycleTracker
@@ -206,9 +207,8 @@ internal class ExperienceRendererTest {
         }
         val scope = initScope { stateMachine }
         val experienceRenderer = ExperienceRenderer(scope)
-        val owner = AppcuesFrameStateMachineOwner(mockk(relaxed = true))
         val context = RenderContext.Embed("frame1")
-        experienceRenderer.start(owner, context)
+        experienceRenderer.start(mockk(relaxed = true), context)
 
         // WHEN
         experienceRenderer.show(QualificationResult(Qualification("screen_view"), listOf(experience)))
@@ -228,12 +228,11 @@ internal class ExperienceRendererTest {
         val scope = initScope { stateMachine }
         val analyticsTracker: AnalyticsTracker = scope.get()
         val experienceRenderer = ExperienceRenderer(scope)
-        val owner = AppcuesFrameStateMachineOwner(mockk(relaxed = true))
         val context = RenderContext.Embed("frame1")
         experienceRenderer.show(QualificationResult(Qualification("screen_view"), listOf(experience)))
 
         // WHEN
-        experienceRenderer.start(owner, context)
+        experienceRenderer.start(mockk(relaxed = true), context)
 
         // THEN
         val slot = slot<Map<String, Any>>()
@@ -267,7 +266,6 @@ internal class ExperienceRendererTest {
         }
         val scope = initScope { stateMachine }
         val experienceRenderer = ExperienceRenderer(scope)
-        val owner = AppcuesFrameStateMachineOwner(mockk(relaxed = true))
         val context = RenderContext.Embed("frame1")
         experienceRenderer.show(QualificationResult(Qualification("screen_view"), listOf(experience)))
 
@@ -276,7 +274,7 @@ internal class ExperienceRendererTest {
         experienceRenderer.show(QualificationResult(Qualification("event_trigger"), listOf()))
         experienceRenderer.show(QualificationResult(Qualification("unknown_value"), listOf()))
 
-        experienceRenderer.start(owner, context)
+        experienceRenderer.start(mockk(relaxed = true), context)
 
         // THEN
         coVerify { stateMachine.handleAction(StartExperience(experience)) }
@@ -292,13 +290,12 @@ internal class ExperienceRendererTest {
         }
         val scope = initScope { stateMachine }
         val experienceRenderer = ExperienceRenderer(scope)
-        val owner = AppcuesFrameStateMachineOwner(mockk(relaxed = true))
         val context = RenderContext.Embed("frame1")
         experienceRenderer.show(QualificationResult(Qualification("screen_view"), listOf(experience)))
 
         // WHEN
         experienceRenderer.show(QualificationResult(Qualification("screen_view"), listOf()))
-        experienceRenderer.start(owner, context)
+        experienceRenderer.start(mockk(relaxed = true), context)
 
         // THEN
         coVerify { stateMachine.handleAction(StartExperience(experience)) wasNot Called }
@@ -315,30 +312,50 @@ internal class ExperienceRendererTest {
         }
         val scope = initScope { stateMachine }
         val experienceRenderer = ExperienceRenderer(scope)
-        val owner = mockk<AppcuesFrameStateMachineOwner>(relaxed = true) {
-            every { this@mockk.stateMachine } answers { stateMachine }
-        }
+        val directory: StateMachineDirectory = scope.get()
         val context = RenderContext.Embed("frame1")
         experienceRenderer.show(QualificationResult(Qualification("screen_view"), listOf(experience)))
 
         // WHEN
-        experienceRenderer.start(owner, context)
-        experienceRenderer.start(owner, context)
+        experienceRenderer.start(mockk(relaxed = true), context)
+        experienceRenderer.start(mockk(relaxed = true), context)
 
         // THEN
-        // reset is called 3 times. The very first time, the context is not in the state machine directory, so only
-        // owner.reset() is called on start(). The second time, the context is already in the directory, so it is found
-        // and reset plus the owner.reset() call - see ExperienceRenderer start implementation for reference:
-        //
-        //        If there's already a frame for the context, reset it back to its unregistered state.
-        //        stateMachines.getOwner(context)?.reset()
-        //
-        //        // If the machine being started is already registered for a different context,
-        //        // reset it back to its unregistered state before potentially showing new content.
-        //        owner.reset()
-        //
-        coVerify(exactly = 3) { owner.reset() }
+        val owner = directory.getOwner(context)
+        val ownerMachine = owner!!.stateMachine
+        coVerify(exactly = 1) { ownerMachine.stop(false) }
         coVerify(exactly = 2) { stateMachine.handleAction(StartExperience(experience)) }
+    }
+
+    @Test
+    fun `frame register to new context SHOULD reset the previous context`() = runTest {
+        // GIVEN
+        val experience = mockEmbedExperience("frame1")
+        val stateMachine = mockk<StateMachine>(relaxed = true) {
+            every { this@mockk.state } answers { Idling }
+            coEvery { this@mockk.handleAction(any()) } answers { Success(Idling) }
+        }
+        val scope = initScope { stateMachine }
+        val experienceRenderer = ExperienceRenderer(scope)
+        val directory: StateMachineDirectory = scope.get()
+        val context1 = RenderContext.Embed("frame1")
+        val context2 = RenderContext.Embed("frame2")
+        val frame: AppcuesFrameView = mockk(relaxed = true)
+        experienceRenderer.show(QualificationResult(Qualification("screen_view"), listOf(experience)))
+
+        // WHEN
+        experienceRenderer.start(frame, context1)
+        val owner1 = directory.getOwner(context1)
+        experienceRenderer.start(frame, context2)
+        val owner2 = directory.getOwner(context2)
+
+        // THEN
+
+        val owner1Machine = owner1!!.stateMachine
+        val owner2Machine = owner2!!.stateMachine
+        coVerify(exactly = 1) { owner1Machine.handleAction(StartExperience(experience)) }
+        coVerify(exactly = 1) { owner1Machine.stop(false) }
+        coVerify(exactly = 1) { owner2Machine.handleAction(StartExperience(experience)) }
     }
 
     private fun initScope(stateMachine: () -> StateMachine): Scope {

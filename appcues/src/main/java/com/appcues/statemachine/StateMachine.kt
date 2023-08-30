@@ -71,11 +71,13 @@ internal class StateMachine(
                 }
             }
         }
+    }
 
+    private fun startLifecycleTracking() {
         lifecycleTracker.start(this, { onEndedExperience?.invoke(it) })
     }
 
-    fun stopLifecycleTracking() {
+    private fun stopLifecycleTracking() {
         lifecycleTracker.stop()
     }
 
@@ -98,8 +100,8 @@ internal class StateMachine(
             }
         }
 
-        if (sideEffect != null) {
-            return when (sideEffect) {
+        return if (sideEffect != null) {
+            when (sideEffect) {
                 is ContinuationEffect -> {
                     // recursive call on continuations to get the final return value
                     handleActionInternal(sideEffect.action)
@@ -128,7 +130,11 @@ internal class StateMachine(
             }
         } else {
             // if no side effect, return success with current state
-            return Success(_state)
+            Success(_state)
+        }.also {
+            if (state == Idling) {
+                stopLifecycleTracking()
+            }
         }
     }
 
@@ -149,8 +155,10 @@ internal class StateMachine(
     private fun takeValidStateTransitions(state: State, action: Action) = with(Transitions) {
         when {
             // Idling
-            state is Idling && action is StartExperience ->
+            state is Idling && action is StartExperience -> {
+                startLifecycleTracking()
                 state.fromIdlingToBeginningExperience(action)
+            }
 
             // BeginningExperience
             state is BeginningExperience && action is StartStep ->
