@@ -98,6 +98,8 @@ public fun ComposeContainer(context: Context, stepContentJson: List<String>?, tr
     val experienceMapper: ExperienceMapper = scope.get()
     val experience = experienceMapper.map(updatedExperienceResponse, ExperienceTrigger.Preview)
     val container = experience.stepContainers[0]
+    val metadataSettingTraits = container.steps[0].metadataSettingTraits
+    val metadata = hashMapOf<String, Any?>().apply { metadataSettingTraits.forEach { putAll(it.produceMetadata()) } }
 
     AppcuesTheme {
         CompositionLocalProvider(
@@ -117,7 +119,7 @@ public fun ComposeContainer(context: Context, stepContentJson: List<String>?, tr
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                ComposeContainer(container, 0)
+                ComposeContainer(container, 0, metadata)
             }
         }
     }

@@ -8,12 +8,9 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.children
-import androidx.core.view.isVisible
 import com.appcues.AppcuesOverlayView
 import com.appcues.R
 import com.appcues.data.model.RenderContext
-import com.appcues.monitor.AppcuesActivityMonitor
-import com.appcues.ui.utils.getParentView
 import org.koin.core.scope.Scope
 
 internal class OverlayViewPresenter(scope: Scope, renderContext: RenderContext) : ViewPresenter(scope, renderContext) {
@@ -54,28 +51,6 @@ internal class OverlayViewPresenter(scope: Scope, renderContext: RenderContext) 
 
         // add customers view back to accessibility stack
         setAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES)
-    }
-
-    override fun setViewVisible(isVisible: Boolean) {
-        AppcuesActivityMonitor.activity?.updateOverlayVisibility(isVisible)
-    }
-
-    private fun Activity.updateOverlayVisibility(isVisible: Boolean) {
-        getParentView().let { parentView ->
-            parentView.post {
-                findViewById<AppcuesOverlayView>(R.id.appcues_overlay_view)?.let {
-                    it.isVisible = isVisible
-                }
-                parentView.setAccessibility(
-                    if (isVisible) {
-                        // when our view is visible, the parent view is removed from the accessibility stack
-                        View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
-                    } else {
-                        View.IMPORTANT_FOR_ACCESSIBILITY_YES
-                    }
-                )
-            }
-        }
     }
 
     private fun ViewGroup.setAccessibility(accessibilityFlag: Int) {

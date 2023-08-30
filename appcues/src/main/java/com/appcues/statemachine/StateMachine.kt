@@ -12,7 +12,7 @@ import com.appcues.statemachine.Action.Reset
 import com.appcues.statemachine.Action.StartExperience
 import com.appcues.statemachine.Action.StartStep
 import com.appcues.statemachine.Error.ExperienceAlreadyActive
-import com.appcues.statemachine.Error.ExperienceError
+import com.appcues.statemachine.Error.StepError
 import com.appcues.statemachine.SideEffect.AwaitEffect
 import com.appcues.statemachine.SideEffect.ContinuationEffect
 import com.appcues.statemachine.SideEffect.PresentContainerEffect
@@ -119,13 +119,25 @@ internal class StateMachine(
                     actionProcessor.process(sideEffect.actions)
 
                     try {
+                        // this could throw an exception on trait failure, handled below
+                        sideEffect.produceMetadata()
+
                         // kick off UI
                         sideEffect.experience.stepContainers[sideEffect.containerIndex].presentingTrait.present()
 
                         handleActionInternal(RenderStep)
                     } catch (exception: AppcuesTraitException) {
                         val message = exception.message ?: "Presenting trait failed to present for index ${sideEffect.containerIndex}"
-                        handleActionInternal(ReportError(ExperienceError(sideEffect.experience, message), true))
+                        handleActionInternal(
+                            ReportError(
+                                error = StepError(
+                                    experience = sideEffect.experience,
+                                    stepIndex = sideEffect.flatStepIndex,
+                                    message = message
+                                ),
+                                fatal = true
+                            )
+                        )
                     }
                 }
 

@@ -25,9 +25,12 @@ import com.appcues.statemachine.State.EndingStep
 import com.appcues.statemachine.State.Idling
 import com.appcues.statemachine.State.RenderingStep
 import com.appcues.statemachine.StepReference.StepIndex
+import com.appcues.trait.AppcuesTraitException
+import com.appcues.trait.MetadataSettingTrait
 import com.appcues.util.ResultOf
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
@@ -63,10 +66,11 @@ internal interface Transitions {
         // starting state of the experience is determined solely by flow settings determining the trigger
         // (i.e. trigger on certain screen).
         val actions = if (experience.trigger is Qualification) emptyList() else experience.getNavigationActions(0)
+        val state = BeginningStep(experience, 0, true)
 
         return Transition(
-            state = BeginningStep(experience, 0, true),
-            sideEffect = PresentContainerEffect(experience, 0, actions)
+            state = state,
+            sideEffect = PresentContainerEffect(experience, 0, 0, actions, state::produceMetadataWithRetry)
         )
     }
 
@@ -184,20 +188,71 @@ private fun transitionsToBeginningStep(
     // given that steps are from different container, we now get step container index to present
     experience.groupLookup[nextStepIndex]?.let { stepContainerIndex ->
         val actions = experience.getNavigationActions(stepContainerIndex)
+        val state = BeginningStep(experience, nextStepIndex, false, hashMapOf())
         Transition(
-            state = BeginningStep(experience, nextStepIndex, false),
-            sideEffect = PresentContainerEffect(experience, stepContainerIndex, actions)
+            state = state,
+            sideEffect = PresentContainerEffect(experience, nextStepIndex, stepContainerIndex, actions, state::produceMetadataWithRetry)
         )
     } ?: run {
         // this should never happen at this point. but better to safe guard anyways
         errorTransition(experience, currentStepIndex, "StepContainer for nextStepIndex $nextStepIndex not found")
     }
 } else {
-    // else we just transition to BeginningStep
-    Transition(
-        state = BeginningStep(experience, nextStepIndex, false),
-        sideEffect = ContinuationEffect(RenderStep)
-    )
+    // else we just transition to BeginningStep, with the continuation to RenderStep
+    try {
+        Transition(
+            state = BeginningStep(experience, nextStepIndex, false).also { it.produceMetadata() },
+            sideEffect = ContinuationEffect(RenderStep)
+        )
+    } catch (ex: AppcuesTraitException) {
+        // this means trait metadata failed on the transition and the step has an error, ends experience
+        Transition(
+            state = Idling,
+            sideEffect = ReportErrorEffect(
+                StepError(
+                    experience = experience,
+                    stepIndex = nextStepIndex,
+                    message = ex.message ?: "Unable to render step $nextStepIndex"
+                )
+            )
+        )
+    }
+}
+
+private fun BeginningStep.produceMetadata() {
+    metadata = hashMapOf<String, Any?>().apply { metadataSettingsTraits().forEach { putAll(it.produceMetadata()) } }
+}
+
+private suspend fun BeginningStep.produceMetadataWithRetry() {
+    return try {
+        metadata = hashMapOf<String, Any?>().apply { metadataSettingsTraits().forEach { putAll(it.produceMetadata()) } }
+    } catch (ex: AppcuesTraitException) {
+        if (ex.retryMilliseconds != null) {
+            delay(ex.retryMilliseconds.toLong())
+            produceMetadataWithRetry()
+        } else {
+            throw ex
+        }
+    }
+}
+
+private fun BeginningStep.metadataSettingsTraits(): List<MetadataSettingTrait> {
+    return with(experience) {
+        // find the container index
+        val containerId = groupLookup[flatStepIndex]
+        // find the step index in relation to the container
+        val stepIndexInContainer = stepIndexLookup[flatStepIndex]
+        // if both are valid ids we return Rendering else null
+        if (containerId != null && stepIndexInContainer != null) {
+            val container = stepContainers[containerId]
+            val step = container.steps[stepIndexInContainer]
+            // this will throw if metadata fails
+            step.metadataSettingTraits
+        } else {
+            // should be impossible at this point, but will cover with an exception as well
+            throw AppcuesTraitException("Invalid step index $flatStepIndex")
+        }
+    }
 }
 
 // Gets any actions defined on the step group container for the "navigate" trigger. These are the

@@ -9,7 +9,6 @@ import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.Interactio
 import com.appcues.data.model.Action
 import com.appcues.data.model.ExperienceStepFormState
 import com.appcues.logging.Logcues
-import com.appcues.trait.AppcuesTraitException
 import com.appcues.ui.presentation.AppcuesViewModel
 import com.google.accompanist.web.AccompanistWebChromeClient
 import java.util.UUID
@@ -60,14 +59,6 @@ internal val LocalExperienceStepFormStateDelegate = compositionLocalOf { Experie
 internal val LocalStackScope = compositionLocalOf { StackScope.COLUMN }
 
 internal val LocalChromeClient = compositionLocalOf { AccompanistWebChromeClient() }
-
-internal val LocalTraitExceptionHandler = compositionLocalOf { AppcuesTraitExceptionHandler {} }
-
-internal val LocalAppcuesExperienceVisibility = compositionLocalOf { AppcuesExperienceVisibility {} }
-
-internal data class AppcuesTraitExceptionHandler(val onTraitException: (AppcuesTraitException) -> Unit)
-
-internal data class AppcuesExperienceVisibility(val setVisible: (Boolean) -> Unit)
 
 internal enum class StackScope {
     ROW, COLUMN

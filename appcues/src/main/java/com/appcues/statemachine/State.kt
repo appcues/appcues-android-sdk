@@ -1,7 +1,6 @@
 package com.appcues.statemachine
 
 import com.appcues.data.model.Experience
-import com.appcues.util.ResultOf
 
 internal sealed class State {
 
@@ -11,6 +10,7 @@ internal sealed class State {
         val experience: Experience,
         val flatStepIndex: Int,
         val isFirst: Boolean,
+        var metadata: Map<String, Any?> = hashMapOf(),
     ) : State()
 
     data class RenderingStep(val experience: Experience, val flatStepIndex: Int, val isFirst: Boolean) : State()

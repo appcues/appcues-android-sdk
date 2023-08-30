@@ -10,11 +10,10 @@ import com.appcues.analytics.SdkMetrics
 import com.appcues.data.model.Experience
 import com.appcues.data.model.RenderContext
 import com.appcues.data.model.StepContainer
-import com.appcues.statemachine.Error.StepError
 import com.appcues.statemachine.State.BeginningStep
 import com.appcues.statemachine.State.EndingStep
+import com.appcues.statemachine.State.Idling
 import com.appcues.statemachine.StepReference.StepGroupPageIndex
-import com.appcues.trait.AppcuesTraitException
 import com.appcues.ui.ExperienceRenderer
 import com.appcues.ui.presentation.AppcuesViewModel.UIState.Dismissing
 import com.appcues.ui.presentation.AppcuesViewModel.UIState.Idle
@@ -31,7 +30,6 @@ internal class AppcuesViewModel(
     override val scope: Scope,
     private val renderContext: RenderContext,
     private val onDismiss: () -> Unit,
-    private val setViewVisible: (Boolean) -> Unit,
 ) : ViewModel(), KoinScopeComponent {
 
     sealed class UIState {
@@ -42,7 +40,7 @@ internal class AppcuesViewModel(
             val stepContainer: StepContainer,
             val position: Int,
             val flatStepIndex: Int,
-            val isPreview: Boolean,
+            val metadata: Map<String, Any?>,
         ) : UIState()
 
         data class Dismissing(val continueAction: () -> Unit) : UIState()
@@ -76,6 +74,10 @@ internal class AppcuesViewModel(
                             _uiState.value = Dismissing(result.dismissAndContinue)
                         }
                     }
+                    is Idling -> {
+                        // can occur in a trait processing error, where the state was reset and the UI should just dismiss
+                        _uiState.value = Dismissing { }
+                    }
                     // ignore other state changes
                     else -> Unit
                 }
@@ -104,7 +106,7 @@ internal class AppcuesViewModel(
             // if both are valid ids we return Rendering else null
             if (containerId != null && stepIndexInContainer != null) {
                 // returns rendering state
-                Rendering(this, stepContainers[containerId], stepIndexInContainer, flatStepIndex, published.not())
+                Rendering(this, stepContainers[containerId], stepIndexInContainer, flatStepIndex, metadata)
             } else null
         }
     }
@@ -131,35 +133,6 @@ internal class AppcuesViewModel(
             if (state is Dismissing) {
                 state.continueAction()
             }
-        }
-    }
-
-    fun updateViewVisibility(isVisible: Boolean) {
-        setViewVisible(isVisible)
-    }
-
-    fun onTraitException(exception: AppcuesTraitException) {
-        appcuesCoroutineScope.launch {
-            uiState.value.let { state ->
-                // if currently attempting to Render and failed, signal back
-                // the render complete (even on fail) and then continue to report
-                // error and reset
-                if (state is Rendering) {
-                    experienceRenderer.reportError(
-                        renderContext,
-                        StepError(
-                            experience = state.experience,
-                            stepIndex = state.flatStepIndex,
-                            // this message cannot be null in AppcuesTraitException, but the parent Exception class
-                            // has it optional. Thus, this fallback message should never actually be used.
-                            message = exception.message ?: "Unable to render step ${state.flatStepIndex}",
-                        )
-                    )
-                }
-            }
-
-            // dismiss this experience
-            dismiss()
         }
     }
 

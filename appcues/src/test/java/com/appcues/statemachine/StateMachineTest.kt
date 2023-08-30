@@ -166,8 +166,8 @@ internal class StateMachineTest : AppcuesScopeTest {
 
         // THEN
         assertThat(stateMachine.state).isEqualTo(targetState)
-        assertThat(result.failureReason()).isInstanceOf(ExperienceError::class.java)
-        with(result.failureReason() as ExperienceError) {
+        assertThat(result.failureReason()).isInstanceOf(StepError::class.java)
+        with(result.failureReason() as StepError) {
             assertThat(message).isEqualTo("test trait exception")
         }
     }
@@ -624,7 +624,7 @@ internal class StateMachineTest : AppcuesScopeTest {
     fun `BeginningStep SHOULD NOT transition WHEN action is something other than RenderStep or Pause`() = runTest {
         // GIVEN
         val experience = mockExperience()
-        val initialState = BeginningStep(experience, 1, false) { }
+        val initialState = BeginningStep(experience, 1, false)
         val stateMachine = initMachine(initialState)
         val action = StartStep(StepOffset(1))
 
@@ -756,9 +756,6 @@ internal class StateMachineTest : AppcuesScopeTest {
             machine.stateFlow.collect {
                 onStateChange?.invoke(it)
                 when (it) {
-                    is BeginningStep -> {
-                        it.presentationComplete.invoke(Success(Unit))
-                    }
                     is EndingStep -> {
                         it.dismissAndContinue?.invoke()
                     }
