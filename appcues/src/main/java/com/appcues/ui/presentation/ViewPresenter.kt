@@ -64,7 +64,7 @@ internal abstract class ViewPresenter(
             // grab composeView or exit with false
             val composeView = setupView(activity) ?: return false
 
-            viewModel = AppcuesViewModel(scope, renderContext, ::onCompositionDismiss, ::setViewVisible)
+            viewModel = AppcuesViewModel(scope, renderContext, ::onCompositionDismiss)
 
             if (currentExperience?.trigger == Preview) {
                 gestureListener = ShakeGestureListener(activity).also {
@@ -106,8 +106,6 @@ internal abstract class ViewPresenter(
     abstract fun ViewGroup.setupView(activity: Activity): ComposeView?
 
     abstract fun ViewGroup.removeView()
-
-    abstract fun setViewVisible(isVisible: Boolean)
 
     private fun refreshPreview() {
         currentExperience?.let {

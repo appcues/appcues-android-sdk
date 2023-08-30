@@ -15,7 +15,6 @@ import com.appcues.rules.MainDispatcherRule
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.StartStep
 import com.appcues.statemachine.State
-import com.appcues.statemachine.State.BeginningStep
 import com.appcues.statemachine.State.EndingStep
 import com.appcues.statemachine.State.RenderingStep
 import com.appcues.statemachine.StateMachine
@@ -23,7 +22,6 @@ import com.appcues.statemachine.StepReference.StepOffset
 import com.appcues.trait.TraitRegistry
 import com.appcues.ui.ExperienceRenderer
 import com.appcues.util.LinkOpener
-import com.appcues.util.ResultOf.Success
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -135,9 +133,6 @@ internal class ExperienceLifecycleTrackerTest : KoinTest {
             // that is required to progress the state machine forward on UI present/dismiss
             machine.stateFlow.collect {
                 when (it) {
-                    is BeginningStep -> {
-                        it.presentationComplete.invoke(Success(Unit))
-                    }
                     is EndingStep -> {
                         it.dismissAndContinue?.invoke()
                     }
