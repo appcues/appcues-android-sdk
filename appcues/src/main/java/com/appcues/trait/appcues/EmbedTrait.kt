@@ -62,6 +62,8 @@ internal class EmbedTrait(
         }
     }
 
+    private val presenter = EmbedViewPresenter(scope, renderContext, scope.get())
+
     @Composable
     override fun WrapContent(
         content: @Composable (
@@ -117,10 +119,14 @@ internal class EmbedTrait(
     }
 
     override fun present() {
-        val success = EmbedViewPresenter(scope, renderContext, scope.get()).present()
+        val success = presenter.present()
 
         if (!success) {
             throw AppcuesTraitException("unable to create embed view for $renderContext")
         }
+    }
+
+    override fun remove() {
+        presenter.remove()
     }
 }

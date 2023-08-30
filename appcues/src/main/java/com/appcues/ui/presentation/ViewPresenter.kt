@@ -86,6 +86,10 @@ internal abstract class ViewPresenter(
         }
     }
 
+    fun remove() {
+        onCompositionDismiss()
+    }
+
     private fun onCompositionDismiss() {
         AppcuesActivityMonitor.unsubscribe(activityMonitorListener)
 

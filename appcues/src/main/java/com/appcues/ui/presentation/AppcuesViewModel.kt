@@ -12,7 +12,6 @@ import com.appcues.data.model.RenderContext
 import com.appcues.data.model.StepContainer
 import com.appcues.statemachine.State.BeginningStep
 import com.appcues.statemachine.State.EndingStep
-import com.appcues.statemachine.State.Idling
 import com.appcues.statemachine.StepReference.StepGroupPageIndex
 import com.appcues.ui.ExperienceRenderer
 import com.appcues.ui.presentation.AppcuesViewModel.UIState.Dismissing
@@ -73,10 +72,6 @@ internal class AppcuesViewModel(
                         if (result.dismissAndContinue != null) {
                             _uiState.value = Dismissing(result.dismissAndContinue)
                         }
-                    }
-                    is Idling -> {
-                        // can occur in a trait processing error, where the state was reset and the UI should just dismiss
-                        _uiState.value = Dismissing { }
                     }
                     // ignore other state changes
                     else -> Unit

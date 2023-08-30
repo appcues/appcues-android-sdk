@@ -85,6 +85,8 @@ internal class TooltipTrait(
         private val MAX_TOOLTIP_WIDTH = 400.0.dp
     }
 
+    private val presenter = OverlayViewPresenter(scope, renderContext)
+
     private val style = config.getConfigStyle("style")
 
     // if hidePointer is present, set base and length to 0 Dp
@@ -101,11 +103,15 @@ internal class TooltipTrait(
     }
 
     override fun present() {
-        val success = OverlayViewPresenter(scope, renderContext).present()
+        val success = presenter.present()
 
         if (!success) {
             throw AppcuesTraitException("unable to create tooltip overlay view")
         }
+    }
+
+    override fun remove() {
+        presenter.remove()
     }
 
     @Composable
@@ -185,7 +191,7 @@ internal class TooltipTrait(
                                 contentSized.value = true
                             }
                             .styleShadowPath(style, tooltipPath, isSystemInDarkTheme())
-                            .clipToPath(tooltipPath)
+                            .clip(GenericShape { _, _ -> addPath(tooltipPath) })
                             .styleBackground(style, isSystemInDarkTheme())
                             .styleBorderPath(style, tooltipPath, isSystemInDarkTheme())
                     ) {
@@ -234,10 +240,6 @@ internal class TooltipTrait(
             }
         )
     }
-
-    private fun Modifier.clipToPath(path: Path) = then(
-        Modifier.clip(GenericShape { _, _ -> addPath(path) })
-    )
 
     private fun Modifier.styleBorderPath(
         style: ComponentStyle?,

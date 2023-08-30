@@ -1,5 +1,3 @@
-@file:Suppress("unused", "UNUSED_PARAMETER")
-
 package com.appcues.statemachine
 
 import com.appcues.action.ExperienceAction
@@ -26,11 +24,9 @@ import com.appcues.statemachine.State.Idling
 import com.appcues.statemachine.State.RenderingStep
 import com.appcues.statemachine.StepReference.StepIndex
 import com.appcues.trait.AppcuesTraitException
-import com.appcues.trait.MetadataSettingTrait
 import com.appcues.util.ResultOf
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
@@ -49,7 +45,6 @@ internal interface Transitions {
 
     fun BeginningExperience.fromBeginningExperienceToBeginningStep(
         action: StartStep,
-        coroutineScope: CoroutineScope
     ): Transition {
         // This is a safeguard against trying to load a step container that has zero steps.
         // We already guard against loading an experience with zero steps (groups) in the BeginningExperience
@@ -70,7 +65,9 @@ internal interface Transitions {
 
         return Transition(
             state = state,
-            sideEffect = PresentContainerEffect(experience, 0, 0, actions, state::produceMetadataWithRetry)
+            sideEffect = PresentContainerEffect { actionProcessor ->
+                state.presentContainer(actionProcessor, actions)
+            }
         )
     }
 
@@ -148,14 +145,13 @@ internal interface Transitions {
 
     fun EndingStep.fromEndingStepToBeginningStep(
         action: StartStep,
-        coroutineScope: CoroutineScope,
     ): Transition {
         // get next step index
         return action.stepReference.getIndex(experience, flatStepIndex).let { nextStepIndex ->
             // check if next step index is valid for this experience
             if (isValidStepIndex(nextStepIndex, experience)) {
                 // check if current step and next step are from different step container
-                transitionsToBeginningStep(coroutineScope, experience, flatStepIndex, nextStepIndex)
+                transitionsToBeginningStep(experience, flatStepIndex, nextStepIndex)
             } else {
                 // next step index is out of bounds error
                 errorTransition(experience, flatStepIndex, "Step at ${action.stepReference} does not exist")
@@ -180,7 +176,6 @@ private fun isValidStepIndex(stepIndex: Int?, experience: Experience): Boolean {
 }
 
 private fun transitionsToBeginningStep(
-    coroutineScope: CoroutineScope,
     experience: Experience,
     currentStepIndex: Int,
     nextStepIndex: Int
@@ -191,7 +186,9 @@ private fun transitionsToBeginningStep(
         val state = BeginningStep(experience, nextStepIndex, false, hashMapOf())
         Transition(
             state = state,
-            sideEffect = PresentContainerEffect(experience, nextStepIndex, stepContainerIndex, actions, state::produceMetadataWithRetry)
+            sideEffect = PresentContainerEffect { actionProcessor ->
+                state.presentContainer(actionProcessor, actions)
+            }
         )
     } ?: run {
         // this should never happen at this point. but better to safe guard anyways
@@ -199,59 +196,18 @@ private fun transitionsToBeginningStep(
     }
 } else {
     // else we just transition to BeginningStep, with the continuation to RenderStep
+    val state = BeginningStep(experience, nextStepIndex, false)
     try {
+        // this could throw a trait exception, if metadata is invalid
+        state.produceMetadata()
         Transition(
-            state = BeginningStep(experience, nextStepIndex, false).also { it.produceMetadata() },
+            state = state,
             sideEffect = ContinuationEffect(RenderStep)
         )
     } catch (ex: AppcuesTraitException) {
         // this means trait metadata failed on the transition and the step has an error, ends experience
-        Transition(
-            state = Idling,
-            sideEffect = ReportErrorEffect(
-                StepError(
-                    experience = experience,
-                    stepIndex = nextStepIndex,
-                    message = ex.message ?: "Unable to render step $nextStepIndex"
-                )
-            )
-        )
-    }
-}
-
-private fun BeginningStep.produceMetadata() {
-    metadata = hashMapOf<String, Any?>().apply { metadataSettingsTraits().forEach { putAll(it.produceMetadata()) } }
-}
-
-private suspend fun BeginningStep.produceMetadataWithRetry() {
-    return try {
-        metadata = hashMapOf<String, Any?>().apply { metadataSettingsTraits().forEach { putAll(it.produceMetadata()) } }
-    } catch (ex: AppcuesTraitException) {
-        if (ex.retryMilliseconds != null) {
-            delay(ex.retryMilliseconds.toLong())
-            produceMetadataWithRetry()
-        } else {
-            throw ex
-        }
-    }
-}
-
-private fun BeginningStep.metadataSettingsTraits(): List<MetadataSettingTrait> {
-    return with(experience) {
-        // find the container index
-        val containerId = groupLookup[flatStepIndex]
-        // find the step index in relation to the container
-        val stepIndexInContainer = stepIndexLookup[flatStepIndex]
-        // if both are valid ids we return Rendering else null
-        if (containerId != null && stepIndexInContainer != null) {
-            val container = stepContainers[containerId]
-            val step = container.steps[stepIndexInContainer]
-            // this will throw if metadata fails
-            step.metadataSettingTraits
-        } else {
-            // should be impossible at this point, but will cover with an exception as well
-            throw AppcuesTraitException("Invalid step index $flatStepIndex")
-        }
+        state.presentingTrait()?.remove()
+        Transition(state = Idling, sideEffect = ReportErrorEffect(state.toStepError(ex)))
     }
 }
 
