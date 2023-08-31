@@ -50,11 +50,6 @@ $dokka.location:com.appcues/AppcuesConfig/navigationHandler/#/PointingToDeclarat
 $dokka.location:com.appcues/AppcuesConfig/sessionTimeout/#/PointingToDeclaration/appcues/com.appcues/-appcues-config/session-timeout.html
 $dokka.location:com.appcues/AppcuesFrameView///PointingToDeclaration/appcues/com.appcues/-appcues-frame-view/index.html
 $dokka.location:com.appcues/AppcuesFrameView/AppcuesFrameView/#android.content.Context#android.util.AttributeSet?#kotlin.Int/PointingToDeclaration/appcues/com.appcues/-appcues-frame-view/-appcues-frame-view.html
-$dokka.location:com.appcues/AppcuesFrameView/addView/#android.view.View?#android.view.ViewGroup.LayoutParams?/PointingToDeclaration/appcues/com.appcues/-appcues-frame-view/add-view.html
-$dokka.location:com.appcues/AppcuesFrameView/addView/#android.view.View?#kotlin.Int#android.view.ViewGroup.LayoutParams?/PointingToDeclaration/appcues/com.appcues/-appcues-frame-view/add-view.html
-$dokka.location:com.appcues/AppcuesFrameView/addView/#android.view.View?#kotlin.Int#kotlin.Int/PointingToDeclaration/appcues/com.appcues/-appcues-frame-view/add-view.html
-$dokka.location:com.appcues/AppcuesFrameView/addView/#android.view.View?#kotlin.Int/PointingToDeclaration/appcues/com.appcues/-appcues-frame-view/add-view.html
-$dokka.location:com.appcues/AppcuesFrameView/addView/#android.view.View?/PointingToDeclaration/appcues/com.appcues/-appcues-frame-view/add-view.html
 $dokka.location:com.appcues/AppcuesInterceptor///PointingToDeclaration/appcues/com.appcues/-appcues-interceptor/index.html
 $dokka.location:com.appcues/AppcuesInterceptor/canDisplayExperience/#java.util.UUID/PointingToDeclaration/appcues/com.appcues/-appcues-interceptor/can-display-experience.html
 $dokka.location:com.appcues/ElementSelector///PointingToDeclaration/appcues/com.appcues/-element-selector/index.html
