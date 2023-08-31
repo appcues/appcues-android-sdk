@@ -8,7 +8,8 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.children
-import com.appcues.AppcuesOverlayView
+import androidx.core.view.isVisible
+import com.appcues.AppcuesFrameView
 import com.appcues.R
 import com.appcues.data.model.RenderContext
 import org.koin.core.scope.Scope
@@ -21,7 +22,7 @@ internal class OverlayViewPresenter(scope: Scope, renderContext: RenderContext) 
 
         val overlayView = if (findViewById<View>(R.id.appcues_overlay_view) == null) {
             // create and add the view
-            AppcuesOverlayView(activity).apply {
+            AppcuesFrameView(activity).apply {
                 id = R.id.appcues_overlay_view
                 layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT).also {
                     // adds margin top and bottom according to visible status and navigation bar
@@ -40,12 +41,14 @@ internal class OverlayViewPresenter(scope: Scope, renderContext: RenderContext) 
             findViewById(R.id.appcues_overlay_view)
         }
 
+        overlayView.isVisible = true
         return overlayView.composeView
     }
 
     override fun ViewGroup.removeView() {
-        findViewById<AppcuesOverlayView?>(R.id.appcues_overlay_view)?.let {
-            it.clearComposition()
+        findViewById<AppcuesFrameView?>(R.id.appcues_overlay_view)?.let {
+            it.reset()
+            it.isVisible = false
             removeView(it)
         }
 

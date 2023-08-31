@@ -19,7 +19,7 @@ internal class EmbedViewPresenter(
     override fun ViewGroup.setupView(activity: Activity): ComposeView? {
         return stateMachines.getFrame(renderContext)?.let {
             it.isVisible = true
-            it.setupComposeView()
+            it.composeView
         }
     }
 
