@@ -194,9 +194,9 @@ internal class TooltipTrait(
                             .styleBorderPath(style, tooltipPath, isSystemInDarkTheme())
                     ) {
                         content(
-                            modifier = Modifier.verticalScroll(rememberScrollState()),
-                            containerPadding = style.getPaddings(),
-                            safeAreaInsets = tooltipSettings.getContentPaddingValues()
+                            Modifier.verticalScroll(rememberScrollState()),
+                            style.getPaddings(),
+                            tooltipSettings.getContentPaddingValues()
                         )
                     }
                 }

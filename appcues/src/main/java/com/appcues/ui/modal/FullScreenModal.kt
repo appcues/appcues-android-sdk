@@ -73,11 +73,11 @@ internal fun FullScreenModal(
                         .modalStyle(style, isDark) { Modifier.fullModifier(windowInfo, isDark, it) },
                     content = {
                         content(
-                            modifier = Modifier
+                            Modifier
                                 .fillMaxSize()
                                 .verticalScroll(rememberScrollState()),
-                            containerPadding = style.getPaddings(),
-                            safeAreaInsets = PaddingValues()
+                            style.getPaddings(),
+                            PaddingValues()
                         )
                     },
                 )

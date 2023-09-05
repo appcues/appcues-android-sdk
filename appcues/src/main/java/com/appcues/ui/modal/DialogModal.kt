@@ -110,9 +110,9 @@ internal fun DialogModal(
                     .modalStyle(style, isDark) { Modifier.dialogModifier(it, isDark) }
             ) {
                 content(
-                    modifier = Modifier.verticalScroll(rememberScrollState()),
-                    containerPadding = style.getPaddings(),
-                    safeAreaInsets = PaddingValues()
+                    Modifier.verticalScroll(rememberScrollState()),
+                    style.getPaddings(),
+                    PaddingValues()
                 )
             }
         }

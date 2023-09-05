@@ -74,11 +74,11 @@ internal fun BottomSheetModal(
                         .modalStyle(style, isDark) { Modifier.sheetModifier(appcuesWindowInfo, isDark, it) },
                     content = {
                         content(
-                            modifier = Modifier
+                            Modifier
                                 .fillMaxSize()
                                 .verticalScroll(rememberScrollState()),
-                            containerPadding = style.getPaddings(),
-                            safeAreaInsets = PaddingValues()
+                            style.getPaddings(),
+                            PaddingValues()
                         )
                     },
                 )
