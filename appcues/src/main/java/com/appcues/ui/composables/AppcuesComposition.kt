@@ -1,5 +1,6 @@
 package com.appcues.ui.composables
 
+import android.webkit.WebChromeClient
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.PaddingValues
@@ -25,14 +26,13 @@ import com.appcues.ui.presentation.AppcuesViewModel
 import com.appcues.ui.presentation.AppcuesViewModel.UIState.Dismissing
 import com.appcues.ui.presentation.AppcuesViewModel.UIState.Rendering
 import com.appcues.ui.theme.AppcuesTheme
-import com.google.accompanist.web.AccompanistWebChromeClient
 
 @Composable
 internal fun AppcuesComposition(
     viewModel: AppcuesViewModel,
     imageLoader: ImageLoader,
     logcues: Logcues,
-    chromeClient: AccompanistWebChromeClient,
+    chromeClient: WebChromeClient,
 ) {
     // ensure to change some colors to match appropriate design for custom primitive blocks
     AppcuesTheme {

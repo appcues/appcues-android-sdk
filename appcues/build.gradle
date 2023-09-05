@@ -14,7 +14,6 @@ apply from: 'dokka.gradle'
 ext.room_version = '2.5.2'
 ext.compose_version = '1.5.0'
 ext.compose_compiler_version = '1.5.3'
-ext.accompanist_version = '0.32.0'
 ext.koin_version = '3.4.3'
 ext.coil_version = '2.4.0'
 ext.moshi_version = '1.15.0'
@@ -113,8 +112,6 @@ dependencies {
     // Dependency Injection
     implementation "io.insert-koin:koin-core:$koin_version"
     implementation "io.insert-koin:koin-android:$koin_version"
-    // Webview
-    implementation "com.google.accompanist:accompanist-webview:$accompanist_version"
     // Play In-App Review
     implementation 'com.google.android.play:review:2.0.1'
     implementation 'com.google.android.play:review-ktx:2.0.1'

@@ -1,5 +1,6 @@
 package com.appcues.ui.composables
 
+import android.webkit.WebChromeClient
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -10,7 +11,6 @@ import com.appcues.data.model.Action
 import com.appcues.data.model.ExperienceStepFormState
 import com.appcues.logging.Logcues
 import com.appcues.ui.presentation.AppcuesViewModel
-import com.google.accompanist.web.AccompanistWebChromeClient
 import java.util.UUID
 
 // used to register callback for all Actions triggered from primitives
@@ -58,7 +58,7 @@ internal val LocalExperienceStepFormStateDelegate = compositionLocalOf { Experie
 
 internal val LocalStackScope = compositionLocalOf { StackScope.COLUMN }
 
-internal val LocalChromeClient = compositionLocalOf { AccompanistWebChromeClient() }
+internal val LocalChromeClient = compositionLocalOf { WebChromeClient() }
 
 internal enum class StackScope {
     ROW, COLUMN

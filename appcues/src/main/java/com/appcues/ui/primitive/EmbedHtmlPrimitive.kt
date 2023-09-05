@@ -3,54 +3,90 @@ package com.appcues.ui.primitive
 import android.annotation.SuppressLint
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewGroup.LayoutParams
+import android.webkit.WebChromeClient
+import android.webkit.WebView
+import android.widget.FrameLayout
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.viewinterop.AndroidView
 import com.appcues.data.model.ExperiencePrimitive.EmbedHtmlPrimitive
 import com.appcues.data.model.styling.ComponentContentMode.FILL
 import com.appcues.ui.composables.LocalChromeClient
 import com.appcues.ui.extensions.aspectRatio
-import com.google.accompanist.web.AccompanistWebChromeClient
-import com.google.accompanist.web.WebView
-import com.google.accompanist.web.rememberWebViewStateWithHTMLData
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
 internal fun EmbedHtmlPrimitive.Compose(modifier: Modifier) {
     val chromeClient = LocalChromeClient.current
-    val webViewState = rememberWebViewStateWithHTMLData(
-        data = """
-        <head>
-            <meta 
-                name='viewport' 
-                content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no'
-            />
-        </head>
-        <body style='margin: 0; padding: 0'>
-            $embed
-        </body>"""
-    )
+    val webViewState = remember { mutableStateOf<WebView?>(null) }
 
-    WebView(
+    webViewState.value?.let { webView ->
+        LaunchedEffect(webView) {
+            webView.loadData(
+                """
+                    <head>
+                        <meta
+                            name='viewport'
+                            content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no'
+                        />
+                    </head>
+                    <body style='margin: 0; padding: 0'>
+                        $embed
+                    </body>""",
+                null,
+                "utf-8",
+            )
+        }
+    }
+    BoxWithConstraints(
         modifier = modifier.then(
             Modifier.aspectRatio(FILL, intrinsicSize, style, LocalDensity.current)
-        ),
-        state = webViewState,
-        onCreated = {
-            it.isNestedScrollingEnabled = false
-            it.isScrollContainer = false
+        )
+    ) {
+        // WebView changes it's layout strategy based on
+        // it's layoutParams. We convert from Compose Modifier to
+        // layout params here.
+        val width =
+            if (constraints.hasFixedWidth)
+                LayoutParams.MATCH_PARENT
+            else
+                LayoutParams.WRAP_CONTENT
+        val height =
+            if (constraints.hasFixedHeight)
+                LayoutParams.MATCH_PARENT
+            else
+                LayoutParams.WRAP_CONTENT
 
-            with(it.settings) {
-                javaScriptEnabled = true
-                mediaPlaybackRequiresUserGesture = false
+        val layoutParams = FrameLayout.LayoutParams(
+            width,
+            height
+        )
+
+        AndroidView(
+            factory = { context ->
+                WebView(context).apply {
+                    isNestedScrollingEnabled = false
+                    isScrollContainer = false
+                    with(settings) {
+                        javaScriptEnabled = true
+                        mediaPlaybackRequiresUserGesture = false
+                    }
+                    this.layoutParams = layoutParams
+                    webChromeClient = chromeClient
+                }.also { webViewState.value = it }
             }
-        },
-        chromeClient = chromeClient
-    )
+        )
+    }
 }
 
 // this is used by the WebView in the Embed component above, to support expand to fullscreen video
-internal class EmbedChromeClient(private val container: ViewGroup) : AccompanistWebChromeClient() {
+internal class EmbedChromeClient(private val container: ViewGroup) : WebChromeClient() {
     private var customView: View? = null
     private var customCallback: CustomViewCallback? = null
 
