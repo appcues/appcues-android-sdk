@@ -34,7 +34,10 @@ internal class CarouselTrait(
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
     override fun BoxScope.CreateContentHolder(containerPages: ContainerPages) {
-        val pagerState = rememberPagerState(initialPage = containerPages.currentPage).also {
+        val pagerState = rememberPagerState(
+            initialPage = containerPages.currentPage,
+            pageCount = { containerPages.pageCount }
+        ).also {
             containerPages.UpdatePaginationData(
                 AppcuesPaginationData(
                     pageCount = containerPages.pageCount,
@@ -102,7 +105,6 @@ internal class CarouselTrait(
 
                     layout(constraints.maxWidth, calculatedHeight) { placeable.place(0, 0) }
                 },
-            pageCount = containerPages.pageCount,
             state = pagerState,
             verticalAlignment = Alignment.Top
         ) { index ->

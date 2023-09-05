@@ -1,12 +1,11 @@
 package com.appcues.debugger.ui
 
 import android.widget.Toast
-import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -37,6 +36,9 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.appcues.R
 import com.appcues.debugger.DebugMode.Debugger
 import com.appcues.debugger.DebuggerViewModel
@@ -46,16 +48,12 @@ import com.appcues.debugger.ui.details.DebuggerEventDetails
 import com.appcues.debugger.ui.fonts.DebuggerFontDetails
 import com.appcues.debugger.ui.main.DebuggerMain
 import com.appcues.ui.theme.AppcuesColors
-import com.google.accompanist.navigation.animation.AnimatedNavHost
-import com.google.accompanist.navigation.animation.composable
-import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 
 private const val SLIDE_TRANSITION_MILLIS = 250
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 internal fun BoxScope.DebuggerPanel(debuggerState: MutableDebuggerState, debuggerViewModel: DebuggerViewModel) {
-    val navController = rememberAnimatedNavController()
+    val navController = rememberNavController()
     val selectedEvent = remember { mutableStateOf<DebuggerEventItem?>(null) }
 
     // don't show if current debugger is paused
@@ -97,9 +95,8 @@ internal fun BoxScope.DebuggerPanel(debuggerState: MutableDebuggerState, debugge
     }
 }
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
-private fun BoxScope.DebuggerPanelPages(
+private fun DebuggerPanelPages(
     navController: NavHostController,
     selectedEvent: MutableState<DebuggerEventItem?>,
     debuggerViewModel: DebuggerViewModel,
@@ -110,7 +107,7 @@ private fun BoxScope.DebuggerPanelPages(
     val fontDetailsPage = "font_details"
     val deepLinkPath = debuggerState.deepLinkPath.value
 
-    AnimatedNavHost(navController = navController, startDestination = mainPage) {
+    NavHost(navController = navController, startDestination = mainPage) {
         mainComposable(
             pageName = mainPage,
             eventDetailsPage = eventDetailsPage
@@ -149,7 +146,6 @@ private fun exitTransition(): ExitTransition {
         fadeOut(tween(durationMillis = 150))
 }
 
-@OptIn(ExperimentalAnimationApi::class)
 private fun NavGraphBuilder.mainComposable(
     pageName: String,
     eventDetailsPage: String,
@@ -160,14 +156,14 @@ private fun NavGraphBuilder.mainComposable(
         enterTransition = {
             when (initialState.destination.route) {
                 eventDetailsPage ->
-                    slideIntoContainer(AnimatedContentScope.SlideDirection.End, animationSpec = tween(SLIDE_TRANSITION_MILLIS))
+                    slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.End, animationSpec = tween(SLIDE_TRANSITION_MILLIS))
                 else -> null
             }
         },
         exitTransition = {
             when (targetState.destination.route) {
                 eventDetailsPage ->
-                    slideOutOfContainer(AnimatedContentScope.SlideDirection.Start, animationSpec = tween(SLIDE_TRANSITION_MILLIS))
+                    slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Start, animationSpec = tween(SLIDE_TRANSITION_MILLIS))
                 else -> null
             }
         },
@@ -175,7 +171,6 @@ private fun NavGraphBuilder.mainComposable(
     )
 }
 
-@OptIn(ExperimentalAnimationApi::class)
 private fun NavGraphBuilder.detailPageComposable(
     pageName: String,
     mainPage: String,
@@ -186,14 +181,14 @@ private fun NavGraphBuilder.detailPageComposable(
         enterTransition = {
             when (initialState.destination.route) {
                 mainPage ->
-                    slideIntoContainer(AnimatedContentScope.SlideDirection.Start, animationSpec = tween(SLIDE_TRANSITION_MILLIS))
+                    slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Start, animationSpec = tween(SLIDE_TRANSITION_MILLIS))
                 else -> null
             }
         },
         exitTransition = {
             when (targetState.destination.route) {
                 mainPage ->
-                    slideOutOfContainer(AnimatedContentScope.SlideDirection.End, animationSpec = tween(SLIDE_TRANSITION_MILLIS))
+                    slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.End, animationSpec = tween(SLIDE_TRANSITION_MILLIS))
                 else -> null
             }
         },
