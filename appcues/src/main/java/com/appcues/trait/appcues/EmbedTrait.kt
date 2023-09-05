@@ -86,9 +86,9 @@ internal class EmbedTrait(
                         .modalStyle(style, isDark) { Modifier.dialogModifier(it, isDark) },
                     content = {
                         content(
-                            modifier = if (constraints.hasBoundedHeight) Modifier.verticalScroll(rememberScrollState()) else Modifier,
-                            containerPadding = style.getPaddings(),
-                            safeAreaInsets = PaddingValues()
+                            if (constraints.hasBoundedHeight) Modifier.verticalScroll(rememberScrollState()) else Modifier,
+                            style.getPaddings(),
+                            PaddingValues()
                         )
                     },
                 )
