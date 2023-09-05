@@ -2,6 +2,8 @@ package com.appcues.ui
 
 import android.content.Context
 import android.content.Intent
+import android.os.Build.VERSION
+import android.os.Build.VERSION_CODES
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
@@ -40,7 +42,12 @@ internal class InAppReviewActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // remove enter animation from this activity
-        overridePendingTransition(0, 0)
+        if (VERSION.SDK_INT >= VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            overrideActivityTransition(OVERRIDE_TRANSITION_OPEN, 0, 0)
+        } else {
+            @Suppress("DEPRECATION")
+            overridePendingTransition(0, 0)
+        }
         super.onCreate(savedInstanceState)
 
         val requestCompletion = CompletableDeferred<Boolean>()
@@ -92,7 +99,12 @@ internal class InAppReviewActivity : AppCompatActivity() {
     override fun finish() {
         super.finish()
         // remove exit animation from this activity
-        overridePendingTransition(0, 0)
+        if (VERSION.SDK_INT >= VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            overrideActivityTransition(OVERRIDE_TRANSITION_CLOSE, 0, 0)
+        } else {
+            @Suppress("DEPRECATION")
+            overridePendingTransition(0, 0)
+        }
 
         completion?.complete(true)
     }

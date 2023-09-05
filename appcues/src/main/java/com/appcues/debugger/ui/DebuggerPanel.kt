@@ -1,9 +1,9 @@
 package com.appcues.debugger.ui
 
 import android.widget.Toast
+import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
@@ -149,7 +149,7 @@ private fun exitTransition(): ExitTransition {
 private fun NavGraphBuilder.mainComposable(
     pageName: String,
     eventDetailsPage: String,
-    content: @Composable AnimatedVisibilityScope.(NavBackStackEntry) -> Unit
+    content: @Composable AnimatedContentScope.(NavBackStackEntry) -> Unit
 ) {
     composable(
         route = pageName,
@@ -174,7 +174,7 @@ private fun NavGraphBuilder.mainComposable(
 private fun NavGraphBuilder.detailPageComposable(
     pageName: String,
     mainPage: String,
-    content: @Composable AnimatedVisibilityScope.(NavBackStackEntry) -> Unit
+    content: @Composable AnimatedContentScope.(NavBackStackEntry) -> Unit
 ) {
     composable(
         route = pageName,
