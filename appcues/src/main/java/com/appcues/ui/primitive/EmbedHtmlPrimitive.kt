@@ -63,7 +63,6 @@ internal class EmbedChromeClient(private val container: ViewGroup) : Accompanist
         customView = view
         customCallback = callback
         container.addView(view)
-        container.visibility = View.VISIBLE
     }
 
     override fun onHideCustomView() {
@@ -71,7 +70,6 @@ internal class EmbedChromeClient(private val container: ViewGroup) : Accompanist
             return
         }
         customView?.visibility = View.GONE
-        container.visibility = View.GONE
         container.removeView(customView)
         customCallback?.onCustomViewHidden()
         customView = null
