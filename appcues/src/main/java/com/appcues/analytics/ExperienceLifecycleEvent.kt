@@ -37,7 +37,7 @@ internal sealed class ExperienceLifecycleEvent(
         override val experience: Experience,
         val stepIndex: Int,
         val interactionType: InteractionType,
-        val interactionProperties: HashMap<String, Any> = hashMapOf()
+        val interactionProperties: Map<String, Any> = hashMapOf()
     ) : ExperienceLifecycleEvent(experience, AnalyticsEvent.ExperienceStepInteraction) {
 
         enum class InteractionType {
