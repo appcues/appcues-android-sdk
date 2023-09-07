@@ -20,7 +20,7 @@ import java.util.Date
 internal interface QualificationService {
 
     // will merge and hit the backend to see if it qualifies, returning QualificationResult
-    suspend fun qualify(intents: List<AnalyticsIntent>): QualificationResult
+    suspend fun qualify(intents: List<AnalyticsIntent>): QualificationResult?
 }
 
 internal interface RenderingService {
@@ -177,7 +177,7 @@ internal class Analytics(
                 // run intents through qualification service
                 .let { qualificationService.qualify(intents) }
                 // attempt to show experiences set clearCache if trigger reason is SCREEN_VIEW
-                .run { renderingService.show(experiences, trigger.reason == Qualification.REASON_SCREEN_VIEW) }
+                ?.run { renderingService.show(experiences, trigger.reason == Qualification.REASON_SCREEN_VIEW) }
         }
     }
 
