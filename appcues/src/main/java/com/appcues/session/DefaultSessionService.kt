@@ -82,7 +82,44 @@ internal class DefaultSessionService(
         }
     }
 
-    override suspend fun isSessionStarted(): Boolean {
+    override suspend fun checkSession(intent: AnalyticsIntent, onSessionStarted: suspend () -> Unit): Boolean {
+        // the order of conditions here is important
+        return when {
+            // check if the incoming intent is Anonymous or Identify, we force start a new session
+            intent is Anonymous -> startAnonymousSession().also { onSessionStarted() }
+            intent is Identify -> startSession(intent).also { onSessionStarted() }
+            // for any other intent types we check if session is started already
+            isSessionStarted() -> true
+            // if not we try to start a session based on stored information
+            startSession() -> true.also { onSessionStarted() }
+            // we could not start or check for existing session
+            else -> false
+        }
+    }
+
+    private suspend fun startAnonymousSession(): Boolean {
+        val anonymousUserId = getAnonymousUserId()
+        // only start anonymousSession if new Id is different from what we already have
+        return if (anonymousUserId != sessionLocalSource.getUserId()) {
+            sessionLocalSource.setUserId(getAnonymousUserId())
+            sessionLocalSource.isAnonymous(true)
+            sessionLocalSource.setUserSignature(null)
+            true
+        } else false
+    }
+
+    private suspend fun startSession(identify: Identify): Boolean {
+        // only start anonymousSession if new Id is different from what we already have
+        return if (identify.userId != sessionLocalSource.getUserId()) {
+            sessionLocalSource.setUserId(identify.userId)
+            sessionLocalSource.isAnonymous(false)
+            sessionLocalSource.setUserSignature(identify.properties?.get("appcues:user_id_signature") as? String)
+            true
+        } else false
+    }
+
+    // validate existing session and update lastActivityAt in case current session is valid
+    private fun isSessionStarted(): Boolean {
         val isExpired = lastActivityAt
             ?.let { TimeUnit.MILLISECONDS.toSeconds(Date().time - it.time) >= config.sessionTimeout }
             ?: false
@@ -90,31 +127,15 @@ internal class DefaultSessionService(
         val isSessionStarted = sessionId != null && !isExpired
 
         if (isSessionStarted) {
-            // whenever session is questioned and its started we should renew lastActivityAt value
             lastActivityAt = Date()
         }
 
         return isSessionStarted
     }
 
-    override suspend fun startSession(intent: AnalyticsIntent): Boolean {
-        val shouldStartSession = when (intent) {
-            Anonymous -> {
-                sessionLocalSource.setUserId(getAnonymousUserId())
-                sessionLocalSource.isAnonymous(true)
-                sessionLocalSource.setUserSignature(null)
-                true
-            }
-            is Identify -> {
-                sessionLocalSource.setUserId(intent.userId)
-                sessionLocalSource.isAnonymous(false)
-                sessionLocalSource.setUserSignature(intent.properties?.get("appcues:user_id_signature") as? String)
-                true
-            }
-            else -> sessionLocalSource.getUserId() == null
-        }
-
-        return if (shouldStartSession) {
+    // start session based on previous session info (userId)
+    private suspend fun startSession(): Boolean {
+        return if (sessionLocalSource.getUserId() == null) {
             sessionId = UUID.randomUUID()
             lastActivityAt = Date()
             true

@@ -8,10 +8,12 @@ import com.appcues.analytics.AnalyticsIntent.Identify
 import com.appcues.analytics.AnalyticsIntent.UpdateGroup
 import com.appcues.analytics.AnalyticsIntent.UpdateProfile
 import com.appcues.analytics.AnalyticsIntentQueue.IntentProcessor
+import com.appcues.analytics.AnalyticsIntentQueue.QueueAction
 import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperienceTrigger.Qualification
 import com.appcues.data.model.QualificationResult
 import com.appcues.monitor.ApplicationMonitor
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
@@ -34,11 +36,7 @@ internal interface RenderingService {
 
 internal interface SessionService {
 
-    // returns whether session is started or not
-    suspend fun isSessionStarted(): Boolean
-
-    // starts session (can start using incoming intent or existing stored information
-    suspend fun startSession(intent: AnalyticsIntent): Boolean
+    suspend fun checkSession(intent: AnalyticsIntent, onSessionStarted: suspend () -> Unit): Boolean
 
     // decorates incoming intent and returns a new intent with session/auto props information
     suspend fun decorateIntent(intent: AnalyticsIntent): AnalyticsIntent
@@ -76,7 +74,7 @@ internal sealed class AnalyticsIntent(open val isInternal: Boolean, val timestam
 }
 
 internal class Analytics(
-    private val appcuesCoroutineScope: AppcuesCoroutineScope,
+    private val coroutineScope: AppcuesCoroutineScope,
     private val intentQueue: AnalyticsIntentQueue,
     private val qualificationService: QualificationService,
     private val renderingService: RenderingService,
@@ -89,48 +87,61 @@ internal class Analytics(
         const val EVENT_CONTEXT_SCREEN_TITLE = "screen_title"
     }
 
+    private val intentChannel = Channel<Pair<AnalyticsIntent, QueueAction>>(Channel.UNLIMITED)
+
     init {
         intentQueue.setProcessor(this)
 
         ApplicationMonitor.subscribe(this)
+
+        coroutineScope.launch {
+            for (element in intentChannel) {
+                enqueueIntent(element.first, element.second)
+            }
+        }
     }
 
     private val _analyticsFlow = MutableSharedFlow<AnalyticsIntent>(1)
     val analyticsFlow: SharedFlow<AnalyticsIntent>
         get() = _analyticsFlow
 
-    fun anonymous() {
-        intentQueue.flushAndProcess(Anonymous)
+    fun anonymous() = coroutineScope.launch {
+        intentChannel.send(Anonymous to QueueAction.FLUSH_THEN_PROCESS)
     }
 
-    fun identify(userId: String, properties: Map<String, Any>? = null) {
-        intentQueue.flushAndProcess(Identify(userId, properties))
+    fun identify(userId: String, properties: Map<String, Any>? = null) = coroutineScope.launch {
+        val intent = Identify(userId, properties)
+
+        intentChannel.send(intent to QueueAction.FLUSH_THEN_PROCESS)
     }
 
-    fun updateProfile(properties: Map<String, Any>? = null, isInternal: Boolean) {
-        intentQueue.queue(UpdateProfile(properties, isInternal))
+    fun updateProfile(properties: Map<String, Any>? = null, isInternal: Boolean) = coroutineScope.launch {
+        val intent = UpdateProfile(properties, isInternal)
+
+        intentChannel.send(intent to QueueAction.QUEUE)
     }
 
-    fun updateGroup(groupId: String?, properties: Map<String, Any>? = null, isInternal: Boolean) {
-        intentQueue.flushAndProcess(UpdateGroup(groupId, properties, isInternal))
+    fun updateGroup(groupId: String?, properties: Map<String, Any>? = null, isInternal: Boolean) = coroutineScope.launch {
+        val intent = UpdateGroup(groupId, properties, isInternal)
+
+        intentChannel.send(intent to QueueAction.FLUSH_THEN_PROCESS)
     }
 
-    fun track(name: String, properties: Map<String, Any>? = null, interactive: Boolean, isInternal: Boolean = false) {
-        val intent = Event(
-            name = name,
-            attributes = properties,
-            context = hashMapOf(),
-            isInternal = isInternal
-        )
+    fun track(name: String, properties: Map<String, Any>? = null, interactive: Boolean, isInternal: Boolean = false) =
+        coroutineScope.launch {
+            val intent = Event(
+                name = name,
+                attributes = properties,
+                context = hashMapOf(),
+                isInternal = isInternal
+            )
 
-        if (interactive) {
-            intentQueue.queueThenFlush(intent)
-        } else {
-            intentQueue.queue(intent)
+            val action = if (interactive) QueueAction.QUEUE_THEN_FLUSH else QueueAction.QUEUE
+
+            intentChannel.send(intent to action)
         }
-    }
 
-    fun screen(title: String, properties: Map<String, Any>? = null, isInternal: Boolean = false) {
+    fun screen(title: String, properties: Map<String, Any>? = null, isInternal: Boolean = false) = coroutineScope.launch {
         val intent = Event(
             // screen calls are really just a special type of event: "appcues:screen_view"
             name = ScreenView.eventName,
@@ -139,43 +150,43 @@ internal class Analytics(
             isInternal = isInternal
         )
 
-        intentQueue.queueThenFlush(intent)
+        intentChannel.send(intent to QueueAction.QUEUE_THEN_FLUSH)
     }
 
     fun reset() {
-        intentQueue.flushAsync()
+        coroutineScope.launch {
+            intentQueue.flush()
 
-        appcuesCoroutineScope.launch {
             sessionService.reset()
 
             renderingService.reset()
         }
     }
 
-    override fun process(intents: List<AnalyticsIntent>) {
-        appcuesCoroutineScope.launch {
-            val sessionIntents = arrayListOf<AnalyticsIntent>()
-            intents.forEach {
-                if (sessionService.isSessionStarted()) {
-                    // if session is started it means we can use this intent
-                    sessionIntents.add(it)
-                } else if (sessionService.startSession(it)) {
-                    // session is not started and user is not identified
-                    // so we try to start session with existing information we have stored
-                    // if true we can also use this intent
-                    // + we add a session started event before this specific event
-                    sessionIntents.add(Event(AnalyticsEvent.SessionStarted.eventName, null, null, true))
-                    sessionIntents.add(it)
-                }
-            }
+    private suspend fun enqueueIntent(intent: AnalyticsIntent, action: QueueAction) {
+        if (!sessionService.checkSession(intent, ::onNewSessionStarted)) return
 
-            sessionIntents
-                // decorate intents
-                .map { sessionService.decorateIntent(it) }
-                // emit analytics flow
-                .onEach { _analyticsFlow.emit(it) }
-                // run intents through qualification service
-                .let { qualificationService.qualify(intents) }
+        sessionService.decorateIntent(intent).also {
+            _analyticsFlow.emit(it)
+
+            intentQueue.queue(it, action)
+        }
+    }
+
+    private suspend fun onNewSessionStarted() {
+        intentQueue.flush()
+
+        sessionService.reset()
+
+        renderingService.reset()
+
+        track(AnalyticsEvent.SessionStarted.eventName, interactive = true, isInternal = true)
+    }
+
+    override fun process(intents: List<AnalyticsIntent>) {
+        coroutineScope.launch {
+            // run intents through qualification service
+            qualificationService.qualify(intents)
                 // attempt to show experiences set clearCache if trigger reason is SCREEN_VIEW
                 ?.run { renderingService.show(experiences, trigger.reason == Qualification.REASON_SCREEN_VIEW) }
         }
@@ -183,6 +194,6 @@ internal class Analytics(
 
     // when application stops
     override fun onApplicationStopped() {
-        intentQueue.flushAsync()
+        intentQueue.flush()
     }
 }
