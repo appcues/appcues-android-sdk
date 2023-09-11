@@ -21,8 +21,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.appcues.data.model.styling.ComponentStyle
-import com.appcues.trait.AppcuesTraitAnimatedVisibility
-import com.appcues.ui.composables.rememberAppcuesContentVisibility
+import com.appcues.trait.AppcuesContentAnimatedVisibility
 import com.appcues.ui.extensions.getPaddings
 import com.appcues.ui.extensions.modalStyle
 import com.appcues.ui.utils.AppcuesWindowInfo
@@ -58,8 +57,7 @@ internal fun ExpandedBottomSheetModal(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = if (windowInfo.deviceType == MOBILE) Alignment.BottomCenter else Alignment.Center
         ) {
-            AppcuesTraitAnimatedVisibility(
-                visibleState = rememberAppcuesContentVisibility(),
+            AppcuesContentAnimatedVisibility(
                 enter = enterAnimation.value,
                 exit = exitAnimation.value,
             ) {

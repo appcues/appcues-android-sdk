@@ -22,13 +22,12 @@ import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.RenderContext
 import com.appcues.data.model.getConfigOrDefault
 import com.appcues.data.model.getConfigStyle
-import com.appcues.trait.AppcuesTraitAnimatedVisibility
+import com.appcues.trait.AppcuesContentAnimatedVisibility
 import com.appcues.trait.AppcuesTraitException
 import com.appcues.trait.ContentWrappingTrait
 import com.appcues.trait.PresentingTrait
 import com.appcues.trait.appcues.EmbedTrait.TransitionType.FADE
 import com.appcues.trait.appcues.EmbedTrait.TransitionType.NONE
-import com.appcues.ui.composables.rememberAppcuesContentVisibility
 import com.appcues.ui.extensions.getBoxAlignment
 import com.appcues.ui.extensions.getPaddings
 import com.appcues.ui.extensions.modalStyle
@@ -74,8 +73,7 @@ internal class EmbedTrait(
     ) {
         val isDark = isSystemInDarkTheme()
 
-        AppcuesTraitAnimatedVisibility(
-            visibleState = rememberAppcuesContentVisibility(),
+        AppcuesContentAnimatedVisibility(
             enter = enterTransition(),
             exit = exitTransition(),
         ) {

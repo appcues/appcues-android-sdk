@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -21,6 +22,7 @@ import com.appcues.trait.ContainerDecoratingTrait.ContainerDecoratingType
 import com.appcues.trait.ContentHolderTrait.ContainerPages
 import com.appcues.ui.presentation.AppcuesViewModel
 import com.appcues.ui.presentation.AppcuesViewModel.UIState.Dismissing
+import com.appcues.ui.presentation.AppcuesViewModel.UIState.Rendering
 import com.appcues.ui.theme.AppcuesTheme
 import com.google.accompanist.web.AccompanistWebChromeClient
 
@@ -67,6 +69,21 @@ private fun MainSurface() {
                 // if state is dismissing then finish activity
                 if (state.value is Dismissing) {
                     viewModel.dismiss()
+                }
+            }
+
+            val experienceState = LocalExperienceCompositionState.current
+            LaunchedEffect(state.value) {
+                state.value.let { uiState ->
+                    if (uiState is Rendering) {
+                        // trigger showing of content
+                        experienceState.isContentVisible.targetState = true
+                        experienceState.isBackdropVisible.targetState = true
+                    } else {
+                        // trigger dismissal of content
+                        experienceState.isContentVisible.targetState = false
+                        experienceState.isBackdropVisible.targetState = false
+                    }
                 }
             }
         }

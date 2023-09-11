@@ -23,8 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.appcues.data.model.styling.ComponentStyle
-import com.appcues.trait.AppcuesTraitAnimatedVisibility
-import com.appcues.ui.composables.rememberAppcuesContentVisibility
+import com.appcues.trait.AppcuesContentAnimatedVisibility
 import com.appcues.ui.extensions.getPaddings
 import com.appcues.ui.extensions.modalStyle
 import com.appcues.ui.utils.AppcuesWindowInfo
@@ -62,8 +61,7 @@ internal fun BottomSheetModal(
                 .then(if (appcuesWindowInfo.deviceType == TABLET) Modifier.padding(bottom = 156.dp) else Modifier),
             contentAlignment = Alignment.BottomCenter
         ) {
-            AppcuesTraitAnimatedVisibility(
-                visibleState = rememberAppcuesContentVisibility(),
+            AppcuesContentAnimatedVisibility(
                 enter = enterAnimation.value,
                 exit = exitAnimation.value,
             ) {

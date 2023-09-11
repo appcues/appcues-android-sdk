@@ -65,13 +65,6 @@ internal fun LaunchOnShowAnimationCompleted(block: () -> Unit) {
     }
 }
 
-// we could make this public to give more flexibility in the future
-@Composable
-internal fun rememberAppcuesContentVisibility() = LocalExperienceCompositionState.current.let { remember { it.isContentVisible } }
-
-@Composable
-internal fun rememberAppcuesBackdropVisibility() = LocalExperienceCompositionState.current.let { remember { it.isBackdropVisible } }
-
 /**
  * rememberAppcuesPaginationState is used by traits that wants to know updates about pagination data
  * returns a State of AppcuesPaginationData containing pageCount, currentPage index and scrollingOffset
@@ -84,21 +77,8 @@ internal fun rememberAppcuesPaginationState() = LocalExperienceCompositionState.
 
 @Composable
 internal fun rememberLastRenderingState(state: State<UIState>): MutableState<Rendering?> {
-    val experienceState = LocalExperienceCompositionState.current
-    return remember { mutableStateOf<Rendering?>(null) }
-        .apply {
-            value = state.value.let { uiState ->
-                if (uiState is Rendering) {
-                    // if UIState is rendering then we set new value and show content
-                    experienceState.isContentVisible.targetState = true
-                    experienceState.isBackdropVisible.targetState = true
-                    uiState
-                } else {
-                    // else we keep the same value and hide content to trigger dismissing animation
-                    experienceState.isContentVisible.targetState = false
-                    experienceState.isBackdropVisible.targetState = false
-                    value
-                }
-            }
-        }
+    // Remember last known rendering state for AppcuesComposition to use when composing content
+    return remember { mutableStateOf<Rendering?>(null) }.apply {
+        value = state.value.let { uiState -> if (uiState is Rendering) uiState else value }
+    }
 }
