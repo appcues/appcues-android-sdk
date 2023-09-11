@@ -218,6 +218,8 @@ internal class TooltipTrait(
         then(
             Modifier.onSizeChanged {
                 with(density) {
+                    if (containerDimens.value.equals(it)) return@onSizeChanged
+
                     containerDimens.value = TooltipContainerDimens(
                         widthDp = it.width.toDp(),
                         heightDp = it.height.toDp(),
