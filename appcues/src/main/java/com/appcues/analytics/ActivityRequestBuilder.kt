@@ -5,6 +5,7 @@ import com.appcues.Storage
 import com.appcues.analytics.AnalyticsEvent.ScreenView
 import com.appcues.data.remote.appcues.request.ActivityRequest
 import com.appcues.data.remote.appcues.request.EventRequest
+import java.util.UUID
 
 internal class ActivityRequestBuilder(
     private val config: AppcuesConfig,
@@ -18,25 +19,27 @@ internal class ActivityRequestBuilder(
         const val SCREEN_TITLE_CONTEXT = "screen_title"
     }
 
-    fun identify(properties: Map<String, Any>? = null) = decorator.decorateIdentify(
+    fun identify(sessionId: UUID, properties: Map<String, Any>? = null) = decorator.decorateIdentify(
         ActivityRequest(
             userId = storage.userId,
             accountId = config.accountId,
             groupId = storage.groupId,
+            sessionId = sessionId,
             profileUpdate = properties?.toMutableMap(),
-            userSignature = storage.userSignature,
+            userSignature = storage.userSignature
         )
     )
 
-    fun group(properties: Map<String, Any>? = null) = ActivityRequest(
+    fun group(sessionId: UUID, properties: Map<String, Any>? = null) = ActivityRequest(
         userId = storage.userId,
         accountId = config.accountId,
         groupId = storage.groupId,
+        sessionId = sessionId,
         groupUpdate = properties, // no auto-properties on group calls
         userSignature = storage.userSignature,
     )
 
-    fun track(name: String, properties: Map<String, Any>? = null): ActivityRequest {
+    fun track(sessionId: UUID, name: String, properties: Map<String, Any>? = null): ActivityRequest {
         // must do this decoration first, so that any auto-prop updates resulting from it get applied before
         // using in the profileUpdate below
         val trackEvent = decorator.decorateTrack(
@@ -48,12 +51,13 @@ internal class ActivityRequestBuilder(
             profileUpdate = decorator.autoProperties.toMutableMap(),
             accountId = config.accountId,
             groupId = storage.groupId,
+            sessionId = sessionId,
             events = listOf(trackEvent),
             userSignature = storage.userSignature,
         )
     }
 
-    fun screen(title: String, properties: MutableMap<String, Any>? = null): ActivityRequest {
+    fun screen(sessionId: UUID, title: String, properties: MutableMap<String, Any>? = null): ActivityRequest {
         // must do this decoration first, so that any auto-prop updates resulting from it get applied before
         // using in the profileUpdate below
         val screenEvent = decorator.decorateTrack(
@@ -70,6 +74,7 @@ internal class ActivityRequestBuilder(
             profileUpdate = decorator.autoProperties.toMutableMap(),
             accountId = config.accountId,
             groupId = storage.groupId,
+            sessionId = sessionId,
             events = listOf(screenEvent),
             userSignature = storage.userSignature,
         )

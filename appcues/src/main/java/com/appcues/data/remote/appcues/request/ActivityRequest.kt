@@ -17,6 +17,8 @@ internal data class ActivityRequest(
     val userId: String,
     @Json(name = "account_id")
     val accountId: String,
+    @Json(name = "session_id")
+    val sessionId: UUID,
     @Json(name = "group_id")
     @SerializeNull
     val groupId: String? = null,

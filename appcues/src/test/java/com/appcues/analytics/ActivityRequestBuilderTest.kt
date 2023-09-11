@@ -10,6 +10,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verifySequence
 import org.junit.Test
+import java.util.UUID
 
 internal class ActivityRequestBuilderTest {
 
@@ -42,13 +43,15 @@ internal class ActivityRequestBuilderTest {
     fun `identify SHOULD call decorator WITH proper ActivityRequest`() {
         // given
         val properties = hashMapOf("_test" to "test")
+        val sessionId = UUID.randomUUID()
         // when
-        activityRequestBuilder.identify(properties)
+        activityRequestBuilder.identify(sessionId, properties)
         // then
         with(activityRequestSlot.captured) {
             assertThat(userId).isEqualTo("userId")
             assertThat(groupId).isEqualTo("groupId")
             assertThat(accountId).isEqualTo("accountId")
+            assertThat(this.sessionId).isEqualTo(sessionId)
             assertThat(profileUpdate).hasSize(1)
             assertThat(profileUpdate).containsEntry("_test", "test")
             assertThat(userSignature).isEqualTo("user-signature")
@@ -59,12 +62,14 @@ internal class ActivityRequestBuilderTest {
     fun `group SHOULD return ActivityRequest WITH proper properties`() {
         // given
         val properties = hashMapOf("_test" to "test")
+        val sessionId = UUID.randomUUID()
         // when
-        with(activityRequestBuilder.group(properties)) {
+        with(activityRequestBuilder.group(sessionId, properties)) {
             // then
             assertThat(userId).isEqualTo("userId")
             assertThat(groupId).isEqualTo("groupId")
             assertThat(accountId).isEqualTo("accountId")
+            assertThat(this.sessionId).isEqualTo(sessionId)
             assertThat(groupUpdate).hasSize(1)
             assertThat(groupUpdate).containsEntry("_test", "test")
             assertThat(userSignature).isEqualTo("user-signature")
@@ -76,7 +81,7 @@ internal class ActivityRequestBuilderTest {
         // given
         val properties = hashMapOf("_test" to "test")
         // when
-        activityRequestBuilder.track("event1", properties)
+        activityRequestBuilder.track(UUID.randomUUID(), "event1", properties)
         // then
         verifySequence {
             autoPropertyDecorator.decorateTrack(eventRequestSlot.captured)
@@ -92,12 +97,14 @@ internal class ActivityRequestBuilderTest {
     fun `track SHOULD return ActivityRequest`() {
         // given
         val properties = hashMapOf("_test" to "test")
+        val sessionId = UUID.randomUUID()
         // when
-        with(activityRequestBuilder.track("event1", properties)) {
+        with(activityRequestBuilder.track(sessionId, "event1", properties)) {
             // then
             assertThat(userId).isEqualTo("userId")
             assertThat(accountId).isEqualTo("accountId")
             assertThat(groupId).isEqualTo("groupId")
+            assertThat(this.sessionId).isEqualTo(sessionId)
             assertThat(profileUpdate).hasSize(1)
             assertThat(profileUpdate).containsEntry("auto", "properties")
             assertThat(events).hasSize(1)
@@ -110,7 +117,7 @@ internal class ActivityRequestBuilderTest {
         // given
         val properties = mutableMapOf<String, Any>("_test" to "test")
         // when
-        activityRequestBuilder.screen("screen2", properties)
+        activityRequestBuilder.screen(UUID.randomUUID(), "screen2", properties)
         // then
         verifySequence {
             autoPropertyDecorator.decorateTrack(eventRequestSlot.captured)
@@ -128,12 +135,14 @@ internal class ActivityRequestBuilderTest {
     fun `screen SHOULD return ActivityRequest`() {
         // given
         val properties = mutableMapOf<String, Any>("_test" to "test")
+        val sessionId = UUID.randomUUID()
         // when
-        with(activityRequestBuilder.screen("screen2", properties)) {
+        with(activityRequestBuilder.screen(sessionId, "screen2", properties)) {
             // then
             assertThat(userId).isEqualTo("userId")
             assertThat(accountId).isEqualTo("accountId")
             assertThat(groupId).isEqualTo("groupId")
+            assertThat(this.sessionId).isEqualTo(sessionId)
             assertThat(profileUpdate).hasSize(1)
             assertThat(profileUpdate).containsEntry("auto", "properties")
             assertThat(events).hasSize(1)

@@ -68,8 +68,9 @@ internal class AnalyticsTrackerExtTest {
     fun `track experiment SHOULD call track with correct properties set in the map`() {
         // GIVEN
         val activity: ActivityRequest = mockk(relaxed = true)
-        every { activityBuilder.track(any(), any()) } returns activity
-        every { sessionMonitor.sessionId } returns UUID.randomUUID()
+        val sessionId = UUID.randomUUID()
+        every { activityBuilder.track(sessionId, any(), any()) } returns activity
+        every { sessionMonitor.sessionId } returns sessionId
         every { sessionMonitor.isExpired } returns false
         val experiment = Experiment(
             id = UUID.fromString("06f9bf87-1921-4919-be55-429b278bf578"),
@@ -83,6 +84,7 @@ internal class AnalyticsTrackerExtTest {
         // THEN
         verify {
             activityBuilder.track(
+                sessionId = sessionId,
                 name = "appcues:experiment_entered",
                 properties = mapOf(
                     "experimentId" to "06f9bf87-1921-4919-be55-429b278bf578",

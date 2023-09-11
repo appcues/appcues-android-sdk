@@ -52,7 +52,7 @@ internal class AnalyticsTrackerTest {
     fun `identify SHOULD do nothing WHEN no active session available`() {
         // given
         every { sessionMonitor.sessionId } returns null
-        every { sessionMonitor.startNewSession() } returns false
+        every { sessionMonitor.startNewSession() } returns null
         // when
         analyticsTracker.identify()
         // then
@@ -62,8 +62,9 @@ internal class AnalyticsTrackerTest {
     @Test
     fun `identify SHOULD update analyticsFlow AND flushThenSend`() {
         // given
-        every { sessionMonitor.sessionId } returns UUID.randomUUID()
-        every { sessionMonitor.startNewSession() } returns true
+        val sessionId = UUID.randomUUID()
+        every { sessionMonitor.sessionId } returns sessionId
+        every { sessionMonitor.startNewSession() } returns sessionId
         val activity: ActivityRequest = mockk(relaxed = true)
         every { activityBuilder.identify(any()) } returns activity
         // when
@@ -81,7 +82,7 @@ internal class AnalyticsTrackerTest {
     fun `track SHOULD do nothing WHEN no active session available`() {
         // given
         every { sessionMonitor.sessionId } returns null
-        every { sessionMonitor.startNewSession() } returns false
+        every { sessionMonitor.startNewSession() } returns null
         // when
         analyticsTracker.track("event1")
         // then
@@ -91,10 +92,11 @@ internal class AnalyticsTrackerTest {
     @Test
     fun `track SHOULD update analyticsFlow AND queueThenFlush WHEN interactive is true`() {
         // given
-        every { sessionMonitor.sessionId } returns UUID.randomUUID()
+        val sessionId = UUID.randomUUID()
+        every { sessionMonitor.sessionId } returns sessionId
         every { sessionMonitor.isExpired } returns false
         val activity: ActivityRequest = mockk(relaxed = true)
-        every { activityBuilder.track(any()) } returns activity
+        every { activityBuilder.track(sessionId, any()) } returns activity
         // when
         analyticsTracker.track("event1", interactive = true)
         // then
@@ -109,10 +111,11 @@ internal class AnalyticsTrackerTest {
     @Test
     fun `track SHOULD update analyticsFlow AND queue WHEN interactive is false`() {
         // given
-        every { sessionMonitor.sessionId } returns UUID.randomUUID()
+        val sessionId = UUID.randomUUID()
+        every { sessionMonitor.sessionId } returns sessionId
         every { sessionMonitor.isExpired } returns false
         val activity: ActivityRequest = mockk(relaxed = true)
-        every { activityBuilder.track(any()) } returns activity
+        every { activityBuilder.track(sessionId, any()) } returns activity
         // when
         analyticsTracker.track("event1", interactive = false)
         // then
@@ -128,7 +131,7 @@ internal class AnalyticsTrackerTest {
     fun `screen SHOULD do nothing WHEN no active session available`() {
         // given
         every { sessionMonitor.sessionId } returns null
-        every { sessionMonitor.startNewSession() } returns false
+        every { sessionMonitor.startNewSession() } returns null
         // when
         analyticsTracker.screen("title")
         // then
@@ -138,10 +141,11 @@ internal class AnalyticsTrackerTest {
     @Test
     fun `screen SHOULD update analyticsFlow AND queueThenFlush`() {
         // given
-        every { sessionMonitor.sessionId } returns UUID.randomUUID()
+        val sessionId = UUID.randomUUID()
+        every { sessionMonitor.sessionId } returns sessionId
         every { sessionMonitor.isExpired } returns false
         val activity: ActivityRequest = mockk(relaxed = true)
-        every { activityBuilder.screen(any()) } returns activity
+        every { activityBuilder.screen(sessionId, any()) } returns activity
         // when
         analyticsTracker.screen("title")
         // then
@@ -157,7 +161,7 @@ internal class AnalyticsTrackerTest {
     fun `group SHOULD do nothing WHEN no active session available`() {
         // given
         every { sessionMonitor.sessionId } returns null
-        every { sessionMonitor.startNewSession() } returns false
+        every { sessionMonitor.startNewSession() } returns null
         // when
         analyticsTracker.group()
         // then
@@ -167,10 +171,11 @@ internal class AnalyticsTrackerTest {
     @Test
     fun `group SHOULD update analyticsFlow AND flushThenSend`() {
         // given
-        every { sessionMonitor.sessionId } returns UUID.randomUUID()
+        val sessionId = UUID.randomUUID()
+        every { sessionMonitor.sessionId } returns sessionId
         every { sessionMonitor.isExpired } returns false
         val activity: ActivityRequest = mockk(relaxed = true)
-        every { activityBuilder.group() } returns activity
+        every { activityBuilder.group(sessionId) } returns activity
         // when
         analyticsTracker.group()
         // then

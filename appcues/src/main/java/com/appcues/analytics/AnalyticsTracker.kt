@@ -11,6 +11,7 @@ import com.appcues.data.remote.appcues.request.ActivityRequest
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 internal class AnalyticsTracker(
     private val appcuesCoroutineScope: AppcuesCoroutineScope,
@@ -24,9 +25,9 @@ internal class AnalyticsTracker(
         get() = _analyticsFlow
 
     fun identify(properties: Map<String, Any>? = null, interactive: Boolean = true) {
-        if (!checkSession()) return
+        val sessionId = getSession() ?: return
 
-        activityBuilder.identify(properties).let {
+        activityBuilder.identify(sessionId, properties).let {
             updateAnalyticsFlow(IDENTIFY, false, it)
 
             if (interactive) {
@@ -38,9 +39,9 @@ internal class AnalyticsTracker(
     }
 
     fun track(name: String, properties: Map<String, Any>? = null, interactive: Boolean = true, isInternal: Boolean = false) {
-        if (!checkSession()) return
+        val sessionId = getSession() ?: return
 
-        activityBuilder.track(name, properties).let { activityRequest ->
+        activityBuilder.track(sessionId, name, properties).let { activityRequest ->
             updateAnalyticsFlow(EVENT, isInternal, activityRequest)
 
             if (interactive) {
@@ -52,18 +53,18 @@ internal class AnalyticsTracker(
     }
 
     fun screen(title: String, properties: Map<String, Any>? = null, isInternal: Boolean = false) {
-        if (!checkSession()) return
+        val sessionId = getSession() ?: return
 
-        activityBuilder.screen(title, properties?.toMutableMap()).let { activityRequest ->
+        activityBuilder.screen(sessionId, title, properties?.toMutableMap()).let { activityRequest ->
             updateAnalyticsFlow(SCREEN, isInternal, activityRequest)
             analyticsQueueProcessor.queueThenFlush(activityRequest)
         }
     }
 
     fun group(properties: Map<String, Any>? = null) {
-        if (!checkSession()) return
+        val sessionId = getSession() ?: return
 
-        activityBuilder.group(properties).let {
+        activityBuilder.group(sessionId, properties).let {
             updateAnalyticsFlow(GROUP, false, it)
             analyticsQueueProcessor.flushThenSend(it)
         }
@@ -75,29 +76,22 @@ internal class AnalyticsTracker(
         analyticsQueueProcessor.flushAsync()
     }
 
-    // return true if we have a valid session and can track analytics, false if not.
-    private fun checkSession(): Boolean {
-
+    // returns valid session id (existing or creating new) or null if unable to start one.
+    private fun getSession(): UUID? {
         if (sessionMonitor.sessionId == null || sessionMonitor.isExpired) {
-
             // if no existing session, or expired, start a new one
-            if (sessionMonitor.startNewSession()) {
-                // immediately track the session_started analytic, before any
-                // subsequent analytics for the session are queued
-                val activityRequest = activityBuilder.track(AnalyticsEvent.SessionStarted.eventName, null)
-                updateAnalyticsFlow(EVENT, true, activityRequest)
-                analyticsQueueProcessor.queueThenFlush(activityRequest)
-            } else {
-                // this means no session could be started (no user) and we cannot track
-                // anything - return false to caller
-                return false
-            }
+            val sessionId = sessionMonitor.startNewSession() ?: return null
+            // immediately track the session_started analytic, before any
+            // subsequent analytics for the session are queued
+            val activityRequest = activityBuilder.track(sessionId, AnalyticsEvent.SessionStarted.eventName, null)
+            updateAnalyticsFlow(EVENT, true, activityRequest)
+            analyticsQueueProcessor.queueThenFlush(activityRequest)
         } else {
             // we have a valid session, update its last activity timestamp to push out the timeout
             sessionMonitor.updateLastActivity()
         }
 
-        return true
+        return sessionMonitor.sessionId
     }
 
     private fun updateAnalyticsFlow(type: AnalyticType, isInternal: Boolean, activity: ActivityRequest) {
