@@ -5,6 +5,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.appcues.trait.appcues.TooltipPointerPosition.Bottom
 import com.appcues.trait.appcues.TooltipPointerPosition.Left
@@ -180,6 +181,12 @@ internal data class TooltipContainerDimens(
 
     val availableHorizontalSpace = (widthDp - (cornerRadius * 2)).coerceAtLeast(0.dp)
     val availableVerticalSpace = (heightDp - (cornerRadius * 2)).coerceAtLeast(0.dp)
+}
+
+internal fun TooltipContainerDimens?.equals(size: IntSize): Boolean {
+    if (this == null) return false
+
+    return (widthPx.toInt() == size.width && heightPx.toInt() == size.height)
 }
 
 internal fun calculatePointerXOffset(
