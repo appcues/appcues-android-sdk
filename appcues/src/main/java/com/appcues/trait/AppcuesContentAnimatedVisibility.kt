@@ -16,13 +16,14 @@ import com.appcues.ui.composables.LocalExperienceCompositionState
  */
 @Composable
 internal fun AppcuesContentAnimatedVisibility(
+    modifier: Modifier = Modifier,
     enter: EnterTransition,
     exit: ExitTransition,
     content: @Composable() AnimatedVisibilityScope.() -> Unit
 ) {
     val compositionState = LocalExperienceCompositionState.current
     AnimatedVisibility(
-        modifier = Modifier,
+        modifier = modifier,
         visibleState = compositionState.isContentVisible,
         enter = enter,
         exit = exit,
