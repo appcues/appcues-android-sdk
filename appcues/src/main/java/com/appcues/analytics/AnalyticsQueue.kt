@@ -1,29 +1,29 @@
 package com.appcues.analytics
 
 import androidx.annotation.VisibleForTesting
-import com.appcues.analytics.AnalyticsIntentQueue.QueueAction.FLUSH_THEN_PROCESS
-import com.appcues.analytics.AnalyticsIntentQueue.QueueAction.QUEUE
-import com.appcues.analytics.AnalyticsIntentQueue.QueueAction.QUEUE_THEN_FLUSH
+import com.appcues.analytics.AnalyticsQueue.QueueAction.FLUSH_THEN_PROCESS
+import com.appcues.analytics.AnalyticsQueue.QueueAction.QUEUE
+import com.appcues.analytics.AnalyticsQueue.QueueAction.QUEUE_THEN_FLUSH
 import java.util.Timer
 import java.util.TimerTask
 import kotlin.concurrent.schedule
 
-internal class AnalyticsIntentQueue(private val scheduler: QueueScheduler) {
+internal class AnalyticsQueue(private val scheduler: QueueScheduler) {
 
     enum class QueueAction {
         QUEUE, QUEUE_THEN_FLUSH, FLUSH_THEN_PROCESS
     }
 
-    interface IntentProcessor {
+    interface QueueProcessor {
 
         // process given intent list, usually the queue is cleared after this is called
-        fun process(intents: List<AnalyticsIntent>)
+        fun process(items: List<AnalyticsActivity>)
     }
 
     // Analytics is also the one that process intents when we send it back
-    private lateinit var processor: IntentProcessor
+    private lateinit var processor: QueueProcessor
 
-    fun setProcessor(processor: IntentProcessor) {
+    fun setProcessor(processor: QueueProcessor) {
         this.processor = processor
     }
 
@@ -35,17 +35,17 @@ internal class AnalyticsIntentQueue(private val scheduler: QueueScheduler) {
         fun cancel()
     }
 
-    private val queue = mutableListOf<AnalyticsIntent>()
+    private val queue = mutableListOf<AnalyticsActivity>()
 
     @VisibleForTesting
-    fun queueForTesting(intent: AnalyticsIntent) {
-        queue.add(intent)
+    fun enqueueForTesting(item: AnalyticsActivity) {
+        queue.add(item)
     }
 
-    fun queue(intent: AnalyticsIntent, action: QueueAction) {
+    fun enqueue(intent: AnalyticsActivity, action: QueueAction) {
         when (action) {
-            QUEUE -> queue(intent)
-            QUEUE_THEN_FLUSH -> queueThenFlush(intent)
+            QUEUE -> enqueue(intent)
+            QUEUE_THEN_FLUSH -> enqueueThenFlush(intent)
             FLUSH_THEN_PROCESS -> flushThenProcess(intent)
         }
     }
@@ -58,10 +58,10 @@ internal class AnalyticsIntentQueue(private val scheduler: QueueScheduler) {
         }
     }
 
-    private fun queue(intent: AnalyticsIntent) {
+    private fun enqueue(item: AnalyticsActivity) {
         synchronized(this) {
             // add activity to pending activities
-            queue.add(intent)
+            queue.add(item)
             // and schedule the flush task
             scheduler.schedule {
                 synchronized(this) {
@@ -71,23 +71,23 @@ internal class AnalyticsIntentQueue(private val scheduler: QueueScheduler) {
         }
     }
 
-    private fun queueThenFlush(intent: AnalyticsIntent) {
+    private fun enqueueThenFlush(item: AnalyticsActivity) {
         synchronized(this) {
             scheduler.cancel()
             // add new intent to queue and flush all
-            queue.add(intent)
+            queue.add(item)
 
             processAndClear()
         }
     }
 
-    private fun flushThenProcess(intent: AnalyticsIntent) {
+    private fun flushThenProcess(item: AnalyticsActivity) {
         synchronized(this) {
             scheduler.cancel()
             // send all pending activities as a merged activity request
             processAndClear()
             // then send another one for our newer activity
-            processor.process(listOf(intent))
+            processor.process(listOf(item))
         }
     }
 

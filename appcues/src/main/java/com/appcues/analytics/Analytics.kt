@@ -1,14 +1,15 @@
 package com.appcues.analytics
 
+import com.appcues.AnalyticType
 import com.appcues.AppcuesCoroutineScope
-import com.appcues.analytics.AnalyticsEvent.ScreenView
 import com.appcues.analytics.AnalyticsIntent.Anonymous
 import com.appcues.analytics.AnalyticsIntent.Event
 import com.appcues.analytics.AnalyticsIntent.Identify
+import com.appcues.analytics.AnalyticsIntent.Screen
 import com.appcues.analytics.AnalyticsIntent.UpdateGroup
 import com.appcues.analytics.AnalyticsIntent.UpdateProfile
-import com.appcues.analytics.AnalyticsIntentQueue.IntentProcessor
-import com.appcues.analytics.AnalyticsIntentQueue.QueueAction
+import com.appcues.analytics.AnalyticsQueue.QueueAction
+import com.appcues.analytics.AnalyticsQueue.QueueProcessor
 import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperienceTrigger.Qualification
 import com.appcues.data.model.QualificationResult
@@ -18,11 +19,12 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import java.util.Date
+import java.util.UUID
 
 internal interface QualificationService {
 
     // will merge and hit the backend to see if it qualifies, returning QualificationResult
-    suspend fun qualify(intents: List<AnalyticsIntent>): QualificationResult?
+    suspend fun qualify(intents: List<AnalyticsActivity>): QualificationResult?
 }
 
 internal interface RenderingService {
@@ -36,61 +38,91 @@ internal interface RenderingService {
 
 internal interface SessionService {
 
+    // checks session or creates one based on existing information or incoming intent
     suspend fun checkSession(intent: AnalyticsIntent, onSessionStarted: suspend () -> Unit): Boolean
 
-    // decorates incoming intent and returns a new intent with session/auto props information
-    suspend fun decorateIntent(intent: AnalyticsIntent): AnalyticsIntent
+    // produce session properties
+    suspend fun getSessionProperties(): SessionProperties?
 
     suspend fun reset()
 }
 
-// new model for Intents available for Analytics
-internal sealed class AnalyticsIntent(open val isInternal: Boolean, val timestamp: Date = Date()) {
+internal data class SessionProperties(
+    val sessionId: UUID,
+    val userId: String,
+    val groupId: String?,
+    val userSignature: String?,
+    val latestUserProperties: Map<String, Any>,
+    val properties: Map<String, Any>,
+)
 
-    object Anonymous : AnalyticsIntent(false)
+internal interface ActivityBuilder {
+
+    suspend fun buildActivity(intent: AnalyticsIntent, sessionProperties: SessionProperties?): AnalyticsActivity?
+}
+
+// new model for Intents available for Analytics
+internal sealed class AnalyticsIntent(open val isInternal: Boolean, open val properties: Map<String, Any>?, val timestamp: Date = Date()) {
+
+    object Anonymous : AnalyticsIntent(false, null)
 
     data class Identify(
         val userId: String,
-        val properties: Map<String, Any>?
-    ) : AnalyticsIntent(false)
+        override val properties: Map<String, Any>?
+    ) : AnalyticsIntent(false, properties)
 
     data class UpdateProfile(
-        val properties: Map<String, Any>?,
-        override val isInternal: Boolean
-    ) : AnalyticsIntent(isInternal)
+        override val isInternal: Boolean,
+        override val properties: Map<String, Any>?
+    ) : AnalyticsIntent(isInternal, properties)
 
     data class UpdateGroup(
+        override val isInternal: Boolean,
         val groupId: String?,
-        val properties: Map<String, Any>?,
-        override val isInternal: Boolean
-    ) : AnalyticsIntent(isInternal)
+        override val properties: Map<String, Any>?
+    ) : AnalyticsIntent(isInternal, properties)
 
     data class Event(
+        override val isInternal: Boolean,
         val name: String,
-        val attributes: Map<String, Any>?,
-        val context: Map<String, Any>?,
-        override val isInternal: Boolean
-    ) : AnalyticsIntent(isInternal)
+        override val properties: Map<String, Any>?
+    ) : AnalyticsIntent(isInternal, properties)
+
+    data class Screen(
+        override val isInternal: Boolean,
+        val title: String,
+        override val properties: Map<String, Any>?
+    ) : AnalyticsIntent(isInternal, properties)
 }
+
+internal data class AnalyticsActivity(
+    val type: AnalyticType,
+    val isInternal: Boolean,
+    val timestamp: Date,
+    val sessionId: UUID,
+    val userId: String,
+    val groupId: String?,
+    val profileProperties: Map<String, Any>?,
+    val groupProperties: Map<String, Any>?,
+    val eventName: String?,
+    val eventAttributes: Map<String, Any>?,
+    val eventContext: Map<String, Any>?,
+    val userSignature: String?,
+)
 
 internal class Analytics(
     private val coroutineScope: AppcuesCoroutineScope,
-    private val intentQueue: AnalyticsIntentQueue,
+    private val queue: AnalyticsQueue,
     private val qualificationService: QualificationService,
     private val renderingService: RenderingService,
     private val sessionService: SessionService,
-) : IntentProcessor, ApplicationMonitor.Listener {
-
-    companion object {
-
-        const val EVENT_ATTR_SCREEN_TITLE = "screenTitle"
-        const val EVENT_CONTEXT_SCREEN_TITLE = "screen_title"
-    }
+    private val activityBuilder: ActivityBuilder,
+) : QueueProcessor, ApplicationMonitor.Listener {
 
     private val intentChannel = Channel<Pair<AnalyticsIntent, QueueAction>>(Channel.UNLIMITED)
 
     init {
-        intentQueue.setProcessor(this)
+        queue.setProcessor(this)
 
         ApplicationMonitor.subscribe(this)
 
@@ -101,9 +133,9 @@ internal class Analytics(
         }
     }
 
-    private val _analyticsFlow = MutableSharedFlow<AnalyticsIntent>(1)
-    val analyticsFlow: SharedFlow<AnalyticsIntent>
-        get() = _analyticsFlow
+    private val _activityFlow = MutableSharedFlow<AnalyticsActivity>(1)
+    val activityFlow: SharedFlow<AnalyticsActivity>
+        get() = _activityFlow
 
     fun anonymous() = coroutineScope.launch {
         intentChannel.send(Anonymous to QueueAction.FLUSH_THEN_PROCESS)
@@ -116,25 +148,20 @@ internal class Analytics(
     }
 
     fun updateProfile(properties: Map<String, Any>? = null, isInternal: Boolean) = coroutineScope.launch {
-        val intent = UpdateProfile(properties, isInternal)
+        val intent = UpdateProfile(isInternal, properties)
 
         intentChannel.send(intent to QueueAction.QUEUE)
     }
 
     fun updateGroup(groupId: String?, properties: Map<String, Any>? = null, isInternal: Boolean) = coroutineScope.launch {
-        val intent = UpdateGroup(groupId, properties, isInternal)
+        val intent = UpdateGroup(isInternal, groupId, properties)
 
         intentChannel.send(intent to QueueAction.FLUSH_THEN_PROCESS)
     }
 
     fun track(name: String, properties: Map<String, Any>? = null, interactive: Boolean, isInternal: Boolean = false) =
         coroutineScope.launch {
-            val intent = Event(
-                name = name,
-                attributes = properties,
-                context = hashMapOf(),
-                isInternal = isInternal
-            )
+            val intent = Event(isInternal, name, properties)
 
             val action = if (interactive) QueueAction.QUEUE_THEN_FLUSH else QueueAction.QUEUE
 
@@ -142,20 +169,14 @@ internal class Analytics(
         }
 
     fun screen(title: String, properties: Map<String, Any>? = null, isInternal: Boolean = false) = coroutineScope.launch {
-        val intent = Event(
-            // screen calls are really just a special type of event: "appcues:screen_view"
-            name = ScreenView.eventName,
-            attributes = (properties?.toMutableMap() ?: hashMapOf()).apply { put(EVENT_ATTR_SCREEN_TITLE, title) },
-            context = hashMapOf(EVENT_CONTEXT_SCREEN_TITLE to title),
-            isInternal = isInternal
-        )
+        val intent = Screen(isInternal, title, properties)
 
         intentChannel.send(intent to QueueAction.QUEUE_THEN_FLUSH)
     }
 
     fun reset() {
         coroutineScope.launch {
-            intentQueue.flush()
+            queue.flush()
 
             sessionService.reset()
 
@@ -166,15 +187,15 @@ internal class Analytics(
     private suspend fun enqueueIntent(intent: AnalyticsIntent, action: QueueAction) {
         if (!sessionService.checkSession(intent, ::onNewSessionStarted)) return
 
-        sessionService.decorateIntent(intent).also {
-            _analyticsFlow.emit(it)
+        activityBuilder.buildActivity(intent, sessionService.getSessionProperties())?.run {
+            _activityFlow.emit(this)
 
-            intentQueue.queue(it, action)
+            queue.enqueue(this, action)
         }
     }
 
     private suspend fun onNewSessionStarted() {
-        intentQueue.flush()
+        queue.flush()
 
         sessionService.reset()
 
@@ -183,10 +204,10 @@ internal class Analytics(
         track(AnalyticsEvent.SessionStarted.eventName, interactive = true, isInternal = true)
     }
 
-    override fun process(intents: List<AnalyticsIntent>) {
+    override fun process(items: List<AnalyticsActivity>) {
         coroutineScope.launch {
             // run intents through qualification service
-            qualificationService.qualify(intents)
+            qualificationService.qualify(items)
                 // attempt to show experiences set clearCache if trigger reason is SCREEN_VIEW
                 ?.run { renderingService.show(experiences, trigger.reason == Qualification.REASON_SCREEN_VIEW) }
         }
@@ -194,6 +215,6 @@ internal class Analytics(
 
     // when application stops
     override fun onApplicationStopped() {
-        intentQueue.flush()
+        queue.flush()
     }
 }

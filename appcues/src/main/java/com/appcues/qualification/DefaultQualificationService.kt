@@ -1,10 +1,9 @@
 package com.appcues.qualification
 
+import com.appcues.AnalyticType.EVENT
+import com.appcues.AnalyticType.SCREEN
 import com.appcues.AppcuesConfig
-import com.appcues.analytics.AnalyticsIntent
-import com.appcues.analytics.AnalyticsIntent.Event
-import com.appcues.analytics.AnalyticsIntent.Identify
-import com.appcues.analytics.AnalyticsIntent.UpdateGroup
+import com.appcues.analytics.AnalyticsActivity
 import com.appcues.analytics.QualificationService
 import com.appcues.analytics.SdkMetrics
 import com.appcues.data.MoshiConfiguration
@@ -20,7 +19,6 @@ import com.appcues.data.remote.RemoteError.NetworkError
 import com.appcues.data.remote.appcues.AppcuesRemoteSource
 import com.appcues.data.remote.appcues.request.ActivityRequest
 import com.appcues.data.remote.appcues.request.EventRequest
-import com.appcues.data.session.PrefSessionLocalSource
 import com.appcues.logging.Logcues
 import com.appcues.util.doIfFailure
 import com.appcues.util.doIfSuccess
@@ -36,7 +34,6 @@ import java.util.concurrent.TimeUnit
 internal class DefaultQualificationService(
     private val appcuesRemoteSource: AppcuesRemoteSource,
     private val appcuesLocalSource: AppcuesLocalSource,
-    private val sessionLocalSource: PrefSessionLocalSource,
     private val experienceMapper: ExperienceMapper,
     private val config: AppcuesConfig,
     private val logcues: Logcues,
@@ -45,10 +42,10 @@ internal class DefaultQualificationService(
     private val processingActivity: HashSet<UUID> = hashSetOf()
     private val mutex = Mutex()
 
-    override suspend fun qualify(intents: List<AnalyticsIntent>): QualificationResult? {
-        val activityRequest = intents.mergeToActivityRequest()
+    override suspend fun qualify(intents: List<AnalyticsActivity>): QualificationResult? {
+        val activityRequest = intents.mergeToActivityRequest() ?: return null
 
-        // FIXME trying to recall reason why old call site flushPendingActivity could accept null as date.
+        // FIXME for now using old SdkMetrics structure, there is probably no harm in tracking ALL ActivityRequests
         SdkMetrics.tracked(activityRequest.requestId, Date())
 
         return trackActivity(activityRequest).also {
@@ -58,38 +55,35 @@ internal class DefaultQualificationService(
         }
     }
 
-    private suspend fun List<AnalyticsIntent>.mergeToActivityRequest(): ActivityRequest {
-        val events = filterIsInstance<Event>().map {
+    private fun List<AnalyticsActivity>.mergeToActivityRequest(): ActivityRequest? {
+        val first = firstOrNull() ?: return null
+        val events = filter { it.type == SCREEN || it.type == EVENT }.map {
             EventRequest(
-                name = it.name,
+                // its never null at this point, since all of type screen and event can provide "name"
+                name = it.eventName ?: String(),
                 // FIXME attr and context wont need to be mutable anymore
-                attributes = it.attributes?.toMutableMap() ?: hashMapOf(),
-                context = it.context?.toMutableMap() ?: hashMapOf()
+                attributes = it.eventAttributes?.toMutableMap() ?: hashMapOf(),
+                context = it.eventContext?.toMutableMap() ?: hashMapOf()
             )
         }
 
-        val profileUpdate = mutableMapOf<String, Any>().apply {
-            // Anonymous, UpdateProfile are also Identify at this point
-            filterIsInstance<Identify>().forEach {
-                it.properties?.run { putAll(this) }
-            }
-        }
+        val profileUpdate = mutableMapOf<String, Any>()
+        val groupUpdate = mutableMapOf<String, Any>()
 
-        val groupUpdate = mutableMapOf<String, Any>().apply {
-            filterIsInstance<UpdateGroup>().forEach {
-                it.properties?.run { putAll(this) }
-            }
+        forEach { activity ->
+            activity.profileProperties?.let { profileUpdate.putAll(it) }
+            activity.groupProperties?.let { groupUpdate.putAll(it) }
         }
 
         return ActivityRequest(
             accountId = config.accountId,
-            // at this point it should never be null
-            userId = sessionLocalSource.getUserId() ?: String(),
+            sessionId = first.sessionId,
+            userId = first.userId,
             profileUpdate = profileUpdate,
-            groupId = sessionLocalSource.getGroupId(),
+            groupId = first.groupId,
             groupUpdate = groupUpdate,
             events = events,
-            userSignature = sessionLocalSource.getUserSignature(),
+            userSignature = first.userSignature,
         )
     }
 

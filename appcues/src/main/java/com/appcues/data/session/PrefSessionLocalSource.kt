@@ -89,6 +89,7 @@ internal class PrefSessionLocalSource(
             .remove(KEY_USER_SIGNATURE)
             .remove(KEY_IS_ANONYMOUS)
             .remove(KEY_GROUP_ID)
+            .remove(KEY_LAST_CONTENT_SHOWN_AT)
             .apply()
     }
 }
