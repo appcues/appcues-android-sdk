@@ -41,11 +41,13 @@ internal class SessionMonitor(
         }
     }
 
-    fun startNewSession(): Boolean {
-        if (storage.userId.isEmpty()) return false
-        _sessionId = UUID.randomUUID()
-        updateLastActivity()
-        return true
+    fun startNewSession(): UUID? {
+        if (storage.userId.isEmpty()) return null
+
+        return UUID.randomUUID().also {
+            _sessionId = it
+            updateLastActivity()
+        }
     }
 
     fun updateLastActivity() {

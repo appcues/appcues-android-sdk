@@ -109,7 +109,7 @@ internal class AppcuesRepositoryTest {
     @Test
     fun `trackActivity SHOULD save to local storage AND send qualify request`() = runTest {
         // GIVEN
-        val request = ActivityRequest(accountId = "123", userId = "userId")
+        val request = ActivityRequest(accountId = "123", sessionId = UUID.randomUUID(), userId = "userId")
         val qualifyResponse = QualifyResponse(
             experiences = listOf(mockk<ExperienceResponse>(), mockk<ExperienceResponse>()),
             performedQualification = true,
@@ -136,7 +136,7 @@ internal class AppcuesRepositoryTest {
     @Test
     fun `trackActivity SHOULD call postActivity on cache item WHEN the next request is sent`() = runTest {
         // GIVEN
-        val request = ActivityRequest(accountId = "123", userId = "userId")
+        val request = ActivityRequest(accountId = "123", sessionId = UUID.randomUUID(), userId = "userId")
         val activityStorage = ActivityStorage(UUID.randomUUID(), "123", "userId", "data", null)
         coEvery { appcuesLocalSource.getAllActivity() } returns listOf(activityStorage)
 
@@ -154,7 +154,7 @@ internal class AppcuesRepositoryTest {
     @Test
     fun `trackActivity SHOULD retain cache item WHEN the qualify request fails with a NetworkError`() = runTest {
         // GIVEN
-        val request = ActivityRequest(accountId = "123", userId = "userId")
+        val request = ActivityRequest(accountId = "123", sessionId = UUID.randomUUID(), userId = "userId")
         coEvery { appcuesRemoteSource.qualify(any(), any(), request.requestId, any()) } returns Failure(NetworkError())
 
         // WHEN
@@ -168,7 +168,7 @@ internal class AppcuesRepositoryTest {
     @Test
     fun `trackActivity SHOULD NOT retain cache item WHEN the qualify request fails with an HTTPError`() = runTest {
         // GIVEN
-        val request = ActivityRequest(accountId = "123", userId = "userId")
+        val request = ActivityRequest(accountId = "123", sessionId = UUID.randomUUID(), userId = "userId")
         coEvery { appcuesRemoteSource.qualify(any(), any(), request.requestId, any()) } returns Failure(HttpError())
 
         // WHEN
@@ -182,7 +182,7 @@ internal class AppcuesRepositoryTest {
     @Test
     fun `trackActivity SHOULD retain a cache item WHEN the retry fails with a NetworkError`() = runTest {
         // GIVEN
-        val request = ActivityRequest(accountId = "123", userId = "userId")
+        val request = ActivityRequest(accountId = "123", sessionId = UUID.randomUUID(), userId = "userId")
         val activityStorage = ActivityStorage(UUID.randomUUID(), "123", "userId", "data", null)
         coEvery { appcuesLocalSource.getAllActivity() } returns listOf(activityStorage)
         coEvery { appcuesRemoteSource.postActivity("userId", null, "data") } returns Failure(NetworkError())
@@ -200,7 +200,7 @@ internal class AppcuesRepositoryTest {
     @Test
     fun `trackActivity SHOULD NOT retain a cache item WHEN the retry fails with an HTTPError`() = runTest {
         // GIVEN
-        val request = ActivityRequest(accountId = "123", userId = "userId")
+        val request = ActivityRequest(accountId = "123", sessionId = UUID.randomUUID(), userId = "userId")
         val activityStorage = ActivityStorage(UUID.randomUUID(), "123", "userId", "data", null)
         coEvery { appcuesLocalSource.getAllActivity() } returns listOf(activityStorage)
         coEvery { appcuesRemoteSource.postActivity("userId", null, "data") } returns Failure(HttpError())
@@ -267,7 +267,7 @@ internal class AppcuesRepositoryTest {
     @Test
     fun `trackActivity SHOULD mark the experience LOW priority WHEN the qualification reason is screen_view`() = runTest {
         // GIVEN
-        val request = ActivityRequest(accountId = "123", userId = "userId")
+        val request = ActivityRequest(accountId = "123", sessionId = UUID.randomUUID(), userId = "userId")
         val qualifyResponse = QualifyResponse(
             experiences = listOf(mockk<ExperienceResponse>(), mockk<ExperienceResponse>()),
             performedQualification = true,
@@ -290,7 +290,7 @@ internal class AppcuesRepositoryTest {
     @Test
     fun `trackActivity SHOULD mark the experience NORMAL priority WHEN the qualification reason is not screen_view`() = runTest {
         // GIVEN
-        val request = ActivityRequest(accountId = "123", userId = "userId")
+        val request = ActivityRequest(accountId = "123", sessionId = UUID.randomUUID(), userId = "userId")
         val qualifyResponse = QualifyResponse(
             experiences = listOf(mockk<ExperienceResponse>(), mockk<ExperienceResponse>()),
             performedQualification = true,
@@ -313,7 +313,7 @@ internal class AppcuesRepositoryTest {
     @Test
     fun `trackActivity SHOULD include user signature in ActivityStorage WHEN the ActivityRequest has a user signature`() = runTest {
         // GIVEN
-        val request = ActivityRequest(accountId = "123", userId = "userId", userSignature = "user-signature")
+        val request = ActivityRequest(accountId = "123", userId = "userId", sessionId = UUID.randomUUID(), userSignature = "user-signature")
         val cacheItem = ActivityStorage(UUID.randomUUID(), "123", "userId", "data1", "user-signature-cache")
         coEvery { appcuesLocalSource.getAllActivity() } returns listOf(cacheItem)
 

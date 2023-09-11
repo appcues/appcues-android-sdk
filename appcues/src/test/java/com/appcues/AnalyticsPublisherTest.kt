@@ -20,6 +20,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.koin.core.component.get
 import java.util.Date
+import java.util.UUID
 
 @OptIn(ExperimentalCoroutinesApi::class)
 internal class AnalyticsPublisherTest : AppcuesScopeTest {
@@ -66,6 +67,7 @@ internal class AnalyticsPublisherTest : AppcuesScopeTest {
         val activity = ActivityRequest(
             accountId = "123",
             userId = "userId",
+            sessionId = UUID.randomUUID(),
             events = listOf(EventRequest("event1", attributes = attributes))
         )
         val data = TrackingData(EVENT, false, activity)
@@ -91,6 +93,7 @@ internal class AnalyticsPublisherTest : AppcuesScopeTest {
         val activity = ActivityRequest(
             accountId = "123",
             userId = "userId",
+            sessionId = UUID.randomUUID(),
             events = listOf(EventRequest("event1", attributes = attributes))
         )
         val data = TrackingData(EVENT, false, activity)
@@ -110,6 +113,7 @@ internal class AnalyticsPublisherTest : AppcuesScopeTest {
         val activity = ActivityRequest(
             accountId = "123",
             userId = "userId",
+            sessionId = UUID.randomUUID(),
             events = listOf(EventRequest(ScreenView.eventName, attributes = attributes))
         )
         val data = TrackingData(SCREEN, false, activity)
@@ -130,6 +134,7 @@ internal class AnalyticsPublisherTest : AppcuesScopeTest {
         val attributes = hashMapOf<String, Any>("prop" to 42)
         val activity = ActivityRequest(
             accountId = "123",
+            sessionId = UUID.randomUUID(),
             userId = storage.userId,
             profileUpdate = attributes
         )
@@ -152,6 +157,7 @@ internal class AnalyticsPublisherTest : AppcuesScopeTest {
         val activity = ActivityRequest(
             accountId = "123",
             userId = "userId",
+            sessionId = UUID.randomUUID(),
             groupId = storage.groupId,
             groupUpdate = attributes
         )
@@ -172,6 +178,7 @@ internal class AnalyticsPublisherTest : AppcuesScopeTest {
         val activity = ActivityRequest(
             accountId = "123",
             userId = "userId",
+            sessionId = UUID.randomUUID(),
             events = listOf(EventRequest("event1", attributes = attributes))
         )
         val data = TrackingData(EVENT, true, activity)

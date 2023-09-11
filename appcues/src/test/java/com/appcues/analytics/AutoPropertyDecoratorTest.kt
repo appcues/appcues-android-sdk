@@ -15,6 +15,7 @@ import io.mockk.mockk
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import java.util.UUID
 
 internal class AutoPropertyDecoratorTest {
 
@@ -187,7 +188,7 @@ internal class AutoPropertyDecoratorTest {
     @Test
     fun `decorateIdentity SHOULD add autoProperties to profileUpdate map`() {
         // given
-        val activityRequest = ActivityRequest(userId = "test userId", accountId = "test accountId")
+        val activityRequest = ActivityRequest(userId = "test userId", sessionId = UUID.randomUUID(), accountId = "test accountId")
         // when
         with(autoPropertyDecorator.decorateIdentify(activityRequest)) {
             // then
@@ -201,6 +202,7 @@ internal class AutoPropertyDecoratorTest {
         val activityRequest = ActivityRequest(
             userId = "test userId",
             accountId = "test accountId",
+            sessionId = UUID.randomUUID(),
             profileUpdate = hashMapOf("test_property" to "test_value")
         )
         // when
@@ -220,6 +222,7 @@ internal class AutoPropertyDecoratorTest {
         val activityRequest = ActivityRequest(
             userId = "test userId",
             accountId = "test accountId",
+            sessionId = UUID.randomUUID(),
             profileUpdate = hashMapOf("_test" to "Test")
         )
         // when

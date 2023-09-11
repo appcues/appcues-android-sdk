@@ -20,6 +20,7 @@ import io.mockk.verify
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import java.util.UUID
 
 internal class AnalyticsQueueProcessorTest {
 
@@ -27,7 +28,8 @@ internal class AnalyticsQueueProcessorTest {
     val dispatcherRule = MainDispatcherRule()
 
     private val mockkEvent: EventRequest = mockk()
-    private val mockkActivity: ActivityRequest = ActivityRequest(userId = "222", accountId = "111", events = listOf(mockkEvent))
+    private val mockkActivity: ActivityRequest =
+        ActivityRequest(userId = "222", accountId = "111", sessionId = UUID.randomUUID(), events = listOf(mockkEvent))
     private val mockkQualificationResult: QualificationResult =
         QualificationResult(Qualification("screen_view"), arrayListOf(mockk()))
 
@@ -82,7 +84,7 @@ internal class AnalyticsQueueProcessorTest {
         // given
         val queuedActivitySlot = slot<ActivityRequest>()
         val queuedEvent: EventRequest = mockk()
-        val queuedActivity = ActivityRequest(userId = "222", accountId = "111", events = listOf(queuedEvent))
+        val queuedActivity = ActivityRequest(userId = "222", accountId = "111", sessionId = UUID.randomUUID(), events = listOf(queuedEvent))
         val activitySlot = slot<ActivityRequest>()
         analyticsQueueProcessor.queueForTesting(queuedActivity)
         // when
@@ -108,7 +110,7 @@ internal class AnalyticsQueueProcessorTest {
         // given
         val queuedActivitySlot = slot<ActivityRequest>()
         val queuedEvent: EventRequest = mockk()
-        val queuedActivity = ActivityRequest(userId = "222", accountId = "111", events = listOf(queuedEvent))
+        val queuedActivity = ActivityRequest(userId = "222", accountId = "111", sessionId = UUID.randomUUID(), events = listOf(queuedEvent))
         analyticsQueueProcessor.queueForTesting(queuedActivity)
         // when
         analyticsQueueProcessor.flushAsync()
