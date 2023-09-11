@@ -1,5 +1,6 @@
 package com.appcues.trait.appcues
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.animateColorAsState
@@ -22,13 +23,12 @@ import androidx.compose.ui.graphics.Color
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.getConfigColor
 import com.appcues.data.model.styling.ComponentColor
-import com.appcues.trait.AppcuesTraitAnimatedVisibility
 import com.appcues.trait.BackdropDecoratingTrait
 import com.appcues.trait.MetadataSettingTrait
 import com.appcues.trait.extensions.rememberColorStepAnimation
 import com.appcues.ui.composables.AppcuesStepMetadata
 import com.appcues.ui.composables.LocalAppcuesStepMetadata
-import com.appcues.ui.composables.rememberAppcuesBackdropVisibility
+import com.appcues.ui.composables.LocalExperienceCompositionState
 import com.appcues.ui.extensions.getColor
 
 internal class BackdropTrait(
@@ -52,8 +52,10 @@ internal class BackdropTrait(
         val animation = rememberColorStepAnimation(metadata)
         val color = rememberBackgroundColor(metadata = metadata, animationSpec = animation)
 
-        AppcuesTraitAnimatedVisibility(
-            visibleState = rememberAppcuesBackdropVisibility(),
+        val compositionState = LocalExperienceCompositionState.current
+
+        AnimatedVisibility(
+            visibleState = compositionState.isBackdropVisible,
             enter = enterTransition(),
             exit = exitTransition(),
         ) {

@@ -37,7 +37,7 @@ import com.appcues.data.model.RenderContext
 import com.appcues.data.model.getConfigOrDefault
 import com.appcues.data.model.getConfigStyle
 import com.appcues.data.model.styling.ComponentStyle
-import com.appcues.trait.AppcuesTraitAnimatedVisibility
+import com.appcues.trait.AppcuesContentAnimatedVisibility
 import com.appcues.trait.AppcuesTraitException
 import com.appcues.trait.ContentWrappingTrait
 import com.appcues.trait.PresentingTrait
@@ -53,7 +53,6 @@ import com.appcues.trait.extensions.rememberDpStepAnimation
 import com.appcues.trait.extensions.rememberFloatStepAnimation
 import com.appcues.trait.extensions.rememberTargetRectangleInfo
 import com.appcues.ui.composables.LocalAppcuesStepMetadata
-import com.appcues.ui.composables.rememberAppcuesContentVisibility
 import com.appcues.ui.extensions.coloredShadowPath
 import com.appcues.ui.extensions.getColor
 import com.appcues.ui.extensions.getPaddings
@@ -173,8 +172,7 @@ internal class TooltipTrait(
                 .fillMaxSize()
                 .padding(SCREEN_HORIZONTAL_PADDING, SCREEN_VERTICAL_PADDING)
         ) {
-            AppcuesTraitAnimatedVisibility(
-                visibleState = rememberAppcuesContentVisibility(),
+            AppcuesContentAnimatedVisibility(
                 enter = dialogEnterTransition(),
                 exit = dialogExitTransition(),
             ) {

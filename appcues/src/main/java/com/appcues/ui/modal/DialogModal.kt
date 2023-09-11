@@ -18,8 +18,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.appcues.data.model.styling.ComponentStyle
-import com.appcues.trait.AppcuesTraitAnimatedVisibility
-import com.appcues.ui.composables.rememberAppcuesContentVisibility
+import com.appcues.trait.AppcuesContentAnimatedVisibility
 import com.appcues.ui.extensions.getBoxAlignment
 import com.appcues.ui.extensions.getPaddings
 import com.appcues.ui.extensions.modalStyle
@@ -50,8 +49,7 @@ internal fun DialogModal(
     val maxWidth = maxWidthDerivedOf(windowInfo)
     val maxHeight = maxHeightDerivedOf(windowInfo)
 
-    AppcuesTraitAnimatedVisibility(
-        visibleState = rememberAppcuesContentVisibility(),
+    AppcuesContentAnimatedVisibility(
         enter = dialogEnterTransition(),
         exit = dialogExitTransition(),
     ) {
