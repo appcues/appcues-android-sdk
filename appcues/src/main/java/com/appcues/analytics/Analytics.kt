@@ -14,6 +14,7 @@ import com.appcues.analytics.RenderingService.EventTracker
 import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperienceTrigger.Qualification
 import com.appcues.data.model.QualificationResult
+import com.appcues.data.model.RenderContext
 import com.appcues.monitor.ApplicationMonitor
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -42,6 +43,26 @@ internal interface RenderingService {
     // clearCache is mostly used when we know the qualification is from a screen_view
     suspend fun show(experiences: List<Experience>, clearCache: Boolean)
 
+    sealed class ShowExperienceResult {
+        object Success : ShowExperienceResult()
+        object Skip : ShowExperienceResult()
+        object NoSession : ShowExperienceResult()
+        object ExperienceNotFound : ShowExperienceResult()
+        data class NoRenderContext(val experience: Experience, val renderContext: RenderContext) : ShowExperienceResult()
+        data class Error(val message: String) : ShowExperienceResult()
+    }
+
+    suspend fun show(experience: Experience): ShowExperienceResult
+
+    sealed class PreviewExperienceResult {
+        object Success : PreviewExperienceResult()
+        object ExperienceNotFound : PreviewExperienceResult()
+        data class PreviewDeferred(val experience: Experience, val frameId: String?) : PreviewExperienceResult()
+        data class Error(val reason: String) : PreviewExperienceResult()
+    }
+
+    suspend fun preview(experience: Experience): PreviewExperienceResult
+
     suspend fun reset()
 }
 
@@ -50,7 +71,7 @@ internal interface SessionService {
     // checks session or creates one based on existing information or incoming intent
     suspend fun checkSession(intent: AnalyticsIntent, onSessionStarted: suspend () -> Unit): Boolean
 
-    // produce session properties
+    // produce session properties or null if session is not present
     suspend fun getSessionProperties(): SessionProperties?
 
     suspend fun reset()

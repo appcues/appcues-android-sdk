@@ -112,15 +112,17 @@ internal class DefaultSessionService(
     }
 
     private suspend fun startAnonymousSession(): Boolean {
-        return getAnonymousUserId().let { anonymousId ->
+        getAnonymousUserId().also { anonymousId ->
             // only start anonymousSession if new Id is different from what we already have
             if (anonymousId != sessionLocalSource.getUserId()) {
                 sessionLocalSource.setUserId(anonymousId)
                 sessionLocalSource.isAnonymous(true)
                 sessionLocalSource.setUserSignature(null)
-                true
-            } else false
+                return startSession()
+            }
         }
+
+        return false
     }
 
     private suspend fun getAnonymousUserId(): String {
@@ -130,12 +132,14 @@ internal class DefaultSessionService(
 
     private suspend fun startSession(identify: Identify): Boolean {
         // only start anonymousSession if new Id is different from what we already have
-        return if (identify.userId != sessionLocalSource.getUserId()) {
+        if (identify.userId != sessionLocalSource.getUserId()) {
             sessionLocalSource.setUserId(identify.userId)
             sessionLocalSource.isAnonymous(false)
             sessionLocalSource.setUserSignature(identify.properties?.get(KEY_USER_SIGNATURE) as? String)
-            true
-        } else false
+            return startSession()
+        }
+
+        return false
     }
 
     // validate existing session and update lastActivityAt in case current session is valid

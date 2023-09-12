@@ -3,6 +3,8 @@ package com.appcues.rendering
 import com.appcues.AppcuesConfig
 import com.appcues.analytics.RenderingService
 import com.appcues.analytics.RenderingService.EventTracker
+import com.appcues.analytics.RenderingService.PreviewExperienceResult
+import com.appcues.analytics.RenderingService.ShowExperienceResult
 import com.appcues.analytics.track
 import com.appcues.analytics.trackExperienceError
 import com.appcues.analytics.trackExperienceRecovery
@@ -11,7 +13,6 @@ import com.appcues.data.model.ExperiencePriority.NORMAL
 import com.appcues.data.model.RenderContext
 import com.appcues.data.model.RenderContext.Modal
 import com.appcues.data.model.getFrameId
-import com.appcues.rendering.ExperienceRendering.PreviewResponse.PreviewDeferred
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.StartExperience
 import com.appcues.statemachine.Action.StartStep
@@ -22,17 +23,13 @@ import com.appcues.statemachine.State.Idling
 import com.appcues.statemachine.StateMachine
 import com.appcues.statemachine.StateMachineFactory
 import com.appcues.statemachine.StepReference
-import com.appcues.ui.ExperienceRenderer.RenderingResult
-import com.appcues.ui.ExperienceRenderer.RenderingResult.NoRenderContext
-import com.appcues.ui.ExperienceRenderer.RenderingResult.StateMachineError
-import com.appcues.ui.ExperienceRenderer.RenderingResult.WontDisplay
 import com.appcues.ui.ModalStateMachineOwner
 import com.appcues.ui.StateMachineDirectory
 import com.appcues.util.ResultOf
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
 
-internal class ExperienceRendering(
+internal class DefaultRenderingService(
     private val config: AppcuesConfig,
     private val stateMachineDirectory: StateMachineDirectory,
     stateMachineFactory: StateMachineFactory,
@@ -63,12 +60,9 @@ internal class ExperienceRendering(
         // Add new experiences, replacing any existing ones
         qualifiedExperiences.putAll(experiences.groupBy { it.renderContext })
 
-        // make a copy while we try to show them, so anything else editing the
+        // make a copy (toMap) while we try to show them, so anything else editing the
         // main mapping won't hit a concurrent modification exception
-        val experiencesToTry = qualifiedExperiences.toMap()
-        experiencesToTry.forEach {
-            attemptToShow(it.value)
-        }
+        qualifiedExperiences.toMap().forEach { attemptToShow(it.value) }
 
         // No caching required for modals since they can't be lazy-loaded.
         qualifiedExperiences.remove(Modal)
@@ -80,7 +74,7 @@ internal class ExperienceRendering(
         if (experiences.isEmpty()) return
 
         val experience = experiences.first()
-        if (show(experience) != RenderingResult.Success) {
+        if (show(experience) != ShowExperienceResult.Success) {
             attemptToShow(experiences.drop(1))
         } else {
             eventTracker.trackExperienceRecovery(experience)
@@ -90,7 +84,7 @@ internal class ExperienceRendering(
     /**
      * returns true/false whether the experience is was started
      */
-    suspend fun show(experience: Experience): RenderingResult = with(experience) {
+    override suspend fun show(experience: Experience): ShowExperienceResult = with(experience) {
         var canShow = config.interceptor?.canDisplayExperience(experience.id) ?: true
 
         // if there is an active experiment, and we should not show this experience (control group), then
@@ -101,17 +95,17 @@ internal class ExperienceRendering(
             canShow = false
         }
 
-        if (!canShow) return WontDisplay
+        if (!canShow) return ShowExperienceResult.Skip
 
         val stateMachine = stateMachineDirectory.getOwner(renderContext)?.stateMachine
-            ?: return NoRenderContext(experience, renderContext).also {
+            ?: return ShowExperienceResult.NoRenderContext(experience, renderContext).also {
                 eventTracker.trackExperienceError(experience, "no render context $renderContext")
             }
 
         if (stateMachine.checkPriority(this)) {
             return when (val result = stateMachine.handleAction(EndExperience(markComplete = false, destroyed = false))) {
                 is Success -> show(this)
-                is Failure -> StateMachineError(experience, result.reason)
+                is Failure -> ShowExperienceResult.Error(result.reason.message)
             }
         }
 
@@ -119,8 +113,8 @@ internal class ExperienceRendering(
         experiment?.let { eventTracker.track(it) }
 
         return when (val result = stateMachine.handleAction(StartExperience(this))) {
-            is Success -> RenderingResult.Success.also { previewExperiences.remove(renderContext) }
-            is Failure -> StateMachineError(experience, result.reason)
+            is Success -> ShowExperienceResult.Success.also { previewExperiences.remove(renderContext) }
+            is Failure -> ShowExperienceResult.Error(result.reason.message)
         }
     }
 
@@ -136,21 +130,15 @@ internal class ExperienceRendering(
         stateMachineDirectory.getOwner(renderContext)?.stateMachine?.handleAction(StartStep(stepReference))
     }
 
-    sealed class PreviewResponse {
-        object Success : PreviewResponse()
-        object ExperienceNotFound : PreviewResponse()
-        object Failed : PreviewResponse()
-        data class PreviewDeferred(val experience: Experience, val frameId: String?) : PreviewResponse()
-        data class StateMachineError(val experience: Experience, val error: Error) : PreviewResponse()
-    }
-
-    suspend fun preview(experience: Experience): PreviewResponse {
+    override suspend fun preview(experience: Experience): PreviewExperienceResult {
         previewExperiences[experience.renderContext] = experience
 
         return when (val result = show(experience)) {
-            is NoRenderContext -> PreviewDeferred(result.experience, result.renderContext.getFrameId())
-            is StateMachineError -> PreviewResponse.StateMachineError(result.experience, result.error)
-            else -> PreviewResponse.Success
+            is ShowExperienceResult.NoRenderContext ->
+                PreviewExperienceResult.PreviewDeferred(result.experience, result.renderContext.getFrameId())
+            is ShowExperienceResult.Error ->
+                PreviewExperienceResult.Error(result.message)
+            else -> PreviewExperienceResult.Success
         }
     }
 

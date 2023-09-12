@@ -5,8 +5,9 @@ import com.appcues.analytics.AnalyticsQueue.DefaultQueueScheduler
 import com.appcues.analytics.AnalyticsQueueProcessor.AnalyticsQueueScheduler
 import com.appcues.analytics.AnalyticsQueueProcessor.QueueScheduler
 import com.appcues.di.KoinScopePlugin
+import com.appcues.experiences.Experiences
 import com.appcues.qualification.DefaultQualificationService
-import com.appcues.rendering.ExperienceRendering
+import com.appcues.rendering.DefaultRenderingService
 import com.appcues.session.DefaultSessionService
 import org.koin.dsl.ScopeDSL
 
@@ -57,6 +58,15 @@ internal object AnalyticsKoin : KoinScopePlugin {
         }
 
         scoped {
+            Experiences(
+                remote = get(),
+                experienceMapper = get(),
+                sessionService = get(),
+                renderingService = get(),
+            )
+        }
+        
+        scoped {
             AnalyticsQueue(
                 scheduler = DefaultQueueScheduler()
             )
@@ -73,7 +83,7 @@ internal object AnalyticsKoin : KoinScopePlugin {
         }
 
         scoped<RenderingService> {
-            ExperienceRendering(
+            DefaultRenderingService(
                 config = get(),
                 stateMachineDirectory = get(),
                 stateMachineFactory = get(),
