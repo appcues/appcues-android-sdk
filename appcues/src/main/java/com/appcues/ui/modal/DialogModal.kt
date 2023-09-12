@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -43,8 +44,8 @@ private val MAX_WIDTH_EXPANDED_DP = 560.dp
 private val MAX_HEIGHT_COMPACT_DP = Dp.Unspecified
 private val MAX_HEIGHT_MEDIUM_DP = 800.dp
 private val MAX_HEIGHT_EXPANDED_DP = 900.dp
+private const val SCREEN_PADDING = 0.05
 
-private val SCREEN_HORIZONTAL_PADDING = 12.dp
 private val SCREEN_VERTICAL_PADDING = 24.dp
 
 internal data class DialogTransition(
@@ -70,13 +71,18 @@ internal fun DialogModal(
     val maxWidth = maxWidthDerivedOf(windowInfo)
     val maxHeight = maxHeightDerivedOf(windowInfo)
 
-    val horizontalPaddingPx = with(density) { SCREEN_HORIZONTAL_PADDING.roundToPx() }
+    // horizontal padding is a scale factor based on device width
+    // vertical padding is a fixed constant
+    val configuration = LocalConfiguration.current
+    val dialogHorizontalPadding = (configuration.screenWidthDp * SCREEN_PADDING).dp
+
+    val horizontalPaddingPx = with(density) { dialogHorizontalPadding.roundToPx() }
     val verticalPaddingPx = with(density) { SCREEN_VERTICAL_PADDING.roundToPx() }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = SCREEN_HORIZONTAL_PADDING, vertical = SCREEN_VERTICAL_PADDING)
+            .padding(horizontal = dialogHorizontalPadding, vertical = SCREEN_VERTICAL_PADDING)
     ) {
         AppcuesContentAnimatedVisibility(
             modifier = Modifier.align(style.getBoxAlignment()),
