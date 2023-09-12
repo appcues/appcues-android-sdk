@@ -10,6 +10,7 @@ import com.appcues.AppcuesConfig
 import com.appcues.BuildConfig
 import com.appcues.R
 import com.appcues.Storage
+import com.appcues.analytics.AnalyticsActivity
 import com.appcues.analytics.AnalyticsEvent
 import com.appcues.data.remote.appcues.AppcuesRemoteSource
 import com.appcues.data.remote.appcues.request.ActivityRequest
@@ -69,6 +70,45 @@ internal class DebuggerStatusManager(
         connectToAppcues(false)
     }
 
+    suspend fun onActivity(activity: AnalyticsActivity) = withContext(Dispatchers.IO) {
+        userIdentified = activity.userId
+
+        when (activity.eventName) {
+            AnalyticsEvent.ScreenView.eventName -> {
+                trackingScreens = true
+            }
+            AnalyticsEvent.ExperienceStarted.eventName -> activity.eventAttributes?.let { attr ->
+                val experienceId = attr["experienceId"] as String
+                val experienceName = attr["experienceName"] as String
+                val frameId = attr["frameId"] as String?
+
+                displayingExperiences[experienceId] = DisplayingExperience(
+                    name = contextResources.getString(R.string.appcues_debugger_status_experience_name, experienceName),
+                    frameId = frameId,
+                )
+            }
+            AnalyticsEvent.ExperienceStepSeen.eventName -> activity.eventAttributes?.let { attr ->
+                val experienceId = attr["experienceId"] as String
+                val step = (attr["stepIndex"] as String).split(",").let {
+                    val group = it.first().toInt() + 1
+                    val step = it.last().toInt() + 1
+
+                    contextResources.getString(R.string.appcues_debugger_status_experience_step, group, step)
+                }
+
+                displayingExperiences[experienceId]?.step = step
+            }
+            AnalyticsEvent.ExperienceCompleted.eventName, AnalyticsEvent.ExperienceDismissed.eventName ->
+                activity.eventAttributes?.let { attr ->
+                    val experienceId = attr["experienceId"] as String
+
+                    displayingExperiences.remove(experienceId)
+                }
+            else -> Unit
+        }
+    }
+
+    // TODO remove this before merging
     suspend fun onActivityRequest(activityRequest: ActivityRequest) = withContext(Dispatchers.IO) {
         userIdentified = activityRequest.userId.ifEmpty { null }
 

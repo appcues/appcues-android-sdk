@@ -46,5 +46,6 @@ internal object AppcuesKoin : KoinScopePlugin {
         scoped { AnalyticsPublisher(storage = get()) }
 
         factory { StateMachine(appcuesCoroutineScope = get(), config = get(), actionProcessor = get(), lifecycleTracker = get()) }
+        scoped { StateMachine(get(), get(), get(), get()) }
     }
 }

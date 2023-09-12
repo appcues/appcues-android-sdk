@@ -6,6 +6,7 @@ import com.appcues.AnalyticType.IDENTIFY
 import com.appcues.AnalyticType.SCREEN
 import com.appcues.R
 import com.appcues.analytics.ActivityRequestBuilder
+import com.appcues.analytics.AnalyticsActivity
 import com.appcues.analytics.AutoPropertyDecorator
 import com.appcues.analytics.ExperienceLifecycleEvent
 import com.appcues.analytics.SdkMetrics
@@ -48,6 +49,16 @@ internal class DebuggerRecentEventsManager(
 
     private var lastEventId = 0
 
+    suspend fun onActivity(activity: AnalyticsActivity) = withContext(Dispatchers.IO) {
+        when (activity.type) {
+            IDENTIFY -> onActivityIdentify(activity)
+            GROUP -> onActivityGroup(activity)
+            EVENT -> onActivityEvent(activity)
+            SCREEN -> onActivityEvent(activity)
+        }
+    }
+
+    // TODO remove before merge
     suspend fun onTrackingData(trackingData: TrackingData) = withContext(Dispatchers.IO) {
         when (trackingData.type) {
             IDENTIFY -> onIdentifyActivityRequest(trackingData.request)
@@ -59,6 +70,7 @@ internal class DebuggerRecentEventsManager(
         updateData()
     }
 
+    // TODO remove before merge
     private fun onIdentifyActivityRequest(request: ActivityRequest) {
         events.addFirst(
             DebuggerEventItem(
@@ -72,6 +84,27 @@ internal class DebuggerRecentEventsManager(
                     DebuggerEventItemPropertySection(
                         title = contextResources.getString(R.string.appcues_debugger_event_details_properties_title),
                         properties = request.profileUpdate?.toSortedList(),
+                    )
+                )
+            )
+        )
+
+        lastEventId++
+    }
+
+    private fun onActivityIdentify(activity: AnalyticsActivity) {
+        events.addFirst(
+            DebuggerEventItem(
+                id = lastEventId,
+                type = EventType.USER_PROFILE,
+                // it should always contain updated at property, this is just a safeguard
+                // in case something changes in the future to avoid unwanted exceptions
+                timestamp = ((activity.profileProperties?.get(AutoPropertyDecorator.UPDATED_AT_PROPERTY) as Date?) ?: Date()).time,
+                name = activity.userId,
+                propertySections = listOf(
+                    DebuggerEventItemPropertySection(
+                        title = contextResources.getString(R.string.appcues_debugger_event_details_properties_title),
+                        properties = activity.profileProperties?.toSortedList(),
                     )
                 )
             )
@@ -95,6 +128,77 @@ internal class DebuggerRecentEventsManager(
                 )
             )
         )
+        lastEventId++
+    }
+
+    private fun onActivityGroup(activity: AnalyticsActivity) {
+        events.addFirst(
+            DebuggerEventItem(
+                id = lastEventId,
+                type = EventType.GROUP_UPDATE,
+                timestamp = Date().time,
+                name = activity.groupId ?: contextResources.getString(R.string.appcues_debugger_event_type_group_update_title),
+                propertySections = listOf(
+                    DebuggerEventItemPropertySection(
+                        title = contextResources.getString(R.string.appcues_debugger_event_details_properties_title),
+                        properties = activity.groupProperties?.toSortedList(),
+                    )
+                )
+            )
+        )
+        lastEventId++
+    }
+
+    private fun onActivityEvent(activity: AnalyticsActivity) {
+        val type = activity.eventName.toEventType()
+        val title = activity.eventName.toEventTitle()?.let { contextResources.getString(it) }
+        val displayName = getEventDisplayName(activity, title)
+        val attributes = activity.eventAttributes ?: hashMapOf()
+
+        events.addFirst(
+            DebuggerEventItem(
+                id = lastEventId,
+                type = type,
+                timestamp = activity.timestamp.time,
+                name = displayName,
+                propertySections = listOf(
+                    DebuggerEventItemPropertySection(
+                        title = contextResources.getString(R.string.appcues_debugger_event_details_properties_title),
+                        properties = attributes
+                            .filterOutScreenProperties(type)
+                            .filterOutAutoProperties()
+                            .filterOutMetricsProperties()
+                            .filterOutInteractionData()
+                            .toSortedList(),
+                    ),
+                    DebuggerEventItemPropertySection(
+                        title = contextResources.getString(R.string.appcues_debugger_event_details_form_response_title),
+                        properties = attributes
+                            .getFormResponse()
+                            .toSortedList(),
+                    ),
+                    DebuggerEventItemPropertySection(
+                        title = contextResources.getString(R.string.appcues_debugger_event_details_interaction_data),
+                        properties = attributes
+                            .getInteractionData()
+                            .toSortedList(),
+                    ),
+                    DebuggerEventItemPropertySection(
+                        title = contextResources.getString(R.string.appcues_debugger_event_details_identity_auto_properties_title),
+                        properties = attributes
+                            .getAutoProperties()
+                            .toSortedList()
+                    ),
+                    DebuggerEventItemPropertySection(
+                        title = contextResources.getString(R.string.appcues_debugger_event_details_sdk_metrics_properties_title),
+                        properties = attributes
+                            .getMetricsProperties()
+                            .toSortedList()
+                    )
+                )
+            )
+        )
+
         lastEventId++
     }
 
@@ -156,6 +260,16 @@ internal class DebuggerRecentEventsManager(
         events.clear()
     }
 
+    private fun getEventDisplayName(activity: AnalyticsActivity, title: String?) =
+        if (activity.type == SCREEN && activity.eventAttributes != null && activity.eventAttributes.contains("screenTitle")) {
+            // screen views are a special case where the title is the screen title
+            activity.eventAttributes["screenTitle"] as String
+        } else {
+            // otherwise - use the given title for system events or the event name for custom events
+            title ?: (activity.eventName ?: String())
+        }
+
+    // TODO remove before merge
     private fun getEventDisplayName(
         event: EventRequest,
         type: EventType,

@@ -4,6 +4,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.appcues.AppcuesCoroutineScope
+import com.appcues.analytics.Analytics
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.data.model.RenderContext
 import com.appcues.debugger.DebugMode.Debugger
@@ -42,6 +43,8 @@ import org.koin.core.scope.Scope
 internal class DebuggerViewModel(
     override val scope: Scope,
 ) : ViewModel(), KoinScopeComponent {
+
+    private val analytics by inject<Analytics>()
 
     private val analyticsTracker by inject<AnalyticsTracker>()
 
@@ -117,6 +120,17 @@ internal class DebuggerViewModel(
                     // dispatch to recent events manager so it stores all recent events and emits only
                     // what is set by the filter
                     debuggerRecentEventsManager.onTrackingData(trackingData)
+                }
+            }
+
+            launch {
+                analytics.activityFlow.collect {
+                    // dispatch to status manager so it can check for new experiences
+                    // and update status info if needed
+                    debuggerStatusManager.onActivity(it)
+                    // dispatch to recent events manager so it stores all recent events and emits only
+                    // what is set by the filter
+                    debuggerRecentEventsManager.onActivity(it)
                 }
             }
 

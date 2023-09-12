@@ -6,7 +6,10 @@ import android.content.Intent
 import com.appcues.action.ActionRegistry
 import com.appcues.action.ExperienceAction
 import com.appcues.analytics.ActivityScreenTracking
+import com.appcues.analytics.Analytics
 import com.appcues.analytics.AnalyticsTracker
+import com.appcues.analytics.getProperties
+import com.appcues.analytics.getValue
 import com.appcues.data.model.ExperienceTrigger
 import com.appcues.data.model.RenderContext
 import com.appcues.debugger.AppcuesDebuggerManager
@@ -75,6 +78,7 @@ public class Appcues internal constructor(koinScope: Scope) {
     private val debuggerManager by koinScope.inject<AppcuesDebuggerManager>()
     private val appcuesCoroutineScope by koinScope.inject<AppcuesCoroutineScope>()
     private val analyticsPublisher by koinScope.inject<AnalyticsPublisher>()
+    private val analytics by koinScope.inject<Analytics>()
 
     /**
      * Set the listener to be notified about the display of Experience content.
@@ -102,6 +106,12 @@ public class Appcues internal constructor(koinScope: Scope) {
         appcuesCoroutineScope.launch {
             analyticsTracker.analyticsFlow.collect {
                 analyticsPublisher.publish(analyticsListener, it)
+            }
+        }
+
+        appcuesCoroutineScope.launch {
+            analytics.activityFlow.collect {
+                analyticsListener?.trackedAnalytic(it.type, it.getValue(), it.getProperties(), it.isInternal)
             }
         }
     }

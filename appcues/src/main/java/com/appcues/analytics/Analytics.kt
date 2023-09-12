@@ -10,6 +10,7 @@ import com.appcues.analytics.AnalyticsIntent.UpdateGroup
 import com.appcues.analytics.AnalyticsIntent.UpdateProfile
 import com.appcues.analytics.AnalyticsQueue.QueueAction
 import com.appcues.analytics.AnalyticsQueue.QueueProcessor
+import com.appcues.analytics.RenderingService.EventTracker
 import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperienceTrigger.Qualification
 import com.appcues.data.model.QualificationResult
@@ -28,6 +29,14 @@ internal interface QualificationService {
 }
 
 internal interface RenderingService {
+
+    // abstraction about who is responsible for tracking experience events
+    interface EventTracker {
+
+        fun trackEvent(name: String, properties: Map<String, Any>?, isInteractive: Boolean, isInternal: Boolean)
+    }
+
+    fun setEventTracker(eventTracker: EventTracker)
 
     // will attempt to show experiences by order
     // clearCache is mostly used when we know the qualification is from a screen_view
@@ -117,14 +126,14 @@ internal class Analytics(
     private val renderingService: RenderingService,
     private val sessionService: SessionService,
     private val activityBuilder: ActivityBuilder,
-) : QueueProcessor, ApplicationMonitor.Listener {
+) : QueueProcessor, ApplicationMonitor.Listener, EventTracker {
 
     private val intentChannel = Channel<Pair<AnalyticsIntent, QueueAction>>(Channel.UNLIMITED)
 
     init {
-        queue.setProcessor(this)
-
         ApplicationMonitor.subscribe(this)
+        queue.setProcessor(this)
+        renderingService.setEventTracker(this)
 
         coroutineScope.launch {
             for (element in intentChannel) {
@@ -209,8 +218,15 @@ internal class Analytics(
             // run intents through qualification service
             qualificationService.qualify(items)
                 // attempt to show experiences set clearCache if trigger reason is SCREEN_VIEW
-                ?.run { renderingService.show(experiences, trigger.reason == Qualification.REASON_SCREEN_VIEW) }
+                ?.run {
+                    val clearCache = trigger.reason == Qualification.REASON_SCREEN_VIEW
+                    renderingService.show(experiences, clearCache)
+                }
         }
+    }
+
+    override fun trackEvent(name: String, properties: Map<String, Any>?, isInteractive: Boolean, isInternal: Boolean) {
+        track(name, properties, isInteractive, isInternal)
     }
 
     // when application stops
