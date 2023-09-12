@@ -28,11 +28,13 @@ import com.appcues.trait.AppcuesContentAnimatedVisibility
 import com.appcues.ui.extensions.getBoxAlignment
 import com.appcues.ui.extensions.getPaddings
 import com.appcues.ui.extensions.modalStyle
-import com.appcues.ui.modal.TransitionEdge.BOTTOM
-import com.appcues.ui.modal.TransitionEdge.CENTER
-import com.appcues.ui.modal.TransitionEdge.LEADING
-import com.appcues.ui.modal.TransitionEdge.TOP
-import com.appcues.ui.modal.TransitionEdge.TRAILING
+import com.appcues.ui.modal.DialogTransition.FADE
+import com.appcues.ui.modal.DialogTransition.SLIDE
+import com.appcues.ui.modal.SlideTransitionEdge.BOTTOM
+import com.appcues.ui.modal.SlideTransitionEdge.CENTER
+import com.appcues.ui.modal.SlideTransitionEdge.LEADING
+import com.appcues.ui.modal.SlideTransitionEdge.TOP
+import com.appcues.ui.modal.SlideTransitionEdge.TRAILING
 import com.appcues.ui.utils.AppcuesWindowInfo
 import com.appcues.ui.utils.AppcuesWindowInfo.ScreenType.COMPACT
 import com.appcues.ui.utils.AppcuesWindowInfo.ScreenType.EXPANDED
@@ -46,15 +48,11 @@ private val MAX_HEIGHT_MEDIUM_DP = 800.dp
 private val MAX_HEIGHT_EXPANDED_DP = 900.dp
 private const val SCREEN_PADDING = 0.05
 
-private val SCREEN_VERTICAL_PADDING = 24.dp
+internal enum class DialogTransition {
+    FADE, SLIDE
+}
 
-internal data class DialogTransition(
-    val type: String,
-    val slideInEdge: String?,
-    val slideOutEdge: String?,
-)
-
-internal enum class TransitionEdge {
+internal enum class SlideTransitionEdge {
     LEADING, TRAILING, TOP, BOTTOM, CENTER
 }
 
@@ -71,18 +69,33 @@ internal fun DialogModal(
     val maxWidth = maxWidthDerivedOf(windowInfo)
     val maxHeight = maxHeightDerivedOf(windowInfo)
 
-    // horizontal padding is a scale factor based on device width
-    // vertical padding is a fixed constant
-    val configuration = LocalConfiguration.current
-    val dialogHorizontalPadding = (configuration.screenWidthDp * SCREEN_PADDING).dp
+    // fixed with is used for slideout style dialogs
+    val isFixedWidth = (style?.width ?: -1.0) > 0.0
+
+    val dialogHorizontalPadding = if (isFixedWidth) {
+        // fixed value for fixed width slideouts
+        12.dp
+    } else {
+        // normal dialog modals use horizontal padding wih a scale factor based on device width
+        val configuration = LocalConfiguration.current
+        (configuration.screenWidthDp * SCREEN_PADDING).dp
+    }
+
+    val dialogVerticalPadding = if (isFixedWidth) {
+        // fixed value for fixed width slideouts
+        12.dp
+    } else {
+        // normal dialog modals use standard 24.dp vertical padding
+        24.dp
+    }
 
     val horizontalPaddingPx = with(density) { dialogHorizontalPadding.roundToPx() }
-    val verticalPaddingPx = with(density) { SCREEN_VERTICAL_PADDING.roundToPx() }
+    val verticalPaddingPx = with(density) { dialogVerticalPadding.roundToPx() }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = dialogHorizontalPadding, vertical = SCREEN_VERTICAL_PADDING)
+            .padding(horizontal = dialogHorizontalPadding, vertical = dialogVerticalPadding)
     ) {
         AppcuesContentAnimatedVisibility(
             modifier = Modifier.align(style.getBoxAlignment()),
@@ -107,38 +120,23 @@ internal fun DialogModal(
 }
 
 private fun DialogTransition.toEnterTransition(style: ComponentStyle?, horizontalPadding: Int, verticalPadding: Int): EnterTransition {
-    return when (this.type) {
-        "slide" ->
-            slideOutEnterTransition(style.getSlideEdge(this.slideInEdge), horizontalPadding, verticalPadding)
-        else -> dialogEnterTransition()
+    return when (this) {
+        SLIDE -> slideOutEnterTransition(style.getSlideEdge(), horizontalPadding, verticalPadding)
+        FADE -> dialogEnterTransition()
     }
 }
 
 private fun DialogTransition.toExitTransition(style: ComponentStyle?, horizontalPadding: Int, verticalPadding: Int): ExitTransition {
-    return when (this.type) {
+    return when (this) {
         // for the exit edge, if no fixed exit given but a fixed enter edge was used, fall back to that
-        "slide" ->
-            slideOutExitTransition(style.getSlideEdge(this.slideOutEdge ?: this.slideInEdge), horizontalPadding, verticalPadding)
-        else -> dialogExitTransition()
+        SLIDE ->
+            slideOutExitTransition(style.getSlideEdge(), horizontalPadding, verticalPadding)
+        FADE -> dialogExitTransition()
     }
 }
 
-// determine slide edge based on config, or default based on alignment
-private fun ComponentStyle?.getSlideEdge(fixed: String?): TransitionEdge {
-    val fixedEdge = fixed?.let {
-        when (it) {
-            "top" -> TOP
-            "bottom" -> BOTTOM
-            "leading" -> LEADING
-            "trailing" -> TRAILING
-            "center" -> CENTER
-            else -> null
-        }
-    }
-
-    if (fixedEdge != null) return fixedEdge
-
-    // if no fixed edge provided, find the best default based on the content alignment
+// determine slide edge based on content alignment
+private fun ComponentStyle?.getSlideEdge(): SlideTransitionEdge {
     return when (this?.horizontalAlignment ?: ComponentHorizontalAlignment.CENTER) {
         ComponentHorizontalAlignment.LEADING -> LEADING
         ComponentHorizontalAlignment.TRAILING -> TRAILING

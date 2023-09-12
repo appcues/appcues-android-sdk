@@ -19,11 +19,11 @@ import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.ui.extensions.getCornerRadius
 import com.appcues.ui.extensions.styleCorner
 import com.appcues.ui.extensions.styleShadow
-import com.appcues.ui.modal.TransitionEdge.BOTTOM
-import com.appcues.ui.modal.TransitionEdge.CENTER
-import com.appcues.ui.modal.TransitionEdge.LEADING
-import com.appcues.ui.modal.TransitionEdge.TOP
-import com.appcues.ui.modal.TransitionEdge.TRAILING
+import com.appcues.ui.modal.SlideTransitionEdge.BOTTOM
+import com.appcues.ui.modal.SlideTransitionEdge.CENTER
+import com.appcues.ui.modal.SlideTransitionEdge.LEADING
+import com.appcues.ui.modal.SlideTransitionEdge.TOP
+import com.appcues.ui.modal.SlideTransitionEdge.TRAILING
 import com.appcues.ui.utils.AppcuesWindowInfo
 import com.appcues.ui.utils.AppcuesWindowInfo.DeviceType.MOBILE
 import com.appcues.ui.utils.AppcuesWindowInfo.DeviceType.TABLET
@@ -40,7 +40,7 @@ internal fun dialogExitTransition(): ExitTransition {
     return fadeOut(tween(durationMillis = 100))
 }
 
-internal fun slideOutEnterTransition(initial: TransitionEdge, horizontalPadding: Int, verticalPadding: Int): EnterTransition {
+internal fun slideOutEnterTransition(initial: SlideTransitionEdge, horizontalPadding: Int, verticalPadding: Int): EnterTransition {
     val slide = slideIn(
         initialOffset = { initial.toOffset(it, horizontalPadding, verticalPadding) },
         animationSpec = tween(durationMillis = 1000)
@@ -53,7 +53,7 @@ internal fun slideOutEnterTransition(initial: TransitionEdge, horizontalPadding:
     }
 }
 
-internal fun slideOutExitTransition(target: TransitionEdge, horizontalPadding: Int, verticalPadding: Int): ExitTransition {
+internal fun slideOutExitTransition(target: SlideTransitionEdge, horizontalPadding: Int, verticalPadding: Int): ExitTransition {
     val slide = slideOut(
         targetOffset = { target.toOffset(it, horizontalPadding, verticalPadding) },
         animationSpec = tween(durationMillis = 300)
@@ -66,7 +66,7 @@ internal fun slideOutExitTransition(target: TransitionEdge, horizontalPadding: I
     }
 }
 
-private fun TransitionEdge.toOffset(fullSize: IntSize, horizontalPadding: Int, verticalPadding: Int): IntOffset {
+private fun SlideTransitionEdge.toOffset(fullSize: IntSize, horizontalPadding: Int, verticalPadding: Int): IntOffset {
     return when (this) {
         LEADING -> IntOffset(-fullSize.width - horizontalPadding, 0)
         TRAILING -> IntOffset(fullSize.width + horizontalPadding, 0)

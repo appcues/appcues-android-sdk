@@ -5,7 +5,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.RenderContext
-import com.appcues.data.model.getConfig
 import com.appcues.data.model.getConfigOrDefault
 import com.appcues.data.model.getConfigStyle
 import com.appcues.trait.AppcuesTraitException
@@ -14,6 +13,8 @@ import com.appcues.trait.PresentingTrait
 import com.appcues.ui.modal.BottomSheetModal
 import com.appcues.ui.modal.DialogModal
 import com.appcues.ui.modal.DialogTransition
+import com.appcues.ui.modal.DialogTransition.FADE
+import com.appcues.ui.modal.DialogTransition.SLIDE
 import com.appcues.ui.modal.ExpandedBottomSheetModal
 import com.appcues.ui.modal.FullScreenModal
 import com.appcues.ui.presentation.OverlayViewPresenter
@@ -71,10 +72,9 @@ internal class ModalTrait(
     }
 
     private fun getDialogTransition(): DialogTransition {
-        return DialogTransition(
-            type = config.getConfigOrDefault("transition", "fade"),
-            slideInEdge = config.getConfig("slideInEdge"),
-            slideOutEdge = config.getConfig("slideOutEdge")
-        )
+        return when (config.getConfigOrDefault("transition", "fade")) {
+            "slide" -> SLIDE
+            else -> FADE
+        }
     }
 }
