@@ -4,6 +4,7 @@ import com.appcues.action.ExperienceAction
 import com.appcues.data.model.Action.Trigger.NAVIGATE
 import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperienceTrigger.Qualification
+import com.appcues.data.model.StepReference.StepIndex
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.RenderStep
 import com.appcues.statemachine.Action.Reset
@@ -22,7 +23,6 @@ import com.appcues.statemachine.State.EndingExperience
 import com.appcues.statemachine.State.EndingStep
 import com.appcues.statemachine.State.Idling
 import com.appcues.statemachine.State.RenderingStep
-import com.appcues.statemachine.StepReference.StepIndex
 import com.appcues.trait.AppcuesTraitException
 import com.appcues.util.ResultOf
 import kotlinx.coroutines.CompletableDeferred

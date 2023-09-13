@@ -1,18 +1,18 @@
 package com.appcues.action.appcues
 
 import com.appcues.action.ExperienceAction
-import com.appcues.analytics.AnalyticsTracker
+import com.appcues.analytics.Analytics
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.RenderContext
-import com.appcues.ui.ExperienceRenderer
+import com.appcues.experiences.Experiences
 
 internal class StepInteractionAction(
     private val renderContext: RenderContext,
     private val interaction: StepInteractionData,
-    private val analyticsTracker: AnalyticsTracker,
-    private val experienceRenderer: ExperienceRenderer,
+    private val analytics: Analytics,
+    private val experiences: Experiences,
 ) : ExperienceAction {
 
     // required in ExperienceAction interface but not used in this action
@@ -38,24 +38,14 @@ internal class StepInteractionAction(
     }
 
     override suspend fun execute() {
-        val (experience, stepIndex) = experienceRenderer.getState(renderContext).let {
-            it?.currentExperience to it?.currentStepIndex
-        }
+        // TODO change this to new approach where we track step interaction directly from Analytics
+        val experienceState = experiences.getExperienceState(renderContext) ?: return
 
-        if (experience != null && stepIndex != null && experience.published) {
-            val interactionEvent = StepInteraction(
-                experience = experience,
-                stepIndex = stepIndex,
-                interactionType = interaction.interactionType,
-                interactionProperties = interaction.properties
-            )
+        // do nothing if experience is not published
+        if (!experienceState.experience.published) return
 
-            analyticsTracker.track(
-                name = interactionEvent.name,
-                properties = interactionEvent.properties,
-                interactive = false,
-                isInternal = true
-            )
+        StepInteraction(experienceState.experience, experienceState.stepIndex, interaction.interactionType, interaction.properties).run {
+            analytics.track(name, properties, interactive = false, isInternal = true)
         }
     }
 }

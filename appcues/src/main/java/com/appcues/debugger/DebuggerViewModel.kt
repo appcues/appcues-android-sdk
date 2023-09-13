@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.appcues.AppcuesCoroutineScope
 import com.appcues.analytics.Analytics
-import com.appcues.analytics.AnalyticsTracker
 import com.appcues.data.model.RenderContext
 import com.appcues.debugger.DebugMode.Debugger
 import com.appcues.debugger.DebugMode.ScreenCapture
@@ -26,7 +25,7 @@ import com.appcues.debugger.model.TapActionType
 import com.appcues.debugger.screencapture.Capture
 import com.appcues.debugger.screencapture.ScreenCaptureProcessor
 import com.appcues.debugger.ui.MutableDebuggerState
-import com.appcues.ui.ExperienceRenderer
+import com.appcues.experiences.Experiences
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
 import kotlinx.coroutines.Dispatchers
@@ -46,7 +45,7 @@ internal class DebuggerViewModel(
 
     private val analytics by inject<Analytics>()
 
-    private val analyticsTracker by inject<AnalyticsTracker>()
+    private val experiences by inject<Experiences>()
 
     private val debuggerStatusManager by inject<DebuggerStatusManager>()
 
@@ -57,8 +56,6 @@ internal class DebuggerViewModel(
     private val screenCaptureProcessor by inject<ScreenCaptureProcessor>()
 
     private val appcuesCoroutineScope by inject<AppcuesCoroutineScope>()
-
-    private val experienceRenderer by inject<ExperienceRenderer>()
 
     sealed class UIState {
         object Creating : UIState()
@@ -112,17 +109,6 @@ internal class DebuggerViewModel(
 
     init {
         with(viewModelScope) {
-            launch {
-                analyticsTracker.analyticsFlow.collect { trackingData ->
-                    // dispatch to status manager so it can check for new experiences
-                    // and update status info if needed
-                    debuggerStatusManager.onActivityRequest(trackingData.request)
-                    // dispatch to recent events manager so it stores all recent events and emits only
-                    // what is set by the filter
-                    debuggerRecentEventsManager.onTrackingData(trackingData)
-                }
-            }
-
             launch {
                 analytics.activityFlow.collect {
                     // dispatch to status manager so it can check for new experiences
@@ -240,7 +226,7 @@ internal class DebuggerViewModel(
 
     fun captureScreen(debuggerState: MutableDebuggerState) {
         appcuesCoroutineScope.launch {
-            experienceRenderer.dismiss(RenderContext.Modal, markComplete = false, destroyed = false)
+            experiences.dismiss(RenderContext.Modal, markComplete = false, destroyed = false)
 
             withContext(Dispatchers.Main) {
                 // capture screen

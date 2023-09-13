@@ -10,10 +10,12 @@ import com.appcues.analytics.SdkMetrics
 import com.appcues.data.model.Experience
 import com.appcues.data.model.RenderContext
 import com.appcues.data.model.StepContainer
+import com.appcues.data.model.StepReference.StepGroupPageIndex
+import com.appcues.experiences.Experiences
 import com.appcues.statemachine.State.BeginningStep
 import com.appcues.statemachine.State.EndingStep
-import com.appcues.statemachine.StepReference.StepGroupPageIndex
-import com.appcues.ui.ExperienceRenderer
+import com.appcues.statemachine.StateMachine
+import com.appcues.ui.StateMachineDirectory
 import com.appcues.ui.presentation.AppcuesViewModel.UIState.Dismissing
 import com.appcues.ui.presentation.AppcuesViewModel.UIState.Idle
 import com.appcues.ui.presentation.AppcuesViewModel.UIState.Rendering
@@ -46,7 +48,8 @@ internal class AppcuesViewModel(
     }
 
     private val appcuesCoroutineScope by inject<AppcuesCoroutineScope>()
-    private val experienceRenderer by inject<ExperienceRenderer>()
+    private val experiences by inject<Experiences>()
+    private val stateMachineDirectory by inject<StateMachineDirectory>()
     private val actionProcessor by inject<ActionProcessor>()
 
     private val _uiState = MutableStateFlow<UIState>(Idle)
@@ -55,8 +58,14 @@ internal class AppcuesViewModel(
         get() = _uiState
 
     init {
+        stateMachineDirectory.getOwner(renderContext)?.run {
+            stateMachine.collectStateFlow()
+        }
+    }
+
+    private fun StateMachine.collectStateFlow() {
         viewModelScope.launch {
-            experienceRenderer.getStateFlow(renderContext)?.collectLatest { result ->
+            stateFlow.collectLatest { result ->
                 // don't collect if we are Dismissing
                 if (uiState.value is Dismissing) return@collectLatest
 
@@ -86,7 +95,7 @@ internal class AppcuesViewModel(
             // from an external source (ex deep link) and we should end the experience
             if (state is Rendering) {
                 appcuesCoroutineScope.launch {
-                    experienceRenderer.dismiss(renderContext, markComplete = false, destroyed = true)
+                    experiences.dismiss(renderContext, markComplete = false, destroyed = true)
                 }
             }
         }
@@ -116,7 +125,7 @@ internal class AppcuesViewModel(
             // then we report new position to state machine
             if (state is Rendering && state.position != index) {
                 appcuesCoroutineScope.launch {
-                    experienceRenderer.show(renderContext, StepGroupPageIndex(index, state.flatStepIndex))
+                    experiences.show(renderContext, StepGroupPageIndex(index, state.flatStepIndex))
                 }
             }
         }

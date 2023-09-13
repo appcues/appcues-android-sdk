@@ -89,8 +89,8 @@ internal class DefaultActivityBuilder(
     }
 
     private fun getGroupProperties(intent: AnalyticsIntent): Map<String, Any>? {
-        // only updating group require groupProperties
-        return if (intent is UpdateGroup) intent.properties else null
+        // only updating group require groupProperties and should only set if groupId is not null
+        return if (intent is UpdateGroup && intent.groupId != null) intent.properties else null
     }
 
     private fun getEventName(intent: AnalyticsIntent): String? {

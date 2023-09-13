@@ -10,6 +10,9 @@ import com.appcues.data.model.ExperiencePriority.NORMAL
 import com.appcues.data.model.ExperienceTrigger
 import com.appcues.data.model.ExperienceTrigger.Qualification
 import com.appcues.data.model.RenderContext
+import com.appcues.data.model.StepReference.StepId
+import com.appcues.data.model.StepReference.StepIndex
+import com.appcues.data.model.StepReference.StepOffset
 import com.appcues.mocks.mockExperience
 import com.appcues.mocks.mockExperienceNavigateActions
 import com.appcues.rules.KoinScopeRule
@@ -29,13 +32,9 @@ import com.appcues.statemachine.State.EndingExperience
 import com.appcues.statemachine.State.EndingStep
 import com.appcues.statemachine.State.Idling
 import com.appcues.statemachine.State.RenderingStep
-import com.appcues.statemachine.StepReference.StepId
-import com.appcues.statemachine.StepReference.StepIndex
-import com.appcues.statemachine.StepReference.StepOffset
 import com.appcues.trait.AppcuesTraitException
 import com.appcues.trait.PresentingTrait
 import com.appcues.util.ResultOf
-import com.appcues.util.ResultOf.Success
 import com.google.common.truth.Truth.assertThat
 import io.mockk.Called
 import io.mockk.coVerify

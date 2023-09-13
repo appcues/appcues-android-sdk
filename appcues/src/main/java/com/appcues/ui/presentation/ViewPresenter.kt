@@ -10,9 +10,9 @@ import com.appcues.AppcuesCoroutineScope
 import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperienceTrigger.Preview
 import com.appcues.data.model.RenderContext
+import com.appcues.experiences.Experiences
 import com.appcues.monitor.AppcuesActivityMonitor
 import com.appcues.monitor.AppcuesActivityMonitor.ActivityMonitorListener
-import com.appcues.ui.ExperienceRenderer
 import com.appcues.ui.composables.AppcuesComposition
 import com.appcues.ui.primitive.EmbedChromeClient
 import com.appcues.ui.utils.getParentView
@@ -26,13 +26,13 @@ internal abstract class ViewPresenter(
 
     private lateinit var viewModel: AppcuesViewModel
 
-    private val experienceRenderer: ExperienceRenderer = scope.get()
+    private val experiences: Experiences = scope.get()
     private val appcuesCoroutineScope: AppcuesCoroutineScope = scope.get()
 
     private var gestureListener: ShakeGestureListener? = null
 
     private val currentExperience: Experience?
-        get() = experienceRenderer.getState(renderContext)?.currentExperience
+        get() = experiences.getExperienceState(renderContext)?.experience
 
     private val activityMonitorListener = object : ActivityMonitorListener {
         override fun onActivityChanged(activity: Activity) {
@@ -114,7 +114,7 @@ internal abstract class ViewPresenter(
     private fun refreshPreview() {
         currentExperience?.let {
             appcuesCoroutineScope.launch {
-                experienceRenderer.preview(it.id.toString())
+                experiences.preview(it.id.toString())
             }
         }
     }

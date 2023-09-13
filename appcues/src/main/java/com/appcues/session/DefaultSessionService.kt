@@ -114,7 +114,7 @@ internal class DefaultSessionService(
     private suspend fun startAnonymousSession(): Boolean {
         getAnonymousUserId().also { anonymousId ->
             // only start anonymousSession if new Id is different from what we already have
-            if (anonymousId != sessionLocalSource.getUserId()) {
+            if (!isSessionStarted() || anonymousId != sessionLocalSource.getUserId()) {
                 sessionLocalSource.setUserId(anonymousId)
                 sessionLocalSource.isAnonymous(true)
                 sessionLocalSource.setUserSignature(null)
@@ -132,7 +132,7 @@ internal class DefaultSessionService(
 
     private suspend fun startSession(identify: Identify): Boolean {
         // only start anonymousSession if new Id is different from what we already have
-        if (identify.userId != sessionLocalSource.getUserId()) {
+        if (!isSessionStarted() || identify.userId != sessionLocalSource.getUserId()) {
             sessionLocalSource.setUserId(identify.userId)
             sessionLocalSource.isAnonymous(false)
             sessionLocalSource.setUserSignature(identify.properties?.get(KEY_USER_SIGNATURE) as? String)
@@ -159,9 +159,14 @@ internal class DefaultSessionService(
 
     // start session based on previous session info (userId)
     private suspend fun startSession(): Boolean {
-        return if (sessionLocalSource.getUserId() == null) {
+        return if (sessionLocalSource.getUserId() != null) {
             sessionId = UUID.randomUUID()
             lastActivityAt = Date()
+            currentScreen = null
+            previousScreen = null
+            sessionPageviews = 0
+            sessionRandomId = 0
+            latestUserProperties = mapOf()
             true
         } else false
     }

@@ -7,20 +7,19 @@ import com.appcues.action.ActionRegistry
 import com.appcues.action.ExperienceAction
 import com.appcues.analytics.ActivityScreenTracking
 import com.appcues.analytics.Analytics
-import com.appcues.analytics.AnalyticsTracker
+import com.appcues.analytics.RenderingService.ShowExperienceResult
 import com.appcues.analytics.getProperties
 import com.appcues.analytics.getValue
 import com.appcues.data.model.ExperienceTrigger
-import com.appcues.data.model.RenderContext
 import com.appcues.debugger.AppcuesDebuggerManager
 import com.appcues.debugger.DebugMode.Debugger
 import com.appcues.debugger.screencapture.AndroidTargetingStrategy
 import com.appcues.di.AppcuesKoinContext
+import com.appcues.experiences.Experiences
 import com.appcues.logging.Logcues
 import com.appcues.trait.ExperienceTrait
 import com.appcues.trait.ExperienceTraitLevel
 import com.appcues.trait.TraitRegistry
-import com.appcues.ui.ExperienceRenderer
 import kotlinx.coroutines.launch
 import org.koin.core.scope.Scope
 import kotlin.DeprecationLevel.ERROR
@@ -66,19 +65,15 @@ public class Appcues internal constructor(koinScope: Scope) {
     }
 
     private val config by koinScope.inject<AppcuesConfig>()
-    private val experienceRenderer by koinScope.inject<ExperienceRenderer>()
     private val logcues by koinScope.inject<Logcues>()
     private val actionRegistry by koinScope.inject<ActionRegistry>()
     private val traitRegistry by koinScope.inject<TraitRegistry>()
-    private val analyticsTracker by koinScope.inject<AnalyticsTracker>()
-    private val storage by koinScope.inject<Storage>()
-    private val sessionMonitor by koinScope.inject<SessionMonitor>()
     private val activityScreenTracking by koinScope.inject<ActivityScreenTracking>()
     private val deepLinkHandler by koinScope.inject<DeepLinkHandler>()
     private val debuggerManager by koinScope.inject<AppcuesDebuggerManager>()
     private val appcuesCoroutineScope by koinScope.inject<AppcuesCoroutineScope>()
-    private val analyticsPublisher by koinScope.inject<AnalyticsPublisher>()
     private val analytics by koinScope.inject<Analytics>()
+    private val experiences by koinScope.inject<Experiences>()
 
     /**
      * Set the listener to be notified about the display of Experience content.
@@ -104,12 +99,6 @@ public class Appcues internal constructor(koinScope: Scope) {
         logcues.info("Appcues SDK $version initialized")
 
         appcuesCoroutineScope.launch {
-            analyticsTracker.analyticsFlow.collect {
-                analyticsPublisher.publish(analyticsListener, it)
-            }
-        }
-
-        appcuesCoroutineScope.launch {
             analytics.activityFlow.collect {
                 analyticsListener?.trackedAnalytic(it.type, it.getValue(), it.getProperties(), it.isInternal)
             }
@@ -132,7 +121,12 @@ public class Appcues internal constructor(koinScope: Scope) {
      * @param properties Optional properties that provide additional context about the user.
      */
     public fun identify(userId: String, properties: Map<String, Any>? = null) {
-        identify(false, userId, properties)
+        if (userId.isEmpty()) {
+            logcues.error("Invalid userId - empty string")
+            return
+        }
+
+        analytics.identify(userId, properties)
     }
 
     /**
@@ -142,11 +136,7 @@ public class Appcues internal constructor(koinScope: Scope) {
      * @param properties Optional properties that provide additional context about the group.
      */
     public fun group(groupId: String?, properties: Map<String, Any>? = null) {
-        storage.groupId = groupId
-
-        (if (groupId.isNullOrEmpty()) null else properties).also {
-            analyticsTracker.group(it)
-        }
+        analytics.updateGroup(groupId, properties, false)
     }
 
     /**
@@ -155,10 +145,7 @@ public class Appcues internal constructor(koinScope: Scope) {
      * to begin tracking activity and checking for qualified content.
      */
     public fun anonymous() {
-        // use the device ID as the default anonymous user ID, unless an override for generating
-        // anonymous user IDs is supplied in the config builder
-        val anonymousId = config.anonymousIdFactory?.invoke() ?: storage.deviceId
-        identify(true, "anon:$anonymousId", null)
+        analytics.anonymous()
     }
 
     /**
@@ -176,21 +163,7 @@ public class Appcues internal constructor(koinScope: Scope) {
      * Can be used when the user logs out of your application.
      */
     public fun reset() {
-        // flush any pending analytics for the previous user, prior to reset
-        analyticsTracker.flushPendingActivity()
-
-        sessionMonitor.reset()
-        storage.userId = ""
-        storage.userSignature = null
-        storage.isAnonymous = true
-        storage.groupId = null
-
-        debuggerManager.reset()
-
-        appcuesCoroutineScope.launch {
-            // stopping running experiences runs async, as it may require dismissal of UI.
-            experienceRenderer.resetAll()
-        }
+        analytics.reset()
     }
 
     /**
@@ -200,7 +173,7 @@ public class Appcues internal constructor(koinScope: Scope) {
      * @param properties Optional properties that provide additional context about the event.
      */
     public fun track(name: String, properties: Map<String, Any>? = null) {
-        analyticsTracker.track(name, properties)
+        analytics.track(name, properties)
     }
 
     /**
@@ -210,7 +183,7 @@ public class Appcues internal constructor(koinScope: Scope) {
      * @param properties Optional properties that provide additional context about the screen.
      */
     public fun screen(title: String, properties: Map<String, Any>? = null) {
-        analyticsTracker.screen(title, properties)
+        analytics.screen(title, properties)
     }
 
     /**
@@ -221,7 +194,7 @@ public class Appcues internal constructor(koinScope: Scope) {
      * @return True if experience content was able to be shown, false if not.
      */
     public suspend fun show(experienceId: String): Boolean {
-        return experienceRenderer.show(experienceId, ExperienceTrigger.ShowCall)
+        return experiences.show(experienceId, ExperienceTrigger.ShowCall) == ShowExperienceResult.Success
     }
 
     /**
@@ -261,7 +234,7 @@ public class Appcues internal constructor(koinScope: Scope) {
      */
     public fun registerEmbed(frameId: String, frame: AppcuesFrameView) {
         appcuesCoroutineScope.launch {
-            experienceRenderer.start(frame, RenderContext.Embed(frameId))
+            experiences.registerFrame(frameId, frame)
         }
     }
 
@@ -291,10 +264,7 @@ public class Appcues internal constructor(koinScope: Scope) {
     public fun stop() {
         debuggerManager.stop()
         activityScreenTracking.stop()
-        appcuesCoroutineScope.launch {
-            // stopping running experiences runs async, as it may require dismissal of UI.
-            experienceRenderer.resetAll()
-        }
+        analytics.reset()
     }
 
     /**
@@ -306,23 +276,5 @@ public class Appcues internal constructor(koinScope: Scope) {
      *
      * @return True if a deep link was handled by the Appcues SDK, false if not - meaning the host application should process.
      */
-    public fun onNewIntent(activity: Activity, intent: Intent?): Boolean =
-        deepLinkHandler.handle(activity, intent)
-
-    private fun identify(isAnonymous: Boolean, userId: String, properties: Map<String, Any>?) {
-        if (userId.isEmpty()) {
-            logcues.error("Invalid userId - empty string")
-            return
-        }
-
-        val mutableProperties = properties?.toMutableMap()
-        val userChanged = storage.userId != userId
-        if (userChanged) {
-            reset()
-        }
-        storage.userId = userId
-        storage.isAnonymous = isAnonymous
-        storage.userSignature = mutableProperties?.remove("appcues:user_id_signature") as? String
-        analyticsTracker.identify(mutableProperties)
-    }
+    public fun onNewIntent(activity: Activity, intent: Intent?): Boolean = deepLinkHandler.handle(activity, intent)
 }

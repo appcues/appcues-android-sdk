@@ -45,10 +45,10 @@ import com.appcues.data.model.getConfigOrDefault
 import com.appcues.data.model.getConfigStyle
 import com.appcues.data.model.styling.ComponentStyle.ComponentHorizontalAlignment
 import com.appcues.data.model.styling.ComponentStyle.ComponentVerticalAlignment
+import com.appcues.experiences.Experiences
 import com.appcues.trait.BackdropDecoratingTrait
 import com.appcues.trait.ContainerDecoratingTrait
 import com.appcues.trait.ContainerDecoratingTrait.ContainerDecoratingType
-import com.appcues.ui.ExperienceRenderer
 import com.appcues.ui.extensions.getBoxAlignment
 import com.appcues.ui.extensions.getColor
 import com.appcues.ui.extensions.getMargins
@@ -61,7 +61,7 @@ import kotlin.math.min
 internal class SkippableTrait(
     override val config: AppcuesConfigMap,
     private val renderContext: RenderContext,
-    private val experienceRenderer: ExperienceRenderer,
+    private val experiences: Experiences,
     private val appcuesCoroutineScope: AppcuesCoroutineScope,
 ) : ContainerDecoratingTrait, BackdropDecoratingTrait {
 
@@ -156,7 +156,7 @@ internal class SkippableTrait(
                     .pointerInput(Unit) {
                         detectTapGestures {
                             appcuesCoroutineScope.launch {
-                                experienceRenderer.dismiss(renderContext, markComplete = false, destroyed = false)
+                                experiences.dismiss(renderContext, markComplete = false, destroyed = false)
                             }
                         }
                     },
@@ -296,7 +296,7 @@ internal class SkippableTrait(
                 clickable(
                     onClick = {
                         appcuesCoroutineScope.launch {
-                            experienceRenderer.dismiss(renderContext, markComplete = false, destroyed = false)
+                            experiences.dismiss(renderContext, markComplete = false, destroyed = false)
                         }
                     },
                     role = Role.Button,

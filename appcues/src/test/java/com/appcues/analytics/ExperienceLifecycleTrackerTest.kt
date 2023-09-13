@@ -7,6 +7,7 @@ import com.appcues.DeepLinkHandler
 import com.appcues.SessionMonitor
 import com.appcues.action.ActionProcessor
 import com.appcues.action.ActionRegistry
+import com.appcues.data.model.StepReference.StepOffset
 import com.appcues.debugger.AppcuesDebuggerManager
 import com.appcues.logging.Logcues
 import com.appcues.mocks.mockExperience
@@ -18,7 +19,6 @@ import com.appcues.statemachine.State
 import com.appcues.statemachine.State.EndingStep
 import com.appcues.statemachine.State.RenderingStep
 import com.appcues.statemachine.StateMachine
-import com.appcues.statemachine.StepReference.StepOffset
 import com.appcues.trait.TraitRegistry
 import com.appcues.ui.ExperienceRenderer
 import com.appcues.util.LinkOpener

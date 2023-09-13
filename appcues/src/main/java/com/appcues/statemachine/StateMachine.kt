@@ -5,6 +5,7 @@ import com.appcues.AppcuesCoroutineScope
 import com.appcues.action.ActionProcessor
 import com.appcues.analytics.ExperienceLifecycleTracker
 import com.appcues.data.model.Experience
+import com.appcues.data.model.StepReference.StepOffset
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.RenderStep
 import com.appcues.statemachine.Action.ReportError
@@ -23,7 +24,6 @@ import com.appcues.statemachine.State.EndingExperience
 import com.appcues.statemachine.State.EndingStep
 import com.appcues.statemachine.State.Idling
 import com.appcues.statemachine.State.RenderingStep
-import com.appcues.statemachine.StepReference.StepOffset
 import com.appcues.statemachine.Transition.EmptyTransition
 import com.appcues.statemachine.Transition.ErrorLoggingTransition
 import com.appcues.statemachine.Transitions.Companion.fromRenderingStepToEndingExperience
@@ -42,6 +42,7 @@ internal class StateMachine(
     private val config: AppcuesConfig,
     private val actionProcessor: ActionProcessor,
     private val lifecycleTracker: ExperienceLifecycleTracker,
+    private val onEndedExperience: ((Experience) -> Unit)?,
     initialState: State = Idling
 ) {
 
@@ -58,8 +59,6 @@ internal class StateMachine(
         get() = _state
 
     private var mutex = Mutex()
-
-    var onEndedExperience: ((Experience) -> Unit)? = null
 
     init {
         appcuesCoroutineScope.launch {

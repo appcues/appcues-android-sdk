@@ -1,9 +1,6 @@
 package com.appcues.analytics
 
-import com.appcues.SessionMonitor
 import com.appcues.analytics.AnalyticsQueue.DefaultQueueScheduler
-import com.appcues.analytics.AnalyticsQueueProcessor.AnalyticsQueueScheduler
-import com.appcues.analytics.AnalyticsQueueProcessor.QueueScheduler
 import com.appcues.di.KoinScopePlugin
 import com.appcues.experiences.Experiences
 import com.appcues.qualification.DefaultQualificationService
@@ -14,37 +11,9 @@ import org.koin.dsl.ScopeDSL
 internal object AnalyticsKoin : KoinScopePlugin {
 
     override fun ScopeDSL.install() {
-        scoped { SessionMonitor(scope = this) }
         scoped { SessionRandomizer() }
-        scoped {
-            AutoPropertyDecorator(
-                contextResources = get(),
-                config = get(),
-                storage = get(),
-                sessionMonitor = get(),
-                sessionRandomizer = get(),
-            )
-        }
-        scoped { ActivityRequestBuilder(config = get(), storage = get(), decorator = get()) }
-        factory { ExperienceLifecycleTracker(scope = this) }
-        scoped { ActivityScreenTracking(context = get(), analyticsTracker = get(), logcues = get()) }
-        scoped<QueueScheduler> { AnalyticsQueueScheduler() }
-        scoped {
-            AnalyticsQueueProcessor(
-                appcuesCoroutineScope = get(),
-                experienceRenderer = get(),
-                repository = get(),
-                analyticsQueueScheduler = get()
-            )
-        }
-        scoped {
-            AnalyticsTracker(
-                appcuesCoroutineScope = get(),
-                activityBuilder = get(),
-                sessionMonitor = get(),
-                analyticsQueueProcessor = get(),
-            )
-        }
+
+        scoped { ActivityScreenTracking(context = get(), analytics = get(), logcues = get()) }
 
         scoped {
             Analytics(
@@ -65,7 +34,7 @@ internal object AnalyticsKoin : KoinScopePlugin {
                 renderingService = get(),
             )
         }
-        
+
         scoped {
             AnalyticsQueue(
                 scheduler = DefaultQueueScheduler()

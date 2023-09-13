@@ -1,6 +1,7 @@
 package com.appcues.statemachine
 
 import com.appcues.data.model.Experience
+import com.appcues.data.model.StepReference
 
 internal sealed class Action {
     data class StartExperience(val experience: Experience) : Action()

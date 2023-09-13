@@ -2,10 +2,10 @@ package com.appcues.action.appcues
 
 import com.appcues.AppcuesScopeTest
 import com.appcues.data.model.RenderContext
+import com.appcues.data.model.StepReference.StepId
+import com.appcues.data.model.StepReference.StepIndex
+import com.appcues.data.model.StepReference.StepOffset
 import com.appcues.rules.KoinScopeRule
-import com.appcues.statemachine.StepReference.StepId
-import com.appcues.statemachine.StepReference.StepIndex
-import com.appcues.statemachine.StepReference.StepOffset
 import com.appcues.ui.ExperienceRenderer
 import com.google.common.truth.Truth
 import io.mockk.coVerify

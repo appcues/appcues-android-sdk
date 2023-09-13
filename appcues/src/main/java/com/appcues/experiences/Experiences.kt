@@ -1,12 +1,16 @@
 package com.appcues.experiences
 
+import com.appcues.AppcuesFrameView
 import com.appcues.analytics.RenderingService
 import com.appcues.analytics.RenderingService.PreviewExperienceResult
 import com.appcues.analytics.RenderingService.ShowExperienceResult
 import com.appcues.analytics.SessionService
 import com.appcues.data.mapper.experience.ExperienceMapper
+import com.appcues.data.model.ExperienceState
 import com.appcues.data.model.ExperienceTrigger
 import com.appcues.data.model.ExperienceTrigger.Preview
+import com.appcues.data.model.RenderContext
+import com.appcues.data.model.StepReference
 import com.appcues.data.remote.RemoteError.HttpError
 import com.appcues.data.remote.appcues.AppcuesRemoteSource
 import com.appcues.util.ResultOf.Failure
@@ -34,9 +38,13 @@ internal class Experiences(
             when (this) {
                 is Success -> renderingService.show(experienceMapper.map(value, trigger))
                 is Failure -> if (reason is HttpError && reason.code == HTTP_CODE_NOT_FOUND)
-                    ShowExperienceResult.ExperienceNotFound else ShowExperienceResult.Error(reason.toString())
+                    ShowExperienceResult.ExperienceNotFound else ShowExperienceResult.RequestError(reason.toString())
             }
         }
+    }
+
+    suspend fun show(renderContext: RenderContext, stepReference: StepReference) {
+        renderingService.show(renderContext, stepReference)
     }
 
     suspend fun preview(experienceId: String): PreviewExperienceResult = withContext(Dispatchers.IO) {
@@ -46,8 +54,20 @@ internal class Experiences(
             when (this) {
                 is Success -> renderingService.preview(experienceMapper.map(value, Preview))
                 is Failure -> if (reason is HttpError && reason.code == HTTP_CODE_NOT_FOUND)
-                    PreviewExperienceResult.ExperienceNotFound else PreviewExperienceResult.Error(reason.toString())
+                    PreviewExperienceResult.ExperienceNotFound else PreviewExperienceResult.RequestError(reason.toString())
             }
         }
+    }
+
+    suspend fun registerFrame(frameId: String, frame: AppcuesFrameView) {
+        renderingService.start(RenderContext.Embed(frameId), frame)
+    }
+
+    suspend fun dismiss(renderContext: RenderContext, markComplete: Boolean, destroyed: Boolean) {
+        renderingService.dismiss(renderContext, markComplete, destroyed)
+    }
+
+    fun getExperienceState(renderContext: RenderContext): ExperienceState? {
+        return renderingService.getExperienceState(renderContext)
     }
 }

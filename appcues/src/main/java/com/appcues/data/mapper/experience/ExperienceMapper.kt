@@ -114,7 +114,7 @@ internal class ExperienceMapper(
                             renderContext = renderContext,
                             completedExperienceId = from.id.toString(),
                             launchExperienceId = it,
-                            experienceRenderer = scope.get(),
+                            experiences = scope.get(),
                         )
                     )
                 }

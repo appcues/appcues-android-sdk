@@ -1,7 +1,9 @@
 package com.appcues.analytics
 
+import android.util.Log
 import com.appcues.AnalyticType
 import com.appcues.AppcuesCoroutineScope
+import com.appcues.AppcuesFrameView
 import com.appcues.analytics.AnalyticsIntent.Anonymous
 import com.appcues.analytics.AnalyticsIntent.Event
 import com.appcues.analytics.AnalyticsIntent.Identify
@@ -12,9 +14,11 @@ import com.appcues.analytics.AnalyticsQueue.QueueAction
 import com.appcues.analytics.AnalyticsQueue.QueueProcessor
 import com.appcues.analytics.RenderingService.EventTracker
 import com.appcues.data.model.Experience
+import com.appcues.data.model.ExperienceState
 import com.appcues.data.model.ExperienceTrigger.Qualification
 import com.appcues.data.model.QualificationResult
 import com.appcues.data.model.RenderContext
+import com.appcues.data.model.StepReference
 import com.appcues.monitor.ApplicationMonitor
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -48,22 +52,31 @@ internal interface RenderingService {
         object Skip : ShowExperienceResult()
         object NoSession : ShowExperienceResult()
         object ExperienceNotFound : ShowExperienceResult()
+        data class RequestError(val message: String) : ShowExperienceResult()
         data class NoRenderContext(val experience: Experience, val renderContext: RenderContext) : ShowExperienceResult()
-        data class Error(val message: String) : ShowExperienceResult()
+        data class RenderError(val experience: Experience, val message: String) : ShowExperienceResult()
     }
 
     suspend fun show(experience: Experience): ShowExperienceResult
+    suspend fun show(renderContext: RenderContext, stepReference: StepReference)
 
     sealed class PreviewExperienceResult {
         object Success : PreviewExperienceResult()
         object ExperienceNotFound : PreviewExperienceResult()
+        data class RequestError(val message: String) : PreviewExperienceResult()
         data class PreviewDeferred(val experience: Experience, val frameId: String?) : PreviewExperienceResult()
-        data class Error(val reason: String) : PreviewExperienceResult()
+        data class RenderError(val experience: Experience, val message: String) : PreviewExperienceResult()
     }
 
     suspend fun preview(experience: Experience): PreviewExperienceResult
 
+    suspend fun start(context: RenderContext, frame: AppcuesFrameView)
+
+    suspend fun dismiss(renderContext: RenderContext, markComplete: Boolean, destroyed: Boolean)
+
     suspend fun reset()
+
+    fun getExperienceState(renderContext: RenderContext): ExperienceState?
 }
 
 internal interface SessionService {
@@ -189,7 +202,7 @@ internal class Analytics(
         intentChannel.send(intent to QueueAction.FLUSH_THEN_PROCESS)
     }
 
-    fun track(name: String, properties: Map<String, Any>? = null, interactive: Boolean, isInternal: Boolean = false) =
+    fun track(name: String, properties: Map<String, Any>? = null, interactive: Boolean = true, isInternal: Boolean = false) =
         coroutineScope.launch {
             val intent = Event(isInternal, name, properties)
 
@@ -227,8 +240,6 @@ internal class Analytics(
     private suspend fun onNewSessionStarted() {
         queue.flush()
 
-        sessionService.reset()
-
         renderingService.reset()
 
         track(AnalyticsEvent.SessionStarted.eventName, interactive = true, isInternal = true)
@@ -236,6 +247,7 @@ internal class Analytics(
 
     override fun process(items: List<AnalyticsActivity>) {
         coroutineScope.launch {
+            Log.i("Logcues", "processing $items")
             // run intents through qualification service
             qualificationService.qualify(items)
                 // attempt to show experiences set clearCache if trigger reason is SCREEN_VIEW

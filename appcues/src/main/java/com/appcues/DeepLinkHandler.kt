@@ -4,21 +4,21 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
+import com.appcues.analytics.RenderingService.PreviewExperienceResult.ExperienceNotFound
+import com.appcues.analytics.RenderingService.PreviewExperienceResult.PreviewDeferred
+import com.appcues.analytics.RenderingService.PreviewExperienceResult.RenderError
+import com.appcues.analytics.RenderingService.PreviewExperienceResult.RequestError
+import com.appcues.analytics.RenderingService.PreviewExperienceResult.Success
 import com.appcues.data.model.ExperienceTrigger.DeepLink
 import com.appcues.debugger.AppcuesDebuggerManager
 import com.appcues.debugger.DebugMode.Debugger
 import com.appcues.debugger.DebugMode.ScreenCapture
-import com.appcues.ui.ExperienceRenderer
-import com.appcues.ui.ExperienceRenderer.PreviewResponse.ExperienceNotFound
-import com.appcues.ui.ExperienceRenderer.PreviewResponse.Failed
-import com.appcues.ui.ExperienceRenderer.PreviewResponse.PreviewDeferred
-import com.appcues.ui.ExperienceRenderer.PreviewResponse.StateMachineError
-import com.appcues.ui.ExperienceRenderer.PreviewResponse.Success
+import com.appcues.experiences.Experiences
 import kotlinx.coroutines.launch
 
 internal class DeepLinkHandler(
     private val config: AppcuesConfig,
-    private val experienceRenderer: ExperienceRenderer,
+    private val experiences: Experiences,
     private val appcuesCoroutineScope: AppcuesCoroutineScope,
     private val debuggerManager: AppcuesDebuggerManager,
 ) {
@@ -51,7 +51,7 @@ internal class DeepLinkHandler(
             }
             segments.count() == 2 && segments[0] == "experience_content" -> {
                 appcuesCoroutineScope.launch {
-                    experienceRenderer.show(segments[1], DeepLink)
+                    experiences.show(segments[1], DeepLink)
                 }
                 true
             }
@@ -74,11 +74,12 @@ internal class DeepLinkHandler(
     }
 
     private suspend fun previewExperience(experienceId: String, activity: Activity) {
-        experienceRenderer.preview(experienceId).run {
+        experiences.preview(experienceId).run {
             val resources = activity.resources
 
             when (this) {
-                is Failed -> resources.getString(R.string.appcues_preview_flow_failed)
+                is RenderError -> resources.getString(R.string.appcues_preview_flow_failed_reason, experience.name, message)
+                is RequestError -> resources.getString(R.string.appcues_preview_flow_failed)
                 is PreviewDeferred -> {
                     if (frameId != null) {
                         resources.getString(R.string.appcues_preview_embed_message, frameId, experience.name)
@@ -86,7 +87,6 @@ internal class DeepLinkHandler(
                         resources.getString(R.string.appcues_preview_flow_failed)
                     }
                 }
-                is StateMachineError -> resources.getString(R.string.appcues_preview_flow_failed_reason, experience.name, error.message)
                 is ExperienceNotFound -> resources.getString(R.string.appcues_preview_flow_not_found)
                 // do nothing. previewing experience
                 is Success -> null

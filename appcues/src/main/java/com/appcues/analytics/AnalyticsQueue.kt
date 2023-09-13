@@ -42,11 +42,11 @@ internal class AnalyticsQueue(private val scheduler: QueueScheduler) {
         queue.add(item)
     }
 
-    fun enqueue(intent: AnalyticsActivity, action: QueueAction) {
+    fun enqueue(item: AnalyticsActivity, action: QueueAction) {
         when (action) {
-            QUEUE -> enqueue(intent)
-            QUEUE_THEN_FLUSH -> enqueueThenFlush(intent)
-            FLUSH_THEN_PROCESS -> flushThenProcess(intent)
+            QUEUE -> enqueue(item)
+            QUEUE_THEN_FLUSH -> enqueueThenFlush(item)
+            FLUSH_THEN_PROCESS -> flushThenProcess(item)
         }
     }
 
@@ -92,7 +92,8 @@ internal class AnalyticsQueue(private val scheduler: QueueScheduler) {
     }
 
     private fun processAndClear() {
-        processor.process(queue)
+        // copy of queue before clearing the original reference
+        processor.process(queue.toList())
 
         queue.clear()
     }

@@ -5,12 +5,12 @@ import com.appcues.action.MetadataSettingsAction
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.RenderContext
 import com.appcues.data.model.getConfigOrDefault
-import com.appcues.ui.ExperienceRenderer
+import com.appcues.experiences.Experiences
 
 internal class CloseAction(
     override val config: AppcuesConfigMap,
     private val renderContext: RenderContext,
-    private val experienceRenderer: ExperienceRenderer,
+    private val experiences: Experiences,
 ) : ExperienceAction, MetadataSettingsAction {
 
     companion object {
@@ -25,6 +25,6 @@ internal class CloseAction(
     override val destination = "end-experience"
 
     override suspend fun execute() {
-        experienceRenderer.dismiss(renderContext, markComplete = markComplete, destroyed = false)
+        experiences.dismiss(renderContext, markComplete, false)
     }
 }

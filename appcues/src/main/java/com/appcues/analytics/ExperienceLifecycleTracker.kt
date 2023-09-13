@@ -1,7 +1,6 @@
 package com.appcues.analytics
 
 import com.appcues.AppcuesCoroutineScope
-import com.appcues.Storage
 import com.appcues.analytics.ExperienceLifecycleEvent.ExperienceCompleted
 import com.appcues.analytics.ExperienceLifecycleEvent.ExperienceDismissed
 import com.appcues.analytics.ExperienceLifecycleEvent.ExperienceError
@@ -9,6 +8,7 @@ import com.appcues.analytics.ExperienceLifecycleEvent.ExperienceStarted
 import com.appcues.analytics.ExperienceLifecycleEvent.StepCompleted
 import com.appcues.analytics.ExperienceLifecycleEvent.StepError
 import com.appcues.analytics.ExperienceLifecycleEvent.StepSeen
+import com.appcues.analytics.RenderingService.EventTracker
 import com.appcues.data.model.Experience
 import com.appcues.statemachine.Error
 import com.appcues.statemachine.Error.ExperienceAlreadyActive
@@ -25,20 +25,11 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinScopeComponent
-import org.koin.core.component.inject
-import org.koin.core.scope.Scope
-import java.util.Date
 
 internal class ExperienceLifecycleTracker(
-    override val scope: Scope,
-) : KoinScopeComponent {
-
-    // lazy property injection to avoid circular DI reference in constructor
-    // AnalyticsTracker -> this <- Analytics Tracker
-    private val analyticsTracker: AnalyticsTracker by inject()
-    private val storage: Storage by inject()
-    private val appcuesCoroutineScope: AppcuesCoroutineScope by inject()
+    private val coroutineScope: AppcuesCoroutineScope,
+    private val eventTracker: EventTracker,
+) {
 
     private var stateJob: Job? = null
     private var errorJob: Job? = null
@@ -47,8 +38,8 @@ internal class ExperienceLifecycleTracker(
         // ensure any existing observers are stopped before starting new ones
         stop()
 
-        stateJob = appcuesCoroutineScope.launch(dispatcher) { stateMachine.observeState(onEndedExperience) }
-        errorJob = appcuesCoroutineScope.launch(dispatcher) { stateMachine.observeErrors() }
+        stateJob = coroutineScope.launch(dispatcher) { stateMachine.observeState(onEndedExperience) }
+        errorJob = coroutineScope.launch(dispatcher) { stateMachine.observeErrors() }
     }
 
     fun stop() {
@@ -66,7 +57,8 @@ internal class ExperienceLifecycleTracker(
                     is RenderingStep -> {
                         if (it.isFirst) {
                             // update this value for auto-properties
-                            storage.lastContentShownAt = Date()
+                            // TODO put this in Session when we receive ExperienceStarted
+                            // storage.lastContentShownAt = Date()
                             trackLifecycleEvent(ExperienceStarted(it.experience), SdkMetrics.trackRender(it.experience.requestId))
                         }
                         trackLifecycleEvent(StepSeen(it.experience, it.flatStepIndex))
@@ -112,7 +104,8 @@ internal class ExperienceLifecycleTracker(
     private fun trackLifecycleEvent(event: ExperienceLifecycleEvent, additionalProperties: Map<String, Any> = emptyMap()) {
         val properties = event.properties.toMutableMap()
         properties.putAll(additionalProperties)
-        analyticsTracker.track(event.name, properties, interactive = false, isInternal = true)
+
+        eventTracker.trackEvent(event.name, properties, isInteractive = false, isInternal = true)
     }
 
     private fun State.shouldTrack(): Boolean =

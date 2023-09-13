@@ -10,7 +10,7 @@ import com.appcues.util.getActivityInfoCompat
 
 internal class ActivityScreenTracking(
     private val context: Context,
-    private val analyticsTracker: AnalyticsTracker,
+    private val analytics: Analytics,
     private val logcues: Logcues,
 ) : Application.ActivityLifecycleCallbacks {
 
@@ -33,7 +33,7 @@ internal class ActivityScreenTracking(
         try {
             val info = packageManager.getActivityInfoCompat(activity.componentName, PackageManager.GET_META_DATA)
             val activityLabel = info.loadLabel(packageManager)
-            analyticsTracker.screen(activityLabel.toString(), isInternal = true)
+            analytics.screen(activityLabel.toString(), isInternal = true)
         } catch (ex: PackageManager.NameNotFoundException) {
             logcues.error(ex)
         }

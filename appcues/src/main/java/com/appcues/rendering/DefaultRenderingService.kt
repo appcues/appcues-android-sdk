@@ -1,6 +1,7 @@
 package com.appcues.rendering
 
 import com.appcues.AppcuesConfig
+import com.appcues.AppcuesFrameView
 import com.appcues.analytics.RenderingService
 import com.appcues.analytics.RenderingService.EventTracker
 import com.appcues.analytics.RenderingService.PreviewExperienceResult
@@ -10,41 +11,34 @@ import com.appcues.analytics.trackExperienceError
 import com.appcues.analytics.trackExperienceRecovery
 import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperiencePriority.NORMAL
+import com.appcues.data.model.ExperienceState
 import com.appcues.data.model.RenderContext
 import com.appcues.data.model.RenderContext.Modal
+import com.appcues.data.model.StepReference
 import com.appcues.data.model.getFrameId
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.StartExperience
 import com.appcues.statemachine.Action.StartStep
-import com.appcues.statemachine.Error
-import com.appcues.statemachine.Error.RenderContextNotActive
-import com.appcues.statemachine.State
 import com.appcues.statemachine.State.Idling
 import com.appcues.statemachine.StateMachine
 import com.appcues.statemachine.StateMachineFactory
-import com.appcues.statemachine.StepReference
+import com.appcues.ui.AppcuesFrameStateMachineOwner
 import com.appcues.ui.ModalStateMachineOwner
 import com.appcues.ui.StateMachineDirectory
-import com.appcues.util.ResultOf
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
+import kotlin.collections.set
 
 internal class DefaultRenderingService(
     private val config: AppcuesConfig,
     private val stateMachineDirectory: StateMachineDirectory,
-    stateMachineFactory: StateMachineFactory,
+    private val stateMachineFactory: StateMachineFactory,
 ) : RenderingService {
 
     private val qualifiedExperiences = hashMapOf<RenderContext, List<Experience>>()
     private val previewExperiences = hashMapOf<RenderContext, Experience>()
 
     private lateinit var eventTracker: EventTracker
-
-    init {
-        // sets up the single state machine used for modal experiences (mobile flows, not embeds)
-        // that lives indefinitely and handles one experience at a time
-        stateMachineDirectory.setOwner(ModalStateMachineOwner(stateMachineFactory.create()))
-    }
 
     override fun setEventTracker(eventTracker: EventTracker) {
         this.eventTracker = eventTracker
@@ -97,15 +91,14 @@ internal class DefaultRenderingService(
 
         if (!canShow) return ShowExperienceResult.Skip
 
-        val stateMachine = stateMachineDirectory.getOwner(renderContext)?.stateMachine
-            ?: return ShowExperienceResult.NoRenderContext(experience, renderContext).also {
-                eventTracker.trackExperienceError(experience, "no render context $renderContext")
-            }
+        val stateMachine = getStateMachine() ?: return ShowExperienceResult.NoRenderContext(experience, renderContext).also {
+            eventTracker.trackExperienceError(experience, "no render context $renderContext")
+        }
 
         if (stateMachine.checkPriority(this)) {
             return when (val result = stateMachine.handleAction(EndExperience(markComplete = false, destroyed = false))) {
                 is Success -> show(this)
-                is Failure -> ShowExperienceResult.Error(result.reason.message)
+                is Failure -> ShowExperienceResult.RenderError(this, result.reason.message)
             }
         }
 
@@ -114,7 +107,20 @@ internal class DefaultRenderingService(
 
         return when (val result = stateMachine.handleAction(StartExperience(this))) {
             is Success -> ShowExperienceResult.Success.also { previewExperiences.remove(renderContext) }
-            is Failure -> ShowExperienceResult.Error(result.reason.message)
+            is Failure -> ShowExperienceResult.RenderError(this, result.reason.message)
+        }
+    }
+
+    private fun Experience.getStateMachine(): StateMachine? {
+        // try to retrieve state machine
+        return stateMachineDirectory.getOwner(renderContext)?.stateMachine ?: run {
+            // in case its null we check if the render context is modal
+            if (renderContext == Modal) {
+                // if it is then we create it (should happen just once)
+                val modalOwner = ModalStateMachineOwner(stateMachineFactory.create(eventTracker))
+                stateMachineDirectory.setOwner(modalOwner)
+                modalOwner.stateMachine
+            } else null
         }
     }
 
@@ -126,7 +132,7 @@ internal class DefaultRenderingService(
         return newExperience.priority == NORMAL && state != Idling
     }
 
-    suspend fun show(renderContext: RenderContext, stepReference: StepReference) {
+    override suspend fun show(renderContext: RenderContext, stepReference: StepReference) {
         stateMachineDirectory.getOwner(renderContext)?.stateMachine?.handleAction(StartStep(stepReference))
     }
 
@@ -136,15 +142,46 @@ internal class DefaultRenderingService(
         return when (val result = show(experience)) {
             is ShowExperienceResult.NoRenderContext ->
                 PreviewExperienceResult.PreviewDeferred(result.experience, result.renderContext.getFrameId())
-            is ShowExperienceResult.Error ->
-                PreviewExperienceResult.Error(result.message)
+            is ShowExperienceResult.RenderError ->
+                PreviewExperienceResult.RenderError(experience, result.message)
+            is ShowExperienceResult.RequestError ->
+                PreviewExperienceResult.RequestError(result.message)
             else -> PreviewExperienceResult.Success
         }
     }
 
-    suspend fun dismiss(renderContext: RenderContext, markComplete: Boolean, destroyed: Boolean): ResultOf<State, Error> {
-        return stateMachineDirectory.getOwner(renderContext)?.stateMachine?.handleAction(EndExperience(markComplete, destroyed))
-            ?: Failure(RenderContextNotActive(renderContext))
+    override suspend fun start(context: RenderContext, frame: AppcuesFrameView) {
+        // If there's already a frame for the context, reset it back to its unregistered state.
+        stateMachineDirectory.getOwner(context)?.reset()
+
+        // if this frame is already registered for a different context, reset it back - a frame
+        // can only be registered to a single RenderContext
+        stateMachineDirectory.getOwner(frame)?.let {
+            if (it.renderContext != context) {
+                it.reset()
+            }
+        }
+
+        val stateMachine = stateMachineFactory.create(eventTracker) { qualifiedExperiences.remove(context) }
+
+        stateMachineDirectory.setOwner(AppcuesFrameStateMachineOwner(frame, context, stateMachine))
+
+        // shows preview if exist or else show possible experiences from qualification
+        previewExperiences[context]?.let { show(it) } ?: qualifiedExperiences[context]?.let { attemptToShow(it) }
+    }
+
+    override suspend fun dismiss(renderContext: RenderContext, markComplete: Boolean, destroyed: Boolean) {
+        stateMachineDirectory.getOwner(renderContext)?.stateMachine?.handleAction(EndExperience(markComplete, destroyed))
+    }
+
+    override fun getExperienceState(renderContext: RenderContext): ExperienceState? {
+        val owner = stateMachineDirectory.getOwner(renderContext) ?: return null
+        val experience = owner.stateMachine.state.currentExperience
+        val stepIndex = owner.stateMachine.state.currentStepIndex
+
+        if (experience == null || stepIndex == null) return null
+
+        return ExperienceState(experience, stepIndex)
     }
 
     override suspend fun reset() {

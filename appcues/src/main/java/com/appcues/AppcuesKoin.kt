@@ -4,8 +4,7 @@ import com.appcues.data.AppcuesRepository
 import com.appcues.debugger.AppcuesDebuggerManager
 import com.appcues.di.KoinScopePlugin
 import com.appcues.logging.Logcues
-import com.appcues.statemachine.StateMachine
-import com.appcues.ui.ExperienceRenderer
+import com.appcues.statemachine.StateMachineFactory
 import com.appcues.ui.StateMachineDirectory
 import com.appcues.util.ContextResources
 import com.appcues.util.LinkOpener
@@ -23,7 +22,7 @@ internal object AppcuesKoin : KoinScopePlugin {
         scoped {
             DeepLinkHandler(
                 config = get(),
-                experienceRenderer = get(),
+                experiences = get(),
                 appcuesCoroutineScope = get(),
                 debuggerManager = get(),
             )
@@ -31,7 +30,6 @@ internal object AppcuesKoin : KoinScopePlugin {
         scoped { AppcuesDebuggerManager(context = get(), koinScope = this) }
         scoped { StateMachineDirectory() }
         scoped { ContextResources(context = get()) }
-        scoped { ExperienceRenderer(scope = get()) }
         scoped {
             AppcuesRepository(
                 appcuesRemoteSource = get(),
@@ -43,9 +41,6 @@ internal object AppcuesKoin : KoinScopePlugin {
             )
         }
         scoped { LinkOpener(get()) }
-        scoped { AnalyticsPublisher(storage = get()) }
-
-        factory { StateMachine(appcuesCoroutineScope = get(), config = get(), actionProcessor = get(), lifecycleTracker = get()) }
-        scoped { StateMachine(get(), get(), get(), get()) }
+        scoped { StateMachineFactory(get(), get(), get()) }
     }
 }
