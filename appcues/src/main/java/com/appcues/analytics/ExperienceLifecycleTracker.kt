@@ -56,9 +56,6 @@ internal class ExperienceLifecycleTracker(
                 when (it) {
                     is RenderingStep -> {
                         if (it.isFirst) {
-                            // update this value for auto-properties
-                            // TODO put this in Session when we receive ExperienceStarted
-                            // storage.lastContentShownAt = Date()
                             trackLifecycleEvent(ExperienceStarted(it.experience), SdkMetrics.trackRender(it.experience.requestId))
                         }
                         trackLifecycleEvent(StepSeen(it.experience, it.flatStepIndex))

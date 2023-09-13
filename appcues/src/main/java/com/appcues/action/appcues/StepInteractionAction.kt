@@ -38,7 +38,6 @@ internal class StepInteractionAction(
     }
 
     override suspend fun execute() {
-        // TODO change this to new approach where we track step interaction directly from Analytics
         val experienceState = experiences.getExperienceState(renderContext) ?: return
 
         // do nothing if experience is not published

@@ -74,7 +74,7 @@ internal class DefaultSessionService(
         }.updateSession(intent)
     }
 
-    private fun Boolean.updateSession(intent: AnalyticsIntent): Boolean {
+    private suspend fun Boolean.updateSession(intent: AnalyticsIntent): Boolean {
         if (this) {
             when {
                 intent is Anonymous -> {
@@ -97,6 +97,9 @@ internal class DefaultSessionService(
                     sessionRandomId = sessionRandomizer.get()
                     currentScreen = null
                     previousScreen = null
+                }
+                intent is Event && intent.name == AnalyticsEvent.ExperienceStarted.eventName -> {
+                    sessionLocalSource.setLastContentShownAt(Date())
                 }
             }
         }

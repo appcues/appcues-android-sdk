@@ -42,7 +42,6 @@ internal class SubmitFormAction(
 
     // reports analytics for step interaction, for the form submission
     override suspend fun execute() {
-        // TODO change this to new approach where we track step interaction directly from Analytics
         val experienceState = experiences.getExperienceState(renderContext) ?: return
         val formState = experienceState.step.formState
 

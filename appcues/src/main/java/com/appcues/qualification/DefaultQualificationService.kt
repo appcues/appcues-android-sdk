@@ -45,7 +45,7 @@ internal class DefaultQualificationService(
     override suspend fun qualify(intents: List<AnalyticsActivity>): QualificationResult? {
         val activityRequest = intents.mergeToActivityRequest() ?: return null
 
-        // FIXME for now using old SdkMetrics structure, there is probably no harm in tracking ALL ActivityRequests
+        // TODO verify sdkMetrics logic
         SdkMetrics.tracked(activityRequest.requestId, Date())
 
         return trackActivity(activityRequest).also {
@@ -61,9 +61,8 @@ internal class DefaultQualificationService(
             EventRequest(
                 // its never null at this point, since all of type screen and event can provide "name"
                 name = it.eventName ?: String(),
-                // FIXME attr and context wont need to be mutable anymore
-                attributes = it.eventAttributes?.toMutableMap() ?: hashMapOf(),
-                context = it.eventContext?.toMutableMap() ?: hashMapOf()
+                attributes = it.eventAttributes ?: mapOf(),
+                context = it.eventContext ?: mapOf()
             )
         }
 

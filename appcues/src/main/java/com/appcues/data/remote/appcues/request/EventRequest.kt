@@ -7,6 +7,6 @@ import java.util.Date
 internal data class EventRequest(
     val name: String,
     val timestamp: Date = Date(),
-    val attributes: MutableMap<String, Any> = hashMapOf(),
-    val context: MutableMap<String, Any> = hashMapOf()
+    val attributes: Map<String, Any>,
+    val context: Map<String, Any>
 )
