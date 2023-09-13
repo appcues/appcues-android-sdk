@@ -1,5 +1,6 @@
 package com.appcues
 
+import coil.ImageLoader
 import com.appcues.LoggingLevel.NONE
 
 /**
@@ -9,7 +10,9 @@ public data class AppcuesConfig internal constructor(
     internal val accountId: String,
     internal val applicationId: String,
 ) {
+
     internal companion object {
+
         const val SESSION_TIMEOUT_DEFAULT = 300 // 5 minutes by default
         const val ACTIVITY_STORAGE_MAX_SIZE = 25
     }
@@ -86,4 +89,7 @@ public data class AppcuesConfig internal constructor(
      * it is ignored.
      */
     var additionalAutoProperties: Map<String, Any> = emptyMap()
+
+    // internally used for ui test on debug variant
+    internal var imageLoader: ImageLoader? = null
 }

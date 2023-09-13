@@ -35,7 +35,7 @@ internal class DefaultAppcuesActionsDelegate(private val viewModel: AppcuesViewM
 internal val LocalAppcuesActions = staticCompositionLocalOf<Map<UUID, List<Action>>> { hashMapOf() }
 
 // used to support UI testing and mocking of image loading
-internal val LocalImageLoader = staticCompositionLocalOf<ImageLoader?> { null }
+internal val LocalImageLoader = staticCompositionLocalOf<ImageLoader> { noLocalProvidedFor("ImageLoader") }
 
 /**
  * LocalAppcuesPagination is used to report back any page change that

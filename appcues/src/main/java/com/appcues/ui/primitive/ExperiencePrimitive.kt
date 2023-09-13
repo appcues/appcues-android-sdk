@@ -31,7 +31,6 @@ import com.appcues.ui.composables.LocalLogcues
 import com.appcues.ui.extensions.PrimitiveGestureProperties
 import com.appcues.ui.extensions.blurHashPlaceholder
 import com.appcues.ui.extensions.getBoxAlignment
-import com.appcues.ui.extensions.getImageLoader
 import com.appcues.ui.extensions.getImageRequest
 import com.appcues.ui.extensions.innerPrimitiveStyle
 import com.appcues.ui.extensions.outerPrimitiveStyle
@@ -111,7 +110,7 @@ internal fun BoxScope.BackgroundImage(style: ComponentStyle) {
                 modifier = Modifier.matchParentSize(),
                 model = context.getImageRequest(imageUrl, contentMode),
                 contentDescription = null,
-                imageLoader = LocalImageLoader.current ?: context.getImageLoader(),
+                imageLoader = LocalImageLoader.current,
                 placeholder = context.blurHashPlaceholder(decodedBlurHash, intrinsicSize),
                 contentScale = contentMode.toImageAsyncContentScale(),
                 alignment = getBoxAlignment(horizontalAlignment, verticalAlignment),
