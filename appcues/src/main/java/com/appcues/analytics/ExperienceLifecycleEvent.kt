@@ -84,6 +84,7 @@ internal sealed class ExperienceLifecycleEvent(
     val properties: Map<String, Any>
         get() = hashMapOf<String, Any?>(
             "experienceId" to experience.id.appcuesFormatted(),
+            "experienceInstanceId" to experience.instanceId.appcuesFormatted(),
             "experienceName" to experience.name,
             "experienceType" to experience.type,
             "frameId" to experience.renderContext.getFrameId(),
