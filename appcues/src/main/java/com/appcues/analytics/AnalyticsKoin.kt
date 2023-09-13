@@ -18,6 +18,7 @@ internal object AnalyticsKoin : KoinScopePlugin {
         scoped {
             Analytics(
                 coroutineScope = get(),
+                logcues = get(),
                 queue = get(),
                 qualificationService = get(),
                 renderingService = get(),

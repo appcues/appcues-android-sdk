@@ -1,6 +1,5 @@
 package com.appcues.analytics
 
-import android.util.Log
 import com.appcues.AnalyticType
 import com.appcues.AppcuesCoroutineScope
 import com.appcues.AppcuesFrameView
@@ -19,6 +18,7 @@ import com.appcues.data.model.ExperienceTrigger.Qualification
 import com.appcues.data.model.QualificationResult
 import com.appcues.data.model.RenderContext
 import com.appcues.data.model.StepReference
+import com.appcues.logging.Logcues
 import com.appcues.monitor.ApplicationMonitor
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -155,6 +155,7 @@ internal data class AnalyticsActivity(
 
 internal class Analytics(
     private val coroutineScope: AppcuesCoroutineScope,
+    private val logcues: Logcues,
     private val queue: AnalyticsQueue,
     private val qualificationService: QualificationService,
     private val renderingService: RenderingService,
@@ -185,6 +186,11 @@ internal class Analytics(
     }
 
     fun identify(userId: String, properties: Map<String, Any>? = null) = coroutineScope.launch {
+        if (userId.isEmpty()) {
+            logcues.error("Invalid userId - empty string")
+            return@launch
+        }
+
         val intent = Identify(userId, properties)
 
         intentChannel.send(intent to QueueAction.FLUSH_THEN_PROCESS)
@@ -217,14 +223,12 @@ internal class Analytics(
         intentChannel.send(intent to QueueAction.QUEUE_THEN_FLUSH)
     }
 
-    fun reset() {
-        coroutineScope.launch {
-            queue.flush()
+    suspend fun reset() {
+        queue.flush()
 
-            sessionService.reset()
+        sessionService.reset()
 
-            renderingService.reset()
-        }
+        renderingService.reset()
     }
 
     private suspend fun enqueueIntent(intent: AnalyticsIntent, action: QueueAction) {
@@ -247,7 +251,6 @@ internal class Analytics(
 
     override fun process(items: List<AnalyticsActivity>) {
         coroutineScope.launch {
-            Log.i("Logcues", "processing $items")
             // run intents through qualification service
             qualificationService.qualify(items)
                 // attempt to show experiences set clearCache if trigger reason is SCREEN_VIEW

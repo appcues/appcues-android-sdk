@@ -71,7 +71,7 @@ public class Appcues internal constructor(koinScope: Scope) {
     private val activityScreenTracking by koinScope.inject<ActivityScreenTracking>()
     private val deepLinkHandler by koinScope.inject<DeepLinkHandler>()
     private val debuggerManager by koinScope.inject<AppcuesDebuggerManager>()
-    private val appcuesCoroutineScope by koinScope.inject<AppcuesCoroutineScope>()
+    private val coroutineScope by koinScope.inject<AppcuesCoroutineScope>()
     private val analytics by koinScope.inject<Analytics>()
     private val experiences by koinScope.inject<Experiences>()
 
@@ -98,7 +98,7 @@ public class Appcues internal constructor(koinScope: Scope) {
     init {
         logcues.info("Appcues SDK $version initialized")
 
-        appcuesCoroutineScope.launch {
+        coroutineScope.launch {
             analytics.activityFlow.collect {
                 analyticsListener?.trackedAnalytic(it.type, it.getValue(), it.getProperties(), it.isInternal)
             }
@@ -121,11 +121,6 @@ public class Appcues internal constructor(koinScope: Scope) {
      * @param properties Optional properties that provide additional context about the user.
      */
     public fun identify(userId: String, properties: Map<String, Any>? = null) {
-        if (userId.isEmpty()) {
-            logcues.error("Invalid userId - empty string")
-            return
-        }
-
         analytics.identify(userId, properties)
     }
 
@@ -163,7 +158,9 @@ public class Appcues internal constructor(koinScope: Scope) {
      * Can be used when the user logs out of your application.
      */
     public fun reset() {
-        analytics.reset()
+        coroutineScope.launch {
+            analytics.reset()
+        }
     }
 
     /**
@@ -233,7 +230,7 @@ public class Appcues internal constructor(koinScope: Scope) {
      * @param frame frame used to inflate the embedded experience
      */
     public fun registerEmbed(frameId: String, frame: AppcuesFrameView) {
-        appcuesCoroutineScope.launch {
+        coroutineScope.launch {
             experiences.registerFrame(frameId, frame)
         }
     }
@@ -264,7 +261,8 @@ public class Appcues internal constructor(koinScope: Scope) {
     public fun stop() {
         debuggerManager.stop()
         activityScreenTracking.stop()
-        analytics.reset()
+
+        reset()
     }
 
     /**
