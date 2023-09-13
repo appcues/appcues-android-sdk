@@ -34,7 +34,7 @@ internal class Experiences(
         // cannot show if no session is active
         val sessionProperties = sessionService.getSessionProperties() ?: return@withContext ShowExperienceResult.NoSession
 
-        return@withContext remote.getExperienceContent(experienceId, sessionProperties.userSignature).run {
+        return@withContext remote.getExperienceContent(experienceId, sessionProperties.userId, sessionProperties.userSignature).run {
             when (this) {
                 is Success -> renderingService.show(experienceMapper.map(value, trigger))
                 is Failure -> if (reason is HttpError && reason.code == HTTP_CODE_NOT_FOUND)
@@ -50,7 +50,7 @@ internal class Experiences(
     suspend fun preview(experienceId: String): PreviewExperienceResult = withContext(Dispatchers.IO) {
         val sessionProperties = sessionService.getSessionProperties()
 
-        return@withContext remote.getExperiencePreview(experienceId, sessionProperties?.userSignature).run {
+        return@withContext remote.getExperiencePreview(experienceId, sessionProperties?.userId, sessionProperties?.userSignature).run {
             when (this) {
                 is Success -> renderingService.preview(experienceMapper.map(value, Preview))
                 is Failure -> if (reason is HttpError && reason.code == HTTP_CODE_NOT_FOUND)

@@ -1,7 +1,6 @@
 package com.appcues.data.remote.appcues
 
 import com.appcues.AppcuesConfig
-import com.appcues.Storage
 import com.appcues.analytics.SdkMetrics
 import com.appcues.data.remote.NetworkRequest
 import com.appcues.data.remote.RemoteError
@@ -19,9 +18,10 @@ import java.util.UUID
 internal class AppcuesRemoteSource(
     private val service: AppcuesService,
     private val config: AppcuesConfig,
-    private val storage: Storage,
 ) {
+
     companion object {
+
         const val BASE_URL = "https://api.appcues.net/"
 
         // we should not show an experience response if it takes > 5 seconds to return
@@ -31,26 +31,25 @@ internal class AppcuesRemoteSource(
 
     suspend fun getExperienceContent(
         experienceId: String,
+        userId: String,
         userSignature: String?,
     ): ResultOf<ExperienceResponse, RemoteError> =
         NetworkRequest.execute {
-            service.experienceContent(config.accountId, storage.userId, experienceId, userSignature?.let { "Bearer $it" })
+            service.experienceContent(config.accountId, userId, experienceId, userSignature?.let { "Bearer $it" })
         }
 
     suspend fun getExperiencePreview(
         experienceId: String,
+        userId: String?,
         userSignature: String?,
-    ): ResultOf<ExperienceResponse, RemoteError> =
+    ): ResultOf<ExperienceResponse, RemoteError> = NetworkRequest.execute {
         // preview _can_ be personalized, so attempt to use the user info, if a valid userId exists
-        if (storage.userId.isNotEmpty()) {
-            NetworkRequest.execute {
-                service.experiencePreview(config.accountId, storage.userId, experienceId, userSignature?.let { "Bearer $it" })
-            }
+        if (userId == null) {
+            service.experiencePreview(config.accountId, experienceId)
         } else {
-            NetworkRequest.execute {
-                service.experiencePreview(config.accountId, experienceId)
-            }
+            service.experiencePreview(config.accountId, userId, experienceId, userSignature?.let { "Bearer $it" })
         }
+    }
 
     suspend fun postActivity(
         userId: String,
@@ -97,6 +96,7 @@ internal class AppcuesRemoteSource(
 // an interceptor used on Appcues requests to track the timing of SDK requests
 // related to experience rendering, for SDK metrics
 internal class MetricsInterceptor : Interceptor {
+
     override fun intercept(chain: Chain): Response {
         val request = chain.request()
         val requestId = request.header("appcues-request-id")

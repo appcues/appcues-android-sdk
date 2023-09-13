@@ -28,7 +28,7 @@ internal object ActionKoin : KoinScopePlugin {
         // other
         factory { LinkAction(config = it[0], get(), get()) }
         factory { TrackEventAction(it[0], get()) }
-        factory { UpdateProfileAction(it[0], get(), get()) }
+        factory { UpdateProfileAction(it[0], get()) }
         factory { RequestReviewAction(it[0], get(), get()) }
     }
 }

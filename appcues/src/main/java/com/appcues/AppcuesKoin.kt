@@ -1,6 +1,5 @@
 package com.appcues
 
-import com.appcues.data.AppcuesRepository
 import com.appcues.debugger.AppcuesDebuggerManager
 import com.appcues.di.KoinScopePlugin
 import com.appcues.logging.Logcues
@@ -18,7 +17,6 @@ internal object AppcuesKoin : KoinScopePlugin {
             val config: AppcuesConfig = get()
             Logcues(config.loggingLevel)
         }
-        scoped { Storage(context = get(), config = get()) }
         scoped {
             DeepLinkHandler(
                 config = get(),
@@ -30,16 +28,6 @@ internal object AppcuesKoin : KoinScopePlugin {
         scoped { AppcuesDebuggerManager(context = get(), koinScope = this) }
         scoped { StateMachineDirectory() }
         scoped { ContextResources(context = get()) }
-        scoped {
-            AppcuesRepository(
-                appcuesRemoteSource = get(),
-                appcuesLocalSource = get(),
-                experienceMapper = get(),
-                config = get(),
-                logcues = get(),
-                storage = get(),
-            )
-        }
         scoped { LinkOpener(get()) }
         scoped { StateMachineFactory(get(), get(), get()) }
     }

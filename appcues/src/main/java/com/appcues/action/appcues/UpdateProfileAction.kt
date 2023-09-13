@@ -1,14 +1,12 @@
 package com.appcues.action.appcues
 
-import com.appcues.Appcues
-import com.appcues.Storage
 import com.appcues.action.ExperienceAction
+import com.appcues.analytics.Analytics
 import com.appcues.data.model.AppcuesConfigMap
 
 internal class UpdateProfileAction(
     override val config: AppcuesConfigMap,
-    private val storage: Storage,
-    private val appcues: Appcues,
+    private val analytics: Analytics,
 ) : ExperienceAction {
 
     companion object {
@@ -18,7 +16,7 @@ internal class UpdateProfileAction(
 
     override suspend fun execute() {
         if (config != null) {
-            appcues.identify(storage.userId, properties = config)
+            analytics.updateProfile(properties = config, isInternal = false)
         }
     }
 }

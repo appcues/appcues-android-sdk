@@ -9,11 +9,10 @@ import android.os.Build.VERSION
 import com.appcues.AppcuesConfig
 import com.appcues.BuildConfig
 import com.appcues.R
-import com.appcues.Storage
 import com.appcues.analytics.AnalyticsActivity
 import com.appcues.analytics.AnalyticsEvent
 import com.appcues.data.remote.appcues.AppcuesRemoteSource
-import com.appcues.data.remote.appcues.request.ActivityRequest
+import com.appcues.data.session.PrefSessionLocalSource
 import com.appcues.debugger.model.DebuggerStatusItem
 import com.appcues.debugger.model.StatusType.ERROR
 import com.appcues.debugger.model.StatusType.EXPERIENCE
@@ -36,9 +35,9 @@ import kotlin.time.Duration.Companion.seconds
 
 @Suppress("TooManyFunctions")
 internal class DebuggerStatusManager(
-    storage: Storage,
     private val appcuesConfig: AppcuesConfig,
     private val appcuesRemoteSource: AppcuesRemoteSource,
+    private val sessionLocalSource: PrefSessionLocalSource,
     private val contextResources: ContextResources,
     private val context: Context,
 ) {
@@ -51,7 +50,7 @@ internal class DebuggerStatusManager(
 
     private var trackingScreens: Boolean? = null
 
-    private var userIdentified: String? = storage.userId.ifEmpty { null }
+    private var userIdentified: String? = null
 
     private data class DisplayingExperience(
         val name: String,
@@ -66,7 +65,8 @@ internal class DebuggerStatusManager(
     val data: StateFlow<List<DebuggerStatusItem>>
         get() = _data
 
-    suspend fun start() = withContext(Dispatchers.IO) {
+    suspend fun start() = withContext(Dispatchers.Main) {
+        userIdentified = sessionLocalSource.getUserId()
         connectToAppcues(false)
     }
 
@@ -105,46 +105,6 @@ internal class DebuggerStatusManager(
                     displayingExperiences.remove(experienceId)
                 }
             else -> Unit
-        }
-    }
-
-    // TODO remove this before merging
-    suspend fun onActivityRequest(activityRequest: ActivityRequest) = withContext(Dispatchers.IO) {
-        userIdentified = activityRequest.userId.ifEmpty { null }
-
-        activityRequest.events?.forEach { event ->
-            when (event.name) {
-                AnalyticsEvent.ScreenView.eventName -> {
-                    trackingScreens = true
-                }
-                AnalyticsEvent.ExperienceStarted.eventName -> {
-                    val id = event.attributes["experienceId"] as String
-                    displayingExperiences[id] = DisplayingExperience(
-                        name = contextResources.getString(
-                            R.string.appcues_debugger_status_experience_name,
-                            event.attributes["experienceName"] as String
-                        ),
-                        frameId = event.attributes["frameId"] as String?,
-                    )
-                }
-                AnalyticsEvent.ExperienceStepSeen.eventName -> {
-                    val id = event.attributes["experienceId"] as String
-                    val step = (event.attributes["stepIndex"] as String).split(",").let {
-                        val group = it.first().toInt() + 1
-                        val step = it.last().toInt() + 1
-
-                        contextResources.getString(R.string.appcues_debugger_status_experience_step, group, step)
-                    }
-
-                    displayingExperiences[id]?.step = step
-                }
-                AnalyticsEvent.ExperienceCompleted.eventName, AnalyticsEvent.ExperienceDismissed.eventName -> {
-                    val id = event.attributes["experienceId"] as String
-
-                    displayingExperiences.remove(id)
-                }
-                else -> Unit
-            }
         }
 
         updateData()
