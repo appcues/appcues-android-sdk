@@ -12,7 +12,6 @@ import com.appcues.ui.composables.LocalLogcues
 import com.appcues.ui.extensions.aspectRatio
 import com.appcues.ui.extensions.blurHashPlaceholder
 import com.appcues.ui.extensions.getBoxAlignment
-import com.appcues.ui.extensions.getImageLoader
 import com.appcues.ui.extensions.getImageRequest
 import com.appcues.ui.extensions.styleSize
 import com.appcues.ui.extensions.toImageAsyncContentScale
@@ -30,7 +29,7 @@ internal fun ImagePrimitive.Compose(modifier: Modifier, matchParentBox: BoxScope
             .aspectRatio(contentMode, intrinsicSize, style, LocalDensity.current),
         model = context.getImageRequest(url, contentMode),
         contentDescription = accessibilityLabel,
-        imageLoader = LocalImageLoader.current ?: context.getImageLoader(),
+        imageLoader = LocalImageLoader.current,
         placeholder = context.blurHashPlaceholder(decodedBlurHash, intrinsicSize),
         contentScale = contentMode.toImageAsyncContentScale(),
         alignment = style.getBoxAlignment(),

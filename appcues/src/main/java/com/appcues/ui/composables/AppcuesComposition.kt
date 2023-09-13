@@ -14,6 +14,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.testTag
+import coil.ImageLoader
 import com.appcues.data.model.StepContainer
 import com.appcues.logging.Logcues
 import com.appcues.trait.BackdropDecoratingTrait
@@ -29,6 +30,7 @@ import com.google.accompanist.web.AccompanistWebChromeClient
 @Composable
 internal fun AppcuesComposition(
     viewModel: AppcuesViewModel,
+    imageLoader: ImageLoader,
     logcues: Logcues,
     chromeClient: AccompanistWebChromeClient,
 ) {
@@ -36,6 +38,7 @@ internal fun AppcuesComposition(
     AppcuesTheme {
         // define composition local provided dependencies
         CompositionLocalProvider(
+            LocalImageLoader provides imageLoader,
             LocalViewModel provides viewModel,
             LocalLogcues provides logcues,
             LocalChromeClient provides chromeClient,

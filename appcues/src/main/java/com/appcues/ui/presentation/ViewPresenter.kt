@@ -78,6 +78,7 @@ internal abstract class ViewPresenter(
                 AppcuesComposition(
                     viewModel = viewModel,
                     logcues = scope.get(),
+                    imageLoader = scope.get(),
                     chromeClient = EmbedChromeClient(this),
                 )
             }

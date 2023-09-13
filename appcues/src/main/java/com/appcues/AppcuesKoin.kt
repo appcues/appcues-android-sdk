@@ -1,5 +1,11 @@
 package com.appcues
 
+import android.os.Build.VERSION
+import android.os.Build.VERSION_CODES
+import coil.ImageLoader
+import coil.decode.GifDecoder
+import coil.decode.ImageDecoderDecoder
+import coil.decode.SvgDecoder
 import com.appcues.data.AppcuesRepository
 import com.appcues.debugger.AppcuesDebuggerManager
 import com.appcues.di.KoinScopePlugin
@@ -46,5 +52,17 @@ internal object AppcuesKoin : KoinScopePlugin {
         scoped { AnalyticsPublisher(storage = get()) }
 
         factory { StateMachine(appcuesCoroutineScope = get(), config = get(), actionProcessor = get(), lifecycleTracker = get()) }
+
+        scoped {
+            get<AppcuesConfig>().imageLoader ?: ImageLoader.Builder(context = get())
+                .components {
+                    if (VERSION.SDK_INT >= VERSION_CODES.P) {
+                        add(ImageDecoderDecoder.Factory())
+                    } else {
+                        add(GifDecoder.Factory())
+                    }
+                    add(SvgDecoder.Factory())
+                }.build()
+        }
     }
 }
