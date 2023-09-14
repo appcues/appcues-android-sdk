@@ -82,27 +82,6 @@ commands:
 #          JOBS
 # --------------------------
 jobs:
-  validate_code:
-    executor: android_compatible
-    steps:
-      - install_with_cache      
-      - run:
-          name: Run fastlane validate_code
-          command: bundle exec fastlane validate_code
-      - store_artifacts:
-          path: appcues/build/outputs
-          destination: sdk_outputs
-      - store_artifacts:
-          path: samples/kotlin-android-app/build/outputs
-          destination: sample_outputs
-      - store_test_results:
-          path: appcues/build/test-results
-      - save_gradle_cache          
-      - slack/notify:
-          event: fail
-          template: basic_fail_1
-          channel: team-mobile-bots
-
   deploy_sample:
     executor: android_compatible
     steps:
@@ -176,18 +155,90 @@ jobs:
               ]
             }
           channel: team-mobile-bots  
+  trigger-spec-test-pipeline:
+      docker: 
+        - image: cimg/base:current
+      resource_class: small
+      steps:
+        - run:
+            name: Trigger spec pipeline
+            # If there's a spec repo branch with the same name as the one currently executing,
+            # trigger against that as a means to allow coordinated test updates.
+            # If we get `{ "message" : "Branch not found" }`, fall back to running on `main`.
+            command: |
+              REMOTE_BRANCH=$CIRCLE_BRANCH
 
-  update_code_coverage:
-    executor: android_compatible
+              create_remote_pipeline () {
+                echo "Try remote job for $REMOTE_BRANCH"
+                CREATED_PIPELINE_ID=$(curl --request POST \
+                  --url https://circleci.com/api/v2/project/github/appcues/appcues-mobile-experience-spec/pipeline \
+                  --header "Circle-Token: $CIRCLE_API_TOKEN" \
+                  --header "content-type: application/json" \
+                  --data "{ \"branch\": \"$REMOTE_BRANCH\", \"parameters\": { \"platform\": \"android\", \"sdk-branch\": \"$CIRCLE_BRANCH\", \"triggering-pipeline-id\": \"<< pipeline.id >>\" }}" \
+                | jq -r '.id'
+                )
+              }
+
+              create_remote_pipeline
+              
+              if [ "$CREATED_PIPELINE_ID" = 'null' ]
+              then
+                REMOTE_BRANCH='main'
+                create_remote_pipeline
+              fi
+
+              echo "Triggered spec pipeline $CREATED_PIPELINE_ID on branch $REMOTE_BRANCH"
+              echo $CREATED_PIPELINE_ID > pipeline.txt
+        - persist_to_workspace:
+            root: .
+            paths: 
+              - pipeline.txt
+  check-status-of-spec-test-pipeline:
+    docker: 
+      - image: cimg/base:current
+    resource_class: small 
     steps:
-      - install_with_cache      
+      # checkout so the source files are here for the codecov upload
+      - checkout
+      - attach_workspace:
+          at: workspace
       - run:
-          name: Generate code coverage report
-          command: bundle exec fastlane code_coverage
+          name: Check triggered workflow status
+          command: |
+            triggered_pipeline_id=$(cat workspace/pipeline.txt)
+            curl --request GET \
+                --url "https://circleci.com/api/v2/pipeline/${triggered_pipeline_id}/workflow" \
+                --header "Circle-Token: $CIRCLE_API_TOKEN" \
+                --header "content-type: application/json" \
+                --output pipeline.json
+            created_workflow_status=$(jq -r '.items[0].status' pipeline.json)
+            echo $created_workflow_status
+            if [[ "$created_workflow_status" != "success" ]]; then
+              echo "Workflow not successful - ${created_workflow_status}"
+              (exit -1) 
+            fi
+            
+            echo "Created workflow successful"
+      - run:
+          name: Get codecov report
+          command: |
+            triggered_workflow_id=$(jq -r '.items[0].id' pipeline.json)
+            created_job_number=$(curl --request GET \
+                --url "https://circleci.com/api/v2/workflow/${triggered_workflow_id}/job" \
+                --header "Circle-Token: $CIRCLE_API_TOKEN" \
+                --header "content-type: application/json" \
+              | jq -r '.items[0].job_number'
+            )
+            jacoco_artifact_url=$(curl --request GET \
+                --url "https://circleci.com/api/v2/project/github/appcues/appcues-mobile-experience-spec/${created_job_number}/artifacts" \
+                --header "Circle-Token: $CIRCLE_API_TOKEN" \
+                --header "content-type: application/json" \
+              | jq -r '.items[] | select( .path == "build/reports/jacoco/codeCoverage/codeCoverage.xml" ).url'
+            )
+            curl -L "$jacoco_artifact_url?circle-token=$CIRCLE_API_TOKEN" --output codeCoverage.xml
       - codecov/upload:
-          file: "./appcues/build/reports/jacoco/debugUnitTestCoverage/debugUnitTestCoverage.xml"
+          file: "codeCoverage.xml"
           token: CODECOV_TOKEN_APPCUES_ANDROID_SDK
-      # not saving gradle cache on this job since it is SDK only
       - slack/notify:
           event: fail
           template: basic_fail_1
@@ -198,23 +249,20 @@ jobs:
 # --------------------------
 workflows:
   version: 2
-  pr_validation:
+  branch_validation:
     when:
-      and:
-        - not: *is_main
-        - not: << pipeline.parameters.deploy-sample >>
-    jobs:      
-      - validate_code:
+        not: << pipeline.parameters.deploy-sample >>
+    jobs:
+      - trigger-spec-test-pipeline:
           context:
             - Appcues
-
-  code_coverage:
-    when:
-      and:
-        - *is_main
-        - not: << pipeline.parameters.deploy-sample >>
-    jobs:
-      - update_code_coverage:
+      - wait-for-spec-test-pipeline:
+          type: approval
+          requires: 
+            - trigger-spec-test-pipeline
+      - check-status-of-spec-test-pipeline:
+          requires:
+            - wait-for-spec-test-pipeline
           context:
             - Appcues
 
@@ -224,18 +272,3 @@ workflows:
       - deploy_sample:
           context:
             - Appcues
-
-  # an empty workflow to avoid Build Error: "All Workflows have been filtered from this Pipeline. No Jobs have been run."
-  # the `when` selects for `is_main` and the filter ignores `main`.
-  no-op:
-    when:
-      and:
-        - *is_main
-        - not: << pipeline.parameters.deploy-sample >>
-    jobs:
-      - validate_code:
-          filters:
-            branches:
-              ignore:
-                - main
-            
