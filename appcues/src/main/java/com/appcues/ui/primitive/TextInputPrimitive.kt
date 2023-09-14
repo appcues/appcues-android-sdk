@@ -32,15 +32,12 @@ import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.LayoutDirection.Ltr
 import androidx.compose.ui.unit.LayoutDirection.Rtl
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.isUnspecified
 import com.appcues.data.model.ExperiencePrimitive.TextInputPrimitive
-import com.appcues.data.model.ExperiencePrimitive.TextPrimitive
-import com.appcues.data.model.ExperiencePrimitive.TextSpanPrimitive
 import com.appcues.data.model.styling.ComponentColor
 import com.appcues.data.model.styling.ComponentDataType
 import com.appcues.data.model.styling.ComponentDataType.ADDRESS
@@ -63,9 +60,7 @@ import com.appcues.ui.extensions.styleBackground
 import com.appcues.ui.extensions.styleBorder
 import com.appcues.ui.extensions.styleCorner
 import com.appcues.ui.extensions.styleShadow
-import com.appcues.ui.theme.AppcuesPreviewPrimitive
 import com.appcues.ui.utils.margin
-import java.util.UUID
 import kotlin.math.max
 
 // constants used in determining the height of the text input box based on the text properties in the model
@@ -238,60 +233,4 @@ private fun mapKeyboardType(value: ComponentDataType): KeyboardType = when (valu
     NAME -> KeyboardType.Text
     ADDRESS -> KeyboardType.Text
     URL -> KeyboardType.Uri
-}
-
-private val textPrimitive = TextPrimitive(
-    id = UUID.randomUUID(),
-    spans = arrayListOf(
-        TextSpanPrimitive("Enter a value")
-    )
-)
-
-private val textInputPrimitive = TextInputPrimitive(
-    id = UUID.randomUUID(),
-    label = textPrimitive,
-    defaultValue = "text input",
-)
-
-@Composable
-@Preview(name = "textInput default", group = "basic")
-internal fun PreviewTestInputDefault() {
-    AppcuesPreviewPrimitive {
-        textInputPrimitive
-    }
-}
-
-@Composable
-@Preview(name = "textInput multiline", group = "basic")
-internal fun PreviewTestInputMultiline() {
-    AppcuesPreviewPrimitive {
-        textInputPrimitive.copy(
-            numberOfLines = 3,
-            defaultValue = "here is\nsome text that\ngoes multi line\nover limit"
-        )
-    }
-}
-
-@Composable
-@Preview(name = "textInput foregroundColor", group = "properties")
-internal fun PreviewTextInputComponentColor() {
-    val previewPrimitive = textInputPrimitive.copy(
-        textFieldStyle = textInputPrimitive.textFieldStyle.copy(
-            foregroundColor = ComponentColor(light = 0xFF000000, dark = 0xFFFFFFFF)
-        ),
-        label = textPrimitive.copy(
-            style = textPrimitive.style.copy(
-                foregroundColor = ComponentColor(light = 0xFF101010, dark = 0xFF808080)
-            )
-        )
-    )
-
-    Column {
-        AppcuesPreviewPrimitive(isDark = true) {
-            previewPrimitive
-        }
-        AppcuesPreviewPrimitive(isDark = false) {
-            previewPrimitive
-        }
-    }
 }
