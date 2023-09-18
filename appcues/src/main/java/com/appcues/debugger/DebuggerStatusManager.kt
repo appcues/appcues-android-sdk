@@ -9,7 +9,7 @@ import android.os.Build.VERSION
 import com.appcues.AppcuesConfig
 import com.appcues.BuildConfig
 import com.appcues.R
-import com.appcues.analytics.AnalyticsActivity
+import com.appcues.analytics.AnalyticActivity
 import com.appcues.analytics.AnalyticsEvent
 import com.appcues.data.remote.appcues.AppcuesRemoteSource
 import com.appcues.data.session.PrefSessionLocalSource
@@ -70,7 +70,7 @@ internal class DebuggerStatusManager(
         connectToAppcues(false)
     }
 
-    suspend fun onActivity(activity: AnalyticsActivity) = withContext(Dispatchers.IO) {
+    suspend fun onActivity(activity: AnalyticActivity) = withContext(Dispatchers.IO) {
         userIdentified = activity.userId
 
         when (activity.eventName) {

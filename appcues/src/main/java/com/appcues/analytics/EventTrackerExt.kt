@@ -1,6 +1,5 @@
 package com.appcues.analytics
 
-import com.appcues.analytics.RenderingService.EventTracker
 import com.appcues.data.model.Experience
 import com.appcues.data.model.Experiment
 import com.appcues.util.appcuesFormatted

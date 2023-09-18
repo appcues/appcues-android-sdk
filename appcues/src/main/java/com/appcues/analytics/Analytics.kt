@@ -3,15 +3,14 @@ package com.appcues.analytics
 import com.appcues.AnalyticType
 import com.appcues.AppcuesCoroutineScope
 import com.appcues.AppcuesFrameView
-import com.appcues.analytics.AnalyticsIntent.Anonymous
-import com.appcues.analytics.AnalyticsIntent.Event
-import com.appcues.analytics.AnalyticsIntent.Identify
-import com.appcues.analytics.AnalyticsIntent.Screen
-import com.appcues.analytics.AnalyticsIntent.UpdateGroup
-import com.appcues.analytics.AnalyticsIntent.UpdateProfile
+import com.appcues.analytics.AnalyticIntent.Anonymous
+import com.appcues.analytics.AnalyticIntent.Event
+import com.appcues.analytics.AnalyticIntent.Identify
+import com.appcues.analytics.AnalyticIntent.Screen
+import com.appcues.analytics.AnalyticIntent.UpdateGroup
+import com.appcues.analytics.AnalyticIntent.UpdateProfile
 import com.appcues.analytics.AnalyticsQueue.QueueAction
 import com.appcues.analytics.AnalyticsQueue.QueueProcessor
-import com.appcues.analytics.RenderingService.EventTracker
 import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperienceState
 import com.appcues.data.model.ExperienceTrigger.Qualification
@@ -30,16 +29,16 @@ import java.util.UUID
 internal interface QualificationService {
 
     // will merge and hit the backend to see if it qualifies, returning QualificationResult
-    suspend fun qualify(intents: List<AnalyticsActivity>): QualificationResult?
+    suspend fun qualify(intents: List<AnalyticActivity>): QualificationResult?
+}
+
+// abstraction about who is responsible for tracking experience events
+internal interface EventTracker {
+
+    fun trackEvent(name: String, properties: Map<String, Any>?, isInteractive: Boolean, isInternal: Boolean)
 }
 
 internal interface RenderingService {
-
-    // abstraction about who is responsible for tracking experience events
-    interface EventTracker {
-
-        fun trackEvent(name: String, properties: Map<String, Any>?, isInteractive: Boolean, isInternal: Boolean)
-    }
 
     fun setEventTracker(eventTracker: EventTracker)
 
@@ -81,16 +80,14 @@ internal interface RenderingService {
 
 internal interface SessionService {
 
-    // checks session or creates one based on existing information or incoming intent
-    suspend fun checkSession(intent: AnalyticsIntent, onSessionStarted: suspend () -> Unit): Boolean
-
-    // produce session properties or null if session is not present
-    suspend fun getSessionProperties(): SessionProperties?
+    // get valid session or attempt to start one based on incoming intent.
+    // reports back to onSessionStarted if a new session started.
+    suspend fun getSession(intent: AnalyticIntent?, onSessionStarted: (suspend () -> Unit)? = null): Session?
 
     suspend fun reset()
 }
 
-internal data class SessionProperties(
+internal data class Session(
     val sessionId: UUID,
     val userId: String,
     val groupId: String?,
@@ -101,44 +98,45 @@ internal data class SessionProperties(
 
 internal interface ActivityBuilder {
 
-    suspend fun buildActivity(intent: AnalyticsIntent, sessionProperties: SessionProperties?): AnalyticsActivity?
+    // responsible for taking in intent and session and build into a proper AnalyticActivity
+    suspend fun build(intent: AnalyticIntent, session: Session): AnalyticActivity
 }
 
 // new model for Intents available for Analytics
-internal sealed class AnalyticsIntent(open val isInternal: Boolean, open val properties: Map<String, Any>?, val timestamp: Date = Date()) {
+internal sealed class AnalyticIntent(open val isInternal: Boolean, open val properties: Map<String, Any>?, val timestamp: Date = Date()) {
 
-    object Anonymous : AnalyticsIntent(false, null)
+    object Anonymous : AnalyticIntent(false, null)
 
     data class Identify(
         val userId: String,
         override val properties: Map<String, Any>?
-    ) : AnalyticsIntent(false, properties)
+    ) : AnalyticIntent(false, properties)
 
     data class UpdateProfile(
         override val isInternal: Boolean,
         override val properties: Map<String, Any>?
-    ) : AnalyticsIntent(isInternal, properties)
+    ) : AnalyticIntent(isInternal, properties)
 
     data class UpdateGroup(
         override val isInternal: Boolean,
         val groupId: String?,
         override val properties: Map<String, Any>?
-    ) : AnalyticsIntent(isInternal, properties)
+    ) : AnalyticIntent(isInternal, properties)
 
     data class Event(
         override val isInternal: Boolean,
         val name: String,
         override val properties: Map<String, Any>?
-    ) : AnalyticsIntent(isInternal, properties)
+    ) : AnalyticIntent(isInternal, properties)
 
     data class Screen(
         override val isInternal: Boolean,
         val title: String,
         override val properties: Map<String, Any>?
-    ) : AnalyticsIntent(isInternal, properties)
+    ) : AnalyticIntent(isInternal, properties)
 }
 
-internal data class AnalyticsActivity(
+internal data class AnalyticActivity(
     val type: AnalyticType,
     val isInternal: Boolean,
     val timestamp: Date,
@@ -163,7 +161,7 @@ internal class Analytics(
     private val activityBuilder: ActivityBuilder,
 ) : QueueProcessor, ApplicationMonitor.Listener, EventTracker {
 
-    private val intentChannel = Channel<Pair<AnalyticsIntent, QueueAction>>(Channel.UNLIMITED)
+    private val intentChannel = Channel<Pair<AnalyticIntent, QueueAction>>(Channel.UNLIMITED)
 
     init {
         ApplicationMonitor.subscribe(this)
@@ -177,8 +175,8 @@ internal class Analytics(
         }
     }
 
-    private val _activityFlow = MutableSharedFlow<AnalyticsActivity>(1)
-    val activityFlow: SharedFlow<AnalyticsActivity>
+    private val _activityFlow = MutableSharedFlow<AnalyticActivity>(1)
+    val activityFlow: SharedFlow<AnalyticActivity>
         get() = _activityFlow
 
     fun anonymous() = coroutineScope.launch {
@@ -231,17 +229,17 @@ internal class Analytics(
         renderingService.reset()
     }
 
-    private suspend fun enqueueIntent(intent: AnalyticsIntent, action: QueueAction) {
-        if (!sessionService.checkSession(intent, ::onNewSessionStarted)) return
+    private suspend fun enqueueIntent(intent: AnalyticIntent, action: QueueAction) {
+        val session = sessionService.getSession(intent, ::onSessionStarted) ?: return
 
-        activityBuilder.buildActivity(intent, sessionService.getSessionProperties())?.run {
-            _activityFlow.emit(this)
+        val activity = activityBuilder.build(intent, session)
 
-            queue.enqueue(this, action)
-        }
+        _activityFlow.emit(activity)
+
+        queue.enqueue(activity, action)
     }
 
-    private suspend fun onNewSessionStarted() {
+    private suspend fun onSessionStarted() {
         queue.flush()
 
         renderingService.reset()
@@ -249,7 +247,7 @@ internal class Analytics(
         track(AnalyticsEvent.SessionStarted.eventName, interactive = true, isInternal = true)
     }
 
-    override fun process(items: List<AnalyticsActivity>) {
+    override fun process(items: List<AnalyticActivity>) {
         coroutineScope.launch {
             // run intents through qualification service
             qualificationService.qualify(items)

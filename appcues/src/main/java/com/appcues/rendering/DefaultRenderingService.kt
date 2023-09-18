@@ -2,8 +2,8 @@ package com.appcues.rendering
 
 import com.appcues.AppcuesConfig
 import com.appcues.AppcuesFrameView
+import com.appcues.analytics.EventTracker
 import com.appcues.analytics.RenderingService
-import com.appcues.analytics.RenderingService.EventTracker
 import com.appcues.analytics.RenderingService.PreviewExperienceResult
 import com.appcues.analytics.RenderingService.ShowExperienceResult
 import com.appcues.analytics.track

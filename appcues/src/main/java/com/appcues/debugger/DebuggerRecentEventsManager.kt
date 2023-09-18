@@ -5,7 +5,7 @@ import com.appcues.AnalyticType.GROUP
 import com.appcues.AnalyticType.IDENTIFY
 import com.appcues.AnalyticType.SCREEN
 import com.appcues.R
-import com.appcues.analytics.AnalyticsActivity
+import com.appcues.analytics.AnalyticActivity
 import com.appcues.analytics.ExperienceLifecycleEvent
 import com.appcues.analytics.SdkMetrics
 import com.appcues.data.model.ExperienceStepFormState
@@ -44,7 +44,7 @@ internal class DebuggerRecentEventsManager(
 
     private var lastEventId = 0
 
-    suspend fun onActivity(activity: AnalyticsActivity) = withContext(Dispatchers.IO) {
+    suspend fun onActivity(activity: AnalyticActivity) = withContext(Dispatchers.IO) {
         when (activity.type) {
             IDENTIFY -> onActivityIdentify(activity)
             GROUP -> onActivityGroup(activity)
@@ -55,7 +55,7 @@ internal class DebuggerRecentEventsManager(
         updateData()
     }
 
-    private fun onActivityIdentify(activity: AnalyticsActivity) {
+    private fun onActivityIdentify(activity: AnalyticActivity) {
         events.addFirst(
             DebuggerEventItem(
                 id = lastEventId,
@@ -74,7 +74,7 @@ internal class DebuggerRecentEventsManager(
         lastEventId++
     }
 
-    private fun onActivityGroup(activity: AnalyticsActivity) {
+    private fun onActivityGroup(activity: AnalyticActivity) {
         events.addFirst(
             DebuggerEventItem(
                 id = lastEventId,
@@ -92,7 +92,7 @@ internal class DebuggerRecentEventsManager(
         lastEventId++
     }
 
-    private fun onActivityEvent(activity: AnalyticsActivity) {
+    private fun onActivityEvent(activity: AnalyticActivity) {
         val type = activity.eventName.toEventType()
         val title = activity.eventName.toEventTitle()?.let { contextResources.getString(it) }
         val displayName = getEventDisplayName(activity, title)
@@ -149,7 +149,7 @@ internal class DebuggerRecentEventsManager(
         events.clear()
     }
 
-    private fun getEventDisplayName(activity: AnalyticsActivity, title: String?) =
+    private fun getEventDisplayName(activity: AnalyticActivity, title: String?) =
         if (activity.type == SCREEN && activity.eventAttributes != null && activity.eventAttributes.contains("screenTitle")) {
             // screen views are a special case where the title is the screen title
             activity.eventAttributes["screenTitle"] as String

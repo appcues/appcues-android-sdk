@@ -32,9 +32,9 @@ internal class Experiences(
 
     suspend fun show(experienceId: String, trigger: ExperienceTrigger): ShowExperienceResult = withContext(Dispatchers.IO) {
         // cannot show if no session is active
-        val sessionProperties = sessionService.getSessionProperties() ?: return@withContext ShowExperienceResult.NoSession
+        val session = sessionService.getSession(null) ?: return@withContext ShowExperienceResult.NoSession
 
-        return@withContext remote.getExperienceContent(experienceId, sessionProperties.userId, sessionProperties.userSignature).run {
+        return@withContext remote.getExperienceContent(experienceId, session.userId, session.userSignature).run {
             when (this) {
                 is Success -> renderingService.show(experienceMapper.map(value, trigger))
                 is Failure -> if (reason is HttpError && reason.code == HTTP_CODE_NOT_FOUND)
@@ -48,9 +48,9 @@ internal class Experiences(
     }
 
     suspend fun preview(experienceId: String): PreviewExperienceResult = withContext(Dispatchers.IO) {
-        val sessionProperties = sessionService.getSessionProperties()
+        val session = sessionService.getSession(null, null)
 
-        return@withContext remote.getExperiencePreview(experienceId, sessionProperties?.userId, sessionProperties?.userSignature).run {
+        return@withContext remote.getExperiencePreview(experienceId, session?.userId, session?.userSignature).run {
             when (this) {
                 is Success -> renderingService.preview(experienceMapper.map(value, Preview))
                 is Failure -> if (reason is HttpError && reason.code == HTTP_CODE_NOT_FOUND)

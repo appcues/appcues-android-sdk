@@ -3,8 +3,8 @@ package com.appcues.statemachine
 import com.appcues.AppcuesConfig
 import com.appcues.AppcuesCoroutineScope
 import com.appcues.action.ActionProcessor
+import com.appcues.analytics.EventTracker
 import com.appcues.analytics.ExperienceLifecycleTracker
-import com.appcues.analytics.RenderingService.EventTracker
 import com.appcues.data.model.Experience
 import com.appcues.statemachine.State.Idling
 

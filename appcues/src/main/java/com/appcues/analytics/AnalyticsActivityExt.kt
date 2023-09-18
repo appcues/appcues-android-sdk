@@ -7,7 +7,7 @@ import com.appcues.AnalyticType.SCREEN
 import com.appcues.data.model.ExperienceStepFormState
 import java.util.Date
 
-internal fun AnalyticsActivity.getValue(): String? {
+internal fun AnalyticActivity.getValue(): String? {
     return when (type) {
         IDENTIFY -> userId
         GROUP -> groupId
@@ -16,7 +16,7 @@ internal fun AnalyticsActivity.getValue(): String? {
     }
 }
 
-internal fun AnalyticsActivity.getProperties(): Map<String, Any>? {
+internal fun AnalyticActivity.getProperties(): Map<String, Any>? {
     return when (type) {
         IDENTIFY -> profileProperties
         GROUP -> groupProperties

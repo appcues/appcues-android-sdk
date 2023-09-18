@@ -11,9 +11,7 @@ internal sealed class ExperienceTrigger {
     }
 
     data class ExperienceCompletionAction(val fromExperienceId: UUID?) : ExperienceTrigger()
-
-    // val fromExperienceId: UUID was not being used
-    object LaunchExperienceAction : ExperienceTrigger()
+    data class LaunchExperienceAction(val fromExperienceId: UUID?) : ExperienceTrigger()
     object ShowCall : ExperienceTrigger()
     object DeepLink : ExperienceTrigger()
     object Preview : ExperienceTrigger()

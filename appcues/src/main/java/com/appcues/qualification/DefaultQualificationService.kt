@@ -3,7 +3,7 @@ package com.appcues.qualification
 import com.appcues.AnalyticType.EVENT
 import com.appcues.AnalyticType.SCREEN
 import com.appcues.AppcuesConfig
-import com.appcues.analytics.AnalyticsActivity
+import com.appcues.analytics.AnalyticActivity
 import com.appcues.analytics.QualificationService
 import com.appcues.analytics.SdkMetrics
 import com.appcues.data.MoshiConfiguration
@@ -42,7 +42,7 @@ internal class DefaultQualificationService(
     private val processingActivity: HashSet<UUID> = hashSetOf()
     private val mutex = Mutex()
 
-    override suspend fun qualify(intents: List<AnalyticsActivity>): QualificationResult? {
+    override suspend fun qualify(intents: List<AnalyticActivity>): QualificationResult? {
         val activityRequest = intents.mergeToActivityRequest() ?: return null
 
         // TODO verify sdkMetrics logic
@@ -55,7 +55,7 @@ internal class DefaultQualificationService(
         }
     }
 
-    private fun List<AnalyticsActivity>.mergeToActivityRequest(): ActivityRequest? {
+    private fun List<AnalyticActivity>.mergeToActivityRequest(): ActivityRequest? {
         val first = firstOrNull() ?: return null
         val events = filter { it.type == SCREEN || it.type == EVENT }.map {
             EventRequest(

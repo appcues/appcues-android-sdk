@@ -8,7 +8,6 @@ import com.appcues.analytics.ExperienceLifecycleEvent.ExperienceStarted
 import com.appcues.analytics.ExperienceLifecycleEvent.StepCompleted
 import com.appcues.analytics.ExperienceLifecycleEvent.StepError
 import com.appcues.analytics.ExperienceLifecycleEvent.StepSeen
-import com.appcues.analytics.RenderingService.EventTracker
 import com.appcues.data.model.Experience
 import com.appcues.statemachine.Error
 import com.appcues.statemachine.Error.ExperienceAlreadyActive

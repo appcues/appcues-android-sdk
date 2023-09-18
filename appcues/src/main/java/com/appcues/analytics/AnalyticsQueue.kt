@@ -17,7 +17,7 @@ internal class AnalyticsQueue(private val scheduler: QueueScheduler) {
     interface QueueProcessor {
 
         // process given intent list, usually the queue is cleared after this is called
-        fun process(items: List<AnalyticsActivity>)
+        fun process(items: List<AnalyticActivity>)
     }
 
     // Analytics is also the one that process intents when we send it back
@@ -35,14 +35,14 @@ internal class AnalyticsQueue(private val scheduler: QueueScheduler) {
         fun cancel()
     }
 
-    private val queue = mutableListOf<AnalyticsActivity>()
+    private val queue = mutableListOf<AnalyticActivity>()
 
     @VisibleForTesting
-    fun enqueueForTesting(item: AnalyticsActivity) {
+    fun enqueueForTesting(item: AnalyticActivity) {
         queue.add(item)
     }
 
-    fun enqueue(item: AnalyticsActivity, action: QueueAction) {
+    fun enqueue(item: AnalyticActivity, action: QueueAction) {
         when (action) {
             QUEUE -> enqueue(item)
             QUEUE_THEN_FLUSH -> enqueueThenFlush(item)
@@ -58,7 +58,7 @@ internal class AnalyticsQueue(private val scheduler: QueueScheduler) {
         }
     }
 
-    private fun enqueue(item: AnalyticsActivity) {
+    private fun enqueue(item: AnalyticActivity) {
         synchronized(this) {
             // add activity to pending activities
             queue.add(item)
@@ -71,7 +71,7 @@ internal class AnalyticsQueue(private val scheduler: QueueScheduler) {
         }
     }
 
-    private fun enqueueThenFlush(item: AnalyticsActivity) {
+    private fun enqueueThenFlush(item: AnalyticActivity) {
         synchronized(this) {
             scheduler.cancel()
             // add new intent to queue and flush all
@@ -81,7 +81,7 @@ internal class AnalyticsQueue(private val scheduler: QueueScheduler) {
         }
     }
 
-    private fun flushThenProcess(item: AnalyticsActivity) {
+    private fun flushThenProcess(item: AnalyticActivity) {
         synchronized(this) {
             scheduler.cancel()
             // send all pending activities as a merged activity request

@@ -9,12 +9,12 @@ import com.appcues.AnalyticType.SCREEN
 import com.appcues.AppcuesConfig
 import com.appcues.BuildConfig
 import com.appcues.R
-import com.appcues.analytics.AnalyticsIntent.Anonymous
-import com.appcues.analytics.AnalyticsIntent.Event
-import com.appcues.analytics.AnalyticsIntent.Identify
-import com.appcues.analytics.AnalyticsIntent.Screen
-import com.appcues.analytics.AnalyticsIntent.UpdateGroup
-import com.appcues.analytics.AnalyticsIntent.UpdateProfile
+import com.appcues.analytics.AnalyticIntent.Anonymous
+import com.appcues.analytics.AnalyticIntent.Event
+import com.appcues.analytics.AnalyticIntent.Identify
+import com.appcues.analytics.AnalyticIntent.Screen
+import com.appcues.analytics.AnalyticIntent.UpdateGroup
+import com.appcues.analytics.AnalyticIntent.UpdateProfile
 import com.appcues.util.ContextResources
 import java.util.Date
 
@@ -50,34 +50,32 @@ internal class DefaultActivityBuilder(
         "_deviceModel" to contextResources.getDeviceName(),
     ).filterValues { it != null }.mapValues { it.value as Any }
 
-    override suspend fun buildActivity(intent: AnalyticsIntent, sessionProperties: SessionProperties?): AnalyticsActivity? {
-        if (sessionProperties == null) return null
-
-        return AnalyticsActivity(
+    override suspend fun build(intent: AnalyticIntent, session: Session): AnalyticActivity {
+        return AnalyticActivity(
             type = intent.toAnalyticType(),
             isInternal = intent.isInternal,
             timestamp = intent.timestamp,
-            sessionId = sessionProperties.sessionId,
-            userId = sessionProperties.userId,
-            groupId = sessionProperties.groupId,
-            userSignature = sessionProperties.userSignature,
-            profileProperties = getProfileProperties(intent, sessionProperties),
+            sessionId = session.sessionId,
+            userId = session.userId,
+            groupId = session.groupId,
+            userSignature = session.userSignature,
+            profileProperties = getProfileProperties(intent, session),
             groupProperties = getGroupProperties(intent),
             eventName = getEventName(intent),
-            eventAttributes = getEventAttributes(intent, sessionProperties),
+            eventAttributes = getEventAttributes(intent, session),
             eventContext = getEventContext(intent),
         )
     }
 
-    private fun getProfileProperties(intent: AnalyticsIntent, sessionProperties: SessionProperties): Map<String, Any>? {
+    private fun getProfileProperties(intent: AnalyticIntent, session: Session): Map<String, Any>? {
         // no profile properties on update group intents
         if (intent is UpdateGroup) return null
 
         return hashMapOf<String, Any>().apply {
             put("_updatedAt", Date())
-            putAll(sessionProperties.latestUserProperties)
+            putAll(session.latestUserProperties)
             putAll(applicationProperties)
-            putAll(sessionProperties.properties)
+            putAll(session.properties)
 
             // additional props cannot overwrite values for existing internal prop keys
             config.additionalAutoProperties.forEach {
@@ -88,12 +86,12 @@ internal class DefaultActivityBuilder(
         }
     }
 
-    private fun getGroupProperties(intent: AnalyticsIntent): Map<String, Any>? {
+    private fun getGroupProperties(intent: AnalyticIntent): Map<String, Any>? {
         // only updating group require groupProperties and should only set if groupId is not null
         return if (intent is UpdateGroup && intent.groupId != null) intent.properties else null
     }
 
-    private fun getEventName(intent: AnalyticsIntent): String? {
+    private fun getEventName(intent: AnalyticIntent): String? {
         return when (intent) {
             is Event -> intent.name
             // screen event is just a different type of event
@@ -102,25 +100,25 @@ internal class DefaultActivityBuilder(
         }
     }
 
-    private fun getEventAttributes(intent: AnalyticsIntent, sessionProperties: SessionProperties): Map<String, Any>? {
+    private fun getEventAttributes(intent: AnalyticIntent, session: Session): Map<String, Any>? {
         // when intent is screen or event its attributes are all the properties coming from the intent
         // + the existing profile properties into the _identify key
         return when (intent) {
             is Event -> mutableMapOf<String, Any>().apply {
                 intent.properties?.also { putAll(it) }
-                getProfileProperties(intent, sessionProperties)?.also { put("_identify", it) }
+                getProfileProperties(intent, session)?.also { put("_identify", it) }
             }
             is Screen -> mutableMapOf<String, Any>().apply {
                 // screen events got extra attribute key that defines screen title
                 put(SCREEN_ATTRIBUTE_TITLE, intent.title)
                 intent.properties?.also { putAll(it) }
-                getProfileProperties(intent, sessionProperties)?.also { put("_identify", it) }
+                getProfileProperties(intent, session)?.also { put("_identify", it) }
             }
             else -> null
         }
     }
 
-    private fun getEventContext(intent: AnalyticsIntent): Map<String, Any>? {
+    private fun getEventContext(intent: AnalyticIntent): Map<String, Any>? {
         return when (intent) {
             is Event ->
                 mutableMapOf<String, Any>().apply {
@@ -135,7 +133,7 @@ internal class DefaultActivityBuilder(
         }
     }
 
-    private fun AnalyticsIntent.toAnalyticType(): AnalyticType {
+    private fun AnalyticIntent.toAnalyticType(): AnalyticType {
         return when (this) {
             Anonymous -> IDENTIFY
             is Identify -> IDENTIFY

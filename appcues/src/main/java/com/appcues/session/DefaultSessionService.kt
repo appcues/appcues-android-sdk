@@ -1,14 +1,15 @@
 package com.appcues.session
 
 import com.appcues.AppcuesConfig
-import com.appcues.analytics.AnalyticsEvent
-import com.appcues.analytics.AnalyticsIntent
-import com.appcues.analytics.AnalyticsIntent.Anonymous
-import com.appcues.analytics.AnalyticsIntent.Event
-import com.appcues.analytics.AnalyticsIntent.Identify
-import com.appcues.analytics.AnalyticsIntent.Screen
-import com.appcues.analytics.AnalyticsIntent.UpdateProfile
-import com.appcues.analytics.SessionProperties
+import com.appcues.analytics.AnalyticIntent
+import com.appcues.analytics.AnalyticIntent.Anonymous
+import com.appcues.analytics.AnalyticIntent.Event
+import com.appcues.analytics.AnalyticIntent.Identify
+import com.appcues.analytics.AnalyticIntent.Screen
+import com.appcues.analytics.AnalyticIntent.UpdateProfile
+import com.appcues.analytics.AnalyticsEvent.ExperienceStarted
+import com.appcues.analytics.AnalyticsEvent.SessionStarted
+import com.appcues.analytics.Session
 import com.appcues.analytics.SessionRandomizer
 import com.appcues.analytics.SessionService
 import com.appcues.data.session.PrefSessionLocalSource
@@ -28,18 +29,114 @@ internal class DefaultSessionService(
     }
 
     private var sessionId: UUID? = null
-    private var lastActivityAt: Date? = null
+    private var lastIntentAt: Date? = null
     private var currentScreen: String? = null
     private var previousScreen: String? = null
     private var sessionPageviews: Int = 0
     private var sessionRandomId: Int = 0
     private var latestUserProperties: Map<String, Any> = mapOf()
 
-    override suspend fun getSessionProperties(): SessionProperties? {
-        val userId = sessionLocalSource.getUserId() ?: return null
-        val sessionId = this.sessionId ?: return null
+    override suspend fun getSession(intent: AnalyticIntent?, onSessionStarted: (suspend () -> Unit)?): Session? {
+        // the order of conditions here is important
+        return when (intent) {
+            // check if the incoming intent is Anonymous or Identify, we force start a new session
+            is Anonymous -> getAnonymousSession(intent, onSessionStarted)
+            is Identify -> getIdentifySession(intent, onSessionStarted)
+            // for any other intent types we check if session is started already
+            // if not we try to start a session based on stored information
+            else -> getValidSession(intent) ?: startSession(intent, onSessionStarted)
+        }
+    }
 
-        return SessionProperties(
+    private suspend fun updateSession(intent: AnalyticIntent?) {
+        if (intent != null) {
+            lastIntentAt = Date()
+        }
+
+        when (intent) {
+            is Anonymous -> {
+                latestUserProperties = hashMapOf()
+            }
+            is Identify -> {
+                latestUserProperties = intent.properties.sanitized()
+            }
+            is UpdateProfile -> {
+                latestUserProperties = intent.properties.sanitized()
+            }
+            is Screen -> {
+                previousScreen = currentScreen
+                currentScreen = intent.title
+                sessionPageviews += 1
+            }
+            is Event -> when (intent.name) {
+                SessionStarted.eventName -> {
+                    // special handling for session start events
+                    sessionPageviews = 0
+                    sessionRandomId = sessionRandomizer.get()
+                    currentScreen = null
+                    previousScreen = null
+                }
+                ExperienceStarted.eventName -> {
+                    sessionLocalSource.setLastContentShownAt(Date())
+                }
+            }
+            else -> Unit
+        }
+    }
+
+    private fun Map<String, Any>?.sanitized(): Map<String, Any> {
+        return mutableMapOf<String, Any>().apply {
+            putAll(this@sanitized ?: hashMapOf())
+            remove(KEY_USER_SIGNATURE)
+        }
+    }
+
+    private suspend fun getIdentifySession(intent: Identify, onSessionStarted: (suspend () -> Unit)?): Session? {
+        val session = getValidSession(intent)
+        // only start anonymousSession if new Id is different from what we already have
+        return if (session == null || intent.userId != session.userId) {
+            sessionLocalSource.setUserId(intent.userId)
+            sessionLocalSource.isAnonymous(false)
+            sessionLocalSource.setUserSignature(intent.properties?.get(KEY_USER_SIGNATURE) as? String)
+            return startSession(intent, onSessionStarted)
+        } else session
+    }
+
+    private suspend fun getAnonymousSession(intent: Anonymous, onSessionStarted: (suspend () -> Unit)?): Session? {
+        getAnonymousUserId().also { anonymousId ->
+            val session = getValidSession(intent)
+            // only start anonymousSession if new Id is different from what we already have
+            return if (session == null || anonymousId != session.userId) {
+                sessionLocalSource.setUserId(anonymousId)
+                sessionLocalSource.isAnonymous(true)
+                sessionLocalSource.setUserSignature(null)
+                startSession(intent, onSessionStarted)
+            } else session
+        }
+    }
+
+    private suspend fun getAnonymousUserId(): String {
+        val anonymousId = config.anonymousIdFactory?.invoke() ?: sessionLocalSource.getDeviceId()
+        return "anon:$anonymousId"
+    }
+
+    // validate existing session and update lastActivityAt in case current session is valid
+    private suspend fun getValidSession(intent: AnalyticIntent?): Session? {
+        val userId = sessionLocalSource.getUserId()
+        val sessionId = sessionId
+        val isExpired = lastIntentAt
+            ?.let { TimeUnit.MILLISECONDS.toSeconds(Date().time - it.time) >= config.sessionTimeout }
+            ?: false
+
+        return if (sessionId != null && userId != null && !isExpired) {
+            updateAndGetSession(intent, userId, sessionId)
+        } else null
+    }
+
+    private suspend fun updateAndGetSession(intent: AnalyticIntent?, userId: String, sessionId: UUID): Session {
+        updateSession(intent)
+
+        return Session(
             sessionId = sessionId,
             userId = userId,
             groupId = sessionLocalSource.getGroupId(),
@@ -59,124 +156,27 @@ internal class DefaultSessionService(
         )
     }
 
-    override suspend fun checkSession(intent: AnalyticsIntent, onSessionStarted: suspend () -> Unit): Boolean {
-        // the order of conditions here is important
-        return when {
-            // check if the incoming intent is Anonymous or Identify, we force start a new session
-            intent is Anonymous -> startAnonymousSession().also { onSessionStarted() }
-            intent is Identify -> startSession(intent).also { onSessionStarted() }
-            // for any other intent types we check if session is started already
-            isSessionStarted() -> true
-            // if not we try to start a session based on stored information
-            startSession() -> true.also { onSessionStarted() }
-            // we could not start or check for existing session
-            else -> false
-        }.updateSession(intent)
-    }
-
-    private suspend fun Boolean.updateSession(intent: AnalyticsIntent): Boolean {
-        if (this) {
-            when {
-                intent is Anonymous -> {
-                    latestUserProperties = hashMapOf()
-                }
-                intent is Identify -> {
-                    latestUserProperties = intent.properties.sanitized()
-                }
-                intent is UpdateProfile -> {
-                    latestUserProperties = intent.properties.sanitized()
-                }
-                intent is Screen -> {
-                    previousScreen = currentScreen
-                    currentScreen = intent.title
-                    sessionPageviews += 1
-                }
-                intent is Event && intent.name == AnalyticsEvent.SessionStarted.eventName -> {
-                    // special handling for session start events
-                    sessionPageviews = 0
-                    sessionRandomId = sessionRandomizer.get()
-                    currentScreen = null
-                    previousScreen = null
-                }
-                intent is Event && intent.name == AnalyticsEvent.ExperienceStarted.eventName -> {
-                    sessionLocalSource.setLastContentShownAt(Date())
-                }
-            }
-        }
-
-        return this
-    }
-
-    private fun Map<String, Any>?.sanitized(): Map<String, Any> {
-        return mutableMapOf<String, Any>().apply {
-            putAll(this@sanitized ?: hashMapOf())
-            remove(KEY_USER_SIGNATURE)
-        }
-    }
-
-    private suspend fun startAnonymousSession(): Boolean {
-        getAnonymousUserId().also { anonymousId ->
-            // only start anonymousSession if new Id is different from what we already have
-            if (!isSessionStarted() || anonymousId != sessionLocalSource.getUserId()) {
-                sessionLocalSource.setUserId(anonymousId)
-                sessionLocalSource.isAnonymous(true)
-                sessionLocalSource.setUserSignature(null)
-                return startSession()
-            }
-        }
-
-        return false
-    }
-
-    private suspend fun getAnonymousUserId(): String {
-        val anonymousId = config.anonymousIdFactory?.invoke() ?: sessionLocalSource.getDeviceId()
-        return "anon:$anonymousId"
-    }
-
-    private suspend fun startSession(identify: Identify): Boolean {
-        // only start anonymousSession if new Id is different from what we already have
-        if (!isSessionStarted() || identify.userId != sessionLocalSource.getUserId()) {
-            sessionLocalSource.setUserId(identify.userId)
-            sessionLocalSource.isAnonymous(false)
-            sessionLocalSource.setUserSignature(identify.properties?.get(KEY_USER_SIGNATURE) as? String)
-            return startSession()
-        }
-
-        return false
-    }
-
-    // validate existing session and update lastActivityAt in case current session is valid
-    private fun isSessionStarted(): Boolean {
-        val isExpired = lastActivityAt
-            ?.let { TimeUnit.MILLISECONDS.toSeconds(Date().time - it.time) >= config.sessionTimeout }
-            ?: false
-
-        val isSessionStarted = sessionId != null && !isExpired
-
-        if (isSessionStarted) {
-            lastActivityAt = Date()
-        }
-
-        return isSessionStarted
-    }
-
     // start session based on previous session info (userId)
-    private suspend fun startSession(): Boolean {
-        return if (sessionLocalSource.getUserId() != null) {
-            sessionId = UUID.randomUUID()
-            lastActivityAt = Date()
+    private suspend fun startSession(intent: AnalyticIntent?, onSessionStarted: (suspend () -> Unit)?): Session? {
+        val userId = sessionLocalSource.getUserId()
+        return if (userId != null) {
+            val newSessionId = UUID.randomUUID()
+            sessionId = newSessionId
+            lastIntentAt = Date()
             currentScreen = null
             previousScreen = null
             sessionPageviews = 0
             sessionRandomId = 0
             latestUserProperties = mapOf()
-            true
-        } else false
+
+            onSessionStarted?.invoke()
+            updateAndGetSession(intent, userId, newSessionId)
+        } else null
     }
 
     override suspend fun reset() {
         sessionId = null
-        lastActivityAt = null
+        lastIntentAt = null
         currentScreen = null
         previousScreen = null
         sessionPageviews = 0
