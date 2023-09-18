@@ -2,18 +2,6 @@ default_platform(:android)
 
 platform :android do
 
-  desc "Validate the code in the SDK repo works properly"
-  lane :validate_code do
-    gradle(task: 'detekt')
-    gradle(task: ':appcues:build')
-    gradle(task: ':samples:kotlin-android-app:bundleRelease')
-  end
-
-  desc "Generate unit test code coverage report"
-  lane :code_coverage do
-    gradle(task: ':appcues:debugUnitTestCoverage')
-  end
-
   desc "Deploy a new version to Google Play internal test"
   lane :deploy_sample do
     sh("sh", "./replace-placeholders.sh", "kotlin-android-app", ENV["EX_APPCUES_ACCOUNT_ID"], ENV["EX_APPCUES_APPLICATION_ID"])
