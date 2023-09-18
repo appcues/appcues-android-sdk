@@ -59,6 +59,14 @@ override fun onResume() {
 
 The Appcues Android SDK supports basic automatic screen tracking for Activities.  This will report a screen view using the Activity `label` value as the screen title, each time a new Activity starts.  To enable this automatic screen tracking, call `trackScreens()`.
 
+## Anchored Tooltips
+
+Anchored tooltips use element targeting to point directly at specific views in your application. For more information about how to configure your application's views for element targeting, refer to the [Anchored Tooltips Guide](https://github.com/appcues/appcues-android-sdk/blob/main/docs/AnchoredTooltips.md).
+
+## Embedded Experiences
+
+Add `AppcuesFrameView` instances in your application layouts to support embedded experience content, with a non-modal presentation. For more information about how to configure your application layouts to use frame views, refer to the guide on [Configuring an AppcuesFrameView](https://github.com/appcues/appcues-android-sdk/blob/main/docs/AppcuesFrameViewConfiguring.md).
+
 ## Debugging
 
 See [Configuring the Appcues URL Scheme](https://github.com/appcues/appcues-android-sdk/blob/main/docs/URLSchemeConfiguring.md) for setup instructions and then refer to Refer to the [Debug Guide](https://github.com/appcues/appcues-android-sdk/blob/main/docs/Debugging.md) for usage details.
