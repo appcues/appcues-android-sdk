@@ -20,7 +20,6 @@ import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.verify
 import io.mockk.verifyOrder
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
@@ -28,7 +27,6 @@ import org.junit.Test
 import org.koin.core.component.get
 import java.util.UUID
 
-@OptIn(ExperimentalCoroutinesApi::class)
 internal class AppcuesTest : AppcuesScopeTest {
 
     @get:Rule
@@ -49,7 +47,6 @@ internal class AppcuesTest : AppcuesScopeTest {
         // GIVEN
         val userId = ""
         val tracker: AnalyticsTracker = get()
-        val sessionMonitor: SessionMonitor = get()
 
         // WHEN
         appcues.identify(userId)
@@ -59,12 +56,11 @@ internal class AppcuesTest : AppcuesScopeTest {
     }
 
     @Test
-    fun `identify SHOULD update Storage AND call AnalyticsTracker identify function AND start session`() {
+    fun `identify SHOULD update Storage AND call AnalyticsTracker identify`() {
         // GIVEN
         val userId = "default-0000"
         val properties = mapOf<String, Any>("prop" to "value")
         val storage: Storage = get()
-        val sessionMonitor: SessionMonitor = get()
         val tracker: AnalyticsTracker = get()
 
         // WHEN
@@ -205,7 +201,6 @@ internal class AppcuesTest : AppcuesScopeTest {
         // GIVEN
         val storage: Storage = get()
         val tracker: AnalyticsTracker = get()
-        val sessionMonitor: SessionMonitor = get()
 
         // WHEN
         appcues.anonymous()
