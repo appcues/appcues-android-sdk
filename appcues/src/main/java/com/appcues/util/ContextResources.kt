@@ -57,7 +57,7 @@ internal class ContextResources(private val context: Context) {
     }
 
     fun getLanguage(): String {
-        return getCurrentLocale(context).language
+        return getCurrentLocale(context).toLanguageTag()
     }
 
     fun getUserAgent(): String? = System.getProperty("http.agent")
