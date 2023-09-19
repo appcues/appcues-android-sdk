@@ -197,7 +197,7 @@ internal class AppcuesTest : AppcuesScopeTest {
     }
 
     @Test
-    fun `anonymous SHOULD set Storage userId equal to the deviceId AND identify AND start a session`() {
+    fun `anonymous SHOULD set Storage userId equal to the deviceId AND identify`() {
         // GIVEN
         val storage: Storage = get()
         val tracker: AnalyticsTracker = get()
