@@ -6,13 +6,11 @@ import com.appcues.rules.KoinScopeRule
 import com.appcues.ui.ExperienceRenderer
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coVerify
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.koin.core.component.get
 
-@OptIn(ExperimentalCoroutinesApi::class)
 internal class CloseActionTest : AppcuesScopeTest {
 
     @get:Rule
@@ -21,6 +19,24 @@ internal class CloseActionTest : AppcuesScopeTest {
     @Test
     fun `close SHOULD have expected type name`() {
         assertThat(CloseAction.TYPE).isEqualTo("@appcues/close")
+    }
+
+    @Test
+    fun `category SHOULD be internal`() {
+        // GIVEN
+        val experienceRenderer: ExperienceRenderer = get()
+        val action = CloseAction(mapOf(), RenderContext.Modal, experienceRenderer)
+        // THEN
+        assertThat(action.category).isEqualTo("internal")
+    }
+
+    @Test
+    fun `destination SHOULD be end experience`() {
+        // GIVEN
+        val experienceRenderer: ExperienceRenderer = get()
+        val action = CloseAction(mapOf(), RenderContext.Modal, experienceRenderer)
+        // THEN
+        assertThat(action.destination).isEqualTo("end-experience")
     }
 
     @Test

@@ -20,8 +20,11 @@ internal class LinkAction(
         const val TYPE = "@appcues/link"
     }
 
-    constructor(redirectUrl: String, linkOpener: LinkOpener, appcues: Appcues) :
-        this(hashMapOf<String, Any>("url" to redirectUrl), linkOpener, appcues)
+    constructor(redirectUrl: String, linkOpener: LinkOpener, appcues: Appcues) : this(
+        config = hashMapOf<String, Any>("url" to redirectUrl),
+        linkOpener = linkOpener,
+        appcues = appcues
+    )
 
     private val url: String? = config.getConfig("url")
     private val openExternally = config.getConfigOrDefault("openExternally", false)
@@ -31,20 +34,18 @@ internal class LinkAction(
     override val destination: String = url ?: String()
 
     override suspend fun execute() {
-        // start web activity if url is not null
-        if (url != null) {
-            val uri = Uri.parse(url)
-            val scheme = uri.scheme?.lowercase()
-            if (scheme != null) {
-                // only HTTP or HTTPS URLs are eligible for Chrome Custom Tabs in-app browser
-                if (!openExternally && (scheme == "http" || scheme == "https")) {
-                    linkOpener.openCustomTabs(uri)
-                } else {
-                    // this will handle any in-app deep link scheme URLs OR any web urls that were
-                    // requested to open into the external browser application
-                    appcues.navigationHandler?.navigateTo(uri) ?: linkOpener.startNewIntent(uri)
-                }
-            }
+        val uri = url?.let { Uri.parse(it) } ?: return
+        val scheme = uri.scheme?.lowercase() ?: return
+
+        // only HTTP or HTTPS URLs are eligible for Chrome Custom Tabs in-app browser
+        val isEligibleCustomTab = !openExternally && (scheme == "http" || scheme == "https")
+
+        if (isEligibleCustomTab) {
+            linkOpener.openCustomTabs(uri)
+        } else {
+            // this will handle any in-app deep link scheme URLs OR any web urls that were
+            // requested to open into the external browser application
+            appcues.navigationHandler?.navigateTo(uri) ?: linkOpener.startNewIntent(uri)
         }
     }
 }

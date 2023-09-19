@@ -7,16 +7,14 @@ import com.appcues.statemachine.StepReference.StepId
 import com.appcues.statemachine.StepReference.StepIndex
 import com.appcues.statemachine.StepReference.StepOffset
 import com.appcues.ui.ExperienceRenderer
-import com.google.common.truth.Truth
+import com.google.common.truth.Truth.assertThat
 import io.mockk.coVerify
 import io.mockk.mockk
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import java.util.UUID
 
-@OptIn(ExperimentalCoroutinesApi::class)
 internal class ContinueActionTest : AppcuesScopeTest {
 
     @get:Rule
@@ -24,7 +22,53 @@ internal class ContinueActionTest : AppcuesScopeTest {
 
     @Test
     fun `continue SHOULD have expected type name`() {
-        Truth.assertThat(ContinueAction.TYPE).isEqualTo("@appcues/continue")
+        assertThat(ContinueAction.TYPE).isEqualTo("@appcues/continue")
+    }
+
+    @Test
+    fun `category SHOULD be internal`() {
+        // GIVEN
+        val experienceRenderer: ExperienceRenderer = mockk(relaxed = true)
+        val action = ContinueAction(mapOf(), RenderContext.Modal, experienceRenderer)
+        // THEN
+        assertThat(action.category).isEqualTo("internal")
+    }
+
+    @Test
+    fun `destination SHOULD match expected when stepReference is StepIndex`() {
+        // GIVEN
+        val experienceRenderer: ExperienceRenderer = mockk(relaxed = true)
+        val action = ContinueAction(mapOf("index" to 1234), RenderContext.Modal, experienceRenderer)
+        // THEN
+        assertThat(action.destination).isEqualTo("#1234")
+    }
+
+    @Test
+    fun `destination SHOULD match expected when stepReference is StepOffset with positive value`() {
+        // GIVEN
+        val experienceRenderer: ExperienceRenderer = mockk(relaxed = true)
+        val action = ContinueAction(mapOf("offset" to 3), RenderContext.Modal, experienceRenderer)
+        // THEN
+        assertThat(action.destination).isEqualTo("+3")
+    }
+
+    @Test
+    fun `destination SHOULD match expected when stepReference is StepOffset with negative value`() {
+        // GIVEN
+        val experienceRenderer: ExperienceRenderer = mockk(relaxed = true)
+        val action = ContinueAction(mapOf("offset" to -3), RenderContext.Modal, experienceRenderer)
+        // THEN
+        assertThat(action.destination).isEqualTo("-3")
+    }
+
+    @Test
+    fun `destination SHOULD match expected when stepReference is StepId`() {
+        // GIVEN
+        val experienceRenderer: ExperienceRenderer = mockk(relaxed = true)
+        val stepId = UUID.randomUUID()
+        val action = ContinueAction(mapOf("stepID" to stepId.toString()), RenderContext.Modal, experienceRenderer)
+        // THEN
+        assertThat(action.destination).isEqualTo(stepId.toString())
     }
 
     @Test
