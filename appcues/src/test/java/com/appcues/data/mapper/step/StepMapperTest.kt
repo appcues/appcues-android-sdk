@@ -129,16 +129,13 @@ internal class StepMapperTest {
 
         val groupTraits = listOf(groupDecoratingTrait to ExperienceTraitLevel.GROUP)
 
-        // helper to avoid nested this@mockk references
-        fun getMockTrait(type: String): TestStepDecoratingTrait = mockk(relaxed = true) {
-            every { this@mockk.type } answers { type }
-        }
-
         val slot = slot<List<LeveledTraitResponse>>()
         val traitMapper = mockk<TraitsMapper>(relaxed = true) {
             every { map(RenderContext.Modal, capture(slot)) } answers {
                 slot.captured.map { leveledTrait ->
-                    getMockTrait(leveledTrait.first.type)
+                    mockk<TestStepDecoratingTrait>(relaxed = true) {
+                        every { type } answers { leveledTrait.first.type }
+                    }
                 }
             }
         }
@@ -169,16 +166,13 @@ internal class StepMapperTest {
 
         val groupTraits = listOf(groupDecoratingTrait to ExperienceTraitLevel.GROUP)
 
-        // helper to avoid nested this@mockk references
-        fun getMockTrait(level: ExperienceTraitLevel): TestStepDecoratingTrait = mockk(relaxed = true) {
-            every { this@mockk.level } answers { level }
-        }
-
         val slot = slot<List<LeveledTraitResponse>>()
         val traitMapper = mockk<TraitsMapper>(relaxed = true) {
             every { map(RenderContext.Modal, capture(slot)) } answers {
                 slot.captured.map { leveledTrait ->
-                    getMockTrait(leveledTrait.second)
+                    mockk<TestStepDecoratingTrait>(relaxed = true) {
+                        every { level } answers { leveledTrait.second }
+                    }
                 }
             }
         }

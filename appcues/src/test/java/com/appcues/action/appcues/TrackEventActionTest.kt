@@ -6,13 +6,11 @@ import com.appcues.rules.KoinScopeRule
 import com.google.common.truth.Truth.assertThat
 import io.mockk.Called
 import io.mockk.coVerify
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.koin.core.component.get
 
-@OptIn(ExperimentalCoroutinesApi::class)
 internal class TrackEventActionTest : AppcuesScopeTest {
 
     @get:Rule

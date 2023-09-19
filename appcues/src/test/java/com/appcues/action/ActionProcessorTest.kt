@@ -22,7 +22,6 @@ import io.mockk.Called
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Rule
@@ -36,7 +35,6 @@ import org.koin.mp.KoinPlatformTools
 import org.koin.test.KoinTest
 import java.util.UUID
 
-@OptIn(ExperimentalCoroutinesApi::class)
 internal class ActionProcessorTest : KoinTest {
 
     @get:Rule
