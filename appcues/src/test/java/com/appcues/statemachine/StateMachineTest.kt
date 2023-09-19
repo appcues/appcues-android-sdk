@@ -341,6 +341,8 @@ internal class StateMachineTest : AppcuesScopeTest {
             publishedAt = 1652895835000,
             completionActions = arrayListOf(),
             experiment = null,
+            localeId = null,
+            localeName = null,
             trigger = ExperienceTrigger.ShowCall,
         )
         val initialState = Idling
@@ -370,6 +372,8 @@ internal class StateMachineTest : AppcuesScopeTest {
             completionActions = arrayListOf(),
             experiment = null,
             error = "Failed decode",
+            localeId = null,
+            localeName = null,
             trigger = ExperienceTrigger.ShowCall,
         )
         val initialState = Idling

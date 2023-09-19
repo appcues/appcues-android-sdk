@@ -89,10 +89,8 @@ internal sealed class ExperienceLifecycleEvent(
             "experienceType" to experience.type,
             "frameId" to experience.renderContext.getFrameId(),
             "version" to experience.publishedAt,
-            // items in the spec that we are not ready for yet:
-            // "version" to experience.version -- not included in response?
-            // "localeName" to "", -- add locale values to analytics for localized experiences
-            // "localeId" to "", -- add locale values to analytics for localized experiences
+            "localeName" to experience.localeName,
+            "localeId" to experience.localeId,
         ).apply {
             flatStepIndex?.let {
                 experience.flatSteps.getOrNull(it)?.let { step ->

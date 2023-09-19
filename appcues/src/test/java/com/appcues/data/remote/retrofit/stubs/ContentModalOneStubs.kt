@@ -28,6 +28,7 @@ internal val contentModalOneStubs = ExperienceResponse(
     theme = null,
     nextContentId = null,
     redirectUrl = null,
+    context = null,
     traits = arrayListOf(),
     steps = arrayListOf(
         StepContainerResponse(
