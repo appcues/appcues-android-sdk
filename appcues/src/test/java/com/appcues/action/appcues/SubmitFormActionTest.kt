@@ -285,6 +285,8 @@ internal class SubmitFormActionTest : AppcuesScopeTest {
         type = "mobile",
         renderContext = RenderContext.Modal,
         publishedAt = Date().time,
+        localeId = null,
+        localeName = null,
         completionActions = listOf(),
         trigger = ExperienceTrigger.ShowCall,
         experiment = null,

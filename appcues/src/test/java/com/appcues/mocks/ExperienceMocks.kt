@@ -58,6 +58,8 @@ internal fun mockExperience(onPresent: (() -> Unit)? = null) =
         experiment = null,
         completionActions = arrayListOf(TrackEventAction(hashMapOf(), appcues = mockk(relaxed = true))),
         trigger = ShowCall,
+        localeId = null,
+        localeName = null,
     )
 
 internal fun mockStep(id: UUID) =
@@ -98,7 +100,9 @@ internal fun mockExperienceExperiment(experiment: Experiment) =
         publishedAt = 1652895835000,
         experiment = experiment,
         completionActions = emptyList(),
-        trigger = ExperienceTrigger.ShowCall,
+        trigger = ShowCall,
+        localeId = null,
+        localeName = null,
     )
 
 internal fun mockEmbedExperience(frameId: String, onPresent: (() -> Unit)? = null) =
@@ -125,6 +129,8 @@ internal fun mockEmbedExperience(frameId: String, onPresent: (() -> Unit)? = nul
         experiment = null,
         completionActions = emptyList(),
         trigger = ExperienceTrigger.Qualification("screen_view"),
+        localeId = null,
+        localeName = null,
     )
 
 // An experience with two step containers, each with one step. The given list of actions are applied to both
@@ -164,4 +170,6 @@ internal fun mockExperienceNavigateActions(actions: List<Action>, presentingTrai
         experiment = null,
         completionActions = emptyList(),
         trigger = trigger,
+        localeId = null,
+        localeName = null,
     )

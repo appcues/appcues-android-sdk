@@ -70,6 +70,8 @@ internal class ExperienceMapper(
             type = from.type ?: "",
             renderContext = from.getRenderContext(),
             publishedAt = from.publishedAt,
+            localeId = from.context?.localeId,
+            localeName = from.context?.localeName,
             experiment = experiments?.getExperiment(from.id),
             completionActions = emptyList(),
             trigger = trigger,
@@ -97,6 +99,8 @@ internal class ExperienceMapper(
             type = from.type,
             renderContext = renderContext,
             publishedAt = from.publishedAt,
+            localeId = from.context?.localeId,
+            localeName = from.context?.localeName,
             experiment = experiments?.getExperiment(from.id),
             completionActions = arrayListOf<ExperienceAction>().apply {
                 from.redirectUrl?.let {

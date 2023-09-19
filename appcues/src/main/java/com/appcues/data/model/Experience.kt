@@ -12,6 +12,8 @@ internal data class Experience(
     val type: String?,
     val renderContext: RenderContext,
     val publishedAt: Long?,
+    val localeId: String?,
+    val localeName: String?,
     val experiment: Experiment?,
     val completionActions: List<ExperienceAction>,
     val trigger: ExperienceTrigger,
