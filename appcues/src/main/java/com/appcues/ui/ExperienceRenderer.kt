@@ -5,8 +5,8 @@ import com.appcues.AppcuesFrameView
 import com.appcues.SessionMonitor
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.analytics.track
-import com.appcues.analytics.trackExperienceError
 import com.appcues.analytics.trackExperienceRecovery
+import com.appcues.analytics.trackRecoverableExperienceError
 import com.appcues.data.AppcuesRepository
 import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperiencePriority.NORMAL
@@ -95,7 +95,7 @@ internal class ExperienceRenderer(override val scope: Scope) : KoinScopeComponen
         if (!canShow) return WontDisplay
 
         val stateMachine = stateMachines.getOwner(renderContext)?.stateMachine ?: return NoRenderContext(experience, renderContext)
-            .also { analyticsTracker.trackExperienceError(experience, "no render context $renderContext") }
+            .also { analyticsTracker.trackRecoverableExperienceError(experience, "no render context $renderContext") }
 
         if (stateMachine.checkPriority(this)) {
             return when (val result = stateMachine.handleAction(EndExperience(markComplete = false, destroyed = false))) {

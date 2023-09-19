@@ -1,7 +1,9 @@
 package com.appcues.analytics
 
+import com.appcues.analytics.ExperienceLifecycleEvent.ExperienceError
 import com.appcues.data.model.Experience
 import com.appcues.data.model.Experiment
+import com.appcues.statemachine.Error
 import com.appcues.util.appcuesFormatted
 import java.util.UUID
 
@@ -23,19 +25,19 @@ internal fun AnalyticsTracker.track(experiment: Experiment) {
     )
 }
 
-internal fun AnalyticsTracker.trackExperienceError(experience: Experience, message: String) {
-    val errorId = UUID.randomUUID()
+internal fun AnalyticsTracker.trackRecoverableExperienceError(experience: Experience, message: String) {
+    // only track the recoverable error once
+    if (experience.renderErrorId != null) return
+
+    experience.renderErrorId = UUID.randomUUID()
+    val error = ExperienceError(Error.ExperienceError(experience, message, experience.renderErrorId))
 
     track(
-        event = AnalyticsEvent.ExperienceError,
-        properties = mapOf(
-            "message" to message,
-            "errorId" to errorId.toString(),
-        ),
-        interactive = false
+        name = error.name,
+        properties = error.properties,
+        interactive = false,
+        isInternal = true,
     )
-
-    experience.renderErrorId = errorId
 }
 
 internal fun AnalyticsTracker.trackExperienceRecovery(experience: Experience) {
