@@ -9,7 +9,10 @@ import android.view.ViewGroup
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import androidx.compose.material.MaterialTheme
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.FragmentActivity
@@ -118,10 +121,15 @@ internal class AppcuesDebuggerManager(context: Context, private val koinScope: S
                         }
 
                         setContent {
-                            MaterialTheme {
-                                DebuggerComposition(debuggerViewModel) {
-                                    stop()
-                                    it.removeView(this)
+                            CompositionLocalProvider(
+                                // Debugger is in English and always LTR regardless of app settings
+                                LocalLayoutDirection provides LayoutDirection.Ltr
+                            ) {
+                                MaterialTheme {
+                                    DebuggerComposition(debuggerViewModel) {
+                                        stop()
+                                        it.removeView(this)
+                                    }
                                 }
                             }
                         }
