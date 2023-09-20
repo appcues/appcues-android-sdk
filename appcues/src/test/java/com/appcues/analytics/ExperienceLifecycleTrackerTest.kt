@@ -10,18 +10,22 @@ import com.appcues.action.ActionRegistry
 import com.appcues.debugger.AppcuesDebuggerManager
 import com.appcues.logging.Logcues
 import com.appcues.mocks.mockExperience
+import com.appcues.mocks.mockLocalizedExperience
 import com.appcues.mocks.storageMockk
 import com.appcues.rules.MainDispatcherRule
 import com.appcues.statemachine.Action.EndExperience
+import com.appcues.statemachine.Action.StartExperience
 import com.appcues.statemachine.Action.StartStep
 import com.appcues.statemachine.State
 import com.appcues.statemachine.State.EndingStep
+import com.appcues.statemachine.State.Idling
 import com.appcues.statemachine.State.RenderingStep
 import com.appcues.statemachine.StateMachine
 import com.appcues.statemachine.StepReference.StepOffset
 import com.appcues.trait.TraitRegistry
 import com.appcues.ui.ExperienceRenderer
 import com.appcues.util.LinkOpener
+import com.google.common.truth.Truth.assertThat
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -118,6 +122,32 @@ internal class ExperienceLifecycleTrackerTest : KoinTest {
 
         // THEN
         verify { analyticsTracker.track("appcues:v2:step_completed", any(), any(), any()) }
+    }
+
+    @Test
+    fun `Idling SHOULD track events WITH locale properties WHEN action is StartExperience`() = runTest {
+        // verify locale properties from context are coming through
+        // GIVEN
+        val experience = mockLocalizedExperience("France", "b636348b-648f-4e0d-a06a-6ebb2fe2b7f8")
+        val initialState = Idling
+        val action = StartExperience(experience)
+        val scope = initScope(initialState)
+        val stateMachine: StateMachine = scope.get()
+        val analyticsTracker: AnalyticsTracker = scope.get()
+
+        // WHEN
+        stateMachine.handleAction(action)
+
+        // THEN
+        val properties = mutableListOf<Map<String, Any>>()
+        verify { analyticsTracker.track(any(), capture(properties), any(), any()) }
+        assertThat(properties).isNotEmpty()
+        properties.forEach {
+            // there are multiple flow events during the experience start (experience start and step start)
+            // and all should have the specified locale information
+            assertThat("France").isEqualTo(it["localeName"])
+            assertThat("b636348b-648f-4e0d-a06a-6ebb2fe2b7f8").isEqualTo(it["localeId"])
+        }
     }
 
     // Helpers

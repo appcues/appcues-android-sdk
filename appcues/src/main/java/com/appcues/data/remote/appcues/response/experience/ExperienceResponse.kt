@@ -35,7 +35,8 @@ internal sealed class LossyExperienceResponse
 
 @JsonClass(generateAdapter = true)
 internal data class ContextResponse(
-    // this value should be a UUID, but it is just for analytics, so capture and return string verbatim
+    // this value is a UUID if a locale is used, or "default" if not - so needs to be a string
+    // and just returned verbatim in analytics
     @Json(name = "locale_id")
     val localeId: String?,
     @Json(name = "locale_name")

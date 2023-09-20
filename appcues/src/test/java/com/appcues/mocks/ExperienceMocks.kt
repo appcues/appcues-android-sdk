@@ -173,3 +173,31 @@ internal fun mockExperienceNavigateActions(actions: List<Action>, presentingTrai
         localeId = null,
         localeName = null,
     )
+
+internal fun mockLocalizedExperience(localeName: String, localeId: String) =
+    Experience(
+        id = UUID.fromString("d84c9d01-aa27-4cbb-b832-ee03720e04fc"),
+        name = "Mock Localized Experience",
+        type = "mobile",
+        renderContext = RenderContext.Modal,
+        stepContainers = listOf(
+            StepContainer(
+                id = UUID.fromString("e062bd81-b736-44c4-abba-633dfff966aa"),
+                steps = listOf(
+                    mockStep(UUID.fromString("01d8a05a-3a55-4ecc-872d-d140cd628902")),
+                ),
+                presentingTrait = mockPresentingTrait(),
+                contentHolderTrait = mockk(relaxed = true),
+                contentWrappingTrait = mockk(relaxed = true),
+                actions = emptyMap(),
+            )
+        ),
+        published = true,
+        priority = LOW,
+        publishedAt = 1652895835000,
+        experiment = null,
+        completionActions = arrayListOf(TrackEventAction(hashMapOf(), appcues = mockk(relaxed = true))),
+        trigger = ShowCall,
+        localeId = localeId,
+        localeName = localeName,
+    )
