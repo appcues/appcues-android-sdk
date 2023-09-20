@@ -20,6 +20,7 @@ import com.appcues.data.remote.appcues.response.experience.ExperienceResponse
 import com.appcues.data.remote.appcues.response.experience.FailedExperienceResponse
 import com.appcues.data.remote.appcues.response.experience.LossyExperienceResponse
 import com.appcues.data.remote.appcues.response.step.StepContainerResponse
+import com.appcues.trait.AppcuesTraitException
 import com.appcues.trait.ContentHolderTrait
 import com.appcues.trait.ContentWrappingTrait
 import com.appcues.trait.ExperienceTrait
@@ -150,10 +151,9 @@ internal class ExperienceMapper(
     }
 
     private fun List<ExperienceTrait>.getExperiencePresentingTraitOrThrow(): PresentingTrait {
-        return filterIsInstance<PresentingTrait>().firstOrNull() ?: throw AppcuesPresentingTraitNotFound()
+        return filterIsInstance<PresentingTrait>().firstOrNull()
+            ?: throw AppcuesTraitException("Presenting capability trait required")
     }
-
-    private class AppcuesPresentingTraitNotFound : Exception("Presenting capability trait required")
 
     private fun List<ExperimentResponse>.getExperiment(experienceId: UUID) =
         this.firstOrNull { it.experienceId == experienceId }?.let { experimentResponse ->

@@ -5,11 +5,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.RenderContext
+import com.appcues.data.model.getConfig
 import com.appcues.data.model.getConfigOrDefault
 import com.appcues.data.model.getConfigStyle
 import com.appcues.trait.AppcuesTraitException
 import com.appcues.trait.ContentWrappingTrait
 import com.appcues.trait.PresentingTrait
+import com.appcues.trait.appcues.ModalTrait.PresentationStyle.DIALOG
+import com.appcues.trait.appcues.ModalTrait.PresentationStyle.FULL
+import com.appcues.trait.appcues.ModalTrait.PresentationStyle.HALF_SHEET
+import com.appcues.trait.appcues.ModalTrait.PresentationStyle.SHEET
 import com.appcues.ui.modal.BottomSheetModal
 import com.appcues.ui.modal.DialogModal
 import com.appcues.ui.modal.DialogTransition
@@ -23,8 +28,8 @@ import org.koin.core.scope.Scope
 
 internal class ModalTrait(
     override val config: AppcuesConfigMap,
-    private val renderContext: RenderContext,
-    private val scope: Scope,
+    renderContext: RenderContext,
+    scope: Scope,
 ) : ContentWrappingTrait, PresentingTrait {
 
     companion object {
@@ -32,8 +37,12 @@ internal class ModalTrait(
         const val TYPE = "@appcues/modal"
     }
 
-    // should we have a default presentation style?
-    private val presentationStyle = config.getConfigOrDefault("presentationStyle", "full")
+    private enum class PresentationStyle {
+        DIALOG, FULL, HALF_SHEET, SHEET
+    }
+
+    // this can throw on init, if invalid presentation style - not one of the known types
+    private val presentationStyle = config.getConfig<String?>("presentationStyle").toPresentationStyle()
 
     private val style = config.getConfigStyle("style")
 
@@ -50,12 +59,10 @@ internal class ModalTrait(
         val windowInfo = rememberAppcuesWindowInfo()
 
         when (presentationStyle) {
-            "dialog" -> DialogModal(style, content, windowInfo, getDialogTransition())
-            "full" -> FullScreenModal(style, content, windowInfo)
-            "sheet" -> ExpandedBottomSheetModal(style, content, windowInfo)
-            "halfSheet" -> BottomSheetModal(style, content, windowInfo)
-            // what to do if presentationStyle is not valid?
-            else -> Unit
+            DIALOG -> DialogModal(style, content, windowInfo, getDialogTransition())
+            FULL -> FullScreenModal(style, content, windowInfo)
+            SHEET -> ExpandedBottomSheetModal(style, content, windowInfo)
+            HALF_SHEET -> BottomSheetModal(style, content, windowInfo)
         }
     }
 
@@ -75,6 +82,16 @@ internal class ModalTrait(
         return when (config.getConfigOrDefault("transition", "fade")) {
             "slide" -> SLIDE
             else -> FADE
+        }
+    }
+
+    private fun String?.toPresentationStyle(): PresentationStyle {
+        return when (this) {
+            "dialog" -> DIALOG
+            "full" -> FULL
+            "sheet" -> SHEET
+            "halfSheet" -> HALF_SHEET
+            else -> throw AppcuesTraitException("invalid modal presentation style: $this")
         }
     }
 }
