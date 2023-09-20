@@ -229,11 +229,12 @@ internal class AppcuesRepository(
                     // configuration - we wrap that in a failed response and map it, so it can be reported, and then
                     // any subsequent lower priority experiences can be attempted
                     val failed = FailedExperienceResponse(
-                        experienceResponse.id,
-                        experienceResponse.name,
-                        experienceResponse.type,
-                        experienceResponse.publishedAt,
-                        ex.message
+                        id = experienceResponse.id,
+                        name = experienceResponse.name,
+                        type = experienceResponse.type,
+                        publishedAt = experienceResponse.publishedAt,
+                        context = experienceResponse.context,
+                        error = ex.message
                     )
                     experienceMapper.mapDecoded(failed, trigger, priority, qualifyResponse.experiments, requestId)
                 }
