@@ -31,6 +31,7 @@ import com.appcues.statemachine.Transitions.Companion.fromRenderingStepToEndingS
 import com.appcues.util.ResultOf
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
@@ -77,8 +78,11 @@ internal class StateMachine(
         lifecycleTracker.start(this, { onEndedExperience?.invoke(it) })
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     private fun stopLifecycleTracking() {
         lifecycleTracker.stop()
+        _stateFlow.resetReplayCache()
+        _errorFlow.resetReplayCache()
     }
 
     suspend fun handleAction(action: Action): ResultOf<State, Error> = mutex.withLock {
@@ -132,7 +136,7 @@ internal class StateMachine(
             // if no side effect, return success with current state
             Success(_state)
         }.also {
-            if (state == Idling) {
+            if (_state == Idling) {
                 stopLifecycleTracking()
             }
         }

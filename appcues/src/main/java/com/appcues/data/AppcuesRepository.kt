@@ -15,7 +15,12 @@ import com.appcues.data.remote.RemoteError
 import com.appcues.data.remote.RemoteError.NetworkError
 import com.appcues.data.remote.appcues.AppcuesRemoteSource
 import com.appcues.data.remote.appcues.request.ActivityRequest
+import com.appcues.data.remote.appcues.response.QualifyResponse
+import com.appcues.data.remote.appcues.response.experience.ExperienceResponse
+import com.appcues.data.remote.appcues.response.experience.FailedExperienceResponse
+import com.appcues.data.remote.appcues.response.experience.LossyExperienceResponse
 import com.appcues.logging.Logcues
+import com.appcues.trait.AppcuesTraitException
 import com.appcues.util.ResultOf
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
@@ -153,12 +158,11 @@ internal class AppcuesRepository(
             val qualifyResult = appcuesRemoteSource.qualify(activity.userId, activity.userSignature, activity.requestId, activity.data)
 
             qualifyResult.doIfSuccess { response ->
-                val priority: ExperiencePriority = if (response.qualificationReason == "screen_view") LOW else NORMAL
                 val trigger = ExperienceTrigger.Qualification(response.qualificationReason)
                 qualificationResult = QualificationResult(
                     trigger = trigger,
-                    experiences = response.experiences.map {
-                        experienceMapper.mapDecoded(it, trigger, priority, response.experiments, activity.requestId)
+                    experiences = response.experiences.mapNotNull {
+                        mapExperience(activity.requestId, response, trigger, it)
                     }
                 )
             }
@@ -206,6 +210,36 @@ internal class AppcuesRepository(
         } else {
             // continue to process the queue until we get to current item
             post(queue, current)
+        }
+    }
+
+    private fun mapExperience(
+        requestId: UUID?,
+        qualifyResponse: QualifyResponse,
+        trigger: ExperienceTrigger,
+        experienceResponse: LossyExperienceResponse,
+    ): Experience? {
+        val priority: ExperiencePriority = if (qualifyResponse.qualificationReason == "screen_view") LOW else NORMAL
+        return try {
+            experienceMapper.mapDecoded(experienceResponse, trigger, priority, qualifyResponse.experiments, requestId)
+        } catch (ex: AppcuesTraitException) {
+            when (experienceResponse) {
+                is ExperienceResponse -> {
+                    // when a trait exception occurs, that means an otherwise valid response had some invalid trait
+                    // configuration - we wrap that in a failed response and map it, so it can be reported, and then
+                    // any subsequent lower priority experiences can be attempted
+                    val failed = FailedExperienceResponse(
+                        experienceResponse.id,
+                        experienceResponse.name,
+                        experienceResponse.type,
+                        experienceResponse.publishedAt,
+                        ex.message
+                    )
+                    experienceMapper.mapDecoded(failed, trigger, priority, qualifyResponse.experiments, requestId)
+                }
+                // it is not expected that a failed response can throw in any way, so should not get here
+                is FailedExperienceResponse -> null
+            }
         }
     }
 }
