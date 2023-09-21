@@ -1,6 +1,7 @@
 package com.appcues
 
 import android.content.Context
+import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -107,14 +108,13 @@ public fun ComposeContainer(context: Context, stepContentJson: List<String>?, tr
             LocalLogcues provides Logcues(LoggingLevel.DEBUG),
             LocalExperienceStepFormStateDelegate provides ExperienceStepFormState(),
             LocalAppcuesActionDelegate provides FakeAppcuesActionDelegate(),
-            LocalExperienceCompositionState provides ExperienceCompositionState()
+            LocalExperienceCompositionState provides ExperienceCompositionState(
+                // disables animations
+                isContentVisible = MutableTransitionState(true),
+                isBackdropVisible = MutableTransitionState(true)
+            )
         ) {
             // render the step container on the desired step
-            LocalExperienceCompositionState.current.let {
-                it.isContentVisible.targetState = true // so animated visibility works
-                it.isBackdropVisible.targetState = true // so animated visibility works
-            }
-
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center

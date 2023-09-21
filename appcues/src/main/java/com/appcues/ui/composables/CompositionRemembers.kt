@@ -34,14 +34,14 @@ internal data class AppcuesPaginationData(
     val scrollOffset: Float
 )
 
-internal class ExperienceCompositionState {
-
-    internal val paginationData = mutableStateOf(AppcuesPaginationData(1, 0, 0.0f))
-
-    internal val isContentVisible = MutableTransitionState(false)
-
-    internal val isBackdropVisible = MutableTransitionState(false)
-}
+internal class ExperienceCompositionState(
+    val paginationData: MutableState<AppcuesPaginationData> =
+        mutableStateOf(AppcuesPaginationData(1, 0, 0.0f)),
+    val isContentVisible: MutableTransitionState<Boolean> =
+        MutableTransitionState(false),
+    val isBackdropVisible: MutableTransitionState<Boolean> =
+        MutableTransitionState(false),
+)
 
 @Composable
 internal fun LaunchOnHideAnimationCompleted(block: () -> Unit) {
