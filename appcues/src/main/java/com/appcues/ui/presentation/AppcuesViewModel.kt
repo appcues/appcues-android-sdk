@@ -21,15 +21,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinScopeComponent
-import org.koin.core.component.inject
-import org.koin.core.scope.Scope
 
 internal class AppcuesViewModel(
-    override val scope: Scope,
     private val renderContext: RenderContext,
+    private val coroutineScope: AppcuesCoroutineScope,
+    private val experienceRenderer: ExperienceRenderer,
+    private val actionProcessor: ActionProcessor,
     private val onDismiss: () -> Unit,
-) : ViewModel(), KoinScopeComponent {
+) : ViewModel() {
 
     sealed class UIState {
         object Idle : UIState()
@@ -44,10 +43,6 @@ internal class AppcuesViewModel(
 
         data class Dismissing(val continueAction: () -> Unit) : UIState()
     }
-
-    private val appcuesCoroutineScope by inject<AppcuesCoroutineScope>()
-    private val experienceRenderer by inject<ExperienceRenderer>()
-    private val actionProcessor by inject<ActionProcessor>()
 
     private val _uiState = MutableStateFlow<UIState>(Idle)
 
@@ -85,25 +80,26 @@ internal class AppcuesViewModel(
             // if current state IS Rendering this means that the Activity was removed
             // from an external source (ex deep link) and we should end the experience
             if (state is Rendering) {
-                appcuesCoroutineScope.launch {
+                coroutineScope.launch {
                     experienceRenderer.dismiss(renderContext, markComplete = false, destroyed = true)
                 }
             }
         }
     }
 
-    private fun BeginningStep.toRenderingState(): Rendering? {
-        return with(experience) {
-            // find the container index
-            val containerId = groupLookup[flatStepIndex]
-            // find the step index in relation to the container
-            val stepIndexInContainer = stepIndexLookup[flatStepIndex]
-            // if both are valid ids we return Rendering else null
-            if (containerId != null && stepIndexInContainer != null) {
-                // returns rendering state
-                Rendering(this, stepContainers[containerId], stepIndexInContainer, flatStepIndex, metadata)
-            } else null
-        }
+    private fun BeginningStep.toRenderingState(): Rendering? = with(experience) {
+        // find the container index
+        val containerId = groupLookup[flatStepIndex] ?: return null
+        // find the step index in relation to the container
+        val stepIndexInContainer = stepIndexLookup[flatStepIndex] ?: return null
+        // returns rendering state
+        return Rendering(
+            experience = this,
+            stepContainer = stepContainers[containerId],
+            position = stepIndexInContainer,
+            flatStepIndex = flatStepIndex,
+            metadata = metadata
+        )
     }
 
     fun onActions(actions: List<ExperienceAction>, interactionType: InteractionType, viewDescription: String?) {
@@ -115,7 +111,7 @@ internal class AppcuesViewModel(
             // if current state is Rendering but position is different than current
             // then we report new position to state machine
             if (state is Rendering && state.position != index) {
-                appcuesCoroutineScope.launch {
+                coroutineScope.launch {
                     experienceRenderer.show(renderContext, StepGroupPageIndex(index, state.flatStepIndex))
                 }
             }

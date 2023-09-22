@@ -7,6 +7,7 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import com.appcues.AppcuesCoroutineScope
+import com.appcues.action.ActionProcessor
 import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperienceTrigger.Preview
 import com.appcues.data.model.RenderContext
@@ -27,7 +28,8 @@ internal abstract class ViewPresenter(
     private lateinit var viewModel: AppcuesViewModel
 
     private val experienceRenderer: ExperienceRenderer = scope.get()
-    private val appcuesCoroutineScope: AppcuesCoroutineScope = scope.get()
+    private val coroutineScope: AppcuesCoroutineScope = scope.get()
+    private val actionProcessor: ActionProcessor = scope.get()
 
     private var gestureListener: ShakeGestureListener? = null
 
@@ -64,7 +66,13 @@ internal abstract class ViewPresenter(
             // grab composeView or exit with false
             val composeView = setupView(activity) ?: return false
 
-            viewModel = AppcuesViewModel(scope, renderContext, ::onCompositionDismiss)
+            viewModel = AppcuesViewModel(
+                renderContext = renderContext,
+                coroutineScope = coroutineScope,
+                experienceRenderer = experienceRenderer,
+                actionProcessor = actionProcessor,
+                onDismiss = ::onCompositionDismiss
+            )
 
             if (currentExperience?.trigger == Preview) {
                 gestureListener = ShakeGestureListener(activity).also {
@@ -114,7 +122,7 @@ internal abstract class ViewPresenter(
 
     private fun refreshPreview() {
         currentExperience?.let {
-            appcuesCoroutineScope.launch {
+            coroutineScope.launch {
                 experienceRenderer.preview(it.id.toString())
             }
         }
