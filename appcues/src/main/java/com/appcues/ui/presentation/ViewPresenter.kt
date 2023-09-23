@@ -25,12 +25,11 @@ internal abstract class ViewPresenter(
     protected val renderContext: RenderContext,
 ) : DefaultLifecycleObserver {
 
-    private lateinit var viewModel: AppcuesViewModel
-
     private val experienceRenderer: ExperienceRenderer = scope.get()
     private val coroutineScope: AppcuesCoroutineScope = scope.get()
     private val actionProcessor: ActionProcessor = scope.get()
 
+    private var viewModel: AppcuesViewModel? = null
     private var gestureListener: ShakeGestureListener? = null
 
     private val currentExperience: Experience?
@@ -38,7 +37,7 @@ internal abstract class ViewPresenter(
 
     private val activityMonitorListener = object : ActivityMonitorListener {
         override fun onActivityChanged(activity: Activity) {
-            viewModel.onActivityChanged()
+            viewModel?.onActivityChanged()
         }
     }
 
@@ -66,14 +65,6 @@ internal abstract class ViewPresenter(
             // grab composeView or exit with false
             val composeView = setupView(activity) ?: return false
 
-            viewModel = AppcuesViewModel(
-                renderContext = renderContext,
-                coroutineScope = coroutineScope,
-                experienceRenderer = experienceRenderer,
-                actionProcessor = actionProcessor,
-                onDismiss = ::onCompositionDismiss
-            )
-
             if (currentExperience?.trigger == Preview) {
                 gestureListener = ShakeGestureListener(activity).also {
                     it.addListener(true) { refreshPreview() }
@@ -82,14 +73,22 @@ internal abstract class ViewPresenter(
 
             findViewTreeLifecycleOwner()?.lifecycle?.addObserver(lifecycleObserver)
 
-            composeView.setContent {
-                AppcuesComposition(
-                    viewModel = viewModel,
-                    logcues = scope.get(),
-                    imageLoader = scope.get(),
-                    chromeClient = EmbedChromeClient(this),
-                    config = scope.get(),
-                )
+            viewModel = AppcuesViewModel(
+                renderContext = renderContext,
+                coroutineScope = coroutineScope,
+                experienceRenderer = experienceRenderer,
+                actionProcessor = actionProcessor,
+                onDismiss = ::onCompositionDismiss
+            ).also {
+                composeView.setContent {
+                    AppcuesComposition(
+                        viewModel = it,
+                        logcues = scope.get(),
+                        imageLoader = scope.get(),
+                        chromeClient = EmbedChromeClient(this),
+                        config = scope.get(),
+                    )
+                }
             }
 
             return true
@@ -105,15 +104,12 @@ internal abstract class ViewPresenter(
 
         gestureListener?.clearListener()
         gestureListener = null
+        viewModel = null
 
         AppcuesActivityMonitor.activity?.getParentView()?.run {
             findViewTreeLifecycleOwner()?.lifecycle?.removeObserver(lifecycleObserver)
 
-            post {
-                removeView()
-
-                viewModel.onFinish()
-            }
+            post { removeView() }
         }
     }
 

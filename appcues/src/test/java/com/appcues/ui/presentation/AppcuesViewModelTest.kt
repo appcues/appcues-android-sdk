@@ -30,6 +30,7 @@ import io.mockk.excludeRecords
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import io.mockk.verifySequence
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -57,7 +58,7 @@ internal class AppcuesViewModelTest {
 
     private val experienceStates = MutableSharedFlow<State>(1)
     private val experienceRenderer: ExperienceRenderer = mockk {
-        coEvery { getStateFlow(RenderContext.Modal) } returns experienceStates
+        coEvery { getStateFlow(renderContext) } returns experienceStates
     }
 
     private val actionProcessor: ActionProcessor = mockk(relaxed = true)
@@ -93,6 +94,18 @@ internal class AppcuesViewModelTest {
     fun `first uiState SHOULD be Idle`() = runTest {
         assertThat(uiStates).hasSize(1)
         assertThat(uiStates[0]).isInstanceOf(Idle::class.java)
+    }
+
+    @Test
+    fun `init SHOULD call onDismiss WHEN getStateFlow is null`() = runTest {
+        // GIVEN
+        val experienceRenderer: ExperienceRenderer = mockk {
+            coEvery { getStateFlow(renderContext) } returns null
+        }
+        // WHEN
+        viewModel = AppcuesViewModel(renderContext, coroutineScope, experienceRenderer, actionProcessor, onDismiss)
+        // WHEN
+        verifySequence { onDismiss.invoke() }
     }
 
     @Test
@@ -164,7 +177,7 @@ internal class AppcuesViewModelTest {
         // THEN
         assertThat(uiStates).hasSize(2)
         with(uiStates[1] as Dismissing) {
-            assertThat(continueAction).isEqualTo(callback)
+            assertThat(onUiDismissed).isEqualTo(callback)
         }
     }
 
@@ -194,14 +207,6 @@ internal class AppcuesViewModelTest {
         // THEN
         assertThat(uiStates).hasSize(2)
         assertThat(uiStates[1]).isInstanceOf(Dismissing::class.java)
-    }
-
-    @Test
-    fun `state SHOULD NOT emit Dismissing WHEN experience State is EndingStep with null dismissAndContinue`() = runTest {
-        // WHEN
-        experienceStates.emit(EndingStep(mockk(), 0, true, null))
-        // THEN
-        assertThat(uiStates).hasSize(1)
     }
 
     @Test
@@ -292,20 +297,15 @@ internal class AppcuesViewModelTest {
     }
 
     @Test
-    fun `onFinish SHOULD call continueAction WHEN state is Dismissing`() = runTest {
+    fun `onDismissed SHOULD call onDismiss and callback`() = runTest {
         // GIVEN
         val callback: () -> Unit = mockk(relaxed = true)
-        experienceStates.emit(EndingStep(mockk(), 0, true, callback))
         // WHEN
-        viewModel.onFinish()
+        viewModel.onDismissed(callback)
         // THEN
-        verify { callback.invoke() }
-    }
-
-    @Test
-    fun `dismiss SHOULD call onDismiss`() = runTest {
-        viewModel.dismiss()
-
-        verify { onDismiss.invoke() }
+        verifySequence {
+            onDismiss.invoke()
+            callback.invoke()
+        }
     }
 }

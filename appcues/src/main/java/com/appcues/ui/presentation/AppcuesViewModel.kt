@@ -17,6 +17,7 @@ import com.appcues.ui.ExperienceRenderer
 import com.appcues.ui.presentation.AppcuesViewModel.UIState.Dismissing
 import com.appcues.ui.presentation.AppcuesViewModel.UIState.Idle
 import com.appcues.ui.presentation.AppcuesViewModel.UIState.Rendering
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -41,7 +42,7 @@ internal class AppcuesViewModel(
             val metadata: Map<String, Any?>,
         ) : UIState()
 
-        data class Dismissing(val continueAction: () -> Unit) : UIState()
+        data class Dismissing(val onUiDismissed: () -> Unit) : UIState()
     }
 
     private val _uiState = MutableStateFlow<UIState>(Idle)
@@ -49,27 +50,28 @@ internal class AppcuesViewModel(
     val uiState: StateFlow<UIState>
         get() = _uiState
 
-    init {
-        viewModelScope.launch {
-            experienceRenderer.getStateFlow(renderContext)?.collectLatest { result ->
-                // don't collect if we are Dismissing
-                if (uiState.value is Dismissing) return@collectLatest
+    private val statesJob: Job?
 
-                when (result) {
-                    is BeginningStep -> {
-                        result.toRenderingState()?.let {
-                            SdkMetrics.renderStart(result.experience.requestId)
-                            _uiState.value = it
-                        }
+    init {
+        statesJob = collectStates()
+
+        if (statesJob == null) onDismiss()
+    }
+
+    private fun collectStates(): Job? {
+        val stateFlow = experienceRenderer.getStateFlow(renderContext) ?: return null
+        return viewModelScope.launch {
+            stateFlow.collectLatest { state ->
+                if (state is BeginningStep) {
+                    state.toRenderingState()?.let {
+                        SdkMetrics.renderStart(state.experience.requestId)
+                        _uiState.value = it
                     }
-                    is EndingStep -> {
-                        // dismiss will trigger exit animations and remove experience UI
-                        if (result.dismissAndContinue != null) {
-                            _uiState.value = Dismissing(result.dismissAndContinue)
-                        }
-                    }
-                    // ignore other state changes
-                    else -> Unit
+                } else if (state is EndingStep && state.onUiDismissed != null) {
+                    // since we are dismissing we don't need to collect states anymore
+                    statesJob?.cancel()
+                    // dismiss will trigger exit animations and remove experience UI
+                    _uiState.value = Dismissing(state.onUiDismissed)
                 }
             }
         }
@@ -118,16 +120,8 @@ internal class AppcuesViewModel(
         }
     }
 
-    fun onFinish() {
-        uiState.value.let { state ->
-            // if current state IS dismissing we send the continueAction from EndingStep
-            if (state is Dismissing) {
-                state.continueAction()
-            }
-        }
-    }
-
-    fun dismiss() {
+    fun onDismissed(onUiDismissed: () -> Unit) {
         onDismiss()
+        onUiDismissed()
     }
 }

@@ -72,10 +72,7 @@ private fun MainSurface() {
 
             // will run when transition from visible to gone is completed
             LaunchOnHideAnimationCompleted {
-                // if state is dismissing then finish activity
-                if (state.value is Dismissing) {
-                    viewModel.dismiss()
-                }
+                (state.value as? Dismissing)?.run { viewModel.onDismissed(onUiDismissed) }
             }
 
             val experienceState = LocalExperienceCompositionState.current

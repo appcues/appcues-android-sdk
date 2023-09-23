@@ -22,7 +22,7 @@ internal sealed class State {
         // send to the state machine once it's done dismissing the current container
         // the presence of a non-null value is what tells the UI to dismiss the current container,
         // and it should be set to null if a dismiss is not requested (i.e. moving to next step in same container)
-        val dismissAndContinue: (() -> Unit)?,
+        val onUiDismissed: (() -> Unit)?,
     ) : State()
 
     data class EndingExperience(
