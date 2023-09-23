@@ -35,7 +35,6 @@ import com.appcues.statemachine.StepReference.StepOffset
 import com.appcues.trait.AppcuesTraitException
 import com.appcues.trait.PresentingTrait
 import com.appcues.util.ResultOf
-import com.appcues.util.ResultOf.Success
 import com.google.common.truth.Truth.assertThat
 import io.mockk.Called
 import io.mockk.coVerify
@@ -761,7 +760,7 @@ internal class StateMachineTest : AppcuesScopeTest {
                 onStateChange?.invoke(it)
                 when (it) {
                     is EndingStep -> {
-                        it.dismissAndContinue?.invoke()
+                        it.onUiDismissed?.invoke()
                     }
                     // ignore other state changes
                     else -> Unit

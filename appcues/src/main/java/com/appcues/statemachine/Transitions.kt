@@ -24,10 +24,6 @@ import com.appcues.statemachine.State.Idling
 import com.appcues.statemachine.State.RenderingStep
 import com.appcues.statemachine.StepReference.StepIndex
 import com.appcues.trait.AppcuesTraitException
-import com.appcues.util.ResultOf
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 
@@ -43,16 +39,14 @@ internal interface Transitions {
         }
     }
 
-    fun BeginningExperience.fromBeginningExperienceToBeginningStep(
-        action: StartStep,
-    ): Transition {
+    fun BeginningExperience.fromBeginningExperienceToBeginningStep(action: StartStep): Transition {
         // This is a safeguard against trying to load a step container that has zero steps.
         // We already guard against loading an experience with zero steps (groups) in the BeginningExperience
         // transition above. However, if a group exists, but has zero steps within - it will get here and
         // fail, so that we don't launch an AppcuesComposition and then have no content to render
         experience.stepContainers.firstOrNull()?.let {
             if (it.steps.isEmpty()) {
-                return stepNotFoundErrorTransition(experience, 0, 0)
+                return emptyExperienceErrorTransition(experience)
             }
         }
 
@@ -75,29 +69,22 @@ internal interface Transitions {
         return Transition(RenderingStep(experience, flatStepIndex, isFirst))
     }
 
-    fun RenderingStep.fromRenderingStepToEndingStep(
-        action: StartStep,
-        coroutineScope: CoroutineScope,
-        continuation: suspend () -> ResultOf<State, Error>
-    ): Transition {
+    fun RenderingStep.fromRenderingStepToEndingStep(action: StartStep): Transition {
         return action.stepReference.getIndex(experience, flatStepIndex).let { nextStepIndex ->
             if (isValidStepIndex(nextStepIndex, experience)) {
+                val markComplete = nextStepIndex > flatStepIndex
                 if (experience.areStepsFromDifferentGroup(flatStepIndex, nextStepIndex)) {
                     // in different groups we want to wait for StartStep action from AppcuesViewModel
-                    val response = CompletableDeferred<ResultOf<State, Error>>()
+                    val awaitEffect = AwaitEffect(ContinuationEffect(action))
                     Transition(
-                        state = EndingStep(experience, flatStepIndex, nextStepIndex > flatStepIndex) {
-                            coroutineScope.launch {
-                                response.complete(continuation())
-                            }
-                        },
-                        sideEffect = AwaitEffect(response)
+                        state = EndingStep(experience, flatStepIndex, markComplete, awaitEffect::complete),
+                        sideEffect = awaitEffect
                     )
                 } else {
                     // in same group we can continue to StartStep internally
                     Transition(
-                        state = EndingStep(experience, flatStepIndex, nextStepIndex > flatStepIndex, null),
-                        sideEffect = ContinuationEffect(StartStep(action.stepReference)),
+                        state = EndingStep(experience, flatStepIndex, markComplete, null),
+                        sideEffect = ContinuationEffect(action),
                     )
                 }
             } else {
@@ -107,11 +94,7 @@ internal interface Transitions {
         }
     }
 
-    fun RenderingStep.fromRenderingStepToEndingExperience(
-        action: EndExperience,
-        coroutineScope: CoroutineScope,
-        continuation: suspend () -> ResultOf<State, Error>
-    ): Transition {
+    fun RenderingStep.fromRenderingStepToEndingExperience(action: EndExperience): Transition {
         return if (action.destroyed) {
             // this means the activity hosting the experience was destroyed externally (i.e. deep link) and we should
             // immediately transition to EndingExperience - not rely on the UI to do it for us (it's gone)
@@ -125,27 +108,22 @@ internal interface Transitions {
             //
             // instead of using sideEffect we pass EndExperience on EndingStep
             // then AppcuesViewModel will continue to EndExperience when appropriate
-            val response = CompletableDeferred<ResultOf<State, Error>>()
+            val awaitEffect = AwaitEffect(ContinuationEffect(action))
             Transition(
-                state = EndingStep(experience, flatStepIndex, action.markComplete) {
-                    coroutineScope.launch {
-                        response.complete(continuation())
-                    }
-                },
-                sideEffect = AwaitEffect(response)
+                state = EndingStep(experience, flatStepIndex, action.markComplete, awaitEffect::complete),
+                sideEffect = awaitEffect
             )
         }
     }
 
     fun EndingStep.fromEndingStepToEndingExperience(action: EndExperience): Transition {
         return Transition(
-            EndingExperience(experience, flatStepIndex, action.markComplete, action.trackAnalytics), ContinuationEffect(Reset)
+            state = EndingExperience(experience, flatStepIndex, action.markComplete, action.trackAnalytics),
+            sideEffect = ContinuationEffect(Reset)
         )
     }
 
-    fun EndingStep.fromEndingStepToBeginningStep(
-        action: StartStep,
-    ): Transition {
+    fun EndingStep.fromEndingStepToBeginningStep(action: StartStep): Transition {
         // get next step index
         return action.stepReference.getIndex(experience, flatStepIndex).let { nextStepIndex ->
             // check if next step index is valid for this experience
@@ -160,7 +138,10 @@ internal interface Transitions {
     }
 
     fun EndingExperience.fromEndingExperienceToIdling(action: Reset): Transition {
-        return Transition(Idling, if (markComplete) ProcessActions(experience.completionActions) else null)
+        return Transition(
+            state = Idling,
+            sideEffect = if (markComplete) ProcessActions(experience.completionActions) else null
+        )
     }
 
     companion object : Transitions
@@ -229,11 +210,9 @@ private fun errorTransition(experience: Experience, currentStepIndex: Int, messa
     )
 }
 
-private fun stepNotFoundErrorTransition(experience: Experience, groupIndex: Int, stepIndex: Int): Transition {
+private fun emptyExperienceErrorTransition(experience: Experience): Transition {
     return Transition(
         state = Idling,
-        sideEffect = ReportErrorEffect(
-            error = StepError(experience, 0, "step group $groupIndex doesn't contain a child step at index $stepIndex")
-        )
+        sideEffect = ReportErrorEffect(StepError(experience, 0, "unable to render empty experience"))
     )
 }

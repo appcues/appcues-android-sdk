@@ -54,17 +54,6 @@ internal fun LaunchOnHideAnimationCompleted(block: () -> Unit) {
     }
 }
 
-@Composable
-internal fun LaunchOnShowAnimationCompleted(block: () -> Unit) {
-    val isContentVisible = LocalExperienceCompositionState.current.isContentVisible
-    with(remember { mutableStateOf(isContentVisible) }.value) {
-        // if show animation is completed
-        if (isIdle && currentState) {
-            block()
-        }
-    }
-}
-
 /**
  * rememberAppcuesPaginationState is used by traits that wants to know updates about pagination data
  * returns a State of AppcuesPaginationData containing pageCount, currentPage index and scrollingOffset

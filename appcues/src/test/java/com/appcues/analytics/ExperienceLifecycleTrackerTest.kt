@@ -164,7 +164,7 @@ internal class ExperienceLifecycleTrackerTest : KoinTest {
             machine.stateFlow.collect {
                 when (it) {
                     is EndingStep -> {
-                        it.dismissAndContinue?.invoke()
+                        it.onUiDismissed?.invoke()
                     }
                     // ignore other state changes
                     else -> Unit

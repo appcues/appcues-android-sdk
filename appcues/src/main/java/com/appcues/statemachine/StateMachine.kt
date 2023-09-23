@@ -90,55 +90,55 @@ internal class StateMachine(
     }
 
     private suspend fun handleActionInternal(action: Action): ResultOf<State, Error> {
-        val transition = _state.take(action)
-        val state = transition.state
-        val sideEffect = transition.sideEffect
+        return _state.take(action).run {
 
-        if (state != null) {
-            // update current state
-            _state = state
+            if (state != null) {
+                // transition to new state
+                _state = state
 
-            if (transition.emitStateChange) {
                 // emit state change to all listeners via flow
-                _stateFlow.emit(state)
+                if (emitStateChange) _stateFlow.emit(state)
+            }
+
+            sideEffect.launch().also {
+                if (_state == Idling) {
+                    stopLifecycleTracking()
+                }
             }
         }
+    }
 
-        return if (sideEffect != null) {
-            when (sideEffect) {
-                is ContinuationEffect -> {
-                    // recursive call on continuations to get the final return value
-                    handleActionInternal(sideEffect.action)
-                }
-
-                is ReportErrorEffect -> {
-                    _errorFlow.emit(sideEffect.error)
-                    // return a failure if this call to `handleAction` ended with a reported error
-                    Failure(sideEffect.error)
-                }
-
-                is PresentContainerEffect -> {
-                    // this will execute the presentation, asynchronously, and return
-                    // the subsequent action to take - either continue to Rendering, or report Error
-                    handleActionInternal(sideEffect.presentContainer(actionProcessor))
-                }
-
-                is AwaitEffect -> {
-                    sideEffect.completion.await()
-                }
-
-                is ProcessActions -> {
-                    actionProcessor.process(sideEffect.actions)
-                    Success(_state)
-                }
+    private suspend fun SideEffect?.launch(): ResultOf<State, Error> {
+        return when (this) {
+            is ContinuationEffect -> {
+                // recursive call on continuations to get the final return value
+                handleActionInternal(action)
             }
-        } else {
+
+            is ReportErrorEffect -> {
+                _errorFlow.emit(error)
+                // return a failure if this call to `handleAction` ended with a reported error
+                Failure(error)
+            }
+
+            is PresentContainerEffect -> {
+                // this will execute the presentation, asynchronously, and return
+                // the subsequent action to take - either continue to Rendering, or report Error
+                handleActionInternal(presentContainer(actionProcessor))
+            }
+
+            is AwaitEffect -> {
+                await()
+                // recursive call to self with the next effect
+                effect.launch()
+            }
+
+            is ProcessActions -> {
+                actionProcessor.process(actions)
+                Success(_state)
+            }
             // if no side effect, return success with current state
-            Success(_state)
-        }.also {
-            if (_state == Idling) {
-                stopLifecycleTracking()
-            }
+            else -> Success(_state)
         }
     }
 
@@ -177,7 +177,7 @@ internal class StateMachine(
                 determineStartStepTransition(state, action)
 
             state is RenderingStep && action is EndExperience ->
-                state.fromRenderingStepToEndingExperience(action, appcuesCoroutineScope) { handleActionInternal(action) }
+                state.fromRenderingStepToEndingExperience(action)
 
             // EndingStep
             state is EndingStep && action is EndExperience ->
@@ -203,16 +203,12 @@ internal class StateMachine(
             if (action.stepReference is StepOffset && action.stepReference.offset == 1) {
                 // for a continue -> next, on the last step, treat this the same as a close
                 val endExperience = EndExperience(markComplete = true, destroyed = false)
-                return state.fromRenderingStepToEndingExperience(endExperience, appcuesCoroutineScope) {
-                    handleActionInternal(endExperience)
-                }
+                return state.fromRenderingStepToEndingExperience(endExperience)
             }
         }
 
         // default behavior, attempt to start the requested step
-        return state.fromRenderingStepToEndingStep(action, appcuesCoroutineScope) {
-            handleActionInternal(StartStep(action.stepReference))
-        }
+        return state.fromRenderingStepToEndingStep(action)
     }
 
     suspend fun stop(dismiss: Boolean) {
