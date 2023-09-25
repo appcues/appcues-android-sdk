@@ -73,9 +73,16 @@ internal fun EmbedHtmlPrimitive.Compose(modifier: Modifier) {
                 WebView(context).apply {
                     isNestedScrollingEnabled = false
                     isScrollContainer = false
-                    with(settings) {
-                        javaScriptEnabled = true
-                        mediaPlaybackRequiresUserGesture = false
+                    @Suppress("SwallowedException")
+                    try {
+                        with(settings) {
+                            javaScriptEnabled = true
+                            mediaPlaybackRequiresUserGesture = false
+                        }
+                    } catch (ex: NoSuchMethodError) {
+                        // in some UI tests, WebView.settings throws a
+                        // NoSuchMethodError, so we're ignoring here for tests. This should
+                        // not impact normal usage at all.
                     }
                     this.layoutParams = layoutParams
                     webChromeClient = chromeClient
