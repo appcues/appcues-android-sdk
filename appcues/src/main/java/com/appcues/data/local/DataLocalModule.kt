@@ -5,12 +5,12 @@ import com.appcues.AppcuesConfig
 import com.appcues.data.local.room.AppcuesDatabase
 import com.appcues.data.local.room.RoomAppcuesLocalSource
 import com.appcues.data.local.room.RoomWrapper
-import com.appcues.di.KoinScopePlugin
-import org.koin.dsl.ScopeDSL
+import com.appcues.di.AppcuesModule
+import com.appcues.di.scope.AppcuesScopeDSL
 
-internal object DataLocalKoin : KoinScopePlugin {
+internal object DataLocalModule : AppcuesModule {
 
-    override fun ScopeDSL.install() {
+    override fun AppcuesScopeDSL.install() {
         scoped<AppcuesLocalSource> {
             RoomAppcuesLocalSource(
                 db = getAppcuesDatabase(

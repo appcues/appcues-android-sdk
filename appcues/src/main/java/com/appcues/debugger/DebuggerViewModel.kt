@@ -25,6 +25,9 @@ import com.appcues.debugger.model.TapActionType
 import com.appcues.debugger.screencapture.Capture
 import com.appcues.debugger.screencapture.ScreenCaptureProcessor
 import com.appcues.debugger.ui.MutableDebuggerState
+import com.appcues.di.component.AppcuesComponent
+import com.appcues.di.component.inject
+import com.appcues.di.scope.AppcuesScope
 import com.appcues.ui.ExperienceRenderer
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
@@ -35,13 +38,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectIndexed
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.koin.core.component.KoinScopeComponent
-import org.koin.core.component.inject
-import org.koin.core.scope.Scope
 
-internal class DebuggerViewModel(
-    override val scope: Scope,
-) : ViewModel(), KoinScopeComponent {
+internal class DebuggerViewModel(override val scope: AppcuesScope) : ViewModel(), AppcuesComponent {
 
     private val analyticsTracker by inject<AnalyticsTracker>()
 

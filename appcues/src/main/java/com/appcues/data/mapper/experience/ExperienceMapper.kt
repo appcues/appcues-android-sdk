@@ -20,6 +20,9 @@ import com.appcues.data.remote.appcues.response.experience.ExperienceResponse
 import com.appcues.data.remote.appcues.response.experience.FailedExperienceResponse
 import com.appcues.data.remote.appcues.response.experience.LossyExperienceResponse
 import com.appcues.data.remote.appcues.response.step.StepContainerResponse
+import com.appcues.di.component.AppcuesComponent
+import com.appcues.di.component.get
+import com.appcues.di.scope.AppcuesScope
 import com.appcues.trait.AppcuesTraitException
 import com.appcues.trait.ContentHolderTrait
 import com.appcues.trait.ContentWrappingTrait
@@ -28,15 +31,14 @@ import com.appcues.trait.ExperienceTraitLevel.EXPERIENCE
 import com.appcues.trait.ExperienceTraitLevel.GROUP
 import com.appcues.trait.PresentingTrait
 import com.appcues.trait.appcues.DefaultContentHolderTrait
-import org.koin.core.scope.Scope
 import java.util.UUID
 
 internal class ExperienceMapper(
     private val stepMapper: StepMapper,
     private val traitsMapper: TraitsMapper,
     private val actionsMapper: ActionsMapper,
-    private val scope: Scope,
-) {
+    override val scope: AppcuesScope,
+) : AppcuesComponent {
 
     // this version is used to map all decoded response objects, which may represent real Experiences
     // or failed responses with minimal info for error reporting
@@ -108,8 +110,8 @@ internal class ExperienceMapper(
                     add(
                         LinkAction(
                             redirectUrl = it,
-                            linkOpener = scope.get(),
-                            appcues = scope.get(),
+                            linkOpener = get(),
+                            appcues = get(),
                         )
                     )
                 }
@@ -119,7 +121,7 @@ internal class ExperienceMapper(
                             renderContext = renderContext,
                             completedExperienceId = from.id.toString(),
                             launchExperienceId = it,
-                            experienceRenderer = scope.get(),
+                            experienceRenderer = get(),
                         )
                     )
                 }

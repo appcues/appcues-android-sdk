@@ -5,17 +5,17 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.analytics.SdkMetrics
+import com.appcues.di.component.AppcuesComponent
+import com.appcues.di.component.inject
+import com.appcues.di.scope.AppcuesScope
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinScopeComponent
-import org.koin.core.component.inject
-import org.koin.core.scope.Scope
 import java.util.Date
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 internal class SessionMonitor(
-    override val scope: Scope,
-) : KoinScopeComponent, DefaultLifecycleObserver {
+    override val scope: AppcuesScope,
+) : AppcuesComponent, DefaultLifecycleObserver {
 
     // lazy prop inject here to avoid circular dependency
     private val analyticsTracker by inject<AnalyticsTracker>()

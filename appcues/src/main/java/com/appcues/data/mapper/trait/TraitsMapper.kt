@@ -2,10 +2,10 @@ package com.appcues.data.mapper.trait
 
 import com.appcues.data.mapper.LeveledTraitResponse
 import com.appcues.data.model.RenderContext
+import com.appcues.di.definition.DefinitionException
 import com.appcues.trait.ExperienceTrait
 import com.appcues.trait.TraitRegistry
 import com.appcues.trait.appcues.BackdropKeyholeTrait
-import org.koin.core.error.InstanceCreationException
 
 internal class TraitsMapper(
     private val traitRegistry: TraitRegistry
@@ -17,7 +17,8 @@ internal class TraitsMapper(
                 traitRegistry[it.first.type]?.also { factory ->
                     try {
                         add(factory.invoke(it.first.config, it.second, renderContext))
-                    } catch (ex: InstanceCreationException) {
+                    } catch (ex: DefinitionException) {
+                        // TODO come back here ensure its still working
                         // since Traits are loaded through Koin, we catch any issue
                         // with Koin instance creation here, then hopefully get the underlying
                         // AppcuesTraitException as the cause and throw that instead. This is

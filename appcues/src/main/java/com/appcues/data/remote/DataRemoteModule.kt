@@ -11,14 +11,14 @@ import com.appcues.data.remote.imageupload.ImageUploadRemoteSource
 import com.appcues.data.remote.imageupload.ImageUploadService
 import com.appcues.data.remote.sdksettings.SdkSettingsRemoteSource
 import com.appcues.data.remote.sdksettings.SdkSettingsService
-import com.appcues.di.KoinScopePlugin
+import com.appcues.di.AppcuesModule
+import com.appcues.di.scope.AppcuesScopeDSL
 import okhttp3.HttpUrl.Companion.toHttpUrl
-import org.koin.dsl.ScopeDSL
 import java.util.concurrent.TimeUnit.SECONDS
 
-internal object DataRemoteKoin : KoinScopePlugin {
+internal object DataRemoteModule : AppcuesModule {
 
-    override fun ScopeDSL.install() {
+    override fun AppcuesScopeDSL.install() {
         scoped {
             val config: AppcuesConfig = get()
             AppcuesRemoteSource(

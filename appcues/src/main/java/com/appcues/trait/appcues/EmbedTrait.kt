@@ -20,6 +20,8 @@ import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.RenderContext
 import com.appcues.data.model.getConfigOrDefault
 import com.appcues.data.model.getConfigStyle
+import com.appcues.di.scope.AppcuesScope
+import com.appcues.di.scope.get
 import com.appcues.trait.AppcuesContentAnimatedVisibility
 import com.appcues.trait.AppcuesTraitException
 import com.appcues.trait.ContentWrappingTrait
@@ -31,12 +33,11 @@ import com.appcues.ui.extensions.getPaddings
 import com.appcues.ui.extensions.modalStyle
 import com.appcues.ui.modal.dialogModifier
 import com.appcues.ui.presentation.EmbedViewPresenter
-import org.koin.core.scope.Scope
 
 internal class EmbedTrait(
     override val config: AppcuesConfigMap,
     private val renderContext: RenderContext,
-    private val scope: Scope,
+    private val scope: AppcuesScope,
 ) : ContentWrappingTrait, PresentingTrait {
 
     companion object {

@@ -2,6 +2,9 @@ package com.appcues.trait
 
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.RenderContext
+import com.appcues.di.component.AppcuesComponent
+import com.appcues.di.component.get
+import com.appcues.di.scope.AppcuesScope
 import com.appcues.logging.Logcues
 import com.appcues.trait.appcues.BackdropKeyholeTrait
 import com.appcues.trait.appcues.BackdropTrait
@@ -16,10 +19,6 @@ import com.appcues.trait.appcues.TargetElementTrait
 import com.appcues.trait.appcues.TargetInteractionTrait
 import com.appcues.trait.appcues.TargetRectangleTrait
 import com.appcues.trait.appcues.TooltipTrait
-import org.koin.core.component.KoinScopeComponent
-import org.koin.core.component.get
-import org.koin.core.parameter.parametersOf
-import org.koin.core.scope.Scope
 import kotlin.collections.set
 
 internal typealias TraitFactoryBlock = (
@@ -29,28 +28,28 @@ internal typealias TraitFactoryBlock = (
 ) -> ExperienceTrait
 
 internal class TraitRegistry(
-    override val scope: Scope,
+    override val scope: AppcuesScope,
     private val logcues: Logcues
-) : KoinScopeComponent {
+) : AppcuesComponent {
 
     private val actions: MutableMap<String, TraitFactoryBlock> = hashMapOf()
 
     init {
-        register(ModalTrait.TYPE) { config, _, context -> get<ModalTrait> { parametersOf(config, context) } }
-        register(TooltipTrait.TYPE) { config, _, context -> get<TooltipTrait> { parametersOf(config, context) } }
-        register(EmbedTrait.TYPE) { config, _, context -> get<EmbedTrait> { parametersOf(config, context) } }
-        register(TargetInteractionTrait.TYPE) { config, _, context -> get<TargetInteractionTrait> { parametersOf(config, context) } }
-        register(SkippableTrait.TYPE) { config, _, context -> get<SkippableTrait> { parametersOf(config, context) } }
+        register(ModalTrait.TYPE) { config, _, context -> ModalTrait(config, context, get()) }
+        register(TooltipTrait.TYPE) { config, _, context -> TooltipTrait(config, context, get()) }
+        register(EmbedTrait.TYPE) { config, _, context -> EmbedTrait(config, context, get()) }
+        register(TargetInteractionTrait.TYPE) { config, _, context -> TargetInteractionTrait(config, context, get(), get()) }
+        register(SkippableTrait.TYPE) { config, _, context -> SkippableTrait(config, context, get(), get()) }
 
-        register(BackgroundContentTrait.TYPE) { config, level -> get<BackgroundContentTrait> { parametersOf(config, level) } }
+        register(BackgroundContentTrait.TYPE) { config, level -> BackgroundContentTrait(config, level) }
 
-        register(StepAnimationTrait.TYPE) { config, _ -> get<StepAnimationTrait> { parametersOf(config) } }
-        register(TargetElementTrait.TYPE) { config, _ -> get<TargetElementTrait> { parametersOf(config) } }
-        register(TargetRectangleTrait.TYPE) { config, _ -> get<TargetRectangleTrait> { parametersOf(config) } }
-        register(BackdropTrait.TYPE) { config, _ -> get<BackdropTrait> { parametersOf(config) } }
-        register(BackdropKeyholeTrait.TYPE) { config, _ -> get<BackdropKeyholeTrait> { parametersOf(config) } }
-        register(CarouselTrait.TYPE) { config, _ -> get<CarouselTrait> { parametersOf(config) } }
-        register(PagingDotsTrait.TYPE) { config, _ -> get<PagingDotsTrait> { parametersOf(config) } }
+        register(StepAnimationTrait.TYPE) { config, _ -> StepAnimationTrait(config) }
+        register(TargetElementTrait.TYPE) { config, _ -> TargetElementTrait(config) }
+        register(TargetRectangleTrait.TYPE) { config, _ -> TargetRectangleTrait(config) }
+        register(BackdropTrait.TYPE) { config, _ -> BackdropTrait(config) }
+        register(BackdropKeyholeTrait.TYPE) { config, _ -> BackdropKeyholeTrait(config) }
+        register(CarouselTrait.TYPE) { config, _ -> CarouselTrait(config) }
+        register(PagingDotsTrait.TYPE) { config, _ -> PagingDotsTrait(config) }
     }
 
     operator fun get(key: String): TraitFactoryBlock? {

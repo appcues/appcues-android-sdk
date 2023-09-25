@@ -22,7 +22,8 @@ import com.appcues.data.remote.appcues.response.experience.ExperienceResponse
 import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse
 import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.StackPrimitiveResponse
 import com.appcues.data.remote.appcues.response.trait.TraitResponse
-import com.appcues.di.AppcuesKoinContext
+import com.appcues.di.Bootstrap
+import com.appcues.di.scope.get
 import com.appcues.logging.Logcues
 import com.appcues.ui.composables.AppcuesActionsDelegate
 import com.appcues.ui.composables.ComposeContainer
@@ -63,8 +64,8 @@ public fun ComposeContent(json: String, imageLoader: ImageLoader) {
 // optional content is injected into the single step, if present.
 @Composable
 public fun ComposeContainer(context: Context, stepContentJson: List<String>?, traitJson: List<String>, imageLoader: ImageLoader) {
-    // set up a Koin scope for testing - for experience/trait mapping, trait registry, etc
-    val scope = AppcuesKoinContext.createAppcuesScope(context, AppcuesConfig("", ""))
+    // set up a scope for testing - for experience/trait mapping, trait registry, etc
+    val scope = Bootstrap.createScope(context, AppcuesConfig("", ""))
 
     // the baseline experience is very simple, single step with empty content
     // read this in and then inject traits and content
@@ -141,7 +142,7 @@ public fun ComposeContainer(
     imageLoader: ImageLoader,
 ) {
     // set up a Koin scope for testing - for experience/trait mapping, trait registry, etc
-    val scope = AppcuesKoinContext.createAppcuesScope(context, AppcuesConfig("", ""))
+    val scope = Bootstrap.createScope(context, AppcuesConfig("", ""))
 
     // this JSON is actually a qualify response, and we'll get the first experience out of it
     val qualifyResponse = MoshiConfiguration.moshi.adapter(QualifyResponse::class.java).fromJson(experienceJson)!!

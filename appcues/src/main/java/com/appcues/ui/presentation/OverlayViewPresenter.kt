@@ -12,9 +12,9 @@ import androidx.core.view.isVisible
 import com.appcues.AppcuesFrameView
 import com.appcues.R
 import com.appcues.data.model.RenderContext
-import org.koin.core.scope.Scope
+import com.appcues.di.scope.AppcuesScope
 
-internal class OverlayViewPresenter(scope: Scope, renderContext: RenderContext) : ViewPresenter(scope, renderContext) {
+internal class OverlayViewPresenter(scope: AppcuesScope, renderContext: RenderContext) : ViewPresenter(scope, renderContext) {
 
     override fun ViewGroup.setupView(activity: Activity): ComposeView {
         // remove customers view on accessibility stack
