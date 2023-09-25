@@ -1,12 +1,12 @@
 package com.appcues.debugger
 
 import com.appcues.debugger.screencapture.ScreenCaptureProcessor
-import com.appcues.di.KoinScopePlugin
-import org.koin.dsl.ScopeDSL
+import com.appcues.di.AppcuesModule
+import com.appcues.di.scope.AppcuesScopeDSL
 
-internal object DebuggerKoin : KoinScopePlugin {
+internal object DebuggerModule : AppcuesModule {
 
-    override fun ScopeDSL.install() {
+    override fun AppcuesScopeDSL.install() {
         scoped {
             DebuggerStatusManager(
                 storage = get(),

@@ -20,17 +20,17 @@ import androidx.lifecycle.viewModelScope
 import com.appcues.R
 import com.appcues.debugger.DebuggerViewModel.UIState.Expanded
 import com.appcues.debugger.ui.DebuggerComposition
+import com.appcues.di.scope.AppcuesScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
-import org.koin.core.scope.Scope
 import kotlin.coroutines.CoroutineContext
 
 @Suppress("TooManyFunctions")
-internal class AppcuesDebuggerManager(context: Context, private val koinScope: Scope) : Application.ActivityLifecycleCallbacks {
+internal class AppcuesDebuggerManager(context: Context, private val scope: AppcuesScope) : Application.ActivityLifecycleCallbacks {
 
     private val coroutineScope: CoroutineScope = object : CoroutineScope {
         override val coroutineContext: CoroutineContext = SupervisorJob() + Dispatchers.Main
@@ -56,7 +56,7 @@ internal class AppcuesDebuggerManager(context: Context, private val koinScope: S
         coroutineScope.coroutineContext.cancelChildren()
         // it is possible to re-enter start without a stop (deepLinks) - in which case we continue to
         // use the VM we already have - else, make new one here
-        val viewModel = debuggerViewModel ?: DebuggerViewModel(koinScope)
+        val viewModel = debuggerViewModel ?: DebuggerViewModel(scope)
         debuggerViewModel = viewModel // and save reference
         viewModel.onStart(mode, changingMode)
         coroutineScope.launch {

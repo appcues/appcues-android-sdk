@@ -8,6 +8,7 @@ import com.appcues.data.model.RenderContext
 import com.appcues.data.model.getConfig
 import com.appcues.data.model.getConfigOrDefault
 import com.appcues.data.model.getConfigStyle
+import com.appcues.di.scope.AppcuesScope
 import com.appcues.trait.AppcuesTraitException
 import com.appcues.trait.ContentWrappingTrait
 import com.appcues.trait.PresentingTrait
@@ -24,12 +25,11 @@ import com.appcues.ui.modal.ExpandedBottomSheetModal
 import com.appcues.ui.modal.FullScreenModal
 import com.appcues.ui.presentation.OverlayViewPresenter
 import com.appcues.ui.utils.rememberAppcuesWindowInfo
-import org.koin.core.scope.Scope
 
 internal class ModalTrait(
     override val config: AppcuesConfigMap,
     renderContext: RenderContext,
-    scope: Scope,
+    scope: AppcuesScope,
 ) : ContentWrappingTrait, PresentingTrait {
 
     companion object {

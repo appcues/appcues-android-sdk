@@ -10,33 +10,30 @@ import com.appcues.action.appcues.TrackEventAction
 import com.appcues.action.appcues.UpdateProfileAction
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.RenderContext
+import com.appcues.di.component.AppcuesComponent
+import com.appcues.di.component.get
+import com.appcues.di.component.inject
+import com.appcues.di.scope.AppcuesScope
 import com.appcues.logging.Logcues
-import org.koin.core.component.KoinScopeComponent
-import org.koin.core.component.get
-import org.koin.core.component.inject
-import org.koin.core.parameter.parametersOf
-import org.koin.core.scope.Scope
 import kotlin.collections.set
 
 internal typealias ActionFactoryBlock = (config: AppcuesConfigMap, renderContext: RenderContext) -> ExperienceAction
 
-internal class ActionRegistry(override val scope: Scope) : KoinScopeComponent {
+internal class ActionRegistry(override val scope: AppcuesScope) : AppcuesComponent {
 
     private val logcues: Logcues by inject()
 
     private val actions: MutableMap<String, ActionFactoryBlock> = hashMapOf()
 
     init {
-        register(CloseAction.TYPE) { config, context -> get<CloseAction> { parametersOf(config, context) } }
-        register(ContinueAction.TYPE) { config, context -> get<ContinueAction> { parametersOf(config, context) } }
-        register(LaunchExperienceAction.TYPE) { config, context ->
-            get<LaunchExperienceAction> { parametersOf(config, context) }
-        }
-        register(SubmitFormAction.TYPE) { config, context -> get<SubmitFormAction> { parametersOf(config, context) } }
-        register(LinkAction.TYPE) { config, _ -> get<LinkAction> { parametersOf(config) } }
-        register(TrackEventAction.TYPE) { config, _ -> get<TrackEventAction> { parametersOf(config) } }
-        register(UpdateProfileAction.TYPE) { config, _ -> get<UpdateProfileAction> { parametersOf(config) } }
-        register(RequestReviewAction.TYPE) { config, _ -> get<RequestReviewAction> { parametersOf(config) } }
+        register(CloseAction.TYPE) { config, context -> CloseAction(config, context, get()) }
+        register(ContinueAction.TYPE) { config, context -> ContinueAction(config, context, get()) }
+        register(LaunchExperienceAction.TYPE) { config, context -> LaunchExperienceAction(config, context, get()) }
+        register(SubmitFormAction.TYPE) { config, context -> SubmitFormAction(config, context, get(), get()) }
+        register(LinkAction.TYPE) { config, _ -> LinkAction(config, get(), get()) }
+        register(TrackEventAction.TYPE) { config, _ -> TrackEventAction(config, get()) }
+        register(UpdateProfileAction.TYPE) { config, _ -> UpdateProfileAction(config, get(), get()) }
+        register(RequestReviewAction.TYPE) { config, _ -> RequestReviewAction(config, get()) }
     }
 
     operator fun get(key: String): ActionFactoryBlock? {

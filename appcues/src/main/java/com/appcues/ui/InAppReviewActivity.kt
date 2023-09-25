@@ -1,14 +1,14 @@
 package com.appcues.ui
 
-import android.content.Context
 import android.content.Intent
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.os.bundleOf
 import androidx.lifecycle.lifecycleScope
-import com.appcues.di.AppcuesKoinContext
+import com.appcues.di.Bootstrap
+import com.appcues.di.scope.AppcuesScope
+import com.appcues.di.scope.get
 import com.appcues.logging.Logcues
 import com.google.android.play.core.review.ReviewManagerFactory
 import kotlinx.coroutines.CompletableDeferred
@@ -19,6 +19,7 @@ import kotlinx.coroutines.withTimeout
 internal class InAppReviewActivity : AppCompatActivity() {
 
     companion object {
+
         private const val REQUEST_TIMEOUT_MILLISECONDS = 3000L
 
         private const val EXTRA_SCOPE_ID = "EXTRA_SCOPE_ID"
@@ -27,13 +28,9 @@ internal class InAppReviewActivity : AppCompatActivity() {
         // deferred can be used to await completion
         var completion: CompletableDeferred<Boolean>? = null
 
-        fun getIntent(context: Context, scopeId: String): Intent =
-            Intent(context, InAppReviewActivity::class.java).apply {
-                putExtras(
-                    bundleOf(
-                        EXTRA_SCOPE_ID to scopeId
-                    )
-                )
+        fun getIntent(scope: AppcuesScope): Intent =
+            Intent(scope.context, InAppReviewActivity::class.java).apply {
+                putExtra(EXTRA_SCOPE_ID, scope.scopeId.toString())
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK
             }
     }
@@ -88,9 +85,12 @@ internal class InAppReviewActivity : AppCompatActivity() {
                     requestCompletion.await()
                 }
             } catch (e: TimeoutCancellationException) {
-                val scope = AppcuesKoinContext.koin.getScope(intent.getStringExtra(EXTRA_SCOPE_ID)!!)
-                val logcues = scope.get<Logcues>()
-                logcues.info("In-App Review not available for this application")
+                val scope = Bootstrap.get(intent.getStringExtra(EXTRA_SCOPE_ID)!!)
+
+                scope?.get<Logcues>()?.run {
+                    info("In-App Review not available for this application")
+                }
+
                 finish()
             }
         }

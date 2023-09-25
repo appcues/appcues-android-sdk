@@ -11,6 +11,10 @@ import com.appcues.action.ActionProcessor
 import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperienceTrigger.Preview
 import com.appcues.data.model.RenderContext
+import com.appcues.di.component.AppcuesComponent
+import com.appcues.di.component.get
+import com.appcues.di.component.inject
+import com.appcues.di.scope.AppcuesScope
 import com.appcues.monitor.AppcuesActivityMonitor
 import com.appcues.monitor.AppcuesActivityMonitor.ActivityMonitorListener
 import com.appcues.ui.ExperienceRenderer
@@ -18,16 +22,15 @@ import com.appcues.ui.composables.AppcuesComposition
 import com.appcues.ui.primitive.EmbedChromeClient
 import com.appcues.ui.utils.getParentView
 import kotlinx.coroutines.launch
-import org.koin.core.scope.Scope
 
 internal abstract class ViewPresenter(
-    private val scope: Scope,
+    override val scope: AppcuesScope,
     protected val renderContext: RenderContext,
-) : DefaultLifecycleObserver {
+) : AppcuesComponent, DefaultLifecycleObserver {
 
-    private val experienceRenderer: ExperienceRenderer = scope.get()
-    private val coroutineScope: AppcuesCoroutineScope = scope.get()
-    private val actionProcessor: ActionProcessor = scope.get()
+    private val experienceRenderer: ExperienceRenderer by inject()
+    private val coroutineScope: AppcuesCoroutineScope by inject()
+    private val actionProcessor: ActionProcessor by inject()
 
     private var viewModel: AppcuesViewModel? = null
     private var gestureListener: ShakeGestureListener? = null
@@ -83,10 +86,10 @@ internal abstract class ViewPresenter(
                 composeView.setContent {
                     AppcuesComposition(
                         viewModel = it,
-                        logcues = scope.get(),
-                        imageLoader = scope.get(),
+                        logcues = get(),
+                        imageLoader = get(),
                         chromeClient = EmbedChromeClient(this),
-                        config = scope.get(),
+                        config = get(),
                     )
                 }
             }

@@ -35,6 +35,7 @@ import com.appcues.data.model.RenderContext
 import com.appcues.data.model.getConfigOrDefault
 import com.appcues.data.model.getConfigStyle
 import com.appcues.data.model.styling.ComponentStyle
+import com.appcues.di.scope.AppcuesScope
 import com.appcues.trait.AppcuesContentAnimatedVisibility
 import com.appcues.trait.AppcuesTraitException
 import com.appcues.trait.ContentWrappingTrait
@@ -61,12 +62,11 @@ import com.appcues.ui.presentation.OverlayViewPresenter
 import com.appcues.ui.utils.AppcuesWindowInfo
 import com.appcues.ui.utils.rememberAppcuesWindowInfo
 import com.appcues.util.ne
-import org.koin.core.scope.Scope
 
 internal class TooltipTrait(
     override val config: AppcuesConfigMap,
     private val renderContext: RenderContext,
-    private val scope: Scope,
+    private val scope: AppcuesScope,
 ) : PresentingTrait, ContentWrappingTrait {
 
     companion object {

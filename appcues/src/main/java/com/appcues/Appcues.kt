@@ -12,14 +12,16 @@ import com.appcues.data.model.RenderContext
 import com.appcues.debugger.AppcuesDebuggerManager
 import com.appcues.debugger.DebugMode.Debugger
 import com.appcues.debugger.screencapture.AndroidTargetingStrategy
-import com.appcues.di.AppcuesKoinContext
+import com.appcues.di.Bootstrap
+import com.appcues.di.scope.AppcuesScope
+import com.appcues.di.scope.get
+import com.appcues.di.scope.inject
 import com.appcues.logging.Logcues
 import com.appcues.trait.ExperienceTrait
 import com.appcues.trait.ExperienceTraitLevel
 import com.appcues.trait.TraitRegistry
 import com.appcues.ui.ExperienceRenderer
 import kotlinx.coroutines.launch
-import org.koin.core.scope.Scope
 import kotlin.DeprecationLevel.ERROR
 
 /**
@@ -35,16 +37,19 @@ public fun Appcues(
     accountId: String,
     applicationId: String,
     config: (AppcuesConfig.() -> Unit)? = null,
-): Appcues = AppcuesKoinContext
-    // This creates the Koin Scope and initializes the Appcues instance within, then returns the Appcues instance
+): Appcues = Bootstrap
+    // This creates the Scope and initializes the Appcues instance within, then returns the Appcues instance
     // ready to go with the necessary dependency configuration in its scope.
-    .createAppcuesScope(context, AppcuesConfig(accountId, applicationId).apply { config?.invoke(this) }).get()
+    .createScope(
+        context = context,
+        config = AppcuesConfig(accountId, applicationId).apply { config?.invoke(this) }
+    ).get()
 
 /**
  * The main entry point for using Appcues functionality in your application - tracking
  * analytics and rendering experiences.
  */
-public class Appcues internal constructor(koinScope: Scope) {
+public class Appcues internal constructor(scope: AppcuesScope) {
 
     public companion object {
 
@@ -62,19 +67,19 @@ public class Appcues internal constructor(koinScope: Scope) {
         public var elementTargeting: ElementTargetingStrategy = AndroidTargetingStrategy()
     }
 
-    private val config by koinScope.inject<AppcuesConfig>()
-    private val experienceRenderer by koinScope.inject<ExperienceRenderer>()
-    private val logcues by koinScope.inject<Logcues>()
-    private val actionRegistry by koinScope.inject<ActionRegistry>()
-    private val traitRegistry by koinScope.inject<TraitRegistry>()
-    private val analyticsTracker by koinScope.inject<AnalyticsTracker>()
-    private val storage by koinScope.inject<Storage>()
-    private val sessionMonitor by koinScope.inject<SessionMonitor>()
-    private val activityScreenTracking by koinScope.inject<ActivityScreenTracking>()
-    private val deepLinkHandler by koinScope.inject<DeepLinkHandler>()
-    private val debuggerManager by koinScope.inject<AppcuesDebuggerManager>()
-    private val appcuesCoroutineScope by koinScope.inject<AppcuesCoroutineScope>()
-    private val analyticsPublisher by koinScope.inject<AnalyticsPublisher>()
+    private val config by scope.inject<AppcuesConfig>()
+    private val experienceRenderer by scope.inject<ExperienceRenderer>()
+    private val logcues by scope.inject<Logcues>()
+    private val actionRegistry by scope.inject<ActionRegistry>()
+    private val traitRegistry by scope.inject<TraitRegistry>()
+    private val analyticsTracker by scope.inject<AnalyticsTracker>()
+    private val storage by scope.inject<Storage>()
+    private val sessionMonitor by scope.inject<SessionMonitor>()
+    private val activityScreenTracking by scope.inject<ActivityScreenTracking>()
+    private val deepLinkHandler by scope.inject<DeepLinkHandler>()
+    private val debuggerManager by scope.inject<AppcuesDebuggerManager>()
+    private val appcuesCoroutineScope by scope.inject<AppcuesCoroutineScope>()
+    private val analyticsPublisher by scope.inject<AnalyticsPublisher>()
 
     /**
      * Set the listener to be notified about the display of Experience content.

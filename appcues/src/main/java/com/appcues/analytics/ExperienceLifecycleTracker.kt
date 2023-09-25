@@ -10,6 +10,9 @@ import com.appcues.analytics.ExperienceLifecycleEvent.StepCompleted
 import com.appcues.analytics.ExperienceLifecycleEvent.StepError
 import com.appcues.analytics.ExperienceLifecycleEvent.StepSeen
 import com.appcues.data.model.Experience
+import com.appcues.di.component.AppcuesComponent
+import com.appcues.di.component.inject
+import com.appcues.di.scope.AppcuesScope
 import com.appcues.statemachine.Error
 import com.appcues.statemachine.Error.ExperienceAlreadyActive
 import com.appcues.statemachine.Error.RenderContextNotActive
@@ -25,14 +28,11 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinScopeComponent
-import org.koin.core.component.inject
-import org.koin.core.scope.Scope
 import java.util.Date
 
 internal class ExperienceLifecycleTracker(
-    override val scope: Scope,
-) : KoinScopeComponent {
+    override val scope: AppcuesScope,
+) : AppcuesComponent {
 
     // lazy property injection to avoid circular DI reference in constructor
     // AnalyticsTracker -> this <- Analytics Tracker

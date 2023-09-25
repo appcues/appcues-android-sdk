@@ -6,16 +6,16 @@ import com.appcues.action.appcues.StepInteractionAction
 import com.appcues.action.appcues.StepInteractionAction.StepInteractionData
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType
 import com.appcues.data.model.RenderContext
+import com.appcues.di.component.AppcuesComponent
+import com.appcues.di.component.get
+import com.appcues.di.component.inject
+import com.appcues.di.scope.AppcuesScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinScopeComponent
-import org.koin.core.component.inject
-import org.koin.core.parameter.parametersOf
-import org.koin.core.scope.Scope
 
 // Responsible for queueing up any ExperienceActions to run in sequential order,
 // to allow for things like closing current experience + launching a new experience, for example.
-internal class ActionProcessor(override val scope: Scope) : KoinScopeComponent {
+internal class ActionProcessor(override val scope: AppcuesScope) : AppcuesComponent {
 
     // lazy initialization injection to avoid circular dependency
     private val appcues: Appcues by inject()
@@ -88,16 +88,13 @@ internal class ActionProcessor(override val scope: Scope) : KoinScopeComponent {
 
         // get an instance of StepInteractionData so it can access
         // StateMachine and AnalyticsTracker
-        return scope.get {
-            parametersOf(
-                renderContext,
-                StepInteractionData(
-                    interactionType = interactionType,
-                    viewDescription = viewDescription,
-                    category = primaryAction?.category ?: "",
-                    destination = primaryAction?.destination ?: "",
-                )
-            )
-        }
+        val data = StepInteractionData(
+            interactionType = interactionType,
+            viewDescription = viewDescription,
+            category = primaryAction?.category ?: "",
+            destination = primaryAction?.destination ?: "",
+        )
+
+        return StepInteractionAction(renderContext, data, get(), get())
     }
 }

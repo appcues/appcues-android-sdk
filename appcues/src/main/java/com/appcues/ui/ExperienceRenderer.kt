@@ -16,6 +16,10 @@ import com.appcues.data.model.RenderContext
 import com.appcues.data.model.RenderContext.Modal
 import com.appcues.data.model.getFrameId
 import com.appcues.data.remote.RemoteError.HttpError
+import com.appcues.di.component.AppcuesComponent
+import com.appcues.di.component.get
+import com.appcues.di.component.inject
+import com.appcues.di.scope.AppcuesScope
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.StartExperience
 import com.appcues.statemachine.Action.StartStep
@@ -34,12 +38,8 @@ import com.appcues.util.ResultOf
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
 import kotlinx.coroutines.flow.SharedFlow
-import org.koin.core.component.KoinScopeComponent
-import org.koin.core.component.get
-import org.koin.core.component.inject
-import org.koin.core.scope.Scope
 
-internal class ExperienceRenderer(override val scope: Scope) : KoinScopeComponent {
+internal class ExperienceRenderer(override val scope: AppcuesScope) : AppcuesComponent {
 
     companion object {
 

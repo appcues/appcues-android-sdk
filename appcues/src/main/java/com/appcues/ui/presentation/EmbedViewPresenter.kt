@@ -6,12 +6,12 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.core.view.isVisible
 import com.appcues.AppcuesFrameView
 import com.appcues.data.model.RenderContext
+import com.appcues.di.scope.AppcuesScope
 import com.appcues.ui.AppcuesFrameStateMachineOwner
 import com.appcues.ui.StateMachineDirectory
-import org.koin.core.scope.Scope
 
 internal class EmbedViewPresenter(
-    scope: Scope,
+    scope: AppcuesScope,
     renderContext: RenderContext,
     private val stateMachines: StateMachineDirectory,
 ) : ViewPresenter(scope, renderContext) {

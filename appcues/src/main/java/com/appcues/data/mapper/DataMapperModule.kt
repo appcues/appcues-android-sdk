@@ -4,12 +4,12 @@ import com.appcues.data.mapper.action.ActionsMapper
 import com.appcues.data.mapper.experience.ExperienceMapper
 import com.appcues.data.mapper.step.StepMapper
 import com.appcues.data.mapper.trait.TraitsMapper
-import com.appcues.di.KoinScopePlugin
-import org.koin.dsl.ScopeDSL
+import com.appcues.di.AppcuesModule
+import com.appcues.di.scope.AppcuesScopeDSL
 
-internal object DataMapperKoin : KoinScopePlugin {
+internal object DataMapperModule : AppcuesModule {
 
-    override fun ScopeDSL.install() {
+    override fun AppcuesScopeDSL.install() {
         scoped {
             ExperienceMapper(
                 stepMapper = get(),
