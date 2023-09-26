@@ -4,6 +4,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,8 +26,18 @@ internal fun TextPrimitive.Compose(modifier: Modifier) {
     val context = LocalContext.current
     val style = LocalTextStyle.current.applyStyle(style, context, isDark)
 
-    var resizedStyle by remember(style) { mutableStateOf(style) }
-    var readyToDraw by remember(style) { mutableStateOf(false) }
+    var resizedStyle by remember(id) { mutableStateOf(style) }
+    var readyToDraw by remember(id) { mutableStateOf(false) }
+
+    // skipping first compose ensures that when Text is added back to the Composition Nodes
+    // it will measure/layout and create new instances that would otherwise be reused.
+    var skipFirstCompose by remember(id) { mutableStateOf(true) }
+
+    LaunchedEffect(key1 = skipFirstCompose) {
+        skipFirstCompose = false
+    }
+
+    if (skipFirstCompose) return
 
     Text(
         modifier = modifier
