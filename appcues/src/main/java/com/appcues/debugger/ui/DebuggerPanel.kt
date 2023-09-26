@@ -30,6 +30,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
@@ -84,6 +85,7 @@ internal fun BoxScope.DebuggerPanel(debuggerState: MutableDebuggerState, debugge
         Box(
             modifier = Modifier
                 .shadow(elevation = 4.dp)
+                .testTag("DebuggerPanel")
                 .height(debuggerState.getExpandedContainerHeight())
                 .fillMaxWidth()
                 .background(Color.White)
