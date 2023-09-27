@@ -5,6 +5,7 @@ import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -26,27 +27,35 @@ internal fun TextPrimitive.Compose(modifier: Modifier) {
     val style = LocalTextStyle.current.applyStyle(style, context, isDark)
 
     var resizedStyle by remember(style) { mutableStateOf(style) }
+    var resizedSpans by remember(style) { mutableStateOf(spans) }
     var readyToDraw by remember(style) { mutableStateOf(false) }
 
-    Text(
-        modifier = modifier
-            .clipToBounds()
-            .drawWithContent { if (readyToDraw) drawContent() },
-        text = spans.toAnnotatedString(context, isDark),
-        style = resizedStyle,
-        overflow = TextOverflow.Ellipsis,
-        onTextLayout = { textLayoutResult ->
-            // this will attempt to auto scale down single line / char text, handling cases
-            // like emoji that are sized too large to fit in side by side layouts
-            if (textLayoutResult.lineCount == 1) {
-                if (textLayoutResult.isLineEllipsized(0)) {
-                    resizedStyle = resizedStyle.copy(fontSize = resizedStyle.fontSize * TEXT_SCALE_REDUCTION_INTERVAL)
+    key(resizedStyle) {
+
+        Text(
+            modifier = modifier
+                .clipToBounds()
+                .drawWithContent { if (readyToDraw) drawContent() },
+            text = resizedSpans.toAnnotatedString(context, isDark),
+            style = resizedStyle,
+            overflow = TextOverflow.Ellipsis,
+            onTextLayout = { textLayoutResult ->
+                // this will attempt to auto scale down single line / char text, handling cases
+                // like emoji that are sized too large to fit in side by side layouts
+                if (textLayoutResult.lineCount == 1) {
+                    if (textLayoutResult.isLineEllipsized(0)) {
+                        resizedStyle = resizedStyle.copy(fontSize = resizedStyle.fontSize * TEXT_SCALE_REDUCTION_INTERVAL)
+                        resizedSpans = resizedSpans.map { span ->
+                            val fontSize = span.style.fontSize?.let { it * TEXT_SCALE_REDUCTION_INTERVAL }
+                            span.copy(style = span.style.copy(fontSize = fontSize))
+                        }
+                    } else {
+                        readyToDraw = true
+                    }
                 } else {
                     readyToDraw = true
                 }
-            } else {
-                readyToDraw = true
-            }
-        },
-    )
+            },
+        )
+    }
 }
