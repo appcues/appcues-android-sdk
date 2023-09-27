@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,21 +25,23 @@ internal fun Step.ComposeStep(
     safeAreaInsets: PaddingValues,
     parent: BoxScope
 ) {
-    CompositionLocalProvider(
-        LocalAppcuesActions provides actions,
-        LocalExperienceStepFormStateDelegate provides formState
-    ) {
-        // used to get the padding values from step decorating trait and apply to the Column
-        val density = LocalDensity.current
-        val stickyContentPadding = remember(this) { StickyContentPadding(density) }
+    key(id) {
+        CompositionLocalProvider(
+            LocalAppcuesActions provides actions,
+            LocalExperienceStepFormStateDelegate provides formState
+        ) {
+            // used to get the padding values from step decorating trait and apply to the Column
+            val density = LocalDensity.current
+            val stickyContentPadding = remember(this) { StickyContentPadding(density) }
 
-        ApplyUnderlayStepTraits(parent, containerPadding, safeAreaInsets, stickyContentPadding)
+            ApplyUnderlayStepTraits(parent, containerPadding, safeAreaInsets, stickyContentPadding)
 
-        ComposeStepContent(modifier, containerPadding, safeAreaInsets, stickyContentPadding)
+            ComposeStepContent(modifier, containerPadding, safeAreaInsets, stickyContentPadding)
 
-        ComposeStickyContent(parent, containerPadding, safeAreaInsets, stickyContentPadding)
+            ComposeStickyContent(parent, containerPadding, safeAreaInsets, stickyContentPadding)
 
-        ApplyOverlayStepTraits(parent, containerPadding, safeAreaInsets, stickyContentPadding)
+            ApplyOverlayStepTraits(parent, containerPadding, safeAreaInsets, stickyContentPadding)
+        }
     }
 }
 
