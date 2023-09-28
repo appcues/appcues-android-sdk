@@ -6,5 +6,6 @@ internal inline fun <reified T : Any> AppcuesComponent.get(vararg params: Any?):
     return scope.get(T::class, DefinitionParams(params.toMutableList()))
 }
 
-internal inline fun <reified T : Any> AppcuesComponent.inject(params: DefinitionParams = DefinitionParams()): Lazy<T> =
-    lazy(LazyThreadSafetyMode.SYNCHRONIZED) { get(params) }
+internal inline fun <reified T : Any> AppcuesComponent.inject(vararg params: Any?): Lazy<T> {
+    return scope.inject(T::class, DefinitionParams(params.toMutableList()))
+}

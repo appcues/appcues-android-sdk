@@ -1,5 +1,6 @@
 package com.appcues.action.appcues
 
+import android.content.Context
 import com.appcues.action.ExperienceAction
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.di.scope.AppcuesScope
@@ -8,6 +9,7 @@ import kotlinx.coroutines.CompletableDeferred
 
 internal class RequestReviewAction(
     override val config: AppcuesConfigMap,
+    private val context: Context,
     private val scope: AppcuesScope,
 ) : ExperienceAction {
 
@@ -21,7 +23,7 @@ internal class RequestReviewAction(
         val completion = CompletableDeferred<Boolean>()
         InAppReviewActivity.completion = completion
 
-        scope.context.startActivity(InAppReviewActivity.getIntent(scope))
+        context.startActivity(InAppReviewActivity.getIntent(context, scope))
 
         completion.await()
     }

@@ -33,7 +33,7 @@ internal class ActionRegistry(override val scope: AppcuesScope) : AppcuesCompone
         register(LinkAction.TYPE) { config, _ -> LinkAction(config, get(), get()) }
         register(TrackEventAction.TYPE) { config, _ -> TrackEventAction(config, get()) }
         register(UpdateProfileAction.TYPE) { config, _ -> UpdateProfileAction(config, get(), get()) }
-        register(RequestReviewAction.TYPE) { config, _ -> RequestReviewAction(config, get()) }
+        register(RequestReviewAction.TYPE) { config, _ -> RequestReviewAction(config, get(), get()) }
     }
 
     operator fun get(key: String): ActionFactoryBlock? {

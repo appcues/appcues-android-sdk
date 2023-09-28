@@ -34,7 +34,6 @@ project.afterEvaluate {
                     '**/Manifest*.*',
                     '**/*Test*.*',
                     'android/**/*.*',
-                    '**/Bootstrap.kt',
                     '**/*Module.kt',
                     '**/appcues/ui/**/*.*',
                     '**/appcues/debugger/ui/**/*.*',

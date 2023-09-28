@@ -13,6 +13,8 @@ import com.appcues.di.scope.AppcuesScopeDSL
 
 internal object Bootstrap {
 
+    private val scopes = arrayListOf<AppcuesScope>()
+
     private val modules = listOf(
         MainModule,
         AnalyticsModule,
@@ -28,17 +30,16 @@ internal object Bootstrap {
         }
     }
 
-    private val scopes = arrayListOf<AppcuesScope>()
-
     fun start(
         context: Context,
         modules: List<AppcuesModule> = arrayListOf(),
         scopeDSL: (AppcuesScopeDSL.() -> Unit)? = null
     ): AppcuesScope {
-        val scope = AppcuesScope(context.applicationContext)
+        val scope = AppcuesScope()
+
         AppcuesScopeDSL(scope).run {
             scoped { scope }
-            scoped { context }
+            scoped { context.applicationContext }
 
             scopeDSL?.invoke(this)
 
