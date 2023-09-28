@@ -11,6 +11,11 @@ import com.appcues.data.model.ExperienceTrigger.Qualification
 import com.appcues.data.model.Experiment
 import com.appcues.data.model.QualificationResult
 import com.appcues.data.model.RenderContext
+import com.appcues.di.AppcuesModule
+import com.appcues.di.Bootstrap
+import com.appcues.di.scope.AppcuesScope
+import com.appcues.di.scope.AppcuesScopeDSL
+import com.appcues.di.scope.get
 import com.appcues.mocks.mockEmbedExperience
 import com.appcues.mocks.mockExperience
 import com.appcues.mocks.mockExperienceExperiment
@@ -29,25 +34,11 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
-import org.junit.After
 import org.junit.Test
-import org.koin.core.context.startKoin
-import org.koin.core.context.stopKoin
-import org.koin.core.qualifier.named
-import org.koin.core.scope.Scope
-import org.koin.dsl.module
-import org.koin.mp.KoinPlatformTools
 import java.util.UUID
 
-@OptIn(ExperimentalCoroutinesApi::class)
 internal class ExperienceRendererTest {
-
-    @After
-    fun shutdown() {
-        stopKoin()
-    }
 
     @Test
     fun `dismissCurrentExperience SHOULD NOT mark complete WHEN current state is on last step`() = runTest {
@@ -57,7 +48,7 @@ internal class ExperienceRendererTest {
             every { this@mockk.state } answers { state }
             coEvery { this@mockk.handleAction(any()) } returns Success(Idling)
         }
-        val scope = initScope { stateMachine }
+        val scope = createScope { stateMachine }
         val experienceRenderer = ExperienceRenderer(scope)
         val experience = mockk<Experience>(relaxed = true) {
             every { this@mockk.renderContext } answers { RenderContext.Modal }
@@ -78,7 +69,7 @@ internal class ExperienceRendererTest {
             every { this@mockk.state } answers { state }
             coEvery { this@mockk.handleAction(any()) } returns Success(Idling)
         }
-        val scope = initScope { stateMachine }
+        val scope = createScope { stateMachine }
         val experienceRenderer = ExperienceRenderer(scope)
         val experience = mockk<Experience>(relaxed = true) {
             every { this@mockk.renderContext } answers { RenderContext.Modal }
@@ -107,7 +98,7 @@ internal class ExperienceRendererTest {
             every { this@mockk.state } answers { Idling }
             coEvery { this@mockk.handleAction(any()) } answers { Success(Idling) }
         }
-        val scope = initScope { stateMachine }
+        val scope = createScope { stateMachine }
         val experienceRenderer = ExperienceRenderer(scope)
 
         // WHEN
@@ -133,7 +124,7 @@ internal class ExperienceRendererTest {
             every { this@mockk.state } answers { Idling }
             coEvery { this@mockk.handleAction(any()) } answers { Success(Idling) }
         }
-        val scope = initScope { stateMachine }
+        val scope = createScope { stateMachine }
         val experienceRenderer = ExperienceRenderer(scope)
 
         // WHEN
@@ -159,7 +150,7 @@ internal class ExperienceRendererTest {
             every { this@mockk.state } answers { Idling }
             coEvery { this@mockk.handleAction(any()) } answers { Success(Idling) }
         }
-        val scope = initScope { stateMachine }
+        val scope = createScope { stateMachine }
         val analyticsTracker: AnalyticsTracker = scope.get()
         val experienceRenderer = ExperienceRenderer(scope)
 
@@ -185,7 +176,7 @@ internal class ExperienceRendererTest {
             every { this@mockk.state } answers { Idling }
             coEvery { this@mockk.handleAction(any()) } answers { Success(Idling) }
         }
-        val scope = initScope { stateMachine }
+        val scope = createScope { stateMachine }
         val analyticsTracker: AnalyticsTracker = scope.get()
         val experienceRenderer = ExperienceRenderer(scope)
 
@@ -205,7 +196,7 @@ internal class ExperienceRendererTest {
             every { this@mockk.state } answers { Idling }
             coEvery { this@mockk.handleAction(any()) } answers { Success(Idling) }
         }
-        val scope = initScope { stateMachine }
+        val scope = createScope { stateMachine }
         val experienceRenderer = ExperienceRenderer(scope)
         val context = RenderContext.Embed("frame1")
         experienceRenderer.start(mockk(relaxed = true), context)
@@ -225,7 +216,7 @@ internal class ExperienceRendererTest {
             every { this@mockk.state } answers { Idling }
             coEvery { this@mockk.handleAction(any()) } answers { Success(Idling) }
         }
-        val scope = initScope { stateMachine }
+        val scope = createScope { stateMachine }
         val analyticsTracker: AnalyticsTracker = scope.get()
         val experienceRenderer = ExperienceRenderer(scope)
         val context = RenderContext.Embed("frame1")
@@ -264,7 +255,7 @@ internal class ExperienceRendererTest {
             every { this@mockk.state } answers { Idling }
             coEvery { this@mockk.handleAction(any()) } answers { Success(Idling) }
         }
-        val scope = initScope { stateMachine }
+        val scope = createScope { stateMachine }
         val experienceRenderer = ExperienceRenderer(scope)
         val context = RenderContext.Embed("frame1")
         experienceRenderer.show(QualificationResult(Qualification("screen_view"), listOf(experience)))
@@ -288,7 +279,7 @@ internal class ExperienceRendererTest {
             every { this@mockk.state } answers { Idling }
             coEvery { this@mockk.handleAction(any()) } answers { Success(Idling) }
         }
-        val scope = initScope { stateMachine }
+        val scope = createScope { stateMachine }
         val experienceRenderer = ExperienceRenderer(scope)
         val context = RenderContext.Embed("frame1")
         experienceRenderer.show(QualificationResult(Qualification("screen_view"), listOf(experience)))
@@ -310,7 +301,7 @@ internal class ExperienceRendererTest {
             every { this@mockk.state } answers { Idling }
             coEvery { this@mockk.handleAction(any()) } answers { Success(Idling) }
         }
-        val scope = initScope { stateMachine }
+        val scope = createScope { stateMachine }
         val experienceRenderer = ExperienceRenderer(scope)
         val directory: StateMachineDirectory = scope.get()
         val context = RenderContext.Embed("frame1")
@@ -335,7 +326,7 @@ internal class ExperienceRendererTest {
             every { this@mockk.state } answers { Idling }
             coEvery { this@mockk.handleAction(any()) } answers { Success(Idling) }
         }
-        val scope = initScope { stateMachine }
+        val scope = createScope { stateMachine }
         val experienceRenderer = ExperienceRenderer(scope)
         val directory: StateMachineDirectory = scope.get()
         val context1 = RenderContext.Embed("frame1")
@@ -358,24 +349,18 @@ internal class ExperienceRendererTest {
         coVerify(exactly = 1) { owner2Machine.handleAction(StartExperience(experience)) }
     }
 
-    private fun initScope(stateMachine: () -> StateMachine): Scope {
-        // close any existing instance
-        KoinPlatformTools.defaultContext().getOrNull()?.close()
-        val scopeId = UUID.randomUUID().toString()
-        return startKoin {
-            val scope = koin.getOrCreateScope(scopeId = scopeId, qualifier = named(scopeId))
-            modules(
-                module {
-                    scope(named(scopeId)) {
-                        scoped { scope }
-                        factory { stateMachine() }
-                        scoped { AppcuesConfig("abc", "123") }
-                        scoped { mockk<AnalyticsTracker>(relaxed = true) }
-                        scoped { mockk<ExperienceLifecycleTracker>(relaxed = true) }
-                        scoped { StateMachineDirectory() }
-                    }
+    private fun createScope(stateMachine: () -> StateMachine): AppcuesScope {
+        return Bootstrap.start(
+            context = mockk(relaxed = true),
+            modules = arrayListOf(object : AppcuesModule {
+                override fun AppcuesScopeDSL.install() {
+                    factory { stateMachine() }
+                    scoped { AppcuesConfig("abc", "123") }
+                    scoped { mockk<AnalyticsTracker>(relaxed = true) }
+                    scoped { mockk<ExperienceLifecycleTracker>(relaxed = true) }
+                    scoped { StateMachineDirectory() }
                 }
-            )
-        }.koin.getScope(scopeId)
+            })
+        )
     }
 }

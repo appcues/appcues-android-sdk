@@ -11,6 +11,10 @@ import com.appcues.analytics.ActivityScreenTracking
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.analytics.ExperienceLifecycleTracker
 import com.appcues.debugger.AppcuesDebuggerManager
+import com.appcues.di.AppcuesModule
+import com.appcues.di.Bootstrap
+import com.appcues.di.scope.AppcuesScope
+import com.appcues.di.scope.AppcuesScopeDSL
 import com.appcues.logging.Logcues
 import com.appcues.mocks.storageMockk
 import com.appcues.statemachine.StateMachine
@@ -20,34 +24,18 @@ import com.appcues.util.LinkOpener
 import io.mockk.mockk
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
-import org.koin.core.context.startKoin
-import org.koin.core.context.stopKoin
-import org.koin.core.qualifier.named
-import org.koin.core.scope.Scope
-import org.koin.dsl.module
-import org.koin.mp.KoinPlatformTools
-import java.util.UUID
 
-/**
- * modeled after KoinTestRule, but adapted for our Scoped dependency concept
- * https://github.com/InsertKoinIO/koin/blob/main/core/koin-test-junit4/src/main/kotlin/org/koin/test/KoinTestRule.kt
- */
-internal class KoinScopeRule : TestWatcher() {
+internal class TestScopeRule : TestWatcher() {
 
-    lateinit var scope: Scope
+    lateinit var scope: AppcuesScope
 
     override fun starting(description: Description) {
-        // close any existing instance
-        KoinPlatformTools.defaultContext().getOrNull()?.close()
-
-        startKoin {
-            val scopeId = UUID.randomUUID().toString()
-            scope = koin.getOrCreateScope(scopeId = scopeId, qualifier = named(scopeId))
-            modules(
-                module {
-                    scope(named(scope.id)) {
+        scope = Bootstrap.start(
+            context = mockk(relaxed = true),
+            modules = arrayListOf(
+                object : AppcuesModule {
+                    override fun AppcuesScopeDSL.install() {
                         scoped { AppcuesConfig("00000", "123") }
-                        scoped { scope }
                         scoped { AppcuesCoroutineScope(get()) }
                         scoped { mockk<AnalyticsTracker>(relaxed = true) }
                         scoped { mockk<SessionMonitor>(relaxed = true) }
@@ -67,10 +55,8 @@ internal class KoinScopeRule : TestWatcher() {
                     }
                 }
             )
-        }
+        )
     }
 
-    override fun finished(description: Description) {
-        stopKoin()
-    }
+    override fun finished(description: Description) = Unit
 }

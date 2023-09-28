@@ -20,7 +20,7 @@ import com.appcues.ui.StateMachineDirectory
 import com.appcues.util.ContextResources
 import com.appcues.util.LinkOpener
 
-internal object AppcuesModule : AppcuesModule {
+internal object MainModule : AppcuesModule {
 
     override fun AppcuesScopeDSL.install() {
         scoped { Appcues(scope) }

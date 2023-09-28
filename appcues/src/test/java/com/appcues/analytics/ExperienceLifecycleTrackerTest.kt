@@ -8,6 +8,11 @@ import com.appcues.SessionMonitor
 import com.appcues.action.ActionProcessor
 import com.appcues.action.ActionRegistry
 import com.appcues.debugger.AppcuesDebuggerManager
+import com.appcues.di.AppcuesModule
+import com.appcues.di.Bootstrap
+import com.appcues.di.scope.AppcuesScope
+import com.appcues.di.scope.AppcuesScopeDSL
+import com.appcues.di.scope.get
 import com.appcues.logging.Logcues
 import com.appcues.mocks.mockExperience
 import com.appcues.mocks.mockLocalizedExperience
@@ -32,29 +37,14 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.After
 import org.junit.Rule
 import org.junit.Test
-import org.koin.core.KoinApplication
-import org.koin.core.context.startKoin
-import org.koin.core.context.stopKoin
-import org.koin.core.qualifier.named
-import org.koin.core.scope.Scope
-import org.koin.dsl.module
-import org.koin.mp.KoinPlatformTools
-import org.koin.test.KoinTest
-import java.util.UUID
 
 @ExperimentalCoroutinesApi
-internal class ExperienceLifecycleTrackerTest : KoinTest {
+internal class ExperienceLifecycleTrackerTest {
 
     @get:Rule
     val dispatcherRule = MainDispatcherRule()
-
-    @After
-    fun shutdown() {
-        stopKoin()
-    }
 
     @Test
     fun `RenderingStep SHOULD track step_completed WHEN action is StartStep`() = runTest {
@@ -151,10 +141,8 @@ internal class ExperienceLifecycleTrackerTest : KoinTest {
     }
 
     // Helpers
-    private suspend fun initScope(state: State): Scope {
-        val scopeId = UUID.randomUUID().toString()
-        val app = createKoinApp(scopeId, state)
-        val scope = app.koin.getScope(scopeId)
+    private suspend fun initScope(state: State): AppcuesScope {
+        val scope = createScope(state)
         val machine: StateMachine = scope.get()
         val coroutineScope: AppcuesCoroutineScope = scope.get()
 
@@ -179,36 +167,30 @@ internal class ExperienceLifecycleTrackerTest : KoinTest {
         return scope
     }
 
-    private fun createKoinApp(scopeId: String, state: State): KoinApplication {
-        // close any existing instance
-        KoinPlatformTools.defaultContext().getOrNull()?.close()
-
-        return startKoin {
-            val scope = koin.getOrCreateScope(scopeId = scopeId, qualifier = named(scopeId))
-            modules(
-                module {
-                    scope(named(scopeId)) {
-                        scoped { AppcuesConfig("00000", "123") }
-                        scoped { scope }
-                        scoped { AppcuesCoroutineScope(get()) }
-                        scoped { mockk<AnalyticsTracker>(relaxed = true) }
-                        scoped { mockk<SessionMonitor>(relaxed = true) }
-                        scoped { mockk<Logcues>(relaxed = true) }
-                        scoped { mockk<ExperienceRenderer>(relaxed = true) }
-                        scoped { mockk<AppcuesDebuggerManager>(relaxed = true) }
-                        scoped { mockk<ActivityScreenTracking>(relaxed = true) }
-                        scoped { mockk<TraitRegistry>(relaxed = true) }
-                        scoped { mockk<ActionRegistry>(relaxed = true) }
-                        scoped { mockk<DeepLinkHandler>(relaxed = true) }
-                        scoped { mockk<LinkOpener>(relaxed = true) }
-                        scoped { storageMockk() }
-                        scoped { mockk<Appcues>(relaxed = true) }
-                        scoped { mockk<ActionProcessor>(relaxed = true) }
-                        factory { ExperienceLifecycleTracker(scope) }
-                        scoped { StateMachine(get(), get(), get(), get(), state) }
-                    }
+    private fun createScope(state: State): AppcuesScope {
+        return Bootstrap.start(
+            context = mockk(relaxed = true),
+            modules = arrayListOf(object : AppcuesModule {
+                override fun AppcuesScopeDSL.install() {
+                    scoped { AppcuesConfig("00000", "123") }
+                    scoped { AppcuesCoroutineScope(get()) }
+                    scoped { mockk<AnalyticsTracker>(relaxed = true) }
+                    scoped { mockk<SessionMonitor>(relaxed = true) }
+                    scoped { mockk<Logcues>(relaxed = true) }
+                    scoped { mockk<ExperienceRenderer>(relaxed = true) }
+                    scoped { mockk<AppcuesDebuggerManager>(relaxed = true) }
+                    scoped { mockk<ActivityScreenTracking>(relaxed = true) }
+                    scoped { mockk<TraitRegistry>(relaxed = true) }
+                    scoped { mockk<ActionRegistry>(relaxed = true) }
+                    scoped { mockk<DeepLinkHandler>(relaxed = true) }
+                    scoped { mockk<LinkOpener>(relaxed = true) }
+                    scoped { storageMockk() }
+                    scoped { mockk<Appcues>(relaxed = true) }
+                    scoped { mockk<ActionProcessor>(relaxed = true) }
+                    factory { ExperienceLifecycleTracker(scope) }
+                    scoped { StateMachine(get(), get(), get(), get(), state) }
                 }
-            )
-        }
+            })
+        )
     }
 }

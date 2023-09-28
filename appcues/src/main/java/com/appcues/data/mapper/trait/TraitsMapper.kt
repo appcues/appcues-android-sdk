@@ -18,9 +18,8 @@ internal class TraitsMapper(
                     try {
                         add(factory.invoke(it.first.config, it.second, renderContext))
                     } catch (ex: DefinitionException) {
-                        // TODO come back here ensure its still working
-                        // since Traits are loaded through Koin, we catch any issue
-                        // with Koin instance creation here, then hopefully get the underlying
+                        // since Traits are loaded through DI framework, we catch any issue
+                        // with definitions during creation, then hopefully get the underlying
                         // AppcuesTraitException as the cause and throw that instead. This is
                         // because higher level mapping code handles the trait exceptions and
                         // reports proper ExperienceErrors

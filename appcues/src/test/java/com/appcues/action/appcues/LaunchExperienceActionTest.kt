@@ -3,8 +3,9 @@ package com.appcues.action.appcues
 import com.appcues.AppcuesScopeTest
 import com.appcues.data.model.ExperienceTrigger
 import com.appcues.data.model.RenderContext
+import com.appcues.di.component.get
 import com.appcues.mocks.mockExperience
-import com.appcues.rules.KoinScopeRule
+import com.appcues.rules.TestScopeRule
 import com.appcues.statemachine.State.RenderingStep
 import com.appcues.ui.ExperienceRenderer
 import com.google.common.truth.Truth.assertThat
@@ -15,13 +16,12 @@ import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
-import org.koin.core.component.get
 import java.util.UUID
 
 internal class LaunchExperienceActionTest : AppcuesScopeTest {
 
     @get:Rule
-    override val koinTestRule = KoinScopeRule()
+    override val scopeRule = TestScopeRule()
 
     @Test
     fun `launch experience SHOULD have expected type name`() {
@@ -97,7 +97,6 @@ internal class LaunchExperienceActionTest : AppcuesScopeTest {
         // GIVEN
         val experienceId = UUID.randomUUID()
         val experienceIdString = experienceId.toString()
-        val currentExperience = mockExperience()
         val experienceRenderer: ExperienceRenderer = mockk(relaxed = true) {
             every { this@mockk.getState(RenderContext.Modal) } returns null
         }

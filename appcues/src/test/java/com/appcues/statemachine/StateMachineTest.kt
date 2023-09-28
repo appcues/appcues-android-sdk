@@ -10,10 +10,11 @@ import com.appcues.data.model.ExperiencePriority.NORMAL
 import com.appcues.data.model.ExperienceTrigger
 import com.appcues.data.model.ExperienceTrigger.Qualification
 import com.appcues.data.model.RenderContext
+import com.appcues.di.component.get
 import com.appcues.mocks.mockExperience
 import com.appcues.mocks.mockExperienceNavigateActions
-import com.appcues.rules.KoinScopeRule
 import com.appcues.rules.MainDispatcherRule
+import com.appcues.rules.TestScopeRule
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.RenderStep
 import com.appcues.statemachine.Action.ReportError
@@ -49,7 +50,6 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeout
 import org.junit.Rule
 import org.junit.Test
-import org.koin.core.component.get
 import java.util.UUID
 import kotlin.time.Duration.Companion.seconds
 
@@ -57,7 +57,7 @@ import kotlin.time.Duration.Companion.seconds
 internal class StateMachineTest : AppcuesScopeTest {
 
     @get:Rule
-    override val koinTestRule = KoinScopeRule()
+    override val scopeRule = TestScopeRule()
 
     @get:Rule
     val dispatcherRule = MainDispatcherRule()
@@ -685,9 +685,7 @@ internal class StateMachineTest : AppcuesScopeTest {
         // THEN
         assertThat(result.successValue()).isEqualTo(Idling)
         assertThat(stateMachine.state).isEqualTo(Idling)
-        coVerify {
-            koinTestRule.scope.get<ActionProcessor>().process(experience.completionActions)
-        }
+        coVerify { get<ActionProcessor>().process(experience.completionActions) }
     }
 
     @Test
@@ -704,7 +702,7 @@ internal class StateMachineTest : AppcuesScopeTest {
         // THEN
         assertThat(result.successValue()).isEqualTo(Idling)
         assertThat(stateMachine.state).isEqualTo(Idling)
-        coVerify { koinTestRule.scope.get<ActionProcessor>() wasNot Called }
+        coVerify { get<ActionProcessor>() wasNot Called }
     }
 
     @Test

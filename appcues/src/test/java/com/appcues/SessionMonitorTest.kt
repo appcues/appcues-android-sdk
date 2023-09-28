@@ -1,18 +1,16 @@
 package com.appcues
 
-import com.appcues.rules.KoinScopeRule
+import com.appcues.di.component.get
 import com.appcues.rules.MainDispatcherRule
+import com.appcues.rules.TestScopeRule
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Rule
 import org.junit.Test
-import org.koin.core.component.get
 
-@OptIn(ExperimentalCoroutinesApi::class)
 internal class SessionMonitorTest : AppcuesScopeTest {
 
     @get:Rule
-    override val koinTestRule = KoinScopeRule()
+    override val scopeRule = TestScopeRule()
 
     @get:Rule
     val dispatcherRule = MainDispatcherRule()

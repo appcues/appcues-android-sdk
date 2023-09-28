@@ -2,19 +2,19 @@ package com.appcues.action.appcues
 
 import com.appcues.AppcuesScopeTest
 import com.appcues.data.model.RenderContext
-import com.appcues.rules.KoinScopeRule
+import com.appcues.di.component.get
+import com.appcues.rules.TestScopeRule
 import com.appcues.ui.ExperienceRenderer
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coVerify
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
-import org.koin.core.component.get
 
 internal class CloseActionTest : AppcuesScopeTest {
 
     @get:Rule
-    override val koinTestRule = KoinScopeRule()
+    override val scopeRule = TestScopeRule()
 
     @Test
     fun `close SHOULD have expected type name`() {

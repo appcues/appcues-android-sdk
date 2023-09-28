@@ -2,7 +2,7 @@ package com.appcues.di
 
 import android.content.Context
 import com.appcues.AppcuesConfig
-import com.appcues.AppcuesModule
+import com.appcues.MainModule
 import com.appcues.analytics.AnalyticsModule
 import com.appcues.data.local.DataLocalModule
 import com.appcues.data.mapper.DataMapperModule
@@ -14,7 +14,7 @@ import com.appcues.di.scope.AppcuesScopeDSL
 internal object Bootstrap {
 
     private val modules = listOf(
-        AppcuesModule,
+        MainModule,
         AnalyticsModule,
         DataRemoteModule,
         DataMapperModule,
@@ -32,7 +32,7 @@ internal object Bootstrap {
 
     fun start(
         context: Context,
-        modules: List<com.appcues.di.AppcuesModule> = arrayListOf(),
+        modules: List<AppcuesModule> = arrayListOf(),
         scopeDSL: (AppcuesScopeDSL.() -> Unit)? = null
     ): AppcuesScope {
         val scope = AppcuesScope(context.applicationContext)

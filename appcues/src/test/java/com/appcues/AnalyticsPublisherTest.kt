@@ -9,24 +9,22 @@ import com.appcues.analytics.AnalyticsEvent.ScreenView
 import com.appcues.analytics.TrackingData
 import com.appcues.data.remote.appcues.request.ActivityRequest
 import com.appcues.data.remote.appcues.request.EventRequest
-import com.appcues.rules.KoinScopeRule
+import com.appcues.di.component.get
 import com.appcues.rules.MainDispatcherRule
+import com.appcues.rules.TestScopeRule
 import com.google.common.truth.Truth.assertThat
 import io.mockk.mockk
 import io.mockk.verify
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.koin.core.component.get
 import java.util.Date
 import java.util.UUID
 
-@OptIn(ExperimentalCoroutinesApi::class)
 internal class AnalyticsPublisherTest : AppcuesScopeTest {
 
     @get:Rule
-    override val koinTestRule = KoinScopeRule()
+    override val scopeRule = TestScopeRule()
 
     @get:Rule
     val dispatcherRule = MainDispatcherRule()
