@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import com.appcues.data.model.ExperiencePrimitive.ButtonPrimitive
 import com.appcues.data.model.styling.ComponentStyle
+import com.appcues.ui.composables.LocalAppcuesConfig
 import com.appcues.ui.extensions.getBoxAlignment
 import com.appcues.ui.extensions.getTextStyle
 
@@ -20,7 +21,7 @@ internal fun ButtonPrimitive.Compose(modifier: Modifier) {
         modifier = modifier,
         color = Color.Transparent,
     ) {
-        ProvideTextStyle(style.getTextStyle(LocalContext.current, isSystemInDarkTheme())) {
+        ProvideTextStyle(style.getTextStyle(LocalContext.current, LocalAppcuesConfig.current, isSystemInDarkTheme())) {
             Box(
                 contentAlignment = content.style.getBoxAlignment(),
                 modifier = Modifier.styleButtonContentWidth(style),

@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.testTag
 import coil.ImageLoader
+import com.appcues.AppcuesConfig
 import com.appcues.data.model.StepContainer
 import com.appcues.logging.Logcues
 import com.appcues.trait.BackdropDecoratingTrait
@@ -33,6 +34,7 @@ internal fun AppcuesComposition(
     imageLoader: ImageLoader,
     logcues: Logcues,
     chromeClient: WebChromeClient,
+    config: AppcuesConfig,
 ) {
     // ensure to change some colors to match appropriate design for custom primitive blocks
     AppcuesTheme {
@@ -40,6 +42,7 @@ internal fun AppcuesComposition(
         CompositionLocalProvider(
             LocalImageLoader provides imageLoader,
             LocalViewModel provides viewModel,
+            LocalAppcuesConfig provides config,
             LocalLogcues provides logcues,
             LocalChromeClient provides chromeClient,
             LocalAppcuesActionDelegate provides DefaultAppcuesActionsDelegate(viewModel),
