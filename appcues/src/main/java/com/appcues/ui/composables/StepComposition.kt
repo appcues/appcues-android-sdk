@@ -5,12 +5,15 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.platform.LocalDensity
 import com.appcues.data.model.Step
 import com.appcues.trait.StepDecoratingTrait.StepDecoratingType
@@ -23,7 +26,8 @@ internal fun Step.ComposeStep(
     modifier: Modifier = Modifier,
     containerPadding: PaddingValues,
     safeAreaInsets: PaddingValues,
-    parent: BoxScope
+    parent: BoxScope,
+    hasVerticalScroll: Boolean,
 ) {
     key(id) {
         CompositionLocalProvider(
@@ -36,7 +40,7 @@ internal fun Step.ComposeStep(
 
             ApplyUnderlayStepTraits(parent, containerPadding, safeAreaInsets, stickyContentPadding)
 
-            ComposeStepContent(modifier, containerPadding, safeAreaInsets, stickyContentPadding)
+            ComposeStepContent(modifier, containerPadding, safeAreaInsets, stickyContentPadding, hasVerticalScroll)
 
             ComposeStickyContent(parent, containerPadding, safeAreaInsets, stickyContentPadding)
 
@@ -74,11 +78,13 @@ private fun Step.ComposeStepContent(
     modifier: Modifier,
     containerPadding: PaddingValues,
     safeAreaInsets: PaddingValues,
-    stickyContentPadding: StickyContentPadding
+    stickyContentPadding: StickyContentPadding,
+    hasVerticalScroll: Boolean,
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
+            .stepVerticalScroll(hasVerticalScroll)
             .padding(containerPadding)
             .padding(safeAreaInsets)
             .padding(stickyContentPadding.paddingValues.value)
@@ -110,5 +116,15 @@ private fun Step.ComposeStickyContent(
                 .alignStepOverlay(boxScope, Alignment.BottomCenter, stickyContentPadding),
             contentAlignment = Alignment.BottomCenter
         ) { it.Compose() }
+    }
+}
+
+// conditionally add vertical scrolling to the step, only if the given ScrollState is not null.
+// this is used to allow the parent trait to control whether or not step content is scrollable
+private fun Modifier.stepVerticalScroll(enabled: Boolean) = composed {
+    if (enabled) {
+        Modifier.verticalScroll(rememberScrollState())
+    } else {
+        Modifier
     }
 }

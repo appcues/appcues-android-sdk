@@ -10,8 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -59,7 +57,12 @@ internal enum class SlideTransitionEdge {
 @Composable
 internal fun DialogModal(
     style: ComponentStyle?,
-    content: @Composable (modifier: Modifier, containerPadding: PaddingValues, safeAreaInsets: PaddingValues) -> Unit,
+    content: @Composable (
+        modifier: Modifier,
+        containerPadding: PaddingValues,
+        safeAreaInsets: PaddingValues,
+        hasVerticalScroll: Boolean,
+    ) -> Unit,
     windowInfo: AppcuesWindowInfo,
     transition: DialogTransition,
 ) {
@@ -110,9 +113,10 @@ internal fun DialogModal(
                     .modalStyle(style, isDark) { Modifier.dialogModifier(it, isDark) }
             ) {
                 content(
-                    Modifier.verticalScroll(rememberScrollState()),
+                    Modifier,
                     style.getPaddings(),
-                    PaddingValues()
+                    PaddingValues(),
+                    true, // support vertical scroll
                 )
             }
         }

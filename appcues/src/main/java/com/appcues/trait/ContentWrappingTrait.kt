@@ -22,6 +22,11 @@ internal interface ContentWrappingTrait : ExperienceTrait {
      */
     @Composable
     fun WrapContent(
-        content: @Composable (modifier: Modifier, containerPadding: PaddingValues, safeAreaInsets: PaddingValues) -> Unit
+        content: @Composable (
+            modifier: Modifier,
+            containerPadding: PaddingValues,
+            safeAreaInsets: PaddingValues,
+            hasVerticalScroll: Boolean,
+        ) -> Unit
     )
 }

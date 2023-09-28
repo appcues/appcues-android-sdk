@@ -13,8 +13,6 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -68,7 +66,8 @@ internal class EmbedTrait(
         content: @Composable (
             modifier: Modifier,
             containerPadding: PaddingValues,
-            safeAreaInsets: PaddingValues
+            safeAreaInsets: PaddingValues,
+            hasVerticalScroll: Boolean,
         ) -> Unit
     ) {
         val isDark = isSystemInDarkTheme()
@@ -86,9 +85,10 @@ internal class EmbedTrait(
                         .modalStyle(style, isDark) { Modifier.dialogModifier(it, isDark) },
                     content = {
                         content(
-                            if (constraints.hasBoundedHeight) Modifier.verticalScroll(rememberScrollState()) else Modifier,
+                            Modifier,
                             style.getPaddings(),
-                            PaddingValues()
+                            PaddingValues(),
+                            constraints.hasBoundedHeight, // support vertical scroll only if bounded height
                         )
                     },
                 )

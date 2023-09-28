@@ -53,7 +53,8 @@ internal class ModalTrait(
         content: @Composable (
             modifier: Modifier,
             containerPadding: PaddingValues,
-            safeAreaInsets: PaddingValues
+            safeAreaInsets: PaddingValues,
+            hasVerticalScroll: Boolean,
         ) -> Unit
     ) {
         val windowInfo = rememberAppcuesWindowInfo()

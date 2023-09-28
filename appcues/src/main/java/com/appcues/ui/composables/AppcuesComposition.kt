@@ -112,7 +112,7 @@ internal fun BoxScope.ComposeContainer(stepContainer: StepContainer, stepIndex: 
                 ApplyBackgroundDecoratingTraits(backdropDecoratingTraits.value)
 
                 // create wrapper
-                contentWrappingTrait.WrapContent { modifier, containerPadding, safeAreaInsets ->
+                contentWrappingTrait.WrapContent { modifier, containerPadding, safeAreaInsets, hasVerticalScroll ->
                     Box(contentAlignment = Alignment.TopCenter) {
                         ApplyUnderlayContainerTraits(containerDecoratingTraits.value, containerPadding, safeAreaInsets)
 
@@ -128,7 +128,8 @@ internal fun BoxScope.ComposeContainer(stepContainer: StepContainer, stepIndex: 
                                             modifier = modifier.testTag("page_$it"),
                                             containerPadding = containerPadding,
                                             safeAreaInsets = safeAreaInsets,
-                                            parent = this@Box
+                                            parent = this@Box,
+                                            hasVerticalScroll = hasVerticalScroll,
                                         )
                                 }
                             ).also {
