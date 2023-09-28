@@ -11,9 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.GenericShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
@@ -118,7 +116,8 @@ internal class TooltipTrait(
         content: @Composable (
             modifier: Modifier,
             containerPadding: PaddingValues,
-            safeAreaInsets: PaddingValues
+            safeAreaInsets: PaddingValues,
+            hasVerticalScroll: Boolean,
         ) -> Unit
     ) {
         val metadata = LocalAppcuesStepMetadata.current
@@ -194,9 +193,10 @@ internal class TooltipTrait(
                             .styleBorderPath(style, tooltipPath, isSystemInDarkTheme())
                     ) {
                         content(
-                            Modifier.verticalScroll(rememberScrollState()),
+                            Modifier,
                             style.getPaddings(),
-                            tooltipSettings.getContentPaddingValues()
+                            tooltipSettings.getContentPaddingValues(),
+                            true // support vertical scroll
                         )
                     }
                 }
