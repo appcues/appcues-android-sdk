@@ -1,8 +1,6 @@
 package com.appcues.action.appcues
 
-import com.appcues.AppcuesScopeTest
 import com.appcues.data.model.RenderContext
-import com.appcues.rules.KoinScopeRule
 import com.appcues.statemachine.StepReference.StepId
 import com.appcues.statemachine.StepReference.StepIndex
 import com.appcues.statemachine.StepReference.StepOffset
@@ -11,14 +9,10 @@ import com.google.common.truth.Truth.assertThat
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import org.junit.Rule
 import org.junit.Test
 import java.util.UUID
 
-internal class ContinueActionTest : AppcuesScopeTest {
-
-    @get:Rule
-    override val koinTestRule = KoinScopeRule()
+internal class ContinueActionTest {
 
     @Test
     fun `continue SHOULD have expected type name`() {

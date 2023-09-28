@@ -1,13 +1,13 @@
 package com.appcues
 
-import com.appcues.rules.KoinScopeRule
-import org.koin.core.component.KoinScopeComponent
-import org.koin.core.scope.Scope
-import org.koin.test.KoinTest
+import com.appcues.di.component.AppcuesComponent
+import com.appcues.di.scope.AppcuesScope
+import com.appcues.rules.TestScopeRule
 
-internal interface AppcuesScopeTest : KoinTest, KoinScopeComponent {
-    val koinTestRule: KoinScopeRule
+internal interface AppcuesScopeTest : AppcuesComponent {
 
-    override val scope: Scope
-        get() = koinTestRule.scope
+    val scopeRule: TestScopeRule
+
+    override val scope: AppcuesScope
+        get() = scopeRule.scope
 }

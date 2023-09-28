@@ -1,7 +1,6 @@
 package com.appcues.action.appcues
 
 import com.appcues.Appcues
-import com.appcues.AppcuesScopeTest
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType.FORM_SUBMITTED
@@ -20,25 +19,18 @@ import com.appcues.data.model.RenderContext
 import com.appcues.data.model.Step
 import com.appcues.data.model.StepContainer
 import com.appcues.data.model.styling.ComponentSelectMode.MULTIPLE
-import com.appcues.rules.KoinScopeRule
 import com.appcues.statemachine.State
 import com.appcues.ui.ExperienceRenderer
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
-import org.junit.Rule
 import org.junit.Test
 import java.util.Date
 import java.util.UUID
 
-@OptIn(ExperimentalCoroutinesApi::class)
-internal class SubmitFormActionTest : AppcuesScopeTest {
-
-    @get:Rule
-    override val koinTestRule = KoinScopeRule()
+internal class SubmitFormActionTest {
 
     @Test
     fun `submit-form SHOULD have expected type name`() {
@@ -100,7 +92,9 @@ internal class SubmitFormActionTest : AppcuesScopeTest {
         action.execute()
 
         // THEN
-        verify { analyticsTracker.identify(mapOf("_appcuesForm_label" to "text", "myCustomAttribute" to "text"), interactive = false) }
+        verify {
+            analyticsTracker.identify(mapOf("_appcuesForm_label" to "text", "myCustomAttribute" to "text"), interactive = false)
+        }
     }
 
     // seems an odd test here, validating that it submits on invalid input - but this is confirming the
@@ -218,7 +212,9 @@ internal class SubmitFormActionTest : AppcuesScopeTest {
         val analyticsTracker: AnalyticsTracker = mockk(relaxed = true)
         val appcues: Appcues = mockk(relaxed = true)
         val action0 = TrackEventAction(mapOf("eventName" to "My Custom Event"), appcues)
-        val action = SubmitFormAction(mapOf("skipValidation" to true), RenderContext.Modal, experienceRenderer, analyticsTracker)
+        val action = SubmitFormAction(
+            mapOf("skipValidation" to true), RenderContext.Modal, experienceRenderer, analyticsTracker
+        )
         val action1 = TrackEventAction(mapOf("eventName" to "My Custom Event"), appcues)
         val action2 = TrackEventAction(mapOf("eventName" to "My Custom Event"), appcues)
         val initialQueue = listOf(action0, action, action1, action2)

@@ -49,7 +49,7 @@ public fun Appcues(
  * The main entry point for using Appcues functionality in your application - tracking
  * analytics and rendering experiences.
  */
-public class Appcues internal constructor(scope: AppcuesScope) {
+public class Appcues internal constructor(internal val scope: AppcuesScope) {
 
     public companion object {
 

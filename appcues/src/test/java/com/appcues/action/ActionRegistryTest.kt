@@ -2,19 +2,19 @@ package com.appcues.action
 
 import com.appcues.AppcuesScopeTest
 import com.appcues.data.model.RenderContext
+import com.appcues.di.component.get
 import com.appcues.logging.Logcues
-import com.appcues.rules.KoinScopeRule
+import com.appcues.rules.TestScopeRule
 import com.google.common.truth.Truth.assertThat
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.Rule
 import org.junit.Test
-import org.koin.core.component.get
 
 internal class ActionRegistryTest : AppcuesScopeTest {
 
     @get:Rule
-    override val koinTestRule = KoinScopeRule()
+    override val scopeRule = TestScopeRule()
 
     @Test
     fun `get SHOULD return registered ExperienceAction`() {

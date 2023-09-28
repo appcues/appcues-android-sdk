@@ -4,7 +4,8 @@ import android.net.Uri
 import com.appcues.Appcues
 import com.appcues.AppcuesScopeTest
 import com.appcues.NavigationHandler
-import com.appcues.rules.KoinScopeRule
+import com.appcues.di.component.get
+import com.appcues.rules.TestScopeRule
 import com.appcues.util.LinkOpener
 import com.google.common.truth.Truth.assertThat
 import io.mockk.Called
@@ -17,12 +18,11 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.koin.core.component.get
 
 internal class LinkActionTest : AppcuesScopeTest {
 
     @get:Rule
-    override val koinTestRule = KoinScopeRule()
+    override val scopeRule = TestScopeRule()
 
     @Before
     fun setUp() {

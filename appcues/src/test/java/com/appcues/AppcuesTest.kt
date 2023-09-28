@@ -1,16 +1,20 @@
 package com.appcues
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import com.appcues.action.ActionRegistry
 import com.appcues.action.ExperienceAction
 import com.appcues.analytics.ActivityScreenTracking
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.data.model.ExperienceTrigger
+import com.appcues.data.model.RenderContext
 import com.appcues.debugger.AppcuesDebuggerManager
 import com.appcues.debugger.DebugMode.Debugger
-import com.appcues.rules.KoinScopeRule
+import com.appcues.di.component.get
+import com.appcues.di.scope.get
 import com.appcues.rules.MainDispatcherRule
+import com.appcues.rules.TestScopeRule
 import com.appcues.trait.ExperienceTrait
 import com.appcues.trait.ExperienceTraitLevel
 import com.appcues.trait.TraitRegistry
@@ -24,13 +28,12 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.koin.core.component.get
 import java.util.UUID
 
 internal class AppcuesTest : AppcuesScopeTest {
 
     @get:Rule
-    override val koinTestRule = KoinScopeRule()
+    override val scopeRule = TestScopeRule()
 
     @get:Rule
     val dispatcherRule = MainDispatcherRule()
@@ -40,6 +43,30 @@ internal class AppcuesTest : AppcuesScopeTest {
     @Before
     fun setUp() {
         appcues = Appcues(get())
+    }
+
+    @Test
+    fun `Appcues version SHOULD match BuildConfig`() {
+        assertThat(appcues.version).isEqualTo(BuildConfig.SDK_VERSION)
+    }
+
+    @Test
+    fun `Appcues call returns instance WITH same context, accountId and appId`() {
+        // GIVEN
+        val context = mockk<Context>(relaxed = true)
+        // WHEN
+        val appcues = Appcues(
+            context = context,
+            accountId = "1234-account",
+            applicationId = "1234-appId"
+        )
+        // THEN
+        with(appcues.scope.get<AppcuesConfig>()) {
+            assertThat(accountId).isEqualTo("1234-account")
+            assertThat(applicationId).isEqualTo("1234-appId")
+        }
+
+        assertThat(appcues.scope.get<Context>()).isEqualTo(context)
     }
 
     @Test
@@ -323,6 +350,19 @@ internal class AppcuesTest : AppcuesScopeTest {
 
         // THEN
         verify { registry.register(type, factory) }
+    }
+
+    @Test
+    fun `registerEmbed SHOULD call the ExperienceRenderer start for given frame`() = runTest {
+        // GIVEN
+        val renderer: ExperienceRenderer = get()
+        val view = mockk<AppcuesFrameView>(relaxed = true)
+
+        // WHEN
+        appcues.registerEmbed("frame1", view)
+
+        // THEN
+        coVerify { renderer.start(view, RenderContext.Embed("frame1")) }
     }
 
     @Test

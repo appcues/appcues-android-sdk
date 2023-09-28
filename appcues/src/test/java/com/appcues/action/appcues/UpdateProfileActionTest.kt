@@ -3,21 +3,19 @@ package com.appcues.action.appcues
 import com.appcues.Appcues
 import com.appcues.AppcuesScopeTest
 import com.appcues.Storage
-import com.appcues.rules.KoinScopeRule
+import com.appcues.di.component.get
+import com.appcues.rules.TestScopeRule
 import com.google.common.truth.Truth.assertThat
 import io.mockk.Called
 import io.mockk.coVerify
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
-import org.koin.core.component.get
 
-@OptIn(ExperimentalCoroutinesApi::class)
 internal class UpdateProfileActionTest : AppcuesScopeTest {
 
     @get:Rule
-    override val koinTestRule = KoinScopeRule()
+    override val scopeRule = TestScopeRule()
 
     @Test
     fun `update profile SHOULD have expected type name`() {

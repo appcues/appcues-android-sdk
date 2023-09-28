@@ -117,7 +117,7 @@ complexity:
     active: true
     threshold: 60
     ignoreAnnotated: [ 'Composable' ]
-    excludes: [ '**/*Koin.kt' ]
+    excludes: [ '**/*Module.kt' ]
   LongParameterList:
     active: true
     functionThreshold: 6
