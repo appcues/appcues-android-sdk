@@ -21,6 +21,7 @@ import com.appcues.trait.TraitRegistry
 import com.appcues.ui.ExperienceRenderer
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import io.mockk.verifyOrder
@@ -53,7 +54,10 @@ internal class AppcuesTest : AppcuesScopeTest {
     @Test
     fun `Appcues call returns instance WITH same context, accountId and appId`() {
         // GIVEN
-        val context = mockk<Context>(relaxed = true)
+        val appContext = mockk<Context>()
+        val context = mockk<Context>(relaxed = true) {
+            every { applicationContext } returns appContext
+        }
         // WHEN
         val appcues = Appcues(
             context = context,
@@ -66,7 +70,7 @@ internal class AppcuesTest : AppcuesScopeTest {
             assertThat(applicationId).isEqualTo("1234-appId")
         }
 
-        assertThat(appcues.scope.get<Context>()).isEqualTo(context)
+        assertThat(appcues.scope.get<Context>()).isEqualTo(appContext)
     }
 
     @Test

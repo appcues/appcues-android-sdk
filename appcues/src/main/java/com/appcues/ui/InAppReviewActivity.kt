@@ -1,5 +1,6 @@
 package com.appcues.ui
 
+import android.content.Context
 import android.content.Intent
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
@@ -28,8 +29,8 @@ internal class InAppReviewActivity : AppCompatActivity() {
         // deferred can be used to await completion
         var completion: CompletableDeferred<Boolean>? = null
 
-        fun getIntent(scope: AppcuesScope): Intent =
-            Intent(scope.context, InAppReviewActivity::class.java).apply {
+        fun getIntent(context: Context, scope: AppcuesScope): Intent =
+            Intent(context, InAppReviewActivity::class.java).apply {
                 putExtra(EXTRA_SCOPE_ID, scope.scopeId.toString())
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK
             }
