@@ -90,6 +90,12 @@ public data class AppcuesConfig internal constructor(
      */
     var additionalAutoProperties: Map<String, Any> = emptyMap()
 
+    /**
+     * Sets a custom path to use when looking for any application-specific fonts in the application assets.
+     * The fonts in /assets/fonts will always be made available. Any custom path here would be in addition.
+     */
+    var fontAssetPath: String? = null
+
     // internally used for ui test on debug variant
     internal var imageLoader: ImageLoader? = null
 }

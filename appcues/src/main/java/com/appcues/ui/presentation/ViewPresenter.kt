@@ -88,6 +88,7 @@ internal abstract class ViewPresenter(
                     logcues = scope.get(),
                     imageLoader = scope.get(),
                     chromeClient = EmbedChromeClient(this),
+                    config = scope.get(),
                 )
             }
 

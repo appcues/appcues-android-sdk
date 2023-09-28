@@ -28,6 +28,7 @@ import com.appcues.ui.composables.AppcuesActionsDelegate
 import com.appcues.ui.composables.ComposeContainer
 import com.appcues.ui.composables.ExperienceCompositionState
 import com.appcues.ui.composables.LocalAppcuesActionDelegate
+import com.appcues.ui.composables.LocalAppcuesConfig
 import com.appcues.ui.composables.LocalExperienceCompositionState
 import com.appcues.ui.composables.LocalExperienceStepFormStateDelegate
 import com.appcues.ui.composables.LocalImageLoader
@@ -47,6 +48,7 @@ public fun ComposeContent(json: String, imageLoader: ImageLoader) {
         CompositionLocalProvider(
             LocalImageLoader provides imageLoader,
             LocalLogcues provides Logcues(LoggingLevel.DEBUG),
+            LocalAppcuesConfig provides AppcuesConfig("test-account", "test-app"),
             LocalExperienceStepFormStateDelegate provides ExperienceStepFormState(),
             LocalAppcuesActionDelegate provides FakeAppcuesActionDelegate(),
             LocalExperienceCompositionState provides ExperienceCompositionState(),
@@ -108,6 +110,7 @@ public fun ComposeContainer(context: Context, stepContentJson: List<String>?, tr
         CompositionLocalProvider(
             LocalImageLoader provides imageLoader,
             LocalLogcues provides Logcues(LoggingLevel.DEBUG),
+            LocalAppcuesConfig provides AppcuesConfig("test-account", "test-app"),
             LocalExperienceStepFormStateDelegate provides ExperienceStepFormState(),
             LocalAppcuesActionDelegate provides FakeAppcuesActionDelegate(),
             LocalExperienceCompositionState provides ExperienceCompositionState(
@@ -170,6 +173,7 @@ public fun ComposeContainer(
         CompositionLocalProvider(
             LocalImageLoader provides imageLoader,
             LocalLogcues provides Logcues(LoggingLevel.DEBUG),
+            LocalAppcuesConfig provides AppcuesConfig("test-account", "test-app"),
             LocalExperienceStepFormStateDelegate provides ExperienceStepFormState(),
             LocalAppcuesActionDelegate provides FakeAppcuesActionDelegate(),
             LocalExperienceCompositionState provides ExperienceCompositionState(

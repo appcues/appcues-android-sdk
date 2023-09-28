@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.appcues.data.model.ExperiencePrimitive.VerticalStackPrimitive
+import com.appcues.ui.composables.LocalAppcuesConfig
 import com.appcues.ui.composables.LocalStackScope
 import com.appcues.ui.composables.StackScope
 import com.appcues.ui.extensions.getHorizontalAlignment
@@ -24,7 +25,7 @@ internal fun VerticalStackPrimitive.Compose(modifier: Modifier) {
         verticalArrangement = Arrangement.spacedBy(spacing.dp, Alignment.CenterVertically)
     ) {
         CompositionLocalProvider(LocalStackScope provides StackScope.COLUMN) {
-            ProvideTextStyle(style.getTextStyle(LocalContext.current, isSystemInDarkTheme())) {
+            ProvideTextStyle(style.getTextStyle(LocalContext.current, LocalAppcuesConfig.current, isSystemInDarkTheme())) {
                 items.forEach {
                     it.Compose()
                 }
