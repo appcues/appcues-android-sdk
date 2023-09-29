@@ -45,8 +45,8 @@ internal class SubmitFormActionTest {
         val formState = formState(optionSelect, textInput)
         val experience = experience(formState)
         val state: State = mockk(relaxed = true) {
-            every { this@mockk.currentExperience } answers { experience }
-            every { this@mockk.currentStepIndex } answers { 0 }
+            every { this@mockk.currentExperience } returns experience
+            every { this@mockk.currentStepIndex } returns 0
         }
         val experienceRenderer: ExperienceRenderer = mockk(relaxed = true) {
             every { this@mockk.getState(RenderContext.Modal) } returns state
@@ -78,8 +78,8 @@ internal class SubmitFormActionTest {
         val formState = formState(textInput)
         val experience = experience(formState)
         val state: State = mockk(relaxed = true) {
-            every { this@mockk.currentExperience } answers { experience }
-            every { this@mockk.currentStepIndex } answers { 0 }
+            every { this@mockk.currentExperience } returns experience
+            every { this@mockk.currentStepIndex } returns 0
         }
         val experienceRenderer: ExperienceRenderer = mockk(relaxed = true) {
             every { this@mockk.getState(RenderContext.Modal) } returns state
@@ -110,8 +110,8 @@ internal class SubmitFormActionTest {
         val formState = formState(optionSelect, textInput)
         val experience = experience(formState)
         val state: State = mockk(relaxed = true) {
-            every { this@mockk.currentExperience } answers { experience }
-            every { this@mockk.currentStepIndex } answers { 0 }
+            every { this@mockk.currentExperience } returns experience
+            every { this@mockk.currentStepIndex } returns 0
         }
         val experienceRenderer: ExperienceRenderer = mockk(relaxed = true) {
             every { this@mockk.getState(RenderContext.Modal) } returns state
@@ -137,8 +137,8 @@ internal class SubmitFormActionTest {
         val formState = formState(optionSelect, textInput)
         val experience = experience(formState)
         val state: State = mockk(relaxed = true) {
-            every { this@mockk.currentExperience } answers { experience }
-            every { this@mockk.currentStepIndex } answers { 0 }
+            every { this@mockk.currentExperience } returns experience
+            every { this@mockk.currentStepIndex } returns 0
         }
         val experienceRenderer: ExperienceRenderer = mockk(relaxed = true) {
             every { this@mockk.getState(RenderContext.Modal) } returns state
@@ -167,8 +167,8 @@ internal class SubmitFormActionTest {
         val formState = formState(optionSelect, textInput)
         val experience = experience(formState)
         val state: State = mockk(relaxed = true) {
-            every { this@mockk.currentExperience } answers { experience }
-            every { this@mockk.currentStepIndex } answers { 0 }
+            every { this@mockk.currentExperience } returns experience
+            every { this@mockk.currentStepIndex } returns 0
         }
         val experienceRenderer: ExperienceRenderer = mockk(relaxed = true) {
             every { this@mockk.getState(RenderContext.Modal) } returns state
@@ -203,8 +203,8 @@ internal class SubmitFormActionTest {
         val formState = formState(optionSelect, textInput)
         val experience = experience(formState)
         val state: State = mockk(relaxed = true) {
-            every { this@mockk.currentExperience } answers { experience }
-            every { this@mockk.currentStepIndex } answers { 0 }
+            every { this@mockk.currentExperience } returns experience
+            every { this@mockk.currentStepIndex } returns 0
         }
         val experienceRenderer: ExperienceRenderer = mockk(relaxed = true) {
             every { this@mockk.getState(RenderContext.Modal) } returns state

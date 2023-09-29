@@ -51,14 +51,7 @@ internal object MainModule : AppcuesModule {
         scoped { LinkOpener(get()) }
         scoped { AnalyticsPublisher(storage = get()) }
 
-        factory {
-            StateMachine(
-                appcuesCoroutineScope = get(),
-                config = get(),
-                actionProcessor = get(),
-                lifecycleTracker = get()
-            )
-        }
+        factory { StateMachine(actionProcessor = get(), lifecycleTracker = get(), onEndedExperience = it.next()) }
 
         scoped { get<AppcuesConfig>().imageLoader ?: get<ImageLoaderWrapper>().build() }
     }

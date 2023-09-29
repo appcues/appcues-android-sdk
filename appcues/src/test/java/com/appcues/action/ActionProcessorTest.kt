@@ -18,8 +18,8 @@ import com.appcues.logging.Logcues
 import com.appcues.mocks.mockExperience
 import com.appcues.rules.MainDispatcherRule
 import com.appcues.statemachine.State
-import com.appcues.statemachine.State.RenderingStep
 import com.appcues.statemachine.StateMachine
+import com.appcues.statemachine.states.RenderingStepState
 import com.appcues.ui.ExperienceRenderer
 import com.appcues.ui.StateMachineDirectory
 import com.google.common.truth.Truth.assertThat
@@ -40,7 +40,7 @@ internal class ActionProcessorTest {
     fun `process SHOULD transform queue WHEN it contains a transformation action`() = runTest {
         // GIVEN
         val experience = mockExperience()
-        val initialState = RenderingStep(experience, 0, true)
+        val initialState = RenderingStepState(experience, 0, true, mutableMapOf())
         val scope = createScope(initialState)
         val actionProcessor = ActionProcessor(scope)
         val action1 = TestAction(false)
@@ -63,7 +63,7 @@ internal class ActionProcessorTest {
 
         // GIVEN
         val experience = mockExperience()
-        val initialState = RenderingStep(experience, 0, true)
+        val initialState = RenderingStepState(experience, 0, true, mutableMapOf())
         val scope = createScope(initialState)
         val experienceRenderer = scope.get<ExperienceRenderer>()
         val actionProcessor = scope.get<ActionProcessor>()
@@ -105,7 +105,7 @@ internal class ActionProcessorTest {
 
         // GIVEN
         val experience = mockExperience().copy(published = false)
-        val initialState = RenderingStep(experience, 0, true)
+        val initialState = RenderingStepState(experience, 0, true, mapOf())
         val scope = createScope(initialState)
         val actionProcessor: ActionProcessor = scope.get()
         val analyticsTracker: AnalyticsTracker = scope.get()
@@ -141,7 +141,7 @@ internal class ActionProcessorTest {
                             experienceRenderer = get(),
                         )
                     }
-                    factory { StateMachine(get(), get(), get(), get(), state) }
+                    factory { StateMachine(get(), get(), state, mockk(relaxed = true)) }
                     scoped { ExperienceRenderer(scope) }
                     scoped { RenderContext.Modal }
                     factory { mockk<ExperienceLifecycleTracker>(relaxed = true) }

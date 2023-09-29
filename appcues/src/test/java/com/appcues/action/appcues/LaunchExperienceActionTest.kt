@@ -6,12 +6,12 @@ import com.appcues.data.model.RenderContext
 import com.appcues.di.component.get
 import com.appcues.mocks.mockExperience
 import com.appcues.rules.TestScopeRule
-import com.appcues.statemachine.State.RenderingStep
+import com.appcues.statemachine.states.RenderingStepState
 import com.appcues.ui.ExperienceRenderer
 import com.google.common.truth.Truth.assertThat
 import io.mockk.Called
+import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -80,7 +80,7 @@ internal class LaunchExperienceActionTest : AppcuesScopeTest {
         val experienceIdString = experienceId.toString()
         val currentExperience = mockExperience()
         val experienceRenderer: ExperienceRenderer = mockk(relaxed = true) {
-            every { this@mockk.getState(RenderContext.Modal) } returns RenderingStep(currentExperience, 0, true)
+            coEvery { this@mockk.getState(RenderContext.Modal) } returns RenderingStepState(currentExperience, 0, true, mutableMapOf())
         }
         val config = mapOf("experienceID" to experienceIdString)
         val action = LaunchExperienceAction(config, RenderContext.Modal, experienceRenderer)
@@ -98,7 +98,7 @@ internal class LaunchExperienceActionTest : AppcuesScopeTest {
         val experienceId = UUID.randomUUID()
         val experienceIdString = experienceId.toString()
         val experienceRenderer: ExperienceRenderer = mockk(relaxed = true) {
-            every { this@mockk.getState(RenderContext.Modal) } returns null
+            coEvery { this@mockk.getState(RenderContext.Modal) } returns null
         }
         val config = mapOf("experienceID" to experienceIdString)
         val action = LaunchExperienceAction(config, RenderContext.Modal, experienceRenderer)

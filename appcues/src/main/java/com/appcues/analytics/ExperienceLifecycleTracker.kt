@@ -1,5 +1,6 @@
 package com.appcues.analytics
 
+import com.appcues.AppcuesConfig
 import com.appcues.AppcuesCoroutineScope
 import com.appcues.Storage
 import com.appcues.analytics.ExperienceLifecycleEvent.ExperienceCompleted
@@ -14,16 +15,13 @@ import com.appcues.di.component.AppcuesComponent
 import com.appcues.di.component.inject
 import com.appcues.di.scope.AppcuesScope
 import com.appcues.statemachine.Error
-import com.appcues.statemachine.Error.ExperienceAlreadyActive
-import com.appcues.statemachine.Error.RenderContextNotActive
 import com.appcues.statemachine.State
-import com.appcues.statemachine.State.BeginningExperience
-import com.appcues.statemachine.State.BeginningStep
-import com.appcues.statemachine.State.EndingExperience
-import com.appcues.statemachine.State.EndingStep
-import com.appcues.statemachine.State.Idling
-import com.appcues.statemachine.State.RenderingStep
 import com.appcues.statemachine.StateMachine
+import com.appcues.statemachine.states.BeginningExperienceState
+import com.appcues.statemachine.states.BeginningStepState
+import com.appcues.statemachine.states.EndingExperienceState
+import com.appcues.statemachine.states.EndingStepState
+import com.appcues.statemachine.states.RenderingStepState
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -39,6 +37,7 @@ internal class ExperienceLifecycleTracker(
     private val analyticsTracker: AnalyticsTracker by inject()
     private val storage: Storage by inject()
     private val appcuesCoroutineScope: AppcuesCoroutineScope by inject()
+    private val config: AppcuesConfig by inject()
 
     private var stateJob: Job? = null
     private var errorJob: Job? = null
@@ -66,8 +65,14 @@ internal class ExperienceLifecycleTracker(
                 state.track()
             }
 
-            if (state is EndingExperience) {
-                onEndedExperience(state.experience)
+            when (state) {
+                is BeginningExperienceState -> {
+                    config.experienceListener?.experienceStarted(state.experience.id)
+                }
+                is EndingExperienceState -> {
+                    config.experienceListener?.experienceFinished(state.experience.id)
+                    onEndedExperience(state.experience)
+                }
             }
         }
     }
@@ -83,7 +88,7 @@ internal class ExperienceLifecycleTracker(
 
     private fun State.track() {
         when (this) {
-            is RenderingStep -> {
+            is RenderingStepState -> {
                 if (isFirst) {
                     // update this value for auto-properties
                     storage.lastContentShownAt = Date()
@@ -91,12 +96,12 @@ internal class ExperienceLifecycleTracker(
                 }
                 trackLifecycleEvent(StepSeen(experience, flatStepIndex))
             }
-            is EndingStep -> {
+            is EndingStepState -> {
                 if (markComplete) {
                     trackLifecycleEvent(StepCompleted(experience, flatStepIndex))
                 }
             }
-            is EndingExperience -> {
+            is EndingExperienceState -> {
                 if (trackAnalytics) {
                     if (markComplete) {
                         // if ending on the last step OR an action requested it be considered complete explicitly,
@@ -116,8 +121,7 @@ internal class ExperienceLifecycleTracker(
         when (this) {
             is Error.ExperienceError -> trackLifecycleEvent(ExperienceError(this))
             is Error.StepError -> trackLifecycleEvent(StepError(this))
-            is ExperienceAlreadyActive -> Unit
-            is RenderContextNotActive -> Unit
+            else -> Unit
         }
     }
 
@@ -129,19 +133,18 @@ internal class ExperienceLifecycleTracker(
 
     private fun State.isPublished(): Boolean =
         when (this) {
-            is BeginningExperience -> experience.published
-            is BeginningStep -> experience.published
-            is EndingExperience -> experience.published
-            is EndingStep -> experience.published
-            is Idling -> false
-            is RenderingStep -> experience.published
+            is BeginningExperienceState -> experience.published
+            is BeginningStepState -> experience.published
+            is EndingExperienceState -> experience.published
+            is EndingStepState -> experience.published
+            is RenderingStepState -> experience.published
+            else -> false
         }
 
     private fun Error.isPublished(): Boolean =
         when (this) {
             is Error.ExperienceError -> experience.published
             is Error.StepError -> experience.published
-            is ExperienceAlreadyActive -> false
-            is RenderContextNotActive -> false
+            else -> false
         }
 }

@@ -21,9 +21,9 @@ import com.appcues.mocks.mockExperience
 import com.appcues.mocks.mockExperienceExperiment
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.StartExperience
-import com.appcues.statemachine.State.Idling
-import com.appcues.statemachine.State.RenderingStep
 import com.appcues.statemachine.StateMachine
+import com.appcues.statemachine.states.IdlingState
+import com.appcues.statemachine.states.RenderingStepState
 import com.appcues.ui.ExperienceRenderer.RenderingResult
 import com.appcues.util.ResultOf.Success
 import com.google.common.truth.Truth.assertThat
@@ -43,10 +43,10 @@ internal class ExperienceRendererTest {
     @Test
     fun `dismissCurrentExperience SHOULD NOT mark complete WHEN current state is on last step`() = runTest {
         // GIVEN
-        val state = RenderingStep(mockExperience(), 3, false)
+        val state = RenderingStepState(mockExperience(), 3, false, mutableMapOf())
         val stateMachine = mockk<StateMachine>(relaxed = true) {
             every { this@mockk.state } answers { state }
-            coEvery { this@mockk.handleAction(any()) } returns Success(Idling)
+            coEvery { this@mockk.handleAction(any()) } returns Success(IdlingState)
         }
         val scope = createScope { stateMachine }
         val experienceRenderer = ExperienceRenderer(scope)
@@ -64,10 +64,10 @@ internal class ExperienceRendererTest {
     @Test
     fun `dismissCurrentExperience SHOULD NOT mark complete WHEN current state is not on last step`() = runTest {
         // GIVEN
-        val state = RenderingStep(mockExperience(), 2, false)
+        val state = RenderingStepState(mockExperience(), 2, false, mutableMapOf())
         val stateMachine = mockk<StateMachine>(relaxed = true) {
             every { this@mockk.state } answers { state }
-            coEvery { this@mockk.handleAction(any()) } returns Success(Idling)
+            coEvery { this@mockk.handleAction(any()) } returns Success(IdlingState)
         }
         val scope = createScope { stateMachine }
         val experienceRenderer = ExperienceRenderer(scope)
@@ -95,8 +95,8 @@ internal class ExperienceRendererTest {
         )
         val experience = mockExperienceExperiment(experiment)
         val stateMachine = mockk<StateMachine>(relaxed = true) {
-            every { this@mockk.state } answers { Idling }
-            coEvery { this@mockk.handleAction(any()) } answers { Success(Idling) }
+            every { this@mockk.state } answers { IdlingState }
+            coEvery { this@mockk.handleAction(any()) } returns Success(IdlingState)
         }
         val scope = createScope { stateMachine }
         val experienceRenderer = ExperienceRenderer(scope)
@@ -121,8 +121,8 @@ internal class ExperienceRendererTest {
         )
         val experience = mockExperienceExperiment(experiment)
         val stateMachine = mockk<StateMachine>(relaxed = true) {
-            every { this@mockk.state } answers { Idling }
-            coEvery { this@mockk.handleAction(any()) } answers { Success(Idling) }
+            every { this@mockk.state } answers { IdlingState }
+            coEvery { this@mockk.handleAction(any()) } returns Success(IdlingState)
         }
         val scope = createScope { stateMachine }
         val experienceRenderer = ExperienceRenderer(scope)
@@ -147,8 +147,8 @@ internal class ExperienceRendererTest {
         )
         val experience = mockExperienceExperiment(experiment)
         val stateMachine = mockk<StateMachine>(relaxed = true) {
-            every { this@mockk.state } answers { Idling }
-            coEvery { this@mockk.handleAction(any()) } answers { Success(Idling) }
+            every { this@mockk.state } answers { IdlingState }
+            coEvery { this@mockk.handleAction(any()) } returns Success(IdlingState)
         }
         val scope = createScope { stateMachine }
         val analyticsTracker: AnalyticsTracker = scope.get()
@@ -173,8 +173,8 @@ internal class ExperienceRendererTest {
         )
         val experience = mockExperienceExperiment(experiment)
         val stateMachine = mockk<StateMachine>(relaxed = true) {
-            every { this@mockk.state } answers { Idling }
-            coEvery { this@mockk.handleAction(any()) } answers { Success(Idling) }
+            every { this@mockk.state } answers { IdlingState }
+            coEvery { this@mockk.handleAction(any()) } returns Success(IdlingState)
         }
         val scope = createScope { stateMachine }
         val analyticsTracker: AnalyticsTracker = scope.get()
@@ -193,8 +193,8 @@ internal class ExperienceRendererTest {
         // GIVEN
         val experience = mockEmbedExperience("frame1")
         val stateMachine = mockk<StateMachine>(relaxed = true) {
-            every { this@mockk.state } answers { Idling }
-            coEvery { this@mockk.handleAction(any()) } answers { Success(Idling) }
+            every { this@mockk.state } answers { IdlingState }
+            coEvery { this@mockk.handleAction(any()) } returns Success(IdlingState)
         }
         val scope = createScope { stateMachine }
         val experienceRenderer = ExperienceRenderer(scope)
@@ -213,8 +213,8 @@ internal class ExperienceRendererTest {
         // GIVEN
         val experience = mockEmbedExperience("frame1")
         val stateMachine = mockk<StateMachine>(relaxed = true) {
-            every { this@mockk.state } answers { Idling }
-            coEvery { this@mockk.handleAction(any()) } answers { Success(Idling) }
+            every { this@mockk.state } answers { IdlingState }
+            coEvery { this@mockk.handleAction(any()) } returns Success(IdlingState)
         }
         val scope = createScope { stateMachine }
         val analyticsTracker: AnalyticsTracker = scope.get()
@@ -252,8 +252,8 @@ internal class ExperienceRendererTest {
         // GIVEN
         val experience = mockEmbedExperience("frame1")
         val stateMachine = mockk<StateMachine>(relaxed = true) {
-            every { this@mockk.state } answers { Idling }
-            coEvery { this@mockk.handleAction(any()) } answers { Success(Idling) }
+            every { this@mockk.state } answers { IdlingState }
+            coEvery { this@mockk.handleAction(any()) } returns Success(IdlingState)
         }
         val scope = createScope { stateMachine }
         val experienceRenderer = ExperienceRenderer(scope)
@@ -276,8 +276,8 @@ internal class ExperienceRendererTest {
         // GIVEN
         val experience = mockEmbedExperience("frame1")
         val stateMachine = mockk<StateMachine>(relaxed = true) {
-            every { this@mockk.state } answers { Idling }
-            coEvery { this@mockk.handleAction(any()) } answers { Success(Idling) }
+            every { this@mockk.state } answers { IdlingState }
+            coEvery { this@mockk.handleAction(any()) } returns Success(IdlingState)
         }
         val scope = createScope { stateMachine }
         val experienceRenderer = ExperienceRenderer(scope)
@@ -298,8 +298,8 @@ internal class ExperienceRendererTest {
         // GIVEN
         val experience = mockEmbedExperience("frame1")
         val stateMachine = mockk<StateMachine>(relaxed = true) {
-            every { this@mockk.state } answers { Idling }
-            coEvery { this@mockk.handleAction(any()) } answers { Success(Idling) }
+            every { this@mockk.state } answers { IdlingState }
+            coEvery { this@mockk.handleAction(any()) } returns Success(IdlingState)
         }
         val scope = createScope { stateMachine }
         val experienceRenderer = ExperienceRenderer(scope)
@@ -323,8 +323,8 @@ internal class ExperienceRendererTest {
         // GIVEN
         val experience = mockEmbedExperience("frame1")
         val stateMachine = mockk<StateMachine>(relaxed = true) {
-            every { this@mockk.state } answers { Idling }
-            coEvery { this@mockk.handleAction(any()) } answers { Success(Idling) }
+            every { this@mockk.state } answers { IdlingState }
+            coEvery { this@mockk.handleAction(any()) } returns Success(IdlingState)
         }
         val scope = createScope { stateMachine }
         val experienceRenderer = ExperienceRenderer(scope)

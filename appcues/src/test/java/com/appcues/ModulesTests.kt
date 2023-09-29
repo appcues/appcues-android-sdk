@@ -25,6 +25,7 @@ import com.appcues.data.mapper.action.ActionsMapper
 import com.appcues.data.mapper.experience.ExperienceMapper
 import com.appcues.data.mapper.step.StepMapper
 import com.appcues.data.mapper.trait.TraitsMapper
+import com.appcues.data.model.Experience
 import com.appcues.data.remote.DataRemoteModule
 import com.appcues.data.remote.appcues.AppcuesRemoteSource
 import com.appcues.data.remote.customerapi.CustomerApiRemoteSource
@@ -37,6 +38,7 @@ import com.appcues.debugger.DebuggerRecentEventsManager
 import com.appcues.debugger.DebuggerStatusManager
 import com.appcues.debugger.screencapture.ScreenCaptureProcessor
 import com.appcues.di.Bootstrap
+import com.appcues.di.definition.DefinitionParams
 import com.appcues.di.scope.AppcuesScope
 import com.appcues.di.scope.get
 import com.appcues.logging.Logcues
@@ -72,6 +74,8 @@ internal class ModulesTests {
     private val imageLoaderWrapper = mockk<ImageLoaderWrapper> {
         every { build() } returns imageLoader
     }
+
+    private val onExperienceEnded: (Experience) -> Unit = mockk(relaxed = true)
 
     private fun withScope(config: AppcuesConfig = appcuesConfig, scopedTest: AppcuesScope.() -> Unit) {
         val modules = arrayListOf(
@@ -116,7 +120,7 @@ internal class ModulesTests {
         get<LinkOpener>()
         get<LinkOpener>()
         get<AnalyticsPublisher>()
-        get<StateMachine>()
+        get<StateMachine>(DefinitionParams(listOf(onExperienceEnded)))
         assertThat(get<ImageLoader>()).isEqualTo(imageLoader)
     }
 
