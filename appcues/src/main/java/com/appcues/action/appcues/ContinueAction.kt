@@ -4,9 +4,9 @@ import com.appcues.action.ExperienceAction
 import com.appcues.action.MetadataSettingsAction
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.RenderContext
+import com.appcues.data.model.StepReference
 import com.appcues.data.model.getConfig
 import com.appcues.data.model.getConfigInt
-import com.appcues.statemachine.StepReference
 import com.appcues.ui.ExperienceRenderer
 import java.util.UUID
 

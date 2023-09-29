@@ -14,6 +14,7 @@ import com.appcues.data.model.ExperienceTrigger
 import com.appcues.data.model.QualificationResult
 import com.appcues.data.model.RenderContext
 import com.appcues.data.model.RenderContext.Modal
+import com.appcues.data.model.StepReference
 import com.appcues.data.model.getFrameId
 import com.appcues.data.remote.RemoteError.HttpError
 import com.appcues.di.component.AppcuesComponent
@@ -26,9 +27,8 @@ import com.appcues.statemachine.Action.StartStep
 import com.appcues.statemachine.Error
 import com.appcues.statemachine.Error.RenderContextNotActive
 import com.appcues.statemachine.State
-import com.appcues.statemachine.State.Idling
 import com.appcues.statemachine.StateMachine
-import com.appcues.statemachine.StepReference
+import com.appcues.statemachine.states.IdlingState
 import com.appcues.ui.ExperienceRenderer.PreviewResponse.Failed
 import com.appcues.ui.ExperienceRenderer.PreviewResponse.PreviewDeferred
 import com.appcues.ui.ExperienceRenderer.RenderingResult.NoRenderContext
@@ -57,10 +57,16 @@ internal class ExperienceRenderer(override val scope: AppcuesScope) : AppcuesCom
     private val potentiallyRenderableExperiences = hashMapOf<RenderContext, List<Experience>>()
     private val previewExperiences = hashMapOf<RenderContext, Experience>()
 
+    private fun onExperienceEnded(experience: Experience) {
+        // when an experience completes, remove this render context from the cache, until a new set of
+        // qualified experiences is processed
+        potentiallyRenderableExperiences.remove(experience.renderContext)
+    }
+
     init {
         // sets up the single state machine used for modal experiences (mobile flows, not embeds)
         // that lives indefinitely and handles one experience at a time
-        stateMachines.setOwner(ModalStateMachineOwner(get()))
+        stateMachines.setOwner(ModalStateMachineOwner(get(::onExperienceEnded)))
     }
 
     fun getStateFlow(renderContext: RenderContext): SharedFlow<State>? {
@@ -118,7 +124,7 @@ internal class ExperienceRenderer(override val scope: AppcuesScope) : AppcuesCom
         // if an experience is currently showing and the new experience coming in is normal priority
         // then it replaces whatever is currently showing - i.e. an "event_trigger" experience will
         // supersede a "screen_view" triggered experience - per Appcues standard behavior
-        return newExperience.priority == NORMAL && state != Idling
+        return newExperience.priority == NORMAL && state !is IdlingState
     }
 
     suspend fun show(qualificationResult: QualificationResult) {
@@ -167,11 +173,7 @@ internal class ExperienceRenderer(override val scope: AppcuesScope) : AppcuesCom
             }
         }
 
-        val stateMachine = get<StateMachine>().also {
-            // when an embed completes, remove this render context from the cache, until a new set of
-            // qualified experiences is processed
-            it.onEndedExperience = { potentiallyRenderableExperiences.remove(context) }
-        }
+        val stateMachine: StateMachine = get(::onExperienceEnded)
 
         val owner = AppcuesFrameStateMachineOwner(frame, context, stateMachine)
 

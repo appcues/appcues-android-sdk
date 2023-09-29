@@ -1,6 +1,5 @@
-package com.appcues.statemachine
+package com.appcues.data.model
 
-import com.appcues.data.model.Experience
 import java.util.UUID
 
 internal sealed class StepReference {

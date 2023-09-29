@@ -10,12 +10,12 @@ import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.Interactio
 import com.appcues.data.model.Experience
 import com.appcues.data.model.RenderContext
 import com.appcues.data.model.StepContainer
+import com.appcues.data.model.StepReference
+import com.appcues.data.model.StepReference.StepGroupPageIndex
 import com.appcues.logging.Logcues
 import com.appcues.statemachine.State
-import com.appcues.statemachine.State.BeginningStep
-import com.appcues.statemachine.State.EndingStep
-import com.appcues.statemachine.StepReference
-import com.appcues.statemachine.StepReference.StepGroupPageIndex
+import com.appcues.statemachine.states.EndingStepState
+import com.appcues.statemachine.states.RenderingStepState
 import com.appcues.ui.ExperienceRenderer
 import com.appcues.ui.presentation.AppcuesViewModel.UIState
 import com.appcues.ui.presentation.AppcuesViewModel.UIState.Dismissing
@@ -109,7 +109,7 @@ internal class AppcuesViewModelTest {
     }
 
     @Test
-    fun `BeginningStep SHOULD emit Rendering`() = runTest {
+    fun `RenderingStepState SHOULD emit Rendering`() = runTest {
         // GIVEN
         val mockStepContainer: StepContainer = mockk()
         val mockExperience: Experience = mockk(relaxed = true) {
@@ -120,7 +120,7 @@ internal class AppcuesViewModelTest {
         val isFirst = true
         val mockMetadata: Map<String, Any?> = hashMapOf()
         // WHEN
-        experienceStates.emit(BeginningStep(mockExperience, 0, isFirst, mockMetadata))
+        experienceStates.emit(RenderingStepState(mockExperience, 0, isFirst, mockMetadata))
         // THEN
         assertThat(uiStates).hasSize(2)
         with(uiStates[1] as Rendering) {
@@ -133,7 +133,7 @@ internal class AppcuesViewModelTest {
     }
 
     @Test
-    fun `BeginningStep SHOULD NOT emit Rendering WHEN flatStepIndex get NULL on groupLookup`() = runTest {
+    fun `RenderingStepState SHOULD NOT emit Rendering WHEN flatStepIndex get NULL on groupLookup`() = runTest {
         // GIVEN
         val mockStepContainer: StepContainer = mockk()
         val mockExperience: Experience = mockk(relaxed = true) {
@@ -145,13 +145,13 @@ internal class AppcuesViewModelTest {
         val isFirst = true
         val mockMetadata: Map<String, Any?> = hashMapOf()
         // WHEN (flatStepIndex is 2 here)
-        experienceStates.emit(BeginningStep(mockExperience, 0, isFirst, mockMetadata))
+        experienceStates.emit(RenderingStepState(mockExperience, 0, isFirst, mockMetadata))
         // THEN
         assertThat(uiStates).hasSize(1)
     }
 
     @Test
-    fun `BeginningStep SHOULD NOT emit Rendering WHEN flatStepIndex get NULL on stepIndexLookup`() = runTest {
+    fun `RenderingStepState SHOULD NOT emit Rendering WHEN flatStepIndex get NULL on stepIndexLookup`() = runTest {
         // GIVEN
         val mockStepContainer: StepContainer = mockk()
         val mockExperience: Experience = mockk(relaxed = true) {
@@ -163,7 +163,7 @@ internal class AppcuesViewModelTest {
         val isFirst = true
         val mockMetadata: Map<String, Any?> = hashMapOf()
         // WHEN (flatStepIndex is 2 here)
-        experienceStates.emit(BeginningStep(mockExperience, 0, isFirst, mockMetadata))
+        experienceStates.emit(RenderingStepState(mockExperience, 0, isFirst, mockMetadata))
         // THEN
         assertThat(uiStates).hasSize(1)
     }
@@ -173,7 +173,7 @@ internal class AppcuesViewModelTest {
         // GIVEN
         val callback: () -> Unit = mockk()
         // WHEN
-        experienceStates.emit(EndingStep(mockk(), 0, true, callback))
+        experienceStates.emit(EndingStepState(mockk(), 0, true, callback))
         // THEN
         assertThat(uiStates).hasSize(2)
         with(uiStates[1] as Dismissing) {
@@ -185,7 +185,7 @@ internal class AppcuesViewModelTest {
     fun `EndingStep SHOULD be ignored WHEN uiState is Dismissing`() = runTest {
         // GIVEN
         val callback: () -> Unit = mockk()
-        val endingStep = EndingStep(mockk(), 0, true, callback)
+        val endingStep = EndingStepState(mockk(), 0, true, callback)
         // this sets current uiState to Dismissing
         experienceStates.emit(endingStep)
         // WHEN
@@ -196,14 +196,14 @@ internal class AppcuesViewModelTest {
     }
 
     @Test
-    fun `BeginningStep SHOULD be ignored WHEN uiState is Dismissing`() = runTest {
+    fun `RenderingStepState SHOULD be ignored WHEN uiState is Dismissing`() = runTest {
         // GIVEN
         val callback: () -> Unit = mockk()
-        val endingStep = EndingStep(mockk(), 0, true, callback)
+        val endingStep = EndingStepState(mockk(), 0, true, callback)
         // this sets current uiState to Dismissing
         experienceStates.emit(endingStep)
         // WHEN
-        experienceStates.emit(BeginningStep(mockk(), 0, true, hashMapOf()))
+        experienceStates.emit(RenderingStepState(mockk(), 0, true, hashMapOf()))
         // THEN
         assertThat(uiStates).hasSize(2)
         assertThat(uiStates[1]).isInstanceOf(Dismissing::class.java)
@@ -221,7 +221,7 @@ internal class AppcuesViewModelTest {
         }
         val isFirst = true
         val mockMetadata: Map<String, Any?> = hashMapOf()
-        experienceStates.emit(BeginningStep(mockExperience, 0, isFirst, mockMetadata))
+        experienceStates.emit(RenderingStepState(mockExperience, 0, isFirst, mockMetadata))
         // WHEN
         viewModel.onPageChanged(2)
         // THEN
@@ -243,7 +243,7 @@ internal class AppcuesViewModelTest {
         }
         val isFirst = true
         val mockMetadata: Map<String, Any?> = hashMapOf()
-        experienceStates.emit(BeginningStep(mockExperience, 0, isFirst, mockMetadata))
+        experienceStates.emit(RenderingStepState(mockExperience, 0, isFirst, mockMetadata))
         // WHEN
         viewModel.onActivityChanged()
         // THEN
@@ -289,7 +289,7 @@ internal class AppcuesViewModelTest {
         }
         val isFirst = true
         val mockMetadata: Map<String, Any?> = hashMapOf()
-        experienceStates.emit(BeginningStep(mockExperience, 0, isFirst, mockMetadata))
+        experienceStates.emit(RenderingStepState(mockExperience, 0, isFirst, mockMetadata))
         // WHEN
         viewModel.onPageChanged(0)
         // THEN

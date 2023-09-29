@@ -7,6 +7,7 @@ import com.appcues.DeepLinkHandler
 import com.appcues.SessionMonitor
 import com.appcues.action.ActionProcessor
 import com.appcues.action.ActionRegistry
+import com.appcues.data.model.StepReference.StepOffset
 import com.appcues.debugger.AppcuesDebuggerManager
 import com.appcues.di.AppcuesModule
 import com.appcues.di.Bootstrap
@@ -22,11 +23,10 @@ import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.StartExperience
 import com.appcues.statemachine.Action.StartStep
 import com.appcues.statemachine.State
-import com.appcues.statemachine.State.EndingStep
-import com.appcues.statemachine.State.Idling
-import com.appcues.statemachine.State.RenderingStep
 import com.appcues.statemachine.StateMachine
-import com.appcues.statemachine.StepReference.StepOffset
+import com.appcues.statemachine.states.EndingStepState
+import com.appcues.statemachine.states.IdlingState
+import com.appcues.statemachine.states.RenderingStepState
 import com.appcues.trait.TraitRegistry
 import com.appcues.ui.ExperienceRenderer
 import com.appcues.util.LinkOpener
@@ -50,7 +50,7 @@ internal class ExperienceLifecycleTrackerTest {
     fun `RenderingStep SHOULD track step_completed WHEN action is StartStep`() = runTest {
         // GIVEN
         val experience = mockExperience()
-        val initialState = RenderingStep(experience, 0, true)
+        val initialState = RenderingStepState(experience, 0, true, mutableMapOf())
         val action = StartStep(StepOffset(1))
         val scope = initScope(initialState)
         val stateMachine: StateMachine = scope.get()
@@ -67,7 +67,7 @@ internal class ExperienceLifecycleTrackerTest {
     fun `RenderingStep SHOULD NOT track step_completed WHEN action is EndExperience markComplete=false AND not on last step`() = runTest {
         // GIVEN
         val experience = mockExperience()
-        val initialState = RenderingStep(experience, 0, true)
+        val initialState = RenderingStepState(experience, 0, true, mutableMapOf())
         val action = EndExperience(destroyed = false, markComplete = false)
         val scope = initScope(initialState)
         val stateMachine: StateMachine = scope.get()
@@ -84,7 +84,7 @@ internal class ExperienceLifecycleTrackerTest {
     fun `RenderingStep SHOULD track step_completed WHEN action is EndExperience markComplete=true on last step`() = runTest {
         // GIVEN
         val experience = mockExperience()
-        val initialState = RenderingStep(experience, 3, false)
+        val initialState = RenderingStepState(experience, 0, true, mutableMapOf())
         val action = EndExperience(destroyed = false, markComplete = true)
         val scope = initScope(initialState)
         val stateMachine: StateMachine = scope.get()
@@ -101,7 +101,7 @@ internal class ExperienceLifecycleTrackerTest {
     fun `RenderingStep SHOULD track step_completed WHEN action is EndExperience markComplete=true AND not on last step`() = runTest {
         // GIVEN
         val experience = mockExperience()
-        val initialState = RenderingStep(experience, 0, true)
+        val initialState = RenderingStepState(experience, 0, true, mutableMapOf())
         val action = EndExperience(destroyed = false, markComplete = true)
         val scope = initScope(initialState)
         val stateMachine: StateMachine = scope.get()
@@ -119,7 +119,7 @@ internal class ExperienceLifecycleTrackerTest {
         // verify locale properties from context are coming through
         // GIVEN
         val experience = mockLocalizedExperience("France", "b636348b-648f-4e0d-a06a-6ebb2fe2b7f8")
-        val initialState = Idling
+        val initialState = IdlingState
         val action = StartExperience(experience)
         val scope = initScope(initialState)
         val stateMachine: StateMachine = scope.get()
@@ -151,7 +151,7 @@ internal class ExperienceLifecycleTrackerTest {
             // that is required to progress the state machine forward on UI present/dismiss
             machine.stateFlow.collect {
                 when (it) {
-                    is EndingStep -> {
+                    is EndingStepState -> {
                         it.onUiDismissed?.invoke()
                     }
                     // ignore other state changes
@@ -187,7 +187,7 @@ internal class ExperienceLifecycleTrackerTest {
                     scoped { mockk<Appcues>(relaxed = true) }
                     scoped { mockk<ActionProcessor>(relaxed = true) }
                     factory { ExperienceLifecycleTracker(scope) }
-                    scoped { StateMachine(get(), get(), get(), get(), state) }
+                    scoped { StateMachine(get(), get(), state, mockk(relaxed = true)) }
                 }
             })
         )

@@ -10,9 +10,9 @@ import com.appcues.analytics.SdkMetrics
 import com.appcues.data.model.Experience
 import com.appcues.data.model.RenderContext
 import com.appcues.data.model.StepContainer
-import com.appcues.statemachine.State.BeginningStep
-import com.appcues.statemachine.State.EndingStep
-import com.appcues.statemachine.StepReference.StepGroupPageIndex
+import com.appcues.data.model.StepReference.StepGroupPageIndex
+import com.appcues.statemachine.states.EndingStepState
+import com.appcues.statemachine.states.RenderingStepState
 import com.appcues.ui.ExperienceRenderer
 import com.appcues.ui.presentation.AppcuesViewModel.UIState.Dismissing
 import com.appcues.ui.presentation.AppcuesViewModel.UIState.Idle
@@ -62,12 +62,12 @@ internal class AppcuesViewModel(
         val stateFlow = experienceRenderer.getStateFlow(renderContext) ?: return null
         return viewModelScope.launch {
             stateFlow.collectLatest { state ->
-                if (state is BeginningStep) {
+                if (state is RenderingStepState) {
                     state.toRenderingState()?.let {
                         SdkMetrics.renderStart(state.experience.requestId)
                         _uiState.value = it
                     }
-                } else if (state is EndingStep && state.onUiDismissed != null) {
+                } else if (state is EndingStepState && state.onUiDismissed != null) {
                     // since we are dismissing we don't need to collect states anymore
                     statesJob?.cancel()
                     // dismiss will trigger exit animations and remove experience UI
@@ -89,7 +89,7 @@ internal class AppcuesViewModel(
         }
     }
 
-    private fun BeginningStep.toRenderingState(): Rendering? = with(experience) {
+    private fun RenderingStepState.toRenderingState(): Rendering? = with(experience) {
         // find the container index
         val containerId = groupLookup[flatStepIndex] ?: return null
         // find the step index in relation to the container

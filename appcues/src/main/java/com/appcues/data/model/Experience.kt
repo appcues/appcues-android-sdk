@@ -1,7 +1,12 @@
 package com.appcues.data.model
 
 import com.appcues.action.ExperienceAction
+import com.appcues.data.model.Action.Trigger.NAVIGATE
+import com.appcues.trait.AppcuesTraitException
+import com.appcues.trait.PresentingTrait
 import java.util.UUID
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.contract
 
 internal data class Experience(
     val id: UUID,
@@ -47,5 +52,30 @@ internal data class Experience(
                 }
             }
         }
+    }
+
+    // Gets any actions defined on the step group container for the "navigate" trigger. These are the
+    // actions that should be executed before presenting this group's container.
+    fun getNavigationActions(stepContainerIndex: Int): List<ExperienceAction> {
+        val stepGroup = stepContainers[stepContainerIndex]
+        return stepGroup.actions[stepGroup.id]?.filter { it.on == NAVIGATE }?.map { it.experienceAction } ?: emptyList()
+    }
+
+    fun areStepsFromDifferentGroup(stepIndexOne: Int, stepIndexTwo: Int): Boolean {
+        return groupLookup[stepIndexOne] != groupLookup[stepIndexTwo]
+    }
+
+    fun getPresentingTrait(flatStepIndex: Int): PresentingTrait {
+        return groupLookup[flatStepIndex]?.let { stepContainers[it].presentingTrait }
+            ?: throw AppcuesTraitException("cannot to find presenting trait")
+    }
+
+    @OptIn(ExperimentalContracts::class)
+    fun isValidStepIndex(stepIndex: Int?): Boolean {
+        contract {
+            returns(true) implies (stepIndex != null)
+        }
+
+        return stepIndex != null && stepIndex >= 0 && stepIndex < flatSteps.size
     }
 }
