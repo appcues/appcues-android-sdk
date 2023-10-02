@@ -60,52 +60,64 @@ internal class ExperienceLifecycleTracker(
     }
 
     private suspend fun StateMachine.observeState(onEndedExperience: (Experience) -> Unit) {
-        stateFlow.collect {
-            if (it.shouldTrack()) { // will not track for unpublished (preview) experiences
-                when (it) {
-                    is RenderingStep -> {
-                        if (it.isFirst) {
-                            // update this value for auto-properties
-                            storage.lastContentShownAt = Date()
-                            trackLifecycleEvent(ExperienceStarted(it.experience), SdkMetrics.trackRender(it.experience.requestId))
-                        }
-                        trackLifecycleEvent(StepSeen(it.experience, it.flatStepIndex))
-                    }
-                    is EndingStep -> {
-                        if (it.markComplete) {
-                            trackLifecycleEvent(StepCompleted(it.experience, it.flatStepIndex))
-                        }
-                    }
-                    is EndingExperience -> {
-                        if (it.trackAnalytics) {
-                            if (it.markComplete) {
-                                // if ending on the last step OR an action requested it be considered complete explicitly,
-                                // track the experience_completed event
-                                trackLifecycleEvent(ExperienceCompleted(it.experience))
-                            } else {
-                                // otherwise its considered experience_dismissed (not completed)
-                                trackLifecycleEvent(ExperienceDismissed(it.experience, it.flatStepIndex))
-                            }
-                        }
+        stateFlow.collect { state ->
+            // will not track for unpublished (preview) experiences
+            if (state.isPublished()) {
+                state.track()
+            }
 
-                        onEndedExperience(it.experience)
-                    }
-                    else -> Unit
-                }
+            if (state is EndingExperience) {
+                onEndedExperience(state.experience)
             }
         }
     }
 
     private suspend fun StateMachine.observeErrors() {
-        errorFlow.collect {
-            if (it.shouldTrack()) { // will not track for unpublished (preview) experiences
-                when (it) {
-                    is Error.ExperienceError -> trackLifecycleEvent(ExperienceError(it))
-                    is Error.StepError -> trackLifecycleEvent(StepError(it))
-                    is ExperienceAlreadyActive -> Unit
-                    is RenderContextNotActive -> Unit
+        errorFlow.collect { error ->
+            // will not track for unpublished (preview) experiences
+            if (error.isPublished()) {
+                error.track()
+            }
+        }
+    }
+
+    private fun State.track() {
+        when (this) {
+            is RenderingStep -> {
+                if (isFirst) {
+                    // update this value for auto-properties
+                    storage.lastContentShownAt = Date()
+                    trackLifecycleEvent(ExperienceStarted(experience), SdkMetrics.trackRender(experience.requestId))
+                }
+                trackLifecycleEvent(StepSeen(experience, flatStepIndex))
+            }
+            is EndingStep -> {
+                if (markComplete) {
+                    trackLifecycleEvent(StepCompleted(experience, flatStepIndex))
                 }
             }
+            is EndingExperience -> {
+                if (trackAnalytics) {
+                    if (markComplete) {
+                        // if ending on the last step OR an action requested it be considered complete explicitly,
+                        // track the experience_completed event
+                        trackLifecycleEvent(ExperienceCompleted(experience))
+                    } else {
+                        // otherwise its considered experience_dismissed (not completed)
+                        trackLifecycleEvent(ExperienceDismissed(experience, flatStepIndex))
+                    }
+                }
+            }
+            else -> Unit
+        }
+    }
+
+    private fun Error.track() {
+        when (this) {
+            is Error.ExperienceError -> trackLifecycleEvent(ExperienceError(this))
+            is Error.StepError -> trackLifecycleEvent(StepError(this))
+            is ExperienceAlreadyActive -> Unit
+            is RenderContextNotActive -> Unit
         }
     }
 
@@ -115,7 +127,7 @@ internal class ExperienceLifecycleTracker(
         analyticsTracker.track(event.name, properties, interactive = false, isInternal = true)
     }
 
-    private fun State.shouldTrack(): Boolean =
+    private fun State.isPublished(): Boolean =
         when (this) {
             is BeginningExperience -> experience.published
             is BeginningStep -> experience.published
@@ -125,7 +137,7 @@ internal class ExperienceLifecycleTracker(
             is RenderingStep -> experience.published
         }
 
-    private fun Error.shouldTrack(): Boolean =
+    private fun Error.isPublished(): Boolean =
         when (this) {
             is Error.ExperienceError -> experience.published
             is Error.StepError -> experience.published
