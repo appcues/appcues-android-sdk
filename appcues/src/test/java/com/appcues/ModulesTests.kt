@@ -1,6 +1,9 @@
 package com.appcues
 
+import android.app.Application
+import android.content.Context
 import android.os.StrictMode
+import coil.ImageLoader
 import com.appcues.action.ActionProcessor
 import com.appcues.action.ActionRegistry
 import com.appcues.analytics.ActivityRequestBuilder
@@ -42,6 +45,8 @@ import com.appcues.statemachine.StateMachine
 import com.appcues.trait.TraitRegistry
 import com.appcues.ui.ExperienceRenderer
 import com.appcues.ui.StateMachineDirectory
+import com.appcues.ui.utils.ImageLoaderWrapper
+import com.appcues.util.ContextWrapper
 import com.appcues.util.LinkOpener
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
@@ -58,6 +63,16 @@ internal class ModulesTests {
 
     private val appcuesConfig = AppcuesConfig("account", "app")
 
+    private val context = mockk<Context>(relaxed = true) {
+        every { applicationContext } returns mockk<Application>(relaxed = true)
+    }
+
+    private val customImageLoader = mockk<ImageLoader>()
+    private val imageLoader = mockk<ImageLoader>()
+    private val imageLoaderWrapper = mockk<ImageLoaderWrapper> {
+        every { build() } returns imageLoader
+    }
+
     private fun withScope(config: AppcuesConfig = appcuesConfig, scopedTest: AppcuesScope.() -> Unit) {
         val modules = arrayListOf(
             MainModule,
@@ -68,8 +83,11 @@ internal class ModulesTests {
             DebuggerModule
         )
 
-        val scope = Bootstrap.start(mockk(relaxed = true), modules) {
+        val scope = Bootstrap.start(modules) {
             scoped { config }
+            scoped<ContextWrapper> { mockk(relaxed = true) }
+            scoped { imageLoaderWrapper }
+            scoped { context.applicationContext }
         }
         with(scope) { scopedTest() }
     }
@@ -99,6 +117,18 @@ internal class ModulesTests {
         get<LinkOpener>()
         get<AnalyticsPublisher>()
         get<StateMachine>()
+        assertThat(get<ImageLoader>()).isEqualTo(imageLoader)
+    }
+
+    @Test
+    fun `check MainModule gets custom ImageLoader`() {
+        val config = AppcuesConfig("account", "app").apply {
+            imageLoader = customImageLoader
+        }
+
+        withScope(config) {
+            assertThat(get<ImageLoader>()).isEqualTo(customImageLoader)
+        }
     }
 
     @Test
