@@ -10,6 +10,7 @@ import com.appcues.data.remote.DataRemoteModule
 import com.appcues.debugger.DebuggerModule
 import com.appcues.di.scope.AppcuesScope
 import com.appcues.di.scope.AppcuesScopeDSL
+import com.appcues.ui.utils.ImageLoaderWrapper
 import com.appcues.util.ContextWrapper
 
 internal object Bootstrap {
@@ -26,13 +27,15 @@ internal object Bootstrap {
     )
 
     fun createScope(context: Context, config: AppcuesConfig): AppcuesScope {
-        return start(ContextWrapper(context), modules) {
+        return start(modules) {
             scoped { config }
+            scoped { ContextWrapper(context) }
+            scoped { ImageLoaderWrapper(context) }
+            scoped { context.applicationContext }
         }
     }
 
     fun start(
-        contextWrapper: ContextWrapper,
         modules: List<AppcuesModule> = arrayListOf(),
         scopeDSL: (AppcuesScopeDSL.() -> Unit)? = null
     ): AppcuesScope {
@@ -40,8 +43,6 @@ internal object Bootstrap {
 
         AppcuesScopeDSL(scope).run {
             scoped { scope }
-            scoped { contextWrapper }
-            scoped<Context> { contextWrapper.getApplication() }
 
             scopeDSL?.invoke(this)
 

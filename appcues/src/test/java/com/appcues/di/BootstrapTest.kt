@@ -45,7 +45,10 @@ internal class BootstrapTest {
             every { applicationContext } returns appContext
         }
         // WHEN
-        val scope = Bootstrap.start(ContextWrapper(context))
+        val scope = Bootstrap.start {
+            scoped { ContextWrapper(context) }
+            scoped { context.applicationContext }
+        }
         // THEN
         assertThat(scope.get<Context>()).isEqualTo(appContext)
         assertThat(scope.get<AppcuesScope>()).isEqualTo(scope)
@@ -54,11 +57,10 @@ internal class BootstrapTest {
     @Test
     fun `start SHOULD invoke dsl for given scope`() {
         // GIVEN
-        val context = mockk<ContextWrapper>(relaxed = true)
         val dsl: (AppcuesScopeDSL.() -> Unit) = mockk(relaxed = true)
         val dslScopeSlot = slot<AppcuesScopeDSL>()
         // WHEN
-        val scope = Bootstrap.start(context, listOf(), dsl)
+        val scope = Bootstrap.start(listOf(), dsl)
         // THEN
         verify { dsl.invoke(capture(dslScopeSlot)) }
         assertThat(dslScopeSlot.captured.scope).isEqualTo(scope)
@@ -77,9 +79,8 @@ internal class BootstrapTest {
                 factory { 12345 }
             }
         }
-        val context = mockk<ContextWrapper>(relaxed = true)
         // WHEN
-        val scope = Bootstrap.start(context, listOf(module1, module2))
+        val scope = Bootstrap.start(listOf(module1, module2))
         // THEN
         assertThat(scope.get<String>()).isEqualTo("test1234")
         assertThat(scope.get<Int>()).isEqualTo(12345)
@@ -92,7 +93,7 @@ internal class BootstrapTest {
         val module2 = mockk<AppcuesModule>(relaxed = true)
         val context = mockk<ContextWrapper>(relaxed = true)
         // WHEN
-        val scope = Bootstrap.start(context, listOf(module1, module2))
+        val scope = Bootstrap.start(listOf(module1, module2))
         // THEN
         verifySequence {
             with(AppcuesScopeDSL(scope)) {

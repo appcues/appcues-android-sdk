@@ -31,7 +31,6 @@ internal class TestScopeRule : TestWatcher() {
 
     override fun starting(description: Description) {
         scope = Bootstrap.start(
-            contextWrapper = mockk(relaxed = true),
             modules = arrayListOf(
                 object : AppcuesModule {
                     override fun AppcuesScopeDSL.install() {

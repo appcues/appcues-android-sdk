@@ -125,7 +125,6 @@ internal class ActionProcessorTest {
 
     private fun createScope(state: State): AppcuesScope {
         return Bootstrap.start(
-            contextWrapper = mockk(relaxed = true),
             modules = arrayListOf(object : AppcuesModule {
                 override fun AppcuesScopeDSL.install() {
                     scoped { mockk<Logcues>(relaxed = true) }

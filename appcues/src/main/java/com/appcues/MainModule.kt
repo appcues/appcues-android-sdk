@@ -1,11 +1,5 @@
 package com.appcues
 
-import android.os.Build.VERSION
-import android.os.Build.VERSION_CODES
-import coil.ImageLoader
-import coil.decode.GifDecoder
-import coil.decode.ImageDecoderDecoder
-import coil.decode.SvgDecoder
 import com.appcues.action.ActionProcessor
 import com.appcues.action.ActionRegistry
 import com.appcues.data.AppcuesRepository
@@ -17,6 +11,7 @@ import com.appcues.statemachine.StateMachine
 import com.appcues.trait.TraitRegistry
 import com.appcues.ui.ExperienceRenderer
 import com.appcues.ui.StateMachineDirectory
+import com.appcues.ui.utils.ImageLoaderWrapper
 import com.appcues.util.LinkOpener
 
 internal object MainModule : AppcuesModule {
@@ -65,16 +60,6 @@ internal object MainModule : AppcuesModule {
             )
         }
 
-        scoped {
-            get<AppcuesConfig>().imageLoader ?: ImageLoader.Builder(context = get())
-                .components {
-                    if (VERSION.SDK_INT >= VERSION_CODES.P) {
-                        add(ImageDecoderDecoder.Factory())
-                    } else {
-                        add(GifDecoder.Factory())
-                    }
-                    add(SvgDecoder.Factory())
-                }.build()
-        }
+        scoped { get<AppcuesConfig>().imageLoader ?: get<ImageLoaderWrapper>().build() }
     }
 }
