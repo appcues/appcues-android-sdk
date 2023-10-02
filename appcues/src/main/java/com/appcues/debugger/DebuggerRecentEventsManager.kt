@@ -18,7 +18,7 @@ import com.appcues.debugger.model.DebuggerEventItemPropertySection
 import com.appcues.debugger.model.EventType
 import com.appcues.debugger.ui.toEventTitle
 import com.appcues.debugger.ui.toEventType
-import com.appcues.util.ContextResources
+import com.appcues.util.ContextWrapper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.sync.Mutex
@@ -27,7 +27,7 @@ import kotlinx.coroutines.withContext
 import java.util.Date
 
 internal class DebuggerRecentEventsManager(
-    private val contextResources: ContextResources,
+    private val contextWrapper: ContextWrapper,
 ) {
 
     companion object {
@@ -70,7 +70,7 @@ internal class DebuggerRecentEventsManager(
                 name = request.userId,
                 propertySections = listOf(
                     DebuggerEventItemPropertySection(
-                        title = contextResources.getString(R.string.appcues_debugger_event_details_properties_title),
+                        title = contextWrapper.getString(R.string.appcues_debugger_event_details_properties_title),
                         properties = request.profileUpdate?.toSortedList(),
                     )
                 )
@@ -86,10 +86,10 @@ internal class DebuggerRecentEventsManager(
                 id = lastEventId,
                 type = EventType.GROUP_UPDATE,
                 timestamp = Date().time,
-                name = request.groupId ?: contextResources.getString(R.string.appcues_debugger_event_type_group_update_title),
+                name = request.groupId ?: contextWrapper.getString(R.string.appcues_debugger_event_type_group_update_title),
                 propertySections = listOf(
                     DebuggerEventItemPropertySection(
-                        title = contextResources.getString(R.string.appcues_debugger_event_details_properties_title),
+                        title = contextWrapper.getString(R.string.appcues_debugger_event_details_properties_title),
                         properties = request.groupUpdate?.toSortedList(),
                     )
                 )
@@ -101,7 +101,7 @@ internal class DebuggerRecentEventsManager(
     private fun onActivityRequest(request: ActivityRequest) {
         request.events?.forEach { event ->
             val type = event.name.toEventType()
-            val title = event.name.toEventTitle()?.let { contextResources.getString(it) }
+            val title = event.name.toEventTitle()?.let { contextWrapper.getString(it) }
             val displayName = getEventDisplayName(event, type, title)
 
             events.addFirst(
@@ -112,7 +112,7 @@ internal class DebuggerRecentEventsManager(
                     name = displayName,
                     propertySections = listOf(
                         DebuggerEventItemPropertySection(
-                            title = contextResources.getString(R.string.appcues_debugger_event_details_properties_title),
+                            title = contextWrapper.getString(R.string.appcues_debugger_event_details_properties_title),
                             properties = event.attributes
                                 .filterOutScreenProperties(type)
                                 .filterOutAutoProperties()
@@ -121,25 +121,25 @@ internal class DebuggerRecentEventsManager(
                                 .toSortedList(),
                         ),
                         DebuggerEventItemPropertySection(
-                            title = contextResources.getString(R.string.appcues_debugger_event_details_form_response_title),
+                            title = contextWrapper.getString(R.string.appcues_debugger_event_details_form_response_title),
                             properties = event.attributes
                                 .getFormResponse()
                                 .toSortedList(),
                         ),
                         DebuggerEventItemPropertySection(
-                            title = contextResources.getString(R.string.appcues_debugger_event_details_interaction_data),
+                            title = contextWrapper.getString(R.string.appcues_debugger_event_details_interaction_data),
                             properties = event.attributes
                                 .getInteractionData()
                                 .toSortedList(),
                         ),
                         DebuggerEventItemPropertySection(
-                            title = contextResources.getString(R.string.appcues_debugger_event_details_identity_auto_properties_title),
+                            title = contextWrapper.getString(R.string.appcues_debugger_event_details_identity_auto_properties_title),
                             properties = event.attributes
                                 .getAutoProperties()
                                 .toSortedList()
                         ),
                         DebuggerEventItemPropertySection(
-                            title = contextResources.getString(R.string.appcues_debugger_event_details_sdk_metrics_properties_title),
+                            title = contextWrapper.getString(R.string.appcues_debugger_event_details_sdk_metrics_properties_title),
                             properties = event.attributes
                                 .getMetricsProperties()
                                 .toSortedList()

@@ -351,7 +351,7 @@ internal class ExperienceRendererTest {
 
     private fun createScope(stateMachine: () -> StateMachine): AppcuesScope {
         return Bootstrap.start(
-            context = mockk(relaxed = true),
+            contextWrapper = mockk(relaxed = true),
             modules = arrayListOf(object : AppcuesModule {
                 override fun AppcuesScopeDSL.install() {
                     factory { stateMachine() }

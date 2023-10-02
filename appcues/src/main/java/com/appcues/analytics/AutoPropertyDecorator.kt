@@ -8,12 +8,12 @@ import com.appcues.SessionMonitor
 import com.appcues.Storage
 import com.appcues.data.remote.appcues.request.ActivityRequest
 import com.appcues.data.remote.appcues.request.EventRequest
-import com.appcues.util.ContextResources
+import com.appcues.util.ContextWrapper
 import java.util.Date
 
 internal class AutoPropertyDecorator(
     private val config: AppcuesConfig,
-    private val contextResources: ContextResources,
+    private val contextWrapper: ContextWrapper,
     private val storage: Storage,
     private val sessionMonitor: SessionMonitor,
     private val sessionRandomizer: SessionRandomizer,
@@ -33,21 +33,21 @@ internal class AutoPropertyDecorator(
 
     private val contextProperties = hashMapOf<String, Any>(
         "app_id" to config.applicationId,
-        "app_version" to contextResources.getAppVersion(),
+        "app_version" to contextWrapper.getAppVersion(),
     )
 
     private var applicationProperties = hashMapOf<String, Any>(
         "_appId" to config.applicationId,
         "_operatingSystem" to "android",
-        "_bundlePackageId" to contextResources.getPackageName(),
-        "_appName" to contextResources.getAppName(),
-        "_appVersion" to contextResources.getAppVersion(),
-        "_appBuild" to contextResources.getAppBuild().toString(),
+        "_bundlePackageId" to contextWrapper.getPackageName(),
+        "_appName" to contextWrapper.getAppName(),
+        "_appVersion" to contextWrapper.getAppVersion(),
+        "_appBuild" to contextWrapper.getAppBuild().toString(),
         "_sdkVersion" to BuildConfig.SDK_VERSION,
         "_sdkName" to "appcues-android",
         "_osVersion" to "${VERSION.SDK_INT}",
-        "_deviceType" to contextResources.getString(R.string.appcues_device_type),
-        "_deviceModel" to contextResources.getDeviceName(),
+        "_deviceType" to contextWrapper.getString(R.string.appcues_device_type),
+        "_deviceModel" to contextWrapper.getDeviceName(),
     )
 
     private val sessionProperties: Map<String, Any>
@@ -58,7 +58,7 @@ internal class AutoPropertyDecorator(
             UPDATED_AT_PROPERTY to Date(),
             "_sessionId" to sessionMonitor.sessionId?.toString(),
             "_lastContentShownAt" to storage.lastContentShownAt,
-            "_lastBrowserLanguage" to contextResources.getLanguage(),
+            "_lastBrowserLanguage" to contextWrapper.getLanguage(),
             "_currentScreenTitle" to currentScreen,
             "_lastScreenTitle" to previousScreen,
             "_sessionPageviews" to sessionPageviews,
@@ -81,7 +81,7 @@ internal class AutoPropertyDecorator(
             }
         }
 
-    private fun getUserAgent(): String? = contextResources.getUserAgent()
+    private fun getUserAgent(): String? = contextWrapper.getUserAgent()
 
     fun decorateTrack(event: EventRequest) = event.apply {
         if (event.name == AnalyticsEvent.ScreenView.eventName) {

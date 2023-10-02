@@ -17,7 +17,6 @@ import com.appcues.statemachine.StateMachine
 import com.appcues.trait.TraitRegistry
 import com.appcues.ui.ExperienceRenderer
 import com.appcues.ui.StateMachineDirectory
-import com.appcues.util.ContextResources
 import com.appcues.util.LinkOpener
 
 internal object MainModule : AppcuesModule {
@@ -41,9 +40,8 @@ internal object MainModule : AppcuesModule {
                 debuggerManager = get(),
             )
         }
-        scoped { AppcuesDebuggerManager(context = get(), scope = scope) }
+        scoped { AppcuesDebuggerManager(contextWrapper = get(), scope = scope) }
         scoped { StateMachineDirectory() }
-        scoped { ContextResources(context = get()) }
         scoped { ExperienceRenderer(scope = scope) }
         scoped {
             AppcuesRepository(

@@ -20,7 +20,7 @@ import com.appcues.data.remote.imageupload.ImageUploadRemoteSource
 import com.appcues.data.remote.sdksettings.SdkSettingsRemoteSource
 import com.appcues.monitor.AppcuesActivityMonitor
 import com.appcues.ui.utils.getParentView
-import com.appcues.util.ContextResources
+import com.appcues.util.ContextWrapper
 import com.appcues.util.ResultOf
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
@@ -29,7 +29,7 @@ import java.util.Date
 
 internal class ScreenCaptureProcessor(
     private val config: AppcuesConfig,
-    private val contextResources: ContextResources,
+    private val contextWrapper: ContextWrapper,
     private val sdkSettingsRemoteSource: SdkSettingsRemoteSource,
     private val customerApiRemoteSource: CustomerApiRemoteSource,
     private val imageUploadRemoteSource: ImageUploadRemoteSource,
@@ -48,7 +48,7 @@ internal class ScreenCaptureProcessor(
                     displayName = displayName,
                     screenshotImageUrl = null,
                     layout = layout,
-                    metadata = contextResources.generateCaptureMetadata(screenshot),
+                    metadata = contextWrapper.generateCaptureMetadata(screenshot),
                     timestamp = timestamp,
                 ).apply {
                     this.screenshot = screenshot.bitmap
@@ -102,7 +102,7 @@ internal class ScreenCaptureProcessor(
 
     // step 3 - upload the screenshot
     private suspend fun PreUploadScreenshotResponse.uploadImage(capture: Capture): Capture {
-        val density = contextResources.displayMetrics.density
+        val density = contextWrapper.displayMetrics.density
         val original = capture.screenshot
         val bitmap = Bitmap.createScaledBitmap(
             capture.screenshot,

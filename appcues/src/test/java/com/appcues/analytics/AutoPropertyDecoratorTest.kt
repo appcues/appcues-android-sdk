@@ -8,7 +8,7 @@ import com.appcues.analytics.AnalyticsEvent.SessionStarted
 import com.appcues.data.remote.appcues.request.ActivityRequest
 import com.appcues.data.remote.appcues.request.EventRequest
 import com.appcues.rules.MainDispatcherRule
-import com.appcues.util.ContextResources
+import com.appcues.util.ContextWrapper
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
@@ -26,7 +26,7 @@ internal class AutoPropertyDecoratorTest {
         every { applicationId } returns "applicationId"
     }
 
-    private val contextResources: ContextResources = mockk<ContextResources>(relaxed = true).apply {
+    private val contextWrapper: ContextWrapper = mockk<ContextWrapper>(relaxed = true).apply {
         every { getAppVersion() } returns "1.0.0-A_TEST"
     }
 
@@ -42,7 +42,7 @@ internal class AutoPropertyDecoratorTest {
     fun setup() {
         autoPropertyDecorator = AutoPropertyDecorator(
             config = config,
-            contextResources = contextResources,
+            contextWrapper = contextWrapper,
             storage = storage,
             sessionMonitor = sessionMonitor,
             sessionRandomizer = sessionRandomizer,
@@ -242,7 +242,7 @@ internal class AutoPropertyDecoratorTest {
         }
         autoPropertyDecorator = AutoPropertyDecorator(
             config = config,
-            contextResources = contextResources,
+            contextWrapper = contextWrapper,
             storage = storage,
             sessionMonitor = sessionMonitor,
             sessionRandomizer = sessionRandomizer,

@@ -1,5 +1,6 @@
 package com.appcues.util
 
+import android.app.Application
 import android.content.Context
 import android.content.res.Configuration
 import android.os.Build
@@ -9,16 +10,20 @@ import android.util.DisplayMetrics
 import androidx.annotation.StringRes
 import java.util.Locale
 
-// class used to access resources from classes that are not
-// supposed to be tied to android context, this is helpful to keep
-// any class clean of Android references, which makes it easier to unit test later
-internal class ContextResources(private val context: Context) {
+/**
+ * Context Wrapper class
+ *
+ * provide with methods related to context itself, abstracting the idea of android.content.Context
+ * for easier testing
+ */
+internal class ContextWrapper(private val context: Context) {
 
     val displayMetrics: DisplayMetrics
         get() = context.resources.displayMetrics
-
     val orientation: String
         get() = if (context.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) "landscape" else "portrait"
+
+    fun getApplication(): Application = context.applicationContext as Application
 
     fun getString(@StringRes id: Int): String {
         return context.getString(id)

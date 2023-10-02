@@ -429,9 +429,6 @@ internal class DeeplinkHandlerTest {
     fun `WHEN preview returns ExperienceNotFound SHOULD call resources preview_flow_not_found`() {
         // GIVEN
         val activity = mockk<Activity>(relaxed = true)
-        val experience = mockk<Experience>(relaxed = true) {
-            every { name } returns "experience-name"
-        }
         val intent = mockk<Intent> {
             every { action } returns Intent.ACTION_VIEW
             every { data } returns mockk(relaxed = true) {

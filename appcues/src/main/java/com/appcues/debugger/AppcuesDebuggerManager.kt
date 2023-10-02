@@ -3,7 +3,6 @@ package com.appcues.debugger
 import android.app.ActionBar.LayoutParams
 import android.app.Activity
 import android.app.Application
-import android.content.Context
 import android.os.Bundle
 import android.view.ViewGroup
 import androidx.activity.ComponentActivity
@@ -21,6 +20,7 @@ import com.appcues.R
 import com.appcues.debugger.DebuggerViewModel.UIState.Expanded
 import com.appcues.debugger.ui.DebuggerComposition
 import com.appcues.di.scope.AppcuesScope
+import com.appcues.util.ContextWrapper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -30,13 +30,16 @@ import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
 @Suppress("TooManyFunctions")
-internal class AppcuesDebuggerManager(context: Context, private val scope: AppcuesScope) : Application.ActivityLifecycleCallbacks {
+internal class AppcuesDebuggerManager(
+    contextWrapper: ContextWrapper,
+    private val scope: AppcuesScope
+) : Application.ActivityLifecycleCallbacks {
 
     private val coroutineScope: CoroutineScope = object : CoroutineScope {
         override val coroutineContext: CoroutineContext = SupervisorJob() + Dispatchers.Main
     }
 
-    private val application = context.applicationContext as Application
+    private val application = contextWrapper.getApplication()
 
     private var debuggerViewModel: DebuggerViewModel? = null
     private var mode: DebugMode? = null

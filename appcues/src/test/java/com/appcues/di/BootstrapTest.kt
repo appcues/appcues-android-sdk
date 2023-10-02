@@ -1,10 +1,12 @@
 package com.appcues.di
 
+import android.app.Application
 import android.content.Context
 import com.appcues.AppcuesConfig
 import com.appcues.di.scope.AppcuesScope
 import com.appcues.di.scope.AppcuesScopeDSL
 import com.appcues.di.scope.get
+import com.appcues.util.ContextWrapper
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
@@ -38,12 +40,12 @@ internal class BootstrapTest {
     @Test
     fun `start SHOULD return scope with scoped app context and self`() {
         // GIVEN
-        val appContext = mockk<Context>(relaxed = true)
+        val appContext = mockk<Application>(relaxed = true)
         val context = mockk<Context> {
             every { applicationContext } returns appContext
         }
         // WHEN
-        val scope = Bootstrap.start(context)
+        val scope = Bootstrap.start(ContextWrapper(context))
         // THEN
         assertThat(scope.get<Context>()).isEqualTo(appContext)
         assertThat(scope.get<AppcuesScope>()).isEqualTo(scope)
@@ -52,7 +54,7 @@ internal class BootstrapTest {
     @Test
     fun `start SHOULD invoke dsl for given scope`() {
         // GIVEN
-        val context = mockk<Context>(relaxed = true)
+        val context = mockk<ContextWrapper>(relaxed = true)
         val dsl: (AppcuesScopeDSL.() -> Unit) = mockk(relaxed = true)
         val dslScopeSlot = slot<AppcuesScopeDSL>()
         // WHEN
@@ -75,7 +77,7 @@ internal class BootstrapTest {
                 factory { 12345 }
             }
         }
-        val context = mockk<Context>(relaxed = true)
+        val context = mockk<ContextWrapper>(relaxed = true)
         // WHEN
         val scope = Bootstrap.start(context, listOf(module1, module2))
         // THEN
@@ -88,7 +90,7 @@ internal class BootstrapTest {
         // GIVEN
         val module1 = mockk<AppcuesModule>(relaxed = true)
         val module2 = mockk<AppcuesModule>(relaxed = true)
-        val context = mockk<Context>(relaxed = true)
+        val context = mockk<ContextWrapper>(relaxed = true)
         // WHEN
         val scope = Bootstrap.start(context, listOf(module1, module2))
         // THEN
