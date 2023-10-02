@@ -13,7 +13,7 @@ internal object AnalyticsModule : AppcuesModule {
         scoped { SessionRandomizer() }
         scoped {
             AutoPropertyDecorator(
-                contextResources = get(),
+                contextWrapper = get(),
                 config = get(),
                 storage = get(),
                 sessionMonitor = get(),

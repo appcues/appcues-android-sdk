@@ -169,7 +169,7 @@ internal class ExperienceLifecycleTrackerTest {
 
     private fun createScope(state: State): AppcuesScope {
         return Bootstrap.start(
-            context = mockk(relaxed = true),
+            contextWrapper = mockk(relaxed = true),
             modules = arrayListOf(object : AppcuesModule {
                 override fun AppcuesScopeDSL.install() {
                     scoped { AppcuesConfig("00000", "123") }

@@ -1,6 +1,7 @@
 package com.appcues
 
 import android.app.Activity
+import android.app.Application
 import android.content.Context
 import android.content.Intent
 import com.appcues.action.ActionRegistry
@@ -54,7 +55,7 @@ internal class AppcuesTest : AppcuesScopeTest {
     @Test
     fun `Appcues call returns instance WITH same context, accountId and appId`() {
         // GIVEN
-        val appContext = mockk<Context>()
+        val appContext = mockk<Application>()
         val context = mockk<Context>(relaxed = true) {
             every { applicationContext } returns appContext
         }

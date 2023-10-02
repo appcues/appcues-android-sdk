@@ -23,7 +23,7 @@ import com.appcues.debugger.model.StatusType.UNKNOWN
 import com.appcues.debugger.model.TapActionType
 import com.appcues.debugger.model.TapActionType.DEEPLINK_CHECK
 import com.appcues.debugger.model.TapActionType.HEALTH_CHECK
-import com.appcues.util.ContextResources
+import com.appcues.util.ContextWrapper
 import com.appcues.util.resolveActivityCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -38,7 +38,7 @@ internal class DebuggerStatusManager(
     storage: Storage,
     private val appcuesConfig: AppcuesConfig,
     private val appcuesRemoteSource: AppcuesRemoteSource,
-    private val contextResources: ContextResources,
+    private val contextWrapper: ContextWrapper,
     private val context: Context,
 ) {
 
@@ -80,7 +80,7 @@ internal class DebuggerStatusManager(
                 AnalyticsEvent.ExperienceStarted.eventName -> {
                     val id = event.attributes["experienceId"] as String
                     displayingExperiences[id] = DisplayingExperience(
-                        name = contextResources.getString(
+                        name = contextWrapper.getString(
                             R.string.appcues_debugger_status_experience_name,
                             event.attributes["experienceName"] as String
                         ),
@@ -93,7 +93,7 @@ internal class DebuggerStatusManager(
                         val group = it.first().toInt() + 1
                         val step = it.last().toInt() + 1
 
-                        contextResources.getString(R.string.appcues_debugger_status_experience_step, group, step)
+                        contextWrapper.getString(R.string.appcues_debugger_status_experience_step, group, step)
                     }
 
                     displayingExperiences[id]?.step = step
@@ -137,15 +137,15 @@ internal class DebuggerStatusManager(
     }
 
     private fun deviceInfoItem() = DebuggerStatusItem(
-        title = contextResources.getString(R.string.appcues_debugger_status_device_title, Build.MANUFACTURER, VERSION.RELEASE),
+        title = contextWrapper.getString(R.string.appcues_debugger_status_device_title, Build.MANUFACTURER, VERSION.RELEASE),
         statusType = PHONE,
     )
 
     private fun sdkInfoItem() = DebuggerStatusItem(
-        title = contextResources.getString(R.string.appcues_debugger_status_sdk_title, BuildConfig.SDK_VERSION),
+        title = contextWrapper.getString(R.string.appcues_debugger_status_sdk_title, BuildConfig.SDK_VERSION),
         statusType = SUCCESS,
-        line1 = contextResources.getString(R.string.appcues_debugger_status_sdk_line1, appcuesConfig.accountId),
-        line2 = contextResources.getString(R.string.appcues_debugger_status_sdk_line2, appcuesConfig.applicationId)
+        line1 = contextWrapper.getString(R.string.appcues_debugger_status_sdk_line1, appcuesConfig.accountId),
+        line2 = contextWrapper.getString(R.string.appcues_debugger_status_sdk_line2, appcuesConfig.applicationId)
     )
 
     private fun connectionCheckItem() = (connectedToAppcues?.let { if (it) SUCCESS else ERROR } ?: LOADING).let { statusType ->
@@ -156,13 +156,13 @@ internal class DebuggerStatusManager(
                     LOADING -> R.string.appcues_debugger_status_check_connection_connecting_title
                     else -> R.string.appcues_debugger_status_check_connection_error_title
                 }
-            }.let { contextResources.getString(it) },
+            }.let { contextWrapper.getString(it) },
             line1 = statusType.let {
                 when (it) {
                     ERROR -> R.string.appcues_debugger_status_check_connection_error_line1
                     else -> null
                 }
-            }?.let { contextResources.getString(it) },
+            }?.let { contextWrapper.getString(it) },
             statusType = statusType,
             showRefreshIcon = statusType != LOADING,
             tapActionType = HEALTH_CHECK
@@ -171,10 +171,10 @@ internal class DebuggerStatusManager(
 
     private fun deepLinkCheckItem() = (deepLinkConfigured?.let { if (it) SUCCESS else ERROR } ?: UNKNOWN).let { statusType ->
         DebuggerStatusItem(
-            title = contextResources.getString(R.string.appcues_debugger_status_check_deep_link_title),
+            title = contextWrapper.getString(R.string.appcues_debugger_status_check_deep_link_title),
             line1 = statusType.let {
                 when (it) {
-                    UNKNOWN -> contextResources.getString(R.string.appcues_debugger_status_check_deep_link_instruction)
+                    UNKNOWN -> contextWrapper.getString(R.string.appcues_debugger_status_check_deep_link_instruction)
                     ERROR -> deepLinkErrorText
                     else -> null
                 }
@@ -187,27 +187,27 @@ internal class DebuggerStatusManager(
 
     private fun trackingScreenCheckItem() = (trackingScreens?.let { if (it) SUCCESS else ERROR } ?: LOADING).let { statusType ->
         DebuggerStatusItem(
-            title = contextResources.getString(R.string.appcues_debugger_status_check_screen_tracking_title),
+            title = contextWrapper.getString(R.string.appcues_debugger_status_check_screen_tracking_title),
             line1 = statusType.let {
                 when (it) {
                     LOADING -> R.string.appcues_debugger_status_check_screen_tracking_loading_line1
                     else -> null
                 }
-            }?.let { contextResources.getString(it) },
+            }?.let { contextWrapper.getString(it) },
             statusType = statusType,
         )
     }
 
     private fun identityItem() = userIdentified?.let {
         DebuggerStatusItem(
-            title = contextResources.getString(R.string.appcues_debugger_status_identity_success_title),
+            title = contextWrapper.getString(R.string.appcues_debugger_status_identity_success_title),
             line1 = userIdentified,
             statusType = SUCCESS,
         )
     } ?: run {
         DebuggerStatusItem(
-            title = contextResources.getString(R.string.appcues_debugger_status_identity_loading_title),
-            line1 = contextResources.getString(R.string.appcues_debugger_status_identity_loading_line1),
+            title = contextWrapper.getString(R.string.appcues_debugger_status_identity_loading_title),
+            line1 = contextWrapper.getString(R.string.appcues_debugger_status_identity_loading_line1),
             statusType = LOADING,
         )
     }
@@ -275,12 +275,12 @@ internal class DebuggerStatusManager(
                 if (deepLinkValidationToken != null) {
                     deepLinkValidationToken = null
                     deepLinkConfigured = false
-                    deepLinkErrorText = contextResources.getString(R.string.appcues_debugger_status_check_deep_link_error_handler)
+                    deepLinkErrorText = contextWrapper.getString(R.string.appcues_debugger_status_check_deep_link_error_handler)
                     updateData()
                 }
             } else {
                 deepLinkConfigured = false
-                deepLinkErrorText = contextResources.getString(R.string.appcues_debugger_status_check_deep_link_error_manifest)
+                deepLinkErrorText = contextWrapper.getString(R.string.appcues_debugger_status_check_deep_link_error_manifest)
                 updateData()
             }
         }

@@ -6,7 +6,7 @@ import com.appcues.BuildConfig
 import com.appcues.R
 import com.appcues.Screenshot
 import com.appcues.ViewElement
-import com.appcues.util.ContextResources
+import com.appcues.util.ContextWrapper
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 import java.util.Date
@@ -54,7 +54,7 @@ internal data class Capture(
     )
 }
 
-internal fun ContextResources.generateCaptureMetadata(screenshot: Screenshot): Capture.Metadata {
+internal fun ContextWrapper.generateCaptureMetadata(screenshot: Screenshot): Capture.Metadata {
     return Capture.Metadata(
         appName = getAppName(),
         appBuild = getAppBuild().toString(),

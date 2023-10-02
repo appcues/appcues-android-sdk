@@ -12,14 +12,14 @@ internal object DebuggerModule : AppcuesModule {
                 storage = get(),
                 appcuesConfig = get(),
                 appcuesRemoteSource = get(),
-                contextResources = get(),
+                contextWrapper = get(),
                 context = get(),
             )
         }
 
         scoped {
             DebuggerRecentEventsManager(
-                contextResources = get()
+                contextWrapper = get()
             )
         }
 
@@ -30,7 +30,7 @@ internal object DebuggerModule : AppcuesModule {
         scoped {
             ScreenCaptureProcessor(
                 config = get(),
-                contextResources = get(),
+                contextWrapper = get(),
                 sdkSettingsRemoteSource = get(),
                 customerApiRemoteSource = get(),
                 imageUploadRemoteSource = get(),
