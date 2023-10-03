@@ -82,6 +82,20 @@ commands:
 #          JOBS
 # --------------------------
 jobs:
+  build_sample:
+    executor: android_compatible
+    steps:
+      - install_with_cache      
+      - run:
+          name: Build sample app release
+          command: ./gradlew :samples:kotlin-android-app:bundleRelease
+      - store_artifacts:
+          path: samples/kotlin-android-app/build/outputs
+      - save_gradle_cache
+      - slack/notify:
+          event: fail
+          template: basic_fail_1
+          channel: team-mobile-bots
   deploy_sample:
     executor: android_compatible
     steps:
@@ -265,6 +279,13 @@ workflows:
             - wait-for-spec-test-pipeline
           context:
             - Appcues
+      - build_sample:
+          context:
+            - Appcues
+          # filters:
+          #   branches:
+          #     only:
+          #       -main
 
   build_and_deploy_sample:
     when: << pipeline.parameters.deploy-sample >>
