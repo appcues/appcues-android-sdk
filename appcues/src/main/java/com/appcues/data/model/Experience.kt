@@ -57,7 +57,7 @@ internal data class Experience(
     // Gets any actions defined on the step group container for the "navigate" trigger. These are the
     // actions that should be executed before presenting this group's container.
     fun getNavigationActions(stepContainerIndex: Int): List<ExperienceAction> {
-        val stepGroup = stepContainers[stepContainerIndex]
+        val stepGroup = stepContainers.getOrNull(stepContainerIndex) ?: return arrayListOf()
         return stepGroup.actions[stepGroup.id]?.filter { it.on == NAVIGATE }?.map { it.experienceAction } ?: emptyList()
     }
 
