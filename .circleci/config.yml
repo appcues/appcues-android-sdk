@@ -82,10 +82,13 @@ commands:
 #          JOBS
 # --------------------------
 jobs:
-  build_sample:
+  additional-branch-validation:
     executor: android_compatible
     steps:
       - install_with_cache      
+      - run:
+          name: Run detekt
+          command: ./gradlew detekt
       - run:
           name: Build sample app release
           command: ./gradlew :samples:kotlin-android-app:bundleRelease
@@ -279,13 +282,9 @@ workflows:
             - wait-for-spec-test-pipeline
           context:
             - Appcues
-      - build_sample:
+      - additional-branch-validation:
           context:
             - Appcues
-          # filters:
-          #   branches:
-          #     only:
-          #       -main
 
   build_and_deploy_sample:
     when: << pipeline.parameters.deploy-sample >>
