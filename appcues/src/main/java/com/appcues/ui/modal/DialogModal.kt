@@ -108,9 +108,10 @@ internal fun DialogModal(
             Surface(
                 modifier = Modifier
                     .sizeIn(maxWidth = maxWidth.value, maxHeight = maxHeight.value)
-                    .styleWidth(style)
                     // default modal style modifiers
                     .modalStyle(style, isDark) { Modifier.dialogModifier(it, isDark) }
+                    // apply width AFTER any margin in modalStyle in line above
+                    .styleWidth(style)
             ) {
                 content(
                     Modifier,
