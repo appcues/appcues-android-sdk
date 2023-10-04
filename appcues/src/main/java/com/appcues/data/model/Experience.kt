@@ -3,6 +3,7 @@ package com.appcues.data.model
 import com.appcues.action.ExperienceAction
 import com.appcues.data.model.Action.Trigger.NAVIGATE
 import com.appcues.trait.AppcuesTraitException
+import com.appcues.trait.MetadataSettingTrait
 import com.appcues.trait.PresentingTrait
 import java.util.UUID
 import kotlin.contracts.ExperimentalContracts
@@ -66,16 +67,23 @@ internal data class Experience(
     }
 
     fun getPresentingTrait(flatStepIndex: Int): PresentingTrait {
-        return groupLookup[flatStepIndex]?.let { stepContainers[it].presentingTrait }
-            ?: throw AppcuesTraitException("cannot to find presenting trait")
+        return getStepOrThrow(flatStepIndex).presentingTrait
     }
 
     @OptIn(ExperimentalContracts::class)
-    fun isValidStepIndex(stepIndex: Int?): Boolean {
+    fun isValidStepIndex(flatStepIndex: Int?): Boolean {
         contract {
-            returns(true) implies (stepIndex != null)
+            returns(true) implies (flatStepIndex != null)
         }
 
-        return stepIndex != null && stepIndex >= 0 && stepIndex < flatSteps.size
+        return flatStepIndex != null && flatStepIndex >= 0 && flatStepIndex < flatSteps.size
+    }
+
+    fun getMetadataSettingTraits(flatStepIndex: Int): List<MetadataSettingTrait> {
+        return getStepOrThrow(flatStepIndex).metadataSettingTraits
+    }
+
+    private fun getStepOrThrow(flatStepIndex: Int): Step {
+        return flatSteps.getOrNull(flatStepIndex) ?: throw AppcuesTraitException("Invalid step index $flatStepIndex")
     }
 }

@@ -9,7 +9,6 @@ import com.appcues.statemachine.Action.ReportError
 import com.appcues.statemachine.Error.ExperienceError
 import com.appcues.statemachine.SideEffect
 import com.appcues.trait.AppcuesTraitException
-import com.appcues.trait.MetadataSettingTrait
 import kotlinx.coroutines.delay
 
 internal class PresentationEffect(
@@ -55,6 +54,13 @@ internal class PresentationEffect(
         }
     }
 
+    /**
+     * produces metadata but it can retry when catching AppcuesTraitException
+     * with retryMilliseconds != null
+     *
+     * its up to the one responsible for throwing the exception to stop sending
+     * a non-null value for retryMilliseconds at some point to avoid infinite loop
+     */
     private suspend fun produceMetadataWithRetry(): Map<String, Any?> {
         return try {
             produceMetadata()
@@ -68,25 +74,14 @@ internal class PresentationEffect(
         }
     }
 
+    /**
+     * creates a map that contains a combined result of all
+     * metadata setting traits for this step
+     */
     private fun produceMetadata(): Map<String, Any?> {
-        return hashMapOf<String, Any?>().apply { metadataSettingsTraits().forEach { putAll(it.produceMetadata()) } }
-    }
-
-    private fun metadataSettingsTraits(): List<MetadataSettingTrait> {
-        return with(experience) {
-            // find the container index
-            val containerId = groupLookup[flatStepIndex]
-            // find the step index in relation to the container
-            val stepIndexInContainer = stepIndexLookup[flatStepIndex]
-            // if both are valid ids we return Rendering else null
-            if (containerId != null && stepIndexInContainer != null) {
-                val container = stepContainers[containerId]
-                val step = container.steps[stepIndexInContainer]
-                // this will throw if metadata fails
-                step.metadataSettingTraits
-            } else {
-                // should be impossible at this point, but will cover with an exception as well
-                throw AppcuesTraitException("Invalid step index $flatStepIndex")
+        return hashMapOf<String, Any?>().apply {
+            experience.getMetadataSettingTraits(flatStepIndex).forEach {
+                putAll(it.produceMetadata())
             }
         }
     }

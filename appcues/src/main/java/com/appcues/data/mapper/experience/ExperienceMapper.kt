@@ -138,14 +138,13 @@ internal class ExperienceMapper(
         val containerTraits = stepContainerResponse.traits.map { it to GROUP }
         val mergedTraits = containerTraits.mergeTraits(experienceTraits)
         val mappedTraits = traitsMapper.map(renderContext, mergedTraits)
-
+        val presentingTrait = mappedTraits.getExperiencePresentingTraitOrThrow()
         // this is where we will use groups to organize steps into stepContainers
         // also merge all necessary traits for each step
         StepContainer(
             id = stepContainerResponse.id,
-            steps = stepContainerResponse.children.map { step -> stepMapper.map(renderContext, step, mergedTraits) },
+            steps = stepContainerResponse.children.map { step -> stepMapper.map(renderContext, step, presentingTrait, mergedTraits) },
             actions = actionsMapper.map(renderContext, stepContainerResponse.actions),
-            presentingTrait = mappedTraits.getExperiencePresentingTraitOrThrow(),
             contentHolderTrait = mappedTraits.getContainerCreatingTraitOrDefault(),
             // what should we do if no content wrapping trait is found?
             contentWrappingTrait = mappedTraits.filterIsInstance<ContentWrappingTrait>().first(),

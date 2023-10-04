@@ -40,7 +40,7 @@ internal class StepMapperTest {
         val stepResponse = mockStickyContentStepResponse(listOf(topItem1, topItem2), listOf(bottomItem1))
 
         // When
-        val step = mapper.map(RenderContext.Modal, stepResponse, listOf())
+        val step = mapper.map(RenderContext.Modal, stepResponse, mockk(), listOf())
 
         // Then
         with(step) {
@@ -66,7 +66,7 @@ internal class StepMapperTest {
         val stepResponse = mockStickyContentStepResponse(listOf(), listOf(bottomItem1))
 
         // When
-        val step = mapper.map(RenderContext.Modal, stepResponse, listOf())
+        val step = mapper.map(RenderContext.Modal, stepResponse, mockk(), listOf())
 
         // Then
         with(step) {
@@ -87,7 +87,7 @@ internal class StepMapperTest {
         val stepResponse = mockBasicStepResponse(listOf())
 
         // When
-        val step = mapper.map(RenderContext.Modal, stepResponse, stepContainerTraits)
+        val step = mapper.map(RenderContext.Modal, stepResponse, mockk(), stepContainerTraits)
 
         // Then
         with(step) {
@@ -109,7 +109,7 @@ internal class StepMapperTest {
         val stepResponse = mockBasicStepResponse(listOf())
 
         // When
-        val step = mapper.map(RenderContext.Modal, stepResponse, stepContainerTraits)
+        val step = mapper.map(RenderContext.Modal, stepResponse, mockk(), stepContainerTraits)
 
         // Then
         with(step) {
@@ -144,7 +144,7 @@ internal class StepMapperTest {
         val stepResponse = mockBasicStepResponse(listOf(stepDecoratingTrait))
 
         // When
-        val step = mapper.map(RenderContext.Modal, stepResponse, groupTraits)
+        val step = mapper.map(RenderContext.Modal, stepResponse, mockk(), groupTraits)
 
         // Then
         with(step) {
@@ -181,7 +181,7 @@ internal class StepMapperTest {
         val stepResponse = mockBasicStepResponse(listOf(stepDecoratingTrait))
 
         // When
-        val step = mapper.map(RenderContext.Modal, stepResponse, groupTraits)
+        val step = mapper.map(RenderContext.Modal, stepResponse, mockk(), groupTraits)
 
         // Then
         with(step) {

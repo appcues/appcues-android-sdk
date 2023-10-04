@@ -28,30 +28,36 @@ internal fun mockExperience(onPresent: (() -> Unit)? = null) =
         name = "Mock Experience",
         type = "mobile",
         renderContext = RenderContext.Modal,
-        stepContainers = listOf(
-            StepContainer(
-                id = UUID.fromString("e062bd81-b736-44c4-abba-633dfff966aa"),
-                steps = listOf(
-                    mockStep(UUID.fromString("01d8a05a-3a55-4ecc-872d-d140cd628902")),
-                    mockStep(UUID.fromString("945e9689-8707-4196-8aa5-7c00c479bdab")),
-                    mockStep(UUID.fromString("933f975e-7d38-4285-847d-ae4166b97618")),
-                ),
-                presentingTrait = mockPresentingTrait(onPresent),
-                contentHolderTrait = mockk(relaxed = true),
-                contentWrappingTrait = mockk(relaxed = true),
-                actions = emptyMap(),
-            ),
-            StepContainer(
-                id = UUID.fromString("373578ad-6371-4aa9-8645-79bffa2bc1a9"),
-                steps = listOf(
-                    mockStep(UUID.fromString("0f6cda9d-17f0-4c0d-b8e7-e4fb94a128d9")),
-                ),
-                presentingTrait = mockPresentingTrait(onPresent),
-                contentHolderTrait = mockk(relaxed = true),
-                contentWrappingTrait = mockk(relaxed = true),
-                actions = emptyMap(),
+        stepContainers = mutableListOf<StepContainer>().apply {
+            val presentingTrait1 = mockPresentingTrait(onPresent)
+
+            add(
+                StepContainer(
+                    id = UUID.fromString("e062bd81-b736-44c4-abba-633dfff966aa"),
+                    steps = listOf(
+                        mockStep(UUID.fromString("01d8a05a-3a55-4ecc-872d-d140cd628902"), presentingTrait1),
+                        mockStep(UUID.fromString("945e9689-8707-4196-8aa5-7c00c479bdab"), presentingTrait1),
+                        mockStep(UUID.fromString("933f975e-7d38-4285-847d-ae4166b97618"), presentingTrait1),
+                    ),
+                    contentHolderTrait = mockk(relaxed = true),
+                    contentWrappingTrait = mockk(relaxed = true),
+                    actions = emptyMap(),
+                )
             )
-        ),
+
+            val presentingTrait2 = mockPresentingTrait(onPresent)
+            add(
+                StepContainer(
+                    id = UUID.fromString("373578ad-6371-4aa9-8645-79bffa2bc1a9"),
+                    steps = listOf(
+                        mockStep(UUID.fromString("0f6cda9d-17f0-4c0d-b8e7-e4fb94a128d9"), presentingTrait2),
+                    ),
+                    contentHolderTrait = mockk(relaxed = true),
+                    contentWrappingTrait = mockk(relaxed = true),
+                    actions = emptyMap(),
+                )
+            )
+        },
         published = true,
         priority = LOW,
         publishedAt = 1652895835000,
@@ -62,7 +68,7 @@ internal fun mockExperience(onPresent: (() -> Unit)? = null) =
         localeName = null,
     )
 
-internal fun mockStep(id: UUID) =
+internal fun mockStep(id: UUID, presentingTrait: PresentingTrait) =
     Step(
         id = id,
         content = TextPrimitive(
@@ -72,6 +78,7 @@ internal fun mockStep(id: UUID) =
         stepDecoratingTraits = listOf(),
         actions = mapOf(),
         type = "modal",
+        presentingTrait = presentingTrait,
         backdropDecoratingTraits = mockk(relaxed = true),
         containerDecoratingTraits = mockk(relaxed = true),
         metadataSettingTraits = mockk(relaxed = true),
@@ -87,9 +94,8 @@ internal fun mockExperienceExperiment(experiment: Experiment) =
             StepContainer(
                 id = UUID.fromString("60b49c12-c49b-47ac-8ed3-ba4e9a55e694"),
                 steps = listOf(
-                    mockStep(UUID.fromString("01d8a05a-3a55-4ecc-872d-d140cd628902")),
+                    mockStep(UUID.fromString("01d8a05a-3a55-4ecc-872d-d140cd628902"), mockPresentingTrait()),
                 ),
-                presentingTrait = mockPresentingTrait(),
                 contentHolderTrait = mockk(relaxed = true),
                 contentWrappingTrait = mockk(relaxed = true),
                 actions = emptyMap(),
@@ -115,9 +121,8 @@ internal fun mockEmbedExperience(frameId: String, onPresent: (() -> Unit)? = nul
             StepContainer(
                 id = UUID.fromString("60b49c12-c49b-47ac-8ed3-ba4e9a55e694"),
                 steps = listOf(
-                    mockStep(UUID.fromString("01d8a05a-3a55-4ecc-872d-d140cd628902")),
+                    mockStep(UUID.fromString("01d8a05a-3a55-4ecc-872d-d140cd628902"), mockPresentingTrait(onPresent)),
                 ),
-                presentingTrait = mockPresentingTrait(onPresent),
                 contentHolderTrait = mockk(relaxed = true),
                 contentWrappingTrait = mockk(relaxed = true),
                 actions = emptyMap(),
@@ -146,9 +151,8 @@ internal fun mockExperienceNavigateActions(actions: List<Action>, presentingTrai
             StepContainer(
                 id = UUID.fromString("60b49c12-c49b-47ac-8ed3-ba4e9a55e694"),
                 steps = listOf(
-                    mockStep(UUID.fromString("01d8a05a-3a55-4ecc-872d-d140cd628902")),
+                    mockStep(UUID.fromString("01d8a05a-3a55-4ecc-872d-d140cd628902"), presentingTrait),
                 ),
-                presentingTrait = presentingTrait,
                 contentHolderTrait = mockk(relaxed = true),
                 contentWrappingTrait = mockk(relaxed = true),
                 actions = mapOf(UUID.fromString("60b49c12-c49b-47ac-8ed3-ba4e9a55e694") to actions),
@@ -156,9 +160,8 @@ internal fun mockExperienceNavigateActions(actions: List<Action>, presentingTrai
             StepContainer(
                 id = UUID.fromString("71614c07-3f37-4f04-a853-f55424160321"),
                 steps = listOf(
-                    mockStep(UUID.fromString("c4b1c500-6939-4bb1-95ff-451bd6472cda")),
+                    mockStep(UUID.fromString("c4b1c500-6939-4bb1-95ff-451bd6472cda"), presentingTrait),
                 ),
-                presentingTrait = presentingTrait,
                 contentHolderTrait = mockk(relaxed = true),
                 contentWrappingTrait = mockk(relaxed = true),
                 actions = mapOf(UUID.fromString("71614c07-3f37-4f04-a853-f55424160321") to actions),
@@ -184,9 +187,8 @@ internal fun mockLocalizedExperience(localeName: String, localeId: String) =
             StepContainer(
                 id = UUID.fromString("e062bd81-b736-44c4-abba-633dfff966aa"),
                 steps = listOf(
-                    mockStep(UUID.fromString("01d8a05a-3a55-4ecc-872d-d140cd628902")),
+                    mockStep(UUID.fromString("01d8a05a-3a55-4ecc-872d-d140cd628902"), mockPresentingTrait()),
                 ),
-                presentingTrait = mockPresentingTrait(),
                 contentHolderTrait = mockk(relaxed = true),
                 contentWrappingTrait = mockk(relaxed = true),
                 actions = emptyMap(),

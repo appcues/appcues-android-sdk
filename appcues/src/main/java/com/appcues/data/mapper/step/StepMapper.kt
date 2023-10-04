@@ -17,6 +17,7 @@ import com.appcues.trait.BackdropDecoratingTrait
 import com.appcues.trait.ContainerDecoratingTrait
 import com.appcues.trait.ExperienceTraitLevel.STEP
 import com.appcues.trait.MetadataSettingTrait
+import com.appcues.trait.PresentingTrait
 import com.appcues.trait.StepDecoratingTrait
 import java.util.UUID
 
@@ -28,6 +29,7 @@ internal class StepMapper(
     fun map(
         renderContext: RenderContext,
         from: StepResponse,
+        presentingTrait: PresentingTrait,
         stepContainerTraits: List<LeveledTraitResponse>,
     ): Step {
         val stepTraits = from.traits.map { it to STEP }
@@ -41,6 +43,7 @@ internal class StepMapper(
         return Step(
             id = from.id,
             content = responseContent.mapPrimitive(),
+            presentingTrait = presentingTrait,
             stepDecoratingTraits = mappedTraits.filterIsInstance(StepDecoratingTrait::class.java),
             backdropDecoratingTraits = mappedTraits.filterIsInstance<BackdropDecoratingTrait>(),
             containerDecoratingTraits = mappedTraits.filterIsInstance<ContainerDecoratingTrait>(),
