@@ -5,9 +5,10 @@ import com.appcues.statemachine.Action
 import com.appcues.statemachine.SideEffect
 import kotlinx.coroutines.CompletableDeferred
 
-internal class AwaitEffect(private val action: Action) : SideEffect {
-
-    private val task = CompletableDeferred<Unit>()
+internal class AwaitEffect(
+    private val action: Action,
+    private val task: CompletableDeferred<Unit> = CompletableDeferred()
+) : SideEffect {
 
     fun complete() = task.complete(Unit)
 

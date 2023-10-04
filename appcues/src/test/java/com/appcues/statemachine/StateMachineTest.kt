@@ -4,6 +4,7 @@ import com.appcues.AppcuesCoroutineScope
 import com.appcues.AppcuesScopeTest
 import com.appcues.action.ActionProcessor
 import com.appcues.action.ExperienceAction
+import com.appcues.data.model.Action
 import com.appcues.data.model.Action.Trigger.NAVIGATE
 import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperiencePriority.NORMAL
@@ -300,10 +301,7 @@ internal class StateMachineTest : AppcuesScopeTest {
         val experienceAction1 = mockk<ExperienceAction>(relaxed = true)
         val experienceAction2 = mockk<ExperienceAction>(relaxed = true)
         val presentingTrait = mockk<PresentingTrait>(relaxed = true)
-        val navigationActions = listOf(
-            com.appcues.data.model.Action(NAVIGATE, experienceAction1),
-            com.appcues.data.model.Action(NAVIGATE, experienceAction2),
-        )
+        val navigationActions = listOf(Action(NAVIGATE, experienceAction1), Action(NAVIGATE, experienceAction2))
         val experience = mockExperienceNavigateActions(navigationActions, presentingTrait, ExperienceTrigger.Preview)
         val initialState = IdlingState
         val stateMachine = initMachine(initialState)

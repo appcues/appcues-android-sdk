@@ -265,12 +265,12 @@ internal class SubmitFormActionTest {
                         actions = emptyMap(),
                         type = "modal",
                         formState = formState,
+                        presentingTrait = mockk(relaxed = true),
                         backdropDecoratingTraits = mockk(relaxed = true),
                         containerDecoratingTraits = mockk(relaxed = true),
                         metadataSettingTraits = mockk(relaxed = true)
                     )
                 ),
-                presentingTrait = mockk(relaxed = true),
                 contentHolderTrait = mockk(relaxed = true),
                 contentWrappingTrait = mockk(relaxed = true),
                 actions = emptyMap(),

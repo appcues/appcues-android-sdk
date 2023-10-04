@@ -5,6 +5,7 @@ import com.appcues.data.model.Action.Trigger.NAVIGATE
 import com.appcues.data.model.Action.Trigger.TAP
 import com.appcues.data.model.ExperiencePriority.NORMAL
 import com.appcues.trait.AppcuesTraitException
+import com.appcues.trait.MetadataSettingTrait
 import com.appcues.trait.PresentingTrait
 import com.google.common.truth.Truth.assertThat
 import io.mockk.mockk
@@ -49,7 +50,10 @@ internal class ExperienceTest {
         // GIVEN
         val action1 = getAction(NAVIGATE)
         val action2 = getAction(NAVIGATE)
-        val stepContainer = getStepContainer(UUID.randomUUID(), actions = mapOf(UUID.randomUUID() to listOf(action1, action2)))
+        val stepContainer = getStepContainer(
+            id = UUID.randomUUID(),
+            actions = mapOf(UUID.randomUUID() to listOf(action1, action2))
+        )
         val experience = getExperience(listOf(stepContainer))
         // WHEN
         val actions = experience.getNavigationActions(0)
@@ -76,8 +80,8 @@ internal class ExperienceTest {
     fun `areStepsFromDifferentGroup SHOULD return true WHEN step 0 and step 1 are from different group`() {
         // GIVEN
         val id = UUID.randomUUID()
-        val stepContainer1 = getStepContainer(steps = arrayListOf(mockk()))
-        val stepContainer2 = getStepContainer(steps = arrayListOf(mockk()))
+        val stepContainer1 = getStepContainer(steps = arrayListOf(getStep()))
+        val stepContainer2 = getStepContainer(steps = arrayListOf(getStep()))
         val experience = getExperience(listOf(stepContainer1, stepContainer2))
         // WHEN
         val result = experience.areStepsFromDifferentGroup(0, 1)
@@ -89,7 +93,7 @@ internal class ExperienceTest {
     fun `areStepsFromDifferentGroup SHOULD return false WHEN step 0 and step 1 are from the same group`() {
         // GIVEN
         val id = UUID.randomUUID()
-        val stepContainer1 = getStepContainer(steps = arrayListOf(mockk(), mockk()))
+        val stepContainer1 = getStepContainer(steps = arrayListOf(getStep(), getStep()))
         val stepContainer2 = getStepContainer(steps = arrayListOf())
         val experience = getExperience(listOf(stepContainer1, stepContainer2))
         // WHEN
@@ -102,7 +106,7 @@ internal class ExperienceTest {
     fun `getPresentingTrait SHOULD return present trait from stepContainer`() {
         // GIVEN
         val trait1 = mockk<PresentingTrait>()
-        val stepContainer = getStepContainer(presentingTrait = trait1, steps = listOf(mockk()))
+        val stepContainer = getStepContainer(steps = listOf(getStep(trait1)))
         val experience = getExperience(listOf(stepContainer))
         // WHEN
         val result = experience.getPresentingTrait(0)
@@ -114,7 +118,7 @@ internal class ExperienceTest {
     fun `getPresentingTrait SHOULD return same trait for both step index`() {
         // GIVEN
         val trait1 = mockk<PresentingTrait>()
-        val stepContainer = getStepContainer(presentingTrait = trait1, steps = listOf(mockk(), mockk()))
+        val stepContainer = getStepContainer(steps = listOf(getStep(trait1), getStep(trait1)))
         val experience = getExperience(listOf(stepContainer))
         // WHEN
         val result1 = experience.getPresentingTrait(0)
@@ -128,9 +132,9 @@ internal class ExperienceTest {
     fun `getPresentingTrait SHOULD return different trait for both step index`() {
         // GIVEN
         val trait1 = mockk<PresentingTrait>()
-        val stepContainer1 = getStepContainer(presentingTrait = trait1, steps = listOf(mockk()))
+        val stepContainer1 = getStepContainer(steps = listOf(getStep(trait1)))
         val trait2 = mockk<PresentingTrait>()
-        val stepContainer2 = getStepContainer(presentingTrait = trait2, steps = listOf(mockk()))
+        val stepContainer2 = getStepContainer(steps = listOf(getStep(trait2)))
         val experience = getExperience(listOf(stepContainer1, stepContainer2))
         // WHEN
         val result1 = experience.getPresentingTrait(0)
@@ -144,7 +148,7 @@ internal class ExperienceTest {
     fun `getPresentingTrait SHOULD throw WHEN flatStepIndex is invalid`() {
         // GIVEN
         val trait1 = mockk<PresentingTrait>()
-        val stepContainer = getStepContainer(presentingTrait = trait1, steps = listOf(mockk()))
+        val stepContainer = getStepContainer(steps = listOf(getStep(trait1)))
         val experience = getExperience(listOf(stepContainer))
         // WHEN
         experience.getPresentingTrait(4)
@@ -153,7 +157,7 @@ internal class ExperienceTest {
     @Test
     fun `isValidStepIndex SHOULD return true AND validate contract`() {
         // GIVEN
-        val stepContainer = getStepContainer(steps = listOf(mockk()))
+        val stepContainer = getStepContainer(steps = listOf(getStep()))
         val experience = getExperience(listOf(stepContainer))
         @Suppress("RedundantNullableReturnType") val valStepIndex: Int? = 0
         // WHEN
@@ -164,10 +168,15 @@ internal class ExperienceTest {
         }
     }
 
+    @Suppress("SameParameterValue")
+    private fun assertIndexNotNull(expected: Int, actual: Int) {
+        assertThat(actual).isEqualTo(expected)
+    }
+
     @Test
     fun `isValidStepIndex SHOULD return false WHEN stepIndex is null`() {
         // GIVEN
-        val stepContainer = getStepContainer(steps = listOf(mockk()))
+        val stepContainer = getStepContainer(steps = listOf(getStep()))
         val experience = getExperience(listOf(stepContainer))
         // WHEN
         val result = experience.isValidStepIndex(null)
@@ -178,7 +187,7 @@ internal class ExperienceTest {
     @Test
     fun `isValidStepIndex SHOULD return false WHEN stepIndex less than 0`() {
         // GIVEN
-        val stepContainer = getStepContainer(steps = listOf(mockk()))
+        val stepContainer = getStepContainer(steps = listOf(getStep()))
         val experience = getExperience(listOf(stepContainer))
         // WHEN
         val result = experience.isValidStepIndex(-1)
@@ -187,19 +196,40 @@ internal class ExperienceTest {
     }
 
     @Test
+    fun `getMetadataSettingTraits SHOULD return traits from step`() {
+        // GIVEN
+        val trait1 = mockk<MetadataSettingTrait>()
+        val trait2 = mockk<MetadataSettingTrait>()
+        val stepContainer = getStepContainer(steps = listOf(getStep(metadataSettingTrait = listOf(trait1, trait2))))
+        val experience = getExperience(listOf(stepContainer))
+        // WHEN
+        val result = experience.getMetadataSettingTraits(0)
+        // THEN
+        assertThat(result).hasSize(2)
+        assertThat(result[0]).isEqualTo(trait1)
+        assertThat(result[1]).isEqualTo(trait2)
+    }
+
+    @Test(expected = AppcuesTraitException::class)
+    fun `getMetadataSettingTraits SHOULD throw AppcuesTraitException if flatStepIndex is invalid`() {
+        // GIVEN
+        val trait1 = mockk<MetadataSettingTrait>()
+        val trait2 = mockk<MetadataSettingTrait>()
+        val stepContainer = getStepContainer(steps = listOf(getStep(metadataSettingTrait = listOf(trait1, trait2))))
+        val experience = getExperience(listOf(stepContainer))
+        // WHEN
+        experience.getMetadataSettingTraits(1)
+    }
+
+    @Test
     fun `isValidStepIndex SHOULD return false WHEN stepIndex greater than flatSteps count`() {
         // GIVEN
-        val stepContainer = getStepContainer(steps = listOf(mockk(), mockk(), mockk()))
+        val stepContainer = getStepContainer(steps = listOf(getStep(), getStep(), getStep()))
         val experience = getExperience(listOf(stepContainer))
         // WHEN
         val result = experience.isValidStepIndex(4)
         // THEN
         assertThat(result).isFalse()
-    }
-
-    @Suppress("SameParameterValue")
-    private fun assertIndexNotNull(expected: Int, actual: Int) {
-        assertThat(actual).isEqualTo(expected)
     }
 
     private fun getExperience(stepContainers: List<StepContainer> = listOf()): Experience {
@@ -227,15 +257,28 @@ internal class ExperienceTest {
         id: UUID = UUID.randomUUID(),
         steps: List<Step> = listOf(),
         actions: Map<UUID, List<Action>> = mapOf(),
-        presentingTrait: PresentingTrait = mockk(),
     ): StepContainer {
         return StepContainer(
             id = id,
             steps = steps,
             actions = actions,
-            presentingTrait = presentingTrait,
+
             contentHolderTrait = mockk(relaxed = true),
             contentWrappingTrait = mockk(relaxed = true),
+        )
+    }
+
+    private fun getStep(presentingTrait: PresentingTrait = mockk(), metadataSettingTrait: List<MetadataSettingTrait> = listOf()): Step {
+        return Step(
+            id = UUID.randomUUID(),
+            content = mockk(),
+            presentingTrait = presentingTrait,
+            stepDecoratingTraits = mockk(),
+            backdropDecoratingTraits = mockk(),
+            containerDecoratingTraits = mockk(),
+            metadataSettingTraits = metadataSettingTrait,
+            actions = mockk(),
+            type = String(),
         )
     }
 
