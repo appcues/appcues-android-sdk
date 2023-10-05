@@ -56,6 +56,22 @@ internal class IdlingStateTest {
     }
 
     @Test
+    fun `take StartExperience SHOULD transition to BeginningExperienceState AND continue to Step 0 WHEN error is empty`() {
+        // GIVEN
+        val state = IdlingState
+        val experience = mockk<Experience> {
+            every { error } returns ""
+            every { flatSteps } returns listOf(mockk(), mockk())
+        }
+        val action = StartExperience(experience)
+        // WHEN
+        val transition = state.take(action)
+        // THEN
+        transition.assertState(BeginningExperienceState(experience))
+        transition.assertEffect(ContinuationEffect(action))
+    }
+
+    @Test
     fun `take StartExperience SHOULD report error WHEN experience contains error`() {
         // GIVEN
         val state = IdlingState

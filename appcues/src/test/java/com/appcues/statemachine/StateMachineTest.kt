@@ -716,7 +716,7 @@ internal class StateMachineTest : AppcuesScopeTest {
         )
 
         // WHEN
-        stateMachine.stop(true)
+        stateMachine.stop(false)
 
         // THEN
         assertThat(completion.await(1.seconds)).isFalse()
@@ -740,7 +740,7 @@ internal class StateMachineTest : AppcuesScopeTest {
                 onStateChange?.invoke(it)
                 when (it) {
                     is EndingStepState -> {
-                        it.awaitEffect?.complete()
+                        it.awaitDismissEffect?.dismissed()
                     }
                     // ignore other state changes
                     else -> Unit

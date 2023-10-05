@@ -9,7 +9,7 @@ import com.appcues.statemachine.Action.StartStep
 import com.appcues.statemachine.Error.StepError
 import com.appcues.statemachine.State
 import com.appcues.statemachine.Transition
-import com.appcues.statemachine.effects.AwaitEffect
+import com.appcues.statemachine.effects.AwaitDismissEffect
 import com.appcues.statemachine.effects.ContinuationEffect
 
 internal data class RenderingStepState(
@@ -57,12 +57,12 @@ internal data class RenderingStepState(
         val markComplete = nextStepIndex > flatStepIndex
         return if (experience.areStepsFromDifferentGroup(flatStepIndex, nextStepIndex)) {
             // in different groups we want to wait ui to dismiss
-            val nextAction = StartStep(nextStepIndex, stepContainerIndex, true)
-            val awaitEffect = AwaitEffect(nextAction)
+            val nextAction = StartStep(nextStepIndex, stepContainerIndex)
+            val awaitDismissEffect = AwaitDismissEffect(nextAction)
 
-            next(EndingStepState(experience, flatStepIndex, markComplete, awaitEffect), awaitEffect)
+            next(EndingStepState(experience, flatStepIndex, markComplete, awaitDismissEffect), awaitDismissEffect)
         } else {
-            val nextAction = StartStep(nextStepIndex, stepContainerIndex, false)
+            val nextAction = StartStep(nextStepIndex, stepContainerIndex)
             // in same group we can continue to StartStep internally
             next(EndingStepState(experience, flatStepIndex, markComplete, null), ContinuationEffect(nextAction))
         }
@@ -79,9 +79,9 @@ internal data class RenderingStepState(
             //
             // instead of using sideEffect we pass EndExperience on EndingStep
             // then AppcuesViewModel will continue to EndExperience when appropriate
-            val awaitEffect = AwaitEffect(action)
+            val awaitDismissEffect = AwaitDismissEffect(action)
 
-            next(EndingStepState(experience, flatStepIndex, action.markComplete, awaitEffect), awaitEffect)
+            next(EndingStepState(experience, flatStepIndex, action.markComplete, awaitDismissEffect), awaitDismissEffect)
         }
     }
 }

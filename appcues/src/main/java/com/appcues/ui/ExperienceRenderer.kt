@@ -25,7 +25,6 @@ import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.MoveToStep
 import com.appcues.statemachine.Action.StartExperience
 import com.appcues.statemachine.Error
-import com.appcues.statemachine.Error.RenderContextNotActive
 import com.appcues.statemachine.State
 import com.appcues.statemachine.StateMachine
 import com.appcues.statemachine.states.IdlingState
@@ -34,7 +33,6 @@ import com.appcues.ui.ExperienceRenderer.PreviewResponse.PreviewDeferred
 import com.appcues.ui.ExperienceRenderer.RenderingResult.NoRenderContext
 import com.appcues.ui.ExperienceRenderer.RenderingResult.StateMachineError
 import com.appcues.ui.ExperienceRenderer.RenderingResult.WontDisplay
-import com.appcues.util.ResultOf
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
 import kotlinx.coroutines.flow.SharedFlow
@@ -231,9 +229,8 @@ internal class ExperienceRenderer(override val scope: AppcuesScope) : AppcuesCom
         }
     }
 
-    suspend fun dismiss(renderContext: RenderContext, markComplete: Boolean, destroyed: Boolean): ResultOf<State, Error> {
-        return stateMachines.getOwner(renderContext)?.stateMachine?.handleAction(EndExperience(markComplete, destroyed))
-            ?: Failure(RenderContextNotActive(renderContext))
+    suspend fun dismiss(renderContext: RenderContext, markComplete: Boolean, destroyed: Boolean) {
+        stateMachines.getOwner(renderContext)?.stateMachine?.handleAction(EndExperience(markComplete, destroyed))
     }
 
     suspend fun resetAll() {

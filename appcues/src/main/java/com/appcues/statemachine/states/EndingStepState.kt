@@ -7,19 +7,20 @@ import com.appcues.statemachine.Action.Reset
 import com.appcues.statemachine.Action.StartStep
 import com.appcues.statemachine.State
 import com.appcues.statemachine.Transition
-import com.appcues.statemachine.effects.AwaitEffect
+import com.appcues.statemachine.effects.AwaitDismissEffect
 import com.appcues.statemachine.effects.ContinuationEffect
 import com.appcues.statemachine.effects.PresentationEffect
 
-// AwaitEffect works as a ContinuationSideEffect that AppcuesViewModel will
+// AwaitDismissEffect works as a ContinuationSideEffect that AppcuesViewModel will
 // send to the state machine once it's done dismissing the current container
 // the presence of a non-null value is what tells the UI to dismiss the current container,
 // and it should be set to null if a dismiss is not requested (i.e. moving to next step in same container)
+// also when awaitDismissEffect is not null it means that when we take StartStep we want to present a new container
 internal data class EndingStepState(
     val experience: Experience,
     val flatStepIndex: Int,
     val markComplete: Boolean,
-    val awaitEffect: AwaitEffect?,
+    val awaitDismissEffect: AwaitDismissEffect?,
 ) : State {
 
     override val currentExperience: Experience
@@ -49,7 +50,7 @@ internal data class EndingStepState(
                 experience = experience,
                 flatStepIndex = action.nextFlatStepIndex,
                 stepContainerIndex = action.nextStepContainerIndex,
-                isDifferentContainer = action.isDifferentContainer
+                shouldPresent = awaitDismissEffect != null
             )
         )
     }

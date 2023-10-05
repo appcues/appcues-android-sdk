@@ -15,7 +15,7 @@ internal data class PresentationEffect(
     private val experience: Experience,
     private val flatStepIndex: Int,
     private val stepContainerIndex: Int,
-    private val isDifferentContainer: Boolean,
+    private val shouldPresent: Boolean,
 ) : SideEffect {
 
     override suspend fun launch(processor: ActionProcessor): Action {
@@ -38,7 +38,7 @@ internal data class PresentationEffect(
 
             // if we are presenting, we try to produce metadata for some time
             // before failing, or else we just try to produce it with no retry
-            if (isDifferentContainer) {
+            if (shouldPresent) {
                 metadata = produceMetadataWithRetry()
 
                 presentingTrait.present()

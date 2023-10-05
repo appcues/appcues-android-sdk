@@ -69,7 +69,7 @@ internal class PresentationEffectTest {
     }
 
     @Test
-    fun `launch SHOULD call presentingTrait present if isDifferentContainer is true`() = runTest {
+    fun `launch SHOULD call presentingTrait present if shouldPresent is true`() = runTest {
         // GIVEN
         val presentingTrait = mockk<PresentingTrait>(relaxed = true)
         val flatStepIndex = 0
@@ -83,7 +83,7 @@ internal class PresentationEffectTest {
     }
 
     @Test
-    fun `launch SHOULD not call presentingTrait present if isDifferentContainer is false`() = runTest {
+    fun `launch SHOULD not call presentingTrait present if shouldPresent is false`() = runTest {
         // GIVEN
         val presentingTrait = mockk<PresentingTrait>(relaxed = true)
         val flatStepIndex = 0
@@ -182,7 +182,7 @@ internal class PresentationEffectTest {
     }
 
     @Test
-    fun `launch SHOULD retry produceMetadata 3 times after 4 seconds WHEN isDifferentContainer AND produceMetadata throws`() = runTest {
+    fun `launch SHOULD retry produceMetadata 3 times after 4 seconds WHEN shouldPresent AND produceMetadata throws`() = runTest {
         // GIVEN
         var remainingThrows = 3
         val presentingTrait = mockk<PresentingTrait>(relaxed = true)

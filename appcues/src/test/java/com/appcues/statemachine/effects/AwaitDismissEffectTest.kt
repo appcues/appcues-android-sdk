@@ -9,16 +9,16 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
-internal class AwaitEffectTest {
+internal class AwaitDismissEffectTest {
 
     @Test
     fun `launch SHOULD return action after complete`() = runTest {
         // GIVEN
         val action = mockk<Action>()
-        val awaitEffect = AwaitEffect(action)
-        launch { awaitEffect.complete() }
+        val awaitDismissEffect = AwaitDismissEffect(action)
+        launch { awaitDismissEffect.dismissed() }
         // WHEN
-        val result = awaitEffect.launch(mockk())
+        val result = awaitDismissEffect.launch(mockk())
         // THEN
         assertThat(result).isEqualTo(action)
     }
@@ -27,11 +27,13 @@ internal class AwaitEffectTest {
     fun `launch SHOULD call task await`() = runTest {
         // GIVEN
         val action = mockk<Action>()
-        val task = mockk<CompletableDeferred<Unit>>(relaxed = true)
-        val awaitEffect = AwaitEffect(action, task)
+        val mockTask = mockk<CompletableDeferred<Unit>>(relaxed = true)
+        val awaitDismissEffect = AwaitDismissEffect(action).apply {
+            task = mockTask
+        }
         // WHEN
-        awaitEffect.launch(mockk())
+        awaitDismissEffect.launch(mockk())
         // THEN
-        coVerifySequence { task.await() }
+        coVerifySequence { mockTask.await() }
     }
 }
