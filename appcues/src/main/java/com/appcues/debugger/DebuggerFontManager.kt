@@ -7,7 +7,6 @@ import android.os.Build.VERSION_CODES
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.Typeface
-import com.appcues.AppcuesConfig
 import com.appcues.debugger.model.DebuggerFontItem
 import com.appcues.logging.Logcues
 import java.io.File
@@ -16,7 +15,6 @@ import java.io.IOException
 internal class DebuggerFontManager(
     private val context: Context,
     private val logcues: Logcues,
-    private val config: AppcuesConfig,
 ) {
 
     // NOTE: naming conventions here match iOS, rather than Android system defaults
@@ -37,12 +35,7 @@ internal class DebuggerFontManager(
 
         val debugFonts = mutableListOf<DebuggerFontItem>()
         addFontResources(debugFonts)
-        addFontAssets("fonts", debugFonts) // the default path
-        config.fontAssetPath?.let {
-            if (it != "fonts") {
-                addFontAssets(it, debugFonts)
-            }
-        }
+        addFontAssets(debugFonts)
         debugFonts.sortWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.name })
         return debugFonts
     }
@@ -73,18 +66,16 @@ internal class DebuggerFontManager(
         }
     }
 
-    private fun addFontAssets(fontAssetPath: String, debugFonts: MutableList<DebuggerFontItem>) {
-        // also look for any fonts included by the app in /assets
-        // normally in the /fonts subdirectory, but a custom path can be provided in config
+    private fun addFontAssets(debugFonts: MutableList<DebuggerFontItem>) {
+        // also look for any fonts included by the app in /assets/fonts
         try {
-            context.assets.list(fontAssetPath)
+            context.assets.list("fonts")
                 ?.filter {
                     it.endsWith(".ttf")
                 }?.forEach {
                     val name = it.subSequence(0, it.lastIndexOf(".ttf")).toString()
-                    val filePath = if (fontAssetPath.isNotEmpty()) "$fontAssetPath/" else ""
                     val typeface: android.graphics.Typeface =
-                        android.graphics.Typeface.createFromAsset(context.assets, filePath + it)
+                        android.graphics.Typeface.createFromAsset(context.assets, "fonts/$it")
                     val fontFamily = FontFamily(Typeface(typeface))
                     debugFonts.add(DebuggerFontItem(name, fontFamily, FontWeight.Normal))
                 }

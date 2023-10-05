@@ -18,7 +18,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.appcues.AppcuesConfig
 import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.data.model.styling.ComponentStyle.ComponentHorizontalAlignment
 import com.appcues.data.model.styling.ComponentStyle.ComponentVerticalAlignment
@@ -57,10 +56,10 @@ internal fun ComponentStyle.getTextAlignment(): TextAlign? {
     }
 }
 
-internal fun ComponentStyle.getFontFamily(context: Context, config: AppcuesConfig): FontFamily? {
+internal fun ComponentStyle.getFontFamily(context: Context): FontFamily? {
     return FontFamily.getSystemFontFamily(fontName)
         ?: FontFamily.getFontResource(context, fontName)
-        ?: FontFamily.getFontAsset(context, config, fontName)
+        ?: FontFamily.getFontAsset(context, fontName)
         ?: FontFamily.getSystemFont(fontName)
 }
 
@@ -109,19 +108,12 @@ private fun FontFamily.Companion.getFontResource(context: Context, fontName: Str
 }
 
 // try to load a custom font from an embedded asset in the host application
-private fun FontFamily.Companion.getFontAsset(context: Context, config: AppcuesConfig, fontName: String?): FontFamily? {
-    // try to find it in /assets/fonts by default, but also try in any custom path provided in config, if available
-    return getFontAsset(context, "fonts", fontName)
-        ?: getFontAsset(context, config.fontAssetPath, fontName)
-}
-
-private fun FontFamily.Companion.getFontAsset(context: Context, fontAssetPath: String?, fontName: String?): FontFamily? {
-    if (fontName != null && fontAssetPath != null) {
+private fun FontFamily.Companion.getFontAsset(context: Context, fontName: String?): FontFamily? {
+    if (fontName != null) {
         val assetName = "$fontName.ttf"
-        val fontsInAssets = context.assets.list(fontAssetPath)
+        val fontsInAssets = context.assets.list("fonts")
         if (fontsInAssets != null && fontsInAssets.contains(assetName)) {
-            val filePath = if (fontAssetPath.isNotEmpty()) "$fontAssetPath/" else ""
-            val typeface = Typeface.createFromAsset(context.assets, "$filePath$fontName.ttf")
+            val typeface = Typeface.createFromAsset(context.assets, "fonts/$fontName.ttf")
             if (typeface != null) {
                 return FontFamily(typeface)
             }
@@ -238,13 +230,13 @@ internal fun getBoxAlignment(
     return BiasAlignment(horizontalBias, verticalBias)
 }
 
-internal fun ComponentStyle.getTextStyle(context: Context, config: AppcuesConfig, isDark: Boolean): TextStyle {
+internal fun ComponentStyle.getTextStyle(context: Context, isDark: Boolean): TextStyle {
     return TextStyle(
         color = foregroundColor.getColor(isDark) ?: Color.Unspecified,
         fontSize = fontSize?.sp ?: TextUnit.Unspecified,
         lineHeight = lineHeight?.sp ?: TextUnit.Unspecified,
         textAlign = getTextAlignment(),
-        fontFamily = getFontFamily(context, config),
+        fontFamily = getFontFamily(context),
         letterSpacing = letterSpacing?.sp ?: TextUnit.Unspecified,
         fontWeight = getFontWeight(),
     )

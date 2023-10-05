@@ -5,7 +5,6 @@ import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.staticCompositionLocalOf
 import coil.ImageLoader
-import com.appcues.AppcuesConfig
 import com.appcues.action.ExperienceAction
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType
 import com.appcues.data.model.Action
@@ -48,8 +47,6 @@ internal val LocalAppcuesPaginationDelegate = compositionLocalOf { AppcuesPagina
 internal data class AppcuesPagination(val onPageChanged: (Int) -> Unit)
 
 internal val LocalViewModel = staticCompositionLocalOf<AppcuesViewModel> { noLocalProvidedFor("AppcuesViewModel") }
-
-internal val LocalAppcuesConfig = staticCompositionLocalOf<AppcuesConfig> { noLocalProvidedFor("AppcuesConfig") }
 
 internal val LocalLogcues = staticCompositionLocalOf<Logcues> { noLocalProvidedFor("LocalLogcues") }
 
