@@ -5,7 +5,8 @@ import com.appcues.data.model.StepReference
 
 internal sealed class Action {
     data class StartExperience(val experience: Experience) : Action()
-    data class StartStep(val stepReference: StepReference) : Action()
+    data class MoveToStep(val stepReference: StepReference) : Action()
+    data class StartStep(val nextFlatStepIndex: Int, val nextStepContainerIndex: Int, val isDifferentContainer: Boolean) : Action()
     data class RenderStep(val metadata: Map<String, Any?>) : Action()
     data class EndExperience(
         val markComplete: Boolean,

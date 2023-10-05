@@ -88,12 +88,12 @@ internal class ExperienceLifecycleTracker(
 
     private fun State.track() {
         when (this) {
+            is BeginningExperienceState -> {
+                // update this value for auto-properties
+                storage.lastContentShownAt = Date()
+                trackLifecycleEvent(ExperienceStarted(experience), SdkMetrics.trackRender(experience.requestId))
+            }
             is RenderingStepState -> {
-                if (isFirst) {
-                    // update this value for auto-properties
-                    storage.lastContentShownAt = Date()
-                    trackLifecycleEvent(ExperienceStarted(experience), SdkMetrics.trackRender(experience.requestId))
-                }
                 trackLifecycleEvent(StepSeen(experience, flatStepIndex))
             }
             is EndingStepState -> {

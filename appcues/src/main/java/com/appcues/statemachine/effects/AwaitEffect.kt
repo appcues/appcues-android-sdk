@@ -4,6 +4,7 @@ import com.appcues.action.ActionProcessor
 import com.appcues.statemachine.Action
 import com.appcues.statemachine.SideEffect
 import kotlinx.coroutines.CompletableDeferred
+import java.util.Objects
 
 internal class AwaitEffect(
     private val action: Action,
@@ -16,5 +17,18 @@ internal class AwaitEffect(
         task.await()
 
         return action
+    }
+
+    // custom equals and hash to ignore task so its easier to compare while testing
+    override fun equals(other: Any?): Boolean {
+        // compare reference
+        if (this === other) return true
+
+        return other is AwaitEffect &&
+            action == other.action
+    }
+
+    override fun hashCode(): Int {
+        return Objects.hash(action)
     }
 }

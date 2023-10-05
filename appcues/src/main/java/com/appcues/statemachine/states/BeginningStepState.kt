@@ -9,7 +9,6 @@ import com.appcues.statemachine.Transition
 internal data class BeginningStepState(
     val experience: Experience,
     val flatStepIndex: Int,
-    val isFirst: Boolean,
 ) : State {
 
     override val currentExperience: Experience
@@ -24,6 +23,6 @@ internal data class BeginningStepState(
     }
 
     private fun toRenderingStep(action: RenderStep): Transition {
-        return next(RenderingStepState(experience, flatStepIndex, isFirst, action.metadata))
+        return next(RenderingStepState(experience, flatStepIndex, action.metadata))
     }
 }

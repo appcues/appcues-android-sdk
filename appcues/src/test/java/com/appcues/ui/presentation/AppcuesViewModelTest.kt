@@ -14,6 +14,7 @@ import com.appcues.data.model.StepReference
 import com.appcues.data.model.StepReference.StepGroupPageIndex
 import com.appcues.logging.Logcues
 import com.appcues.statemachine.State
+import com.appcues.statemachine.effects.AwaitEffect
 import com.appcues.statemachine.states.EndingStepState
 import com.appcues.statemachine.states.RenderingStepState
 import com.appcues.ui.ExperienceRenderer
@@ -117,10 +118,9 @@ internal class AppcuesViewModelTest {
             every { stepIndexLookup } returns hashMapOf(0 to 1234)
             every { stepContainers } returns listOf(mockStepContainer)
         }
-        val isFirst = true
         val mockMetadata: Map<String, Any?> = hashMapOf()
         // WHEN
-        experienceStates.emit(RenderingStepState(mockExperience, 0, isFirst, mockMetadata))
+        experienceStates.emit(RenderingStepState(mockExperience, 0, mockMetadata))
         // THEN
         assertThat(uiStates).hasSize(2)
         with(uiStates[1] as Rendering) {
@@ -142,10 +142,9 @@ internal class AppcuesViewModelTest {
             every { stepIndexLookup } returns hashMapOf(0 to 1234)
             every { stepContainers } returns listOf(mockStepContainer)
         }
-        val isFirst = true
         val mockMetadata: Map<String, Any?> = hashMapOf()
         // WHEN (flatStepIndex is 2 here)
-        experienceStates.emit(RenderingStepState(mockExperience, 0, isFirst, mockMetadata))
+        experienceStates.emit(RenderingStepState(mockExperience, 0, mockMetadata))
         // THEN
         assertThat(uiStates).hasSize(1)
     }
@@ -160,10 +159,9 @@ internal class AppcuesViewModelTest {
             every { stepIndexLookup } returns hashMapOf(6 to 1234)
             every { stepContainers } returns listOf(mockStepContainer)
         }
-        val isFirst = true
         val mockMetadata: Map<String, Any?> = hashMapOf()
         // WHEN (flatStepIndex is 2 here)
-        experienceStates.emit(RenderingStepState(mockExperience, 0, isFirst, mockMetadata))
+        experienceStates.emit(RenderingStepState(mockExperience, 0, mockMetadata))
         // THEN
         assertThat(uiStates).hasSize(1)
     }
@@ -171,21 +169,21 @@ internal class AppcuesViewModelTest {
     @Test
     fun `EndingStep SHOULD emit Dismissing`() = runTest {
         // GIVEN
-        val callback: () -> Unit = mockk()
+        val mockAwaitEffect = AwaitEffect(mockk())
         // WHEN
-        experienceStates.emit(EndingStepState(mockk(), 0, true, callback))
+        experienceStates.emit(EndingStepState(mockk(), 0, true, mockAwaitEffect))
         // THEN
         assertThat(uiStates).hasSize(2)
         with(uiStates[1] as Dismissing) {
-            assertThat(onUiDismissed).isEqualTo(callback)
+            assertThat(awaitEffect).isEqualTo(mockAwaitEffect)
         }
     }
 
     @Test
     fun `EndingStep SHOULD be ignored WHEN uiState is Dismissing`() = runTest {
         // GIVEN
-        val callback: () -> Unit = mockk()
-        val endingStep = EndingStepState(mockk(), 0, true, callback)
+        val mockAwaitEffect = AwaitEffect(mockk())
+        val endingStep = EndingStepState(mockk(), 0, true, mockAwaitEffect)
         // this sets current uiState to Dismissing
         experienceStates.emit(endingStep)
         // WHEN
@@ -198,12 +196,12 @@ internal class AppcuesViewModelTest {
     @Test
     fun `RenderingStepState SHOULD be ignored WHEN uiState is Dismissing`() = runTest {
         // GIVEN
-        val callback: () -> Unit = mockk()
-        val endingStep = EndingStepState(mockk(), 0, true, callback)
+        val mockAwaitEffect = AwaitEffect(mockk())
+        val endingStep = EndingStepState(mockk(), 0, true, mockAwaitEffect)
         // this sets current uiState to Dismissing
         experienceStates.emit(endingStep)
         // WHEN
-        experienceStates.emit(RenderingStepState(mockk(), 0, true, hashMapOf()))
+        experienceStates.emit(RenderingStepState(mockk(), 0, hashMapOf()))
         // THEN
         assertThat(uiStates).hasSize(2)
         assertThat(uiStates[1]).isInstanceOf(Dismissing::class.java)
@@ -219,9 +217,8 @@ internal class AppcuesViewModelTest {
             every { stepIndexLookup } returns hashMapOf(0 to 1234)
             every { stepContainers } returns listOf(mockStepContainer)
         }
-        val isFirst = true
         val mockMetadata: Map<String, Any?> = hashMapOf()
-        experienceStates.emit(RenderingStepState(mockExperience, 0, isFirst, mockMetadata))
+        experienceStates.emit(RenderingStepState(mockExperience, 0, mockMetadata))
         // WHEN
         viewModel.onPageChanged(2)
         // THEN
@@ -241,9 +238,8 @@ internal class AppcuesViewModelTest {
             every { stepIndexLookup } returns hashMapOf(0 to 0)
             every { stepContainers } returns listOf(mockStepContainer)
         }
-        val isFirst = true
         val mockMetadata: Map<String, Any?> = hashMapOf()
-        experienceStates.emit(RenderingStepState(mockExperience, 0, isFirst, mockMetadata))
+        experienceStates.emit(RenderingStepState(mockExperience, 0, mockMetadata))
         // WHEN
         viewModel.onActivityChanged()
         // THEN
@@ -287,9 +283,8 @@ internal class AppcuesViewModelTest {
             every { stepIndexLookup } returns hashMapOf(0 to 0)
             every { stepContainers } returns listOf(mockStepContainer)
         }
-        val isFirst = true
         val mockMetadata: Map<String, Any?> = hashMapOf()
-        experienceStates.emit(RenderingStepState(mockExperience, 0, isFirst, mockMetadata))
+        experienceStates.emit(RenderingStepState(mockExperience, 0, mockMetadata))
         // WHEN
         viewModel.onPageChanged(0)
         // THEN
@@ -299,13 +294,13 @@ internal class AppcuesViewModelTest {
     @Test
     fun `onDismissed SHOULD call onDismiss and callback`() = runTest {
         // GIVEN
-        val callback: () -> Unit = mockk(relaxed = true)
+        val awaitEffect = mockk<AwaitEffect>(relaxed = true)
         // WHEN
-        viewModel.onDismissed(callback)
+        viewModel.onDismissed(awaitEffect)
         // THEN
         verifySequence {
             onDismiss.invoke()
-            callback.invoke()
+            awaitEffect.complete()
         }
     }
 }

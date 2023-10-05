@@ -1,6 +1,6 @@
 package com.appcues.statemachine.effects
 
-import com.appcues.statemachine.Action.StartStep
+import com.appcues.statemachine.Action
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coVerifySequence
 import io.mockk.mockk
@@ -14,7 +14,7 @@ internal class AwaitEffectTest {
     @Test
     fun `launch SHOULD return action after complete`() = runTest {
         // GIVEN
-        val action = StartStep(mockk())
+        val action = mockk<Action>()
         val awaitEffect = AwaitEffect(action)
         launch { awaitEffect.complete() }
         // WHEN
@@ -26,7 +26,7 @@ internal class AwaitEffectTest {
     @Test
     fun `launch SHOULD call task await`() = runTest {
         // GIVEN
-        val action = StartStep(mockk())
+        val action = mockk<Action>()
         val task = mockk<CompletableDeferred<Unit>>(relaxed = true)
         val awaitEffect = AwaitEffect(action, task)
         // WHEN
