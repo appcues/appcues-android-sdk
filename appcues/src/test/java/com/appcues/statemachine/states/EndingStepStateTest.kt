@@ -58,13 +58,13 @@ internal class EndingStepStateTest {
     }
 
     @Test
-    fun `take StartStep SHOULD transition to BeginningStepState AND Present`() {
+    fun `take StartStep SHOULD transition to BeginningStepState AND Present WITH shouldPresent false WHEN null dismissEffect`() {
         // GIVEN
         val experience = mockk<Experience>()
         val currentStep = 2
         val nextStep = 3
         val state = EndingStepState(experience, currentStep, true, null)
-        val action = StartStep(nextStep, 2, true)
+        val action = StartStep(nextStep, 2)
         // WHEN
         val transition = state.take(action)
         // THEN
@@ -74,7 +74,29 @@ internal class EndingStepStateTest {
                 experience,
                 action.nextFlatStepIndex,
                 action.nextStepContainerIndex,
-                action.isDifferentContainer
+                false
+            )
+        )
+    }
+
+    @Test
+    fun `take StartStep SHOULD transition to BeginningStepState AND Present WITH shouldPresent true WHEN non-null dismissEffect`() {
+        // GIVEN
+        val experience = mockk<Experience>()
+        val currentStep = 2
+        val nextStep = 3
+        val state = EndingStepState(experience, currentStep, true, mockk())
+        val action = StartStep(nextStep, 2)
+        // WHEN
+        val transition = state.take(action)
+        // THEN
+        transition.assertState(BeginningStepState(experience, nextStep))
+        transition.assertEffect(
+            PresentationEffect(
+                experience,
+                action.nextFlatStepIndex,
+                action.nextStepContainerIndex,
+                true
             )
         )
     }

@@ -7,7 +7,7 @@ import com.appcues.statemachine.Action.MoveToStep
 import com.appcues.statemachine.Action.StartStep
 import com.appcues.statemachine.Error.StepError
 import com.appcues.statemachine.State
-import com.appcues.statemachine.effects.AwaitEffect
+import com.appcues.statemachine.effects.AwaitDismissEffect
 import com.appcues.statemachine.effects.ContinuationEffect
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
@@ -71,9 +71,9 @@ internal class RenderingStepStateTest {
         // WHEN
         val transition = state.take(action)
         // THEN
-        val awaitEffect = AwaitEffect(action)
-        transition.assertState(EndingStepState(experience, flatStepIndex, markComplete, awaitEffect))
-        transition.assertEffect(awaitEffect)
+        val awaitDismissEffect = AwaitDismissEffect(action)
+        transition.assertState(EndingStepState(experience, flatStepIndex, markComplete, awaitDismissEffect))
+        transition.assertEffect(awaitDismissEffect)
     }
 
     @Test
@@ -86,14 +86,33 @@ internal class RenderingStepStateTest {
         }
         val currentIndex = 0
         val nextIndex = 1
-        val markComplete = true
         val state = RenderingStepState(experience, currentIndex, mapOf())
         val action = MoveToStep(StepReference.StepIndex(nextIndex))
-        val nextAction = StartStep(nextIndex, 0, false)
+        val nextAction = StartStep(nextIndex, 0)
         // WHEN
         val transition = state.take(action)
         // THEN
-        transition.assertState(EndingStepState(experience, currentIndex, markComplete, null))
+        transition.assertState(EndingStepState(experience, currentIndex, true, null))
+        transition.assertEffect(ContinuationEffect(nextAction))
+    }
+
+    @Test
+    fun `take MoveToStep SHOULD transition to EndingStep AND markComplete false WHEN new step is lower than current`() {
+        // GIVEN
+        val experience = mockk<Experience> {
+            every { areStepsFromDifferentGroup(any(), any()) } returns false
+            every { flatSteps } returns listOf(mockk(), mockk())
+            every { groupLookup } returns mapOf(0 to 0, 1 to 0)
+        }
+        val currentIndex = 1
+        val nextIndex = 0
+        val state = RenderingStepState(experience, currentIndex, mapOf())
+        val action = MoveToStep(StepReference.StepIndex(nextIndex))
+        val nextAction = StartStep(nextIndex, 0)
+        // WHEN
+        val transition = state.take(action)
+        // THEN
+        transition.assertState(EndingStepState(experience, currentIndex, false, null))
         transition.assertEffect(ContinuationEffect(nextAction))
     }
 
@@ -107,16 +126,15 @@ internal class RenderingStepStateTest {
         }
         val currentIndex = 0
         val nextIndex = 1
-        val markComplete = true
         val state = RenderingStepState(experience, currentIndex, mapOf())
         val action = MoveToStep(StepReference.StepIndex(nextIndex))
-        val nextAction = StartStep(nextIndex, 1, true)
+        val nextAction = StartStep(nextIndex, 1)
         // WHEN
         val transition = state.take(action)
         // THEN
-        val awaitEffect = AwaitEffect(nextAction)
-        transition.assertState(EndingStepState(experience, currentIndex, markComplete, awaitEffect))
-        transition.assertEffect(awaitEffect)
+        val awaitDismissEffect = AwaitDismissEffect(nextAction)
+        transition.assertState(EndingStepState(experience, currentIndex, true, awaitDismissEffect))
+        transition.assertEffect(awaitDismissEffect)
     }
 
     @Test
@@ -138,6 +156,26 @@ internal class RenderingStepStateTest {
     }
 
     @Test
+    fun `take MoveToStep SHOULD keep StepError WHEN stepContainer for nextStepIndex is invalid`() {
+        // GIVEN
+        val experience = mockk<Experience> {
+            every { areStepsFromDifferentGroup(any(), any()) } returns true
+            every { flatSteps } returns listOf(mockk(), mockk())
+            // should never happen
+            every { groupLookup } returns mapOf(0 to 0)
+        }
+        val currentIndex = 0
+        val nextIndex = 1
+        val state = RenderingStepState(experience, currentIndex, mapOf())
+        val action = MoveToStep(StepReference.StepIndex(nextIndex))
+        // WHEN
+        val transition = state.take(action)
+        // THEN
+        transition.assertState(state)
+        transition.assertError(StepError(experience, currentIndex, "StepContainer for nextStepIndex $nextIndex not found"))
+    }
+
+    @Test
     fun `take MoveToStep SHOULD transition to EndExperience WHEN action is MoveToStep Offset 1 on the last step`() {
         // GIVEN
         val experience = mockk<Experience> {
@@ -150,8 +188,8 @@ internal class RenderingStepStateTest {
         // WHEN
         val transition = state.take(action)
         // THEN we actually change from MoveToStep to EndExperience Action
-        val awaitEffect = AwaitEffect(EndExperience(markComplete = true, destroyed = false))
-        transition.assertState(EndingStepState(experience, currentIndex, true, awaitEffect))
-        transition.assertEffect(awaitEffect)
+        val awaitDismissEffect = AwaitDismissEffect(EndExperience(markComplete = true, destroyed = false))
+        transition.assertState(EndingStepState(experience, currentIndex, true, awaitDismissEffect))
+        transition.assertEffect(awaitDismissEffect)
     }
 }

@@ -11,7 +11,7 @@ import com.appcues.data.model.Experience
 import com.appcues.data.model.RenderContext
 import com.appcues.data.model.StepContainer
 import com.appcues.data.model.StepReference.StepGroupPageIndex
-import com.appcues.statemachine.effects.AwaitEffect
+import com.appcues.statemachine.effects.AwaitDismissEffect
 import com.appcues.statemachine.states.EndingStepState
 import com.appcues.statemachine.states.RenderingStepState
 import com.appcues.ui.ExperienceRenderer
@@ -43,7 +43,7 @@ internal class AppcuesViewModel(
             val metadata: Map<String, Any?>,
         ) : UIState()
 
-        data class Dismissing(val awaitEffect: AwaitEffect) : UIState()
+        data class Dismissing(val awaitDismissEffect: AwaitDismissEffect) : UIState()
     }
 
     private val _uiState = MutableStateFlow<UIState>(Idle)
@@ -68,11 +68,11 @@ internal class AppcuesViewModel(
                         SdkMetrics.renderStart(state.experience.requestId)
                         _uiState.value = it
                     }
-                } else if (state is EndingStepState && state.awaitEffect != null) {
+                } else if (state is EndingStepState && state.awaitDismissEffect != null) {
                     // since we are dismissing we don't need to collect states anymore
                     statesJob?.cancel()
                     // dismiss will trigger exit animations and remove experience UI
-                    _uiState.value = Dismissing(state.awaitEffect)
+                    _uiState.value = Dismissing(state.awaitDismissEffect)
                 }
             }
         }
@@ -121,8 +121,8 @@ internal class AppcuesViewModel(
         }
     }
 
-    fun onDismissed(awaitEffect: AwaitEffect) {
+    fun onDismissed(awaitDismissEffect: AwaitDismissEffect) {
         onDismiss()
-        awaitEffect.complete()
+        awaitDismissEffect.dismissed()
     }
 }

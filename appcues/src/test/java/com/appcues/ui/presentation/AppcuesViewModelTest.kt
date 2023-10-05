@@ -14,7 +14,7 @@ import com.appcues.data.model.StepReference
 import com.appcues.data.model.StepReference.StepGroupPageIndex
 import com.appcues.logging.Logcues
 import com.appcues.statemachine.State
-import com.appcues.statemachine.effects.AwaitEffect
+import com.appcues.statemachine.effects.AwaitDismissEffect
 import com.appcues.statemachine.states.EndingStepState
 import com.appcues.statemachine.states.RenderingStepState
 import com.appcues.ui.ExperienceRenderer
@@ -169,21 +169,21 @@ internal class AppcuesViewModelTest {
     @Test
     fun `EndingStep SHOULD emit Dismissing`() = runTest {
         // GIVEN
-        val mockAwaitEffect = AwaitEffect(mockk())
+        val mockAwaitDismissEffect = AwaitDismissEffect(mockk())
         // WHEN
-        experienceStates.emit(EndingStepState(mockk(), 0, true, mockAwaitEffect))
+        experienceStates.emit(EndingStepState(mockk(), 0, true, mockAwaitDismissEffect))
         // THEN
         assertThat(uiStates).hasSize(2)
         with(uiStates[1] as Dismissing) {
-            assertThat(awaitEffect).isEqualTo(mockAwaitEffect)
+            assertThat(awaitDismissEffect).isEqualTo(mockAwaitDismissEffect)
         }
     }
 
     @Test
     fun `EndingStep SHOULD be ignored WHEN uiState is Dismissing`() = runTest {
         // GIVEN
-        val mockAwaitEffect = AwaitEffect(mockk())
-        val endingStep = EndingStepState(mockk(), 0, true, mockAwaitEffect)
+        val mockAwaitDismissEffect = AwaitDismissEffect(mockk())
+        val endingStep = EndingStepState(mockk(), 0, true, mockAwaitDismissEffect)
         // this sets current uiState to Dismissing
         experienceStates.emit(endingStep)
         // WHEN
@@ -196,8 +196,8 @@ internal class AppcuesViewModelTest {
     @Test
     fun `RenderingStepState SHOULD be ignored WHEN uiState is Dismissing`() = runTest {
         // GIVEN
-        val mockAwaitEffect = AwaitEffect(mockk())
-        val endingStep = EndingStepState(mockk(), 0, true, mockAwaitEffect)
+        val mockAwaitDismissEffect = AwaitDismissEffect(mockk())
+        val endingStep = EndingStepState(mockk(), 0, true, mockAwaitDismissEffect)
         // this sets current uiState to Dismissing
         experienceStates.emit(endingStep)
         // WHEN
@@ -294,13 +294,13 @@ internal class AppcuesViewModelTest {
     @Test
     fun `onDismissed SHOULD call onDismiss and callback`() = runTest {
         // GIVEN
-        val awaitEffect = mockk<AwaitEffect>(relaxed = true)
+        val awaitDismissEffect = mockk<AwaitDismissEffect>(relaxed = true)
         // WHEN
-        viewModel.onDismissed(awaitEffect)
+        viewModel.onDismissed(awaitDismissEffect)
         // THEN
         verifySequence {
             onDismiss.invoke()
-            awaitEffect.complete()
+            awaitDismissEffect.dismissed()
         }
     }
 }

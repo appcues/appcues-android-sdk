@@ -167,7 +167,7 @@ internal class ExperienceLifecycleTrackerTest {
             machine.stateFlow.collect {
                 when (it) {
                     is EndingStepState -> {
-                        it.awaitEffect?.complete()
+                        it.awaitDismissEffect?.dismissed()
                     }
                     // ignore other state changes
                     else -> Unit
