@@ -89,7 +89,6 @@ internal abstract class ViewPresenter(
                         logcues = get(),
                         imageLoader = get(),
                         chromeClient = EmbedChromeClient(this),
-                        config = get(),
                     )
                 }
             }

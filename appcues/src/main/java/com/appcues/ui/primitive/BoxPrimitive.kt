@@ -7,7 +7,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.appcues.data.model.ExperiencePrimitive.BoxPrimitive
-import com.appcues.ui.composables.LocalAppcuesConfig
 import com.appcues.ui.extensions.getBoxAlignment
 import com.appcues.ui.extensions.getTextStyle
 
@@ -17,7 +16,7 @@ internal fun BoxPrimitive.Compose(modifier: Modifier) {
         modifier = modifier,
         contentAlignment = style.getBoxAlignment(),
     ) {
-        ProvideTextStyle(style.getTextStyle(LocalContext.current, LocalAppcuesConfig.current, isSystemInDarkTheme())) {
+        ProvideTextStyle(style.getTextStyle(LocalContext.current, isSystemInDarkTheme())) {
             items.forEach { it.Compose() }
         }
     }

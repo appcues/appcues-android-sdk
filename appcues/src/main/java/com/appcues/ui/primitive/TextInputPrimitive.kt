@@ -48,7 +48,6 @@ import com.appcues.data.model.styling.ComponentDataType.PHONE
 import com.appcues.data.model.styling.ComponentDataType.TEXT
 import com.appcues.data.model.styling.ComponentDataType.URL
 import com.appcues.data.model.styling.ComponentStyle
-import com.appcues.ui.composables.LocalAppcuesConfig
 import com.appcues.ui.composables.LocalExperienceStepFormStateDelegate
 import com.appcues.ui.extensions.applyStyle
 import com.appcues.ui.extensions.checkErrorStyle
@@ -88,7 +87,6 @@ internal fun TextInputPrimitive.Compose(modifier: Modifier) {
     val textStyle = LocalTextStyle.current.applyStyle(
         style = textFieldStyle,
         context = LocalContext.current,
-        config = LocalAppcuesConfig.current,
         isDark = isDark,
     )
 
