@@ -1,1 +1,1 @@
-sourceset_dependencies='{":appcues:dokkaHtml/generatedByKspDebugKotlin":[],":appcues:dokkaHtml/generatedByKspReleaseKotlin":[],":appcues:dokkaHtml/main":[],":appcues:dokkaHtml/release":[]}'
+sourceset_dependencies='{":appcues:dokkaHtml/main":[],":appcues:dokkaHtml/release":[]}'
