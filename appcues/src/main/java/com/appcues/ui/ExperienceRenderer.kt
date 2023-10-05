@@ -22,8 +22,8 @@ import com.appcues.di.component.get
 import com.appcues.di.component.inject
 import com.appcues.di.scope.AppcuesScope
 import com.appcues.statemachine.Action.EndExperience
+import com.appcues.statemachine.Action.MoveToStep
 import com.appcues.statemachine.Action.StartExperience
-import com.appcues.statemachine.Action.StartStep
 import com.appcues.statemachine.Error
 import com.appcues.statemachine.Error.RenderContextNotActive
 import com.appcues.statemachine.State
@@ -202,7 +202,7 @@ internal class ExperienceRenderer(override val scope: AppcuesScope) : AppcuesCom
     }
 
     suspend fun show(renderContext: RenderContext, stepReference: StepReference) {
-        stateMachines.getOwner(renderContext)?.stateMachine?.handleAction(StartStep(stepReference))
+        stateMachines.getOwner(renderContext)?.stateMachine?.handleAction(MoveToStep(stepReference))
     }
 
     sealed class PreviewResponse {

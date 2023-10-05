@@ -43,7 +43,7 @@ internal class ExperienceRendererTest {
     @Test
     fun `dismissCurrentExperience SHOULD NOT mark complete WHEN current state is on last step`() = runTest {
         // GIVEN
-        val state = RenderingStepState(mockExperience(), 3, false, mutableMapOf())
+        val state = RenderingStepState(mockExperience(), 3, mutableMapOf())
         val stateMachine = mockk<StateMachine>(relaxed = true) {
             every { this@mockk.state } answers { state }
             coEvery { this@mockk.handleAction(any()) } returns Success(IdlingState)
@@ -64,7 +64,7 @@ internal class ExperienceRendererTest {
     @Test
     fun `dismissCurrentExperience SHOULD NOT mark complete WHEN current state is not on last step`() = runTest {
         // GIVEN
-        val state = RenderingStepState(mockExperience(), 2, false, mutableMapOf())
+        val state = RenderingStepState(mockExperience(), 2, mutableMapOf())
         val stateMachine = mockk<StateMachine>(relaxed = true) {
             every { this@mockk.state } answers { state }
             coEvery { this@mockk.handleAction(any()) } returns Success(IdlingState)

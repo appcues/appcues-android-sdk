@@ -20,8 +20,8 @@ import com.appcues.mocks.mockLocalizedExperience
 import com.appcues.mocks.storageMockk
 import com.appcues.rules.MainDispatcherRule
 import com.appcues.statemachine.Action.EndExperience
+import com.appcues.statemachine.Action.MoveToStep
 import com.appcues.statemachine.Action.StartExperience
-import com.appcues.statemachine.Action.StartStep
 import com.appcues.statemachine.State
 import com.appcues.statemachine.StateMachine
 import com.appcues.statemachine.states.EndingStepState
@@ -50,8 +50,8 @@ internal class ExperienceLifecycleTrackerTest {
     fun `RenderingStep SHOULD track step_completed WHEN action is StartStep`() = runTest {
         // GIVEN
         val experience = mockExperience()
-        val initialState = RenderingStepState(experience, 0, true, mutableMapOf())
-        val action = StartStep(StepOffset(1))
+        val initialState = RenderingStepState(experience, 0, mutableMapOf())
+        val action = MoveToStep(StepOffset(1))
         val scope = initScope(initialState)
         val stateMachine: StateMachine = scope.get()
         val analyticsTracker: AnalyticsTracker = scope.get()
@@ -67,7 +67,7 @@ internal class ExperienceLifecycleTrackerTest {
     fun `RenderingStep SHOULD NOT track step_completed WHEN action is EndExperience markComplete=false AND not on last step`() = runTest {
         // GIVEN
         val experience = mockExperience()
-        val initialState = RenderingStepState(experience, 0, true, mutableMapOf())
+        val initialState = RenderingStepState(experience, 0, mutableMapOf())
         val action = EndExperience(destroyed = false, markComplete = false)
         val scope = initScope(initialState)
         val stateMachine: StateMachine = scope.get()
@@ -84,7 +84,7 @@ internal class ExperienceLifecycleTrackerTest {
     fun `RenderingStep SHOULD track step_completed WHEN action is EndExperience markComplete=true on last step`() = runTest {
         // GIVEN
         val experience = mockExperience()
-        val initialState = RenderingStepState(experience, 0, true, mutableMapOf())
+        val initialState = RenderingStepState(experience, 0, mutableMapOf())
         val action = EndExperience(destroyed = false, markComplete = true)
         val scope = initScope(initialState)
         val stateMachine: StateMachine = scope.get()
@@ -101,7 +101,7 @@ internal class ExperienceLifecycleTrackerTest {
     fun `RenderingStep SHOULD track step_completed WHEN action is EndExperience markComplete=true AND not on last step`() = runTest {
         // GIVEN
         val experience = mockExperience()
-        val initialState = RenderingStepState(experience, 0, true, mutableMapOf())
+        val initialState = RenderingStepState(experience, 0, mutableMapOf())
         val action = EndExperience(destroyed = false, markComplete = true)
         val scope = initScope(initialState)
         val stateMachine: StateMachine = scope.get()
@@ -112,6 +112,21 @@ internal class ExperienceLifecycleTrackerTest {
 
         // THEN
         verify { analyticsTracker.track("appcues:v2:step_completed", any(), any(), any()) }
+    }
+
+    @Test
+    fun `BeginningExperience SHOULD track experience_started`() = runTest {
+        // GIVEN
+        val experience = mockExperience()
+        val initialState = IdlingState
+        val action = StartExperience(experience)
+        val scope = initScope(initialState)
+        val stateMachine: StateMachine = scope.get()
+        val analyticsTracker: AnalyticsTracker = scope.get()
+        // WHEN
+        stateMachine.handleAction(action)
+        // THEN
+        verify { analyticsTracker.track("appcues:v2:experience_started", any(), any(), any()) }
     }
 
     @Test
@@ -152,7 +167,7 @@ internal class ExperienceLifecycleTrackerTest {
             machine.stateFlow.collect {
                 when (it) {
                     is EndingStepState -> {
-                        it.onUiDismissed?.invoke()
+                        it.awaitEffect?.complete()
                     }
                     // ignore other state changes
                     else -> Unit

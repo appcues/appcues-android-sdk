@@ -11,7 +11,7 @@ import com.appcues.statemachine.SideEffect
 import com.appcues.trait.AppcuesTraitException
 import kotlinx.coroutines.delay
 
-internal class PresentationEffect(
+internal data class PresentationEffect(
     private val experience: Experience,
     private val flatStepIndex: Int,
     private val stepContainerIndex: Int,

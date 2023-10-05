@@ -1,10 +1,8 @@
 package com.appcues.statemachine.states
 
 import com.appcues.data.model.Experience
-import com.appcues.data.model.StepReference.StepIndex
 import com.appcues.statemachine.Action
 import com.appcues.statemachine.Action.StartExperience
-import com.appcues.statemachine.Action.StartStep
 import com.appcues.statemachine.Error.ExperienceError
 import com.appcues.statemachine.State
 import com.appcues.statemachine.Transition
@@ -26,10 +24,10 @@ internal object IdlingState : State {
     private fun toBeginningExperience(action: StartExperience): Transition {
         return if (!action.experience.error.isNullOrEmpty()) {
             keep(ExperienceError(action.experience, action.experience.error))
-        } else if (action.experience.stepContainers.isEmpty()) {
+        } else if (action.experience.flatSteps.isEmpty()) {
             keep(ExperienceError(action.experience, "Experience has 0 steps"))
         } else {
-            next(BeginningExperienceState(action.experience), ContinuationEffect(StartStep(StepIndex(0))))
+            next(BeginningExperienceState(action.experience), ContinuationEffect(action))
         }
     }
 }
