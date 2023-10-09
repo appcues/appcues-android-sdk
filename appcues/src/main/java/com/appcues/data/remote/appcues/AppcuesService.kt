@@ -30,6 +30,13 @@ internal interface AppcuesService {
         @Body activity: RequestBody
     ): QualifyResponse
 
+    @POST("v1/accounts/{account}/users/{user}/offline_experiences")
+    suspend fun offlineExperience(
+        @Path("account") account: String,
+        @Path("user") user: String,
+        @Header("Authorization") authorization: String?,
+    ): QualifyResponse
+
     @GET("v1/accounts/{account}/users/{user}/experience_content/{experienceId}")
     suspend fun experienceContent(
         @Path("account") account: String,

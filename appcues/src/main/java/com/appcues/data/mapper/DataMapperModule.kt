@@ -2,6 +2,7 @@ package com.appcues.data.mapper
 
 import com.appcues.data.mapper.action.ActionsMapper
 import com.appcues.data.mapper.experience.ExperienceMapper
+import com.appcues.data.mapper.rules.RulesMapper
 import com.appcues.data.mapper.step.StepMapper
 import com.appcues.data.mapper.trait.TraitsMapper
 import com.appcues.di.AppcuesModule
@@ -13,11 +14,14 @@ internal object DataMapperModule : AppcuesModule {
         scoped {
             ExperienceMapper(
                 stepMapper = get(),
+                rulesMapper = get(),
                 traitsMapper = get(),
                 actionsMapper = get(),
                 scope = get(),
             )
         }
+
+        scoped { RulesMapper() }
 
         scoped {
             StepMapper(

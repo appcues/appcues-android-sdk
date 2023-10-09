@@ -2,6 +2,7 @@ package com.appcues.data.model
 
 import com.appcues.action.ExperienceAction
 import com.appcues.data.model.Action.Trigger.NAVIGATE
+import com.appcues.data.model.rules.QualificationRule
 import com.appcues.trait.AppcuesTraitException
 import com.appcues.trait.MetadataSettingTrait
 import com.appcues.trait.PresentingTrait
@@ -12,6 +13,7 @@ import kotlin.contracts.contract
 internal data class Experience(
     val id: UUID,
     val name: String,
+    val qualificationRule: QualificationRule?,
     val stepContainers: List<StepContainer>,
     val published: Boolean,
     val priority: ExperiencePriority,
@@ -22,6 +24,7 @@ internal data class Experience(
     val localeName: String?,
     val experiment: Experiment?,
     val completionActions: List<ExperienceAction>,
+    // not being used
     val trigger: ExperienceTrigger,
     val requestId: UUID? = null,
     val error: String? = null,

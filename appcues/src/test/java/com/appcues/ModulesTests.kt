@@ -30,7 +30,7 @@ import com.appcues.data.remote.DataRemoteModule
 import com.appcues.data.remote.appcues.AppcuesRemoteSource
 import com.appcues.data.remote.customerapi.CustomerApiRemoteSource
 import com.appcues.data.remote.imageupload.ImageUploadRemoteSource
-import com.appcues.data.remote.sdksettings.SdkSettingsRemoteSource
+import com.appcues.data.remote.sdksettings.AppcuesBundleRemoteSource
 import com.appcues.debugger.AppcuesDebuggerManager
 import com.appcues.debugger.DebuggerFontManager
 import com.appcues.debugger.DebuggerModule
@@ -42,6 +42,7 @@ import com.appcues.di.definition.DefinitionParams
 import com.appcues.di.scope.AppcuesScope
 import com.appcues.di.scope.get
 import com.appcues.logging.Logcues
+import com.appcues.qualifications.QualificationsModule
 import com.appcues.rules.MainDispatcherRule
 import com.appcues.statemachine.StateMachine
 import com.appcues.trait.TraitRegistry
@@ -84,7 +85,8 @@ internal class ModulesTests {
             DataRemoteModule,
             DataMapperModule,
             DataLocalModule,
-            DebuggerModule
+            DebuggerModule,
+            QualificationsModule
         )
 
         val scope = Bootstrap.start(modules) {
@@ -151,7 +153,7 @@ internal class ModulesTests {
     @Test
     fun `check DataRemoteModule instance`() = withScope {
         get<AppcuesRemoteSource>()
-        get<SdkSettingsRemoteSource>()
+        get<AppcuesBundleRemoteSource>()
         get<CustomerApiRemoteSource>()
         get<ImageUploadRemoteSource>()
     }

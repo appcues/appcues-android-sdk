@@ -12,14 +12,14 @@ import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
-internal class SdkSettingsRemoteSourceTest {
+internal class AppcuesBundleRemoteSourceTest {
 
     @Test
     fun `sdkSettings SHOULD return Success`() = runTest {
         // GIVEN
-        val service = mockk<SdkSettingsService>(relaxed = true)
+        val service = mockk<BundleService>(relaxed = true)
         val config = mockk<AppcuesConfig>(relaxed = true)
-        val source = SdkSettingsRemoteSource(service, config)
+        val source = AppcuesBundleRemoteSource(service, config)
         val mockResponse = SdkSettingsResponse(services = Services("customer-api"))
         every { config.accountId } returns "1234"
         coEvery { service.sdkSettings("1234") } returns mockResponse
@@ -32,9 +32,9 @@ internal class SdkSettingsRemoteSourceTest {
     @Test
     fun `sdkSettings SHOULD return Failure`() = runTest {
         // GIVEN
-        val service = mockk<SdkSettingsService>(relaxed = true)
+        val service = mockk<BundleService>(relaxed = true)
         val config = mockk<AppcuesConfig>(relaxed = true)
-        val source = SdkSettingsRemoteSource(service, config)
+        val source = AppcuesBundleRemoteSource(service, config)
         every { config.accountId } returns "1234"
         coEvery { service.sdkSettings("1234") } throws Exception()
         // WHEN

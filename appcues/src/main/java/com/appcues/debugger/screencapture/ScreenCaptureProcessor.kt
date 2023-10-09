@@ -17,7 +17,7 @@ import com.appcues.data.remote.customerapi.CustomerApiBaseUrlInterceptor
 import com.appcues.data.remote.customerapi.CustomerApiRemoteSource
 import com.appcues.data.remote.customerapi.response.PreUploadScreenshotResponse
 import com.appcues.data.remote.imageupload.ImageUploadRemoteSource
-import com.appcues.data.remote.sdksettings.SdkSettingsRemoteSource
+import com.appcues.data.remote.sdksettings.AppcuesBundleRemoteSource
 import com.appcues.monitor.AppcuesActivityMonitor
 import com.appcues.ui.utils.getParentView
 import com.appcues.util.ContextWrapper
@@ -30,7 +30,7 @@ import java.util.Date
 internal class ScreenCaptureProcessor(
     private val config: AppcuesConfig,
     private val contextWrapper: ContextWrapper,
-    private val sdkSettingsRemoteSource: SdkSettingsRemoteSource,
+    private val appcuesBundleRemoteSource: AppcuesBundleRemoteSource,
     private val customerApiRemoteSource: CustomerApiRemoteSource,
     private val imageUploadRemoteSource: ImageUploadRemoteSource,
 ) {
@@ -83,7 +83,7 @@ internal class ScreenCaptureProcessor(
 
     // step 1 - get the settings, with the path to customer API
     private suspend fun configureCustomerApi(): CustomerApiRemoteSource {
-        return when (val settings = sdkSettingsRemoteSource.sdkSettings()) {
+        return when (val settings = appcuesBundleRemoteSource.sdkSettings()) {
             is Failure -> throw ScreenCaptureSaveException(settings.reason)
             is Success -> {
                 CustomerApiBaseUrlInterceptor.baseUrl = settings.value.services.customerApi.toHttpUrl()

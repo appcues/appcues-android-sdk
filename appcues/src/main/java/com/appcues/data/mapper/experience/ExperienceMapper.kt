@@ -6,6 +6,7 @@ import com.appcues.action.appcues.LinkAction
 import com.appcues.data.mapper.LeveledTraitResponse
 import com.appcues.data.mapper.action.ActionsMapper
 import com.appcues.data.mapper.mergeTraits
+import com.appcues.data.mapper.rules.RulesMapper
 import com.appcues.data.mapper.step.StepMapper
 import com.appcues.data.mapper.trait.TraitsMapper
 import com.appcues.data.model.Experience
@@ -35,6 +36,7 @@ import java.util.UUID
 
 internal class ExperienceMapper(
     private val stepMapper: StepMapper,
+    private val rulesMapper: RulesMapper,
     private val traitsMapper: TraitsMapper,
     private val actionsMapper: ActionsMapper,
     override val scope: AppcuesScope,
@@ -70,6 +72,7 @@ internal class ExperienceMapper(
             stepContainers = emptyList(),
             published = true,
             priority = priority,
+            qualificationRule = null,
             type = from.type ?: "",
             renderContext = from.getRenderContext(),
             publishedAt = from.publishedAt,
@@ -96,6 +99,7 @@ internal class ExperienceMapper(
         return Experience(
             id = from.id,
             name = from.name,
+            qualificationRule = rulesMapper.map(from.rules),
             stepContainers = from.steps.mapToStepContainer(renderContext, experienceTraits),
             published = from.state != "DRAFT", // "DRAFT" is used for experience preview in builder
             priority = priority,

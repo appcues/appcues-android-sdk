@@ -16,6 +16,7 @@ internal class ExperienceMapperTest {
         // GIVEN
         val mapper = ExperienceMapper(
             stepMapper = mockk(relaxed = true),
+            rulesMapper = mockk(relaxed = true),
             actionsMapper = mockk(relaxed = true),
             traitsMapper = mockk(relaxed = true),
             scope = mockk(relaxed = true)
@@ -31,6 +32,7 @@ internal class ExperienceMapperTest {
             publishedAt = null,
             nextContentId = null,
             redirectUrl = null,
+            rules = null,
             context = ContextResponse("locale-id", "locale-name")
         )
 
@@ -47,6 +49,7 @@ internal class ExperienceMapperTest {
         // GIVEN
         val mapper = ExperienceMapper(
             stepMapper = mockk(relaxed = true),
+            rulesMapper = mockk(relaxed = true),
             actionsMapper = mockk(relaxed = true),
             traitsMapper = mockk(relaxed = true),
             scope = mockk(relaxed = true)
@@ -62,6 +65,7 @@ internal class ExperienceMapperTest {
             publishedAt = null,
             nextContentId = null,
             redirectUrl = null,
+            rules = null,
             context = null
         )
 
@@ -78,6 +82,7 @@ internal class ExperienceMapperTest {
         // GIVEN
         val mapper = ExperienceMapper(
             stepMapper = mockk(relaxed = true),
+            rulesMapper = mockk(relaxed = true),
             actionsMapper = mockk(relaxed = true),
             traitsMapper = mockk(relaxed = true),
             scope = mockk(relaxed = true)

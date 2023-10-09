@@ -28,7 +28,7 @@ internal object AnalyticsModule : AppcuesModule {
             AnalyticsQueueProcessor(
                 appcuesCoroutineScope = get(),
                 experienceRenderer = get(),
-                repository = get(),
+                qualifications = get(),
                 analyticsQueueScheduler = get()
             )
         }

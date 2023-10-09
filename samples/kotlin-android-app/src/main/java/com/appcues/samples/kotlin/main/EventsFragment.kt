@@ -37,7 +37,7 @@ class EventsFragment : Fragment() {
         _binding = FragmentEventsBinding.inflate(inflater, container, false)
 
         binding.buttonEvent1.setOnClickListener {
-            appcues.track("event1")
+            appcues.track("event1", hashMapOf("attr1" to "test"))
         }
 
         binding.buttonEvent2.setOnClickListener {

@@ -82,6 +82,18 @@ internal class AppcuesRemoteSource(
             )
         }
 
+    suspend fun offlineExperiences(
+        userId: String,
+        userSignature: String?,
+    ): ResultOf<QualifyResponse, RemoteError> =
+        NetworkRequest.execute {
+            service.offlineExperience(
+                account = config.accountId,
+                user = userId,
+                authorization = userSignature?.let { "Bearer $it" },
+            )
+        }
+
     suspend fun checkAppcuesConnection(): Boolean {
         return NetworkRequest.execute {
             service.healthCheck()

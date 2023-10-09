@@ -68,41 +68,42 @@ internal class AppcuesRepository(
         }
     }
 
-    suspend fun trackActivity(activity: ActivityRequest): QualificationResult? = withContext(Dispatchers.IO) {
+    suspend fun trackActivity(activity: ActivityRequest, qualify: Boolean = true): QualificationResult? =
+        withContext(Dispatchers.IO) {
 
-        val activityStorage = ActivityStorage(
-            requestId = activity.requestId,
-            accountId = activity.accountId,
-            userId = activity.userId,
-            data = MoshiConfiguration.moshi.adapter(ActivityRequest::class.java).toJson(activity),
-            userSignature = activity.userSignature,
-        )
-        val itemsToFlush = mutableListOf<ActivityStorage>()
+            val activityStorage = ActivityStorage(
+                requestId = activity.requestId,
+                accountId = activity.accountId,
+                userId = activity.userId,
+                data = MoshiConfiguration.moshi.adapter(ActivityRequest::class.java).toJson(activity),
+                userSignature = activity.userSignature,
+            )
+            val itemsToFlush = mutableListOf<ActivityStorage>()
 
-        // need to protect thread-safety in this section where it is determining which activities in the queue each new
-        // track attempt should process
-        mutex.withLock {
-            // mark this current item as processing before inserting into storage
-            // so that any concurrent flush going on will not use it
-            processingActivity.add(activity.requestId)
+            // need to protect thread-safety in this section where it is determining which activities in the queue each new
+            // track attempt should process
+            mutex.withLock {
+                // mark this current item as processing before inserting into storage
+                // so that any concurrent flush going on will not use it
+                processingActivity.add(activity.requestId)
 
-            // save this item to local storage so we can retry later if needed
-            appcuesLocalSource.saveActivity(activityStorage)
+                // save this item to local storage so we can retry later if needed
+                appcuesLocalSource.saveActivity(activityStorage)
 
-            // exclude any items that are already processing
-            val stored = appcuesLocalSource.getAllActivity().filter { !processingActivity.contains(it.requestId) }
+                // exclude any items that are already processing
+                val stored = appcuesLocalSource.getAllActivity().filter { !processingActivity.contains(it.requestId) }
 
-            itemsToFlush.addAll(prepareForRetry(stored))
+                itemsToFlush.addAll(prepareForRetry(stored))
 
-            // add the current item (since it was marked as processing already)
-            itemsToFlush.add(activityStorage)
+                // add the current item (since it was marked as processing already)
+                itemsToFlush.add(activityStorage)
 
-            // mark them all as requests in process
-            processingActivity.addAll(itemsToFlush.map { it.requestId })
+                // mark them all as requests in process
+                processingActivity.addAll(itemsToFlush.map { it.requestId })
+            }
+
+            post(itemsToFlush, activityStorage, qualify)
         }
-
-        post(itemsToFlush, activityStorage)
-    }
 
     private suspend fun prepareForRetry(available: List<ActivityStorage>): MutableList<ActivityStorage> {
         val activities = available.sortedBy { it.created }
@@ -140,7 +141,7 @@ internal class AppcuesRepository(
         return eligible
     }
 
-    private suspend fun post(queue: MutableList<ActivityStorage>, current: ActivityStorage): QualificationResult? {
+    private suspend fun post(queue: MutableList<ActivityStorage>, current: ActivityStorage, qualify: Boolean): QualificationResult? {
         // pop the next activity off the current queue to process
         // the list is processed in chronological order
         val activity = queue.removeFirstOrNull() ?: return null
@@ -152,7 +153,7 @@ internal class AppcuesRepository(
         var successful = true
         var qualificationResult: QualificationResult? = null
 
-        if (isCurrent) {
+        if (isCurrent && qualify) {
             // if we are processing the current item (last item in queue) - then use the /qualify
             // endpoint and optionally get back qualified experiences to render
             val qualifyResult = appcuesRemoteSource.qualify(activity.userId, activity.userSignature, activity.requestId, activity.data)
@@ -209,7 +210,7 @@ internal class AppcuesRepository(
             qualificationResult
         } else {
             // continue to process the queue until we get to current item
-            post(queue, current)
+            post(queue, current, qualify)
         }
     }
 

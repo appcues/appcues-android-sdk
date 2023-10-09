@@ -2,12 +2,12 @@ package com.appcues.analytics
 
 import com.appcues.AppcuesCoroutineScope
 import com.appcues.LoggingLevel.NONE
-import com.appcues.data.AppcuesRepository
 import com.appcues.data.model.ExperienceTrigger.Qualification
 import com.appcues.data.model.QualificationResult
 import com.appcues.data.remote.appcues.request.ActivityRequest
 import com.appcues.data.remote.appcues.request.EventRequest
 import com.appcues.logging.Logcues
+import com.appcues.qualifications.Qualifications
 import com.appcues.rules.MainDispatcherRule
 import com.appcues.ui.ExperienceRenderer
 import com.google.common.truth.Truth.assertThat
@@ -27,7 +27,7 @@ internal class AnalyticsQueueProcessorTest {
     @get:Rule
     val dispatcherRule = MainDispatcherRule()
 
-    private val mockkEvent: EventRequest = mockk()
+    private val mockkEvent: EventRequest = mockk(relaxed = true)
     private val mockkActivity: ActivityRequest =
         ActivityRequest(userId = "222", accountId = "111", sessionId = UUID.randomUUID(), events = listOf(mockkEvent))
     private val mockkQualificationResult: QualificationResult =
@@ -35,8 +35,8 @@ internal class AnalyticsQueueProcessorTest {
 
     private val coroutineScope = AppcuesCoroutineScope(Logcues(NONE))
     private val experienceRenderer: ExperienceRenderer = mockk()
-    private val repository: AppcuesRepository = mockk<AppcuesRepository>().apply {
-        coEvery { trackActivity(any()) } returns mockkQualificationResult
+    private val qualifications: Qualifications = mockk<Qualifications>(relaxed = true).apply {
+        coEvery { qualify(any()) } returns mockkQualificationResult
     }
 
     private val queueScheduler = StubQueueScheduler()
@@ -48,7 +48,7 @@ internal class AnalyticsQueueProcessorTest {
         analyticsQueueProcessor = AnalyticsQueueProcessor(
             appcuesCoroutineScope = coroutineScope,
             experienceRenderer = experienceRenderer,
-            repository = repository,
+            qualifications = qualifications,
             analyticsQueueScheduler = queueScheduler,
         )
     }
@@ -61,7 +61,7 @@ internal class AnalyticsQueueProcessorTest {
         analyticsQueueProcessor.queue(mockkActivity)
         // then
         verify { queueScheduler.mockkScheduler.schedule(any()) }
-        coVerify { repository.trackActivity(capture(activitySlot)) }
+        coVerify { qualifications.qualify(capture(activitySlot)) }
         coVerify { experienceRenderer.show(mockkQualificationResult) }
         assertThat(activitySlot.captured.events).hasSize(1)
         assertThat(activitySlot.captured.events!![0]).isEqualTo(mockkEvent)
@@ -75,7 +75,7 @@ internal class AnalyticsQueueProcessorTest {
         analyticsQueueProcessor.queueThenFlush(mockkActivity)
         // then
         verify { queueScheduler.mockkScheduler.cancel() }
-        coVerify { repository.trackActivity(capture(activitySlot)) }
+        coVerify { qualifications.qualify(capture(activitySlot)) }
         coVerify { experienceRenderer.show(mockkQualificationResult) }
     }
 
@@ -83,7 +83,7 @@ internal class AnalyticsQueueProcessorTest {
     fun `flushThenSend SHOULD cancel scheduler and call repository for pendingActivities AND for new activity`() {
         // given
         val queuedActivitySlot = slot<ActivityRequest>()
-        val queuedEvent: EventRequest = mockk()
+        val queuedEvent: EventRequest = mockk(relaxed = true)
         val queuedActivity = ActivityRequest(userId = "222", accountId = "111", sessionId = UUID.randomUUID(), events = listOf(queuedEvent))
         val activitySlot = slot<ActivityRequest>()
         analyticsQueueProcessor.queueForTesting(queuedActivity)
@@ -92,9 +92,9 @@ internal class AnalyticsQueueProcessorTest {
         // then verify sequence of events
         coVerifySequence {
             queueScheduler.mockkScheduler.cancel()
-            repository.trackActivity(capture(queuedActivitySlot))
+            qualifications.qualify(capture(queuedActivitySlot))
             experienceRenderer.show(mockkQualificationResult)
-            repository.trackActivity(capture(activitySlot))
+            qualifications.qualify(capture(activitySlot))
             experienceRenderer.show(mockkQualificationResult)
         }
 
@@ -109,14 +109,15 @@ internal class AnalyticsQueueProcessorTest {
     fun `flushAsync SHOULD call repository for pendingActivities`() {
         // given
         val queuedActivitySlot = slot<ActivityRequest>()
-        val queuedEvent: EventRequest = mockk()
+        val queuedEvent: EventRequest = mockk(relaxed = true)
         val queuedActivity = ActivityRequest(userId = "222", accountId = "111", sessionId = UUID.randomUUID(), events = listOf(queuedEvent))
         analyticsQueueProcessor.queueForTesting(queuedActivity)
         // when
         analyticsQueueProcessor.flushAsync()
         // then
         coVerifySequence {
-            repository.trackActivity(capture(queuedActivitySlot))
+            qualifications.qualify(capture(queuedActivitySlot))
+
             experienceRenderer.show(mockkQualificationResult)
         }
     }

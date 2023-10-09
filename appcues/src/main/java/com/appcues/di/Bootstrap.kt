@@ -10,6 +10,7 @@ import com.appcues.data.remote.DataRemoteModule
 import com.appcues.debugger.DebuggerModule
 import com.appcues.di.scope.AppcuesScope
 import com.appcues.di.scope.AppcuesScopeDSL
+import com.appcues.qualifications.QualificationsModule
 import com.appcues.ui.utils.ImageLoaderWrapper
 import com.appcues.util.ContextWrapper
 
@@ -23,7 +24,8 @@ internal object Bootstrap {
         DataRemoteModule,
         DataMapperModule,
         DataLocalModule,
-        DebuggerModule
+        DebuggerModule,
+        QualificationsModule
     )
 
     fun createScope(context: Context, config: AppcuesConfig): AppcuesScope {

@@ -1,5 +1,6 @@
 package com.appcues.data.remote.appcues.response.experience
 
+import com.appcues.data.remote.appcues.response.rules.RulesResponse
 import com.appcues.data.remote.appcues.response.step.StepContainerResponse
 import com.appcues.data.remote.appcues.response.trait.TraitResponse
 import com.squareup.moshi.Json
@@ -11,6 +12,7 @@ internal data class ExperienceResponse(
     val id: UUID,
     val name: String,
     val theme: String?,
+    val rules: RulesResponse?,
     val traits: List<TraitResponse>,
     val steps: List<StepContainerResponse>,
     val state: String?,

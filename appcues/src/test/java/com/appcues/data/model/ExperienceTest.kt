@@ -249,6 +249,7 @@ internal class ExperienceTest {
             trigger = ExperienceTrigger.Preview,
             requestId = null,
             error = null,
+            qualificationRule = null,
             renderErrorId = null,
         )
     }

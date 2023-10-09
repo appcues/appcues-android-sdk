@@ -271,7 +271,7 @@ internal class StateMachineTest : AppcuesScopeTest {
         val experienceAction1 = mockk<ExperienceAction>(relaxed = true)
         val experienceAction2 = mockk<ExperienceAction>(relaxed = true)
         val presentingTrait = mockk<PresentingTrait>(relaxed = true)
-        val navigationActions = listOf(Action(NAVIGATE, experienceAction1), Action(NAVIGATE, experienceAction2),)
+        val navigationActions = listOf(Action(NAVIGATE, experienceAction1), Action(NAVIGATE, experienceAction2))
         val experience = mockExperienceNavigateActions(navigationActions, presentingTrait, Qualification("screen_view"))
         val initialState = IdlingState
         val stateMachine = initMachine(initialState)
@@ -338,6 +338,7 @@ internal class StateMachineTest : AppcuesScopeTest {
             experiment = null,
             localeId = null,
             localeName = null,
+            qualificationRule = null,
             trigger = ExperienceTrigger.ShowCall,
         )
         val initialState = IdlingState
@@ -369,6 +370,7 @@ internal class StateMachineTest : AppcuesScopeTest {
             error = "Failed decode",
             localeId = null,
             localeName = null,
+            qualificationRule = null,
             trigger = ExperienceTrigger.ShowCall,
         )
         val initialState = IdlingState

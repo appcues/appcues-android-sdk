@@ -31,7 +31,7 @@ internal object DebuggerModule : AppcuesModule {
             ScreenCaptureProcessor(
                 config = get(),
                 contextWrapper = get(),
-                sdkSettingsRemoteSource = get(),
+                appcuesBundleRemoteSource = get(),
                 customerApiRemoteSource = get(),
                 imageUploadRemoteSource = get(),
             )

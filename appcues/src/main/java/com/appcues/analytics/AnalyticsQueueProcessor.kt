@@ -2,9 +2,9 @@ package com.appcues.analytics
 
 import androidx.annotation.VisibleForTesting
 import com.appcues.AppcuesCoroutineScope
-import com.appcues.data.AppcuesRepository
 import com.appcues.data.remote.appcues.request.ActivityRequest
 import com.appcues.data.remote.appcues.request.EventRequest
+import com.appcues.qualifications.Qualifications
 import com.appcues.ui.ExperienceRenderer
 import kotlinx.coroutines.launch
 import java.util.Date
@@ -14,7 +14,7 @@ import kotlin.concurrent.schedule
 
 internal class AnalyticsQueueProcessor(
     private val appcuesCoroutineScope: AppcuesCoroutineScope,
-    private val repository: AppcuesRepository,
+    private val qualifications: Qualifications,
     private val experienceRenderer: ExperienceRenderer,
     private val analyticsQueueScheduler: QueueScheduler,
 ) {
@@ -101,18 +101,17 @@ internal class AnalyticsQueueProcessor(
 
     private fun send(activity: ActivityRequest, time: Date?) {
         SdkMetrics.tracked(activity.requestId, time)
+
         appcuesCoroutineScope.launch {
             // this will respond with qualified experiences, if applicable
-            repository.trackActivity(activity).also {
-                it?.let { qualificationResult ->
-                    // we will try to show experience from this list
-                    experienceRenderer.show(qualificationResult)
+            qualifications.qualify(activity)?.also { result ->
+                // we will try to show experience from this list
+                experienceRenderer.show(result)
 
-                    if (qualificationResult.experiences.isEmpty()) {
-                        // we know we are not rendering any experiences, so no metrics needed
-                        // can proactively clear this request out
-                        SdkMetrics.remove(activity.requestId)
-                    }
+                if (result.experiences.isEmpty()) {
+                    // we know we are not rendering any experiences, so no metrics needed
+                    // can proactively clear this request out
+                    SdkMetrics.remove(activity.requestId)
                 }
             }
         }

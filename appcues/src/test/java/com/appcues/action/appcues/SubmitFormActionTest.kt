@@ -285,6 +285,7 @@ internal class SubmitFormActionTest {
         localeName = null,
         completionActions = listOf(),
         trigger = ExperienceTrigger.ShowCall,
+        qualificationRule = null,
         experiment = null,
     )
 }

@@ -30,6 +30,7 @@ internal val contentModalOneStubs = ExperienceResponse(
     redirectUrl = null,
     context = null,
     traits = arrayListOf(),
+    rules = null,
     steps = arrayListOf(
         StepContainerResponse(
             id = UUID.fromString("6c2b7488-309c-432f-b62e-9f8539b46c9d"),

@@ -66,6 +66,7 @@ internal fun mockExperience(onPresent: (() -> Unit)? = null) =
         trigger = ShowCall,
         localeId = null,
         localeName = null,
+        qualificationRule = null,
     )
 
 internal fun mockStep(id: UUID, presentingTrait: PresentingTrait) =
@@ -109,6 +110,7 @@ internal fun mockExperienceExperiment(experiment: Experiment) =
         trigger = ShowCall,
         localeId = null,
         localeName = null,
+        qualificationRule = null,
     )
 
 internal fun mockEmbedExperience(frameId: String, onPresent: (() -> Unit)? = null) =
@@ -136,6 +138,7 @@ internal fun mockEmbedExperience(frameId: String, onPresent: (() -> Unit)? = nul
         trigger = ExperienceTrigger.Qualification("screen_view"),
         localeId = null,
         localeName = null,
+        qualificationRule = null,
     )
 
 // An experience with two step containers, each with one step. The given list of actions are applied to both
@@ -175,6 +178,7 @@ internal fun mockExperienceNavigateActions(actions: List<Action>, presentingTrai
         trigger = trigger,
         localeId = null,
         localeName = null,
+        qualificationRule = null,
     )
 
 internal fun mockLocalizedExperience(localeName: String, localeId: String) =
@@ -202,4 +206,5 @@ internal fun mockLocalizedExperience(localeName: String, localeId: String) =
         trigger = ShowCall,
         localeId = localeId,
         localeName = localeName,
+        qualificationRule = null,
     )

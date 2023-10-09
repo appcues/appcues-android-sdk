@@ -9,8 +9,8 @@ import com.appcues.data.remote.customerapi.CustomerApiRemoteSource
 import com.appcues.data.remote.customerapi.CustomerApiService
 import com.appcues.data.remote.imageupload.ImageUploadRemoteSource
 import com.appcues.data.remote.imageupload.ImageUploadService
-import com.appcues.data.remote.sdksettings.SdkSettingsRemoteSource
-import com.appcues.data.remote.sdksettings.SdkSettingsService
+import com.appcues.data.remote.sdksettings.AppcuesBundleRemoteSource
+import com.appcues.data.remote.sdksettings.BundleService
 import com.appcues.di.AppcuesModule
 import com.appcues.di.scope.AppcuesScopeDSL
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -35,11 +35,13 @@ internal object DataRemoteModule : AppcuesModule {
         }
 
         scoped {
-            SdkSettingsRemoteSource(
+            AppcuesBundleRemoteSource(
                 service = RetrofitWrapper(
-                    baseUrl = SdkSettingsRemoteSource.BASE_URL.toHttpUrl()
-                ).create(SdkSettingsService::class),
+                    baseUrl = AppcuesBundleRemoteSource.BASE_URL.toHttpUrl()
+                ).create(BundleService::class),
                 config = get(),
+                experienceMapper = get(),
+                ruleMapper = get()
             )
         }
 
