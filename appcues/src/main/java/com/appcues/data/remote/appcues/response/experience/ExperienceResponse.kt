@@ -10,7 +10,6 @@ import java.util.UUID
 internal data class ExperienceResponse(
     val id: UUID,
     val name: String,
-    val theme: String?,
     val traits: List<TraitResponse>,
     val steps: List<StepContainerResponse>,
     val state: String?,

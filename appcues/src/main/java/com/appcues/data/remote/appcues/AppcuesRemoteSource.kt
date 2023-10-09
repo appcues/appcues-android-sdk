@@ -7,7 +7,9 @@ import com.appcues.data.remote.NetworkRequest
 import com.appcues.data.remote.RemoteError
 import com.appcues.data.remote.appcues.response.ActivityResponse
 import com.appcues.data.remote.appcues.response.QualifyResponse
+import com.appcues.data.remote.appcues.response.QualifyResponseV2
 import com.appcues.data.remote.appcues.response.experience.ExperienceResponse
+import com.appcues.model.QualifiedExperiences
 import com.appcues.util.ResultOf
 import okhttp3.Interceptor
 import okhttp3.Interceptor.Chain
@@ -21,7 +23,9 @@ internal class AppcuesRemoteSource(
     private val config: AppcuesConfig,
     private val storage: Storage,
 ) {
+
     companion object {
+
         const val BASE_URL = "https://api.appcues.net/"
 
         // we should not show an experience response if it takes > 5 seconds to return
@@ -82,6 +86,22 @@ internal class AppcuesRemoteSource(
             )
         }
 
+    suspend fun qualifyV2(
+        userId: String,
+        userSignature: String?,
+        requestId: UUID,
+        activityJson: String,
+    ): ResultOf<QualifiedExperiences, RemoteError> =
+        NetworkRequest.execute {
+            service.qualifyV2(
+                account = config.accountId,
+                user = userId,
+                requestId = requestId,
+                authorization = userSignature?.let { "Bearer $it" },
+                activity = activityJson.toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
+            ).toQualifiedExperiences()
+        }
+
     suspend fun checkAppcuesConnection(): Boolean {
         return NetworkRequest.execute {
             service.healthCheck()
@@ -94,9 +114,14 @@ internal class AppcuesRemoteSource(
     }
 }
 
+private fun QualifyResponseV2.toQualifiedExperiences(): QualifiedExperiences {
+    TODO("Not yet implemented")
+}
+
 // an interceptor used on Appcues requests to track the timing of SDK requests
 // related to experience rendering, for SDK metrics
 internal class MetricsInterceptor : Interceptor {
+
     override fun intercept(chain: Chain): Response {
         val request = chain.request()
         val requestId = request.header("appcues-request-id")

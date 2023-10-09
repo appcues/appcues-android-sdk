@@ -3,6 +3,7 @@ package com.appcues.data.remote.appcues
 import com.appcues.data.remote.appcues.response.ActivityResponse
 import com.appcues.data.remote.appcues.response.HealthCheckResponse
 import com.appcues.data.remote.appcues.response.QualifyResponse
+import com.appcues.data.remote.appcues.response.QualifyResponseV2
 import com.appcues.data.remote.appcues.response.experience.ExperienceResponse
 import okhttp3.RequestBody
 import retrofit2.http.Body
@@ -29,6 +30,15 @@ internal interface AppcuesService {
         @Header("appcues-request-id") requestId: UUID,
         @Body activity: RequestBody
     ): QualifyResponse
+
+    @POST("v1/accounts/{account}/users/{user}/qualify")
+    suspend fun qualifyV2(
+        @Path("account") account: String,
+        @Path("user") user: String,
+        @Header("Authorization") authorization: String?,
+        @Header("appcues-request-id") requestId: UUID,
+        @Body activity: RequestBody
+    ): QualifyResponseV2
 
     @GET("v1/accounts/{account}/users/{user}/experience_content/{experienceId}")
     suspend fun experienceContent(

@@ -1,8 +1,7 @@
 package com.appcues.ui
 
 import com.appcues.AppcuesFrameView
-import com.appcues.data.model.RenderContext
-import com.appcues.data.model.RenderContext.Modal
+import com.appcues.model.RenderContext
 import com.appcues.statemachine.StateMachine
 import java.lang.ref.WeakReference
 
@@ -28,7 +27,7 @@ internal class AppcuesFrameStateMachineOwner(
 
 internal class ModalStateMachineOwner(override val stateMachine: StateMachine) : StateMachineOwning {
 
-    override val renderContext: RenderContext = Modal
+    override val renderContext: RenderContext = RenderContext.Modal
 
     override suspend fun reset() {
         stateMachine.stop(true)

@@ -103,7 +103,7 @@ internal class AnalyticsQueueProcessor(
         SdkMetrics.tracked(activity.requestId, time)
         appcuesCoroutineScope.launch {
             // this will respond with qualified experiences, if applicable
-            repository.trackActivity(activity).also {
+            repository.trackActivityV2(activity).also {
                 it?.let { qualificationResult ->
                     // we will try to show experience from this list
                     experienceRenderer.show(qualificationResult)

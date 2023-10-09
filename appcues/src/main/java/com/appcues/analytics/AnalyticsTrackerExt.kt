@@ -1,8 +1,8 @@
 package com.appcues.analytics
 
 import com.appcues.analytics.ExperienceLifecycleEvent.ExperienceError
-import com.appcues.data.model.Experience
-import com.appcues.data.model.Experiment
+import com.appcues.model.Experience
+import com.appcues.model.Experiment
 import com.appcues.statemachine.Error
 import com.appcues.util.appcuesFormatted
 import java.util.UUID

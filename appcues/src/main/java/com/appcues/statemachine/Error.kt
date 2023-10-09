@@ -1,7 +1,7 @@
 package com.appcues.statemachine
 
-import com.appcues.data.model.Experience
-import com.appcues.data.model.RenderContext
+import com.appcues.model.Experience
+import com.appcues.model.RenderContext
 import java.util.UUID
 
 internal sealed class Error(open val message: String, errorId: UUID? = null) {

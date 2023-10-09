@@ -20,6 +20,7 @@ import com.appcues.data.remote.appcues.response.experience.ExperienceResponse
 import com.appcues.data.remote.appcues.response.experience.FailedExperienceResponse
 import com.appcues.data.remote.appcues.response.experience.LossyExperienceResponse
 import com.appcues.logging.Logcues
+import com.appcues.model.QualifiedExperiences
 import com.appcues.trait.AppcuesTraitException
 import com.appcues.util.ResultOf
 import com.appcues.util.ResultOf.Failure
@@ -104,6 +105,41 @@ internal class AppcuesRepository(
         post(itemsToFlush, activityStorage)
     }
 
+    suspend fun trackActivityV2(activity: ActivityRequest): QualifiedExperiences? = withContext(Dispatchers.IO) {
+        val activityStorage = ActivityStorage(
+            requestId = activity.requestId,
+            accountId = activity.accountId,
+            userId = activity.userId,
+            data = MoshiConfiguration.moshi.adapter(ActivityRequest::class.java).toJson(activity),
+            userSignature = activity.userSignature,
+        )
+        val itemsToFlush = mutableListOf<ActivityStorage>()
+
+        // need to protect thread-safety in this section where it is determining which activities in the queue each new
+        // track attempt should process
+        mutex.withLock {
+            // mark this current item as processing before inserting into storage
+            // so that any concurrent flush going on will not use it
+            processingActivity.add(activity.requestId)
+
+            // save this item to local storage so we can retry later if needed
+            appcuesLocalSource.saveActivity(activityStorage)
+
+            // exclude any items that are already processing
+            val stored = appcuesLocalSource.getAllActivity().filter { !processingActivity.contains(it.requestId) }
+
+            itemsToFlush.addAll(prepareForRetry(stored))
+
+            // add the current item (since it was marked as processing already)
+            itemsToFlush.add(activityStorage)
+
+            // mark them all as requests in process
+            processingActivity.addAll(itemsToFlush.map { it.requestId })
+        }
+
+        return@withContext postV2(itemsToFlush, activityStorage)
+    }
+
     private suspend fun prepareForRetry(available: List<ActivityStorage>): MutableList<ActivityStorage> {
         val activities = available.sortedBy { it.created }
         val count = activities.count()
@@ -138,6 +174,57 @@ internal class AppcuesRepository(
         }
 
         return eligible
+    }
+
+    private suspend fun postV2(queue: MutableList<ActivityStorage>, current: ActivityStorage): QualifiedExperiences? {
+        // pop the next activity off the current queue to process
+        // the list is processed in chronological order
+        val activity = queue.removeFirstOrNull() ?: return null
+
+        // `current` is the activity that triggered this processing, and may be qualifying
+        // it will be the last activity in the queue
+        val isCurrent = activity == current
+
+        var qualificationResult: QualifiedExperiences? = null
+
+        if (isCurrent) {
+            // if we are processing the current item (last item in queue) - then use the /qualify
+            // endpoint and optionally get back qualified experiences to render
+            appcuesRemoteSource.qualifyV2(activity.userId, activity.userSignature, activity.requestId, activity.data).doIfSuccess {
+                qualificationResult = it
+                appcuesLocalSource.removeActivity(activity)
+            }.doIfFailure {
+                logcues.info("qualify request failed, reason: $it")
+                when (it) {
+                    is NetworkError -> {
+                        when (it.throwable) {
+                            // don't retry on JSON parse failures, server responded, it was just unexpected structure
+                            is JsonDataException -> appcuesLocalSource.removeActivity(activity)
+                        }
+                    }
+                    else -> Unit
+                }
+            }
+        } else {
+            // if we are processing non current items (retries) - then use the /activity
+            // endpoint, which will never returned qualified content, only ingest analytics
+            appcuesRemoteSource.postActivity(activity.userId, activity.userSignature, activity.data).doIfSuccess {
+                appcuesLocalSource.removeActivity(activity)
+            }
+        }
+
+        synchronized(this) {
+            // always mark done processing after an attempt
+            processingActivity.remove(activity.requestId)
+        }
+
+        return if (isCurrent) {
+            // processed the qualify and should return the qualification result
+            qualificationResult
+        } else {
+            // continue to process the queue until we get to current item
+            postV2(queue, current)
+        }
     }
 
     private suspend fun post(queue: MutableList<ActivityStorage>, current: ActivityStorage): QualificationResult? {
