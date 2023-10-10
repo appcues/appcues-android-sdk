@@ -15,6 +15,7 @@ import com.appcues.di.component.AppcuesComponent
 import com.appcues.di.component.inject
 import com.appcues.di.scope.AppcuesScope
 import com.appcues.statemachine.Error
+import com.appcues.statemachine.Error.ExperienceAlreadyActive
 import com.appcues.statemachine.State
 import com.appcues.statemachine.StateMachine
 import com.appcues.statemachine.states.BeginningExperienceState
@@ -65,11 +66,11 @@ internal class ExperienceLifecycleTracker(
                 state.track()
             }
 
-            when (state) {
-                is BeginningExperienceState -> {
+            when {
+                state is RenderingStepState && state.isFirst -> {
                     config.experienceListener?.experienceStarted(state.experience.id)
                 }
-                is EndingExperienceState -> {
+                state is EndingExperienceState -> {
                     config.experienceListener?.experienceFinished(state.experience.id)
                     onEndedExperience(state.experience)
                 }
@@ -88,12 +89,12 @@ internal class ExperienceLifecycleTracker(
 
     private fun State.track() {
         when (this) {
-            is BeginningExperienceState -> {
-                // update this value for auto-properties
-                storage.lastContentShownAt = Date()
-                trackLifecycleEvent(ExperienceStarted(experience), SdkMetrics.trackRender(experience.requestId))
-            }
             is RenderingStepState -> {
+                if (isFirst) {
+                    // update this value for auto-properties
+                    storage.lastContentShownAt = Date()
+                    trackLifecycleEvent(ExperienceStarted(experience), SdkMetrics.trackRender(experience.requestId))
+                }
                 trackLifecycleEvent(StepSeen(experience, flatStepIndex))
             }
             is EndingStepState -> {
@@ -121,7 +122,7 @@ internal class ExperienceLifecycleTracker(
         when (this) {
             is Error.ExperienceError -> trackLifecycleEvent(ExperienceError(this))
             is Error.StepError -> trackLifecycleEvent(StepError(this))
-            else -> Unit
+            ExperienceAlreadyActive -> Unit
         }
     }
 
@@ -145,6 +146,6 @@ internal class ExperienceLifecycleTracker(
         when (this) {
             is Error.ExperienceError -> experience.published
             is Error.StepError -> experience.published
-            else -> false
+            ExperienceAlreadyActive -> false
         }
 }

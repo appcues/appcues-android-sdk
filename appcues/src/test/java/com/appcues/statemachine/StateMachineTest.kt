@@ -82,7 +82,7 @@ internal class StateMachineTest : AppcuesScopeTest {
         val initialState = IdlingState
         val stateMachine = initMachine(initialState)
         val action = StartExperience(experience)
-        val targetState = RenderingStepState(experience, 0, mutableMapOf())
+        val targetState = RenderingStepState(experience, 0, mutableMapOf(), true)
 
         // WHEN
         val result = stateMachine.handleAction(action)
@@ -240,8 +240,8 @@ internal class StateMachineTest : AppcuesScopeTest {
         val experienceAction2 = mockk<ExperienceAction>(relaxed = true)
         val presentingTrait = mockk<PresentingTrait>(relaxed = true)
         val navigationActions = listOf(
-            com.appcues.data.model.Action(NAVIGATE, experienceAction1),
-            com.appcues.data.model.Action(NAVIGATE, experienceAction2),
+            Action(NAVIGATE, experienceAction1),
+            Action(NAVIGATE, experienceAction2),
         )
         val experience = mockExperienceNavigateActions(navigationActions, presentingTrait, Qualification("screen_view"))
         val initialState = RenderingStepState(experience, 0, mutableMapOf())
@@ -271,15 +271,12 @@ internal class StateMachineTest : AppcuesScopeTest {
         val experienceAction1 = mockk<ExperienceAction>(relaxed = true)
         val experienceAction2 = mockk<ExperienceAction>(relaxed = true)
         val presentingTrait = mockk<PresentingTrait>(relaxed = true)
-        val navigationActions = listOf(
-            com.appcues.data.model.Action(NAVIGATE, experienceAction1),
-            com.appcues.data.model.Action(NAVIGATE, experienceAction2),
-        )
+        val navigationActions = listOf(Action(NAVIGATE, experienceAction1), Action(NAVIGATE, experienceAction2),)
         val experience = mockExperienceNavigateActions(navigationActions, presentingTrait, Qualification("screen_view"))
         val initialState = IdlingState
         val stateMachine = initMachine(initialState)
         val action = StartExperience(experience)
-        val targetState = RenderingStepState(experience, 0, mutableMapOf())
+        val targetState = RenderingStepState(experience, 0, mutableMapOf(), true)
         val actionProcessor: ActionProcessor = get()
 
         // WHEN
@@ -306,7 +303,7 @@ internal class StateMachineTest : AppcuesScopeTest {
         val initialState = IdlingState
         val stateMachine = initMachine(initialState)
         val action = StartExperience(experience)
-        val targetState = RenderingStepState(experience, 0, mutableMapOf())
+        val targetState = RenderingStepState(experience, 0, mutableMapOf(), true)
         val actionProcessor: ActionProcessor = get()
 
         // WHEN

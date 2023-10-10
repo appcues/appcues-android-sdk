@@ -49,7 +49,7 @@ internal data class PresentationEffect(
             return RenderStep(metadata)
         } catch (exception: AppcuesTraitException) {
             presentingTrait.remove()
-
+            
             return ReportError(ExperienceError(experience, exception.message), true)
         }
     }
