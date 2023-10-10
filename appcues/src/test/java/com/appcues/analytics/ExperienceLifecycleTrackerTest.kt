@@ -50,7 +50,7 @@ internal class ExperienceLifecycleTrackerTest {
     fun `RenderingStep SHOULD track step_completed WHEN action is StartStep`() = runTest {
         // GIVEN
         val experience = mockExperience()
-        val initialState = RenderingStepState(experience, 0, mutableMapOf())
+        val initialState = RenderingStepState(experience, 0, mutableMapOf(), true)
         val action = MoveToStep(StepOffset(1))
         val scope = initScope(initialState)
         val stateMachine: StateMachine = scope.get()
@@ -67,7 +67,7 @@ internal class ExperienceLifecycleTrackerTest {
     fun `RenderingStep SHOULD NOT track step_completed WHEN action is EndExperience markComplete=false AND not on last step`() = runTest {
         // GIVEN
         val experience = mockExperience()
-        val initialState = RenderingStepState(experience, 0, mutableMapOf())
+        val initialState = RenderingStepState(experience, 0, mutableMapOf(), true)
         val action = EndExperience(destroyed = false, markComplete = false)
         val scope = initScope(initialState)
         val stateMachine: StateMachine = scope.get()
@@ -84,7 +84,7 @@ internal class ExperienceLifecycleTrackerTest {
     fun `RenderingStep SHOULD track step_completed WHEN action is EndExperience markComplete=true on last step`() = runTest {
         // GIVEN
         val experience = mockExperience()
-        val initialState = RenderingStepState(experience, 0, mutableMapOf())
+        val initialState = RenderingStepState(experience, 0, mutableMapOf(), true)
         val action = EndExperience(destroyed = false, markComplete = true)
         val scope = initScope(initialState)
         val stateMachine: StateMachine = scope.get()
@@ -101,7 +101,7 @@ internal class ExperienceLifecycleTrackerTest {
     fun `RenderingStep SHOULD track step_completed WHEN action is EndExperience markComplete=true AND not on last step`() = runTest {
         // GIVEN
         val experience = mockExperience()
-        val initialState = RenderingStepState(experience, 0, mutableMapOf())
+        val initialState = RenderingStepState(experience, 0, mutableMapOf(), true)
         val action = EndExperience(destroyed = false, markComplete = true)
         val scope = initScope(initialState)
         val stateMachine: StateMachine = scope.get()

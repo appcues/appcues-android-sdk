@@ -40,7 +40,7 @@ internal class ActionProcessorTest {
     fun `process SHOULD transform queue WHEN it contains a transformation action`() = runTest {
         // GIVEN
         val experience = mockExperience()
-        val initialState = RenderingStepState(experience, 0, mutableMapOf())
+        val initialState = RenderingStepState(experience, 0, mutableMapOf(), true)
         val scope = createScope(initialState)
         val actionProcessor = ActionProcessor(scope)
         val action1 = TestAction(false)
@@ -63,7 +63,7 @@ internal class ActionProcessorTest {
 
         // GIVEN
         val experience = mockExperience()
-        val initialState = RenderingStepState(experience, 0, mutableMapOf())
+        val initialState = RenderingStepState(experience, 0, mutableMapOf(), true)
         val scope = createScope(initialState)
         val experienceRenderer = scope.get<ExperienceRenderer>()
         val actionProcessor = scope.get<ActionProcessor>()
@@ -105,7 +105,7 @@ internal class ActionProcessorTest {
 
         // GIVEN
         val experience = mockExperience().copy(published = false)
-        val initialState = RenderingStepState(experience, 0, mapOf())
+        val initialState = RenderingStepState(experience, 0, mapOf(), true)
         val scope = createScope(initialState)
         val actionProcessor: ActionProcessor = scope.get()
         val analyticsTracker: AnalyticsTracker = scope.get()

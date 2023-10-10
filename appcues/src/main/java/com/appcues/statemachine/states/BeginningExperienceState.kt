@@ -22,7 +22,7 @@ internal data class BeginningExperienceState(val experience: Experience) : State
 
     private fun toBeginningStep(): Transition {
         return next(
-            state = BeginningStepState(experience, 0),
+            state = BeginningStepState(experience, 0, true),
             sideEffect = PresentationEffect(experience, 0, 0, true)
         )
     }

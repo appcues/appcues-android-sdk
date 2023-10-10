@@ -45,7 +45,7 @@ internal data class EndingStepState(
 
     private fun toBeginningStep(action: StartStep): Transition {
         return next(
-            state = BeginningStepState(experience, action.nextFlatStepIndex),
+            state = BeginningStepState(experience, action.nextFlatStepIndex, false),
             sideEffect = PresentationEffect(
                 experience = experience,
                 flatStepIndex = action.nextFlatStepIndex,

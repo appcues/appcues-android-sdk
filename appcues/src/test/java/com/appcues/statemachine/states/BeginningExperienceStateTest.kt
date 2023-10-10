@@ -47,7 +47,7 @@ internal class BeginningExperienceStateTest {
         // WHEN
         val transition = state.take(StartExperience(experience))
         // THEN
-        transition.assertState(BeginningStepState(experience, 0))
+        transition.assertState(BeginningStepState(experience, 0, true))
         transition.assertEffect(PresentationEffect(experience, 0, 0, true))
     }
 }

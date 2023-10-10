@@ -80,7 +80,8 @@ internal class LaunchExperienceActionTest : AppcuesScopeTest {
         val experienceIdString = experienceId.toString()
         val currentExperience = mockExperience()
         val experienceRenderer: ExperienceRenderer = mockk(relaxed = true) {
-            coEvery { this@mockk.getState(RenderContext.Modal) } returns RenderingStepState(currentExperience, 0, mutableMapOf())
+            coEvery { this@mockk.getState(RenderContext.Modal) } returns
+                RenderingStepState(currentExperience, 0, mutableMapOf(), true)
         }
         val config = mapOf("experienceID" to experienceIdString)
         val action = LaunchExperienceAction(config, RenderContext.Modal, experienceRenderer)

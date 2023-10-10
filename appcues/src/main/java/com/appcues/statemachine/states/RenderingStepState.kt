@@ -15,7 +15,8 @@ import com.appcues.statemachine.effects.ContinuationEffect
 internal data class RenderingStepState(
     val experience: Experience,
     val flatStepIndex: Int,
-    val metadata: Map<String, Any?>
+    val metadata: Map<String, Any?>,
+    val isFirst: Boolean = false,
 ) : State {
 
     override val currentExperience: Experience
