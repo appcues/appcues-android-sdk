@@ -91,7 +91,6 @@ internal class BootstrapTest {
         // GIVEN
         val module1 = mockk<AppcuesModule>(relaxed = true)
         val module2 = mockk<AppcuesModule>(relaxed = true)
-        val context = mockk<ContextWrapper>(relaxed = true)
         // WHEN
         val scope = Bootstrap.start(listOf(module1, module2))
         // THEN
