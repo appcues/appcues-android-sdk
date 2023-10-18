@@ -1,14 +1,14 @@
 package com.appcues.monitor
 
-import android.app.Application
 import android.content.Context
 import androidx.startup.Initializer
+import com.appcues.AppcuesProviderService
 
 @Suppress("unused")
-internal class AppcuesInitializer : Initializer<AppcuesActivityMonitor> {
+internal class AppcuesInitializer : Initializer<Unit> {
 
-    override fun create(context: Context): AppcuesActivityMonitor {
-        return AppcuesActivityMonitor.initialize(context.applicationContext as Application)
+    override fun create(context: Context) {
+        AppcuesProviderService.start(context)
     }
 
     override fun dependencies() = emptyList<Class<out Initializer<*>>>()
