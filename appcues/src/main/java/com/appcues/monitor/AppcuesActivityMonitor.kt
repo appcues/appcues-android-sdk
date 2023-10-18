@@ -34,6 +34,12 @@ internal object AppcuesActivityMonitor : Application.ActivityLifecycleCallbacks 
         application.registerActivityLifecycleCallbacks(this)
     }
 
+    fun reset(application: Application) {
+        application.unregisterActivityLifecycleCallbacks(this)
+        _isPaused = true
+        activityWeakReference = null
+    }
+
     override fun onActivityResumed(activity: Activity) {
         _isPaused = false
         if (this.activity != activity) {
