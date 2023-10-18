@@ -30,7 +30,7 @@ internal object AppcuesActivityMonitor : Application.ActivityLifecycleCallbacks 
         activityMonitorListener.remove(listener)
     }
 
-    fun initialize(application: Application) = apply {
+    fun initialize(application: Application) {
         application.registerActivityLifecycleCallbacks(this)
     }
 
