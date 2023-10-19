@@ -86,20 +86,25 @@ internal class ExperienceRenderer(override val scope: AppcuesScope) : AppcuesCom
      * returns true/false whether the experience is was started
      */
     suspend fun show(experience: Experience): RenderingResult = with(experience) {
-        var canShow = config.interceptor?.canDisplayExperience(experience.id) ?: true
+        if (config.interceptor?.canDisplayExperience(experience.id) == false) {
+            return WontDisplay
+        }
+
+        val stateMachine = stateMachines.getOwner(renderContext)?.stateMachine ?: return NoRenderContext(experience, renderContext)
+            .also { analyticsTracker.trackRecoverableExperienceError(experience, "no render context $renderContext") }
+
+        if (experience.instanceId == stateMachine.state.currentExperience?.instanceId) {
+            // this experience instance is already showing
+            return RenderingResult.Success
+        }
 
         // if there is an active experiment, and we should not show this experience (control group), then
         // track the analytics for experiment_entered, but ensure we exit early. This should be checked before
         // we dismiss any current experience below.
         if (experiment?.group == "control") {
             analyticsTracker.track(experiment)
-            canShow = false
+            return WontDisplay
         }
-
-        if (!canShow) return WontDisplay
-
-        val stateMachine = stateMachines.getOwner(renderContext)?.stateMachine ?: return NoRenderContext(experience, renderContext)
-            .also { analyticsTracker.trackRecoverableExperienceError(experience, "no render context $renderContext") }
 
         if (stateMachine.checkPriority(this)) {
             return when (val result = stateMachine.handleAction(EndExperience(markComplete = false, destroyed = false))) {

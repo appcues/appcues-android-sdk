@@ -7,6 +7,7 @@ import com.appcues.analytics.AnalyticsTracker
 import com.appcues.analytics.ExperienceLifecycleTracker
 import com.appcues.analytics.track
 import com.appcues.data.model.Experience
+import com.appcues.data.model.ExperiencePriority.NORMAL
 import com.appcues.data.model.ExperienceTrigger.Qualification
 import com.appcues.data.model.Experiment
 import com.appcues.data.model.QualificationResult
@@ -21,6 +22,7 @@ import com.appcues.mocks.mockExperience
 import com.appcues.mocks.mockExperienceExperiment
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.StartExperience
+import com.appcues.statemachine.State
 import com.appcues.statemachine.StateMachine
 import com.appcues.statemachine.states.IdlingState
 import com.appcues.statemachine.states.RenderingStepState
@@ -347,6 +349,64 @@ internal class ExperienceRendererTest {
         coVerify(exactly = 1) { owner1Machine.handleAction(StartExperience(experience)) }
         coVerify(exactly = 1) { owner1Machine.stop(false) }
         coVerify(exactly = 1) { owner2Machine.handleAction(StartExperience(experience)) }
+    }
+
+    @Test
+    fun `show SHOULD dismiss current experience WHEN new experience is normal priority`() = runTest {
+        // GIVEN
+        val existingExperience = mockk<Experience>(relaxed = true) {
+            every { renderContext } answers { RenderContext.Modal }
+            every { priority } answers { NORMAL }
+        }
+        val newExperience = mockk<Experience>(relaxed = true) {
+            every { renderContext } answers { RenderContext.Modal }
+            every { priority } answers { NORMAL }
+        }
+        var state: State = RenderingStepState(existingExperience, 0, mutableMapOf())
+        val stateMachine = mockk<StateMachine>(relaxed = true) {
+            every { this@mockk.state } answers { state }
+            coEvery { handleAction(EndExperience(markComplete = false, destroyed = false)) } answers {
+                state = IdlingState
+                Success(state)
+            }
+            coEvery { handleAction(StartExperience(newExperience)) } answers {
+                state = RenderingStepState(newExperience, 0, mutableMapOf())
+                Success(state)
+            }
+        }
+        val scope = createScope { stateMachine }
+        val experienceRenderer = ExperienceRenderer(scope)
+
+        // WHEN
+        experienceRenderer.show(newExperience)
+
+        // THEN
+        coVerify { stateMachine.handleAction(EndExperience(markComplete = false, destroyed = false)) }
+    }
+
+    @Test
+    fun `show SHOULD NOT dismiss current experience WHEN it is the same instance ID`() = runTest {
+        // GIVEN
+        val experience = mockk<Experience>(relaxed = true) {
+            every { renderContext } answers { RenderContext.Modal }
+            every { priority } answers { NORMAL }
+        }
+        val state: State = RenderingStepState(experience, 0, mutableMapOf())
+        val stateMachine = mockk<StateMachine>(relaxed = true) {
+            every { this@mockk.state } answers { state }
+            coEvery { handleAction(any()) } returns Success(IdlingState)
+        }
+        val scope = createScope { stateMachine }
+        val experienceRenderer = ExperienceRenderer(scope)
+
+        // WHEN
+        val result = experienceRenderer.show(experience)
+
+        // THEN
+        // it will be considered a successful render, since already showing, but nothing will change in the state machine
+        assertThat(result).isEqualTo(RenderingResult.Success)
+        coVerify(exactly = 0) { stateMachine.handleAction(StartExperience(experience)) }
+        coVerify(exactly = 0) { stateMachine.handleAction(EndExperience(markComplete = false, destroyed = false)) }
     }
 
     private fun createScope(stateMachine: () -> StateMachine): AppcuesScope {
