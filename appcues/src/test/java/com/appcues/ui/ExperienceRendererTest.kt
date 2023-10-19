@@ -2,6 +2,7 @@ package com.appcues.ui
 
 import com.appcues.AppcuesConfig
 import com.appcues.AppcuesFrameView
+import com.appcues.AppcuesInterceptor
 import com.appcues.analytics.AnalyticsEvent
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.analytics.ExperienceLifecycleTracker
@@ -407,6 +408,65 @@ internal class ExperienceRendererTest {
         assertThat(result).isEqualTo(RenderingResult.Success)
         coVerify(exactly = 0) { stateMachine.handleAction(StartExperience(experience)) }
         coVerify(exactly = 0) { stateMachine.handleAction(EndExperience(markComplete = false, destroyed = false)) }
+    }
+
+    @Test
+    fun `show SHOULD NOT render WHEN config interceptor blocks an experience ID`() = runTest {
+        // GIVEN
+        val mockExperienceId = UUID.randomUUID()
+        val experience = mockk<Experience>(relaxed = true) {
+            every { id } returns mockExperienceId
+        }
+        val stateMachine = mockk<StateMachine>(relaxed = true)
+        val scope = createScope { stateMachine }
+        val experienceRenderer = ExperienceRenderer(scope)
+        val config: AppcuesConfig = scope.get()
+        config.interceptor = object : AppcuesInterceptor {
+            override suspend fun canDisplayExperience(experienceId: UUID): Boolean {
+                return experienceId != mockExperienceId
+            }
+        }
+
+        // WHEN
+        val result = experienceRenderer.show(experience)
+
+        // THEN
+        assertThat(result).isEqualTo(RenderingResult.WontDisplay)
+        coVerify(exactly = 0) { stateMachine.handleAction(StartExperience(experience)) }
+        coVerify(exactly = 0) { stateMachine.handleAction(EndExperience(markComplete = false, destroyed = false)) }
+    }
+
+    @Test
+    fun `show SHOULD render WHEN config interceptor allows an experience ID`() = runTest {
+        // GIVEN
+        val mockExperienceId = UUID.randomUUID()
+        val experience = mockk<Experience>(relaxed = true) {
+            every { id } returns mockExperienceId
+            every { renderContext } returns RenderContext.Modal
+        }
+        var state: State = IdlingState
+        val stateMachine = mockk<StateMachine>(relaxed = true) {
+            every { this@mockk.state } answers { state }
+            coEvery { handleAction(StartExperience(experience)) } answers {
+                state = RenderingStepState(experience, 0, mutableMapOf())
+                Success(state)
+            }
+        }
+        val scope = createScope { stateMachine }
+        val experienceRenderer = ExperienceRenderer(scope)
+        val config: AppcuesConfig = scope.get()
+        config.interceptor = object : AppcuesInterceptor {
+            override suspend fun canDisplayExperience(experienceId: UUID): Boolean {
+                return experienceId == mockExperienceId
+            }
+        }
+
+        // WHEN
+        val result = experienceRenderer.show(experience)
+
+        // THEN
+        assertThat(result).isEqualTo(RenderingResult.Success)
+        coVerify { stateMachine.handleAction(StartExperience(experience)) }
     }
 
     private fun createScope(stateMachine: () -> StateMachine): AppcuesScope {
