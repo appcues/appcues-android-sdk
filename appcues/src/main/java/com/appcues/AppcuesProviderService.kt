@@ -3,6 +3,7 @@ package com.appcues
 import android.app.Activity
 import android.app.Application
 import android.content.Context
+import android.util.Log
 import com.appcues.monitor.AppcuesActivityMonitor
 
 /**
@@ -26,10 +27,16 @@ public object AppcuesProviderService {
      * @param context The Android Context used by the host application.
      */
     public fun start(context: Context) {
+        val application = context.applicationContext as? Application
+
+        if (application == null) {
+            Log.e("Appcues", "no application context available")
+            return
+        }
+
         // stop any existing services first before starting new
         stop(context)
 
-        val application = context.applicationContext as Application
         AppcuesActivityMonitor.initialize(application)
         (context as? Activity)?.let {
             AppcuesActivityMonitor.onActivityResumed(it)
@@ -46,7 +53,13 @@ public object AppcuesProviderService {
      * @param context The Android Context used by the host application.
      */
     public fun stop(context: Context) {
-        val application = context.applicationContext as Application
+        val application = context.applicationContext as? Application
+
+        if (application == null) {
+            Log.e("Appcues", "no application context available")
+            return
+        }
+
         AppcuesActivityMonitor.reset(application)
     }
 }
