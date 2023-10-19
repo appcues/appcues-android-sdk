@@ -52,6 +52,9 @@ $dokka.location:com.appcues/AppcuesFrameView///PointingToDeclaration/appcues/co
 $dokka.location:com.appcues/AppcuesFrameView/AppcuesFrameView/#android.content.Context#android.util.AttributeSet?#kotlin.Int/PointingToDeclaration/appcues/com.appcues/-appcues-frame-view/-appcues-frame-view.html
 $dokka.location:com.appcues/AppcuesInterceptor///PointingToDeclaration/appcues/com.appcues/-appcues-interceptor/index.html
 $dokka.location:com.appcues/AppcuesInterceptor/canDisplayExperience/#java.util.UUID/PointingToDeclaration/appcues/com.appcues/-appcues-interceptor/can-display-experience.html
+$dokka.location:com.appcues/AppcuesProviderService///PointingToDeclaration/appcues/com.appcues/-appcues-provider-service/index.html
+$dokka.location:com.appcues/AppcuesProviderService/start/#android.content.Context/PointingToDeclaration/appcues/com.appcues/-appcues-provider-service/start.html
+$dokka.location:com.appcues/AppcuesProviderService/stop/#android.content.Context/PointingToDeclaration/appcues/com.appcues/-appcues-provider-service/stop.html
 $dokka.location:com.appcues/ElementSelector///PointingToDeclaration/appcues/com.appcues/-element-selector/index.html
 $dokka.location:com.appcues/ElementSelector/evaluateMatch/#com.appcues.ElementSelector/PointingToDeclaration/appcues/com.appcues/-element-selector/evaluate-match.html
 $dokka.location:com.appcues/ElementSelector/toMap/#/PointingToDeclaration/appcues/com.appcues/-element-selector/to-map.html
