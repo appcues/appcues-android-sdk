@@ -69,8 +69,6 @@ internal class AutoPropertyDecorator(
         get() = hashMapOf<String, Any>().apply {
             putAll(sessionLatestUserProperties)
             putAll(applicationProperties)
-            // add userAgent if exists (userAgent is a mutable property loaded asynchronously) and can be null
-            getUserAgent()?.let { put("_userAgent", it) }
             putAll(sessionProperties)
             config.additionalAutoProperties.forEach {
                 // additional props cannot overwrite values for existing internal prop keys
@@ -80,8 +78,6 @@ internal class AutoPropertyDecorator(
                 }
             }
         }
-
-    private fun getUserAgent(): String? = contextWrapper.getUserAgent()
 
     fun decorateTrack(event: EventRequest) = event.apply {
         if (event.name == AnalyticsEvent.ScreenView.eventName) {
