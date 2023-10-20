@@ -65,8 +65,6 @@ internal class ContextWrapper(private val context: Context) {
         return getCurrentLocale(context).toLanguageTag()
     }
 
-    fun getUserAgent(): String? = System.getProperty("http.agent")
-
     private fun getCurrentLocale(context: Context): Locale {
         return if (VERSION.SDK_INT >= VERSION_CODES.N) {
             context.resources.configuration.locales[0]
