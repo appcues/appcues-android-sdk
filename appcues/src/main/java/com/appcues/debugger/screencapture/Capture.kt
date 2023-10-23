@@ -22,6 +22,15 @@ internal data class Capture(
     val metadata: Metadata,
     val timestamp: Date,
 ) {
+
+    val targetableElementCount: Int = getTargetableElementCount(layout)
+
+    private fun getTargetableElementCount(element: ViewElement): Int {
+        val selectableElement = if (element.selector != null) 1 else 0
+
+        return selectableElement + (element.children?.sumOf { getTargetableElementCount(it) } ?: 0)
+    }
+
     // this is a lateinit var instead of a constructor arg so we can ignore it in JSON
     // serialization and a default value is not needed for the Moshi generated adapter
     @Json(ignore = true)
