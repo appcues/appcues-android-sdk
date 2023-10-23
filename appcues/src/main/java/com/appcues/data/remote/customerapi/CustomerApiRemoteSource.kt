@@ -61,6 +61,7 @@ internal class CustomerApiBaseUrlInterceptor : Interceptor {
         val newUrl = request.url.newBuilder()
             .scheme(baseUrl.scheme)
             .host(baseUrl.host)
+            .port(baseUrl.port)
             .build()
 
         request = request.newBuilder()
