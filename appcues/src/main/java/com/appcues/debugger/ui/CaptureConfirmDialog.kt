@@ -37,16 +37,17 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import coil.compose.rememberAsyncImagePainter
 import com.appcues.R.string
 import com.appcues.ViewElement
 import com.appcues.debugger.DebuggerViewModel
@@ -124,8 +125,8 @@ private fun CaptureContents(debuggerViewModel: DebuggerViewModel, capture: Captu
         ) {
             // Captured screenshot
             Image(
+                bitmap = capture.screenshot.asImageBitmap(),
                 modifier = Modifier.border(1.dp, AppcuesColors.CaptureImageBorder),
-                painter = rememberAsyncImagePainter(capture.screenshot),
                 contentDescription = stringResource(id = string.appcues_screen_capture_image_description),
                 contentScale = ContentScale.Fit,
             )
@@ -140,6 +141,7 @@ private fun CaptureContents(debuggerViewModel: DebuggerViewModel, capture: Captu
         }
 
         OutlinedTextField(
+            modifier = Modifier.testTag("screen-capture-name"),
             value = text.value,
             singleLine = true,
             onValueChange = { text.value = it },

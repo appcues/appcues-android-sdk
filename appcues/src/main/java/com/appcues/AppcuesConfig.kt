@@ -92,4 +92,5 @@ public data class AppcuesConfig internal constructor(
 
     // internally used for ui test on debug variant
     internal var imageLoader: ImageLoader? = null
+    internal var configApiBasePath: String? = null
 }

@@ -20,6 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -57,6 +58,7 @@ internal fun BoxScope.SuccessToast(toast: ScreenCaptureSuccess, debuggerState: M
                 interactionSource = remember { MutableInteractionSource() },
                 onClick = toast.onDismiss
             )
+            .testTag("capture-success-toast")
     )
 
     AnimatedVisibility(
@@ -106,6 +108,7 @@ internal fun BoxScope.FailureToast(toast: ScreenCaptureFailure, debuggerState: M
                 interactionSource = remember { MutableInteractionSource() },
                 onClick = toast.onDismiss
             )
+            .testTag("capture-failure-toast")
     )
 
     AnimatedVisibility(

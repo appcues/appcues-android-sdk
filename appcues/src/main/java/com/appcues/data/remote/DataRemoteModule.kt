@@ -35,9 +35,10 @@ internal object DataRemoteModule : AppcuesModule {
         }
 
         scoped {
+            val config: AppcuesConfig = get()
             SdkSettingsRemoteSource(
                 service = RetrofitWrapper(
-                    baseUrl = SdkSettingsRemoteSource.BASE_URL.toHttpUrl()
+                    baseUrl = (config.configApiBasePath ?: SdkSettingsRemoteSource.BASE_URL).toHttpUrl(),
                 ).create(SdkSettingsService::class),
                 config = get(),
             )
