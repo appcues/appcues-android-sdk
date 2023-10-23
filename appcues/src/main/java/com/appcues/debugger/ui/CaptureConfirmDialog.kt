@@ -12,11 +12,13 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.OutlinedTextField
@@ -41,10 +43,14 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -131,14 +137,34 @@ private fun CaptureContents(debuggerViewModel: DebuggerViewModel, capture: Captu
                 contentScale = ContentScale.Fit,
             )
 
-            // Overlay to highlight selectable elements
+            // Overlay to highlight targetable elements
             Canvas(modifier = Modifier.matchParentSize()) {
                 // figure out the scale value
                 val scale = maxHeight / capture.layout.height.dp
 
-                drawSelectableElement(capture.layout, scale)
+                drawTargetableElement(capture.layout, scale)
             }
         }
+
+        if (capture.targetableElementCount > 0) {
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = stringResource(id = string.appcues_screen_capture_not_seeing_element),
+                fontSize = 12.sp
+            )
+        } else {
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = stringResource(id = string.appcues_screen_capture_no_element),
+                fontSize = 12.sp,
+                color = Color(color = 0xFFF39325)
+            )
+        }
+
+        TextWebLink(
+            text = stringResource(id = string.appcues_screen_capture_troubleshoot),
+            url = "https://docs.appcues.com/mobile-sdk-screen-capture-help"
+        )
 
         OutlinedTextField(
             modifier = Modifier.testTag("screen-capture-name"),
@@ -190,11 +216,32 @@ private fun CaptureContents(debuggerViewModel: DebuggerViewModel, capture: Captu
     }
 }
 
-private fun DrawScope.drawSelectableElement(element: ViewElement, scale: Float) {
+@Composable
+private fun TextWebLink(text: String, @Suppress("SameParameterValue") url: String) {
+    val uriHandler = LocalUriHandler.current
+    ClickableText(
+        modifier = Modifier.fillMaxWidth(),
+        text = buildAnnotatedString {
+            append(text)
+            addStyle(
+                style = SpanStyle(
+                    color = Color(color = 0xFF0A7AEA),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium,
+                ),
+                start = 0,
+                end = text.length
+            )
+        },
+        onClick = { uriHandler.openUri(url) }
+    )
+}
+
+private fun DrawScope.drawTargetableElement(element: ViewElement, scale: Float) {
     val x = element.x.dp.toPx() * scale
     val y = element.y.dp.toPx() * scale
 
-    // only draw if this element is selectable
+    // only draw if this element is targetable
     if (element.selector != null) {
         val width = element.width.dp.toPx() * scale
         val height = element.height.dp.toPx() * scale
@@ -213,7 +260,7 @@ private fun DrawScope.drawSelectableElement(element: ViewElement, scale: Float) 
         )
     }
 
-    element.children?.forEach { drawSelectableElement(it, scale) }
+    element.children?.forEach { drawTargetableElement(it, scale) }
 }
 
 private fun Modifier.conditionalClickable(enabled: Boolean, onClick: () -> Unit) = composed {

@@ -99,4 +99,7 @@
     <string name="appcues_screen_capture_toast_upload_failed">Upload failed</string>
     <string name="appcues_screen_capture_toast_try_again">Try again</string>
     <string name="appcues_screen_capture_toast_success_suffix">is now available for preview and targeting.</string>
+    <string name="appcues_screen_capture_not_seeing_element">Not seeing the element you want highlighted?</string>
+    <string name="appcues_screen_capture_no_element">Warning: this screen capture does not have any targetable elements identified.</string>
+    <string name="appcues_screen_capture_troubleshoot">Tap to view troubleshooting documentation.</string>
 </resources>
