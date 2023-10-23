@@ -1,5 +1,6 @@
 package com.appcues.debugger.ui
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -7,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -31,8 +33,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
@@ -43,6 +48,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import coil.compose.rememberAsyncImagePainter
 import com.appcues.R.string
+import com.appcues.ViewElement
 import com.appcues.debugger.DebuggerViewModel
 import com.appcues.debugger.screencapture.Capture
 import com.appcues.ui.extensions.xShapePath
@@ -113,14 +119,26 @@ private fun CaptureContents(debuggerViewModel: DebuggerViewModel, capture: Captu
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Image(
-            painter = rememberAsyncImagePainter(capture.screenshot),
-            contentDescription = stringResource(id = string.appcues_screen_capture_image_description),
-            modifier = Modifier
-                .height(375.dp)
-                .border(1.dp, AppcuesColors.CaptureImageBorder),
-            contentScale = ContentScale.Fit,
-        )
+        BoxWithConstraints(
+            modifier = Modifier.height(375.dp)
+        ) {
+            // Captured screenshot
+            Image(
+                modifier = Modifier.border(1.dp, AppcuesColors.CaptureImageBorder),
+                painter = rememberAsyncImagePainter(capture.screenshot),
+                contentDescription = stringResource(id = string.appcues_screen_capture_image_description),
+                contentScale = ContentScale.Fit,
+            )
+
+            // Overlay to highlight selectable elements
+            Canvas(modifier = Modifier.matchParentSize()) {
+                // figure out the scale value
+                val scale = maxHeight / capture.layout.height.dp
+
+                drawSelectableElement(capture.layout, scale)
+            }
+        }
+
         OutlinedTextField(
             value = text.value,
             singleLine = true,
@@ -153,9 +171,13 @@ private fun CaptureContents(debuggerViewModel: DebuggerViewModel, capture: Captu
                         RoundedCornerShape(6.dp)
                     )
                     .conditionalClickable(
-                        enabled = text.value.isEmpty().not(),
+                        enabled = text.value
+                            .isEmpty()
+                            .not(),
                         onClick = {
-                            val updatedCapture = capture.copy(displayName = text.value).apply { screenshot = capture.screenshot }
+                            val updatedCapture = capture
+                                .copy(displayName = text.value)
+                                .apply { screenshot = capture.screenshot }
                             debuggerViewModel.onScreenCaptureConfirm(updatedCapture)
                         }
                     ),
@@ -164,6 +186,32 @@ private fun CaptureContents(debuggerViewModel: DebuggerViewModel, capture: Captu
             )
         }
     }
+}
+
+private fun DrawScope.drawSelectableElement(element: ViewElement, scale: Float) {
+    val x = element.x.dp.toPx() * scale
+    val y = element.y.dp.toPx() * scale
+
+    // only draw if this element is selectable
+    if (element.selector != null) {
+        val width = element.width.dp.toPx() * scale
+        val height = element.height.dp.toPx() * scale
+
+        drawRect(
+            topLeft = Offset(x, y),
+            size = Size(width, height),
+            color = Color(color = 0x80E3F2FF),
+        )
+
+        drawRect(
+            topLeft = Offset(x, y),
+            size = Size(width, height),
+            color = Color(color = 0xFF1491FF),
+            style = Stroke(width = 1.dp.toPx()),
+        )
+    }
+
+    element.children?.forEach { drawSelectableElement(it, scale) }
 }
 
 private fun Modifier.conditionalClickable(enabled: Boolean, onClick: () -> Unit) = composed {
