@@ -282,7 +282,7 @@ internal class AppcuesTest : AppcuesScopeTest {
         appcues.debug(activity)
 
         // THEN
-        verify { debuggerManager.start(activity, Debugger(null)) }
+        verify { debuggerManager.start(activity, Debugger) }
     }
 
     @Test

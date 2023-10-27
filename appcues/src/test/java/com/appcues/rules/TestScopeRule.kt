@@ -15,6 +15,7 @@ import com.appcues.di.AppcuesModule
 import com.appcues.di.Bootstrap
 import com.appcues.di.scope.AppcuesScope
 import com.appcues.di.scope.AppcuesScopeDSL
+import com.appcues.logging.LogcatDestination
 import com.appcues.logging.Logcues
 import com.appcues.mocks.storageMockk
 import com.appcues.statemachine.StateMachine
@@ -34,6 +35,7 @@ internal class TestScopeRule : TestWatcher() {
             modules = arrayListOf(
                 object : AppcuesModule {
                     override fun AppcuesScopeDSL.install() {
+                        scoped { mockk<LogcatDestination>(relaxed = true) }
                         scoped { AppcuesConfig("00000", "123") }
                         scoped { AppcuesCoroutineScope(get()) }
                         scoped { mockk<AnalyticsTracker>(relaxed = true) }

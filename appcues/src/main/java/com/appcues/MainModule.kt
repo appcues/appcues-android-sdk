@@ -6,6 +6,7 @@ import com.appcues.data.AppcuesRepository
 import com.appcues.debugger.AppcuesDebuggerManager
 import com.appcues.di.AppcuesModule
 import com.appcues.di.scope.AppcuesScopeDSL
+import com.appcues.logging.LogcatDestination
 import com.appcues.logging.Logcues
 import com.appcues.statemachine.StateMachine
 import com.appcues.trait.TraitRegistry
@@ -22,10 +23,8 @@ internal object MainModule : AppcuesModule {
         scoped { ActionRegistry(get()) }
         scoped { ActionProcessor(get()) }
         scoped { AppcuesCoroutineScope(logcues = get()) }
-        scoped {
-            val config: AppcuesConfig = get()
-            Logcues(config.loggingLevel)
-        }
+        scoped { Logcues() }
+        scoped { LogcatDestination(get(), get<AppcuesConfig>().loggingLevel) }
         scoped { Storage(context = get(), config = get()) }
         scoped {
             DeepLinkHandler(
@@ -44,7 +43,7 @@ internal object MainModule : AppcuesModule {
                 appcuesLocalSource = get(),
                 experienceMapper = get(),
                 config = get(),
-                logcues = get(),
+                dataLogcues = get(),
                 storage = get(),
             )
         }

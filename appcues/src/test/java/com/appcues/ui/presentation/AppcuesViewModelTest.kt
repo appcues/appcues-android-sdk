@@ -3,7 +3,6 @@ package com.appcues.ui.presentation
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.viewModelScope
 import com.appcues.AppcuesCoroutineScope
-import com.appcues.LoggingLevel.NONE
 import com.appcues.action.ActionProcessor
 import com.appcues.action.ExperienceAction
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType
@@ -55,7 +54,7 @@ internal class AppcuesViewModelTest {
 
     private val renderContext: RenderContext = RenderContext.Modal
 
-    private val coroutineScope: AppcuesCoroutineScope = AppcuesCoroutineScope(Logcues(NONE))
+    private val coroutineScope: AppcuesCoroutineScope = AppcuesCoroutineScope(Logcues())
 
     private val experienceStates = MutableSharedFlow<State>(1)
     private val experienceRenderer: ExperienceRenderer = mockk {

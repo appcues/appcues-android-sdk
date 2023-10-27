@@ -57,7 +57,7 @@ internal class DeepLinkHandler(
             }
             segments.any() && segments[0] == "debugger" -> {
                 val deepLinkPath = if (segments.count() > 1) segments[1] else null
-                debuggerManager.start(activity, Debugger(deepLinkPath))
+                debuggerManager.start(activity, Debugger, deepLinkPath)
                 true
             }
             segments.any() && segments[0] == "capture_screen" -> {

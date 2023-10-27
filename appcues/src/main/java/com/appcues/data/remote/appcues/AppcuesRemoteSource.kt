@@ -2,18 +2,14 @@ package com.appcues.data.remote.appcues
 
 import com.appcues.AppcuesConfig
 import com.appcues.Storage
-import com.appcues.analytics.SdkMetrics
 import com.appcues.data.remote.NetworkRequest
 import com.appcues.data.remote.RemoteError
 import com.appcues.data.remote.appcues.response.ActivityResponse
 import com.appcues.data.remote.appcues.response.QualifyResponse
 import com.appcues.data.remote.appcues.response.experience.ExperienceResponse
 import com.appcues.util.ResultOf
-import okhttp3.Interceptor
-import okhttp3.Interceptor.Chain
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.Response
 import java.util.UUID
 
 internal class AppcuesRemoteSource(
@@ -21,7 +17,9 @@ internal class AppcuesRemoteSource(
     private val config: AppcuesConfig,
     private val storage: Storage,
 ) {
+
     companion object {
+
         const val BASE_URL = "https://api.appcues.net/"
 
         // we should not show an experience response if it takes > 5 seconds to return
@@ -91,22 +89,5 @@ internal class AppcuesRemoteSource(
                 is ResultOf.Success -> it.value.ok
             }
         }
-    }
-}
-
-// an interceptor used on Appcues requests to track the timing of SDK requests
-// related to experience rendering, for SDK metrics
-internal class MetricsInterceptor : Interceptor {
-    override fun intercept(chain: Chain): Response {
-        val request = chain.request()
-        val requestId = request.header("appcues-request-id")
-        val requestBuilder = request
-            .newBuilder()
-            .method(request.method, request.body)
-            .removeHeader("appcues-request-id")
-        SdkMetrics.requested(requestId)
-        val response = chain.proceed(requestBuilder.build())
-        SdkMetrics.responded(requestId)
-        return response
     }
 }

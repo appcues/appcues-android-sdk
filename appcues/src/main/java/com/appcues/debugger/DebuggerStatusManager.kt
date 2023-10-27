@@ -11,6 +11,7 @@ import com.appcues.BuildConfig
 import com.appcues.R
 import com.appcues.Storage
 import com.appcues.analytics.AnalyticsEvent
+import com.appcues.analytics.AnalyticsTracker
 import com.appcues.data.remote.appcues.AppcuesRemoteSource
 import com.appcues.data.remote.appcues.request.ActivityRequest
 import com.appcues.debugger.model.DebuggerStatusItem
@@ -25,12 +26,16 @@ import com.appcues.debugger.model.TapActionType.DEEPLINK_CHECK
 import com.appcues.debugger.model.TapActionType.HEALTH_CHECK
 import com.appcues.util.ContextWrapper
 import com.appcues.util.resolveActivityCompat
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.UUID
+import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration.Companion.seconds
 
 @Suppress("TooManyFunctions")
@@ -40,7 +45,11 @@ internal class DebuggerStatusManager(
     private val appcuesRemoteSource: AppcuesRemoteSource,
     private val contextWrapper: ContextWrapper,
     private val context: Context,
-) {
+    private val analyticsTracker: AnalyticsTracker,
+) : CoroutineScope {
+
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Default
 
     private var connectedToAppcues: Boolean? = false
 
@@ -65,11 +74,30 @@ internal class DebuggerStatusManager(
     val data: StateFlow<List<DebuggerStatusItem>>
         get() = _data
 
-    suspend fun start() = withContext(Dispatchers.IO) {
-        connectToAppcues(false)
+    private var isStarted = false
+
+    fun start() {
+        if (isStarted) return
+
+        launch {
+            analyticsTracker.analyticsFlow.collect {
+                onActivityRequest(it.request)
+            }
+        }
+
+        launch { connectToAppcues(false) }
+
+        isStarted = true
     }
 
-    suspend fun onActivityRequest(activityRequest: ActivityRequest) = withContext(Dispatchers.IO) {
+    fun reset() {
+        isStarted = false
+        userIdentified = null
+        coroutineContext.cancelChildren()
+        launch { updateData() }
+    }
+
+    private suspend fun onActivityRequest(activityRequest: ActivityRequest) = withContext(Dispatchers.IO) {
         userIdentified = activityRequest.userId.ifEmpty { null }
 
         activityRequest.events?.forEach { event ->
@@ -110,16 +138,14 @@ internal class DebuggerStatusManager(
         updateData()
     }
 
-    suspend fun reset() {
-        userIdentified = null
-        updateData()
-    }
-
-    suspend fun checkDeepLinkValidation(deepLinkPath: String) {
-        if (deepLinkPath == deepLinkValidationToken) {
+    suspend fun checkDeepLinkValidation(deepLinkPath: String): Boolean {
+        return if (deepLinkPath == deepLinkValidationToken) {
             deepLinkConfigured = true
             deepLinkValidationToken = null
             updateData()
+            true
+        } else {
+            false
         }
     }
 

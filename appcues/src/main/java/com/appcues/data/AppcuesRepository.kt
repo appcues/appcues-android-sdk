@@ -11,6 +11,7 @@ import com.appcues.data.model.ExperiencePriority.LOW
 import com.appcues.data.model.ExperiencePriority.NORMAL
 import com.appcues.data.model.ExperienceTrigger
 import com.appcues.data.model.QualificationResult
+import com.appcues.data.remote.DataLogcues
 import com.appcues.data.remote.RemoteError
 import com.appcues.data.remote.RemoteError.NetworkError
 import com.appcues.data.remote.appcues.AppcuesRemoteSource
@@ -19,7 +20,6 @@ import com.appcues.data.remote.appcues.response.QualifyResponse
 import com.appcues.data.remote.appcues.response.experience.ExperienceResponse
 import com.appcues.data.remote.appcues.response.experience.FailedExperienceResponse
 import com.appcues.data.remote.appcues.response.experience.LossyExperienceResponse
-import com.appcues.logging.Logcues
 import com.appcues.trait.AppcuesTraitException
 import com.appcues.util.ResultOf
 import com.appcues.util.ResultOf.Failure
@@ -40,7 +40,7 @@ internal class AppcuesRepository(
     private val appcuesLocalSource: AppcuesLocalSource,
     private val experienceMapper: ExperienceMapper,
     private val config: AppcuesConfig,
-    private val logcues: Logcues,
+    private val dataLogcues: DataLogcues,
     private val storage: Storage,
 ) {
 
@@ -52,7 +52,7 @@ internal class AppcuesRepository(
             when (it) {
                 is Success -> experienceMapper.map(it.value, trigger)
                 is Failure -> {
-                    logcues.info("Experience content request failed, reason: ${it.reason}")
+                    dataLogcues.error("Experience content request failed", it.reason.toString())
                     null
                 }
             }
@@ -63,7 +63,10 @@ internal class AppcuesRepository(
         return@withContext appcuesRemoteSource.getExperiencePreview(experienceId, storage.userSignature).let {
             when (it) {
                 is Success -> Success(experienceMapper.map(it.value, ExperienceTrigger.Preview))
-                is Failure -> it.also { logcues.info("Experience preview request failed, reason: ${it.reason}") }
+                is Failure -> {
+                    dataLogcues.error("Experience preview request failed", it.reason.toString())
+                    it
+                }
             }
         }
     }
@@ -168,7 +171,7 @@ internal class AppcuesRepository(
             }
 
             qualifyResult.doIfFailure {
-                logcues.info("qualify request failed, reason: $it")
+                dataLogcues.error("Qualify request failed", it.toString())
                 when (it) {
                     is NetworkError -> {
                         when (it.throwable) {
@@ -186,7 +189,7 @@ internal class AppcuesRepository(
             val activityResult = appcuesRemoteSource.postActivity(activity.userId, activity.userSignature, activity.data)
 
             activityResult.doIfFailure {
-                logcues.info("activity request failed, reason: $it")
+                dataLogcues.error("Activity request failed", it.toString())
                 when (it) {
                     is NetworkError -> successful = false
                     else -> Unit

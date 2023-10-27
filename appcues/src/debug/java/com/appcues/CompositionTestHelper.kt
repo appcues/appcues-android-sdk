@@ -47,7 +47,7 @@ public fun ComposeContent(json: String, imageLoader: ImageLoader) {
     AppcuesTheme {
         CompositionLocalProvider(
             LocalImageLoader provides imageLoader,
-            LocalLogcues provides Logcues(LoggingLevel.DEBUG),
+            LocalLogcues provides Logcues(),
             LocalExperienceStepFormStateDelegate provides ExperienceStepFormState(),
             LocalAppcuesActionDelegate provides FakeAppcuesActionDelegate(),
             LocalExperienceCompositionState provides ExperienceCompositionState(),
@@ -108,7 +108,7 @@ public fun ComposeContainer(context: Context, stepContentJson: List<String>?, tr
     AppcuesTheme {
         CompositionLocalProvider(
             LocalImageLoader provides imageLoader,
-            LocalLogcues provides Logcues(LoggingLevel.DEBUG),
+            LocalLogcues provides Logcues(),
             LocalExperienceStepFormStateDelegate provides ExperienceStepFormState(),
             LocalAppcuesActionDelegate provides FakeAppcuesActionDelegate(),
             LocalExperienceCompositionState provides ExperienceCompositionState(
@@ -170,7 +170,7 @@ public fun ComposeContainer(
     AppcuesTheme {
         CompositionLocalProvider(
             LocalImageLoader provides imageLoader,
-            LocalLogcues provides Logcues(LoggingLevel.DEBUG),
+            LocalLogcues provides Logcues(),
             LocalExperienceStepFormStateDelegate provides ExperienceStepFormState(),
             LocalAppcuesActionDelegate provides FakeAppcuesActionDelegate(),
             LocalExperienceCompositionState provides ExperienceCompositionState(

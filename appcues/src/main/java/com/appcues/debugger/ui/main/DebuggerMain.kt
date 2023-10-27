@@ -61,6 +61,7 @@ internal fun DebuggerMain(
     debuggerViewModel: DebuggerViewModel,
     onEventClick: (DebuggerEventItem) -> Unit,
     onFontsClick: () -> Unit,
+    onDetailedLogClick: () -> Unit,
 ) {
     val statusInfo = debuggerViewModel.statusInfo.collectAsState()
     val recentEvents = debuggerViewModel.events.collectAsState()
@@ -73,22 +74,15 @@ internal fun DebuggerMain(
             .lazyColumnScrollIndicator(lazyListState),
         state = lazyListState
     ) {
+        statusSection(statusInfo.value) { debuggerViewModel.onStatusTapAction(it) }
 
-        statusItemsHeader()
+        infoSection(onFontsClick, onDetailedLogClick)
 
-        statusItemsCompose(statusInfo.value) { debuggerViewModel.onStatusTapAction(it) }
-
-        infoHeader()
-
-        infoItemsCompose { onFontsClick() }
-
-        recentEventsItemsHeader(isFilterOn.value) { debuggerViewModel.onApplyEventFilter(it) }
-
-        recentEventsItemsCompose(recentEvents.value) { onEventClick(it) }
+        eventsSection(isFilterOn.value, recentEvents.value, { debuggerViewModel.onApplyEventFilter(it) }, { onEventClick(it) })
     }
 }
 
-private fun LazyListScope.statusItemsHeader() {
+private fun LazyListScope.statusSection(list: List<DebuggerStatusItem>, onTap: (TapActionType) -> Unit) {
     item {
         Box(
             modifier = Modifier
@@ -106,9 +100,7 @@ private fun LazyListScope.statusItemsHeader() {
             )
         }
     }
-}
 
-private fun LazyListScope.statusItemsCompose(list: List<DebuggerStatusItem>, onTap: (TapActionType) -> Unit) {
     items(list) { item ->
         Row(
             modifier = Modifier
@@ -132,7 +124,10 @@ private fun LazyListScope.statusItemsCompose(list: List<DebuggerStatusItem>, onT
     }
 }
 
-private fun LazyListScope.infoHeader() {
+private fun LazyListScope.infoSection(
+    onFontsClick: () -> Unit,
+    onDetailedLogClick: () -> Unit,
+) {
     item {
         Box(
             modifier = Modifier
@@ -149,14 +144,12 @@ private fun LazyListScope.infoHeader() {
             )
         }
     }
-}
 
-private fun LazyListScope.infoItemsCompose(onFontTap: () -> Unit) {
     item {
         Row(
             modifier = Modifier
                 .fillParentMaxWidth()
-                .clickable { onFontTap() }
+                .clickable { onFontsClick() }
                 .padding(horizontal = 20.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -167,9 +160,30 @@ private fun LazyListScope.infoItemsCompose(onFontTap: () -> Unit) {
 
         ListItemDivider()
     }
+
+    item {
+        Row(
+            modifier = Modifier
+                .fillParentMaxWidth()
+                .clickable { onDetailedLogClick() }
+                .padding(horizontal = 20.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            with(DebuggerInfoItem(LocalContext.current.getString(R.string.appcues_debugger_info_detailed_log))) {
+                InfoItemContent(rowScope = this@Row)
+            }
+        }
+
+        ListItemDivider()
+    }
 }
 
-private fun LazyListScope.recentEventsItemsHeader(currentFilter: EventType?, onApplyFilter: (EventType?) -> Unit) {
+private fun LazyListScope.eventsSection(
+    currentFilter: EventType?,
+    list: List<DebuggerEventItem>,
+    onApplyFilter: (EventType?) -> Unit,
+    onTap: (DebuggerEventItem) -> Unit
+) {
     item {
         Box(
             modifier = Modifier
@@ -192,7 +206,8 @@ private fun LazyListScope.recentEventsItemsHeader(currentFilter: EventType?, onA
 
             Crossfade(
                 targetState = currentFilter != null,
-                modifier = Modifier.align(Alignment.CenterEnd)
+                modifier = Modifier.align(Alignment.CenterEnd),
+                label = "filter cross-fade"
             ) {
                 Icon(
                     modifier = Modifier
@@ -214,6 +229,22 @@ private fun LazyListScope.recentEventsItemsHeader(currentFilter: EventType?, onA
                 onApplyFilter(it)
             }
         }
+    }
+
+    items(list) { item ->
+        Row(
+            modifier = Modifier
+                .fillParentMaxWidth()
+                .clickable { onTap(item) }
+                .padding(horizontal = 20.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            item.EventItemIcon()
+
+            item.EventItemContent(rowScope = this@Row)
+        }
+
+        ListItemDivider()
     }
 }
 
@@ -265,7 +296,10 @@ private fun EventTypeFilterDropdown(
 
 @Composable
 private fun ColumnScope.FilterEventTypeMenuItem(eventType: EventType?, isSelected: Boolean, onClick: () -> Unit) {
-    val background = animateColorAsState(targetValue = if (isSelected) AppcuesColors.PurpleLuna else MaterialTheme.colors.background)
+    val background = animateColorAsState(
+        targetValue = if (isSelected) AppcuesColors.PurpleLuna else MaterialTheme.colors.background,
+        label = "Dropdown background"
+    )
     DropdownMenuItem(
         modifier = Modifier
             .align(Alignment.Start)
@@ -287,27 +321,6 @@ private fun ColumnScope.FilterEventTypeMenuItem(eventType: EventType?, isSelecte
                 .padding(start = 20.dp),
             text = LocalContext.current.getString(eventType.getTitleString())
         )
-    }
-}
-
-private fun LazyListScope.recentEventsItemsCompose(list: List<DebuggerEventItem>, onTap: (DebuggerEventItem) -> Unit) {
-    items(list) { item ->
-
-        Row(
-            modifier = Modifier
-                .fillParentMaxWidth()
-                .clickable { onTap(item) }
-                .padding(horizontal = 20.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            with(item) {
-                EventItemIcon()
-
-                EventItemContent(rowScope = this@Row)
-            }
-        }
-
-        ListItemDivider()
     }
 }
 

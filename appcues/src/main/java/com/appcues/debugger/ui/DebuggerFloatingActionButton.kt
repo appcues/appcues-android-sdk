@@ -1,7 +1,6 @@
 package com.appcues.debugger.ui
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
@@ -21,7 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,7 +51,6 @@ private const val FAB_DRAGGING_SIZE_MULTIPLIER = 1.1f
 private const val FAB_DEFAULT_SIZE_MULTIPLIER = 1.0f
 private const val FAB_PAUSED_SIZE_MULTIPLIER = 0.0f
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 internal fun BoxScope.DebuggerFloatingActionButton(
     debuggerState: MutableDebuggerState,
@@ -60,8 +58,12 @@ internal fun BoxScope.DebuggerFloatingActionButton(
 ) {
     val resizeBy = resizeAnimatedState(debuggerState)
 
-    val iconResId = remember(debuggerState.debugMode) { derivedStateOf { debuggerState.debugMode.value.fabIconResourceId() } }
-    val clickLabelResId = remember(debuggerState.debugMode) { derivedStateOf { debuggerState.debugMode.value.fabClickLabelResourceId() } }
+    val iconResId = remember(debuggerState.debugMode) {
+        mutableIntStateOf(debuggerState.debugMode.fabIconResourceId())
+    }
+    val clickLabelResId = remember(debuggerState.debugMode) {
+        mutableIntStateOf(debuggerState.debugMode.fabClickLabelResourceId())
+    }
 
     // only draw if IntOffset is not null
     debuggerState.getFabPositionAsIntOffset()?.let { offset ->
@@ -85,7 +87,8 @@ internal fun BoxScope.DebuggerFloatingActionButton(
                     debuggerState.isExpanded.targetState -> 2.dp
                     debuggerState.isVisible.currentState -> 4.dp
                     else -> 0.dp
-                }
+                },
+                label = "Debugger Fab elevation"
             )
 
             Box(
@@ -95,9 +98,9 @@ internal fun BoxScope.DebuggerFloatingActionButton(
                         shape = RoundedCornerShape(percent = 100)
                     )
                     .clickableAndDraggable(
-                        onClickLabel = LocalContext.current.getString(clickLabelResId.value),
-                        onDragEnd = { debuggerViewModel.transition(Idle(debuggerViewModel.mode)) },
-                        onDrag = { debuggerViewModel.transition(Dragging(it)) },
+                        onClickLabel = LocalContext.current.getString(clickLabelResId.intValue),
+                        onDragEnd = { debuggerViewModel.transition(Idle(debuggerState.debugMode)) },
+                        onDrag = { debuggerViewModel.transition(Dragging(debuggerState.debugMode, it)) },
                         onClick = { debuggerViewModel.onFabClick() }
                     )
                     .size(size = debuggerState.fabSize.times(resizeBy.value))
@@ -111,7 +114,7 @@ internal fun BoxScope.DebuggerFloatingActionButton(
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
-                    painter = painterResource(id = iconResId.value),
+                    painter = painterResource(id = iconResId.intValue),
                     tint = Color.White,
                     contentDescription = LocalContext.current.getString(R.string.appcues_debugger_fab_image_content_description)
                 )
@@ -129,7 +132,8 @@ private fun resizeAnimatedState(debuggerState: MutableDebuggerState) = animateFl
         debuggerState.isDragging.targetState && debuggerState.isPaused.value -> FAB_PAUSED_SIZE_MULTIPLIER
         debuggerState.isDragging.targetState -> FAB_DRAGGING_SIZE_MULTIPLIER
         else -> FAB_DEFAULT_SIZE_MULTIPLIER
-    }
+    },
+    label = "On dragging FAB resize"
 )
 
 private fun Modifier.offsetResize(offset: IntOffset, originalSize: Dp, resizeBy: Float) = then(

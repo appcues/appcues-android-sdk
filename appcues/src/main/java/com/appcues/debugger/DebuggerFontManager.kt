@@ -32,7 +32,6 @@ internal class DebuggerFontManager(
     )
 
     fun getAppSpecificFonts(): List<DebuggerFontItem> {
-
         val debugFonts = mutableListOf<DebuggerFontItem>()
         addFontResources(debugFonts)
         addFontAssets(debugFonts)

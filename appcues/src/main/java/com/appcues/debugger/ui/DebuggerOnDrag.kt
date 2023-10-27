@@ -26,12 +26,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.appcues.R
 import com.appcues.R.drawable
+import com.appcues.debugger.DebuggerViewModel
+import com.appcues.debugger.DebuggerViewModel.UIState.Dismissing
 import com.appcues.ui.theme.AppcuesColors
 
 @Composable
 internal fun BoxScope.DebuggerOnDrag(
     debuggerState: MutableDebuggerState,
-    onDismiss: () -> Unit,
+    debuggerViewModel: DebuggerViewModel,
 ) {
     // don't show if current debugger is paused
     if (debuggerState.isPaused.value) return
@@ -51,7 +53,7 @@ internal fun BoxScope.DebuggerOnDrag(
     with(debuggerState.isDragging) {
         LaunchedEffect(targetState) {
             if (targetState.not() && debuggerState.isDraggingOverDismiss.value) {
-                onDismiss()
+                debuggerViewModel.transition(Dismissing(debuggerState.debugMode))
             }
         }
     }
@@ -63,8 +65,14 @@ private const val ROTATE_NONE = 0f
 @Composable
 private fun DismissDebuggerArea(debuggerState: MutableDebuggerState, onGloballyPositioned: (LayoutCoordinates) -> Unit) {
     val isDraggingAndColliding = debuggerState.isDragging.targetState && debuggerState.isDraggingOverDismiss.value
-    val size = animateDpAsState(if (isDraggingAndColliding) 50.dp else 44.dp)
-    val rotate = animateFloatAsState(if (isDraggingAndColliding) ROTATE_90_DEGREES else ROTATE_NONE)
+    val size = animateDpAsState(
+        if (isDraggingAndColliding) 50.dp else 44.dp,
+        label = "Fab dismissing Size"
+    )
+    val rotate = animateFloatAsState(
+        if (isDraggingAndColliding) ROTATE_90_DEGREES else ROTATE_NONE,
+        label = "Fab dismissing Rotation"
+    )
 
     Box(
         modifier = Modifier

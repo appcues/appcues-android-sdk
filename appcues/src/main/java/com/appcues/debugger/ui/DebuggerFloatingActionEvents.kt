@@ -67,15 +67,15 @@ internal fun BoxScope.DebuggerFloatingActionEvents(
                 .align(
                     when {
                         eventsProperties.anchorToStart && eventsProperties.drawTop -> Alignment.BottomStart
-                        eventsProperties.anchorToStart && eventsProperties.drawTop.not() -> Alignment.TopStart
-                        eventsProperties.anchorToStart.not() && eventsProperties.drawTop -> Alignment.BottomEnd
+                        eventsProperties.anchorToStart -> Alignment.TopStart
+                        eventsProperties.drawTop -> Alignment.BottomEnd
                         else -> Alignment.TopEnd
                     }
                 )
                 .offset { eventsProperties.positionOffset },
             contentAlignment = Alignment.TopEnd
         ) {
-            val shouldDisplayEvents = debuggerState.debugMode.value is Debugger &&
+            val shouldDisplayEvents = debuggerState.debugMode is Debugger &&
                 debuggerState.isDragging.targetState.not() &&
                 debuggerState.isExpanded.targetState.not()
 
@@ -103,7 +103,10 @@ internal fun BoxScope.DebuggerFloatingActionEvents(
 private fun LazyItemScope.Item(event: DebuggerEventItem, isAnchoredStart: Boolean, eventTimedOut: () -> Unit) {
     val visibility = remember { MutableTransitionState(false) }.apply { targetState = event.showOnFab }
     val displayed = remember { mutableStateOf(false) }
-    val alpha = animateFloatAsState(targetValue = if (displayed.value) FAB_EVENT_DISPLAYED_ALPHA else 1f)
+    val alpha = animateFloatAsState(
+        targetValue = if (displayed.value) FAB_EVENT_DISPLAYED_ALPHA else 1f,
+        label = "Floating actions Alpha"
+    )
 
     AnimatedVisibility(
         enter = slideInHorizontally(initialOffsetX = { if (isAnchoredStart) -it else it }),

@@ -3,12 +3,13 @@ package com.appcues.data.remote
 import com.appcues.AppcuesConfig
 import com.appcues.data.remote.appcues.AppcuesRemoteSource
 import com.appcues.data.remote.appcues.AppcuesService
-import com.appcues.data.remote.appcues.MetricsInterceptor
-import com.appcues.data.remote.customerapi.CustomerApiBaseUrlInterceptor
 import com.appcues.data.remote.customerapi.CustomerApiRemoteSource
 import com.appcues.data.remote.customerapi.CustomerApiService
 import com.appcues.data.remote.imageupload.ImageUploadRemoteSource
 import com.appcues.data.remote.imageupload.ImageUploadService
+import com.appcues.data.remote.interceptor.CustomerApiBaseUrlInterceptor
+import com.appcues.data.remote.interceptor.HttpLogcuesInterceptor
+import com.appcues.data.remote.interceptor.SdkMetricsInterceptor
 import com.appcues.data.remote.sdksettings.SdkSettingsRemoteSource
 import com.appcues.data.remote.sdksettings.SdkSettingsService
 import com.appcues.di.AppcuesModule
@@ -19,12 +20,18 @@ import java.util.concurrent.TimeUnit.SECONDS
 internal object DataRemoteModule : AppcuesModule {
 
     override fun AppcuesScopeDSL.install() {
+        scoped { DataLogcues(get()) }
+
+        factory { HttpLogcuesInterceptor(get()) }
+        factory { SdkMetricsInterceptor() }
+        factory { CustomerApiBaseUrlInterceptor() }
+
         scoped {
             val config: AppcuesConfig = get()
             AppcuesRemoteSource(
                 service = RetrofitWrapper(
                     baseUrl = (config.apiBasePath ?: AppcuesRemoteSource.BASE_URL).toHttpUrl(),
-                    interceptors = listOf(MetricsInterceptor()),
+                    interceptors = listOf(get<HttpLogcuesInterceptor>(), get<SdkMetricsInterceptor>()),
                     okhttpConfig = {
                         it.readTimeout(AppcuesRemoteSource.READ_TIMEOUT_SECONDS, SECONDS)
                     }
@@ -39,6 +46,7 @@ internal object DataRemoteModule : AppcuesModule {
             SdkSettingsRemoteSource(
                 service = RetrofitWrapper(
                     baseUrl = (config.configApiBasePath ?: SdkSettingsRemoteSource.BASE_URL).toHttpUrl(),
+                    interceptors = listOf(get<HttpLogcuesInterceptor>())
                 ).create(SdkSettingsService::class),
                 config = get(),
             )
@@ -48,7 +56,7 @@ internal object DataRemoteModule : AppcuesModule {
             CustomerApiRemoteSource(
                 service = RetrofitWrapper(
                     baseUrl = null,
-                    interceptors = listOf(CustomerApiBaseUrlInterceptor()),
+                    interceptors = listOf(get<HttpLogcuesInterceptor>(), get<CustomerApiBaseUrlInterceptor>()),
                 ).create(CustomerApiService::class),
                 config = get()
             )
@@ -56,7 +64,10 @@ internal object DataRemoteModule : AppcuesModule {
 
         scoped {
             ImageUploadRemoteSource(
-                service = RetrofitWrapper(null).create(ImageUploadService::class)
+                service = RetrofitWrapper(
+                    baseUrl = null,
+                    interceptors = listOf(get<HttpLogcuesInterceptor>())
+                ).create(ImageUploadService::class)
             )
         }
     }
