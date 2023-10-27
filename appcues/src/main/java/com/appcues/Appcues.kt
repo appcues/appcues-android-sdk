@@ -16,6 +16,7 @@ import com.appcues.di.Bootstrap
 import com.appcues.di.scope.AppcuesScope
 import com.appcues.di.scope.get
 import com.appcues.di.scope.inject
+import com.appcues.logging.LogcatDestination
 import com.appcues.logging.Logcues
 import com.appcues.trait.ExperienceTrait
 import com.appcues.trait.ExperienceTraitLevel
@@ -109,6 +110,8 @@ public class Appcues internal constructor(internal val scope: AppcuesScope) {
                 analyticsPublisher.publish(analyticsListener, it)
             }
         }
+
+        scope.get<LogcatDestination>().init()
     }
 
     /**
@@ -273,7 +276,7 @@ public class Appcues internal constructor(internal val scope: AppcuesScope) {
      * @param activity The Activity to launch the debugger over.
      */
     public fun debug(activity: Activity) {
-        debuggerManager.start(activity, Debugger(null))
+        debuggerManager.start(activity, Debugger)
     }
 
     /**

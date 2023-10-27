@@ -14,18 +14,22 @@ internal object DebuggerModule : AppcuesModule {
                 appcuesRemoteSource = get(),
                 contextWrapper = get(),
                 context = get(),
+                analyticsTracker = get(),
             )
         }
 
         scoped {
             DebuggerRecentEventsManager(
-                contextWrapper = get()
+                contextWrapper = get(),
+                analyticsTracker = get(),
             )
         }
 
         scoped {
             DebuggerFontManager(context = get(), logcues = get())
         }
+
+        scoped { DebuggerLogMessageManager(get()) }
 
         scoped {
             ScreenCaptureProcessor(

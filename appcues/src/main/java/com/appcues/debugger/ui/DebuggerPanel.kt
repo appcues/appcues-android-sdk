@@ -1,8 +1,6 @@
 package com.appcues.debugger.ui
 
-import android.widget.Toast
-import androidx.compose.animation.AnimatedContentScope
-import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.AnimatedContentTransitionScope.SlideDirection
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
@@ -21,42 +19,39 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavBackStackEntry
-import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.appcues.R
-import com.appcues.debugger.DebugMode.Debugger
 import com.appcues.debugger.DebuggerViewModel
-import com.appcues.debugger.DebuggerViewModel.UIState.Expanded
 import com.appcues.debugger.model.DebuggerEventItem
-import com.appcues.debugger.ui.details.DebuggerEventDetails
-import com.appcues.debugger.ui.fonts.DebuggerFontDetails
+import com.appcues.debugger.ui.DebuggerPages.EventDetailsPage
+import com.appcues.debugger.ui.DebuggerPages.ExpandedLogDetailsPage
+import com.appcues.debugger.ui.DebuggerPages.FontListPage
+import com.appcues.debugger.ui.DebuggerPages.LogListPage
+import com.appcues.debugger.ui.DebuggerPages.MainPage
+import com.appcues.debugger.ui.events.DebuggerEventDetails
+import com.appcues.debugger.ui.fonts.DebuggerFontList
+import com.appcues.debugger.ui.logs.DebuggerLogDetails
+import com.appcues.debugger.ui.logs.DebuggerLogList
 import com.appcues.debugger.ui.main.DebuggerMain
+import com.appcues.logging.LogMessage
 import com.appcues.ui.theme.AppcuesColors
 
-private const val SLIDE_TRANSITION_MILLIS = 250
+internal const val SLIDE_TRANSITION_MILLIS = 250
 
 @Composable
 internal fun BoxScope.DebuggerPanel(debuggerState: MutableDebuggerState, debuggerViewModel: DebuggerViewModel) {
-    val navController = rememberNavController()
-    val selectedEvent = remember { mutableStateOf<DebuggerEventItem?>(null) }
-
     // don't show if current debugger is paused
     // IMPORTANT: any "remember" calls (like above) that affect the content of the expanded debugger pane, or subpages,
     // need to happen before this short-circuit return is executed, otherwise state will not be properly retained
@@ -92,50 +87,83 @@ internal fun BoxScope.DebuggerPanel(debuggerState: MutableDebuggerState, debugge
                 .clickable(enabled = false, onClickLabel = null) {},
             contentAlignment = Alignment.TopCenter
         ) {
-            DebuggerPanelPages(navController, selectedEvent, debuggerViewModel, debuggerState)
+            DebuggerPanelPages(debuggerViewModel)
         }
     }
 }
 
-@Composable
-private fun DebuggerPanelPages(
-    navController: NavHostController,
-    selectedEvent: MutableState<DebuggerEventItem?>,
-    debuggerViewModel: DebuggerViewModel,
-    debuggerState: MutableDebuggerState,
-) {
-    val mainPage = "main"
-    val eventDetailsPage = "event_details"
-    val fontDetailsPage = "font_details"
-    val deepLinkPath = debuggerState.deepLinkPath.value
+internal sealed class DebuggerPages(val path: String, val parent: DebuggerPages?, val children: List<DebuggerPages>) {
+    object MainPage : DebuggerPages("main", null, listOf(EventDetailsPage, FontListPage, LogListPage))
+    object EventDetailsPage : DebuggerPages("event_details", MainPage, listOf())
+    object FontListPage : DebuggerPages("fonts", MainPage, listOf())
+    object LogListPage : DebuggerPages("logs", MainPage, listOf(ExpandedLogDetailsPage))
+    object ExpandedLogDetailsPage : DebuggerPages("log_details", LogListPage, listOf())
+}
 
-    NavHost(navController = navController, startDestination = mainPage) {
-        mainComposable(
-            pageName = mainPage,
-            eventDetailsPage = eventDetailsPage
-        ) {
+internal fun NavHostController.navigate(page: DebuggerPages) {
+    navigate(page.path)
+}
+
+private fun String?.toPage(): DebuggerPages? {
+    return when (this) {
+        MainPage.path -> MainPage
+        EventDetailsPage.path -> EventDetailsPage
+        FontListPage.path -> FontListPage
+        LogListPage.path -> LogListPage
+        ExpandedLogDetailsPage.path -> ExpandedLogDetailsPage
+        else -> null
+    }
+}
+
+@Composable
+private fun DebuggerPanelPages(viewModel: DebuggerViewModel) {
+    val navController = rememberNavController()
+    val selectedEvent = remember { mutableStateOf<DebuggerEventItem?>(null) }
+    val selectedLogMessage = remember { mutableStateOf<LogMessage?>(null) }
+
+    NavHost(navController = navController, startDestination = MainPage.path) {
+        registerPage(MainPage) {
             DebuggerMain(
-                debuggerViewModel = debuggerViewModel,
+                debuggerViewModel = viewModel,
                 onEventClick = {
                     selectedEvent.value = it
-                    navController.navigate(eventDetailsPage)
+                    navController.navigate(EventDetailsPage)
                 },
-                onFontsClick = {
-                    navController.navigate(fontDetailsPage)
-                },
+                onFontsClick = { navController.navigate(FontListPage) },
+                onDetailedLogClick = { navController.navigate(LogListPage) }
             )
+        }
 
-            LaunchedEffect(deepLinkPath) {
-                when (deepLinkPath) {
-                    "fonts" -> navController.navigate(fontDetailsPage)
-                    else -> Unit
-                }
+        registerPage(EventDetailsPage) {
+            selectedEvent.value?.let {
+                DebuggerEventDetails(it, navController)
             }
         }
 
-        eventDetailsComposable(eventDetailsPage, mainPage, selectedEvent, navController)
+        registerPage(FontListPage) {
+            DebuggerFontList(viewModel, navController)
+        }
 
-        fontDetailsComposable(fontDetailsPage, mainPage, debuggerViewModel, debuggerState, navController)
+        registerPage(LogListPage) {
+            DebuggerLogList(viewModel, navController) {
+                selectedLogMessage.value = it
+                navController.navigate(ExpandedLogDetailsPage)
+            }
+        }
+
+        registerPage(ExpandedLogDetailsPage) {
+            selectedLogMessage.value?.let {
+                DebuggerLogDetails(it, navController)
+            }
+        }
+    }
+
+    val deeplink = viewModel.deeplink.collectAsState()
+    LaunchedEffect(deeplink.value) {
+        deeplink.value.toPage()?.let {
+            navController.navigate(it)
+            viewModel.consumeDeeplink()
+        }
     }
 }
 
@@ -148,103 +176,32 @@ private fun exitTransition(): ExitTransition {
         fadeOut(tween(durationMillis = 150))
 }
 
-private fun NavGraphBuilder.mainComposable(
-    pageName: String,
-    eventDetailsPage: String,
-    content: @Composable AnimatedContentScope.(NavBackStackEntry) -> Unit
+private fun NavGraphBuilder.registerPage(
+    page: DebuggerPages,
+    content: @Composable () -> Unit
 ) {
     composable(
-        route = pageName,
+        route = page.path,
         enterTransition = {
-            when (initialState.destination.route) {
-                eventDetailsPage ->
-                    slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.End, animationSpec = tween(SLIDE_TRANSITION_MILLIS))
+            val destination = initialState.destination.route.toPage()
+
+            when {
+                page.parent == destination -> slideIntoContainer(SlideDirection.Start, tween(SLIDE_TRANSITION_MILLIS))
+                page.children.contains(destination) -> slideIntoContainer(SlideDirection.End, tween(SLIDE_TRANSITION_MILLIS))
                 else -> null
             }
         },
         exitTransition = {
-            when (targetState.destination.route) {
-                eventDetailsPage ->
-                    slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Start, animationSpec = tween(SLIDE_TRANSITION_MILLIS))
-                else -> null
-            }
-        },
-        content = content
-    )
-}
+            val destination = targetState.destination.route.toPage()
 
-private fun NavGraphBuilder.detailPageComposable(
-    pageName: String,
-    mainPage: String,
-    content: @Composable AnimatedContentScope.(NavBackStackEntry) -> Unit
-) {
-    composable(
-        route = pageName,
-        enterTransition = {
-            when (initialState.destination.route) {
-                mainPage ->
-                    slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Start, animationSpec = tween(SLIDE_TRANSITION_MILLIS))
+            when {
+                page.parent == destination -> slideOutOfContainer(SlideDirection.End, tween(SLIDE_TRANSITION_MILLIS))
+                page.children.contains(destination) -> slideOutOfContainer(SlideDirection.Start, tween(SLIDE_TRANSITION_MILLIS))
                 else -> null
             }
         },
-        exitTransition = {
-            when (targetState.destination.route) {
-                mainPage ->
-                    slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.End, animationSpec = tween(SLIDE_TRANSITION_MILLIS))
-                else -> null
-            }
-        },
-        content = content
-    )
-}
-
-private fun NavGraphBuilder.eventDetailsComposable(
-    pageName: String,
-    mainPage: String,
-    selectedEvent: MutableState<DebuggerEventItem?>,
-    navController: NavController,
-) {
-    detailPageComposable(
-        pageName = pageName,
-        mainPage = mainPage
-    ) {
-        DebuggerEventDetails(selectedEvent.value) {
-            navController.popBackStack()
+        content = {
+            Box(modifier = Modifier.testTag("route/${page.path}")) { content() }
         }
-    }
-}
-
-private fun NavGraphBuilder.fontDetailsComposable(
-    pageName: String,
-    mainPage: String,
-    debuggerViewModel: DebuggerViewModel,
-    debuggerState: MutableDebuggerState,
-    navController: NavController,
-) {
-    detailPageComposable(
-        pageName = pageName,
-        mainPage = mainPage
-    ) {
-        val clipboard = LocalClipboardManager.current
-        val context = LocalContext.current
-
-        DebuggerFontDetails(
-            appSpecificFonts = debuggerViewModel.appSpecificFonts,
-            systemFonts = debuggerViewModel.systemFonts,
-            allFonts = debuggerViewModel.allFonts,
-            onFontTap = {
-                clipboard.setText(AnnotatedString(it.name))
-                Toast.makeText(
-                    context,
-                    context.getString(R.string.appcues_debugger_font_details_clipboard_message),
-                    Toast.LENGTH_SHORT
-                ).show()
-            },
-            onBackPressed = {
-                debuggerState.deepLinkPath.value = null
-                navController.popBackStack()
-                debuggerViewModel.transition(Expanded(Debugger(null)))
-            }
-        )
-    }
+    )
 }

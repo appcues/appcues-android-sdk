@@ -6,6 +6,7 @@ import com.appcues.AnalyticType.IDENTIFY
 import com.appcues.AnalyticType.SCREEN
 import com.appcues.R
 import com.appcues.analytics.ActivityRequestBuilder
+import com.appcues.analytics.AnalyticsTracker
 import com.appcues.analytics.AutoPropertyDecorator
 import com.appcues.analytics.ExperienceLifecycleEvent
 import com.appcues.analytics.SdkMetrics
@@ -19,22 +20,30 @@ import com.appcues.debugger.model.EventType
 import com.appcues.debugger.ui.toEventTitle
 import com.appcues.debugger.ui.toEventType
 import com.appcues.util.ContextWrapper
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.util.Date
+import kotlin.coroutines.CoroutineContext
 
 internal class DebuggerRecentEventsManager(
     private val contextWrapper: ContextWrapper,
-) {
+    private val analyticsTracker: AnalyticsTracker,
+) : CoroutineScope {
 
     companion object {
 
         private const val MAX_RECENT_EVENTS = 20
         private const val IDENTITY_PROPERTY_PREFIX = "_"
     }
+
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Default
 
     private val events: ArrayList<DebuggerEventItem> = arrayListOf()
 
@@ -48,12 +57,34 @@ internal class DebuggerRecentEventsManager(
 
     private var lastEventId = 0
 
-    suspend fun onTrackingData(trackingData: TrackingData) = withContext(Dispatchers.IO) {
+    private var isStarted = false
+
+    fun start() {
+        if (isStarted) return
+
+        launch {
+            analyticsTracker.analyticsFlow.collect { onTrackingData(it) }
+        }
+
+        isStarted = true
+    }
+
+    fun reset() {
+        isStarted = false
+        coroutineContext.cancelChildren()
+        events.clear()
+    }
+
+    private suspend fun onTrackingData(trackingData: TrackingData) = withContext(Dispatchers.IO) {
         when (trackingData.type) {
             IDENTIFY -> onIdentifyActivityRequest(trackingData.request)
             GROUP -> onGroupUpdateActivityRequest(trackingData.request)
             EVENT -> onActivityRequest(trackingData.request)
             SCREEN -> onActivityRequest(trackingData.request)
+        }
+
+        if (events.size == 1) {
+            events.first().showOnFab = false
         }
 
         updateData()
@@ -152,20 +183,17 @@ internal class DebuggerRecentEventsManager(
         }
     }
 
-    fun reset() {
-        events.clear()
-    }
-
     private fun getEventDisplayName(
         event: EventRequest,
         type: EventType,
         title: String?
-    ) = if (type == EventType.SCREEN && event.attributes.contains(ActivityRequestBuilder.SCREEN_TITLE_ATTRIBUTE))
-    // screen views are a special case where the title is the screen title
+    ) = if (type == EventType.SCREEN && event.attributes.contains(ActivityRequestBuilder.SCREEN_TITLE_ATTRIBUTE)) {
+        // screen views are a special case where the title is the screen title
         event.attributes[ActivityRequestBuilder.SCREEN_TITLE_ATTRIBUTE] as String
-    else
-    // otherwise - use the given title for system events or the event name for custom events
+    } else {
+        // otherwise - use the given title for system events or the event name for custom events
         title ?: event.name
+    }
 
     private fun Map<String, Any?>.toSortedList(): List<Pair<String, Any?>> = toList().let { list ->
         arrayListOf<Pair<String, Any?>>().apply {

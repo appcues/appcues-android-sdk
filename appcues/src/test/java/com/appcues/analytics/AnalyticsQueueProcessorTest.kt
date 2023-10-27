@@ -1,7 +1,6 @@
 package com.appcues.analytics
 
 import com.appcues.AppcuesCoroutineScope
-import com.appcues.LoggingLevel.NONE
 import com.appcues.data.AppcuesRepository
 import com.appcues.data.model.ExperienceTrigger.Qualification
 import com.appcues.data.model.QualificationResult
@@ -33,7 +32,7 @@ internal class AnalyticsQueueProcessorTest {
     private val mockkQualificationResult: QualificationResult =
         QualificationResult(Qualification("screen_view"), arrayListOf(mockk()))
 
-    private val coroutineScope = AppcuesCoroutineScope(Logcues(NONE))
+    private val coroutineScope = AppcuesCoroutineScope(Logcues())
     private val experienceRenderer: ExperienceRenderer = mockk()
     private val repository: AppcuesRepository = mockk<AppcuesRepository>().apply {
         coEvery { trackActivity(any()) } returns mockkQualificationResult

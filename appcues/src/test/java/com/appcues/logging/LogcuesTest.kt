@@ -1,81 +1,62 @@
 package com.appcues.logging
 
-import android.util.Log
-import com.appcues.LoggingLevel.INFO
-import com.appcues.LoggingLevel.NONE
-import io.mockk.called
-import io.mockk.every
-import io.mockk.mockkStatic
-import io.mockk.verify
-import org.junit.Before
+import app.cash.turbine.test
+import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import org.junit.Test
 
 internal class LogcuesTest {
 
-    @Before
-    fun setUp() {
-        mockkStatic(Log::class)
-        every { Log.i("Appcues", "message") } returns 1
-        every { Log.e("Appcues", "message") } returns 1
-    }
+    private val logcues = Logcues(Dispatchers.Unconfined)
 
     @Test
-    fun `info SHOULD log message WHEN level is INFO`() {
-        // GIVEN
-        val logcues = Logcues(loggingLevel = INFO)
+    fun `info SHOULD emit info message`() = runBlocking {
         // WHEN
         logcues.info("message")
         // THEN
-        verify { Log.i("Appcues", "message") }
+        logcues.messageFlow.test {
+            val log = awaitItem()
+            assertThat(log.type).isEqualTo(LogType.INFO)
+            assertThat(log.message).isEqualTo("message")
+        }
     }
 
     @Test
-    fun `info SHOULD not log WHEN level is NONE`() {
-        // GIVEN
-        val logcues = Logcues(loggingLevel = NONE)
+    fun `debug SHOULD emit debug message`() = runBlocking {
         // WHEN
-        logcues.info("message")
+        logcues.debug("message")
         // THEN
-        verify { Log::class.java wasNot called }
+        logcues.messageFlow.test {
+            val log = awaitItem()
+            assertThat(log.type).isEqualTo(LogType.DEBUG)
+            assertThat(log.message).isEqualTo("message")
+        }
     }
 
     @Test
-    fun `error SHOULD log message WHEN level is INFO`() {
-        // GIVEN
-        val logcues = Logcues(loggingLevel = INFO)
-        // WHEN
-        logcues.error("message")
-        // THEN
-        verify { Log.e("Appcues", "message") }
-    }
-
-    @Test
-    fun `error SHOULD not log WHEN level is NONE`() {
-        // GIVEN
-        val logcues = Logcues(loggingLevel = NONE)
+    fun `error SHOULD emit info message`() = runBlocking {
         // WHEN
         logcues.error("message")
         // THEN
-        verify { Log::class.java wasNot called }
+        logcues.messageFlow.test {
+            val log = awaitItem()
+            assertThat(log.type).isEqualTo(LogType.ERROR)
+            assertThat(log.message).isEqualTo("message")
+        }
     }
 
     @Test
-    fun `error SHOULD log throwable message WHEN level is INFO`() {
+    fun `error throwable SHOULD emit info message`() = runBlocking {
         // GIVEN
-        val logcues = Logcues(loggingLevel = INFO)
+        val throwable = Throwable("message throwable")
         // WHEN
-        logcues.error(Throwable("message"))
+        logcues.error(throwable)
         // THEN
-        verify { Log.e("Appcues", "message") }
-    }
-
-    @Test
-    fun `error SHOULD not log throwable WHEN level is NONE`() {
-        // GIVEN
-        val logcues = Logcues(loggingLevel = NONE)
-        // WHEN
-        logcues.error(Throwable("message"))
-        // THEN
-        verify { Log::class.java wasNot called }
+        logcues.messageFlow.test {
+            val log = awaitItem()
+            assertThat(log.type).isEqualTo(LogType.ERROR)
+            assertThat(log.message).isEqualTo("message throwable")
+        }
     }
 }

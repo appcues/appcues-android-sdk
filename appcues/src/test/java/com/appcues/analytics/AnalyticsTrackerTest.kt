@@ -2,7 +2,6 @@ package com.appcues.analytics
 
 import com.appcues.AnalyticType
 import com.appcues.AppcuesCoroutineScope
-import com.appcues.LoggingLevel.NONE
 import com.appcues.SessionMonitor
 import com.appcues.data.remote.appcues.request.ActivityRequest
 import com.appcues.logging.Logcues
@@ -23,7 +22,7 @@ internal class AnalyticsTrackerTest {
     @get:Rule
     val dispatcherRule = MainDispatcherRule()
 
-    private val coroutineScope = AppcuesCoroutineScope(Logcues(NONE))
+    private val coroutineScope = AppcuesCoroutineScope(Logcues())
     private val activityBuilder: ActivityRequestBuilder = mockk()
     private val sessionMonitor: SessionMonitor = mockk(relaxed = true)
     private val analyticsQueueProcessor: AnalyticsQueueProcessor = mockk(relaxed = true)

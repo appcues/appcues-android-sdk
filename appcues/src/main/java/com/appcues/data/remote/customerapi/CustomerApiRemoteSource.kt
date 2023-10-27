@@ -7,16 +7,14 @@ import com.appcues.data.remote.RemoteError
 import com.appcues.data.remote.customerapi.response.PreUploadScreenshotResponse
 import com.appcues.debugger.screencapture.Capture
 import com.appcues.util.ResultOf
-import okhttp3.HttpUrl
-import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.Response
 
 internal class CustomerApiRemoteSource(
     private val service: CustomerApiService,
     private val config: AppcuesConfig,
 ) {
+
     suspend fun preUploadScreenshot(
         capture: Capture,
         token: String,
@@ -43,31 +41,5 @@ internal class CustomerApiRemoteSource(
                 screen = captureJson.toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
             )
         }
-    }
-}
-
-internal class CustomerApiBaseUrlInterceptor : Interceptor {
-
-    companion object {
-        // customer API host is looked up in settings, and must be set here
-        // before any usage
-        lateinit var baseUrl: HttpUrl
-    }
-
-    override fun intercept(chain: Interceptor.Chain): Response {
-
-        var request = chain.request()
-
-        val newUrl = request.url.newBuilder()
-            .scheme(baseUrl.scheme)
-            .host(baseUrl.host)
-            .port(baseUrl.port)
-            .build()
-
-        request = request.newBuilder()
-            .url(newUrl)
-            .build()
-
-        return chain.proceed(request)
     }
 }

@@ -4,7 +4,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.appcues.AppcuesCoroutineScope
-import com.appcues.analytics.AnalyticsTracker
 import com.appcues.data.model.RenderContext
 import com.appcues.debugger.DebugMode.Debugger
 import com.appcues.debugger.DebugMode.ScreenCapture
@@ -28,6 +27,7 @@ import com.appcues.debugger.ui.MutableDebuggerState
 import com.appcues.di.component.AppcuesComponent
 import com.appcues.di.component.inject
 import com.appcues.di.scope.AppcuesScope
+import com.appcues.logging.LogMessage
 import com.appcues.ui.ExperienceRenderer
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
@@ -35,13 +35,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collectIndexed
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-internal class DebuggerViewModel(override val scope: AppcuesScope) : ViewModel(), AppcuesComponent {
-
-    private val analyticsTracker by inject<AnalyticsTracker>()
+internal class DebuggerViewModel(override val scope: AppcuesScope, debugMode: DebugMode) : ViewModel(), AppcuesComponent {
 
     private val debuggerStatusManager by inject<DebuggerStatusManager>()
 
@@ -55,13 +52,15 @@ internal class DebuggerViewModel(override val scope: AppcuesScope) : ViewModel()
 
     private val experienceRenderer by inject<ExperienceRenderer>()
 
-    sealed class UIState {
-        object Creating : UIState()
-        data class Idle(val mode: DebugMode) : UIState()
-        data class Dragging(val dragAmount: Offset) : UIState()
-        data class Expanded(val mode: DebugMode) : UIState()
-        object Dismissing : UIState()
-        object Dismissed : UIState()
+    private val logMessageManager by inject<DebuggerLogMessageManager>()
+
+    sealed class UIState(val mode: DebugMode) {
+        class Creating(mode: DebugMode) : UIState(mode)
+        class Idle(mode: DebugMode) : UIState(mode)
+        class Dragging(mode: DebugMode, val dragAmount: Offset) : UIState(mode)
+        class Expanded(mode: DebugMode) : UIState(mode)
+        class Dismissing(mode: DebugMode) : UIState(mode)
+        class Dismissed(mode: DebugMode) : UIState(mode)
     }
 
     sealed class ToastState {
@@ -69,10 +68,15 @@ internal class DebuggerViewModel(override val scope: AppcuesScope) : ViewModel()
         data class Rendering(val type: DebuggerToast) : ToastState()
     }
 
-    private val _uiState = MutableStateFlow<UIState>(Creating)
+    private val _uiState = MutableStateFlow<UIState>(Creating(debugMode))
 
     val uiState: StateFlow<UIState>
         get() = _uiState
+
+    private val _deeplink = MutableStateFlow<String?>(null)
+
+    val deeplink: StateFlow<String?>
+        get() = _deeplink
 
     private val _toastState = MutableStateFlow<ToastState>(ToastState.Idle)
 
@@ -83,6 +87,11 @@ internal class DebuggerViewModel(override val scope: AppcuesScope) : ViewModel()
 
     val statusInfo: StateFlow<List<DebuggerStatusItem>>
         get() = _statusInfo
+
+    private val _logMessages = MutableStateFlow<List<LogMessage>>(arrayListOf())
+
+    val logMessages: StateFlow<List<LogMessage>>
+        get() = _logMessages
 
     private val _events = MutableStateFlow<List<DebuggerEventItem>>(arrayListOf())
 
@@ -103,89 +112,43 @@ internal class DebuggerViewModel(override val scope: AppcuesScope) : ViewModel()
     val allFonts: List<DebuggerFontItem>
         get() = debuggerFontManager.getAllFonts()
 
-    lateinit var mode: DebugMode
-
     init {
+        debuggerStatusManager.start()
+        debuggerRecentEventsManager.start()
+        logMessageManager.start()
+
         with(viewModelScope) {
-            launch {
-                analyticsTracker.analyticsFlow.collect { trackingData ->
-                    // dispatch to status manager so it can check for new experiences
-                    // and update status info if needed
-                    debuggerStatusManager.onActivityRequest(trackingData.request)
-                    // dispatch to recent events manager so it stores all recent events and emits only
-                    // what is set by the filter
-                    debuggerRecentEventsManager.onTrackingData(trackingData)
-                }
-            }
-
-            launch {
-                debuggerStatusManager.data.collect { items ->
-                    _statusInfo.value = items
-                }
-            }
-
-            launch {
-                debuggerRecentEventsManager.data.collectIndexed { index, value ->
-                    // every time we start collecting we want to not show the elements that we take
-                    _events.value = if (index == 0) value.hideEventsForFab() else value
-                }
-            }
-            launch {
-                debuggerStatusManager.start()
-            }
+            launch { debuggerRecentEventsManager.data.collect { _events.value = it } }
+            launch { debuggerStatusManager.data.collect { _statusInfo.value = it } }
+            launch { logMessageManager.data.collect { _logMessages.value = it } }
         }
     }
 
-    fun onStart(mode: DebugMode, reset: Boolean) {
-        this.mode = mode
-
-        when (mode) {
-            is Debugger -> {
-                val deepLinkPath = mode.deepLinkPath
-                if (deepLinkPath.isNullOrEmpty()) {
-                    // if no path is given, and currently expanded, go back to Idle
-                    if (_uiState.value is Expanded ||
-                        // OR if showing FAB but the mode changed, reset to new Idle mode
-                        (_uiState.value is Idle && reset)
-                    ) {
-                        _uiState.value = Idle(mode)
+    fun onStart(mode: DebugMode, deeplink: String?) {
+        _deeplink.value = deeplink
+        if (!deeplink.isNullOrEmpty()) {
+            // the deep link might be from the debugger checking that the configuration is correct
+            // pass along to allow it to check
+            viewModelScope.launch {
+                if (!debuggerStatusManager.checkDeepLinkValidation(deeplink)) {
+                    when (_uiState.value) {
+                        // if currently idle and a new link comes in - expand to that link
+                        is Idle -> transition(Expanded(mode))
+                        // currently open - reset to the new path
+                        is Expanded -> transition(Expanded(mode))
+                        // otherwise, no valid link action available
+                        else -> Unit
                     }
-                    return
-                } else {
-                    // the deep link might be from the debugger checking that the configuration is correct
-                    // pass along to allow it to check
-                    viewModelScope.launch {
-                        debuggerStatusManager.checkDeepLinkValidation(deepLinkPath)
-                    }
-                }
-
-                when (_uiState.value) {
-                    // if currently idle and a new link comes in - expand to that link
-                    is Idle -> _uiState.value = Expanded(mode)
-                    // currently open - reset to the new path
-                    is Expanded -> _uiState.value = Expanded(mode)
-                    // otherwise, no valid link action available
-                    else -> Unit
-                }
-            }
-            is ScreenCapture -> {
-                // if in debugger mode, expanded, go to new Idle state
-                if (_uiState.value is Expanded ||
-                    // OR if in Idle (FAB) mode but mode changed, reset to new Idle mode
-                    (_uiState.value is Idle && reset)
-                ) {
-                    _uiState.value = Idle(mode)
                 }
             }
         }
     }
 
     fun onRender() {
-        when (val currentMode = mode) {
+        when (val currentMode = uiState.value.mode) {
             is Debugger -> {
-                val deepLinkPath = currentMode.deepLinkPath
                 // if we had a deep link from initial startup, process it now
-                _uiState.value = if (deepLinkPath.isNullOrEmpty()) Idle(currentMode) else Expanded(currentMode)
+                _uiState.value = if (_deeplink.value.isNullOrEmpty()) Idle(currentMode) else Expanded(currentMode)
             }
             is ScreenCapture -> {
                 _uiState.value = Idle(currentMode)
@@ -195,7 +158,7 @@ internal class DebuggerViewModel(override val scope: AppcuesScope) : ViewModel()
 
     fun onDismissAnimationCompleted() {
         if (_uiState.value is Dismissing) {
-            _uiState.value = Dismissed
+            _uiState.value = Dismissed(uiState.value.mode)
             viewModelScope.cancel()
         }
     }
@@ -210,7 +173,7 @@ internal class DebuggerViewModel(override val scope: AppcuesScope) : ViewModel()
                 _uiState.value = Expanded(state.mode)
             }
             is Expanded -> {
-                _uiState.value = Idle(mode)
+                _uiState.value = Idle(state.mode)
             }
             else -> Unit
         }
@@ -218,7 +181,7 @@ internal class DebuggerViewModel(override val scope: AppcuesScope) : ViewModel()
 
     fun closeExpandedView() {
         if (_uiState.value is Expanded) {
-            _uiState.value = Idle(mode)
+            _uiState.value = Idle(uiState.value.mode)
         }
     }
 
@@ -242,9 +205,9 @@ internal class DebuggerViewModel(override val scope: AppcuesScope) : ViewModel()
 
     fun onScreenCaptureConfirm(capture: Capture) {
         // return back to Idle for the current mode (ScreenCapture)
-        _uiState.value = Idle(mode)
+        _uiState.value = Idle(uiState.value.mode)
 
-        when (val currentMode = mode) {
+        when (val currentMode = uiState.value.mode) {
             // saving a capture is only valid in screen capture mode with token
             is ScreenCapture -> {
                 viewModelScope.launch {
@@ -292,13 +255,16 @@ internal class DebuggerViewModel(override val scope: AppcuesScope) : ViewModel()
     }
 
     fun reset() {
-        viewModelScope.launch {
-            debuggerStatusManager.reset()
-            debuggerRecentEventsManager.reset()
-        }
+        debuggerStatusManager.reset()
+        debuggerRecentEventsManager.reset()
+        logMessageManager.reset()
     }
 
     private fun List<DebuggerEventItem>.hideEventsForFab(): List<DebuggerEventItem> {
         return toMutableList().onEach { it.showOnFab = false }
+    }
+
+    fun consumeDeeplink() {
+        _deeplink.value = null
     }
 }

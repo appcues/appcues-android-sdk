@@ -8,7 +8,6 @@ import com.appcues.data.remote.retrofit.stubs.contentModalOneStubs
 import com.appcues.util.appcuesFormatted
 import com.google.common.truth.Truth.assertThat
 import com.squareup.moshi.JsonDataException
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.mockwebserver.MockWebServer
@@ -17,13 +16,11 @@ import org.junit.Assert
 import org.junit.Test
 import java.util.UUID
 
-@OptIn(ExperimentalCoroutinesApi::class)
 internal class AppcuesServiceTest {
 
     private val mockWebServer = MockWebServer()
 
-    private val api = RetrofitWrapper(mockWebServer.url("/"), false)
-        .create(AppcuesService::class)
+    private val api = RetrofitWrapper(mockWebServer.url("/")).create(AppcuesService::class)
 
     @After
     fun tearDown() {

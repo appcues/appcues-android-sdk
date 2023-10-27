@@ -13,10 +13,10 @@ import com.appcues.AppcuesConfig
 import com.appcues.R
 import com.appcues.Screenshot
 import com.appcues.data.remote.RemoteError
-import com.appcues.data.remote.customerapi.CustomerApiBaseUrlInterceptor
 import com.appcues.data.remote.customerapi.CustomerApiRemoteSource
 import com.appcues.data.remote.customerapi.response.PreUploadScreenshotResponse
 import com.appcues.data.remote.imageupload.ImageUploadRemoteSource
+import com.appcues.data.remote.interceptor.CustomerApiBaseUrlInterceptor
 import com.appcues.data.remote.sdksettings.SdkSettingsRemoteSource
 import com.appcues.monitor.AppcuesActivityMonitor
 import com.appcues.ui.utils.getParentView
@@ -34,6 +34,7 @@ internal class ScreenCaptureProcessor(
     private val customerApiRemoteSource: CustomerApiRemoteSource,
     private val imageUploadRemoteSource: ImageUploadRemoteSource,
 ) {
+
     fun captureScreen(): Capture? {
         return AppcuesActivityMonitor.activity?.getParentView()?.let {
             prepare(it)

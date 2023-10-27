@@ -9,13 +9,13 @@ import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperiencePriority.LOW
 import com.appcues.data.model.ExperiencePriority.NORMAL
 import com.appcues.data.model.ExperienceTrigger
+import com.appcues.data.remote.DataLogcues
 import com.appcues.data.remote.RemoteError.HttpError
 import com.appcues.data.remote.RemoteError.NetworkError
 import com.appcues.data.remote.appcues.AppcuesRemoteSource
 import com.appcues.data.remote.appcues.request.ActivityRequest
 import com.appcues.data.remote.appcues.response.QualifyResponse
 import com.appcues.data.remote.appcues.response.experience.ExperienceResponse
-import com.appcues.logging.Logcues
 import com.appcues.rules.MainDispatcherRule
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
@@ -41,7 +41,7 @@ internal class AppcuesRepositoryTest {
     private val appcuesRemoteSource: AppcuesRemoteSource = mockk(relaxed = true)
     private val appcuesLocalSource: AppcuesLocalSource = mockk(relaxed = true)
     private val experienceMapper: ExperienceMapper = mockk()
-    private val logcues: Logcues = mockk(relaxed = true)
+    private val dataLogcues: DataLogcues = mockk(relaxed = true)
     private val storage: Storage = mockk(relaxed = true)
 
     private lateinit var config: AppcuesConfig
@@ -55,7 +55,7 @@ internal class AppcuesRepositoryTest {
             appcuesLocalSource = appcuesLocalSource,
             experienceMapper = experienceMapper,
             config = config,
-            logcues = logcues,
+            dataLogcues = dataLogcues,
             storage = storage,
         )
     }

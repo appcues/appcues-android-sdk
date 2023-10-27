@@ -2,7 +2,6 @@ package com.appcues
 
 import android.app.Activity
 import android.content.Intent
-import com.appcues.LoggingLevel.NONE
 import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperienceTrigger.DeepLink
 import com.appcues.debugger.AppcuesDebuggerManager
@@ -38,7 +37,7 @@ internal class DeeplinkHandlerTest {
 
     private val config: AppcuesConfig = mockk(relaxed = true)
     private val experienceRenderer: ExperienceRenderer = mockk(relaxed = true)
-    private val appcuesCoroutineScope: AppcuesCoroutineScope = AppcuesCoroutineScope(Logcues(NONE))
+    private val appcuesCoroutineScope: AppcuesCoroutineScope = AppcuesCoroutineScope(Logcues())
     private val debuggerManager: AppcuesDebuggerManager = mockk(relaxed = true)
 
     @Before
@@ -272,7 +271,7 @@ internal class DeeplinkHandlerTest {
         deepLinkHandler.handle(activity, intent)
 
         // THEN
-        coVerify { debuggerManager.start(activity, Debugger(null)) }
+        coVerify { debuggerManager.start(activity, Debugger) }
     }
 
     @Test
@@ -292,7 +291,7 @@ internal class DeeplinkHandlerTest {
         deepLinkHandler.handle(activity, intent)
 
         // THEN
-        coVerify { debuggerManager.start(activity, Debugger("deeplink-path")) }
+        coVerify { debuggerManager.start(activity, Debugger, "deeplink-path") }
     }
 
     @Test

@@ -38,9 +38,10 @@ import kotlinx.coroutines.launch
 
 @Composable
 internal fun DebuggerComposition(viewModel: DebuggerViewModel, onDismiss: () -> Unit) {
+    val uiState = viewModel.uiState.collectAsState()
     val density = LocalDensity.current
-    val debuggerState by remember {
-        mutableStateOf(MutableDebuggerState(viewModel.mode, density, viewModel.uiState.value == Creating))
+    val debuggerState by remember(uiState.value.mode) {
+        mutableStateOf(MutableDebuggerState(uiState.value.mode, density, uiState.value is Creating))
     }
 
     // listening for lifecycle changes to update isPaused properly
@@ -57,7 +58,7 @@ internal fun DebuggerComposition(viewModel: DebuggerViewModel, onDismiss: () -> 
 
         DebuggerOnDrag(
             debuggerState = debuggerState,
-            onDismiss = { viewModel.transition(Dismissing) }
+            debuggerViewModel = viewModel,
         )
 
         DebuggerPanel(
@@ -141,13 +142,11 @@ private fun LaunchedUIStateEffect(
     viewModel.uiState.collectAsState().value.let { state ->
         LaunchedEffect(state) {
             when (state) {
-                Creating -> {
+                is Creating -> {
                     debuggerState.isVisible.targetState = true
                 }
                 is Idle -> {
-                    // this controls FAB styling and behavior
                     debuggerState.isVisible.targetState = true
-                    debuggerState.debugMode.value = state.mode
 
                     // lets only animate to idle when we come form isExpanded
                     if (debuggerState.isExpanded.targetState) {
@@ -170,18 +169,12 @@ private fun LaunchedUIStateEffect(
                     debuggerState.dragFabOffsets(state.dragAmount)
                 }
                 is Expanded -> {
-                    // this controls FAB styling and behavior
-                    debuggerState.debugMode.value = state.mode
-
                     when (state.mode) {
                         is Debugger -> {
-                            debuggerState.deepLinkPath.value = state.mode.deepLinkPath
                             animateFabToExpanded(debuggerState)
                             debuggerState.isExpanded.targetState = true
                         }
                         is ScreenCapture -> {
-                            debuggerState.deepLinkPath.value = null
-
                             // hide FAB
                             debuggerState.isVisible.targetState = false
 
@@ -190,7 +183,7 @@ private fun LaunchedUIStateEffect(
                         }
                     }
                 }
-                Dismissing -> {
+                is Dismissing -> {
                     animateFabToDismiss(
                         debuggerState = debuggerState,
                         onComplete = { viewModel.onDismissAnimationCompleted() },
@@ -198,7 +191,7 @@ private fun LaunchedUIStateEffect(
 
                     debuggerState.isVisible.targetState = false
                 }
-                Dismissed -> onDismiss()
+                is Dismissed -> onDismiss()
             }
         }
     }
@@ -207,20 +200,20 @@ private fun LaunchedUIStateEffect(
 private fun CoroutineScope.animateFabToExpanded(debuggerState: MutableDebuggerState) {
     with(debuggerState) {
         launch {
-            Animatable(fabXOffset.value).animateTo(
+            Animatable(fabXOffset.floatValue).animateTo(
                 targetValue = getExpandedFabAnchor().x,
                 animationSpec = tween(durationMillis = 250)
             ) {
-                fabXOffset.value = value
+                fabXOffset.floatValue = value
             }
         }
 
         launch {
-            Animatable(fabYOffset.value).animateTo(
+            Animatable(fabYOffset.floatValue).animateTo(
                 targetValue = getExpandedFabAnchor().y,
                 animationSpec = tween(durationMillis = 350)
             ) {
-                fabYOffset.value = value
+                fabYOffset.floatValue = value
             }
         }
     }
@@ -229,11 +222,11 @@ private fun CoroutineScope.animateFabToExpanded(debuggerState: MutableDebuggerSt
 private fun CoroutineScope.animateToAnchor(debuggerState: MutableDebuggerState) {
     with(debuggerState) {
         launch {
-            Animatable(fabXOffset.value).animateTo(
+            Animatable(fabXOffset.floatValue).animateTo(
                 targetValue = getLastAnchoredPosition().x,
                 animationSpec = tween(durationMillis = 300)
             ) {
-                fabXOffset.value = value
+                fabXOffset.floatValue = value
             }
         }
     }
@@ -242,20 +235,20 @@ private fun CoroutineScope.animateToAnchor(debuggerState: MutableDebuggerState) 
 private fun CoroutineScope.animateFabToIdle(debuggerState: MutableDebuggerState) {
     with(debuggerState) {
         launch {
-            Animatable(fabXOffset.value).animateTo(
+            Animatable(fabXOffset.floatValue).animateTo(
                 targetValue = getLastAnchoredPosition().x,
                 animationSpec = tween(durationMillis = 350)
             ) {
-                fabXOffset.value = value
+                fabXOffset.floatValue = value
             }
         }
 
         launch {
-            Animatable(fabYOffset.value).animateTo(
+            Animatable(fabYOffset.floatValue).animateTo(
                 targetValue = getLastAnchoredPosition().y,
                 animationSpec = tween(durationMillis = 250)
             ) {
-                fabYOffset.value = value
+                fabYOffset.floatValue = value
             }
         }
     }
@@ -268,22 +261,22 @@ private fun CoroutineScope.animateFabToDismiss(
     with(debuggerState) {
         val channel = Channel<Boolean>()
         launch {
-            Animatable(fabXOffset.value).animateTo(
+            Animatable(fabXOffset.floatValue).animateTo(
                 targetValue = getDismissAreaTargetXOffset(),
                 animationSpec = tween(durationMillis = 300)
             ) {
-                fabXOffset.value = value
+                fabXOffset.floatValue = value
             }
 
             channel.send(true)
         }
 
         launch {
-            Animatable(fabYOffset.value).animateTo(
+            Animatable(fabYOffset.floatValue).animateTo(
                 targetValue = getDismissAreaTargetYOffset(),
                 animationSpec = tween(durationMillis = 300)
             ) {
-                fabYOffset.value = value
+                fabYOffset.floatValue = value
             }
 
             channel.send(true)

@@ -1,31 +1,38 @@
 package com.appcues.logging
 
-import android.util.Log
-import com.appcues.LoggingLevel
-import com.appcues.LoggingLevel.NONE
+import com.appcues.logging.LogType.DEBUG
+import com.appcues.logging.LogType.ERROR
+import com.appcues.logging.LogType.INFO
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.launch
+import java.util.Date
+import kotlin.coroutines.CoroutineContext
 
-internal class Logcues(private val loggingLevel: LoggingLevel) {
+internal class Logcues(private val dispatcher: CoroutineDispatcher = Dispatchers.Default) : CoroutineScope {
 
-    companion object {
+    override val coroutineContext: CoroutineContext
+        get() = dispatcher
 
-        private const val TAG = "Appcues"
-    }
+    private val _messageFlow = MutableSharedFlow<LogMessage>(replay = 15)
+    val messageFlow: SharedFlow<LogMessage> = _messageFlow
 
     fun info(message: String) {
-        if (loggingLevel > NONE) {
-            Log.i(TAG, message)
-        }
+        launch { _messageFlow.emit(LogMessage(message, INFO, Date())) }
+    }
+
+    fun debug(message: String) {
+        launch { _messageFlow.emit(LogMessage(message, DEBUG, Date())) }
     }
 
     fun error(message: String) {
-        if (loggingLevel > NONE) {
-            Log.e(TAG, message)
-        }
+        launch { _messageFlow.emit(LogMessage(message, ERROR, Date())) }
     }
 
     fun error(throwable: Throwable) {
-        if (loggingLevel > NONE) {
-            Log.e(TAG, throwable.message.toString())
-        }
+        error(throwable.message.toString())
     }
 }

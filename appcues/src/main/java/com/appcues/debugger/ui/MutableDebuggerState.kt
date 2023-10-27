@@ -1,6 +1,7 @@
 package com.appcues.debugger.ui
 
 import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -18,7 +19,7 @@ import com.appcues.debugger.screencapture.Capture
 import kotlin.math.roundToInt
 
 internal class MutableDebuggerState(
-    mode: DebugMode,
+    val debugMode: DebugMode,
     private val density: Density,
     private val isCreating: Boolean,
     val fabSize: Dp = 56.dp
@@ -40,12 +41,9 @@ internal class MutableDebuggerState(
     val isPaused = mutableStateOf(value = false)
     val toast = MutableTransitionState<DebuggerToast?>(null)
 
-    val fabXOffset = mutableStateOf(value = -1f)
-    val fabYOffset = mutableStateOf(value = -1f)
+    val fabXOffset = mutableFloatStateOf(value = -1f)
+    val fabYOffset = mutableFloatStateOf(value = -1f)
     val isDraggingOverDismiss = mutableStateOf(value = false)
-
-    val deepLinkPath = mutableStateOf<String?>(value = null)
-    val debugMode = mutableStateOf(mode)
 
     private var boxSize = IntSize(0, 0)
     private var dismissRect = Rect(Offset(0f, 0f), Size(0f, 0f))
@@ -73,29 +71,29 @@ internal class MutableDebuggerState(
 
     fun getFabPositionAsIntOffset(): IntOffset? {
         // in case the value is initial value we return null
-        if (fabXOffset.value < 0f || fabYOffset.value < 0f) return null
+        if (fabXOffset.floatValue < 0f || fabYOffset.floatValue < 0f) return null
 
-        return IntOffset(fabXOffset.value.roundToInt(), fabYOffset.value.roundToInt())
+        return IntOffset(fabXOffset.floatValue.roundToInt(), fabYOffset.floatValue.roundToInt())
     }
 
     fun getEventsProperties(): EventsProperties {
         with(density) {
-            val isStart = fabXOffset.value + (fabSize.toPx() / 2) < boxSize.width / 2
-            val drawTop = fabYOffset.value + (fabSize.toPx() / 2) > boxSize.height / 2
+            val isStart = fabXOffset.floatValue + (fabSize.toPx() / 2) < boxSize.width / 2
+            val drawTop = fabYOffset.floatValue + (fabSize.toPx() / 2) > boxSize.height / 2
 
             // calculate X/Y based on anchor position
             val offset = when {
                 isStart && drawTop -> {
-                    IntOffset(0, fabYOffset.value.toInt() - boxSize.height)
+                    IntOffset(0, fabYOffset.floatValue.toInt() - boxSize.height)
                 }
-                isStart && drawTop.not() -> {
-                    IntOffset(0, fabYOffset.value.toInt() + fabSize.toPx().toInt())
+                isStart -> {
+                    IntOffset(0, fabYOffset.floatValue.toInt() + fabSize.toPx().toInt())
                 }
-                isStart.not() && drawTop -> {
-                    IntOffset(0, fabYOffset.value.toInt() - boxSize.height)
+                drawTop -> {
+                    IntOffset(0, fabYOffset.floatValue.toInt() - boxSize.height)
                 }
                 else -> {
-                    IntOffset(0, fabYOffset.value.toInt() + fabSize.toPx().toInt())
+                    IntOffset(0, fabYOffset.floatValue.toInt() + fabSize.toPx().toInt())
                 }
             }
 
@@ -116,8 +114,8 @@ internal class MutableDebuggerState(
     fun dragFabOffsets(dragAmount: Offset) {
         with(density) {
             updatePosition(
-                x = (fabXOffset.value + dragAmount.x).coerceIn(0f, boxSize.width.toFloat() - fabSize.toPx()),
-                y = (fabYOffset.value + dragAmount.y).coerceIn(0f, boxSize.height.toFloat() - fabSize.toPx())
+                x = (fabXOffset.floatValue + dragAmount.x).coerceIn(0f, boxSize.width.toFloat() - fabSize.toPx()),
+                y = (fabYOffset.floatValue + dragAmount.y).coerceIn(0f, boxSize.height.toFloat() - fabSize.toPx())
             )
 
             isDraggingOverDismiss.value = dismissRect.overlaps(fabRect)
@@ -125,8 +123,8 @@ internal class MutableDebuggerState(
     }
 
     private fun updatePosition(x: Float, y: Float) {
-        fabXOffset.value = x
-        fabYOffset.value = y
+        fabXOffset.floatValue = x
+        fabYOffset.floatValue = y
         updateFabRect(x, y)
 
         // update global offset value with latest update
