@@ -6,6 +6,7 @@ import com.appcues.LoggingLevel.INFO
 import com.appcues.LoggingLevel.NONE
 import io.mockk.called
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -13,6 +14,7 @@ import io.mockk.verify
 import io.mockk.verifySequence
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -31,7 +33,7 @@ internal class LogcatDestinationTest {
     }
 
     @Test
-    fun `info SHOULD log messages WHEN level is INFO`() = runTest {
+    fun `emit messages SHOULD log messages WHEN level is INFO`() = runTest {
         // GIVEN
         val sharedFlow = MutableSharedFlow<LogMessage>()
         coEvery { logcues.messageFlow } returns sharedFlow
@@ -49,7 +51,7 @@ internal class LogcatDestinationTest {
     }
 
     @Test
-    fun `info SHOULD log nothing WHEN level is NONE`() = runTest {
+    fun `emit messages SHOULD log nothing WHEN level is NONE`() = runTest {
         // GIVEN
         val sharedFlow = MutableSharedFlow<LogMessage>()
         coEvery { logcues.messageFlow } returns sharedFlow
@@ -64,7 +66,18 @@ internal class LogcatDestinationTest {
     }
 
     @Test
-    fun `info SHOULD log messages WHEN level is DEBUG`() = runTest {
+    fun `collect SHOULD not be called WHEN level is NONE`() = runTest {
+        // GIVEN
+        val sharedFlow = mockk<SharedFlow<LogMessage>>(relaxed = true)
+        coEvery { logcues.messageFlow } returns sharedFlow
+        // WHEN
+        LogcatDestination(logcues, NONE, Dispatchers.Unconfined).apply { init() }
+        // THEN
+        coVerify { sharedFlow wasNot called }
+    }
+
+    @Test
+    fun `emit messages SHOULD log messages WHEN level is DEBUG`() = runTest {
         // GIVEN
         val sharedFlow = MutableSharedFlow<LogMessage>()
         coEvery { logcues.messageFlow } returns sharedFlow

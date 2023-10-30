@@ -8,6 +8,10 @@ import okhttp3.Response
 import okhttp3.internal.http.promisesBody
 import okio.Buffer
 
+/**
+ * This class wrappers Logcues and provide specific log methods for Http Request, Response
+ * and general error logging where the "reason" should be formatted(beautify)
+ */
 internal class DataLogcues(private val logcues: Logcues) {
 
     companion object {
