@@ -75,7 +75,7 @@ internal fun DebuggerLogDetails(message: LogMessage, navController: NavHostContr
             color = color
         )
         Text(
-            text = stringResource(id = R.string.appcues_debugger_log_timestamp, message.timestamp),
+            text = stringResource(id = R.string.appcues_debugger_log_timestamp, message.timestamp.toLogFormat()),
             fontSize = 12.sp,
             fontWeight = FontWeight.SemiBold,
             fontFamily = FontFamily.Monospace,

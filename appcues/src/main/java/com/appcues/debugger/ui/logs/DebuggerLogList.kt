@@ -106,7 +106,7 @@ private fun LazyItemScope.ListItem(index: Int, logMessage: LogMessage, onItemCli
                 text = stringResource(
                     id = R.string.appcues_debugger_item_title,
                     logMessage.type.displayName,
-                    logMessage.timestamp.toString()
+                    logMessage.timestamp.toLogFormat()
                 ),
                 fontSize = 12.sp,
                 fontWeight = FontWeight.SemiBold,
