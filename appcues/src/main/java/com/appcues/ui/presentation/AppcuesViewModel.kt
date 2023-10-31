@@ -125,4 +125,13 @@ internal class AppcuesViewModel(
         onDismiss()
         awaitDismissEffect.dismissed()
     }
+
+    fun onBackPressed() {
+        val state = uiState.value
+        if (state is Rendering && state.experience.isSkippable(state.flatStepIndex)) {
+            coroutineScope.launch {
+                experienceRenderer.dismiss(renderContext, markComplete = false, destroyed = false)
+            }
+        }
+    }
 }

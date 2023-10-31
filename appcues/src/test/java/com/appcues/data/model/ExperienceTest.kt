@@ -5,8 +5,11 @@ import com.appcues.data.model.Action.Trigger.NAVIGATE
 import com.appcues.data.model.Action.Trigger.TAP
 import com.appcues.data.model.ExperiencePriority.NORMAL
 import com.appcues.trait.AppcuesTraitException
+import com.appcues.trait.BackdropDecoratingTrait
 import com.appcues.trait.MetadataSettingTrait
 import com.appcues.trait.PresentingTrait
+import com.appcues.trait.appcues.BackdropTrait
+import com.appcues.trait.appcues.SkippableTrait
 import com.google.common.truth.Truth.assertThat
 import io.mockk.mockk
 import org.junit.Test
@@ -196,6 +199,30 @@ internal class ExperienceTest {
     }
 
     @Test
+    fun `isSkippable SHOULD return true WHEN step contains skippableTrait`() {
+        // GIVEN
+        val skippableTrait = mockk<SkippableTrait>()
+        val stepContainer = getStepContainer(steps = listOf(getStep(backdropDecoratingTrait = listOf(skippableTrait))))
+        val experience = getExperience(listOf(stepContainer))
+        // WHEN
+        val result = experience.isSkippable(0)
+        // THEN
+        assertThat(result).isTrue()
+    }
+
+    @Test
+    fun `isSkippable SHOULD return false WHEN step contains no skippableTrait`() {
+        // GIVEN
+        val skippableTrait = mockk<BackdropTrait>()
+        val stepContainer = getStepContainer(steps = listOf(getStep(backdropDecoratingTrait = listOf(skippableTrait))))
+        val experience = getExperience(listOf(stepContainer))
+        // WHEN
+        val result = experience.isSkippable(0)
+        // THEN
+        assertThat(result).isFalse()
+    }
+
+    @Test
     fun `getMetadataSettingTraits SHOULD return traits from step`() {
         // GIVEN
         val trait1 = mockk<MetadataSettingTrait>()
@@ -268,13 +295,17 @@ internal class ExperienceTest {
         )
     }
 
-    private fun getStep(presentingTrait: PresentingTrait = mockk(), metadataSettingTrait: List<MetadataSettingTrait> = listOf()): Step {
+    private fun getStep(
+        presentingTrait: PresentingTrait = mockk(),
+        metadataSettingTrait: List<MetadataSettingTrait> = listOf(),
+        backdropDecoratingTrait: List<BackdropDecoratingTrait> = listOf()
+    ): Step {
         return Step(
             id = UUID.randomUUID(),
             content = mockk(),
             presentingTrait = presentingTrait,
             stepDecoratingTraits = mockk(),
-            backdropDecoratingTraits = mockk(),
+            backdropDecoratingTraits = backdropDecoratingTrait,
             containerDecoratingTraits = mockk(),
             metadataSettingTraits = metadataSettingTrait,
             actions = mockk(),

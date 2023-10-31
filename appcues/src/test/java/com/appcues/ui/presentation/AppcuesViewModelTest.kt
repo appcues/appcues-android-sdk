@@ -14,6 +14,7 @@ import com.appcues.data.model.StepReference.StepGroupPageIndex
 import com.appcues.logging.Logcues
 import com.appcues.statemachine.State
 import com.appcues.statemachine.effects.AwaitDismissEffect
+import com.appcues.statemachine.states.BeginningStepState
 import com.appcues.statemachine.states.EndingStepState
 import com.appcues.statemachine.states.RenderingStepState
 import com.appcues.ui.ExperienceRenderer
@@ -22,6 +23,7 @@ import com.appcues.ui.presentation.AppcuesViewModel.UIState.Dismissing
 import com.appcues.ui.presentation.AppcuesViewModel.UIState.Idle
 import com.appcues.ui.presentation.AppcuesViewModel.UIState.Rendering
 import com.google.common.truth.Truth.assertThat
+import io.mockk.Called
 import io.mockk.called
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -57,7 +59,7 @@ internal class AppcuesViewModelTest {
     private val coroutineScope: AppcuesCoroutineScope = AppcuesCoroutineScope(Logcues())
 
     private val experienceStates = MutableSharedFlow<State>(1)
-    private val experienceRenderer: ExperienceRenderer = mockk {
+    private val experienceRenderer: ExperienceRenderer = mockk(relaxed = true) {
         coEvery { getStateFlow(renderContext) } returns experienceStates
     }
 
@@ -301,5 +303,58 @@ internal class AppcuesViewModelTest {
             onDismiss.invoke()
             awaitDismissEffect.dismissed()
         }
+    }
+
+    @Test
+    fun `onBackPressed SHOULD call dismiss WHEN state is Rendering AND experience is skippable`() = runTest {
+        // GIVEN
+        val mockStepContainer: StepContainer = mockk()
+        val mockExperience: Experience = mockk(relaxed = true) {
+            every { isSkippable(any()) } returns true
+            every { groupLookup } returns hashMapOf(0 to 0)
+            every { stepIndexLookup } returns hashMapOf(0 to 0)
+            every { stepContainers } returns listOf(mockStepContainer)
+        }
+        val mockMetadata: Map<String, Any?> = hashMapOf()
+        experienceStates.emit(RenderingStepState(mockExperience, 0, mockMetadata))
+        // WHEN
+        viewModel.onBackPressed()
+        // THEN
+        coVerify { experienceRenderer.dismiss(renderContext, markComplete = false, destroyed = false) }
+    }
+
+    @Test
+    fun `onBackPressed SHOULD not call experienceRenderer WHEN state is Rendering AND experience is not skippable`() = runTest {
+        // GIVEN
+        val mockStepContainer: StepContainer = mockk()
+        val mockExperience: Experience = mockk(relaxed = true) {
+            every { isSkippable(any()) } returns false
+            every { groupLookup } returns hashMapOf(0 to 0)
+            every { stepIndexLookup } returns hashMapOf(0 to 0)
+            every { stepContainers } returns listOf(mockStepContainer)
+        }
+        val mockMetadata: Map<String, Any?> = hashMapOf()
+        experienceStates.emit(RenderingStepState(mockExperience, 0, mockMetadata))
+        // WHEN
+        viewModel.onBackPressed()
+        // THEN
+        coVerify { experienceRenderer wasNot Called }
+    }
+
+    @Test
+    fun `onBackPressed SHOULD not call experienceRenderer WHEN state is not Rendering`() = runTest {
+        // GIVEN
+        val mockStepContainer: StepContainer = mockk()
+        val mockExperience: Experience = mockk(relaxed = true) {
+            every { isSkippable(any()) } returns true
+            every { groupLookup } returns hashMapOf(0 to 0)
+            every { stepIndexLookup } returns hashMapOf(0 to 0)
+            every { stepContainers } returns listOf(mockStepContainer)
+        }
+        experienceStates.emit(BeginningStepState(mockExperience, 0, true))
+        // WHEN
+        viewModel.onBackPressed()
+        // THEN
+        coVerify { experienceRenderer wasNot Called }
     }
 }
