@@ -16,6 +16,8 @@ internal class EmbedViewPresenter(
     private val stateMachines: StateMachineDirectory,
 ) : ViewPresenter(scope, renderContext) {
 
+    override val shouldHandleBack = false
+
     override fun ViewGroup.setupView(activity: Activity): ComposeView? {
         return stateMachines.getFrame(renderContext)?.let {
             it.isVisible = true

@@ -2,6 +2,8 @@ package com.appcues.ui.presentation
 
 import android.app.Activity
 import android.view.ViewGroup
+import androidx.activity.ComponentActivity
+import androidx.activity.OnBackPressedCallback
 import androidx.compose.ui.platform.ComposeView
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -41,6 +43,12 @@ internal abstract class ViewPresenter(
     private val activityMonitorListener = object : ActivityMonitorListener {
         override fun onActivityChanged(activity: Activity) {
             viewModel?.onActivityChanged()
+        }
+    }
+
+    private val onBackPressCallback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            viewModel?.onBackPressed()
         }
     }
 
@@ -93,6 +101,7 @@ internal abstract class ViewPresenter(
                 }
             }
 
+            setOnBackPressDispatcher(activity)
             return true
         }
     }
@@ -110,10 +119,13 @@ internal abstract class ViewPresenter(
 
         AppcuesActivityMonitor.activity?.getParentView()?.run {
             findViewTreeLifecycleOwner()?.lifecycle?.removeObserver(lifecycleObserver)
+            onBackPressCallback.remove()
 
             post { removeView() }
         }
     }
+
+    abstract val shouldHandleBack: Boolean
 
     abstract fun ViewGroup.setupView(activity: Activity): ComposeView?
 
@@ -124,6 +136,15 @@ internal abstract class ViewPresenter(
             coroutineScope.launch {
                 experienceRenderer.preview(it.id.toString())
             }
+        }
+    }
+
+    private fun setOnBackPressDispatcher(activity: Activity) {
+        // add onBackPressedDispatcher to handle internally native android back press when presenting
+        if (activity is ComponentActivity && shouldHandleBack) {
+            onBackPressCallback.remove()
+            // attach to activity
+            activity.onBackPressedDispatcher.addCallback(onBackPressCallback)
         }
     }
 }

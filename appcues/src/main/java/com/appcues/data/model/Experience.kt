@@ -5,6 +5,7 @@ import com.appcues.data.model.Action.Trigger.NAVIGATE
 import com.appcues.trait.AppcuesTraitException
 import com.appcues.trait.MetadataSettingTrait
 import com.appcues.trait.PresentingTrait
+import com.appcues.trait.appcues.SkippableTrait
 import java.util.UUID
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
@@ -81,6 +82,10 @@ internal data class Experience(
 
     fun getMetadataSettingTraits(flatStepIndex: Int): List<MetadataSettingTrait> {
         return getStepOrThrow(flatStepIndex).metadataSettingTraits
+    }
+
+    fun isSkippable(flatStepIndex: Int): Boolean {
+        return getStepOrThrow(flatStepIndex).backdropDecoratingTraits.any { it is SkippableTrait }
     }
 
     private fun getStepOrThrow(flatStepIndex: Int): Step {

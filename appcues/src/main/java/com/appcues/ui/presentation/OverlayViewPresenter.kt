@@ -16,6 +16,8 @@ import com.appcues.di.scope.AppcuesScope
 
 internal class OverlayViewPresenter(scope: AppcuesScope, renderContext: RenderContext) : ViewPresenter(scope, renderContext) {
 
+    override val shouldHandleBack = true
+
     override fun ViewGroup.setupView(activity: Activity): ComposeView {
         // remove customers view on accessibility stack
         setAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS)
