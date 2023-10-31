@@ -25,8 +25,16 @@ internal fun Activity.getParentView(): ViewGroup {
     // to find the top most decorView like below.
 
     val decorView = if (VERSION.SDK_INT >= VERSION_CODES.Q) {
-        // this is the preferred method on API 29+ with the new WindowInspector function
-        WindowInspector.getGlobalWindowViews().last()
+        try {
+            // this is the preferred method on API 29+ with the new WindowInspector function
+            // in case of multiple views, get the one that is hosting android.R.id.content
+            // we get the last one because sometimes stacking activities might be listed in this method,
+            // and we always want the one that is on top
+            WindowInspector.getGlobalWindowViews().last { it.findViewById<View?>(android.R.id.content) != null }
+        } catch (_: NoSuchElementException) {
+            // should never fail but just in case try to use standard decorView
+            window.decorView
+        }
     } else {
         @Suppress("SwallowedException", "TooGenericExceptionCaught")
         try {
