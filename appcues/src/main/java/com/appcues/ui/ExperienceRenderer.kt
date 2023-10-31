@@ -195,6 +195,11 @@ internal class ExperienceRenderer(override val scope: AppcuesScope) : AppcuesCom
         if (sessionMonitor.sessionId == null) return false
 
         repository.getExperienceContent(experienceId, trigger)?.let {
+            if (it.renderContext != Modal) {
+                // No caching required for modals since they can't be lazy-loaded.
+                potentiallyRenderableExperiences[it.renderContext] = listOf(it)
+            }
+
             return when (show(it)) {
                 RenderingResult.Success -> true
                 else -> false
