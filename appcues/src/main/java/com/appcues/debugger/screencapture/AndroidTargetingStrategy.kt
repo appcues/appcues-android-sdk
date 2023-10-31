@@ -104,17 +104,20 @@ private fun View.asCaptureView(screenBounds: Rect): ViewElement? {
     val displayMetrics = context.resources.displayMetrics
     val density = displayMetrics.density
 
-    // this is the position of the view relative to the entire screen
-    val actualPosition = Rect()
-    getGlobalVisibleRect(actualPosition)
+    // the coordinates of the non-clipped area of this view in the coordinate space of the view's root view
+    val globalVisibleRect = Rect()
 
-    // if the view is not currently in the screenshot image (scrolled away), ignore
-    if (Rect.intersects(actualPosition, screenBounds).not()) {
-        return null
-    }
-
-    // ignore the Appcues SDK content that has been injected into the view hierarchy
-    if (this.isAppcuesView()) {
+    if (
+        // ignore the Appcues SDK content that has been injected into the view hierarchy
+        this.isAppcuesView() ||
+        // if getGlobalVisibleRect returns false, that indicates that none of the view is
+        // visible within the root view, and we will not include it in our capture
+        getGlobalVisibleRect(globalVisibleRect).not() ||
+        // if the view is not currently in the screenshot image (scrolled away), ignore
+        // (this is possibly a redundant check to item above, but keeping for now)
+        Rect.intersects(globalVisibleRect, screenBounds).not()
+    ) {
+        // if any of these conditions failed, this view is not captured
         return null
     }
 
@@ -160,10 +163,10 @@ private fun View.asCaptureView(screenBounds: Rect): ViewElement? {
 
     return selector().let {
         ViewElement(
-            x = actualPosition.left.toDp(density),
-            y = actualPosition.top.toDp(density),
-            width = actualPosition.width().toDp(density),
-            height = actualPosition.height().toDp(density),
+            x = globalVisibleRect.left.toDp(density),
+            y = globalVisibleRect.top.toDp(density),
+            width = globalVisibleRect.width().toDp(density),
+            height = globalVisibleRect.height().toDp(density),
             displayName = it?.displayName,
             selector = it,
             type = it?.type ?: this::class.java.simpleName,
