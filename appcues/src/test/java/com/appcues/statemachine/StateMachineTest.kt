@@ -24,14 +24,17 @@ import com.appcues.statemachine.Action.MoveToStep
 import com.appcues.statemachine.Action.RenderStep
 import com.appcues.statemachine.Action.ReportError
 import com.appcues.statemachine.Action.Reset
+import com.appcues.statemachine.Action.Retry
 import com.appcues.statemachine.Action.StartExperience
 import com.appcues.statemachine.Error.ExperienceAlreadyActive
 import com.appcues.statemachine.Error.ExperienceError
 import com.appcues.statemachine.Error.StepError
+import com.appcues.statemachine.effects.PresentationEffect
 import com.appcues.statemachine.states.BeginningExperienceState
 import com.appcues.statemachine.states.BeginningStepState
 import com.appcues.statemachine.states.EndingExperienceState
 import com.appcues.statemachine.states.EndingStepState
+import com.appcues.statemachine.states.FailingState
 import com.appcues.statemachine.states.IdlingState
 import com.appcues.statemachine.states.RenderingStepState
 import com.appcues.trait.AppcuesTraitException
@@ -152,25 +155,25 @@ internal class StateMachineTest : AppcuesScopeTest {
     }
 
     @Test
-    fun `Idling SHOULD transition to Idling WHEN action is StartExperience AND present throws`() = runTest {
+    fun `Idling SHOULD transition to Failing WHEN action is StartExperience AND present throws`() = runTest {
         // this happens when a presenting trait fails to present and throws AppcuesTraitException instead
 
         // GIVEN
         val experience = mockExperience { throw AppcuesTraitException("test trait exception") }
         val initialState = IdlingState
-        val targetState = IdlingState
         val stateMachine = initMachine(initialState)
         val action = StartExperience(experience)
+        val error = StepError(experience, 0, "test trait exception")
+        val stateAtFailure = BeginningStepState(experience, 0, true)
+        val effect = PresentationEffect(experience, 0, 0, true)
+        val targetState = FailingState(stateAtFailure, effect)
 
         // WHEN
         val result = stateMachine.handleAction(action)
 
         // THEN
         assertThat(stateMachine.state).isEqualTo(targetState)
-        assertThat(result.failureReason()).isInstanceOf(ExperienceError::class.java)
-        with(result.failureReason() as ExperienceError) {
-            assertThat(message).isEqualTo("test trait exception")
-        }
+        assertThat(result.failureReason()).isEqualTo(error)
     }
 
     @Test
@@ -448,37 +451,21 @@ internal class StateMachineTest : AppcuesScopeTest {
     }
 
     @Test
-    fun `RenderingStep SHOULD NOT transition WHEN action is ReportError AND non-fatal`() = runTest {
+    fun `BeginningStep SHOULD transition to Failing WHEN action is ReportError`() = runTest {
         // GIVEN
         val experience = mockExperience()
-        val initialState = RenderingStepState(experience, 1, mutableMapOf())
+        val initialState = BeginningStepState(experience, 1, false)
         val stateMachine = initMachine(initialState)
-        val error = ExperienceError(experience, "test error")
-        val action = ReportError(error, false)
+        val error: Error = mockk()
+        val retryEffect: SideEffect = mockk()
+        val action = ReportError(error, retryEffect)
 
         // WHEN
         val result = stateMachine.handleAction(action)
 
         // THEN
         assertThat(result.failureReason()).isEqualTo(error)
-        assertThat(stateMachine.state).isEqualTo(initialState)
-    }
-
-    @Test
-    fun `RenderingStep SHOULD transition to IdlingState WHEN action is ReportError AND is fatal`() = runTest {
-        // GIVEN
-        val experience = mockExperience()
-        val initialState = RenderingStepState(experience, 1, mutableMapOf())
-        val stateMachine = initMachine(initialState)
-        val error = ExperienceError(experience, "test error")
-        val action = ReportError(error, true)
-
-        // WHEN
-        val result = stateMachine.handleAction(action)
-
-        // THEN
-        assertThat(result.failureReason()).isEqualTo(error)
-        assertThat(stateMachine.state).isEqualTo(IdlingState)
+        assertThat(stateMachine.state).isEqualTo(FailingState(initialState, retryEffect))
     }
 
     @Test
@@ -509,7 +496,7 @@ internal class StateMachineTest : AppcuesScopeTest {
         val initialState = RenderingStepState(experience, 1, mutableMapOf())
         val stateMachine = initMachine(initialState, onError = { errorCompletable.complete(it) })
         val error = ExperienceError(experience, "test error")
-        val action = ReportError(error, false)
+        val action = ReportError(error, mockk())
 
         // WHEN
         stateMachine.handleAction(action)
@@ -717,6 +704,79 @@ internal class StateMachineTest : AppcuesScopeTest {
 
         // THEN
         assertThat(completion.await(1.seconds)).isFalse()
+    }
+
+    @Test
+    fun `Failing SHOULD transition to RenderingStep WHEN action is Retry AND presentation succeeds`() = runTest {
+        // GIVEN
+        val experience = mockExperience()
+        val stateAtFailure = BeginningStepState(experience, 0, true)
+        val retryEffect = PresentationEffect(experience, 0, 0, true)
+        val initialState = FailingState(stateAtFailure, retryEffect)
+        val stateMachine = initMachine(initialState)
+        val action = Retry
+        val targetState = RenderingStepState(experience, 0, mapOf(), true)
+
+        // WHEN
+        val result = stateMachine.handleAction(action)
+
+        // THEN
+        assertThat(result.successValue()).isEqualTo(targetState)
+        assertThat(stateMachine.state).isEqualTo(targetState)
+    }
+
+    @Test
+    fun `Failing SHOULD remain Failing WHEN action is Retry AND presentation fails`() = runTest {
+        // GIVEN
+        val experience = mockExperience { throw AppcuesTraitException("test trait exception") }
+        val stateAtFailure = BeginningStepState(experience, 0, true)
+        val retryEffect = PresentationEffect(experience, 0, 0, true)
+        val initialState = FailingState(stateAtFailure, retryEffect)
+        val stateMachine = initMachine(initialState)
+        val action = Retry
+        val error = StepError(experience, 0, "test trait exception")
+
+        // WHEN
+        val result = stateMachine.handleAction(action)
+
+        // THEN
+        assertThat(stateMachine.state).isEqualTo(initialState)
+        assertThat(result.failureReason()).isEqualTo(error)
+    }
+
+    @Test
+    fun `Failing SHOULD transition to Rendering new Experience WHEN action StartExperience`() = runTest {
+        // GIVEN
+        var presented = false
+        val experience = mockExperience { presented = true }
+        val initialState = FailingState(mockk(), mockk())
+        val stateMachine = initMachine(initialState)
+        val action = StartExperience(experience)
+        val targetState = RenderingStepState(experience, 0, mutableMapOf(), true)
+
+        // WHEN
+        val result = stateMachine.handleAction(action)
+
+        // THEN
+        assertThat(result.successValue()).isEqualTo(targetState)
+        assertThat(presented).isTrue()
+        assertThat(stateMachine.state).isEqualTo(targetState)
+    }
+
+    @Test
+    fun `Failing SHOULD transition to Idling WHEN action EndExperience`() = runTest {
+        // GIVEN
+        val initialState = FailingState(mockk(), mockk())
+        val stateMachine = initMachine(initialState)
+        val action = EndExperience(false, false)
+        val targetState = IdlingState
+
+        // WHEN
+        val result = stateMachine.handleAction(action)
+
+        // THEN
+        assertThat(result.successValue()).isEqualTo(targetState)
+        assertThat(stateMachine.state).isEqualTo(targetState)
     }
 
     // Helpers

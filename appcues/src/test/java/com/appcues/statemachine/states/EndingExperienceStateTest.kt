@@ -37,6 +37,7 @@ internal class EndingExperienceStateTest {
                 MockActions.RenderStep,
                 MockActions.EndExperience,
                 MockActions.ReportError,
+                MockActions.Retry,
             )
         )
     }

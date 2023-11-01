@@ -35,6 +35,7 @@ internal class BeginningStepStateTest {
                 MockActions.EndExperience,
                 MockActions.Reset,
                 MockActions.ReportError,
+                MockActions.Retry,
             )
         )
     }
