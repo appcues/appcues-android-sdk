@@ -7,6 +7,7 @@ import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.ReportError
 import com.appcues.statemachine.Action.StartExperience
 import com.appcues.statemachine.Error.ExperienceAlreadyActive
+import com.appcues.statemachine.states.FailingState
 import com.appcues.statemachine.states.IdlingState
 import com.appcues.util.ResultOf
 import com.appcues.util.ResultOf.Failure
@@ -100,8 +101,8 @@ internal class StateMachine(
         return take(action) ?: when (action) {
             // start experience action when experience is already active
             is StartExperience -> keep(ExperienceAlreadyActive)
-            // report error action
-            is ReportError -> if (action.fatal) exit(action.error) else keep(action.error)
+            // handle presentation failure
+            is ReportError -> next(FailingState(this, action.retryEffect), action.error)
             // undefined transition - no-op
             else -> keep()
         }

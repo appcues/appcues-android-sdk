@@ -6,7 +6,7 @@ import com.appcues.data.model.ExperienceTrigger.Qualification
 import com.appcues.statemachine.Action
 import com.appcues.statemachine.Action.RenderStep
 import com.appcues.statemachine.Action.ReportError
-import com.appcues.statemachine.Error.ExperienceError
+import com.appcues.statemachine.Error.StepError
 import com.appcues.statemachine.SideEffect
 import com.appcues.trait.AppcuesTraitException
 import kotlinx.coroutines.delay
@@ -50,7 +50,10 @@ internal data class PresentationEffect(
         } catch (exception: AppcuesTraitException) {
             presentingTrait.remove()
             
-            return ReportError(ExperienceError(experience, exception.message), true)
+            return ReportError(
+                error = StepError(experience, flatStepIndex, exception.message),
+                retryEffect = this.copy(shouldPresent = true)
+            )
         }
     }
 
