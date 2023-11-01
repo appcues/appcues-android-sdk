@@ -15,5 +15,6 @@ internal sealed class Action {
     ) : Action()
 
     object Reset : Action()
-    data class ReportError(val error: Error, val fatal: Boolean) : Action()
+    data class ReportError(val error: Error, var retryEffect: SideEffect) : Action()
+    object Retry : Action()
 }
