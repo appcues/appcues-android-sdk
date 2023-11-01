@@ -42,6 +42,7 @@ internal class RenderingStepStateTest {
                 MockActions.StartExperience,
                 MockActions.RenderStep,
                 MockActions.ReportError,
+                MockActions.Retry,
             )
         )
     }

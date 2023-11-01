@@ -172,10 +172,10 @@ internal class PresentationEffectTest {
         coVerifySequence { presentingTrait.remove() }
         assertThat(result).isInstanceOf(ReportError::class.java)
         with(result as ReportError) {
-            assertThat(fatal).isTrue()
-            assertThat(error).isInstanceOf(Error.ExperienceError::class.java)
-            with(error as Error.ExperienceError) {
+            assertThat(error).isInstanceOf(Error.StepError::class.java)
+            with(error as Error.StepError) {
                 assertThat(experience).isEqualTo(this@PresentationEffectTest.experience)
+                assertThat(stepIndex).isEqualTo(flatStepIndex)
                 assertThat(message).isEqualTo("produceMetadata error")
             }
         }
@@ -210,10 +210,10 @@ internal class PresentationEffectTest {
         // after retrying returns ReportError
         assertThat(result).isInstanceOf(ReportError::class.java)
         with(result as ReportError) {
-            assertThat(fatal).isTrue()
-            assertThat(error).isInstanceOf(Error.ExperienceError::class.java)
-            with(error as Error.ExperienceError) {
+            assertThat(error).isInstanceOf(Error.StepError::class.java)
+            with(error as Error.StepError) {
                 assertThat(experience).isEqualTo(this@PresentationEffectTest.experience)
+                assertThat(stepIndex).isEqualTo(flatStepIndex)
                 assertThat(message).isEqualTo("produceMetadata error")
             }
         }

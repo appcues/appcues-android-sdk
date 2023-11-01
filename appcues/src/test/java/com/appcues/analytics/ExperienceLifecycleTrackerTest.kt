@@ -21,17 +21,24 @@ import com.appcues.mocks.storageMockk
 import com.appcues.rules.MainDispatcherRule
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.MoveToStep
+import com.appcues.statemachine.Action.Retry
 import com.appcues.statemachine.Action.StartExperience
 import com.appcues.statemachine.State
 import com.appcues.statemachine.StateMachine
+import com.appcues.statemachine.effects.PresentationEffect
+import com.appcues.statemachine.states.BeginningStepState
 import com.appcues.statemachine.states.EndingStepState
+import com.appcues.statemachine.states.FailingState
 import com.appcues.statemachine.states.IdlingState
 import com.appcues.statemachine.states.RenderingStepState
+import com.appcues.trait.AppcuesTraitException
 import com.appcues.trait.TraitRegistry
 import com.appcues.ui.ExperienceRenderer
 import com.appcues.util.LinkOpener
+import com.appcues.util.appcuesFormatted
 import com.google.common.truth.Truth.assertThat
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
@@ -39,6 +46,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
+import java.util.UUID
 
 @ExperimentalCoroutinesApi
 internal class ExperienceLifecycleTrackerTest {
@@ -153,6 +161,101 @@ internal class ExperienceLifecycleTrackerTest {
             assertThat("France").isEqualTo(it["localeName"])
             assertThat("b636348b-648f-4e0d-a06a-6ebb2fe2b7f8").isEqualTo(it["localeId"])
         }
+    }
+
+    @Test
+    fun `Failing SHOULD track experience_started WHEN recovering first step`() = runTest {
+        // GIVEN
+        val experience = mockExperience()
+        val renderErrorId = UUID.randomUUID()
+        experience.renderErrorId = renderErrorId // would have been set on previous failure
+        val stateAtFailure = BeginningStepState(experience, 0, true)
+        val retryEffect = PresentationEffect(experience, 0, 0, true)
+        val initialState = FailingState(stateAtFailure, retryEffect)
+        val action = Retry
+        val scope = initScope(initialState)
+        val stateMachine: StateMachine = scope.get()
+        val analyticsTracker: AnalyticsTracker = scope.get()
+
+        // WHEN
+        stateMachine.handleAction(action)
+
+        // THEN
+        val properties = slot<Map<String, Any>>()
+        verify { analyticsTracker.track("appcues:v2:experience_started", any(), any(), any()) }
+        verify { analyticsTracker.track("appcues:v2:step_recovered", capture(properties), any(), any()) }
+        verify { analyticsTracker.track("appcues:v2:step_seen", any(), any(), any()) }
+        assertThat(properties.captured["errorId"]).isEqualTo(renderErrorId.appcuesFormatted())
+        assertThat(experience.renderErrorId).isNull() // gets cleared out after recover is logged
+    }
+
+    @Test
+    fun `Failing SHOULD NOT track experience_started WHEN recovering step that is not first`() = runTest {
+        // GIVEN
+        val experience = mockExperience()
+        val renderErrorId = UUID.randomUUID()
+        experience.renderErrorId = renderErrorId // would have been set on previous failure
+        val stateAtFailure = BeginningStepState(experience, 1, false)
+        val retryEffect = PresentationEffect(experience, 1, 1, true)
+        val initialState = FailingState(stateAtFailure, retryEffect)
+        val action = Retry
+        val scope = initScope(initialState)
+        val stateMachine: StateMachine = scope.get()
+        val analyticsTracker: AnalyticsTracker = scope.get()
+
+        // WHEN
+        stateMachine.handleAction(action)
+
+        // THEN
+        val properties = slot<Map<String, Any>>()
+        verify(exactly = 0) { analyticsTracker.track("appcues:v2:experience_started", any(), any(), any()) }
+        verify { analyticsTracker.track("appcues:v2:step_recovered", capture(properties), any(), any()) }
+        verify { analyticsTracker.track("appcues:v2:step_seen", any(), any(), any()) }
+        assertThat(properties.captured["errorId"]).isEqualTo(renderErrorId.appcuesFormatted())
+        assertThat(experience.renderErrorId).isNull() // gets cleared out after recover is logged
+    }
+
+    @Test
+    fun `Idling SHOULD track step_error WHEN presentation fails`() = runTest {
+        // GIVEN
+        val experience = mockExperience { throw AppcuesTraitException("presenting trait failed") }
+        val initialState = IdlingState
+        val action = StartExperience(experience)
+        val scope = initScope(initialState)
+        val stateMachine: StateMachine = scope.get()
+        val analyticsTracker: AnalyticsTracker = scope.get()
+
+        // WHEN
+        stateMachine.handleAction(action)
+
+        // THEN
+        val properties = slot<Map<String, Any>>()
+        verify(exactly = 0) { analyticsTracker.track("appcues:v2:experience_started", any(), any(), any()) }
+        verify { analyticsTracker.track("appcues:v2:step_error", capture(properties), any(), any()) }
+        verify(exactly = 0) { analyticsTracker.track("appcues:v2:step_seen", any(), any(), any()) }
+        assertThat(experience.renderErrorId).isNotNull()
+        assertThat(properties.captured["errorId"]).isEqualTo(experience.renderErrorId?.appcuesFormatted())
+    }
+
+    @Test
+    fun `Idling SHOULD track step_error once WHEN presentation fails multiple times`() = runTest {
+        // repeated retries do not log the same render error - just one track of a given render error
+
+        // GIVEN
+        val experience = mockExperience { throw AppcuesTraitException("presenting trait failed") }
+        val initialState = IdlingState
+        val action = StartExperience(experience)
+        val scope = initScope(initialState)
+        val stateMachine: StateMachine = scope.get()
+        val analyticsTracker: AnalyticsTracker = scope.get()
+        stateMachine.handleAction(action) // puts into failing state
+
+        // WHEN
+        stateMachine.handleAction(Retry)
+        stateMachine.handleAction(Retry)
+
+        // THEN
+        verify(exactly = 1) { analyticsTracker.track("appcues:v2:step_error", any(), any(), any()) }
     }
 
     // Helpers
