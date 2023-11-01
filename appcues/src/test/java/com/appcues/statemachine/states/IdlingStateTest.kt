@@ -35,6 +35,7 @@ internal class IdlingStateTest {
                 MockActions.EndExperience,
                 MockActions.Reset,
                 MockActions.ReportError,
+                MockActions.Retry,
             )
         )
     }

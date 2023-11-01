@@ -54,4 +54,5 @@ internal object MockActions {
     val EndExperience = mockk<EndExperience>(relaxed = true)
     val Reset = mockk<Reset>(relaxed = true)
     val ReportError = mockk<ReportError>(relaxed = true)
+    val Retry = mockk<Action.Retry>(relaxed = true)
 }
