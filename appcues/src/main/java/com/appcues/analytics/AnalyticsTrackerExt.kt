@@ -30,11 +30,13 @@ internal fun AnalyticsTracker.trackRecoverableExperienceError(experience: Experi
     if (experience.renderErrorId != null) return
 
     experience.renderErrorId = UUID.randomUUID()
-    val error = ExperienceError(Error.ExperienceError(experience, message, experience.renderErrorId))
+    val error = Error.ExperienceError(experience, message)
+    error.errorId = experience.renderErrorId
+    val experienceError = ExperienceError(error)
 
     track(
-        name = error.name,
-        properties = error.properties,
+        name = experienceError.name,
+        properties = experienceError.properties,
         interactive = false,
         isInternal = true,
     )

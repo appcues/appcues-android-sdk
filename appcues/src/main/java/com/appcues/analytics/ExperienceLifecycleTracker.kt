@@ -9,6 +9,7 @@ import com.appcues.analytics.ExperienceLifecycleEvent.ExperienceError
 import com.appcues.analytics.ExperienceLifecycleEvent.ExperienceStarted
 import com.appcues.analytics.ExperienceLifecycleEvent.StepCompleted
 import com.appcues.analytics.ExperienceLifecycleEvent.StepError
+import com.appcues.analytics.ExperienceLifecycleEvent.StepRecovered
 import com.appcues.analytics.ExperienceLifecycleEvent.StepSeen
 import com.appcues.data.model.Experience
 import com.appcues.di.component.AppcuesComponent
@@ -28,6 +29,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.util.Date
+import java.util.UUID
 
 internal class ExperienceLifecycleTracker(
     override val scope: AppcuesScope,
@@ -95,6 +97,11 @@ internal class ExperienceLifecycleTracker(
                     storage.lastContentShownAt = Date()
                     trackLifecycleEvent(ExperienceStarted(experience), SdkMetrics.trackRender(experience.requestId))
                 }
+                if (experience.renderErrorId != null) {
+                    val errorId = experience.renderErrorId
+                    trackLifecycleEvent(StepRecovered(experience, flatStepIndex), mapOf("errorId" to errorId.toString()))
+                    experience.renderErrorId = null
+                }
                 trackLifecycleEvent(StepSeen(experience, flatStepIndex))
             }
             is EndingStepState -> {
@@ -120,8 +127,21 @@ internal class ExperienceLifecycleTracker(
 
     private fun Error.track() {
         when (this) {
-            is Error.ExperienceError -> trackLifecycleEvent(ExperienceError(this))
-            is Error.StepError -> trackLifecycleEvent(StepError(this))
+            is Error.ExperienceError -> {
+                // only track error analytics the first time, as they may retry/recover later.
+                if (experience.renderErrorId == null) {
+                    experience.renderErrorId = UUID.randomUUID()
+                    errorId = experience.renderErrorId
+                    trackLifecycleEvent(ExperienceError(this))
+                }
+            }
+            is Error.StepError -> {
+                if (experience.renderErrorId == null) {
+                    experience.renderErrorId = UUID.randomUUID()
+                    errorId = experience.renderErrorId
+                    trackLifecycleEvent(StepError(this))
+                }
+            }
             ExperienceAlreadyActive -> Unit
         }
     }
