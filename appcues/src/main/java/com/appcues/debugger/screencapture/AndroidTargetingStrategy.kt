@@ -171,7 +171,7 @@ private fun View.asCaptureView(screenBounds: Rect): ViewElement? {
             displayName = it?.displayName,
             selector = it,
             type = it?.type ?: this::class.java.simpleName,
-            children = if (children.isEmpty()) null else children,
+            children = children.ifEmpty { null },
         )
     }
 }

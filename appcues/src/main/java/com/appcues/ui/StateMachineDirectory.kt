@@ -3,10 +3,7 @@ package com.appcues.ui
 import com.appcues.AppcuesFrameView
 import com.appcues.data.model.RenderContext
 import com.appcues.data.model.RenderContext.Embed
-import com.appcues.data.model.RenderContext.Modal
-import com.appcues.statemachine.Action.Reset
 import com.appcues.statemachine.StateMachine
-import com.appcues.statemachine.states.RenderingStepState
 import org.jetbrains.annotations.VisibleForTesting
 import java.lang.ref.WeakReference
 
@@ -40,21 +37,6 @@ internal class AppcuesFrameStateMachineOwner(
         frame?.reset()
         // do not need to dismiss here, as the frame UI is already removed for embed
         stateMachine.stop(false)
-    }
-}
-
-internal class ModalStateMachineOwner(override val stateMachine: StateMachine) : StateMachineOwning {
-
-    override val renderContext: RenderContext = Modal
-
-    override suspend fun reset() {
-        stateMachine.stop(true)
-    }
-
-    override suspend fun onConfigurationChanged() {
-        if (stateMachine.state is RenderingStepState) {
-            stateMachine.handleAction(Reset)
-        }
     }
 }
 

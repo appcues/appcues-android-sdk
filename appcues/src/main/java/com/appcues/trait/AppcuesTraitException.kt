@@ -11,4 +11,11 @@ internal class AppcuesTraitException(
      *  of traits can be attempted, to try to auto-recover from this error.
      */
     val retryMilliseconds: Int? = null,
+
+    /**
+     * When true, this means that the issue may be recoverable at a later time, for instance
+     * if a target element is not found, but future layout updates to scroll other content
+     * into view could resolve the target.
+     */
+    val recoverable: Boolean = false
 ) : Exception(message)
