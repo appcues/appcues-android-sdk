@@ -25,10 +25,10 @@ internal data class FailingState(
         return when (action) {
             is Retry -> next(targetState, retryEffect)
             // a new start means recovery never happened, move to Idling and continue with the new start attempt
-            is StartExperience -> Transition(IdlingState, null, ContinuationEffect(action))
+            is StartExperience -> next(IdlingState, ContinuationEffect(action))
             // an explicit request to EndExperience just moves directly to IdlingState
             // can happen in ExperienceRender if a new higher priority experience is starting
-            is EndExperience -> Transition(IdlingState, null, null)
+            is EndExperience -> next(IdlingState)
             else -> null
         }
     }
