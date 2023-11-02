@@ -16,6 +16,7 @@ internal data class PresentationEffect(
     private val flatStepIndex: Int,
     private val stepContainerIndex: Int,
     private val shouldPresent: Boolean,
+    private val isRecovering: Boolean = false,
 ) : SideEffect {
 
     override suspend fun launch(processor: ActionProcessor): Action {
@@ -34,16 +35,18 @@ internal data class PresentationEffect(
         val presentingTrait = experience.getPresentingTrait(flatStepIndex)
 
         try {
-            val metadata: Map<String, Any?>
-
-            // if we are presenting, we try to produce metadata for some time
-            // before failing, or else we just try to produce it with no retry
-            if (shouldPresent) {
-                metadata = produceMetadataWithRetry()
-
-                presentingTrait.present()
+            // if we are presenting (for the first time, not recovery),
+            // we try to produce metadata for some time before failing, or else we
+            // just try to produce it with no retry. this is to try to be lenient
+            // around view loading and animation times
+            val metadata: Map<String, Any?> = if (shouldPresent && !isRecovering) {
+                produceMetadataWithRetry()
             } else {
-                metadata = produceMetadata()
+                produceMetadata()
+            }
+
+            if (shouldPresent || isRecovering) {
+                presentingTrait.present()
             }
 
             return RenderStep(metadata)
@@ -51,8 +54,8 @@ internal data class PresentationEffect(
             presentingTrait.remove()
             
             return ReportError(
-                error = StepError(experience, flatStepIndex, exception.message),
-                retryEffect = this.copy(shouldPresent = true)
+                error = StepError(experience, flatStepIndex, exception.message, exception.recoverable),
+                retryEffect = this.copy(isRecovering = true)
             )
         }
     }
