@@ -1,6 +1,7 @@
 package com.appcues.debugger
 
-import com.appcues.debugger.screencapture.ScreenCaptureProcessor
+import com.appcues.debugger.screencapture.GetCaptureUseCase
+import com.appcues.debugger.screencapture.SaveCaptureUseCase
 import com.appcues.di.AppcuesModule
 import com.appcues.di.scope.AppcuesScopeDSL
 
@@ -31,14 +32,7 @@ internal object DebuggerModule : AppcuesModule {
 
         scoped { DebuggerLogMessageManager(get()) }
 
-        scoped {
-            ScreenCaptureProcessor(
-                config = get(),
-                contextWrapper = get(),
-                sdkSettingsRemoteSource = get(),
-                customerApiRemoteSource = get(),
-                imageUploadRemoteSource = get(),
-            )
-        }
+        scoped { SaveCaptureUseCase(sdkSettings = get(), customer = get(), imageUpload = get()) }
+        scoped { GetCaptureUseCase() }
     }
 }

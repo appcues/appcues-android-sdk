@@ -7,7 +7,6 @@ import com.appcues.data.remote.customerapi.CustomerApiRemoteSource
 import com.appcues.data.remote.customerapi.CustomerApiService
 import com.appcues.data.remote.imageupload.ImageUploadRemoteSource
 import com.appcues.data.remote.imageupload.ImageUploadService
-import com.appcues.data.remote.interceptor.CustomerApiBaseUrlInterceptor
 import com.appcues.data.remote.interceptor.HttpLogcuesInterceptor
 import com.appcues.data.remote.interceptor.SdkMetricsInterceptor
 import com.appcues.data.remote.sdksettings.SdkSettingsRemoteSource
@@ -24,7 +23,6 @@ internal object DataRemoteModule : AppcuesModule {
 
         factory { HttpLogcuesInterceptor(get()) }
         factory { SdkMetricsInterceptor() }
-        factory { CustomerApiBaseUrlInterceptor() }
 
         scoped {
             val config: AppcuesConfig = get()
@@ -56,9 +54,10 @@ internal object DataRemoteModule : AppcuesModule {
             CustomerApiRemoteSource(
                 service = RetrofitWrapper(
                     baseUrl = null,
-                    interceptors = listOf(get<HttpLogcuesInterceptor>(), get<CustomerApiBaseUrlInterceptor>()),
+                    interceptors = listOf(get<HttpLogcuesInterceptor>()),
                 ).create(CustomerApiService::class),
-                config = get()
+                config = get(),
+                contextWrapper = get(),
             )
         }
 

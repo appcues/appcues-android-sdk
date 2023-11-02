@@ -23,6 +23,7 @@ import com.appcues.debugger.screencapture.AndroidViewSelector.Companion.SELECTOR
 import com.appcues.isAppcuesView
 import com.appcues.monitor.AppcuesActivityMonitor
 import com.appcues.ui.utils.getParentView
+import com.appcues.util.withDensity
 
 internal class AndroidViewSelector(
     private val properties: Map<String, String?>,
@@ -102,15 +103,11 @@ internal class AndroidTargetingStrategy : ElementTargetingStrategy {
 private const val ANDROID_COMPOSE_VIEW_CLASS_NAME = "androidx.compose.ui.platform.AndroidComposeView"
 
 private fun View.asCaptureView(screenBounds: Rect): ViewElement? {
-    val displayMetrics = context.resources.displayMetrics
-    val density = displayMetrics.density
-
     // the coordinates of the non-clipped area of this view in the coordinate space of the view's root view
     val globalVisibleRect = Rect()
 
-    if (
-        // ignore the Appcues SDK content that has been injected into the view hierarchy
-        this.isAppcuesView() ||
+    // ignore the Appcues SDK content that has been injected into the view hierarchy
+    if (this.isAppcuesView() ||
         // if getGlobalVisibleRect returns false, that indicates that none of the view is
         // visible within the root view, and we will not include it in our capture
         getGlobalVisibleRect(globalVisibleRect).not() ||
@@ -164,11 +161,13 @@ private fun View.asCaptureView(screenBounds: Rect): ViewElement? {
     }
 
     return selector(globalVisibleRect).let {
+        val rectDp = withDensity { globalVisibleRect.toDp() }
+
         ViewElement(
-            x = globalVisibleRect.left.toDp(density),
-            y = globalVisibleRect.top.toDp(density),
-            width = globalVisibleRect.width().toDp(density),
-            height = globalVisibleRect.height().toDp(density),
+            x = rectDp.left,
+            y = rectDp.top,
+            width = rectDp.width(),
+            height = rectDp.height(),
             displayName = it?.displayName,
             selector = it,
             type = it?.type ?: this::class.java.simpleName,
@@ -224,11 +223,12 @@ private fun SemanticsNode.asCaptureView(context: Context, screenBounds: Rect): V
     }
 
     return selector(bounds, screenBounds).let {
+        val boundsDp = context.withDensity { bounds.toDp() }
         ViewElement(
-            x = bounds.left.toDp(density),
-            y = bounds.top.toDp(density),
-            width = bounds.width().toDp(density),
-            height = bounds.height().toDp(density),
+            x = boundsDp.left,
+            y = boundsDp.top,
+            width = boundsDp.width(),
+            height = boundsDp.height(),
             displayName = it?.displayName,
             selector = it,
             type = it?.type ?: "Composable #$id",
