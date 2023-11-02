@@ -2,7 +2,6 @@ package com.appcues.ui
 
 import com.appcues.AppcuesFrameView
 import com.appcues.data.model.RenderContext
-import com.appcues.data.model.RenderContext.Modal
 import com.appcues.statemachine.StateMachine
 import java.lang.ref.WeakReference
 
@@ -23,15 +22,6 @@ internal class AppcuesFrameStateMachineOwner(
         frame.get()?.reset()
         // do not need to dismiss here, as the frame UI is already removed for embed
         stateMachine.stop(false)
-    }
-}
-
-internal class ModalStateMachineOwner(override val stateMachine: StateMachine) : StateMachineOwning {
-
-    override val renderContext: RenderContext = Modal
-
-    override suspend fun reset() {
-        stateMachine.stop(true)
     }
 }
 

@@ -115,7 +115,7 @@ private fun View.asCaptureView(screenBounds: Rect): ViewElement? {
         getGlobalVisibleRect(globalVisibleRect).not() ||
         // if the view is not currently in the screenshot image (scrolled away), ignore
         // (this is possibly a redundant check to item above, but keeping for now)
-        Rect.intersects(globalVisibleRect, screenBounds).not()
+        screenBounds.contains(globalVisibleRect).not()
     ) {
         // if any of these conditions failed, this view is not captured
         return null
@@ -151,8 +151,9 @@ private fun View.asCaptureView(screenBounds: Rect): ViewElement? {
             val semanticsOwnerField = androidComposeViewClass.getDeclaredField("semanticsOwner")
                 .apply { isAccessible = true } // make private filed accessible
             val semanticsOwner = semanticsOwnerField.get(this) as SemanticsOwner
-            val composeChildren = listOf(semanticsOwner.rootSemanticsNode.asCaptureView(context))
-            children.addAll(composeChildren)
+            semanticsOwner.rootSemanticsNode.asCaptureView(context, screenBounds)?.let {
+                children.add(it)
+            }
         } catch (_: Exception) {
             // Catching and swallowing exceptions here with the Compose view handling in case
             // something changes in the future that breaks the expected structure being accessed
@@ -161,7 +162,7 @@ private fun View.asCaptureView(screenBounds: Rect): ViewElement? {
         }
     }
 
-    return selector().let {
+    return selector(globalVisibleRect).let {
         ViewElement(
             x = globalVisibleRect.left.toDp(density),
             y = globalVisibleRect.top.toDp(density),
@@ -170,12 +171,26 @@ private fun View.asCaptureView(screenBounds: Rect): ViewElement? {
             displayName = it?.displayName,
             selector = it,
             type = it?.type ?: this::class.java.simpleName,
-            children = if (children.isEmpty()) null else children,
+            children = children.ifEmpty { null },
         )
     }
 }
 
-private fun View.selector(): AndroidViewSelector? {
+private fun View.isFullyVisible(globalVisibleRect: Rect, tolerance: Double = 0.1): Boolean {
+    val visibleHeight = globalVisibleRect.height().toDouble()
+    val actualHeight = measuredHeight.toDouble()
+    val visibleWidth = globalVisibleRect.width().toDouble()
+    val actualWidth = measuredWidth.toDouble()
+
+    val heightVisible = visibleHeight > actualHeight * (1.0 - tolerance)
+    val widthVisible = visibleWidth > actualWidth * (1.0 - tolerance)
+    return heightVisible && widthVisible
+}
+
+private fun View.selector(globalVisibleRect: Rect): AndroidViewSelector? {
+    // if the entire view is not visible (within tolerance) exclude selector for targeting
+    if (isFullyVisible(globalVisibleRect).not()) return null
+
     return AndroidViewSelector(
         properties = mapOf(
             SELECTOR_CONTENT_DESCRIPTION to contentDescription?.toString(),
@@ -195,16 +210,17 @@ private fun View.extractResourceName(): String? {
     }
 }
 
-private fun SemanticsNode.asCaptureView(context: Context): ViewElement {
+private fun SemanticsNode.asCaptureView(context: Context, screenBounds: Rect): ViewElement? {
     val displayMetrics = context.resources.displayMetrics
     val density = displayMetrics.density
 
-    var childElements: List<ViewElement>? = children.map {
-        it.asCaptureView(context)
+    // if the view is not currently in the screenshot image (scrolled away), ignore
+    if (screenBounds.contains(unclippedGlobalBounds).not()) {
+        return null
     }
 
-    if (childElements?.isEmpty() == true) {
-        childElements = null
+    val childElements: List<ViewElement> = children.mapNotNull {
+        it.asCaptureView(context, screenBounds)
     }
 
     return selector().let {
@@ -216,7 +232,7 @@ private fun SemanticsNode.asCaptureView(context: Context): ViewElement {
             displayName = it?.displayName,
             selector = it,
             type = it?.type ?: "Composable #$id",
-            children = childElements
+            children = childElements.ifEmpty { null },
         )
     }
 }

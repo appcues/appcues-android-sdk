@@ -78,6 +78,7 @@ internal class TargetElementTrait(
             throw AppcuesTraitException(
                 message = "no view matching selector ${selector.toMap()}",
                 retryMilliseconds = retryMilliseconds,
+                recoverable = true,
             )
         }
 
@@ -114,6 +115,7 @@ internal class TargetElementTrait(
         throw AppcuesTraitException(
             message = "multiple non-distinct views (${weightedViews.count()}) matched selector ${selector.toMap()}",
             retryMilliseconds = retryMilliseconds,
+            recoverable = true,
         )
     }
 }
