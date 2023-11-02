@@ -35,7 +35,7 @@ import com.appcues.ui.ExperienceRenderer.RenderingResult.StateMachineError
 import com.appcues.ui.ExperienceRenderer.RenderingResult.WontDisplay
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
-import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.Flow
 
 internal class ExperienceRenderer(override val scope: AppcuesScope) : AppcuesComponent {
 
@@ -67,7 +67,7 @@ internal class ExperienceRenderer(override val scope: AppcuesScope) : AppcuesCom
         stateMachines.setOwner(ModalStateMachineOwner(get(::onExperienceEnded)))
     }
 
-    fun getStateFlow(renderContext: RenderContext): SharedFlow<State>? {
+    fun getStateFlow(renderContext: RenderContext): Flow<State>? {
         return stateMachines.getOwner(renderContext)?.stateMachine?.stateFlow
     }
 

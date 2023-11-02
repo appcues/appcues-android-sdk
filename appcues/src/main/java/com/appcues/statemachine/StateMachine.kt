@@ -11,8 +11,9 @@ import com.appcues.statemachine.states.IdlingState
 import com.appcues.util.ResultOf
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -24,11 +25,16 @@ internal class StateMachine(
 ) {
 
     private val _stateFlow = MutableSharedFlow<State>(1)
-    val stateFlow: SharedFlow<State>
-        get() = _stateFlow
+    val stateFlow: Flow<State>
+        // important that we use .distinctUntilChanged explicitly here, as it is not enabled
+        // by default on SharedFlows (only on StateFlows) - duplicate states can sent
+        // during error transitions, and we don't want those to actually be emitted to listeners
+        get() = _stateFlow.distinctUntilChanged()
 
     private val _errorFlow = MutableSharedFlow<Error>()
-    val errorFlow: SharedFlow<Error>
+    val errorFlow: Flow<Error>
+        // don't need .distinctUntilChanged() here since it would not be expected
+        // to send the same error through multiple times
         get() = _errorFlow
 
     private var _state: State = initialState
@@ -48,7 +54,9 @@ internal class StateMachine(
         }
 
         with(_state take action) {
-            // propagate new state (duplicate state will be ignored by sharedFlow)
+            // propagate new state
+            // duplicate state will be ignored by flow used externally
+            // due to the usage of .distinctUntilChanged()
             _state = newState
             _stateFlow.emit(newState)
 
