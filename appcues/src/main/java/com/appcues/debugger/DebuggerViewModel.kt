@@ -21,8 +21,9 @@ import com.appcues.debugger.model.DebuggerToast.ScreenCaptureFailure
 import com.appcues.debugger.model.DebuggerToast.ScreenCaptureSuccess
 import com.appcues.debugger.model.EventType
 import com.appcues.debugger.model.TapActionType
-import com.appcues.debugger.screencapture.Capture
-import com.appcues.debugger.screencapture.ScreenCaptureProcessor
+import com.appcues.debugger.screencapture.GetCaptureUseCase
+import com.appcues.debugger.screencapture.SaveCaptureUseCase
+import com.appcues.debugger.screencapture.model.Capture
 import com.appcues.debugger.ui.MutableDebuggerState
 import com.appcues.di.component.AppcuesComponent
 import com.appcues.di.component.inject
@@ -44,7 +45,9 @@ internal class DebuggerViewModel(override val scope: AppcuesScope, debugMode: De
 
     private val debuggerFontManager by inject<DebuggerFontManager>()
 
-    private val screenCaptureProcessor by inject<ScreenCaptureProcessor>()
+    private val saveCaptureUseCase by inject<SaveCaptureUseCase>()
+
+    private val getCaptureUseCase by inject<GetCaptureUseCase>()
 
     private val appcuesCoroutineScope by inject<AppcuesCoroutineScope>()
 
@@ -193,7 +196,7 @@ internal class DebuggerViewModel(override val scope: AppcuesScope, debugMode: De
             experienceRenderer.dismiss(RenderContext.Modal, markComplete = false, destroyed = false)
 
             // capture screen
-            screenCaptureProcessor.captureScreen()?.let {
+            getCaptureUseCase()?.let {
                 debuggerState.screenCapture.value = it
             } ?: run {
                 // go back to idle if for some reason we could not capture the screen
@@ -210,16 +213,15 @@ internal class DebuggerViewModel(override val scope: AppcuesScope, debugMode: De
             // saving a capture is only valid in screen capture mode with token
             is ScreenCapture -> {
                 viewModelScope.launch {
-                    when (val result = screenCaptureProcessor.save(capture, currentMode.token)) {
+                    when (saveCaptureUseCase(currentMode.token, capture)) {
                         is Success -> _toastState.value = Rendering(
-                            type = ScreenCaptureSuccess(result.value) {
+                            type = ScreenCaptureSuccess(capture.displayName) {
                                 // on dismiss
                                 _toastState.value = ToastState.Idle
                             }
                         )
                         is Failure -> _toastState.value = Rendering(
                             type = ScreenCaptureFailure(
-                                capture = capture,
                                 onDismiss = { _toastState.value = ToastState.Idle },
                                 onRetry = {
                                     _toastState.value = ToastState.Idle

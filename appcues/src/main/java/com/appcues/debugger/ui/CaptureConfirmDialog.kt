@@ -57,7 +57,7 @@ import androidx.compose.ui.window.Dialog
 import com.appcues.R.string
 import com.appcues.ViewElement
 import com.appcues.debugger.DebuggerViewModel
-import com.appcues.debugger.screencapture.Capture
+import com.appcues.debugger.screencapture.model.Capture
 import com.appcues.ui.extensions.xShapePath
 import com.appcues.ui.theme.AppcuesColors
 
@@ -131,7 +131,7 @@ private fun CaptureContents(debuggerViewModel: DebuggerViewModel, capture: Captu
         ) {
             // Captured screenshot
             Image(
-                bitmap = capture.screenshot.asImageBitmap(),
+                bitmap = capture.screenshot.bitmap.asImageBitmap(),
                 modifier = Modifier.border(1.dp, AppcuesColors.CaptureImageBorder),
                 contentDescription = stringResource(id = string.appcues_screen_capture_image_description),
                 contentScale = ContentScale.Fit,
@@ -203,9 +203,7 @@ private fun CaptureContents(debuggerViewModel: DebuggerViewModel, capture: Captu
                             .isEmpty()
                             .not(),
                         onClick = {
-                            val updatedCapture = capture
-                                .copy(displayName = text.value)
-                                .apply { screenshot = capture.screenshot }
+                            val updatedCapture = capture.copy(displayName = text.value)
                             debuggerViewModel.onScreenCaptureConfirm(updatedCapture)
                         }
                     ),

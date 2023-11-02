@@ -79,7 +79,7 @@ internal fun BoxScope.SuccessToast(toast: ScreenCaptureSuccess, debuggerState: M
                     withStyle(
                         style = SpanStyle(fontWeight = FontWeight.Bold, color = Color.White, fontSize = 14.sp)
                     ) {
-                        append("\"${toast.capture.displayName}\" ")
+                        append("\"${toast.displayName}\" ")
                     }
                     withStyle(
                         style = SpanStyle(fontWeight = FontWeight.Normal, color = Color.White, fontSize = 14.sp)
@@ -97,6 +97,7 @@ internal fun BoxScope.SuccessToast(toast: ScreenCaptureSuccess, debuggerState: M
         }
     }
 }
+
 @Composable
 internal fun BoxScope.FailureToast(toast: ScreenCaptureFailure, debuggerState: MutableDebuggerState) {
     // any tap on this background will dismiss the toast before it auto expires

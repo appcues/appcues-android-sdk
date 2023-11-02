@@ -36,7 +36,8 @@ import com.appcues.debugger.DebuggerFontManager
 import com.appcues.debugger.DebuggerModule
 import com.appcues.debugger.DebuggerRecentEventsManager
 import com.appcues.debugger.DebuggerStatusManager
-import com.appcues.debugger.screencapture.ScreenCaptureProcessor
+import com.appcues.debugger.screencapture.GetCaptureUseCase
+import com.appcues.debugger.screencapture.SaveCaptureUseCase
 import com.appcues.di.Bootstrap
 import com.appcues.di.definition.DefinitionParams
 import com.appcues.di.scope.AppcuesScope
@@ -177,6 +178,7 @@ internal class ModulesTests {
         get<DebuggerStatusManager>()
         get<DebuggerRecentEventsManager>()
         get<DebuggerFontManager>()
-        get<ScreenCaptureProcessor>()
+        get<SaveCaptureUseCase>()
+        get<GetCaptureUseCase>()
     }
 }

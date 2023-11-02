@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.appcues.debugger.DebugMode
 import com.appcues.debugger.model.DebuggerToast
-import com.appcues.debugger.screencapture.Capture
+import com.appcues.debugger.screencapture.model.Capture
 import kotlin.math.roundToInt
 
 internal class MutableDebuggerState(
