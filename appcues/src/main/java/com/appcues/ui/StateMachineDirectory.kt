@@ -6,6 +6,7 @@ import com.appcues.data.model.RenderContext.Embed
 import com.appcues.statemachine.StateMachine
 import org.jetbrains.annotations.VisibleForTesting
 import java.lang.ref.WeakReference
+import kotlin.collections.set
 
 internal interface StateMachineOwning {
 
@@ -14,6 +15,10 @@ internal interface StateMachineOwning {
     suspend fun reset()
 
     suspend fun onConfigurationChanged() = Unit
+
+    fun onScreenChange() { }
+
+    fun isInvalid(): Boolean = false
 }
 
 internal class AppcuesFrameStateMachineOwner(
@@ -38,19 +43,17 @@ internal class AppcuesFrameStateMachineOwner(
         // do not need to dismiss here, as the frame UI is already removed for embed
         stateMachine.stop(false)
     }
+
+    override fun isInvalid(): Boolean = frame == null
 }
 
 internal class StateMachineDirectory {
 
     private var stateMachines = mutableMapOf<RenderContext, StateMachineOwning>()
 
-    fun cleanup() {
-        stateMachines.values.removeAll {
-            val frameOwner = it as? AppcuesFrameStateMachineOwner ?: return@removeAll false
-            // clean any state machines for views that are no longer valid
-            // (weak reference is null)
-            frameOwner.frame == null
-        }
+    fun onScreenChange() {
+        stateMachines.values.forEach { it.onScreenChange() }
+        stateMachines.values.removeAll { it.isInvalid() }
     }
 
     fun getOwner(context: RenderContext): StateMachineOwning? = stateMachines[context]
