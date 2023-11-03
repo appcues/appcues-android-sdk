@@ -1,6 +1,7 @@
 package com.appcues.ui
 
 import com.appcues.AppcuesConfig
+import com.appcues.AppcuesCoroutineScope
 import com.appcues.AppcuesFrameView
 import com.appcues.AppcuesInterceptor
 import com.appcues.analytics.AnalyticsEvent
@@ -18,6 +19,7 @@ import com.appcues.di.Bootstrap
 import com.appcues.di.scope.AppcuesScope
 import com.appcues.di.scope.AppcuesScopeDSL
 import com.appcues.di.scope.get
+import com.appcues.logging.Logcues
 import com.appcues.mocks.mockEmbedExperience
 import com.appcues.mocks.mockExperience
 import com.appcues.mocks.mockExperienceExperiment
@@ -478,6 +480,8 @@ internal class ExperienceRendererTest {
                     scoped { mockk<AnalyticsTracker>(relaxed = true) }
                     scoped { mockk<ExperienceLifecycleTracker>(relaxed = true) }
                     scoped { StateMachineDirectory() }
+                    scoped { AppcuesCoroutineScope(get()) }
+                    scoped { mockk<Logcues>(relaxed = true) }
                 }
             })
         )

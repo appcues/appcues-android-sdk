@@ -165,7 +165,7 @@ internal class StateMachineTest : AppcuesScopeTest {
         val action = StartExperience(experience)
         val error = StepError(experience, 0, "test trait exception")
         val stateAtFailure = BeginningStepState(experience, 0, true)
-        val effect = PresentationEffect(experience, 0, 0, true)
+        val effect = PresentationEffect(experience, 0, 0, true, isRecovering = true)
         val targetState = FailingState(stateAtFailure, effect)
 
         // WHEN
@@ -730,7 +730,7 @@ internal class StateMachineTest : AppcuesScopeTest {
         // GIVEN
         val experience = mockExperience { throw AppcuesTraitException("test trait exception") }
         val stateAtFailure = BeginningStepState(experience, 0, true)
-        val retryEffect = PresentationEffect(experience, 0, 0, true)
+        val retryEffect = PresentationEffect(experience, 0, 0, true, isRecovering = true)
         val initialState = FailingState(stateAtFailure, retryEffect)
         val stateMachine = initMachine(initialState)
         val action = Retry
