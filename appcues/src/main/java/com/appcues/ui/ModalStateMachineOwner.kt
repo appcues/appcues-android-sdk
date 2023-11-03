@@ -1,15 +1,10 @@
 package com.appcues.ui
 
 import android.view.MotionEvent
-import android.view.View
 import android.view.ViewTreeObserver
 import android.view.ViewTreeObserver.OnDrawListener
-import android.view.ViewTreeObserver.OnGlobalFocusChangeListener
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.view.ViewTreeObserver.OnScrollChangedListener
-import android.view.ViewTreeObserver.OnTouchModeChangeListener
-import android.view.ViewTreeObserver.OnWindowAttachListener
-import android.view.ViewTreeObserver.OnWindowFocusChangeListener
 import com.appcues.AppcuesCoroutineScope
 import com.appcues.data.model.RenderContext
 import com.appcues.data.model.RenderContext.Modal
@@ -107,15 +102,10 @@ internal class ModalStateMachineOwner(
         }
     }
 
-    private class ViewTreeUpdateHandler(private var action: () -> Unit) :
-        OnScrollChangedListener,
-        OnGlobalLayoutListener,
-        OnTouchModeChangeListener,
-        OnDrawListener,
-        OnGlobalFocusChangeListener,
-        OnWindowAttachListener,
-        OnWindowFocusChangeListener
-    {
+    private class ViewTreeUpdateHandler(
+        private var action: () -> Unit
+    ) : OnScrollChangedListener, OnGlobalLayoutListener, OnDrawListener {
+
         private var viewTreeObserver: ViewTreeObserver? = null
 
         fun attach(viewTreeObserver: ViewTreeObserver) {
@@ -123,22 +113,14 @@ internal class ModalStateMachineOwner(
 
             viewTreeObserver.addOnScrollChangedListener(this)
             viewTreeObserver.addOnGlobalLayoutListener(this)
-            viewTreeObserver.addOnTouchModeChangeListener(this)
             viewTreeObserver.addOnDrawListener(this)
-            viewTreeObserver.addOnGlobalFocusChangeListener(this)
-            viewTreeObserver.addOnWindowAttachListener(this)
-            viewTreeObserver.addOnWindowFocusChangeListener(this)
         }
 
         fun detach() {
             viewTreeObserver?.let {
                 it.removeOnScrollChangedListener(this)
                 it.removeOnGlobalLayoutListener(this)
-                it.removeOnTouchModeChangeListener(this)
                 it.removeOnDrawListener(this)
-                it.removeOnGlobalFocusChangeListener(this)
-                it.removeOnWindowAttachListener(this)
-                it.removeOnWindowFocusChangeListener(this)
             }
             viewTreeObserver = null
         }
@@ -151,28 +133,8 @@ internal class ModalStateMachineOwner(
             action()
         }
 
-        override fun onTouchModeChanged(p0: Boolean) {
-
-        }
-
         override fun onDraw() {
             action()
-        }
-
-        override fun onGlobalFocusChanged(p0: View?, p1: View?) {
-
-        }
-
-        override fun onWindowAttached() {
-
-        }
-
-        override fun onWindowDetached() {
-
-        }
-
-        override fun onWindowFocusChanged(p0: Boolean) {
-
         }
     }
 }
