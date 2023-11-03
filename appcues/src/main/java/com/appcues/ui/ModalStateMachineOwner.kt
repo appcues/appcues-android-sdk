@@ -59,7 +59,13 @@ internal class ModalStateMachineOwner(
         }
     }
 
-    fun stopRetryHandling() {
+    // gets called by the StateMachineDirectory onScreenChange, which occurs when a new screen view
+    // is processed in ExperienceRenderer - stop any active retry in that case
+    override fun onScreenChange() {
+        stopRetryHandling()
+    }
+
+    private fun stopRetryHandling() {
         viewTreeUpdateHandler.detach()
         viewTreeObserver = null
     }
