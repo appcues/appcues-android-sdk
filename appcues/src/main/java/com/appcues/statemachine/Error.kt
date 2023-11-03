@@ -20,6 +20,6 @@ internal sealed class Error(open val message: String) {
         val experience: Experience,
         val stepIndex: Int,
         override val message: String,
-        var recoverable: Boolean = false,
+        val recoverable: Boolean = false,
     ) : Error(message)
 }

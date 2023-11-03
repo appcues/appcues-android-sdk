@@ -115,7 +115,7 @@ private fun View.asCaptureView(screenBounds: Rect): ViewElement? {
         getGlobalVisibleRect(globalVisibleRect).not() ||
         // if the view is not currently in the screenshot image (scrolled away), ignore
         // (this is possibly a redundant check to item above, but keeping for now)
-        screenBounds.contains(globalVisibleRect).not()
+        Rect.intersects(globalVisibleRect, screenBounds).not()
     ) {
         // if any of these conditions failed, this view is not captured
         return null

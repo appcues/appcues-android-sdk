@@ -55,8 +55,6 @@ internal class ExperienceRenderer(override val scope: AppcuesScope) : AppcuesCom
     private val potentiallyRenderableExperiences = hashMapOf<RenderContext, List<Experience>>()
     private val previewExperiences = hashMapOf<RenderContext, Experience>()
 
-    private val modalStateMachineOwner = ModalStateMachineOwner(get(::onExperienceEnded), get())
-
     private fun onExperienceEnded(experience: Experience) {
         // when an experience completes, remove this render context from the cache, until a new set of
         // qualified experiences is processed
@@ -66,7 +64,7 @@ internal class ExperienceRenderer(override val scope: AppcuesScope) : AppcuesCom
     init {
         // sets up the single state machine used for modal experiences (mobile flows, not embeds)
         // that lives indefinitely and handles one experience at a time
-        stateMachines.setOwner(modalStateMachineOwner)
+        stateMachines.setOwner(ModalStateMachineOwner(get(::onExperienceEnded), get()))
     }
 
     fun getStateFlow(renderContext: RenderContext): Flow<State>? {
@@ -136,10 +134,7 @@ internal class ExperienceRenderer(override val scope: AppcuesScope) : AppcuesCom
         if (qualificationResult.trigger.reason == "screen_view") {
             // clear list in case this was a screen_view qualification
             potentiallyRenderableExperiences.clear()
-            stateMachines.cleanup()
-
-            // and stop any Modal retry processing ongoing when screen changes
-            modalStateMachineOwner.stopRetryHandling()
+            stateMachines.onScreenChange()
         }
 
         // Add new experiences, replacing any existing ones
