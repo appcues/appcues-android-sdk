@@ -260,4 +260,56 @@ internal class AutoPropertyDecoratorTest {
             assertThat(get("_sdkName") as String).isNotEqualTo("test-sdk")
         }
     }
+
+    @Test
+    fun `decorateGroup SHOULD add autoProperties to groupUpdate map WHEN group is not null`() {
+        // given
+        val activityRequest = ActivityRequest(
+            userId = "test userId",
+            sessionId = UUID.randomUUID(),
+            accountId = "test accountId",
+            groupId = "group"
+        )
+        // when
+        with(autoPropertyDecorator.decorateGroup(activityRequest)) {
+            // then
+            assertThat(groupUpdate).hasSize(1)
+            assertThat(groupUpdate).containsKey("_lastSeenAt")
+        }
+    }
+
+    @Test
+    fun `decorateGroup SHOULD NOT add autoProperties to groupUpdate map WHEN group is null`() {
+        // given
+        val activityRequest = ActivityRequest(
+            userId = "test userId",
+            sessionId = UUID.randomUUID(),
+            accountId = "test accountId",
+            groupId = null
+        )
+        // when
+        with(autoPropertyDecorator.decorateGroup(activityRequest)) {
+            // then
+            assertThat(groupUpdate).isNull()
+        }
+    }
+
+    @Test
+    fun `decorateGroup SHOULD include custom properties into groupUpdate map`() {
+        // given
+        val activityRequest = ActivityRequest(
+            userId = "test userId",
+            accountId = "test accountId",
+            sessionId = UUID.randomUUID(),
+            groupId = "group",
+            groupUpdate = hashMapOf("prop" to 12)
+        )
+        // when
+        with(autoPropertyDecorator.decorateGroup(activityRequest)) {
+            // then
+            assertThat(groupUpdate).hasSize(2)
+            assertThat(groupUpdate!!["prop"]).isEqualTo(12)
+            assertThat(groupUpdate).containsKey("_lastSeenAt")
+        }
+    }
 }

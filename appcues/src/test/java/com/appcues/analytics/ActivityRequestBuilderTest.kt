@@ -31,6 +31,7 @@ internal class ActivityRequestBuilderTest {
         every { decorateIdentify(capture(activityRequestSlot)) } returns mockk()
         every { decorateTrack(capture(eventRequestSlot)) } returns mockk()
         every { autoProperties } returns hashMapOf("auto" to "properties")
+        every { decorateGroup(capture(activityRequestSlot)) } returns mockk()
     }
 
     private val activityRequestBuilder = ActivityRequestBuilder(
@@ -64,8 +65,9 @@ internal class ActivityRequestBuilderTest {
         val properties = hashMapOf("_test" to "test")
         val sessionId = UUID.randomUUID()
         // when
-        with(activityRequestBuilder.group(sessionId, properties)) {
-            // then
+        activityRequestBuilder.group(sessionId, properties)
+        // then
+        with(activityRequestSlot.captured) {
             assertThat(userId).isEqualTo("userId")
             assertThat(groupId).isEqualTo("groupId")
             assertThat(accountId).isEqualTo("accountId")
