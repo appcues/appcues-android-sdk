@@ -3,6 +3,7 @@ package com.appcues.debugger.screencapture
 import android.content.Context
 import android.content.res.Resources.NotFoundException
 import android.graphics.Rect
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.ui.semantics.SemanticsNode
@@ -145,6 +146,7 @@ private fun View.asCaptureView(screenBounds: Rect): ViewElement? {
     // SemanticsNodes within allows us to traverse the view info to find selectable elements
     // very similar to how compose UI testing works.
     if (this::class.java.name == ANDROID_COMPOSE_VIEW_CLASS_NAME) {
+        @Suppress("TooGenericExceptionCaught")
         try {
             val androidComposeViewClass = Class.forName(ANDROID_COMPOSE_VIEW_CLASS_NAME)
             // use getDeclaredField instead of getField due to private access
@@ -153,11 +155,12 @@ private fun View.asCaptureView(screenBounds: Rect): ViewElement? {
             val semanticsOwner = semanticsOwnerField.get(this) as SemanticsOwner
             val composeChildren = listOf(semanticsOwner.rootSemanticsNode.asCaptureView(context))
             children.addAll(composeChildren)
-        } catch (_: Exception) {
+        } catch (ex: Exception) {
             // Catching and swallowing exceptions here with the Compose view handling in case
             // something changes in the future that breaks the expected structure being accessed
             // through reflection here. If anything goes wrong within this block, prefer to continue
             // processing the remainder of the view tree as best we can.
+            Log.e("Appcues", "error processing Compose layout, ${ex.message}")
         }
     }
 
