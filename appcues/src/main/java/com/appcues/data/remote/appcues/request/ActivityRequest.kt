@@ -23,9 +23,12 @@ internal data class ActivityRequest(
     @SerializeNull
     val groupId: String? = null,
     @Json(name = "group_update")
-    val groupUpdate: Map<String, Any>? = null,
+    val groupUpdate: MutableMap<String, Any>? = null,
     @Json(ignore = true)
     val timestamp: Date = Date(),
     @Transient
     val userSignature: String? = null,
-)
+) {
+    // all requests from mobile should have `"source": "mobile"` in the request body root
+    var source: String = "mobile"
+}

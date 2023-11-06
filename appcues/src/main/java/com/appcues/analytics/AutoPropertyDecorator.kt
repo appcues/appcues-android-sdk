@@ -104,4 +104,15 @@ internal class AutoPropertyDecorator(
             putAll(autoProperties)
         }
     )
+
+    fun decorateGroup(activity: ActivityRequest): ActivityRequest {
+        // only apply group auto props when the user is associated with a non-null group
+        if (activity.groupId == null) return activity
+
+        return activity.copy(
+            groupUpdate = (activity.groupUpdate ?: hashMapOf()).also {
+                it["_lastSeenAt"] = Date()
+            }
+        )
+    }
 }

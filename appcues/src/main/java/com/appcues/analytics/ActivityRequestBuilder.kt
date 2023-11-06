@@ -30,13 +30,15 @@ internal class ActivityRequestBuilder(
         )
     )
 
-    fun group(sessionId: UUID, properties: Map<String, Any>? = null) = ActivityRequest(
-        userId = storage.userId,
-        accountId = config.accountId,
-        groupId = storage.groupId,
-        sessionId = sessionId,
-        groupUpdate = properties, // no auto-properties on group calls
-        userSignature = storage.userSignature,
+    fun group(sessionId: UUID, properties: Map<String, Any>? = null) = decorator.decorateGroup(
+        ActivityRequest(
+            userId = storage.userId,
+            accountId = config.accountId,
+            groupId = storage.groupId,
+            sessionId = sessionId,
+            groupUpdate = properties?.toMutableMap(),
+            userSignature = storage.userSignature,
+        )
     )
 
     fun track(sessionId: UUID, name: String, properties: Map<String, Any>? = null): ActivityRequest {
