@@ -153,8 +153,7 @@ private fun View.asCaptureView(screenBounds: Rect): ViewElement? {
             val semanticsOwnerField = androidComposeViewClass.getDeclaredField("semanticsOwner")
                 .apply { isAccessible = true } // make private filed accessible
             val semanticsOwner = semanticsOwnerField.get(this) as SemanticsOwner
-            val composeChildren = listOf(semanticsOwner.rootSemanticsNode.asCaptureView(context))
-            children.addAll(composeChildren)
+            semanticsOwner.rootSemanticsNode.asCaptureView(context, screenBounds)?.let { children.add(it) }
         } catch (ex: Exception) {
             // Catching and swallowing exceptions here with the Compose view handling in case
             // something changes in the future that breaks the expected structure being accessed
@@ -164,7 +163,7 @@ private fun View.asCaptureView(screenBounds: Rect): ViewElement? {
         }
     }
 
-    return selector().let {
+    return selector(globalVisibleRect).let {
         ViewElement(
             x = globalVisibleRect.left.toDp(density),
             y = globalVisibleRect.top.toDp(density),
@@ -178,7 +177,18 @@ private fun View.asCaptureView(screenBounds: Rect): ViewElement? {
     }
 }
 
-private fun View.selector(): AndroidViewSelector? {
+private fun View.isVisibleForTargeting(globalVisibleRect: Rect): Boolean {
+    // considering it eligible for targeting if the center point is visible
+    val actualHeight = measuredHeight.toDouble()
+    val actualWidth = measuredWidth.toDouble()
+    val centerX = (globalVisibleRect.left + (actualWidth / 2.0)).toInt()
+    val centerY = (globalVisibleRect.top + (actualHeight / 2.0)).toInt()
+    return globalVisibleRect.contains(centerX, centerY)
+}
+
+private fun View.selector(globalVisibleRect: Rect): AndroidViewSelector? {
+    if (!isVisibleForTargeting(globalVisibleRect)) return null
+
     return AndroidViewSelector(
         properties = mapOf(
             SELECTOR_CONTENT_DESCRIPTION to contentDescription?.toString(),
@@ -198,48 +208,58 @@ private fun View.extractResourceName(): String? {
     }
 }
 
-private fun SemanticsNode.asCaptureView(context: Context): ViewElement {
+private fun SemanticsNode.asCaptureView(context: Context, screenBounds: Rect): ViewElement? {
     val displayMetrics = context.resources.displayMetrics
     val density = displayMetrics.density
 
-    var childElements: List<ViewElement>? = children.map {
-        it.asCaptureView(context)
+    val bounds = unclippedGlobalBounds()
+
+    // if the view is not currently in the screenshot image (scrolled away), ignore
+    if (Rect.intersects(bounds, screenBounds).not()) {
+        return null
     }
 
-    if (childElements?.isEmpty() == true) {
-        childElements = null
+    val childElements: List<ViewElement> = children.mapNotNull {
+        it.asCaptureView(context, screenBounds)
     }
 
-    return selector().let {
+    return selector(bounds, screenBounds).let {
         ViewElement(
-            x = unclippedGlobalBounds.left.toDp(density),
-            y = unclippedGlobalBounds.top.toDp(density),
-            width = unclippedGlobalBounds.width().toDp(density),
-            height = unclippedGlobalBounds.height().toDp(density),
+            x = bounds.left.toDp(density),
+            y = bounds.top.toDp(density),
+            width = bounds.width().toDp(density),
+            height = bounds.height().toDp(density),
             displayName = it?.displayName,
             selector = it,
             type = it?.type ?: "Composable #$id",
-            children = childElements
+            children = childElements.ifEmpty { null },
         )
     }
 }
 
-private val SemanticsNode.unclippedGlobalBounds: Rect
-    get() {
-        return Rect(
-            positionInWindow.x.toInt(),
-            positionInWindow.y.toInt(),
-            positionInWindow.x.toInt() + size.width,
-            positionInWindow.y.toInt() + size.height
-        )
-    }
+private fun SemanticsNode.unclippedGlobalBounds(): Rect =
+    Rect(
+        positionInWindow.x.toInt(),
+        positionInWindow.y.toInt(),
+        positionInWindow.x.toInt() + size.width,
+        positionInWindow.y.toInt() + size.height
+    )
 
 private val AppcuesViewTagKey = SemanticsPropertyKey<String>("AppcuesViewTagKey")
 
 // used by the public appcuesViewTag Modifier in ElementTargetingStrategy.kt provided by SDK
 internal var SemanticsPropertyReceiver.appcuesViewTagProperty by AppcuesViewTagKey
 
-private fun SemanticsNode.selector(): AndroidViewSelector? {
+private fun SemanticsNode.selector(bounds: Rect, screenBounds: Rect): AndroidViewSelector? {
+    // the view center point must be within the screen bounds to be eligible for targeting
+    // this is the Compose version of View.isVisibleForTargeting() that is done with the visible
+    // rect of an Android.view.View.
+    val centerX = bounds.left + (bounds.width() / 2)
+    val centerY = bounds.top + (bounds.height() / 2)
+    if (!screenBounds.contains(centerX, centerY)) {
+        return null
+    }
+
     // we can look up the view tag set by the Modifier here and use it for our selector
     if (config.contains(AppcuesViewTagKey)) {
         return AndroidViewSelector(
