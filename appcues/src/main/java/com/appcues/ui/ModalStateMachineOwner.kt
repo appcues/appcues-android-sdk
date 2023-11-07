@@ -68,6 +68,8 @@ internal class ModalStateMachineOwner(
     private fun stopRetryHandling() {
         viewTreeUpdateHandler.detach()
         viewTreeObserver = null
+        uiIdleDebounceTimer?.cancel()
+        uiIdleDebounceTimer = null
     }
 
     private fun startRetryHandling() {
