@@ -1,5 +1,6 @@
 # generated Moshi adapaters
--keep class com.appcues.**.*JsonAdapter { *; }
+-keep class com.appcues.data.remote.**.response.** { *; }
+-keep class com.appcues.ViewElement { *; }
 
 # required for element targeting with Jetpack Compose
 -keep class androidx.compose.ui.platform.AndroidComposeView { *; }
