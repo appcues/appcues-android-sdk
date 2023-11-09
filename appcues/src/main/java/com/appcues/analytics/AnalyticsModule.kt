@@ -23,13 +23,14 @@ internal object AnalyticsModule : AppcuesModule {
         scoped { ActivityRequestBuilder(config = get(), storage = get(), decorator = get()) }
         factory { ExperienceLifecycleTracker(scope = scope) }
         scoped { ActivityScreenTracking(context = get(), analyticsTracker = get(), logcues = get()) }
-        scoped<QueueScheduler> { AnalyticsQueueScheduler() }
+        factory<QueueScheduler> { AnalyticsQueueScheduler() }
         scoped {
             AnalyticsQueueProcessor(
                 appcuesCoroutineScope = get(),
                 experienceRenderer = get(),
                 repository = get(),
-                analyticsQueueScheduler = get()
+                analyticsQueueScheduler = get(),
+                priorityQueueScheduler = get(),
             )
         }
         scoped {

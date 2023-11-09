@@ -7,8 +7,8 @@ internal class StubQueueScheduler : QueueScheduler {
 
     val mockkScheduler: QueueScheduler = mockk(relaxed = true)
 
-    override fun schedule(block: () -> Unit) {
-        mockkScheduler.schedule(block)
+    override fun schedule(delay: Long, block: () -> Unit) {
+        mockkScheduler.schedule(delay, block)
         block()
     }
 
