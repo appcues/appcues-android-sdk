@@ -71,7 +71,7 @@ internal class AnalyticsTrackerTest {
         // then
         verify { sessionMonitor.updateLastActivity() }
         assertThat(analyticsFlowUpdates).hasSize(1)
-        verify { analyticsQueueProcessor.flushThenSend(activity) }
+        verify { analyticsQueueProcessor.flushThenSend(activity, true) }
         assertThat(analyticsFlowUpdates.first().type).isEqualTo(AnalyticType.IDENTIFY)
         assertThat(analyticsFlowUpdates.first().isInternal).isFalse()
         assertThat(analyticsFlowUpdates.first().request).isEqualTo(activity)

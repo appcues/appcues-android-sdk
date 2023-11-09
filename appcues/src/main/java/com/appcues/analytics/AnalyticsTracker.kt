@@ -31,7 +31,9 @@ internal class AnalyticsTracker(
             updateAnalyticsFlow(IDENTIFY, false, it)
 
             if (interactive) {
-                analyticsQueueProcessor.flushThenSend(it)
+                // use true for waitForBatch - since a new identify() should merge with any
+                // immediately subsequent analytics - to prevent stale group info on qualification
+                analyticsQueueProcessor.flushThenSend(it, true)
             } else {
                 analyticsQueueProcessor.queue(it)
             }
@@ -85,7 +87,9 @@ internal class AnalyticsTracker(
             // subsequent analytics for the session are queued
             val activityRequest = activityBuilder.track(sessionId, AnalyticsEvent.SessionStarted.eventName, null)
             updateAnalyticsFlow(EVENT, true, activityRequest)
-            analyticsQueueProcessor.queueThenFlush(activityRequest)
+            // use true for waitForBatch, as a session_started event created due to a new user identify() should
+            // merge and send together in a single activity payload
+            analyticsQueueProcessor.flushThenSend(activityRequest, true)
         } else {
             // we have a valid session, update its last activity timestamp to push out the timeout
             sessionMonitor.updateLastActivity()

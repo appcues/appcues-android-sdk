@@ -39,6 +39,7 @@ internal class AnalyticsQueueProcessorTest {
     }
 
     private val queueScheduler = StubQueueScheduler()
+    private val priorityQueueScheduler = StubQueueScheduler()
 
     private lateinit var analyticsQueueProcessor: AnalyticsQueueProcessor
 
@@ -49,6 +50,7 @@ internal class AnalyticsQueueProcessorTest {
             experienceRenderer = experienceRenderer,
             repository = repository,
             analyticsQueueScheduler = queueScheduler,
+            priorityQueueScheduler = priorityQueueScheduler,
         )
     }
 
@@ -59,7 +61,7 @@ internal class AnalyticsQueueProcessorTest {
         // when
         analyticsQueueProcessor.queue(mockkActivity)
         // then
-        verify { queueScheduler.mockkScheduler.schedule(any()) }
+        verify { queueScheduler.mockkScheduler.schedule(any(), any()) }
         coVerify { repository.trackActivity(capture(activitySlot)) }
         coVerify { experienceRenderer.show(mockkQualificationResult) }
         assertThat(activitySlot.captured.events).hasSize(1)
