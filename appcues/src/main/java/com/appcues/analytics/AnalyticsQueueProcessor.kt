@@ -17,7 +17,7 @@ internal class AnalyticsQueueProcessor(
     private val repository: AppcuesRepository,
     private val experienceRenderer: ExperienceRenderer,
     // this is the background analytics processing queue - 10 sec batch
-    private val analyticsQueueScheduler: QueueScheduler,
+    private val backgroundQueueScheduler: QueueScheduler,
     // this is the immediate processing queue - 50ms batch to group identify with immediate subsequent updates
     private val priorityQueueScheduler: QueueScheduler,
 ) {
@@ -28,25 +28,25 @@ internal class AnalyticsQueueProcessor(
     }
 
     // holds background analytics (flow events) to batch and send in 10 sec intervals
-    private val pendingActivity = mutableListOf<ActivityRequest>()
+    private val backgroundQueue = mutableListOf<ActivityRequest>()
 
     // holds items to be immediately processed, but allowed to group with very near additional updates (50ms)
     private val priorityQueue = mutableListOf<ActivityRequest>()
 
     @VisibleForTesting
     fun queueForTesting(activity: ActivityRequest) {
-        pendingActivity.add(activity)
+        backgroundQueue.add(activity)
     }
 
     // used by non-interactive tracking - flow events - allowing for 10 sec batching
     fun queue(activity: ActivityRequest) {
         synchronized(this) {
             // add activity to pending activities
-            pendingActivity.add(activity)
+            backgroundQueue.add(activity)
             // and schedule the flush task
-            analyticsQueueScheduler.schedule {
+            backgroundQueueScheduler.schedule {
                 synchronized(this) {
-                    flushPendingActivity()
+                    flushBackgroundActivity()
                 }
             }
         }
@@ -57,10 +57,10 @@ internal class AnalyticsQueueProcessor(
     // preempting any 10 sec wait for other items
     fun queueThenFlush(activity: ActivityRequest) {
         synchronized(this) {
-            analyticsQueueScheduler.cancel()
+            backgroundQueueScheduler.cancel()
             // add new activity to pending activities and try to send all as a merged activity request
-            pendingActivity.add(activity)
-            flushPendingActivity(activity.timestamp)
+            backgroundQueue.add(activity)
+            flushBackgroundActivity(activity.timestamp)
         }
     }
 
@@ -74,11 +74,11 @@ internal class AnalyticsQueueProcessor(
     // that immediately follows
     fun flushThenSend(activity: ActivityRequest, waitForBatch: Boolean = false) {
         synchronized(this) {
-            analyticsQueueScheduler.cancel()
+            backgroundQueueScheduler.cancel()
             // send all pending activities as a merged activity request
-            flushPendingActivity()
+            flushBackgroundActivity()
             // then send another one for our newer activity
-            sendPriority(activity, waitForBatch, activity.timestamp)
+            sendWithPriorityQueue(activity, waitForBatch, activity.timestamp)
         }
     }
 
@@ -87,9 +87,39 @@ internal class AnalyticsQueueProcessor(
         // to be called when any pending activity should immediately be flushed to cache, and network if possible
         // i.e. app going to background / being killed
         synchronized(this) {
+            // this will move into priority queue, if exists
+            flushBackgroundActivity()
+            // flush priority queue, if exists
             flushPriorityActivity()
-            flushPendingActivity()
         }
+    }
+
+    // send anything in the background analytics queue, merging into a priority queue, if exists
+    private fun flushBackgroundActivity(time: Date? = null) {
+        backgroundQueue.merge()
+            .let {
+                if (it != null) {
+                    // sending through the priority queue here - if there
+                    // is anything batching at 50ms delay (i.e. a new identify)
+                    // then these items will get merged in. Typically, this
+                    // is not the case, and they will be sent immediately.
+                    // `startQueue` is false, as this call will never start a new
+                    // 50ms delay, only merge with an existing one, if exists.
+                    sendWithPriorityQueue(it, false, time)
+                }
+            }.also {
+                backgroundQueue.clear()
+            }
+    }
+
+    // send the priority queue
+    private fun flushPriorityActivity() {
+        priorityQueue.merge()
+            .let {
+                if (it != null) send(it, it.timestamp)
+            }.also {
+                priorityQueue.clear()
+            }
     }
 
     // this function handles the optional creation of a 50ms buffer to allow for priority items
@@ -98,7 +128,7 @@ internal class AnalyticsQueueProcessor(
     // 2. if no queue exists, and not starting a queue - send immediately with no delay
     // 3. if a queue exists and it contains items from a different user - flush immediately and then process this item
     // 4. otherwise, add this item to the queue and start it (if not already)
-    private fun sendPriority(activity: ActivityRequest, startQueue: Boolean, time: Date?) {
+    private fun sendWithPriorityQueue(activity: ActivityRequest, startQueue: Boolean, time: Date?) {
         // if there is no queue in flight, just send it immediate - hopefully common case
         if (!startQueue && priorityQueue.isEmpty()) {
             send(activity, time)
@@ -113,7 +143,7 @@ internal class AnalyticsQueueProcessor(
             // with a new user identified, in flushThenSend.
             //
             // then try again..
-            sendPriority(activity, startQueue, time)
+            sendWithPriorityQueue(activity, startQueue, time)
             return
         }
         // add activity to priority queue
@@ -124,65 +154,6 @@ internal class AnalyticsQueueProcessor(
                 flushPriorityActivity()
             }
         }
-    }
-
-    // send anything in the background analytics queue, merging into a priority queue, if exists
-    private fun flushPendingActivity(time: Date? = null) {
-        pendingActivity.merge()
-            .let {
-                if (it != null) {
-                    // sending through the priority queue here - if there
-                    // is anything batching at 50ms delay (i.e. a new identify)
-                    // then these items will get merged in. Typically, this
-                    // is not the case, and they will be sent immediately.
-                    // `startQueue` is false, as this call will never start a new
-                    // 50ms delay, only merge with an existing one, if exists.
-                    sendPriority(it, false, time)
-                }
-            }.also {
-                pendingActivity.clear()
-            }
-    }
-
-    // send the priority queue
-    private fun flushPriorityActivity() {
-        priorityQueue.merge()
-            .let {
-                if (it != null) send(it, it.timestamp)
-            }.also {
-                priorityQueue.clear()
-            }
-    }
-
-    private fun List<ActivityRequest>.merge(): ActivityRequest? {
-        if (isEmpty()) return null
-        val activity = first()
-        val events = mutableListOf<EventRequest>()
-        val profileUpdate = hashMapOf<String, Any>()
-        val groupUpdate = hashMapOf<String, Any>()
-        var groupId: String? = null
-        forEach { item ->
-            // merge events
-            item.events?.let {
-                events.addAll(it)
-            }
-            // merge auto properties in profile update
-            if (item.profileUpdate != null) {
-                profileUpdate.putAll(item.profileUpdate)
-            }
-            // since a group update might get merged in with a new user identify,
-            // we need to take the latest groupId and merge group props as well
-            groupId = item.groupId
-            if (item.groupUpdate != null) {
-                groupUpdate.putAll(item.groupUpdate)
-            }
-        }
-        return activity.copy(
-            groupId = groupId,
-            events = events.ifEmpty { null },
-            profileUpdate = profileUpdate.ifEmpty { null },
-            groupUpdate = groupUpdate.ifEmpty { null },
-        )
     }
 
     // make the network call to send the activity, and process the result
@@ -226,4 +197,35 @@ internal class AnalyticsQueueProcessor(
             debounceTimer = null
         }
     }
+}
+
+private fun List<ActivityRequest>.merge(): ActivityRequest? {
+    if (isEmpty()) return null
+    val activity = first()
+    val events = mutableListOf<EventRequest>()
+    val profileUpdate = hashMapOf<String, Any>()
+    val groupUpdate = hashMapOf<String, Any>()
+    var groupId: String? = null
+    forEach { item ->
+        // merge events
+        item.events?.let {
+            events.addAll(it)
+        }
+        // merge auto properties in profile update
+        if (item.profileUpdate != null) {
+            profileUpdate.putAll(item.profileUpdate)
+        }
+        // since a group update might get merged in with a new user identify,
+        // we need to take the latest groupId and merge group props as well
+        groupId = item.groupId
+        if (item.groupUpdate != null) {
+            groupUpdate.putAll(item.groupUpdate)
+        }
+    }
+    return activity.copy(
+        groupId = groupId,
+        events = events.ifEmpty { null },
+        profileUpdate = profileUpdate.ifEmpty { null },
+        groupUpdate = groupUpdate.ifEmpty { null },
+    )
 }

@@ -49,7 +49,7 @@ internal class AnalyticsQueueProcessorTest {
             appcuesCoroutineScope = coroutineScope,
             experienceRenderer = experienceRenderer,
             repository = repository,
-            analyticsQueueScheduler = queueScheduler,
+            backgroundQueueScheduler = queueScheduler,
             priorityQueueScheduler = priorityQueueScheduler,
         )
     }
