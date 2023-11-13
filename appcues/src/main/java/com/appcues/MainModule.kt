@@ -13,12 +13,14 @@ import com.appcues.trait.TraitRegistry
 import com.appcues.ui.ExperienceRenderer
 import com.appcues.ui.StateMachineDirectory
 import com.appcues.ui.utils.ImageLoaderWrapper
+import com.appcues.util.AppcuesViewTreeOwner
 import com.appcues.util.LinkOpener
 
 internal object MainModule : AppcuesModule {
 
     override fun AppcuesScopeDSL.install() {
         scoped { Appcues(scope) }
+        scoped { AppcuesViewTreeOwner() }
         scoped { TraitRegistry(get(), get()) }
         scoped { ActionRegistry(get()) }
         scoped { ActionProcessor(get()) }
@@ -34,7 +36,7 @@ internal object MainModule : AppcuesModule {
                 debuggerManager = get(),
             )
         }
-        scoped { AppcuesDebuggerManager(contextWrapper = get(), scope = scope) }
+        scoped { AppcuesDebuggerManager(appcuesViewTreeOwner = get(), contextWrapper = get(), scope = scope) }
         scoped { StateMachineDirectory() }
         scoped { ExperienceRenderer(scope = scope) }
         scoped {
