@@ -16,6 +16,7 @@ import io.mockk.coVerifySequence
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -38,7 +39,7 @@ internal class AnalyticsQueueProcessorTest {
         coEvery { trackActivity(any()) } returns mockkQualificationResult
     }
 
-    private val queueScheduler = StubQueueScheduler()
+    private val backgroundQueueScheduler = StubQueueScheduler()
     private val priorityQueueScheduler = StubQueueScheduler()
 
     private lateinit var analyticsQueueProcessor: AnalyticsQueueProcessor
@@ -49,9 +50,16 @@ internal class AnalyticsQueueProcessorTest {
             appcuesCoroutineScope = coroutineScope,
             experienceRenderer = experienceRenderer,
             repository = repository,
-            backgroundQueueScheduler = queueScheduler,
+            backgroundQueueScheduler = backgroundQueueScheduler,
             priorityQueueScheduler = priorityQueueScheduler,
         )
+    }
+
+    @After
+    fun tearDown() {
+        // reset any usage of queue completion handler for next test
+        backgroundQueueScheduler.deferCompletion = false
+        priorityQueueScheduler.deferCompletion = false
     }
 
     @Test
@@ -61,7 +69,7 @@ internal class AnalyticsQueueProcessorTest {
         // when
         analyticsQueueProcessor.queue(mockkActivity)
         // then
-        verify { queueScheduler.mockkScheduler.schedule(any(), any()) }
+        verify { backgroundQueueScheduler.mockkScheduler.schedule(any(), any()) }
         coVerify { repository.trackActivity(capture(activitySlot)) }
         coVerify { experienceRenderer.show(mockkQualificationResult) }
         assertThat(activitySlot.captured.events).hasSize(1)
@@ -75,7 +83,7 @@ internal class AnalyticsQueueProcessorTest {
         // when
         analyticsQueueProcessor.queueThenFlush(mockkActivity)
         // then
-        verify { queueScheduler.mockkScheduler.cancel() }
+        verify { backgroundQueueScheduler.mockkScheduler.cancel() }
         coVerify { repository.trackActivity(capture(activitySlot)) }
         coVerify { experienceRenderer.show(mockkQualificationResult) }
     }
@@ -92,7 +100,7 @@ internal class AnalyticsQueueProcessorTest {
         analyticsQueueProcessor.flushThenSend(mockkActivity)
         // then verify sequence of events
         coVerifySequence {
-            queueScheduler.mockkScheduler.cancel()
+            backgroundQueueScheduler.mockkScheduler.cancel()
             repository.trackActivity(capture(queuedActivitySlot))
             experienceRenderer.show(mockkQualificationResult)
             repository.trackActivity(capture(activitySlot))
@@ -120,5 +128,148 @@ internal class AnalyticsQueueProcessorTest {
             repository.trackActivity(capture(queuedActivitySlot))
             experienceRenderer.show(mockkQualificationResult)
         }
+    }
+
+    @Test
+    fun `flushThenSend SHOULD batch activity WHEN waitForBatch is true AND a second Activity is sent immediately after`() {
+        // given
+        val identifyActivity = ActivityRequest(
+            userId = "user-1",
+            accountId = "00000",
+            sessionId = UUID.randomUUID(),
+            profileUpdate = mutableMapOf("userProp" to 1)
+        )
+        val groupActivity = ActivityRequest(
+            userId = "user-1",
+            accountId = "00000",
+            sessionId = UUID.randomUUID(),
+            groupId = "group-id",
+            groupUpdate = mutableMapOf("groupProp" to 2)
+        )
+
+        val mergedActivitySlot = slot<ActivityRequest>()
+        priorityQueueScheduler.deferCompletion = true
+        // when
+        analyticsQueueProcessor.flushThenSend(identifyActivity, true)
+        analyticsQueueProcessor.flushThenSend(groupActivity, false)
+        priorityQueueScheduler.processQueue() // simulates priority queue completion
+        // then verify sequence of events
+        coVerifySequence {
+            repository.trackActivity(capture(mergedActivitySlot))
+            experienceRenderer.show(mockkQualificationResult)
+        }
+
+        // check that correct events where captured by mockk
+        assertThat(mergedActivitySlot.captured.groupId).isEqualTo("group-id")
+        assertThat(mergedActivitySlot.captured.profileUpdate!!["userProp"]).isEqualTo(1)
+        assertThat(mergedActivitySlot.captured.groupUpdate!!["groupProp"]).isEqualTo(2)
+    }
+
+    @Test
+    fun `flushThenSend SHOULD NOT batch activity WHEN waitForBatch is true AND second Activity is for different user ID`() {
+        // given
+        val identifyActivity1 = ActivityRequest(
+            userId = "user-1",
+            accountId = "00000",
+            sessionId = UUID.randomUUID(),
+            profileUpdate = mutableMapOf("userProp" to 1)
+        )
+        val identifyActivity2 = ActivityRequest(
+            userId = "user-2",
+            accountId = "00000",
+            sessionId = UUID.randomUUID(),
+            profileUpdate = mutableMapOf("groupProp" to 2)
+        )
+
+        val identify1ActivitySlot = slot<ActivityRequest>()
+        val identify2ActivitySlot = slot<ActivityRequest>()
+        priorityQueueScheduler.deferCompletion = true
+        // when
+        analyticsQueueProcessor.flushThenSend(identifyActivity1, true)
+        analyticsQueueProcessor.flushThenSend(identifyActivity2, true)
+        priorityQueueScheduler.processQueue() // simulates priority queue completion
+        // then verify sequence of events
+        coVerifySequence {
+            backgroundQueueScheduler.mockkScheduler.cancel() // start processing 1st item
+            priorityQueueScheduler.mockkScheduler.schedule(any(), any())
+            backgroundQueueScheduler.mockkScheduler.cancel() // start processing 2nd item
+            priorityQueueScheduler.mockkScheduler.cancel() // priority queue is flushed due to user change
+            repository.trackActivity(capture(identify1ActivitySlot))
+            experienceRenderer.show(mockkQualificationResult)
+            priorityQueueScheduler.mockkScheduler.schedule(any(), any()) // now queue 2nd item
+            repository.trackActivity(capture(identify2ActivitySlot))
+            experienceRenderer.show(mockkQualificationResult)
+        }
+
+        // check that correct events where captured by mockk
+        assertThat(identify1ActivitySlot.captured.userId).isEqualTo("user-1")
+        assertThat(identify2ActivitySlot.captured.userId).isEqualTo("user-2")
+    }
+
+    @Test
+    fun `flushThenSend SHOULD batch activity WHEN waitForBatch is true AND and queueThenFlush is called immediately after`() {
+        // given
+        val identifyActivity = ActivityRequest(
+            userId = "user-1",
+            accountId = "00000",
+            sessionId = UUID.randomUUID(),
+            profileUpdate = mutableMapOf("userProp" to 1)
+        )
+        val eventActivity = ActivityRequest(
+            userId = "user-1",
+            accountId = "00000",
+            sessionId = UUID.randomUUID(),
+            events = listOf(mockkEvent)
+        )
+
+        val mergedActivitySlot = slot<ActivityRequest>()
+        priorityQueueScheduler.deferCompletion = true
+        // when
+        analyticsQueueProcessor.flushThenSend(identifyActivity, true)
+        analyticsQueueProcessor.queueThenFlush(eventActivity)
+        priorityQueueScheduler.processQueue() // simulates priority queue completion
+        // then verify sequence of events
+        coVerifySequence {
+            repository.trackActivity(capture(mergedActivitySlot))
+            experienceRenderer.show(mockkQualificationResult)
+        }
+
+        // check that correct events where captured by mockk
+        assertThat(mergedActivitySlot.captured.profileUpdate!!["userProp"]).isEqualTo(1)
+        assertThat(mergedActivitySlot.captured.events!![0]).isEqualTo(mockkEvent)
+    }
+
+    @Test
+    fun `flushThenSend SHOULD NOT batch activity WHEN waitForBatch is true AND and queueThenFlush is called after queue is processed`() {
+        // given
+        val identifyActivity = ActivityRequest(
+            userId = "user-1",
+            accountId = "00000",
+            sessionId = UUID.randomUUID(),
+            profileUpdate = mutableMapOf("userProp" to 1)
+        )
+        val eventActivity = ActivityRequest(
+            userId = "user-1",
+            accountId = "00000",
+            sessionId = UUID.randomUUID(),
+            events = listOf(mockkEvent)
+        )
+
+        val activitySlot1 = slot<ActivityRequest>()
+        val activitySlot2 = slot<ActivityRequest>()
+        priorityQueueScheduler.deferCompletion = true
+        // when
+        analyticsQueueProcessor.flushThenSend(identifyActivity, true)
+        priorityQueueScheduler.processQueue() // simulates priority queue completion BEFORE 2nd activity
+        analyticsQueueProcessor.queueThenFlush(eventActivity)
+        // then verify sequence of events
+        coVerifySequence {
+            repository.trackActivity(capture(activitySlot1))
+            repository.trackActivity(capture(activitySlot2))
+        }
+
+        // check that correct events where captured by mockk
+        assertThat(activitySlot1.captured.profileUpdate!!["userProp"]).isEqualTo(1)
+        assertThat(activitySlot2.captured.events!![0]).isEqualTo(mockkEvent)
     }
 }
