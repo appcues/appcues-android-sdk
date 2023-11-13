@@ -14,6 +14,7 @@ import com.appcues.samples.kotlin.databinding.ActivitySigninBinding
 import com.appcues.samples.kotlin.main.MainActivity
 
 class SignInActivity : AppCompatActivity() {
+
     private val binding by lazy { ActivitySigninBinding.inflate(layoutInflater) }
     private val appcues = ExampleApplication.appcues
 

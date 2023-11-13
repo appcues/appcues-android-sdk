@@ -48,6 +48,7 @@ import com.appcues.trait.TraitRegistry
 import com.appcues.ui.ExperienceRenderer
 import com.appcues.ui.StateMachineDirectory
 import com.appcues.ui.utils.ImageLoaderWrapper
+import com.appcues.util.AppcuesViewTreeOwner
 import com.appcues.util.ContextWrapper
 import com.appcues.util.LinkOpener
 import com.google.common.truth.Truth.assertThat
@@ -106,6 +107,7 @@ internal class ModulesTests {
     @Test
     fun `check MainModule instances`() = withScope {
         get<Appcues>()
+        get<AppcuesViewTreeOwner>()
         get<TraitRegistry>()
         get<ActionRegistry>()
         get<ActionProcessor>()

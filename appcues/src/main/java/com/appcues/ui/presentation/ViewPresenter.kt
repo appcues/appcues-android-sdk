@@ -2,8 +2,8 @@ package com.appcues.ui.presentation
 
 import android.app.Activity
 import android.view.ViewGroup
-import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.findViewTreeOnBackPressedDispatcherOwner
 import androidx.compose.ui.platform.ComposeView
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -23,16 +23,18 @@ import com.appcues.ui.ExperienceRenderer
 import com.appcues.ui.composables.AppcuesComposition
 import com.appcues.ui.primitive.EmbedChromeClient
 import com.appcues.ui.utils.getParentView
+import com.appcues.util.AppcuesViewTreeOwner
 import kotlinx.coroutines.launch
 
 internal abstract class ViewPresenter(
     override val scope: AppcuesScope,
     protected val renderContext: RenderContext,
-) : AppcuesComponent, DefaultLifecycleObserver {
+) : AppcuesComponent {
 
     private val experienceRenderer: ExperienceRenderer by inject()
     private val coroutineScope: AppcuesCoroutineScope by inject()
     private val actionProcessor: ActionProcessor by inject()
+    private val appcuesViewTreeOwner: AppcuesViewTreeOwner by inject()
 
     private var viewModel: AppcuesViewModel? = null
     private var gestureListener: ShakeGestureListener? = null
@@ -43,12 +45,6 @@ internal abstract class ViewPresenter(
     private val activityMonitorListener = object : ActivityMonitorListener {
         override fun onActivityChanged(activity: Activity) {
             viewModel?.onActivityChanged()
-        }
-    }
-
-    private val onBackPressCallback = object : OnBackPressedCallback(true) {
-        override fun handleOnBackPressed() {
-            viewModel?.onBackPressed()
         }
     }
 
@@ -82,7 +78,9 @@ internal abstract class ViewPresenter(
                 }
             }
 
-            findViewTreeLifecycleOwner()?.lifecycle?.addObserver(lifecycleObserver)
+            appcuesViewTreeOwner.init(this, activity)
+            setLifecycleObserver(this)
+            setOnBackPressDispatcher(this)
 
             viewModel = AppcuesViewModel(
                 renderContext = renderContext,
@@ -100,8 +98,6 @@ internal abstract class ViewPresenter(
                     )
                 }
             }
-
-            setOnBackPressDispatcher(activity)
             return true
         }
     }
@@ -139,12 +135,25 @@ internal abstract class ViewPresenter(
         }
     }
 
-    private fun setOnBackPressDispatcher(activity: Activity) {
-        // add onBackPressedDispatcher to handle internally native android back press when presenting
-        if (activity is ComponentActivity && shouldHandleBack) {
-            onBackPressCallback.remove()
-            // attach to activity
-            activity.onBackPressedDispatcher.addCallback(onBackPressCallback)
+    private fun setLifecycleObserver(view: ViewGroup) {
+        view.findViewTreeLifecycleOwner()?.run {
+            lifecycle.addObserver(lifecycleObserver)
+        }
+    }
+
+    private fun setOnBackPressDispatcher(view: ViewGroup) {
+        if (shouldHandleBack) {
+            view.findViewTreeOnBackPressedDispatcherOwner()?.run {
+                onBackPressCallback.remove()
+
+                onBackPressedDispatcher.addCallback(onBackPressCallback)
+            }
+        }
+    }
+
+    private val onBackPressCallback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            viewModel?.onBackPressed()
         }
     }
 }
