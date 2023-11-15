@@ -59,7 +59,8 @@ internal class DebuggerStatusManager(
 
     private var trackingScreens: Boolean? = null
 
-    private var userIdentified: String? = storage.userId.ifEmpty { null }
+    private var userId: String? = storage.userId.ifEmpty { null }
+    private var groupId: String? = storage.groupId
 
     private data class DisplayingExperience(
         val name: String,
@@ -92,13 +93,15 @@ internal class DebuggerStatusManager(
 
     fun reset() {
         isStarted = false
-        userIdentified = null
+        userId = null
+        groupId = null
         coroutineContext.cancelChildren()
         launch { updateData() }
     }
 
     private suspend fun onActivityRequest(activityRequest: ActivityRequest) = withContext(Dispatchers.IO) {
-        userIdentified = activityRequest.userId.ifEmpty { null }
+        userId = activityRequest.userId.ifEmpty { null }
+        groupId = activityRequest.groupId
 
         activityRequest.events?.forEach { event ->
             when (event.name) {
@@ -157,7 +160,8 @@ internal class DebuggerStatusManager(
                 connectionCheckItem(),
                 deepLinkCheckItem(),
                 trackingScreenCheckItem(),
-                identityItem()
+                identifyUserItem(),
+                identifyGroupItem()
             ).appendExperienceIfAny()
         )
     }
@@ -224,17 +228,30 @@ internal class DebuggerStatusManager(
         )
     }
 
-    private fun identityItem() = userIdentified?.let {
+    private fun identifyUserItem() = userId?.let {
         DebuggerStatusItem(
-            title = contextWrapper.getString(R.string.appcues_debugger_status_identity_success_title),
-            line1 = userIdentified,
+            title = contextWrapper.getString(R.string.appcues_debugger_status_user_identity_title),
+            line1 = it,
             statusType = SUCCESS,
         )
     } ?: run {
         DebuggerStatusItem(
-            title = contextWrapper.getString(R.string.appcues_debugger_status_identity_loading_title),
-            line1 = contextWrapper.getString(R.string.appcues_debugger_status_identity_loading_line1),
+            title = contextWrapper.getString(R.string.appcues_debugger_status_no_user_identity_title),
+            line1 = contextWrapper.getString(R.string.appcues_debugger_status_no_user_identity_description),
             statusType = LOADING,
+        )
+    }
+
+    private fun identifyGroupItem() = groupId?.let {
+        DebuggerStatusItem(
+            title = contextWrapper.getString(R.string.appcues_debugger_status_group_identity_title),
+            line1 = it,
+            statusType = SUCCESS,
+        )
+    } ?: run {
+        DebuggerStatusItem(
+            title = contextWrapper.getString(R.string.appcues_debugger_status_no_group_identity_title),
+            statusType = UNKNOWN,
         )
     }
 

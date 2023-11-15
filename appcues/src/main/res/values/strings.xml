@@ -33,9 +33,12 @@
     <string name="appcues_debugger_status_check_deep_link_error_handler">Error 2: Appcues SDK not receiving links</string>
     <string name="appcues_debugger_status_check_screen_tracking_title">Tracking Screens</string>
     <string name="appcues_debugger_status_check_screen_tracking_loading_line1">waiting for screen event…</string>
-    <string name="appcues_debugger_status_identity_success_title">User Identified</string>
-    <string name="appcues_debugger_status_identity_loading_title">Identifying User</string>
-    <string name="appcues_debugger_status_identity_loading_line1">waiting for any event…</string>
+    <string name="appcues_debugger_status_user_identity_title">User Identified</string>
+    <string name="appcues_debugger_status_no_user_identity_title">Identifying User</string>
+    <string name="appcues_debugger_status_no_user_identity_description">waiting for any event…</string>
+    <string name="appcues_debugger_status_group_identity_title">Group Identified</string>
+    <string name="appcues_debugger_status_no_group_identity_title">No Group Identified</string>
+
 
     <string name="appcues_debugger_info_title">Info</string>
     <string name="appcues_debugger_info_fonts">Available Fonts</string>
