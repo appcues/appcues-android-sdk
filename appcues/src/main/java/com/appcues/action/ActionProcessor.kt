@@ -31,8 +31,7 @@ internal class ActionProcessor(override val scope: AppcuesScope) : AppcuesCompon
         }
     }
 
-    // This is used for internal actions, like navigation actions processed during step transitions, or
-    // post flow completion actions.
+    // This is used for internal actions, like navigation actions processed during step transitions.
     suspend fun process(actions: List<ExperienceAction>) {
         if (actions.isEmpty()) return
 
@@ -42,6 +41,13 @@ internal class ActionProcessor(override val scope: AppcuesScope) : AppcuesCompon
         // make this a suspend function and wait on them, we cannot place them in the queue or
         // suspend the currently executing action at all, or the queue would become deadlocked.
         transformQueue(actions).toMutableList().forEach { it.execute() }
+    }
+
+    // This is used for post flow actions, ensures we never get to a deadlock state with the current transition
+    // being processed by the state machine. Mainly because of LaunchExperienceAction when we have another
+    // experience we would want to trigger when current flow completes
+    suspend fun processPostFlowActions(actions: List<ExperienceAction>) {
+        transformQueue(actions).forEach { actionQueue.send(it) }
     }
 
     // This version is used by the viewModel to process interactive actions from user input - button taps.

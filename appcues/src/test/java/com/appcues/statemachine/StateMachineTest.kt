@@ -271,7 +271,7 @@ internal class StateMachineTest : AppcuesScopeTest {
         val experienceAction1 = mockk<ExperienceAction>(relaxed = true)
         val experienceAction2 = mockk<ExperienceAction>(relaxed = true)
         val presentingTrait = mockk<PresentingTrait>(relaxed = true)
-        val navigationActions = listOf(Action(NAVIGATE, experienceAction1), Action(NAVIGATE, experienceAction2),)
+        val navigationActions = listOf(Action(NAVIGATE, experienceAction1), Action(NAVIGATE, experienceAction2))
         val experience = mockExperienceNavigateActions(navigationActions, presentingTrait, Qualification("screen_view"))
         val initialState = IdlingState
         val stateMachine = initMachine(initialState)
@@ -664,7 +664,7 @@ internal class StateMachineTest : AppcuesScopeTest {
         // THEN
         assertThat(result.successValue()).isEqualTo(IdlingState)
         assertThat(stateMachine.state).isEqualTo(IdlingState)
-        coVerify { get<ActionProcessor>().process(experience.completionActions) }
+        coVerify { get<ActionProcessor>().processPostFlowActions(experience.completionActions) }
     }
 
     @Test

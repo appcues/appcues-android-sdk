@@ -20,6 +20,6 @@ internal class ExperienceActionEffectTest {
         val result = effect.launch(actionProcessor)
         // THEN
         assertThat(result).isNull()
-        coVerify { actionProcessor.process(actions) }
+        coVerify { actionProcessor.processPostFlowActions(actions) }
     }
 }
