@@ -1,5 +1,6 @@
 package com.appcues.action.appcues
 
+import android.content.ActivityNotFoundException
 import android.net.Uri
 import com.appcues.Appcues
 import com.appcues.action.ExperienceAction
@@ -7,12 +8,14 @@ import com.appcues.action.MetadataSettingsAction
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.getConfig
 import com.appcues.data.model.getConfigOrDefault
+import com.appcues.logging.Logcues
 import com.appcues.util.LinkOpener
 
 internal class LinkAction(
     override val config: AppcuesConfigMap,
     private val linkOpener: LinkOpener,
     private val appcues: Appcues,
+    private val logcues: Logcues,
 ) : ExperienceAction, MetadataSettingsAction {
 
     companion object {
@@ -20,10 +23,11 @@ internal class LinkAction(
         const val TYPE = "@appcues/link"
     }
 
-    constructor(redirectUrl: String, linkOpener: LinkOpener, appcues: Appcues) : this(
+    constructor(redirectUrl: String, linkOpener: LinkOpener, appcues: Appcues, logcues: Logcues) : this(
         config = hashMapOf<String, Any>("url" to redirectUrl),
         linkOpener = linkOpener,
-        appcues = appcues
+        appcues = appcues,
+        logcues = logcues
     )
 
     private val url: String? = config.getConfig("url")
@@ -42,10 +46,12 @@ internal class LinkAction(
 
         if (isEligibleCustomTab) {
             linkOpener.openCustomTabs(uri)
-        } else {
+        } else try {
             // this will handle any in-app deep link scheme URLs OR any web urls that were
             // requested to open into the external browser application
             appcues.navigationHandler?.navigateTo(uri) ?: linkOpener.startNewIntent(uri)
+        } catch (exception: ActivityNotFoundException) {
+            logcues.error("Unable to process deep link $destination\n\n Reason: ${exception.message}")
         }
     }
 }

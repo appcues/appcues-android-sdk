@@ -112,6 +112,7 @@ internal class ExperienceMapper(
                             redirectUrl = it,
                             linkOpener = get(),
                             appcues = get(),
+                            logcues = get(),
                         )
                     )
                 }

@@ -1,14 +1,17 @@
 package com.appcues.action.appcues
 
+import android.content.ActivityNotFoundException
 import android.net.Uri
 import com.appcues.Appcues
 import com.appcues.AppcuesScopeTest
 import com.appcues.NavigationHandler
 import com.appcues.di.component.get
+import com.appcues.logging.Logcues
 import com.appcues.rules.TestScopeRule
 import com.appcues.util.LinkOpener
 import com.google.common.truth.Truth.assertThat
 import io.mockk.Called
+import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
@@ -55,7 +58,7 @@ internal class LinkActionTest : AppcuesScopeTest {
         // GIVEN
         val linkOpener: LinkOpener = get()
         val appcues = mockk<Appcues>(relaxed = true)
-        val action = LinkAction(redirectUrl = "custom-url", linkOpener, appcues)
+        val action = LinkAction(redirectUrl = "custom-url", linkOpener, appcues, mockk(relaxed = true))
         // THEN
         assertThat(action.config).containsEntry("url", "custom-url")
     }
@@ -65,7 +68,7 @@ internal class LinkActionTest : AppcuesScopeTest {
         // GIVEN
         val linkOpener: LinkOpener = get()
         val appcues = mockk<Appcues>(relaxed = true)
-        val action = LinkAction(mapOf(), linkOpener, appcues)
+        val action = LinkAction(mapOf(), linkOpener, appcues, mockk(relaxed = true))
         // THEN
         assertThat(action.category).isEqualTo("link")
     }
@@ -75,7 +78,7 @@ internal class LinkActionTest : AppcuesScopeTest {
         // GIVEN
         val linkOpener: LinkOpener = get()
         val appcues = mockk<Appcues>(relaxed = true)
-        val action = LinkAction(mapOf("url" to "test-url.com"), linkOpener, appcues)
+        val action = LinkAction(mapOf("url" to "test-url.com"), linkOpener, appcues, mockk(relaxed = true))
         // THEN
         assertThat(action.destination).isEqualTo("test-url.com")
     }
@@ -85,7 +88,7 @@ internal class LinkActionTest : AppcuesScopeTest {
         // GIVEN
         val linkOpener: LinkOpener = get()
         val appcues = mockk<Appcues>(relaxed = true)
-        val action = LinkAction(mapOf(), linkOpener, appcues)
+        val action = LinkAction(mapOf(), linkOpener, appcues, mockk(relaxed = true))
         // THEN
         assertThat(action.destination).isEmpty()
     }
@@ -98,7 +101,7 @@ internal class LinkActionTest : AppcuesScopeTest {
         val appcues = mockk<Appcues>(relaxed = true) {
             every { this@mockk.navigationHandler } returns null
         }
-        val action = LinkAction(mapOf("url" to uri.toString(), "openExternally" to true), linkOpener, appcues)
+        val action = LinkAction(mapOf("url" to uri.toString(), "openExternally" to true), linkOpener, appcues, mockk(relaxed = true))
 
         // WHEN
         action.execute()
@@ -116,7 +119,7 @@ internal class LinkActionTest : AppcuesScopeTest {
         val appcues = mockk<Appcues>(relaxed = true) {
             every { this@mockk.navigationHandler } returns mockkNavigationHandler
         }
-        val action = LinkAction(mapOf("url" to uri.toString(), "openExternally" to true), linkOpener, appcues)
+        val action = LinkAction(mapOf("url" to uri.toString(), "openExternally" to true), linkOpener, appcues, mockk(relaxed = true))
 
         // WHEN
         action.execute()
@@ -131,7 +134,7 @@ internal class LinkActionTest : AppcuesScopeTest {
         // GIVEN
         val uri: Uri = Uri.parse("https://test/path")
         val linkOpener: LinkOpener = get()
-        val action = LinkAction(mapOf("url" to uri.toString()), linkOpener, get())
+        val action = LinkAction(mapOf("url" to uri.toString()), linkOpener, get(), mockk(relaxed = true))
 
         // WHEN
         action.execute()
@@ -148,7 +151,7 @@ internal class LinkActionTest : AppcuesScopeTest {
         val appcues = mockk<Appcues>(relaxed = true) {
             every { this@mockk.navigationHandler } returns null
         }
-        val action = LinkAction(mapOf("url" to uri.toString()), linkOpener, appcues)
+        val action = LinkAction(mapOf("url" to uri.toString()), linkOpener, appcues, mockk(relaxed = true))
 
         // WHEN
         action.execute()
@@ -166,7 +169,7 @@ internal class LinkActionTest : AppcuesScopeTest {
         val appcues = mockk<Appcues>(relaxed = true) {
             every { this@mockk.navigationHandler } returns mockkNavigationHandler
         }
-        val action = LinkAction(mapOf("url" to uri.toString()), linkOpener, appcues)
+        val action = LinkAction(mapOf("url" to uri.toString()), linkOpener, appcues, mockk(relaxed = true))
 
         // WHEN
         action.execute()
@@ -184,7 +187,7 @@ internal class LinkActionTest : AppcuesScopeTest {
         val appcues = mockk<Appcues>(relaxed = true) {
             every { this@mockk.navigationHandler } returns mockkNavigationHandler
         }
-        val action = LinkAction(mapOf(), linkOpener, appcues)
+        val action = LinkAction(mapOf(), linkOpener, appcues, mockk(relaxed = true))
 
         // WHEN
         action.execute()
@@ -203,7 +206,7 @@ internal class LinkActionTest : AppcuesScopeTest {
         val appcues = mockk<Appcues>(relaxed = true) {
             every { this@mockk.navigationHandler } returns mockkNavigationHandler
         }
-        val action = LinkAction(mapOf("url" to uri.toString()), linkOpener, appcues)
+        val action = LinkAction(mapOf("url" to uri.toString()), linkOpener, appcues, mockk(relaxed = true))
 
         // WHEN
         action.execute()
@@ -211,5 +214,47 @@ internal class LinkActionTest : AppcuesScopeTest {
         // THEN
         coVerify { mockkNavigationHandler wasNot Called }
         verify { linkOpener wasNot Called }
+    }
+
+    @Test
+    fun `execute SHOULD call logcues error when ActivityNotFoundException is thrown by linkOpener`() = runTest {
+        // GIVEN
+        val uri: Uri = Uri.parse("myapp://test/path")
+        val exception = ActivityNotFoundException("Invalid Activity")
+        val linkOpener: LinkOpener = mockk(relaxed = true) {
+            every { startNewIntent(any()) } throws exception
+        }
+        val appcues = mockk<Appcues>(relaxed = true) {
+            every { this@mockk.navigationHandler } returns null
+        }
+        val logcues = mockk<Logcues>(relaxed = true)
+        val action = LinkAction(mapOf("url" to uri.toString()), linkOpener, appcues, logcues)
+
+        // WHEN
+        action.execute()
+
+        // THEN
+        verify { logcues.error(message = "Unable to process deep link myapp://test/path\n\n Reason: ${exception.message}") }
+    }
+
+    @Test
+    fun `execute SHOULD call logcues error when ActivityNotFoundException is thrown by navigationHandler`() = runTest {
+        // GIVEN
+        val uri: Uri = Uri.parse("myapp://test/path")
+        val linkOpener: LinkOpener = get()
+        val exception = ActivityNotFoundException("Invalid Activity")
+        val appcues = mockk<Appcues>(relaxed = true) {
+            every { this@mockk.navigationHandler } returns mockk(relaxed = true) {
+                coEvery { navigateTo(any()) } throws exception
+            }
+        }
+        val logcues = mockk<Logcues>(relaxed = true)
+        val action = LinkAction(mapOf("url" to uri.toString()), linkOpener, appcues, logcues)
+
+        // WHEN
+        action.execute()
+
+        // THEN
+        verify { logcues.error(message = "Unable to process deep link myapp://test/path\n\n Reason: ${exception.message}") }
     }
 }
