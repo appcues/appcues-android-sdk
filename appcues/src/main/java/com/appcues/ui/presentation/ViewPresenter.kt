@@ -4,6 +4,7 @@ import android.app.Activity
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.findViewTreeOnBackPressedDispatcherOwner
+import androidx.compose.runtime.key
 import androidx.compose.ui.platform.ComposeView
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -90,12 +91,14 @@ internal abstract class ViewPresenter(
                 onDismiss = ::onCompositionDismiss
             ).also {
                 composeView.setContent {
-                    AppcuesComposition(
-                        viewModel = it,
-                        logcues = get(),
-                        imageLoader = get(),
-                        chromeClient = EmbedChromeClient(this),
-                    )
+                    key(currentExperience?.instanceId) {
+                        AppcuesComposition(
+                            viewModel = it,
+                            logcues = get(),
+                            imageLoader = get(),
+                            chromeClient = EmbedChromeClient(this),
+                        )
+                    }
                 }
             }
             return true
