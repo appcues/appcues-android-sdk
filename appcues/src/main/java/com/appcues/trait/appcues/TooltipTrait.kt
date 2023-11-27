@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeightIn
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.shape.GenericShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -412,9 +412,9 @@ internal class TooltipTrait(
             val requiredHeight = if (tooltipSettings.tooltipPointerPosition.isVertical) pointerLengthDp else 0.dp
 
             val modifier = when (tooltipSettings.tooltipPointerPosition) {
-                is Bottom, is Top -> Modifier.width(min(width, containerMaxSize.width))
-                is Left, is Right -> Modifier.width(min(width + pointerLengthDp, containerMaxSize.width))
-                is None -> Modifier.width(min(width, containerMaxSize.width))
+                is Bottom, is Top -> Modifier.requiredWidth(min(width, containerMaxSize.width))
+                is Left, is Right -> Modifier.requiredWidth(min(width + pointerLengthDp, containerMaxSize.width))
+                is None -> Modifier.requiredWidth(min(width, containerMaxSize.width))
             }.requiredHeightIn(48.dp + requiredHeight, containerMaxSize.height)
 
             return@composed modifier
