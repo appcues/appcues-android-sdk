@@ -37,6 +37,7 @@ import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
 import kotlinx.coroutines.flow.Flow
 
+@Suppress("TooManyFunctions")
 internal class ExperienceRenderer(override val scope: AppcuesScope) : AppcuesComponent {
 
     companion object {
@@ -211,6 +212,10 @@ internal class ExperienceRenderer(override val scope: AppcuesScope) : AppcuesCom
 
     suspend fun show(renderContext: RenderContext, stepReference: StepReference) {
         stateMachines.getOwner(renderContext)?.stateMachine?.handleAction(MoveToStep(stepReference))
+    }
+
+    suspend fun onViewConfigurationChanged(renderContext: RenderContext) {
+        stateMachines.getOwner(renderContext)?.onConfigurationChanged()
     }
 
     sealed class PreviewResponse {

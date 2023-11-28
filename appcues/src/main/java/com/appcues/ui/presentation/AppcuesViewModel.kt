@@ -134,4 +134,10 @@ internal class AppcuesViewModel(
             }
         }
     }
+
+    fun onConfigurationChanged() {
+        coroutineScope.launch {
+            experienceRenderer.onViewConfigurationChanged(renderContext)
+        }
+    }
 }

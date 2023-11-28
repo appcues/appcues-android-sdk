@@ -3,13 +3,18 @@ package com.appcues.ui
 import com.appcues.AppcuesFrameView
 import com.appcues.data.model.RenderContext
 import com.appcues.data.model.RenderContext.Modal
+import com.appcues.statemachine.Action.Reset
 import com.appcues.statemachine.StateMachine
+import com.appcues.statemachine.states.RenderingStepState
 import java.lang.ref.WeakReference
 
 internal interface StateMachineOwning {
+
     val renderContext: RenderContext
     val stateMachine: StateMachine
     suspend fun reset()
+
+    suspend fun onConfigurationChanged() = Unit
 }
 
 internal class AppcuesFrameStateMachineOwner(
@@ -17,6 +22,7 @@ internal class AppcuesFrameStateMachineOwner(
     override val renderContext: RenderContext,
     override val stateMachine: StateMachine
 ) : StateMachineOwning {
+
     val frame: WeakReference<AppcuesFrameView> = WeakReference(frame)
 
     override suspend fun reset() {
@@ -33,9 +39,16 @@ internal class ModalStateMachineOwner(override val stateMachine: StateMachine) :
     override suspend fun reset() {
         stateMachine.stop(true)
     }
+
+    override suspend fun onConfigurationChanged() {
+        if (stateMachine.state is RenderingStepState) {
+            stateMachine.handleAction(Reset)
+        }
+    }
 }
 
 internal class StateMachineDirectory {
+
     private var stateMachines = mutableMapOf<RenderContext, StateMachineOwning>()
 
     fun cleanup() {

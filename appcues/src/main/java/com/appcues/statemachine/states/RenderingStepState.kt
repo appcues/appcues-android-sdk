@@ -5,12 +5,14 @@ import com.appcues.data.model.StepReference.StepOffset
 import com.appcues.statemachine.Action
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.MoveToStep
+import com.appcues.statemachine.Action.Reset
 import com.appcues.statemachine.Action.StartStep
 import com.appcues.statemachine.Error.StepError
 import com.appcues.statemachine.State
 import com.appcues.statemachine.Transition
 import com.appcues.statemachine.effects.AwaitDismissEffect
 import com.appcues.statemachine.effects.ContinuationEffect
+import com.appcues.statemachine.effects.PresentationEffect
 
 internal data class RenderingStepState(
     val experience: Experience,
@@ -30,6 +32,9 @@ internal data class RenderingStepState(
                 toEndingExperience(EndExperience(markComplete = true, destroyed = false))
             } else {
                 toEndingStep(action)
+            }
+            is Reset -> {
+                toBeginningStep()
             }
             is EndExperience -> {
                 toEndingExperience(action)
@@ -67,6 +72,21 @@ internal data class RenderingStepState(
             // in same group we can continue to StartStep internally
             next(EndingStepState(experience, flatStepIndex, markComplete, null), ContinuationEffect(nextAction))
         }
+    }
+
+    private fun toBeginningStep(): Transition {
+        val stepContainerIndex = experience.groupLookup[flatStepIndex]
+            ?: return exit(StepError(experience, flatStepIndex, "StepContainer for stepIndex $flatStepIndex not found"))
+
+        return next(
+            state = BeginningStepState(experience, flatStepIndex, false),
+            sideEffect = PresentationEffect(
+                experience = experience,
+                flatStepIndex = flatStepIndex,
+                stepContainerIndex = stepContainerIndex,
+                shouldPresent = true
+            )
+        )
     }
 
     private fun toEndingExperience(action: EndExperience): Transition {

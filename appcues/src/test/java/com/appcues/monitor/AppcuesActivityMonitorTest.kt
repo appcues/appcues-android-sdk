@@ -60,6 +60,7 @@ internal class AppcuesActivityMonitorTest {
         val monitor = AppcuesActivityMonitor
         // WHEN
         monitor.subscribe(listener)
+        monitor.onActivityCreated(activity, null)
         monitor.onActivityResumed(activity)
         // THEN
         verify { listener.onActivityChanged(activity) }
@@ -92,6 +93,7 @@ internal class AppcuesActivityMonitorTest {
         excludeRecords { listener.hashCode() }
         // WHEN
         monitor.onActivityResumed(activity1)
+        monitor.onActivityCreated(activity2, null)
         monitor.onActivityResumed(activity2)
         // THEN
         verifySequence {
