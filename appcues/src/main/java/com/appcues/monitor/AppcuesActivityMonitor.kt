@@ -10,11 +10,15 @@ internal object AppcuesActivityMonitor : Application.ActivityLifecycleCallbacks 
     interface ActivityMonitorListener {
 
         fun onActivityChanged(activity: Activity)
+
+        fun onConfigurationChanged(activity: Activity)
     }
 
     private var _isPaused = false
     val isPaused: Boolean
         get() = _isPaused
+
+    private var notifyConfigurationChanged = false
 
     private var activityWeakReference: WeakReference<Activity>? = null
     val activity: Activity?
@@ -42,15 +46,32 @@ internal object AppcuesActivityMonitor : Application.ActivityLifecycleCallbacks 
 
     override fun onActivityResumed(activity: Activity) {
         _isPaused = false
-        if (this.activity != activity) {
-            this.activityWeakReference = WeakReference(activity)
 
+        if (this.activity == null) {
+            this.activityWeakReference = WeakReference(activity)
             // notifies all subscribers that activity has changed
             activityMonitorListener.forEach { it.onActivityChanged(activity) }
         }
+
+        if (notifyConfigurationChanged) {
+            // notifies all subscribers that activity has changed
+            activityMonitorListener.forEach { it.onConfigurationChanged(activity) }
+            notifyConfigurationChanged = false
+        }
     }
 
-    override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) = Unit
+    override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
+        // whenever we hit onActivityCreated + savedInstanceState is not null
+        // it means configuration has changed (same activity was re-created
+        if (savedInstanceState != null) {
+            notifyConfigurationChanged = true
+        } else {
+            if (this.activity != activity) {
+                this.activityWeakReference = null
+            }
+        }
+    }
+
     override fun onActivityStarted(activity: Activity) = Unit
     override fun onActivityPaused(activity: Activity) {
         _isPaused = true

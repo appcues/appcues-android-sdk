@@ -47,6 +47,10 @@ internal abstract class ViewPresenter(
         override fun onActivityChanged(activity: Activity) {
             viewModel?.onActivityChanged()
         }
+
+        override fun onConfigurationChanged(activity: Activity) {
+            viewModel?.onConfigurationChanged()
+        }
     }
 
     private val lifecycleObserver = object : DefaultLifecycleObserver {
