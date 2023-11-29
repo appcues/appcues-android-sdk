@@ -94,7 +94,7 @@ internal fun DebuggerComposition(viewModel: DebuggerViewModel, onDismiss: () -> 
             if (isIdle && currentState.not() && targetState.not()) {
                 // when current state and target state are set to hide and animation is idle
                 // we will call back to onDismiss
-                viewModel.onDismissAnimationCompleted()
+                viewModel.onDismissAnimationCompleted(debuggerState)
             }
         }
     }
@@ -177,16 +177,13 @@ private fun LaunchedUIStateEffect(
                         is ScreenCapture -> {
                             // hide FAB
                             debuggerState.isVisible.targetState = false
-
-                            // capture screen
-                            viewModel.captureScreen(debuggerState)
                         }
                     }
                 }
                 is Dismissing -> {
                     animateFabToDismiss(
                         debuggerState = debuggerState,
-                        onComplete = { viewModel.onDismissAnimationCompleted() },
+                        onComplete = { viewModel.onDismissAnimationCompleted(debuggerState) },
                     )
 
                     debuggerState.isVisible.targetState = false

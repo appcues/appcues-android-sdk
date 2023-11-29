@@ -31,12 +31,10 @@ import com.appcues.logging.LogMessage
 import com.appcues.ui.ExperienceRenderer
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 internal class DebuggerViewModel(override val scope: AppcuesScope, debugMode: DebugMode) : ViewModel(), AppcuesComponent {
 
@@ -156,10 +154,15 @@ internal class DebuggerViewModel(override val scope: AppcuesScope, debugMode: De
         }
     }
 
-    fun onDismissAnimationCompleted() {
+    fun onDismissAnimationCompleted(debuggerState: MutableDebuggerState) {
         if (_uiState.value is Dismissing) {
             _uiState.value = Dismissed(uiState.value.mode)
             viewModelScope.cancel()
+        }
+
+        // fab is completely dismissed, we can take screenshot
+        if (_uiState.value is Expanded && _uiState.value.mode is ScreenCapture) {
+            captureScreen(debuggerState)
         }
     }
 
@@ -189,16 +192,12 @@ internal class DebuggerViewModel(override val scope: AppcuesScope, debugMode: De
         appcuesCoroutineScope.launch {
             experienceRenderer.dismiss(RenderContext.Modal, markComplete = false, destroyed = false)
 
-            withContext(Dispatchers.Main) {
-                // capture screen
-                val capture = screenCaptureProcessor.captureScreen()
-
-                if (capture != null) {
-                    debuggerState.screenCapture.value = capture
-                } else {
-                    // go back to idle if for some reason we could not capture the screen
-                    closeExpandedView()
-                }
+            // capture screen
+            screenCaptureProcessor.captureScreen()?.let {
+                debuggerState.screenCapture.value = it
+            } ?: run {
+                // go back to idle if for some reason we could not capture the screen
+                closeExpandedView()
             }
         }
     }

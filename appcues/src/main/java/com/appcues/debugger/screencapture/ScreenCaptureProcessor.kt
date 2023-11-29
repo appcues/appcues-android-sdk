@@ -2,15 +2,19 @@ package com.appcues.debugger.screencapture
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Rect
+import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.util.Size
+import android.view.PixelCopy
 import android.view.View
+import android.view.Window
 import androidx.core.graphics.Insets
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.isVisible
 import com.appcues.Appcues
 import com.appcues.AppcuesConfig
-import com.appcues.R
 import com.appcues.Screenshot
 import com.appcues.data.remote.RemoteError
 import com.appcues.data.remote.customerapi.CustomerApiRemoteSource
@@ -24,6 +28,7 @@ import com.appcues.util.ContextWrapper
 import com.appcues.util.ResultOf
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
+import kotlinx.coroutines.CompletableDeferred
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import java.util.Date
 
@@ -35,13 +40,13 @@ internal class ScreenCaptureProcessor(
     private val imageUploadRemoteSource: ImageUploadRemoteSource,
 ) {
 
-    fun captureScreen(): Capture? {
-        return AppcuesActivityMonitor.activity?.getParentView()?.let {
-            prepare(it)
+    suspend fun captureScreen(): Capture? {
+        val activity = AppcuesActivityMonitor.activity ?: return null
+        return activity.getParentView().let {
 
             val timestamp = Date()
             val displayName = it.screenCaptureDisplayName()
-            val screenshot = Appcues.elementTargeting.captureScreenshot() ?: it.screenshot()
+            val screenshot = Appcues.elementTargeting.captureScreenshot() ?: it.screenshot(activity.window)
             val layout = Appcues.elementTargeting.captureLayout()
             val capture = if (screenshot != null && layout != null) {
                 Capture(
@@ -55,8 +60,6 @@ internal class ScreenCaptureProcessor(
                     this.screenshot = screenshot.bitmap
                 }
             } else null
-
-            restore(it)
 
             capture
         }
@@ -126,16 +129,62 @@ internal class ScreenCaptureProcessor(
             is Success -> this
         }
 
-    private fun prepare(view: View) {
-        // hide the debugger view for screen capture, if present
-        view.findViewById<View>(R.id.appcues_debugger_view)?.apply {
-            isVisible = false
+    private suspend fun View.screenshot(window: Window) =
+        if (this.width > 0 && this.height > 0) {
+            val bitmap = awaitCaptureBitmap(this, window)
+            val density = context.resources.displayMetrics.density
+            val width = width.toDp(density)
+            val height = height.toDp(density)
+            val insets = ViewCompat.getRootWindowInsets(this)?.getInsets(WindowInsetsCompat.Type.systemBars())
+                ?: Insets.NONE
+
+            Screenshot(
+                bitmap = bitmap,
+                size = Size(width, height),
+                insets = Insets.of(
+                    insets.left.toDp(density),
+                    insets.top.toDp(density),
+                    insets.right.toDp(density),
+                    insets.bottom.toDp(density),
+                )
+            )
+        } else {
+            null
+        }
+
+    // converts async function (captureBitmap) to a suspend function that will await for completion
+    private suspend fun awaitCaptureBitmap(view: View, window: Window): Bitmap {
+        return with(CompletableDeferred<Bitmap>()) {
+            captureBitmap(view, window) { complete(it) }
+
+            await()
         }
     }
 
-    private fun restore(view: View) {
-        view.findViewById<View>(R.id.appcues_debugger_view)?.apply {
-            isVisible = true
+    private fun captureBitmap(view: View, window: Window, bitmapCallback: (Bitmap) -> Unit) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // Above Android O, use PixelCopy
+            val bitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
+            val location = IntArray(2)
+            view.getLocationInWindow(location)
+
+            PixelCopy.request(
+                window,
+                Rect(location[0], location[1], location[0] + view.width, location[1] + view.height),
+                bitmap,
+                {
+                    if (it == PixelCopy.SUCCESS) {
+                        bitmapCallback.invoke(bitmap)
+                    }
+                },
+                Handler(Looper.getMainLooper())
+            )
+        } else {
+            val bitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
+            val canvas = Canvas(bitmap)
+            view.draw(canvas)
+            canvas.setBitmap(null)
+            bitmapCallback.invoke(bitmap)
         }
     }
 }
@@ -153,31 +202,5 @@ private fun View.screenCaptureDisplayName(): String {
     }
     return name
 }
-
-private fun View.screenshot() =
-    if (this.width > 0 && this.height > 0) {
-        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(bitmap)
-        this.draw(canvas)
-
-        val density = context.resources.displayMetrics.density
-        val width = width.toDp(density)
-        val height = height.toDp(density)
-        val insets = ViewCompat.getRootWindowInsets(this)?.getInsets(WindowInsetsCompat.Type.systemBars())
-            ?: Insets.NONE
-
-        Screenshot(
-            bitmap = bitmap,
-            size = Size(width, height),
-            insets = Insets.of(
-                insets.left.toDp(density),
-                insets.top.toDp(density),
-                insets.right.toDp(density),
-                insets.bottom.toDp(density),
-            )
-        )
-    } else {
-        null
-    }
 
 private class ScreenCaptureSaveException(val error: RemoteError) : Exception("ScreenCaptureException: $error")
