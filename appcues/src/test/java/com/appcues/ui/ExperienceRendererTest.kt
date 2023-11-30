@@ -13,6 +13,8 @@ import com.appcues.data.model.ExperienceTrigger.Qualification
 import com.appcues.data.model.Experiment
 import com.appcues.data.model.QualificationResult
 import com.appcues.data.model.RenderContext
+import com.appcues.data.model.RenderContext.Embed
+import com.appcues.data.model.RenderContext.Modal
 import com.appcues.di.AppcuesModule
 import com.appcues.di.Bootstrap
 import com.appcues.di.scope.AppcuesScope
@@ -467,6 +469,40 @@ internal class ExperienceRendererTest {
         // THEN
         assertThat(result).isEqualTo(RenderingResult.Success)
         coVerify { stateMachine.handleAction(StartExperience(experience)) }
+    }
+
+    @Test
+    fun `onViewConfigurationChanged SHOULD call onConfigurationChanged for given renderContext`() = runTest {
+        // GIVEN
+        val scope = createScope { mockk(relaxed = true) }
+        val experienceRenderer = ExperienceRenderer(scope)
+        val ownerDirectory = scope.get<StateMachineDirectory>()
+        val modalOwner = mockk<StateMachineOwning>(relaxed = true) {
+            every { renderContext } returns Modal
+        }
+        ownerDirectory.setOwner(modalOwner)
+        // WHEN
+        experienceRenderer.onViewConfigurationChanged(Modal)
+        // THEN
+        coVerify {
+            modalOwner.onConfigurationChanged()
+        }
+    }
+
+    @Test
+    fun `onViewConfigurationChanged SHOULD not call onConfigurationChanged WHEN renderContext is not set`() = runTest {
+        // GIVEN
+        val scope = createScope { mockk(relaxed = true) }
+        val experienceRenderer = ExperienceRenderer(scope)
+        val ownerDirectory = scope.get<StateMachineDirectory>()
+        val modalOwner = mockk<StateMachineOwning>(relaxed = true) {
+            every { renderContext } returns Modal
+        }
+        ownerDirectory.setOwner(modalOwner)
+        // WHEN
+        experienceRenderer.onViewConfigurationChanged(Embed("frame1"))
+        // THEN
+        coVerify(exactly = 0) { modalOwner.onConfigurationChanged() }
     }
 
     private fun createScope(stateMachine: () -> StateMachine): AppcuesScope {

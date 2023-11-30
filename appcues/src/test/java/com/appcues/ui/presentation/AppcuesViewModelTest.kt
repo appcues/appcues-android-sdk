@@ -357,4 +357,14 @@ internal class AppcuesViewModelTest {
         // THEN
         coVerify { experienceRenderer wasNot Called }
     }
+
+    @Test
+    fun `onConfigurationChanged SHOULD call experienceRenderer onViewConfigurationChanged`() = runTest {
+        // WHEN
+        viewModel.onConfigurationChanged()
+        // THEN
+        coVerify {
+            experienceRenderer.onViewConfigurationChanged(renderContext)
+        }
+    }
 }

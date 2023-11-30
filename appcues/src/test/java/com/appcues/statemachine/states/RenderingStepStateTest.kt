@@ -4,11 +4,13 @@ import com.appcues.data.model.Experience
 import com.appcues.data.model.StepReference
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.MoveToStep
+import com.appcues.statemachine.Action.Reset
 import com.appcues.statemachine.Action.StartStep
 import com.appcues.statemachine.Error.StepError
 import com.appcues.statemachine.State
 import com.appcues.statemachine.effects.AwaitDismissEffect
 import com.appcues.statemachine.effects.ContinuationEffect
+import com.appcues.statemachine.effects.PresentationEffect
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
@@ -190,5 +192,40 @@ internal class RenderingStepStateTest {
         val awaitDismissEffect = AwaitDismissEffect(EndExperience(markComplete = true, destroyed = false))
         transition.assertState(EndingStepState(experience, currentIndex, true, awaitDismissEffect))
         transition.assertEffect(awaitDismissEffect)
+    }
+
+    @Test
+    fun `take Reset SHOULD transition to BeginningStep AND Present`() {
+        // GIVEN
+        val experience = mockk<Experience> {
+            every { flatSteps } returns listOf(mockk(), mockk())
+            every { groupLookup } returns mapOf(0 to 0, 1 to 0)
+        }
+        val currentIndex = 0
+        val state = RenderingStepState(experience, currentIndex, mapOf())
+        val action = Reset
+        // WHEN
+        val transition = state.take(action)
+        // THEN
+        transition.assertState(BeginningStepState(experience, currentIndex, false))
+        transition.assertEffect(PresentationEffect(experience, currentIndex, 0, true))
+    }
+
+    @Test
+    fun `take Reset SHOULD exit StepError WHEN stepContainer for nextStepIndex is invalid`() {
+        // GIVEN
+        val experience = mockk<Experience> {
+            every { flatSteps } returns listOf(mockk(), mockk())
+            // should never happen
+            every { groupLookup } returns mapOf(0 to 0)
+        }
+        val currentIndex = 1
+        val state = RenderingStepState(experience, currentIndex, mapOf())
+        val action = Reset
+        // WHEN
+        val transition = state.take(action)
+        // THEN
+        transition.assertState(IdlingState)
+        transition.assertError(StepError(experience, currentIndex, "StepContainer for stepIndex $currentIndex not found"))
     }
 }

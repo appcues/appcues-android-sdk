@@ -114,9 +114,25 @@ internal class AppcuesActivityMonitorTest {
         excludeRecords { listener.hashCode() }
         // WHEN
         monitor.onActivityResumed(activity1)
+        monitor.onActivityCreated(activity1, null)
         monitor.onActivityResumed(activity1)
         // THEN
         verify(exactly = 1) { listener.onActivityChanged(activity1) }
+    }
+
+    @Test
+    fun `SHOULD notify WHEN activity configuration changed (bundle is not null)`() {
+        // GIVEN
+        val activity1 = mockk<Activity>(relaxed = true)
+        val listener = mockk<ActivityMonitorListener>(relaxed = true)
+        val monitor = AppcuesActivityMonitor
+        monitor.subscribe(listener)
+        excludeRecords { listener.hashCode() }
+        // WHEN
+        monitor.onActivityCreated(activity1, mockk(relaxed = true))
+        monitor.onActivityResumed(activity1)
+        // THEN
+        verify(exactly = 1) { listener.onConfigurationChanged(activity1) }
     }
 
     @Test
