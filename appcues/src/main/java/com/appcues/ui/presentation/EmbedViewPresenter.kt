@@ -19,20 +19,20 @@ internal class EmbedViewPresenter(
     override val shouldHandleBack = false
 
     override fun ViewGroup.setupView(activity: Activity): ComposeView? {
-        return stateMachines.getFrame(renderContext)?.let {
+        return stateMachines.getFrame()?.let {
             it.isVisible = true
             it.composeView
         }
     }
 
     override fun ViewGroup.removeView() {
-        stateMachines.getFrame(renderContext)?.let {
+        stateMachines.getFrame()?.let {
             it.isVisible = false
             it.reset()
         }
     }
 
-    private fun StateMachineDirectory.getFrame(context: RenderContext): AppcuesFrameView? {
-        return (getOwner(context) as? AppcuesFrameStateMachineOwner)?.frame?.get()
+    private fun StateMachineDirectory.getFrame(): AppcuesFrameView? {
+        return (getOwner(renderContext) as? AppcuesFrameStateMachineOwner)?.frame
     }
 }

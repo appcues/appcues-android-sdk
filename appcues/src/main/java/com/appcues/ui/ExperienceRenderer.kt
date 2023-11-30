@@ -165,7 +165,7 @@ internal class ExperienceRenderer(override val scope: AppcuesScope) : AppcuesCom
         }
     }
 
-    suspend fun start(frame: AppcuesFrameView, context: RenderContext) {
+    suspend fun start(frame: AppcuesFrameView, context: RenderContext.Embed) {
         // If there's already a frame for the context, reset it back to its unregistered state.
         stateMachines.getOwner(context)?.reset()
 
