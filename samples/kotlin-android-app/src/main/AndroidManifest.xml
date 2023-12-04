@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <application
         android:name=".ExampleApplication"
         android:icon="@mipmap/ic_launcher"
@@ -36,7 +36,7 @@
                 <data android:scheme="appcues-example" android:host="group" />
             </intent-filter>
             <intent-filter>
-                <data android:scheme="appcues-APPCUES_APPLICATION_ID" />
+                <data android:scheme="appcues-4b6b796f-1313-440a-b356-ee4b7abe931c" />
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
@@ -57,6 +57,13 @@
                 <data android:scheme="appcues-example" android:host="signin" />
             </intent-filter>
         </activity>
+        <service
+            android:name=".PushNotificationService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>
