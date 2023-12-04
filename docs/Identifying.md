@@ -26,3 +26,11 @@ This signature will be used in an Authorization header on network requests from 
 ## Identifying Anonymous Users
 
 You can target users during anonymous usage in your application using `anonymous()` instead of `identify()`.  This can have implications on your billing based on active user counts. The format of anonymous IDs can be customized during initialization with the `AppcuesConfig`, using the `anonymousIdFactory` property. Anonymous IDs will always be prefixed with `anon:` by the SDK.
+
+## Grouping Users
+
+Associating a user with a group allows you to additionally capture analytics at the group level, and target content to show based upon group membership and properties.
+
+```kotlin
+appcues.group(groupId, properties)
+```
