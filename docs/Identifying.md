@@ -34,3 +34,5 @@ Associating a user with a group allows you to additionally capture analytics at 
 ```kotlin
 appcues.group(groupId, properties)
 ```
+
+To ensure the most accurate content targeting based upon group information, it's recommended to supply the group information immediately after a new user is identified.
