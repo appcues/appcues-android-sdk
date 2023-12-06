@@ -96,7 +96,7 @@ internal class StateMachineDirectoryTest {
         // WHEN
         owner1.simulateGarbageCollector()
         owner2.simulateGarbageCollector()
-        ownerDirectory.cleanup()
+        ownerDirectory.onScreenChange()
         // THEN
         assertThat(ownerDirectory.getOwner(Embed("frame1"))).isNull()
         assertThat(ownerDirectory.getOwner(Embed("frame2"))).isNull()
