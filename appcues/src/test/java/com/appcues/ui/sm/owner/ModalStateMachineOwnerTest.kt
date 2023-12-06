@@ -1,5 +1,7 @@
 package com.appcues.ui.sm.owner
 
+import com.appcues.AppcuesCoroutineScope
+import com.appcues.logging.Logcues
 import com.appcues.statemachine.Action.Reset
 import com.appcues.statemachine.StateMachine
 import com.appcues.statemachine.states.IdlingState
@@ -7,7 +9,7 @@ import com.appcues.statemachine.states.RenderingStepState
 import com.appcues.ui.ModalStateMachineOwner
 import com.appcues.ui.StateMachineOwning
 import com.google.common.truth.Truth.assertThat
-import io.mockk.coVerifySequence
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
@@ -15,9 +17,10 @@ import org.junit.Test
 
 internal class ModalStateMachineOwnerTest {
 
+    private val coroutineScope = AppcuesCoroutineScope(Logcues())
     private val stateMachine = mockk<StateMachine>(relaxed = true)
 
-    private val owner = ModalStateMachineOwner(stateMachine)
+    private val owner = ModalStateMachineOwner(stateMachine, coroutineScope)
 
     @Test
     fun `owner SHOULD extend from StateMachineOwning`() {
@@ -29,7 +32,7 @@ internal class ModalStateMachineOwnerTest {
         // WHEN
         owner.reset()
         // THEN
-        coVerifySequence {
+        coVerify {
             stateMachine.stop(true)
         }
     }
@@ -41,9 +44,7 @@ internal class ModalStateMachineOwnerTest {
         // WHEN
         owner.onConfigurationChanged()
         // THEN
-        coVerifySequence {
-            stateMachine.state
-
+        coVerify {
             stateMachine.handleAction(Reset)
         }
     }
@@ -55,8 +56,8 @@ internal class ModalStateMachineOwnerTest {
         // WHEN
         owner.onConfigurationChanged()
         // THEN
-        coVerifySequence {
-            stateMachine.state
+        coVerify(exactly = 0) {
+            stateMachine.handleAction(any())
         }
     }
 }

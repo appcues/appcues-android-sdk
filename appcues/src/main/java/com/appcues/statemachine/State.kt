@@ -1,6 +1,7 @@
 package com.appcues.statemachine
 
 import com.appcues.data.model.Experience
+import com.appcues.statemachine.states.IdlingState
 
 internal interface State {
 
@@ -15,4 +16,6 @@ internal interface State {
     fun State.next(state: State, error: Error) = Transition(state, error, null)
 
     fun State.keep(error: Error? = null) = Transition(this, error, null)
+
+    fun State.exit(error: Error) = Transition(IdlingState, error, null)
 }
