@@ -16,8 +16,6 @@ internal interface StateMachineOwning {
 
     suspend fun onConfigurationChanged() = Unit
 
-    fun onScreenChange() { }
-
     fun isInvalid(): Boolean = false
 }
 
@@ -52,7 +50,6 @@ internal class StateMachineDirectory {
     private var stateMachines = mutableMapOf<RenderContext, StateMachineOwning>()
 
     fun onScreenChange() {
-        stateMachines.values.forEach { it.onScreenChange() }
         stateMachines.values.removeAll { it.isInvalid() }
     }
 

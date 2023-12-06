@@ -13,6 +13,7 @@ import com.appcues.statemachine.Action.Reset
 import com.appcues.statemachine.Action.Retry
 import com.appcues.statemachine.Error.StepError
 import com.appcues.statemachine.StateMachine
+import com.appcues.statemachine.states.IdlingState
 import com.appcues.statemachine.states.RenderingStepState
 import com.appcues.ui.utils.getParentView
 import kotlinx.coroutines.Dispatchers
@@ -47,6 +48,18 @@ internal class ModalStateMachineOwner(
                 }
             }
         }
+        // and to stop retry when no longer applicable
+        coroutineScope.launch(Dispatchers.IO) {
+            stateMachine.stateFlow.collect { state ->
+                if (state is IdlingState) {
+                    // if the machine goes back to idling, this means that any experience
+                    // that was in a retry state was fully dismissed, or potentially a new
+                    // experience has been queued up to start in its place - remove any
+                    // existing retry handler to stop attempting recovery
+                    stopRetryHandling(true)
+                }
+            }
+        }
     }
 
     override suspend fun reset() {
@@ -59,14 +72,12 @@ internal class ModalStateMachineOwner(
         }
     }
 
-    // gets called by the StateMachineDirectory onScreenChange, which occurs when a new screen view
-    // is processed in ExperienceRenderer - stop any active retry in that case
-    override fun onScreenChange() {
-        stopRetryHandling()
-    }
-
-    private fun stopRetryHandling() {
-        viewTreeUpdateHandler.detach()
+    private fun stopRetryHandling(detach: Boolean) {
+        if (detach) {
+            viewTreeUpdateHandler.detach()
+        } else {
+            viewTreeUpdateHandler.disable()
+        }
         viewTreeObserver = null
         uiIdleDebounceTimer?.cancel()
         uiIdleDebounceTimer = null
@@ -84,7 +95,7 @@ internal class ModalStateMachineOwner(
     private fun attemptRetry() {
         onUiIdle {
             // stop listening for updates, will re-attach if another error occurs
-            stopRetryHandling()
+            stopRetryHandling(false)
 
             // cancel any current touch (drag) as our overlay is about to drop on top and we don't want things moving behind it
             AppcuesActivityMonitor.activity?.getParentView()?.dispatchTouchEvent(
@@ -116,15 +127,32 @@ internal class ModalStateMachineOwner(
 
         private var viewTreeObserver: ViewTreeObserver? = null
 
-        fun attach(viewTreeObserver: ViewTreeObserver) {
-            this.viewTreeObserver = viewTreeObserver
+        private var enabled = false
 
-            viewTreeObserver.addOnScrollChangedListener(this)
-            viewTreeObserver.addOnGlobalLayoutListener(this)
-            viewTreeObserver.addOnDrawListener(this)
+        fun attach(viewTreeObserver: ViewTreeObserver) {
+            // only attach if different
+            if (viewTreeObserver != this.viewTreeObserver) {
+                detach() // clean up any existing listeners we might be holding
+                this.viewTreeObserver = viewTreeObserver
+
+                viewTreeObserver.addOnScrollChangedListener(this)
+                viewTreeObserver.addOnGlobalLayoutListener(this)
+                viewTreeObserver.addOnDrawListener(this)
+            }
+            enabled = true
+        }
+
+        // we have a separate concept for disabling the listeners vs fully
+        // detaching them, as we cannot detach during retry, if that retry is triggered
+        // from onDraw, or this exception can occur
+        // java.lang.IllegalStateException: Cannot call removeOnDrawListener inside of onDraw
+        // https://developer.android.com/reference/android/view/ViewTreeObserver.OnDrawListener#onDraw()
+        fun disable() {
+            enabled = false
         }
 
         fun detach() {
+            enabled = false
             viewTreeObserver?.let {
                 it.removeOnScrollChangedListener(this)
                 it.removeOnGlobalLayoutListener(this)
@@ -134,15 +162,15 @@ internal class ModalStateMachineOwner(
         }
 
         override fun onScrollChanged() {
-            action()
+            if (enabled) action()
         }
 
         override fun onGlobalLayout() {
-            action()
+            if (enabled) action()
         }
 
         override fun onDraw() {
-            action()
+            if (enabled) action()
         }
     }
 }
