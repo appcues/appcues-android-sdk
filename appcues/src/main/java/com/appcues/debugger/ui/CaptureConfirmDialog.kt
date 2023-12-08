@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -127,7 +128,7 @@ private fun CaptureContents(debuggerViewModel: DebuggerViewModel, capture: Captu
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         BoxWithConstraints(
-            modifier = Modifier.height(375.dp)
+            modifier = Modifier.heightIn(max = 375.dp)
         ) {
             // Captured screenshot
             Image(
@@ -140,7 +141,12 @@ private fun CaptureContents(debuggerViewModel: DebuggerViewModel, capture: Captu
             // Overlay to highlight targetable elements
             Canvas(modifier = Modifier.matchParentSize()) {
                 // figure out the scale value
-                val scale = maxHeight / capture.layout.height.dp
+                val landscape = capture.layout.width > capture.layout.height
+                val scale = if (landscape) {
+                    maxWidth / capture.layout.width.dp
+                } else {
+                    maxHeight / capture.layout.height.dp
+                }
 
                 drawTargetableElement(capture.layout, scale)
             }

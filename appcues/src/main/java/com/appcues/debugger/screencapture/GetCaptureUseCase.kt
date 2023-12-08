@@ -61,55 +61,69 @@ internal class GetCaptureUseCase {
     // default capture screenshot when the current strategy returns null
     private suspend fun View.screenshot(window: Window): Screenshot? {
         return if (this.width > 0 && this.height > 0) {
-            val bitmap = awaitCaptureBitmap(this, window)
-            val canvas = Canvas(bitmap)
-            this.draw(canvas)
+            awaitCaptureBitmap(this, window)?.let {
+                val canvas = Canvas(it)
+                this.draw(canvas)
 
-            val insets = ViewCompat.getRootWindowInsets(this)?.getInsets(WindowInsetsCompat.Type.systemBars()) ?: Insets.NONE
+                val insets = ViewCompat.getRootWindowInsets(this)?.getInsets(WindowInsetsCompat.Type.systemBars()) ?: Insets.NONE
 
-            Screenshot(
-                bitmap = bitmap,
-                size = withDensity { Size(width, height).toDp() },
-                insets = withDensity { insets.toDp() }
-            )
+                Screenshot(
+                    bitmap = it,
+                    size = withDensity { Size(width, height).toDp() },
+                    insets = withDensity { insets.toDp() }
+                )
+            }
         } else {
             null
         }
     }
 
     // converts async function (captureBitmap) to a suspend function that will await for completion
-    private suspend fun awaitCaptureBitmap(view: View, window: Window): Bitmap {
-        return with(CompletableDeferred<Bitmap>()) {
+    private suspend fun awaitCaptureBitmap(view: View, window: Window): Bitmap? {
+        return with(CompletableDeferred<Bitmap?>()) {
             captureBitmap(view, window) { complete(it) }
 
             await()
         }
     }
 
-    private fun captureBitmap(view: View, window: Window, bitmapCallback: (Bitmap) -> Unit) {
+    private fun captureBitmap(view: View, window: Window, bitmapCallback: (Bitmap?) -> Unit) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // Above Android O, use PixelCopy
             val bitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
             val location = IntArray(2)
             view.getLocationInWindow(location)
 
-            PixelCopy.request(
-                window,
-                Rect(location[0], location[1], location[0] + view.width, location[1] + view.height),
-                bitmap,
-                {
-                    if (it == PixelCopy.SUCCESS) {
-                        bitmapCallback.invoke(bitmap)
-                    }
-                },
-                Handler(Looper.getMainLooper())
-            )
+            try {
+                PixelCopy.request(
+                    window,
+                    Rect(location[0], location[1], location[0] + view.width, location[1] + view.height),
+                    bitmap,
+                    {
+                        if (it == PixelCopy.SUCCESS) {
+                            bitmapCallback.invoke(bitmap)
+                        }
+                    },
+                    Handler(Looper.getMainLooper())
+                )
+            } catch (_: IllegalArgumentException) {
+                // if something failed with PixelCopy for any reason, try legacy bitmap creation
+                captureLegacyBitmap(view, bitmapCallback)
+            }
         } else {
+            captureLegacyBitmap(view, bitmapCallback)
+        }
+    }
+
+    private fun captureLegacyBitmap(view: View, bitmapCallback: (Bitmap?) -> Unit) {
+        try {
             val bitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
             val canvas = Canvas(bitmap)
             view.draw(canvas)
             canvas.setBitmap(null)
             bitmapCallback.invoke(bitmap)
+        } catch (_: IllegalArgumentException) {
+            bitmapCallback.invoke(null)
         }
     }
 

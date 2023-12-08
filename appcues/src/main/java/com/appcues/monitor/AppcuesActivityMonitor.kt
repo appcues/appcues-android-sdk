@@ -47,7 +47,7 @@ internal object AppcuesActivityMonitor : Application.ActivityLifecycleCallbacks 
     override fun onActivityResumed(activity: Activity) {
         _isPaused = false
 
-        if (this.activity == null) {
+        if (this.activity != activity) {
             this.activityWeakReference = WeakReference(activity)
             // notifies all subscribers that activity has changed
             activityMonitorListener.forEach { it.onActivityChanged(activity) }
@@ -65,10 +65,6 @@ internal object AppcuesActivityMonitor : Application.ActivityLifecycleCallbacks 
         // it means configuration has changed (same activity was re-created
         if (savedInstanceState != null) {
             notifyConfigurationChanged = true
-        } else {
-            if (this.activity != activity) {
-                this.activityWeakReference = null
-            }
         }
     }
 
