@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -46,7 +47,6 @@ import com.appcues.debugger.ui.logs.DebuggerLogDetails
 import com.appcues.debugger.ui.logs.DebuggerLogList
 import com.appcues.debugger.ui.main.DebuggerMain
 import com.appcues.logging.LogMessage
-import com.appcues.ui.theme.AppcuesColors
 
 internal const val SLIDE_TRANSITION_MILLIS = 250
 
@@ -66,7 +66,7 @@ internal fun BoxScope.DebuggerPanel(debuggerState: MutableDebuggerState, debugge
         Spacer(
             modifier = Modifier
                 .fillMaxSize()
-                .background(AppcuesColors.DebuggerBackdrop)
+                .background(Color(color = 0x51000000))
                 .clickable { debuggerViewModel.closeExpandedView() }
         )
     }
@@ -77,15 +77,13 @@ internal fun BoxScope.DebuggerPanel(debuggerState: MutableDebuggerState, debugge
         exit = exitTransition(),
         modifier = Modifier.align(Alignment.BottomCenter)
     ) {
-        Box(
+        Surface(
             modifier = Modifier
                 .shadow(elevation = 4.dp)
                 .testTag("DebuggerPanel")
                 .height(debuggerState.getExpandedContainerHeight())
                 .fillMaxWidth()
-                .background(Color.White)
-                .clickable(enabled = false, onClickLabel = null) {},
-            contentAlignment = Alignment.TopCenter
+                .clickable(enabled = false, onClickLabel = null, onClick = { })
         ) {
             DebuggerPanelPages(debuggerViewModel)
         }

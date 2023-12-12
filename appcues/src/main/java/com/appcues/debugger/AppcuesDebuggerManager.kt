@@ -9,17 +9,14 @@ import android.os.Looper
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.findViewTreeOnBackPressedDispatcherOwner
-import androidx.compose.material.MaterialTheme
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.viewModelScope
 import com.appcues.R
 import com.appcues.debugger.DebuggerViewModel.UIState.Expanded
 import com.appcues.debugger.ui.DebuggerComposition
+import com.appcues.debugger.ui.theme.AppcuesTheme
 import com.appcues.di.scope.AppcuesScope
 import com.appcues.ui.utils.getParentView
 import com.appcues.util.AppcuesViewTreeOwner
@@ -125,15 +122,10 @@ internal class AppcuesDebuggerManager(
                     }
 
                     setContent {
-                        CompositionLocalProvider(
-                            // Debugger is in English and always LTR regardless of app settings
-                            LocalLayoutDirection provides LayoutDirection.Ltr
-                        ) {
-                            MaterialTheme {
-                                DebuggerComposition(debuggerViewModel) {
-                                    stop()
-                                    parentView.removeView(this)
-                                }
+                        AppcuesTheme {
+                            DebuggerComposition(debuggerViewModel) {
+                                stop()
+                                parentView.removeView(this)
                             }
                         }
                     }

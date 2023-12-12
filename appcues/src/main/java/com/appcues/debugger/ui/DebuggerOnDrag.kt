@@ -17,8 +17,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
@@ -28,7 +26,7 @@ import com.appcues.R
 import com.appcues.R.drawable
 import com.appcues.debugger.DebuggerViewModel
 import com.appcues.debugger.DebuggerViewModel.UIState.Dismissing
-import com.appcues.ui.theme.AppcuesColors
+import com.appcues.debugger.ui.theme.LocalAppcuesTheme
 
 @Composable
 internal fun BoxScope.DebuggerOnDrag(
@@ -76,11 +74,7 @@ private fun DismissDebuggerArea(debuggerState: MutableDebuggerState, onGloballyP
 
     Box(
         modifier = Modifier
-            .background(
-                brush = Brush.radialGradient(
-                    listOf(AppcuesColors.DebuggerDismissArea, Color.Transparent)
-                )
-            )
+            .background(brush = LocalAppcuesTheme.current.gradientDismiss)
             .size(168.dp)
             .onGloballyPositioned { onGloballyPositioned(it) },
         contentAlignment = Alignment.Center

@@ -19,7 +19,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -31,7 +30,7 @@ import androidx.compose.ui.unit.sp
 import com.appcues.R.string
 import com.appcues.debugger.model.DebuggerToast.ScreenCaptureFailure
 import com.appcues.debugger.model.DebuggerToast.ScreenCaptureSuccess
-import com.appcues.ui.theme.AppcuesColors
+import com.appcues.debugger.ui.theme.LocalAppcuesTheme
 import kotlinx.coroutines.delay
 
 private const val SUCCESS_TOAST_LENGTH = 3_000L
@@ -67,9 +66,10 @@ internal fun BoxScope.SuccessToast(toast: ScreenCaptureSuccess, debuggerState: M
             .align(Alignment.BottomCenter)
             .padding(20.dp)
     ) {
+        val theme = LocalAppcuesTheme.current
         Row(
             modifier = Modifier
-                .background(color = AppcuesColors.DebuggerToastSuccessBackground, shape = RoundedCornerShape(6.dp))
+                .background(color = theme.info, shape = RoundedCornerShape(6.dp))
                 .fillMaxWidth()
                 .height(64.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -77,12 +77,12 @@ internal fun BoxScope.SuccessToast(toast: ScreenCaptureSuccess, debuggerState: M
             Text(
                 text = buildAnnotatedString {
                     withStyle(
-                        style = SpanStyle(fontWeight = FontWeight.Bold, color = Color.White, fontSize = 14.sp)
+                        style = SpanStyle(fontWeight = FontWeight.Bold, color = theme.background, fontSize = 14.sp)
                     ) {
                         append("\"${toast.displayName}\" ")
                     }
                     withStyle(
-                        style = SpanStyle(fontWeight = FontWeight.Normal, color = Color.White, fontSize = 14.sp)
+                        style = SpanStyle(fontWeight = FontWeight.Normal, color = theme.background, fontSize = 14.sp)
                     ) {
                         append(stringResource(id = string.appcues_screen_capture_toast_success_suffix))
                     }
@@ -118,9 +118,11 @@ internal fun BoxScope.FailureToast(toast: ScreenCaptureFailure, debuggerState: M
             .align(Alignment.BottomCenter)
             .padding(20.dp)
     ) {
+        val color = LocalAppcuesTheme.current.background
+
         Row(
             modifier = Modifier
-                .background(color = AppcuesColors.DebuggerToastFailureBackground, shape = RoundedCornerShape(6.dp))
+                .background(color = LocalAppcuesTheme.current.error, shape = RoundedCornerShape(6.dp))
                 .fillMaxWidth()
                 .height(64.dp)
                 .padding(start = 16.dp, end = 16.dp),
@@ -130,7 +132,7 @@ internal fun BoxScope.FailureToast(toast: ScreenCaptureFailure, debuggerState: M
                 text = stringResource(id = string.appcues_screen_capture_toast_upload_failed),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White
+                color = color
             )
             Spacer(modifier = Modifier.weight(1.0f))
 
@@ -140,14 +142,14 @@ internal fun BoxScope.FailureToast(toast: ScreenCaptureFailure, debuggerState: M
                     .border(
                         width = 1.dp,
                         shape = RoundedCornerShape(6.dp),
-                        color = Color.White
+                        color = color
                     )
                     .clickable(onClick = toast.onRetry)
             ) {
                 Text(
                     text = stringResource(id = string.appcues_screen_capture_toast_try_again),
                     fontSize = 14.sp,
-                    color = Color.White,
+                    color = color,
                     modifier = Modifier
                         .align(Alignment.Center)
                         .padding(start = 16.dp, end = 16.dp)

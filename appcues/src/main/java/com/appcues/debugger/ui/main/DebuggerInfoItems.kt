@@ -11,7 +11,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.appcues.debugger.model.DebuggerInfoItem
-import com.appcues.ui.theme.AppcuesColors
+import com.appcues.debugger.ui.theme.LocalAppcuesTheme
 
 @Composable
 internal fun DebuggerInfoItem.InfoItemContent(rowScope: RowScope) {
@@ -26,7 +26,7 @@ internal fun DebuggerInfoItem.InfoItemContent(rowScope: RowScope) {
                 text = title,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Normal,
-                color = AppcuesColors.Infinity
+                color = LocalAppcuesTheme.current.primary
             )
         }
     }

@@ -29,16 +29,17 @@ import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
@@ -59,8 +60,8 @@ import com.appcues.R.string
 import com.appcues.ViewElement
 import com.appcues.debugger.DebuggerViewModel
 import com.appcues.debugger.screencapture.model.Capture
+import com.appcues.debugger.ui.theme.LocalAppcuesTheme
 import com.appcues.ui.extensions.xShapePath
-import com.appcues.ui.theme.AppcuesColors
 
 @Composable
 internal fun CaptureConfirmDialog(capture: Capture, debuggerState: MutableDebuggerState, debuggerViewModel: DebuggerViewModel) {
@@ -70,15 +71,14 @@ internal fun CaptureConfirmDialog(capture: Capture, debuggerState: MutableDebugg
     if (debuggerState.isPaused.value) return
 
     Dialog(
-        onDismissRequest = {
-            debuggerViewModel.closeExpandedView()
-        },
+        onDismissRequest = { debuggerViewModel.closeExpandedView() },
     ) {
         Column(
             modifier = Modifier
-                .background(AppcuesColors.DebuggerBackground, RoundedCornerShape(6.dp))
-                .padding(9.dp)
+                .clip(RoundedCornerShape(6.dp))
                 .verticalScroll(rememberScrollState())
+                .background(LocalAppcuesTheme.current.background)
+                .padding(9.dp)
         ) {
             Header(debuggerViewModel = debuggerViewModel)
             CaptureContents(debuggerViewModel = debuggerViewModel, capture = capture, text = text)
@@ -89,12 +89,12 @@ internal fun CaptureConfirmDialog(capture: Capture, debuggerState: MutableDebugg
 @Composable
 private fun Header(debuggerViewModel: DebuggerViewModel) {
     Row(verticalAlignment = Alignment.CenterVertically) {
+        val theme = LocalAppcuesTheme.current
         Text(
             modifier = Modifier.padding(start = 16.dp),
             text = stringResource(id = string.appcues_screen_capture_title),
-            style = TextStyle(
-                fontSize = 20.sp
-            )
+            fontSize = 20.sp,
+            color = theme.primary,
         )
         Spacer(modifier = Modifier.weight(1.0f))
         Spacer(
@@ -111,7 +111,7 @@ private fun Header(debuggerViewModel: DebuggerViewModel) {
                     xShapePath(pathSize = 16.dp).also {
                         drawPath(
                             path = it,
-                            color = Color.Black,
+                            color = theme.primary,
                             style = Stroke(1.5.dp.toPx()),
                         )
                     }
@@ -122,6 +122,8 @@ private fun Header(debuggerViewModel: DebuggerViewModel) {
 
 @Composable
 private fun CaptureContents(debuggerViewModel: DebuggerViewModel, capture: Capture, text: MutableState<String>) {
+    val theme = LocalAppcuesTheme.current
+
     Column(
         modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 5.dp, bottom = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -133,7 +135,7 @@ private fun CaptureContents(debuggerViewModel: DebuggerViewModel, capture: Captu
             // Captured screenshot
             Image(
                 bitmap = capture.screenshot.bitmap.asImageBitmap(),
-                modifier = Modifier.border(1.dp, AppcuesColors.CaptureImageBorder),
+                modifier = Modifier.border(1.dp, theme.brand),
                 contentDescription = stringResource(id = string.appcues_screen_capture_image_description),
                 contentScale = ContentScale.Fit,
             )
@@ -148,7 +150,7 @@ private fun CaptureContents(debuggerViewModel: DebuggerViewModel, capture: Captu
                     maxHeight / capture.layout.height.dp
                 }
 
-                drawTargetableElement(capture.layout, scale)
+                drawTargetableElement(capture.layout, scale, theme.brand.copy(alpha = 0.2f), theme.brand)
             }
         }
 
@@ -156,14 +158,15 @@ private fun CaptureContents(debuggerViewModel: DebuggerViewModel, capture: Captu
             Text(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(id = string.appcues_screen_capture_not_seeing_element),
-                fontSize = 12.sp
+                fontSize = 12.sp,
+                color = theme.primary,
             )
         } else {
             Text(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(id = string.appcues_screen_capture_no_element),
                 fontSize = 12.sp,
-                color = Color(color = 0xFFF39325)
+                color = theme.warning,
             )
         }
 
@@ -179,42 +182,42 @@ private fun CaptureContents(debuggerViewModel: DebuggerViewModel, capture: Captu
             onValueChange = { text.value = it },
             label = { Text(text = stringResource(id = string.appcues_screen_capture_text_input_label)) },
             colors = TextFieldDefaults.outlinedTextFieldColors(
-                backgroundColor = Color.Transparent,
-                focusedBorderColor = AppcuesColors.CaptureTextInputBorder,
-                focusedLabelColor = AppcuesColors.Blurple,
-                unfocusedBorderColor = AppcuesColors.CaptureTextInputBorder,
-                unfocusedLabelColor = AppcuesColors.Blurple,
+                textColor = theme.secondary,
+                backgroundColor = theme.background,
+                focusedBorderColor = theme.inputActive,
+                focusedLabelColor = theme.inputActive,
+                unfocusedBorderColor = theme.input,
+                unfocusedLabelColor = theme.input,
             )
         )
         Row {
             CaptureButton(
                 modifier = Modifier
                     .height(40.dp)
-                    .background(AppcuesColors.DebuggerBackground)
-                    .border(1.dp, AppcuesColors.Blurple, RoundedCornerShape(6.dp))
+                    .background(theme.background)
+                    .border(1.dp, theme.brand, RoundedCornerShape(6.dp))
                     .clickable { debuggerViewModel.closeExpandedView() },
                 text = stringResource(id = string.appcues_screen_capture_cancel),
-                textColor = AppcuesColors.Blurple,
+                textColor = theme.brand,
             )
             Spacer(modifier = Modifier.weight(1.0f))
+
+            // deriving from text value
+            val isSendEnabled = remember { derivedStateOf { text.value.isEmpty().not() } }
+
             CaptureButton(
                 modifier = Modifier
                     .height(40.dp)
                     .background(
-                        Brush.horizontalGradient(listOf(AppcuesColors.Blurple, AppcuesColors.CaptureButtonGradientEnd)),
+                        LocalAppcuesTheme.current.primaryButton,
                         RoundedCornerShape(6.dp)
                     )
                     .conditionalClickable(
-                        enabled = text.value
-                            .isEmpty()
-                            .not(),
-                        onClick = {
-                            val updatedCapture = capture.copy(displayName = text.value)
-                            debuggerViewModel.onScreenCaptureConfirm(updatedCapture)
-                        }
+                        enabled = isSendEnabled.value,
+                        onClick = { debuggerViewModel.onScreenCaptureConfirm(capture.copy(displayName = text.value)) }
                     ),
                 text = stringResource(id = string.appcues_screen_capture_ok),
-                textColor = Color.White,
+                textColor = theme.background,
             )
         }
     }
@@ -229,7 +232,7 @@ private fun TextWebLink(text: String, @Suppress("SameParameterValue") url: Strin
             append(text)
             addStyle(
                 style = SpanStyle(
-                    color = Color(color = 0xFF0A7AEA),
+                    color = LocalAppcuesTheme.current.link,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium,
                 ),
@@ -241,7 +244,7 @@ private fun TextWebLink(text: String, @Suppress("SameParameterValue") url: Strin
     )
 }
 
-private fun DrawScope.drawTargetableElement(element: ViewElement, scale: Float) {
+private fun DrawScope.drawTargetableElement(element: ViewElement, scale: Float, fillColor: Color, strokeColor: Color) {
     val x = element.x.dp.toPx() * scale
     val y = element.y.dp.toPx() * scale
 
@@ -253,18 +256,18 @@ private fun DrawScope.drawTargetableElement(element: ViewElement, scale: Float) 
         drawRect(
             topLeft = Offset(x, y),
             size = Size(width, height),
-            color = Color(color = 0x80E3F2FF),
+            color = fillColor,
         )
 
         drawRect(
             topLeft = Offset(x, y),
             size = Size(width, height),
-            color = Color(color = 0xFF1491FF),
+            color = strokeColor,
             style = Stroke(width = 1.dp.toPx()),
         )
     }
 
-    element.children?.forEach { drawTargetableElement(it, scale) }
+    element.children?.forEach { drawTargetableElement(it, scale, fillColor, strokeColor) }
 }
 
 private fun Modifier.conditionalClickable(enabled: Boolean, onClick: () -> Unit) = composed {

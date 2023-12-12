@@ -11,6 +11,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -19,8 +20,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.appcues.R
 import com.appcues.debugger.model.DebuggerEventItem
+import com.appcues.debugger.ui.theme.LocalAppcuesTheme
 import com.appcues.debugger.ui.toResourceId
-import com.appcues.ui.theme.AppcuesColors
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -31,11 +32,14 @@ internal fun DebuggerEventItem.EventItemIcon() {
         .padding(horizontal = 24.dp, vertical = 20.dp)
         .size(24.dp)
 
+    val theme = LocalAppcuesTheme.current
+
     Image(
         painter = painterResource(id = type.toResourceId()),
         contentDescription = LocalContext.current.getString(R.string.appcues_debugger_recent_events_item_icon_description),
         modifier = iconModifier,
-        contentScale = ContentScale.None
+        contentScale = ContentScale.None,
+        colorFilter = ColorFilter.tint(theme.primary)
     )
 }
 
@@ -43,6 +47,7 @@ private const val EVENT_DATE_FORMAT = "hh:mm:ss"
 
 @Composable
 internal fun DebuggerEventItem.EventItemContent(rowScope: RowScope) {
+    val theme = LocalAppcuesTheme.current
     val dateFormat = SimpleDateFormat(EVENT_DATE_FORMAT, Locale.getDefault())
     with(rowScope) {
         Column(
@@ -55,7 +60,7 @@ internal fun DebuggerEventItem.EventItemContent(rowScope: RowScope) {
                 text = name,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Normal,
-                color = AppcuesColors.Infinity
+                color = theme.primary
             )
 
             Row(
@@ -74,7 +79,7 @@ internal fun DebuggerEventItem.EventItemContent(rowScope: RowScope) {
                     text = dateFormat.format(Date(timestamp)),
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Normal,
-                    color = AppcuesColors.SharkbaitOhAh
+                    color = theme.secondary
                 )
             }
         }
