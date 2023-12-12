@@ -135,7 +135,7 @@ private fun CaptureContents(debuggerViewModel: DebuggerViewModel, capture: Captu
             // Captured screenshot
             Image(
                 bitmap = capture.screenshot.bitmap.asImageBitmap(),
-                modifier = Modifier.border(1.dp, theme.brand),
+                modifier = Modifier.border(1.dp, theme.brand.copy(alpha = 0.5f)),
                 contentDescription = stringResource(id = string.appcues_screen_capture_image_description),
                 contentScale = ContentScale.Fit,
             )
@@ -150,7 +150,7 @@ private fun CaptureContents(debuggerViewModel: DebuggerViewModel, capture: Captu
                     maxHeight / capture.layout.height.dp
                 }
 
-                drawTargetableElement(capture.layout, scale, theme.brand.copy(alpha = 0.2f), theme.brand)
+                drawTargetableElement(capture.layout, scale, theme.info.copy(alpha = 0.1f), theme.info)
             }
         }
 

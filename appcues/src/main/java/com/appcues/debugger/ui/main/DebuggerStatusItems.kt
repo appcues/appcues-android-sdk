@@ -33,7 +33,7 @@ internal fun DebuggerStatusItem.StatusItemIcon() {
     val theme = LocalAppcuesTheme.current
 
     if (statusType == StatusType.LOADING) {
-        CircularProgressIndicator(modifier = iconModifier, color = theme.primary)
+        CircularProgressIndicator(modifier = iconModifier, color = theme.info)
     } else {
         Image(
             painter = painterResource(id = statusType.toResourceId()),
@@ -60,6 +60,8 @@ private fun StatusType.toResourceId(): Int {
 private fun StatusType.getColorFilter(theme: AppcuesThemeColors): ColorFilter? {
     return when (this) {
         StatusType.PHONE, StatusType.EXPERIENCE, StatusType.UNKNOWN -> ColorFilter.tint(theme.primary)
+        StatusType.SUCCESS -> ColorFilter.tint(theme.success)
+        StatusType.ERROR -> ColorFilter.tint(theme.error)
         else -> null
     }
 }

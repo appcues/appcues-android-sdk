@@ -29,6 +29,7 @@ internal class AppcuesThemeColors(
     error: Color,
     warning: Color,
     info: Color,
+    success: Color,
     link: Color,
     primary: Color,
     secondary: Color,
@@ -49,6 +50,8 @@ internal class AppcuesThemeColors(
     var warning by mutableStateOf(warning, structuralEqualityPolicy())
         internal set
     var info by mutableStateOf(info, structuralEqualityPolicy())
+        internal set
+    var success by mutableStateOf(success, structuralEqualityPolicy())
         internal set
     var link by mutableStateOf(link, structuralEqualityPolicy())
         internal set
