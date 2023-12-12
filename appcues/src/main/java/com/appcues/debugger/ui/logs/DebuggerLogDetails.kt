@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.appcues.R
-import com.appcues.debugger.ui.shared.FloatingBackButton
+import com.appcues.debugger.ui.ds.FloatingBackButton
 import com.appcues.debugger.ui.shared.copyToClipboardAndToast
 import com.appcues.debugger.ui.theme.LocalAppcuesTheme
 import com.appcues.logging.LogMessage
@@ -84,11 +84,9 @@ internal fun DebuggerLogDetails(message: LogMessage, navController: NavHostContr
             fontFamily = FontFamily.Monospace,
             color = color
         )
-        Divider(
-            modifier = Modifier.padding(vertical = 12.dp),
-            color = LocalAppcuesTheme.current.divider,
-            thickness = 1.dp,
-        )
+
+        Divider(Modifier.padding(vertical = 12.dp))
+
         Text(
             modifier = Modifier.horizontalScroll(rememberScrollState()),
             softWrap = false,

@@ -13,7 +13,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -31,8 +30,9 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.appcues.R
 import com.appcues.debugger.DebuggerViewModel
+import com.appcues.debugger.ui.ds.DividerItem
+import com.appcues.debugger.ui.ds.FloatingBackButton
 import com.appcues.debugger.ui.lazyColumnScrollIndicator
-import com.appcues.debugger.ui.shared.FloatingBackButton
 import com.appcues.debugger.ui.theme.LocalAppcuesTheme
 import com.appcues.logging.LogMessage
 import com.appcues.logging.LogType.DEBUG
@@ -124,9 +124,5 @@ private fun LazyItemScope.ListItem(index: Int, logMessage: LogMessage, onItemCli
         }
     }
 
-    Divider(
-        modifier = Modifier.padding(horizontal = 20.dp),
-        color = LocalAppcuesTheme.current.divider,
-        thickness = 1.dp,
-    )
+    DividerItem()
 }

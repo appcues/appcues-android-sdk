@@ -8,8 +8,8 @@ import androidx.compose.ui.graphics.Color
 
 private val Neutral0 = Color(color = 0xFFFFFFFF)
 private val Neutral50 = Color(color = 0xFFE7EBF2)
+private val Neutral100 = Color(color = 0xFFD0D7E4)
 private val Neutral300 = Color(color = 0xFF7186AE)
-private val Neutral400 = Color(color = 0xFF99A6BF)
 private val Neutral600 = Color(color = 0xFF222B3A)
 private val Neutral700 = Color(color = 0xFF1E2635)
 private val Blue300 = Color(color = 0xFF81B2EF)
@@ -31,8 +31,8 @@ internal fun darkAppcuesTheme() = AppcuesThemeColors(
     link = Blurple300,
     primary = Neutral0,
     secondary = Neutral50,
+    tertiary = Neutral100,
     brand = Blurple400,
-    divider = Neutral400,
     input = Neutral300,
     inputActive = Blue300,
     gradientDismiss = Brush.radialGradient(listOf(Color(color = 0x30FFFFFF), Color.Transparent)),

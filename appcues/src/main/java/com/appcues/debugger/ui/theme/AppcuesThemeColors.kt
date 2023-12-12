@@ -33,8 +33,8 @@ internal class AppcuesThemeColors(
     link: Color,
     primary: Color,
     secondary: Color,
+    tertiary: Color,
     brand: Color,
-    divider: Color,
     input: Color,
     inputActive: Color,
     gradientDismiss: Brush,
@@ -59,9 +59,9 @@ internal class AppcuesThemeColors(
         internal set
     var secondary by mutableStateOf(secondary, structuralEqualityPolicy())
         internal set
-    var brand by mutableStateOf(brand, structuralEqualityPolicy())
+    var tertiary by mutableStateOf(tertiary, structuralEqualityPolicy())
         internal set
-    var divider by mutableStateOf(divider, structuralEqualityPolicy())
+    var brand by mutableStateOf(brand, structuralEqualityPolicy())
         internal set
     var input by mutableStateOf(input, structuralEqualityPolicy())
         internal set

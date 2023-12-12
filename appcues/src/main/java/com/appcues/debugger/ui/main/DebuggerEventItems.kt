@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -15,11 +14,11 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.appcues.R
 import com.appcues.debugger.model.DebuggerEventItem
+import com.appcues.debugger.ui.ds.TextPrimary
+import com.appcues.debugger.ui.ds.TextSecondary
 import com.appcues.debugger.ui.theme.LocalAppcuesTheme
 import com.appcues.debugger.ui.toResourceId
 import java.text.SimpleDateFormat
@@ -47,7 +46,6 @@ private const val EVENT_DATE_FORMAT = "hh:mm:ss"
 
 @Composable
 internal fun DebuggerEventItem.EventItemContent(rowScope: RowScope) {
-    val theme = LocalAppcuesTheme.current
     val dateFormat = SimpleDateFormat(EVENT_DATE_FORMAT, Locale.getDefault())
     with(rowScope) {
         Column(
@@ -56,12 +54,7 @@ internal fun DebuggerEventItem.EventItemContent(rowScope: RowScope) {
                 .padding(vertical = 8.dp),
             verticalArrangement = Arrangement.Center
         ) {
-            Text(
-                text = name,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Normal,
-                color = theme.primary
-            )
+            TextPrimary(text = name)
 
             Row(
                 Modifier.padding(top = 8.dp),
@@ -75,12 +68,8 @@ internal fun DebuggerEventItem.EventItemContent(rowScope: RowScope) {
                     contentDescription = LocalContext.current.getString(R.string.appcues_debugger_recent_events_timestamp_icon_description),
                     contentScale = ContentScale.Fit
                 )
-                Text(
-                    text = dateFormat.format(Date(timestamp)),
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Normal,
-                    color = theme.secondary
-                )
+
+                TextSecondary(text = dateFormat.format(Date(timestamp)))
             }
         }
     }
