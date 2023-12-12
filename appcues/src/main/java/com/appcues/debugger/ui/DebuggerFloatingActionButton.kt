@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -17,7 +18,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Icon
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableIntStateOf
@@ -28,8 +28,6 @@ import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -45,7 +43,7 @@ import com.appcues.debugger.DebugMode.ScreenCapture
 import com.appcues.debugger.DebuggerViewModel
 import com.appcues.debugger.DebuggerViewModel.UIState.Dragging
 import com.appcues.debugger.DebuggerViewModel.UIState.Idle
-import com.appcues.ui.theme.AppcuesColors
+import com.appcues.debugger.ui.theme.LocalAppcuesTheme
 
 private const val FAB_DRAGGING_SIZE_MULTIPLIER = 1.1f
 private const val FAB_DEFAULT_SIZE_MULTIPLIER = 1.0f
@@ -105,17 +103,12 @@ internal fun BoxScope.DebuggerFloatingActionButton(
                     )
                     .size(size = debuggerState.fabSize.times(resizeBy.value))
                     .clip(RoundedCornerShape(percent = 100))
-                    .background(
-                        brush = Brush.horizontalGradient(
-                            listOf(AppcuesColors.Blurple, AppcuesColors.PurpleAnemone)
-                        )
-                    )
+                    .background(brush = LocalAppcuesTheme.current.primaryButton)
                     .padding(12.dp),
                 contentAlignment = Alignment.Center,
             ) {
-                Icon(
+                Image(
                     painter = painterResource(id = iconResId.intValue),
-                    tint = Color.White,
                     contentDescription = LocalContext.current.getString(R.string.appcues_debugger_fab_image_content_description)
                 )
             }

@@ -12,7 +12,7 @@ import androidx.compose.ui.graphics.Color
  * Official AppcuesTheme for all compositions
  */
 @Composable
-internal fun AppcuesTheme(
+internal fun AppcuesExperienceTheme(
     content: @Composable () -> Unit
 ) {
     MaterialTheme(

@@ -16,7 +16,6 @@ import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -31,11 +30,11 @@ import androidx.navigation.NavHostController
 import com.appcues.R
 import com.appcues.debugger.ui.shared.FloatingBackButton
 import com.appcues.debugger.ui.shared.copyToClipboardAndToast
+import com.appcues.debugger.ui.theme.LocalAppcuesTheme
 import com.appcues.logging.LogMessage
 import com.appcues.logging.LogType.DEBUG
 import com.appcues.logging.LogType.ERROR
 import com.appcues.logging.LogType.INFO
-import com.appcues.ui.theme.AppcuesColors
 
 private val firstVisibleItemOffsetThreshold = 56.dp
 
@@ -45,14 +44,14 @@ internal fun DebuggerLogDetails(message: LogMessage, navController: NavHostContr
     val context = LocalContext.current
     val clipboard = LocalClipboardManager.current
     val color = when (message.type) {
-        INFO, DEBUG -> AppcuesColors.Infinity
-        ERROR -> Color.Red
+        INFO, DEBUG -> LocalAppcuesTheme.current.primary
+        ERROR -> LocalAppcuesTheme.current.error
     }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(AppcuesColors.DebuggerBackground)
+            .background(LocalAppcuesTheme.current.background)
             .verticalScroll(scrollState)
             .padding(16.dp)
     ) {
@@ -63,8 +62,12 @@ internal fun DebuggerLogDetails(message: LogMessage, navController: NavHostContr
                     this.contentDescription = text
                 }
                 .align(Alignment.End),
-            onClick = { copyToClipboardAndToast(context, clipboard, message.message) }) {
-            Text(text = text, color = AppcuesColors.Blurple)
+            onClick = { copyToClipboardAndToast(context, clipboard, message.message) }
+        ) {
+            Text(
+                text = text,
+                color = LocalAppcuesTheme.current.link
+            )
         }
 
         Text(
@@ -83,7 +86,7 @@ internal fun DebuggerLogDetails(message: LogMessage, navController: NavHostContr
         )
         Divider(
             modifier = Modifier.padding(vertical = 12.dp),
-            color = AppcuesColors.WhisperBlue,
+            color = LocalAppcuesTheme.current.divider,
             thickness = 1.dp,
         )
         Text(

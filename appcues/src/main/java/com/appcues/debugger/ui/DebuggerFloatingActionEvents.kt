@@ -42,7 +42,7 @@ import androidx.compose.ui.unit.sp
 import com.appcues.debugger.DebugMode.Debugger
 import com.appcues.debugger.DebuggerViewModel
 import com.appcues.debugger.model.DebuggerEventItem
-import com.appcues.ui.theme.AppcuesColors
+import com.appcues.debugger.ui.theme.LocalAppcuesTheme
 import kotlinx.coroutines.delay
 
 private const val MAX_FAB_EVENTS = 10
@@ -101,6 +101,7 @@ internal fun BoxScope.DebuggerFloatingActionEvents(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun LazyItemScope.Item(event: DebuggerEventItem, isAnchoredStart: Boolean, eventTimedOut: () -> Unit) {
+    val theme = LocalAppcuesTheme.current
     val visibility = remember { MutableTransitionState(false) }.apply { targetState = event.showOnFab }
     val displayed = remember { mutableStateOf(false) }
     val alpha = animateFloatAsState(
@@ -119,7 +120,7 @@ private fun LazyItemScope.Item(event: DebuggerEventItem, isAnchoredStart: Boolea
                 .alpha(alpha.value)
                 .shadow(2.dp, RoundedCornerShape(6.dp), clip = true)
                 .clip(RoundedCornerShape(6.dp))
-                .background(AppcuesColors.WhisperBlue)
+                .background(theme.background)
                 .padding(2.dp)
                 .animateItemPlacement(),
             verticalAlignment = Alignment.CenterVertically,
@@ -127,12 +128,12 @@ private fun LazyItemScope.Item(event: DebuggerEventItem, isAnchoredStart: Boolea
         ) {
             Image(
                 modifier = Modifier.size(14.dp),
-                colorFilter = ColorFilter.tint(AppcuesColors.SharkbaitOhAh),
+                colorFilter = ColorFilter.tint(theme.secondary),
                 painter = painterResource(id = event.type.toResourceId()),
                 contentDescription = LocalContext.current.getString(event.type.getTitleString())
             )
 
-            Text(fontSize = 12.sp, text = event.name, color = AppcuesColors.SharkbaitOhAh)
+            Text(fontSize = 12.sp, text = event.name, color = theme.secondary)
         }
     }
 

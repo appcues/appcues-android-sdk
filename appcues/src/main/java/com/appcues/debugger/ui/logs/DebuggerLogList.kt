@@ -21,7 +21,6 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -34,11 +33,11 @@ import com.appcues.R
 import com.appcues.debugger.DebuggerViewModel
 import com.appcues.debugger.ui.lazyColumnScrollIndicator
 import com.appcues.debugger.ui.shared.FloatingBackButton
+import com.appcues.debugger.ui.theme.LocalAppcuesTheme
 import com.appcues.logging.LogMessage
 import com.appcues.logging.LogType.DEBUG
 import com.appcues.logging.LogType.ERROR
 import com.appcues.logging.LogType.INFO
-import com.appcues.ui.theme.AppcuesColors
 
 private val firstVisibleItemOffsetThreshold = 56.dp
 
@@ -53,7 +52,7 @@ internal fun DebuggerLogList(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .background(AppcuesColors.DebuggerBackground)
+            .background(LocalAppcuesTheme.current.background)
             .lazyColumnScrollIndicator(lazyListState),
         state = lazyListState
     ) {
@@ -99,9 +98,10 @@ private fun LazyItemScope.ListItem(index: Int, logMessage: LogMessage, onItemCli
             verticalArrangement = Arrangement.Center
         ) {
             val color = when (logMessage.type) {
-                INFO, DEBUG -> AppcuesColors.Infinity
-                ERROR -> Color.Red
+                INFO, DEBUG -> LocalAppcuesTheme.current.primary
+                ERROR -> LocalAppcuesTheme.current.error
             }
+
             Text(
                 text = stringResource(
                     id = R.string.appcues_debugger_item_title,
@@ -126,7 +126,7 @@ private fun LazyItemScope.ListItem(index: Int, logMessage: LogMessage, onItemCli
 
     Divider(
         modifier = Modifier.padding(horizontal = 20.dp),
-        color = AppcuesColors.WhisperBlue,
+        color = LocalAppcuesTheme.current.divider,
         thickness = 1.dp,
     )
 }

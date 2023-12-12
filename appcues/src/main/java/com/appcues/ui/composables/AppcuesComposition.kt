@@ -25,7 +25,7 @@ import com.appcues.trait.ContentHolderTrait.ContainerPages
 import com.appcues.ui.presentation.AppcuesViewModel
 import com.appcues.ui.presentation.AppcuesViewModel.UIState.Dismissing
 import com.appcues.ui.presentation.AppcuesViewModel.UIState.Rendering
-import com.appcues.ui.theme.AppcuesTheme
+import com.appcues.ui.theme.AppcuesExperienceTheme
 
 @Composable
 internal fun AppcuesComposition(
@@ -35,7 +35,7 @@ internal fun AppcuesComposition(
     chromeClient: WebChromeClient,
 ) {
     // ensure to change some colors to match appropriate design for custom primitive blocks
-    AppcuesTheme {
+    AppcuesExperienceTheme {
         // define composition local provided dependencies
         CompositionLocalProvider(
             LocalImageLoader provides imageLoader,

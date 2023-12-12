@@ -1,6 +1,5 @@
 package com.appcues.debugger.ui.events
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -31,7 +30,7 @@ import com.appcues.debugger.model.DebuggerEventItem
 import com.appcues.debugger.ui.getTitleString
 import com.appcues.debugger.ui.lazyColumnScrollIndicator
 import com.appcues.debugger.ui.shared.FloatingBackButton
-import com.appcues.ui.theme.AppcuesColors
+import com.appcues.debugger.ui.theme.LocalAppcuesTheme
 import java.sql.Timestamp
 
 private val firstVisibleItemOffsetThreshold = 56.dp
@@ -43,7 +42,6 @@ internal fun DebuggerEventDetails(debuggerEventItem: DebuggerEventItem, navContr
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .background(AppcuesColors.DebuggerBackground)
             .lazyColumnScrollIndicator(lazyListState),
         state = lazyListState
     ) {
@@ -84,7 +82,7 @@ private fun LazyListScope.detailsTitle() {
             modifier = Modifier.padding(start = 40.dp, top = 20.dp, bottom = 16.dp),
             fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold,
-            color = AppcuesColors.HadfieldBlue,
+            color = LocalAppcuesTheme.current.brand,
         )
     }
 }
@@ -117,7 +115,7 @@ private fun LazyListScope.propertiesTitle(title: String) {
             modifier = Modifier.padding(start = 40.dp, top = 20.dp, bottom = 16.dp),
             fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold,
-            color = AppcuesColors.HadfieldBlue,
+            color = LocalAppcuesTheme.current.brand,
         )
     }
 }
@@ -150,13 +148,13 @@ private fun LazyItemScope.ListItem(key: String, value: String) {
                 text = key,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Normal,
-                color = AppcuesColors.Infinity
+                color = LocalAppcuesTheme.current.primary
             )
             Text(
                 text = value,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Normal,
-                color = AppcuesColors.SharkbaitOhAh
+                color = LocalAppcuesTheme.current.secondary
             )
         }
     }
@@ -168,7 +166,7 @@ private fun LazyItemScope.ListItem(key: String, value: String) {
 private fun ListItemDivider() {
     Divider(
         modifier = Modifier.padding(horizontal = 20.dp),
-        color = AppcuesColors.WhisperBlue,
+        color = LocalAppcuesTheme.current.divider,
         thickness = 1.dp,
     )
 }

@@ -15,7 +15,6 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -40,12 +39,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.SoftwareKeyboardController
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.appcues.R.string
-import com.appcues.ui.theme.AppcuesColors
+import com.appcues.debugger.ui.theme.LocalAppcuesTheme
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -62,7 +62,10 @@ internal fun AppcuesSearchView(
     val cornerDp = remember { derivedStateOf { height / 2 } }
     val focusRequester = remember { FocusRequester() }
     val isFocusOn = remember { mutableStateOf(false) }
-    val border = animateColorAsState(targetValue = if (isFocusOn.value) AppcuesColors.SharkbaitOhAh else AppcuesColors.SharkbaitOhAh50)
+    val border = animateColorAsState(
+        targetValue = if (isFocusOn.value) LocalAppcuesTheme.current.inputActive else LocalAppcuesTheme.current.input,
+        label = "SearchView border"
+    )
 
     Box(
         modifier = Modifier
@@ -70,7 +73,7 @@ internal fun AppcuesSearchView(
             .shadow(elevation, RoundedCornerShape(cornerDp.value))
             .clip(RoundedCornerShape(cornerDp.value))
             .border(1.dp, border.value, RoundedCornerShape(cornerDp.value))
-            .background(MaterialTheme.colors.surface)
+            .background(LocalAppcuesTheme.current.background)
             .height(height)
             .clickable(interactionSource = MutableInteractionSource(), indication = null) { focusRequester.requestFocus() },
     ) {
@@ -100,7 +103,8 @@ internal fun AppcuesSearchView(
             keyboardActions = KeyboardActions(
                 onDone = { keyboardController?.hide() }
             ),
-            cursorBrush = SolidColor(AppcuesColors.Infinity)
+            textStyle = TextStyle.Default.copy(color = LocalAppcuesTheme.current.primary),
+            cursorBrush = SolidColor(LocalAppcuesTheme.current.inputActive)
         )
 
         SearchViewOverlay(isFocusOn, height, keyboardController, focusManager, hint) { text.value = TextFieldValue(String()) }
@@ -147,15 +151,14 @@ private fun BoxScope.SearchViewOverlay(
             modifier = iconModifier,
             imageVector = Icons.Default.Close,
             contentDescription = LocalContext.current.getString(string.appcues_debugger_font_details_clean_filter),
-            tint = AppcuesColors.Infinity
+            tint = LocalAppcuesTheme.current.secondary
         )
     } else {
         Text(
             text = hint,
             modifier = Companion
                 .align(Alignment.CenterStart)
-                .padding(start = 12.dp),
-            color = AppcuesColors.SharkbaitOhAh
+                .padding(start = 12.dp)
         )
     }
 }

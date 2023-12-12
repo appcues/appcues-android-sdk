@@ -42,7 +42,7 @@ import com.appcues.debugger.ui.AppcuesSearchView
 import com.appcues.debugger.ui.lazyColumnScrollIndicator
 import com.appcues.debugger.ui.shared.FloatingBackButton
 import com.appcues.debugger.ui.shared.copyToClipboardAndToast
-import com.appcues.ui.theme.AppcuesColors
+import com.appcues.debugger.ui.theme.LocalAppcuesTheme
 
 private val firstVisibleItemOffsetThreshold = 56.dp
 
@@ -82,7 +82,7 @@ internal fun DebuggerFontList(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .background(AppcuesColors.DebuggerBackground)
+            .background(LocalAppcuesTheme.current.background)
             .lazyColumnScrollIndicator(lazyListState),
         state = lazyListState
     ) {
@@ -157,7 +157,7 @@ private fun LazyListScope.sectionTitle(resId: Int) {
             modifier = Modifier.padding(start = 20.dp, top = 20.dp, bottom = 16.dp),
             fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold,
-            color = AppcuesColors.HadfieldBlue,
+            color = LocalAppcuesTheme.current.brand,
         )
     }
 }
@@ -190,7 +190,7 @@ private fun LazyItemScope.ListItem(debuggerFont: DebuggerFontItem) {
             fontSize = 16.sp,
             fontWeight = debuggerFont.fontWeight,
             fontFamily = debuggerFont.fontFamily,
-            color = AppcuesColors.Infinity
+            color = LocalAppcuesTheme.current.primary
         )
         Spacer(modifier = Modifier.weight(1.0f))
         Icon(
@@ -199,7 +199,7 @@ private fun LazyItemScope.ListItem(debuggerFont: DebuggerFontItem) {
             modifier = Modifier
                 .padding(start = 10.dp)
                 .size(20.dp),
-            tint = AppcuesColors.SharkbaitOhAh,
+            tint = LocalAppcuesTheme.current.secondary,
         )
     }
 
@@ -210,7 +210,7 @@ private fun LazyItemScope.ListItem(debuggerFont: DebuggerFontItem) {
 private fun ListItemDivider() {
     Divider(
         modifier = Modifier.padding(horizontal = 20.dp),
-        color = AppcuesColors.WhisperBlue,
+        color = LocalAppcuesTheme.current.divider,
         thickness = 1.dp,
     )
 }

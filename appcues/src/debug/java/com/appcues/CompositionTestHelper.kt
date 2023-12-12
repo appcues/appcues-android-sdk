@@ -34,7 +34,7 @@ import com.appcues.ui.composables.LocalExperienceStepFormStateDelegate
 import com.appcues.ui.composables.LocalImageLoader
 import com.appcues.ui.composables.LocalLogcues
 import com.appcues.ui.primitive.Compose
-import com.appcues.ui.theme.AppcuesTheme
+import com.appcues.ui.theme.AppcuesExperienceTheme
 import java.util.UUID
 
 // This helper supports testing a single experience primitive (can have nested children),
@@ -44,7 +44,7 @@ public fun ComposeContent(json: String, imageLoader: ImageLoader) {
     val response = MoshiConfiguration.moshi.adapter(PrimitiveResponse::class.java).fromJson(json)
     val primitive = response!!.mapPrimitive()
 
-    AppcuesTheme {
+    AppcuesExperienceTheme {
         CompositionLocalProvider(
             LocalImageLoader provides imageLoader,
             LocalLogcues provides Logcues(),
@@ -105,7 +105,7 @@ public fun ComposeContainer(context: Context, stepContentJson: List<String>?, tr
     val metadataSettingTraits = container.steps[0].metadataSettingTraits
     val metadata = hashMapOf<String, Any?>().apply { metadataSettingTraits.forEach { putAll(it.produceMetadata()) } }
 
-    AppcuesTheme {
+    AppcuesExperienceTheme {
         CompositionLocalProvider(
             LocalImageLoader provides imageLoader,
             LocalLogcues provides Logcues(),
@@ -167,7 +167,7 @@ public fun ComposeContainer(
     val metadataSettingTraits = container.steps[stepIndex].metadataSettingTraits
     val metadata = hashMapOf<String, Any?>().apply { metadataSettingTraits.forEach { putAll(it.produceMetadata()) } }
 
-    AppcuesTheme {
+    AppcuesExperienceTheme {
         CompositionLocalProvider(
             LocalImageLoader provides imageLoader,
             LocalLogcues provides Logcues(),

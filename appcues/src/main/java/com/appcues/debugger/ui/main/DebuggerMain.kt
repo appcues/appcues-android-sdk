@@ -20,7 +20,6 @@ import androidx.compose.material.Divider
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -30,6 +29,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.onSizeChanged
@@ -52,8 +52,8 @@ import com.appcues.debugger.model.StatusType
 import com.appcues.debugger.model.TapActionType
 import com.appcues.debugger.ui.getTitleString
 import com.appcues.debugger.ui.lazyColumnScrollIndicator
+import com.appcues.debugger.ui.theme.LocalAppcuesTheme
 import com.appcues.debugger.ui.toResourceId
-import com.appcues.ui.theme.AppcuesColors
 import kotlinx.coroutines.delay
 
 @Composable
@@ -96,7 +96,7 @@ private fun LazyListScope.statusSection(list: List<DebuggerStatusItem>, onTap: (
                 modifier = Modifier.padding(start = 40.dp),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = AppcuesColors.HadfieldBlue,
+                color = LocalAppcuesTheme.current.brand,
             )
         }
     }
@@ -140,7 +140,7 @@ private fun LazyListScope.infoSection(
                 modifier = Modifier.padding(start = 40.dp),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = AppcuesColors.HadfieldBlue,
+                color = LocalAppcuesTheme.current.brand,
             )
         }
     }
@@ -201,7 +201,7 @@ private fun LazyListScope.eventsSection(
                 text = LocalContext.current.getString(R.string.appcues_debugger_recent_events_title),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = AppcuesColors.HadfieldBlue,
+                color = LocalAppcuesTheme.current.brand,
             )
 
             Crossfade(
@@ -221,7 +221,7 @@ private fun LazyListScope.eventsSection(
                         },
                     painter = painterResource(id = if (it) R.drawable.appcues_ic_filter_on else R.drawable.appcues_ic_filter_off),
                     contentDescription = LocalContext.current.getString(R.string.appcues_debugger_recent_events_filter_icon_description),
-                    tint = AppcuesColors.SharkbaitOhAh
+                    tint = if (it) LocalAppcuesTheme.current.brand else LocalAppcuesTheme.current.secondary
                 )
             }
 
@@ -296,9 +296,14 @@ private fun EventTypeFilterDropdown(
 
 @Composable
 private fun ColumnScope.FilterEventTypeMenuItem(eventType: EventType?, isSelected: Boolean, onClick: () -> Unit) {
+    val theme = LocalAppcuesTheme.current
     val background = animateColorAsState(
-        targetValue = if (isSelected) AppcuesColors.PurpleLuna else MaterialTheme.colors.background,
-        label = "Dropdown background"
+        targetValue = if (isSelected) theme.backgroundSelected else theme.background,
+        label = "Dropdown item background"
+    )
+    val foreground = animateColorAsState(
+        targetValue = if (isSelected) theme.brand else theme.primary,
+        label = "Dropdown item foreground"
     )
     DropdownMenuItem(
         modifier = Modifier
@@ -311,6 +316,7 @@ private fun ColumnScope.FilterEventTypeMenuItem(eventType: EventType?, isSelecte
                 .padding(vertical = 12.dp)
                 .size(24.dp),
             painter = painterResource(id = eventType.toResourceId()),
+            colorFilter = ColorFilter.tint(foreground.value),
             contentDescription = LocalContext.current.getString(R.string.appcues_debugger_recent_events_item_icon_description),
             contentScale = ContentScale.None
         )
@@ -319,6 +325,7 @@ private fun ColumnScope.FilterEventTypeMenuItem(eventType: EventType?, isSelecte
             modifier = Modifier
                 .width(160.dp)
                 .padding(start = 20.dp),
+            color = foreground.value,
             text = LocalContext.current.getString(eventType.getTitleString())
         )
     }
@@ -328,7 +335,7 @@ private fun ColumnScope.FilterEventTypeMenuItem(eventType: EventType?, isSelecte
 private fun ListItemDivider() {
     Divider(
         modifier = Modifier.padding(horizontal = 20.dp),
-        color = AppcuesColors.WhisperBlue,
+        color = LocalAppcuesTheme.current.divider,
         thickness = 1.dp,
     )
 }
