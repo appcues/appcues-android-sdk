@@ -16,7 +16,6 @@ import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -30,7 +29,6 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -39,8 +37,10 @@ import com.appcues.R.string
 import com.appcues.debugger.DebuggerViewModel
 import com.appcues.debugger.model.DebuggerFontItem
 import com.appcues.debugger.ui.AppcuesSearchView
+import com.appcues.debugger.ui.ds.DividerItem
+import com.appcues.debugger.ui.ds.FloatingBackButton
+import com.appcues.debugger.ui.ds.TextHeader
 import com.appcues.debugger.ui.lazyColumnScrollIndicator
-import com.appcues.debugger.ui.shared.FloatingBackButton
 import com.appcues.debugger.ui.shared.copyToClipboardAndToast
 import com.appcues.debugger.ui.theme.LocalAppcuesTheme
 
@@ -152,12 +152,9 @@ private fun FontDetailsOverlay(
 
 private fun LazyListScope.sectionTitle(resId: Int) {
     item {
-        Text(
-            text = LocalContext.current.getString(resId),
+        TextHeader(
             modifier = Modifier.padding(start = 20.dp, top = 20.dp, bottom = 16.dp),
-            fontSize = 14.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = LocalAppcuesTheme.current.brand,
+            text = LocalContext.current.getString(resId)
         )
     }
 }
@@ -203,14 +200,5 @@ private fun LazyItemScope.ListItem(debuggerFont: DebuggerFontItem) {
         )
     }
 
-    ListItemDivider()
-}
-
-@Composable
-private fun ListItemDivider() {
-    Divider(
-        modifier = Modifier.padding(horizontal = 20.dp),
-        color = LocalAppcuesTheme.current.divider,
-        thickness = 1.dp,
-    )
+    DividerItem()
 }

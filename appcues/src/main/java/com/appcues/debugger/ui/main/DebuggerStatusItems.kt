@@ -8,19 +8,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.appcues.R
 import com.appcues.debugger.model.DebuggerStatusItem
 import com.appcues.debugger.model.StatusType
+import com.appcues.debugger.ui.ds.TextPrimary
+import com.appcues.debugger.ui.ds.TextSecondary
 import com.appcues.debugger.ui.theme.AppcuesThemeColors
 import com.appcues.debugger.ui.theme.LocalAppcuesTheme
 
@@ -76,28 +75,10 @@ internal fun DebuggerStatusItem.StatusItemContent(rowScope: RowScope) {
                 .padding(end = 8.dp),
             verticalArrangement = Arrangement.Center
         ) {
-            Text(
-                text = title,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Normal,
-                color = LocalAppcuesTheme.current.primary
-            )
-            line1?.let {
-                Text(
-                    text = it,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Normal,
-                    color = LocalAppcuesTheme.current.secondary
-                )
-            }
-            line2?.let {
-                Text(
-                    text = it,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Normal,
-                    color = LocalAppcuesTheme.current.secondary
-                )
-            }
+            TextPrimary(text = title)
+
+            line1?.let { TextSecondary(text = it) }
+            line2?.let { TextSecondary(text = it) }
         }
     }
 }

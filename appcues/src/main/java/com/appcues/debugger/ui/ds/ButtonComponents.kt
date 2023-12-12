@@ -1,4 +1,4 @@
-package com.appcues.debugger.ui.shared
+package com.appcues.debugger.ui.ds
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image

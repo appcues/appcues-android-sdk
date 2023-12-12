@@ -12,8 +12,6 @@ import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.Divider
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
@@ -21,16 +19,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.appcues.R
 import com.appcues.debugger.model.DebuggerEventItem
+import com.appcues.debugger.ui.ds.DividerItem
+import com.appcues.debugger.ui.ds.FloatingBackButton
+import com.appcues.debugger.ui.ds.TextHeader
+import com.appcues.debugger.ui.ds.TextPrimary
+import com.appcues.debugger.ui.ds.TextSecondary
 import com.appcues.debugger.ui.getTitleString
 import com.appcues.debugger.ui.lazyColumnScrollIndicator
-import com.appcues.debugger.ui.shared.FloatingBackButton
-import com.appcues.debugger.ui.theme.LocalAppcuesTheme
 import java.sql.Timestamp
 
 private val firstVisibleItemOffsetThreshold = 56.dp
@@ -51,7 +50,10 @@ internal fun DebuggerEventDetails(debuggerEventItem: DebuggerEventItem, navContr
 
         debuggerEventItem.propertySections.forEach {
             if (!it.properties.isNullOrEmpty()) {
-                propertiesTitle(it.title)
+                item {
+                    TextHeader(modifier = Modifier.padding(start = 40.dp, top = 20.dp, bottom = 16.dp), text = it.title)
+                }
+
                 properties(it.properties)
             }
         }
@@ -77,12 +79,9 @@ private fun LazyListScope.detailsTitle() {
     }
 
     item {
-        Text(
-            text = LocalContext.current.getString(R.string.appcues_debugger_event_details_title),
+        TextHeader(
             modifier = Modifier.padding(start = 40.dp, top = 20.dp, bottom = 16.dp),
-            fontSize = 14.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = LocalAppcuesTheme.current.brand,
+            text = LocalContext.current.getString(R.string.appcues_debugger_event_details_title)
         )
     }
 }
@@ -104,18 +103,6 @@ private fun LazyListScope.details(event: DebuggerEventItem) {
         ListItem(
             key = context.getString(R.string.appcues_debugger_event_details_timestamp_title),
             value = Timestamp(event.timestamp).toString()
-        )
-    }
-}
-
-private fun LazyListScope.propertiesTitle(title: String) {
-    item {
-        Text(
-            text = title,
-            modifier = Modifier.padding(start = 40.dp, top = 20.dp, bottom = 16.dp),
-            fontSize = 14.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = LocalAppcuesTheme.current.brand,
         )
     }
 }
@@ -144,29 +131,10 @@ private fun LazyItemScope.ListItem(key: String, value: String) {
                 .padding(vertical = 8.dp, horizontal = 20.dp),
             verticalArrangement = Arrangement.Center
         ) {
-            Text(
-                text = key,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Normal,
-                color = LocalAppcuesTheme.current.primary
-            )
-            Text(
-                text = value,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Normal,
-                color = LocalAppcuesTheme.current.secondary
-            )
+            TextPrimary(text = key)
+            TextSecondary(text = value)
         }
     }
 
-    ListItemDivider()
-}
-
-@Composable
-private fun ListItemDivider() {
-    Divider(
-        modifier = Modifier.padding(horizontal = 20.dp),
-        color = LocalAppcuesTheme.current.divider,
-        thickness = 1.dp,
-    )
+    DividerItem()
 }

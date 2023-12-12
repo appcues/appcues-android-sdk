@@ -8,7 +8,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -16,7 +18,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.Divider
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
@@ -37,11 +38,9 @@ import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.appcues.R
 import com.appcues.debugger.DebuggerViewModel
 import com.appcues.debugger.model.DebuggerEventItem
@@ -50,6 +49,8 @@ import com.appcues.debugger.model.DebuggerStatusItem
 import com.appcues.debugger.model.EventType
 import com.appcues.debugger.model.StatusType
 import com.appcues.debugger.model.TapActionType
+import com.appcues.debugger.ui.ds.DividerItem
+import com.appcues.debugger.ui.ds.TextHeader
 import com.appcues.debugger.ui.getTitleString
 import com.appcues.debugger.ui.lazyColumnScrollIndicator
 import com.appcues.debugger.ui.theme.LocalAppcuesTheme
@@ -74,6 +75,8 @@ internal fun DebuggerMain(
             .lazyColumnScrollIndicator(lazyListState),
         state = lazyListState
     ) {
+        item { Spacer(modifier = Modifier.height(40.dp)) }
+
         statusSection(statusInfo.value) { debuggerViewModel.onStatusTapAction(it) }
 
         infoSection(onFontsClick, onDetailedLogClick)
@@ -84,21 +87,10 @@ internal fun DebuggerMain(
 
 private fun LazyListScope.statusSection(list: List<DebuggerStatusItem>, onTap: (TapActionType) -> Unit) {
     item {
-        Box(
-            modifier = Modifier
-                .fillParentMaxWidth()
-                // some space at the top so nothing draws right below the Appcues logo
-                .padding(top = 40.dp),
-            contentAlignment = Alignment.CenterStart
-        ) {
-            Text(
-                text = LocalContext.current.getString(R.string.appcues_debugger_status_title),
-                modifier = Modifier.padding(start = 40.dp),
-                fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = LocalAppcuesTheme.current.brand,
-            )
-        }
+        TextHeader(
+            modifier = Modifier.padding(start = 40.dp),
+            text = LocalContext.current.getString(R.string.appcues_debugger_status_title)
+        )
     }
 
     items(list) { item ->
@@ -120,7 +112,7 @@ private fun LazyListScope.statusSection(list: List<DebuggerStatusItem>, onTap: (
             }
         }
 
-        ListItemDivider()
+        DividerItem()
     }
 }
 
@@ -135,12 +127,9 @@ private fun LazyListScope.infoSection(
                 .padding(top = 24.dp),
             contentAlignment = Alignment.CenterStart
         ) {
-            Text(
-                text = LocalContext.current.getString(R.string.appcues_debugger_info_title),
+            TextHeader(
                 modifier = Modifier.padding(start = 40.dp),
-                fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = LocalAppcuesTheme.current.brand,
+                text = LocalContext.current.getString(R.string.appcues_debugger_info_title)
             )
         }
     }
@@ -158,7 +147,7 @@ private fun LazyListScope.infoSection(
             }
         }
 
-        ListItemDivider()
+        DividerItem()
     }
 
     item {
@@ -174,7 +163,7 @@ private fun LazyListScope.infoSection(
             }
         }
 
-        ListItemDivider()
+        DividerItem()
     }
 }
 
@@ -194,14 +183,11 @@ private fun LazyListScope.eventsSection(
             val isFilterExpanded = remember { mutableStateOf(false) }
             val filterImagePosition = remember { mutableStateOf(DpOffset(0.dp, 0.dp)) }
 
-            Text(
+            TextHeader(
                 modifier = Modifier
                     .padding(start = 28.dp)
                     .align(Alignment.CenterStart),
-                text = LocalContext.current.getString(R.string.appcues_debugger_recent_events_title),
-                fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = LocalAppcuesTheme.current.brand,
+                text = LocalContext.current.getString(R.string.appcues_debugger_recent_events_title)
             )
 
             Crossfade(
@@ -221,7 +207,7 @@ private fun LazyListScope.eventsSection(
                         },
                     painter = painterResource(id = if (it) R.drawable.appcues_ic_filter_on else R.drawable.appcues_ic_filter_off),
                     contentDescription = LocalContext.current.getString(R.string.appcues_debugger_recent_events_filter_icon_description),
-                    tint = if (it) LocalAppcuesTheme.current.brand else LocalAppcuesTheme.current.secondary
+                    tint = if (it) LocalAppcuesTheme.current.brand else LocalAppcuesTheme.current.tertiary
                 )
             }
 
@@ -244,7 +230,7 @@ private fun LazyListScope.eventsSection(
             item.EventItemContent(rowScope = this@Row)
         }
 
-        ListItemDivider()
+        DividerItem()
     }
 }
 
@@ -329,13 +315,4 @@ private fun ColumnScope.FilterEventTypeMenuItem(eventType: EventType?, isSelecte
             text = LocalContext.current.getString(eventType.getTitleString())
         )
     }
-}
-
-@Composable
-private fun ListItemDivider() {
-    Divider(
-        modifier = Modifier.padding(horizontal = 20.dp),
-        color = LocalAppcuesTheme.current.divider,
-        thickness = 1.dp,
-    )
 }
