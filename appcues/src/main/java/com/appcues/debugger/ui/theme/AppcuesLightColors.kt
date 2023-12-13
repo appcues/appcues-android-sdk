@@ -21,7 +21,7 @@ private val Green600 = Color(color = 0xFF108484)
 
 // Composing a color palette for light mode are based on foundation figma doc.
 // Visit: https://www.figma.com/file/8Sozh9JnseLTF5oWjvGfIp/Foundations?type=design&node-id=5619-2635&mode=design&t=56CipGcX1bXwpUOW-0
-internal fun lightAppcuesTheme() = AppcuesThemeColors(
+internal fun appcuesLightColors() = AppcuesThemeColors(
     background = Neutral0,
     backgroundSelected = Neutral50,
     error = Pink600,
