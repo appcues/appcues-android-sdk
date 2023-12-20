@@ -1,14 +1,21 @@
 package com.appcues.samples.kotlin
 
 import android.app.Application
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Intent
 import android.net.Uri
+import android.os.Build.VERSION
+import android.os.Build.VERSION_CODES
 import android.os.StrictMode
 import android.os.StrictMode.ThreadPolicy
 import android.os.StrictMode.VmPolicy
+import android.util.Log
 import com.appcues.Appcues
 import com.appcues.LoggingLevel
 import com.appcues.NavigationHandler
+import com.google.android.gms.tasks.Task
+import com.google.firebase.messaging.FirebaseMessaging
 
 class ExampleApplication : Application() {
 
@@ -16,6 +23,8 @@ class ExampleApplication : Application() {
 
         lateinit var appcues: Appcues
         var currentUserID = "default-0000"
+
+        const val pushChannel = "PUSH_NOTIFICATION"
     }
 
     override fun onCreate() {
@@ -58,6 +67,25 @@ class ExampleApplication : Application() {
                     return true // navigation successful
                 }
             }
+        }
+
+        if (VERSION.SDK_INT >= VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                pushChannel,
+                "Heads Up Notification",
+                NotificationManager.IMPORTANCE_HIGH
+            )
+            getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
+        }
+
+        FirebaseMessaging.getInstance().token.addOnCompleteListener { task: Task<String?> ->
+            if (!task.isSuccessful) {
+                Log.w("Appcues", "Exception while registering FCM token.", task.exception)
+                return@addOnCompleteListener
+            }
+            val token = task.result
+            appcues.setPushToken(token)
+            Log.i("Appcues", "Push token: $token")
         }
     }
 }

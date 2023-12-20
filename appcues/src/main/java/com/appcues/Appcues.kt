@@ -307,6 +307,10 @@ public class Appcues internal constructor(internal val scope: AppcuesScope) {
     public fun onNewIntent(activity: Activity, intent: Intent?): Boolean =
         deepLinkHandler.handle(activity, intent)
 
+    public fun setPushToken(token: String?) {
+        storage.deviceToken = token
+    }
+
     private fun identify(isAnonymous: Boolean, userId: String, properties: Map<String, Any>?) {
         if (userId.isEmpty()) {
             logcues.error("Invalid userId - empty string")

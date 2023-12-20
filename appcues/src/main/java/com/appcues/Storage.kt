@@ -18,6 +18,7 @@ internal class Storage(
         IsAnonymous("appcues.isAnonymous"),
         LastContentShownAt("appcues.lastContentShownAt"),
         UserSignature("appcues.userSignature"),
+        DeviceToken("appcues.deviceToken"),
     }
 
     private val sharedPreferences: SharedPreferences = allowReads {
@@ -36,6 +37,10 @@ internal class Storage(
     var groupId: String?
         get() = allowReads { sharedPreferences.getString(Constants.GroupId.rawVal, null) }
         set(value) = sharedPreferences.edit().putString(Constants.GroupId.rawVal, value).apply()
+
+    var deviceToken: String?
+        get() = allowReads { sharedPreferences.getString(Constants.DeviceToken.rawVal, null) }
+        set(value) = sharedPreferences.edit().putString(Constants.DeviceToken.rawVal, value).apply()
 
     var isAnonymous: Boolean
         get() = allowReads { sharedPreferences.getBoolean(Constants.IsAnonymous.rawVal, true) }

@@ -1,10 +1,14 @@
 package com.appcues.samples.kotlin.signin
 
+import android.Manifest
 import android.content.Intent
+import android.os.Build.VERSION
+import android.os.Build.VERSION_CODES
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
 import androidx.appcompat.app.AppCompatActivity
 import com.appcues.samples.kotlin.ExampleApplication
 import com.appcues.samples.kotlin.R
@@ -17,6 +21,26 @@ class SignInActivity : AppCompatActivity() {
 
     private val binding by lazy { ActivitySigninBinding.inflate(layoutInflater) }
     private val appcues = ExampleApplication.appcues
+
+    // Register the permissions callback, which handles the user's response to the
+    // system permissions dialog. Save the return value, an instance of
+    // ActivityResultLauncher. You can use either a val, as shown in this snippet,
+    // or a lateinit var in your onAttach() or onCreate() method.
+    private val requestPermissionLauncher =
+        registerForActivityResult(
+            RequestPermission()
+        ) { isGranted: Boolean ->
+            if (isGranted) {
+                // Permission is granted. Continue the action or workflow in your
+                // app.
+            } else {
+                // Explain to the user that the feature is unavailable because the
+                // feature requires a permission that the user has denied. At the
+                // same time, respect the user's decision. Don't link to system
+                // settings in an effort to convince the user to change their
+                // decision.
+            }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,6 +68,10 @@ class SignInActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         appcues.screen("Sign In")
+
+        if (VERSION.SDK_INT >= VERSION_CODES.TIRAMISU) {
+            requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
     }
 
     private fun completeSignIn() {

@@ -63,6 +63,7 @@ internal class AutoPropertyDecorator(
             "_lastScreenTitle" to previousScreen,
             "_sessionPageviews" to sessionPageviews,
             "_sessionRandomizer" to sessionRandomId,
+            "_deviceToken" to storage.deviceToken
         ).filterValues { it != null }.mapValues { it.value as Any }
 
     val autoProperties: Map<String, Any>
