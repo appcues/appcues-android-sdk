@@ -12,7 +12,7 @@ internal class SdkSettingsRemoteSource(
 
     companion object {
 
-        const val BASE_URL = "https://fast.appcues.com/"
+        const val BASE_URL = "https://appcues-bundler-development.global.ssl.fastly.net"
     }
 
     suspend fun getCustomerApiUrl(): ResultOf<String, RemoteError> =

@@ -41,6 +41,7 @@ class ExampleApplication : Application() {
         }
 
         appcues = Appcues(this, BuildConfig.APPCUES_ACCOUNT_ID, BuildConfig.APPCUES_APPLICATION_ID) {
+            apiBasePath = "https://api-main.staging.us-west-2.aws.appcues.net/"
             loggingLevel = if (BuildConfig.DEBUG) LoggingLevel.DEBUG else LoggingLevel.INFO
             navigationHandler = object : NavigationHandler {
                 // This is an example where we're processing navigation requests coming from Appcues experiences,

@@ -26,8 +26,8 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField "String", "APPCUES_ACCOUNT_ID", "\"PLACEHOLDER_ACCOUNT_ID\""
-        buildConfigField "String", "APPCUES_APPLICATION_ID", "\"PLACEHOLDER_APPLICATION_ID\""
+        buildConfigField "String", "APPCUES_ACCOUNT_ID", "\"17411\""
+        buildConfigField "String", "APPCUES_APPLICATION_ID", "\"af99603f-2714-4055-8d96-ae5bef31a94d\""
     }
 
     buildTypes {
