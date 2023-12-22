@@ -45,7 +45,7 @@ class EventsFragment : Fragment() {
         }
 
         binding.buttonEvent3.setOnClickListener {
-            appcues.track("event3")
+            appcues.track("request_push")
         }
 
         return binding.root

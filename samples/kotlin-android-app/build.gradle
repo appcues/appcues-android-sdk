@@ -22,7 +22,7 @@ android {
         applicationId "com.appcues.samples.kotlin"
         minSdk 21
         targetSdk 34
-        versionCode Integer.valueOf(System.getenv("CIRCLE_BUILD_NUM") ?: 1)
+        versionCode Integer.valueOf(System.getenv("CIRCLE_BUILD_NUM") ?: 3)
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
