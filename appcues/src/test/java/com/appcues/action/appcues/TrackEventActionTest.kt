@@ -36,6 +36,20 @@ internal class TrackEventActionTest : AppcuesScopeTest {
     }
 
     @Test
+    fun `track event SHOULD trigger Appcues track with event and attributes`() = runTest {
+        // GIVEN
+        val event = "track_event"
+        val appcues: Appcues = get()
+        val action = TrackEventAction(mapOf("eventName" to event, "attributes" to mapOf("_builderButtonClick" to true)), appcues)
+
+        // WHEN
+        action.execute()
+
+        // THEN
+        coVerify { appcues.track(event, mapOf("_builderButtonClick" to true)) }
+    }
+
+    @Test
     fun `track event SHOULD NOT trigger Appcues track WHEN no eventName is in config`() = runTest {
         // GIVEN
         val appcues: Appcues = get()
