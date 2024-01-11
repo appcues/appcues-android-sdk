@@ -3,6 +3,7 @@ package com.appcues.samples.kotlin.main
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.MenuItemCompat
 import androidx.navigation.findNavController
@@ -51,6 +52,16 @@ class MainActivity : AppCompatActivity() {
         MenuItemCompat.setContentDescription(embedTab, resources.getString(R.string.content_description_tab_group))
 
         handleLinkIntent(intent)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == android.R.id.home) {
+            findNavController(id.nav_host_fragment_activity_example).navigate(id.navigation_events)
+            findNavController(id.nav_host_fragment_activity_example).clearBackStack(id.navigation_recycler_view)
+            return true
+        }
+
+        return super.onOptionsItemSelected(item)
     }
 
     override fun onNewIntent(intent: Intent?) {

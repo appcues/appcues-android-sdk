@@ -9,7 +9,11 @@
         android:id="@+id/navigation_events"
         android:name="com.appcues.samples.kotlin.main.EventsFragment"
         android:label="@string/fragment_events"
-        tools:layout="@layout/fragment_events" />
+        tools:layout="@layout/fragment_events">
+        <action
+            android:id="@+id/action_from_events_to_recycler_view"
+            app:destination="@id/navigation_recycler_view" />
+    </fragment>
 
     <fragment
         android:id="@+id/navigation_profile"
@@ -28,4 +32,10 @@
         android:name="com.appcues.samples.kotlin.main.EmbedFragment"
         android:label="@string/fragment_embed"
         tools:layout="@layout/fragment_embed" />
+
+    <fragment
+        android:id="@+id/navigation_recycler_view"
+        android:name="com.appcues.samples.kotlin.main.RecyclerViewFragment"
+        android:label="@string/fragment_recyclerview_list"
+        tools:layout="@layout/fragment_recyclerview" />
 </navigation>

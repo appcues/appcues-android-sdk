@@ -13,6 +13,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.findNavController
 import com.appcues.samples.kotlin.ExampleApplication
 import com.appcues.samples.kotlin.R
 import com.appcues.samples.kotlin.databinding.FragmentEventsBinding
@@ -46,6 +47,12 @@ class EventsFragment : Fragment() {
 
         binding.buttonEvent3.setOnClickListener {
             appcues.track("event3")
+        }
+
+        binding.recyclerViewButton.setOnClickListener {
+            requireActivity()
+                .findNavController(R.id.nav_host_fragment_activity_example)
+                .navigate(R.id.action_from_events_to_recycler_view)
         }
 
         return binding.root
