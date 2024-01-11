@@ -49,4 +49,18 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/buttonEvent2" />
 
+    <Button
+        android:id="@+id/recyclerViewButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="24dp"
+        android:contentDescription="@string/content_description_show_recycler_view"
+        android:tag="btnEvent4"
+        android:text="@string/show_recycler_view_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/buttonEvent3" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
