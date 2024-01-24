@@ -38,7 +38,7 @@ internal class AutoPropertyDecorator(
 
     private var applicationProperties = hashMapOf<String, Any>(
         "_appId" to config.applicationId,
-        "_operatingSystem" to "android",
+        "_operatingSystem" to "Android",
         "_bundlePackageId" to contextWrapper.getPackageName(),
         "_appName" to contextWrapper.getAppName(),
         "_appVersion" to contextWrapper.getAppVersion(),
