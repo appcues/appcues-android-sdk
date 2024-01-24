@@ -39,19 +39,32 @@ internal class DeepLinkHandler(
         return false // link not handled
     }
 
+    private fun Uri.getQueryMap(): Map<String, String> {
+        val queryMap = mutableMapOf<String, String>()
+        queryParameterNames.forEach { key ->
+            getQueryParameter(key)?.let { value ->
+                queryMap[key] = value
+            }
+        }
+
+        return queryMap
+    }
+
     // return true if handled
     private fun processLink(linkData: Uri, activity: Activity): Boolean {
         val segments = linkData.pathSegments
+        val query = linkData.getQueryMap()
+
         return when {
             segments.count() == 2 && segments[0] == "experience_preview" -> {
                 appcuesCoroutineScope.launch {
-                    previewExperience(segments[1], activity)
+                    previewExperience(segments[1], activity, query)
                 }
                 true
             }
             segments.count() == 2 && segments[0] == "experience_content" -> {
                 appcuesCoroutineScope.launch {
-                    experienceRenderer.show(segments[1], DeepLink)
+                    experienceRenderer.show(segments[1], DeepLink, query)
                 }
                 true
             }
@@ -73,8 +86,8 @@ internal class DeepLinkHandler(
         }
     }
 
-    private suspend fun previewExperience(experienceId: String, activity: Activity) {
-        experienceRenderer.preview(experienceId).run {
+    private suspend fun previewExperience(experienceId: String, activity: Activity, query: Map<String, String>) {
+        experienceRenderer.preview(experienceId, query).run {
             val resources = activity.resources
 
             when (this) {

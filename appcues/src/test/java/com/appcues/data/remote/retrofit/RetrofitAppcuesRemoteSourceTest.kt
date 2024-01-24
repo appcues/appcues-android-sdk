@@ -41,19 +41,19 @@ internal class RetrofitAppcuesRemoteSourceTest {
     @Test
     fun `getExperienceContent SHOULD add Bearer token auth WHEN userSignature is not null`() = runTest {
         // When
-        retrofitAppcuesRemoteSource.getExperienceContent("test-experience", "abc")
+        retrofitAppcuesRemoteSource.getExperienceContent("test-experience", "abc", mapOf())
 
         // Then
-        coVerify { appcuesService.experienceContent("123", "test-user", "test-experience", "Bearer abc") }
+        coVerify { appcuesService.experienceContent("123", "test-user", "test-experience", mapOf(), "Bearer abc") }
     }
 
     @Test
     fun `getExperienceContent SHOULD NOT add Bearer token auth WHEN userSignature is null`() = runTest {
         // When
-        retrofitAppcuesRemoteSource.getExperienceContent("test-experience", null)
+        retrofitAppcuesRemoteSource.getExperienceContent("test-experience", null, mapOf())
 
         // Then
-        coVerify { appcuesService.experienceContent("123", "test-user", "test-experience", null) }
+        coVerify { appcuesService.experienceContent("123", "test-user", "test-experience", mapOf(), null) }
     }
 
     @Test
@@ -62,10 +62,10 @@ internal class RetrofitAppcuesRemoteSourceTest {
         // userId set in storage in setUp()
 
         // When
-        retrofitAppcuesRemoteSource.getExperiencePreview("test-experience", "abc")
+        retrofitAppcuesRemoteSource.getExperiencePreview("test-experience", "abc", mapOf())
 
         // Then
-        coVerify { appcuesService.experiencePreview("123", "test-user", "test-experience", "Bearer abc") }
+        coVerify { appcuesService.experiencePreview("123", "test-user", "test-experience", mapOf(), "Bearer abc") }
     }
 
     @Test
@@ -74,10 +74,10 @@ internal class RetrofitAppcuesRemoteSourceTest {
         // userId set in storage in setUp()
 
         // When
-        retrofitAppcuesRemoteSource.getExperiencePreview("test-experience", null)
+        retrofitAppcuesRemoteSource.getExperiencePreview("test-experience", null, mapOf())
 
         // Then
-        coVerify { appcuesService.experiencePreview("123", "test-user", "test-experience", null) }
+        coVerify { appcuesService.experiencePreview("123", "test-user", "test-experience", mapOf(), null) }
     }
 
     @Test

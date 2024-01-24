@@ -30,25 +30,29 @@ internal class AppcuesRemoteSource(
     suspend fun getExperienceContent(
         experienceId: String,
         userSignature: String?,
-    ): ResultOf<ExperienceResponse, RemoteError> =
-        NetworkRequest.execute {
-            service.experienceContent(config.accountId, storage.userId, experienceId, userSignature?.let { "Bearer $it" })
+        query: Map<String, String>
+    ): ResultOf<ExperienceResponse, RemoteError> {
+        return NetworkRequest.execute {
+            service.experienceContent(config.accountId, storage.userId, experienceId, query, userSignature?.let { "Bearer $it" })
         }
+    }
 
     suspend fun getExperiencePreview(
         experienceId: String,
         userSignature: String?,
-    ): ResultOf<ExperienceResponse, RemoteError> =
+        query: Map<String, String>
+    ): ResultOf<ExperienceResponse, RemoteError> {
         // preview _can_ be personalized, so attempt to use the user info, if a valid userId exists
-        if (storage.userId.isNotEmpty()) {
+        return if (storage.userId.isNotEmpty()) {
             NetworkRequest.execute {
-                service.experiencePreview(config.accountId, storage.userId, experienceId, userSignature?.let { "Bearer $it" })
+                service.experiencePreview(config.accountId, storage.userId, experienceId, query, userSignature?.let { "Bearer $it" })
             }
         } else {
             NetworkRequest.execute {
-                service.experiencePreview(config.accountId, experienceId)
+                service.experiencePreview(config.accountId, experienceId, query)
             }
         }
+    }
 
     suspend fun postActivity(
         userId: String,

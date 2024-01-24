@@ -137,7 +137,7 @@ internal abstract class ViewPresenter(
     private fun refreshPreview() {
         currentExperience?.let {
             coroutineScope.launch {
-                experienceRenderer.preview(it.id.toString())
+                experienceRenderer.preview(it.id.toString(), it.previewQuery)
             }
         }
     }

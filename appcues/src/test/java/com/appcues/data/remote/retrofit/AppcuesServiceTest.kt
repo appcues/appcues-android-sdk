@@ -37,7 +37,7 @@ internal class AppcuesServiceTest {
         mockWebServer.mockExperienceContent(accountId, userId, experienceId, mock)
 
         // When
-        val result = api.experienceContent(accountId, userId, experienceId, null)
+        val result = api.experienceContent(accountId, userId, experienceId, mapOf(), null)
 
         // Then
         with(result) {
@@ -165,7 +165,7 @@ internal class AppcuesServiceTest {
 
         // When
         try {
-            api.experienceContent(accountId, userId, experienceId, null)
+            api.experienceContent(accountId, userId, experienceId, mapOf(), null)
         } catch (exception: JsonDataException) {
             error = exception.message
         }
@@ -188,7 +188,7 @@ internal class AppcuesServiceTest {
 
         // When
         try {
-            api.experienceContent(accountId, userId, experienceId, null)
+            api.experienceContent(accountId, userId, experienceId, mapOf(), null)
         } catch (exception: JsonDataException) {
             error = exception.message
         }
@@ -211,7 +211,7 @@ internal class AppcuesServiceTest {
 
         // When
         try {
-            api.experienceContent(accountId, userId, experienceId, null)
+            api.experienceContent(accountId, userId, experienceId, mapOf(), null)
         } catch (exception: JsonDataException) {
             error = exception.message
         }

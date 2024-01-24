@@ -47,29 +47,31 @@ internal class AppcuesRepository(
     private val processingActivity: HashSet<UUID> = hashSetOf()
     private val mutex = Mutex()
 
-    suspend fun getExperienceContent(experienceId: String, trigger: ExperienceTrigger): Experience? = withContext(Dispatchers.IO) {
-        appcuesRemoteSource.getExperienceContent(experienceId, storage.userSignature).let {
-            when (it) {
-                is Success -> experienceMapper.map(it.value, trigger)
-                is Failure -> {
-                    dataLogcues.error("Experience content request failed", it.reason.toString())
-                    null
+    suspend fun getExperienceContent(experienceId: String, trigger: ExperienceTrigger, query: Map<String, String>): Experience? =
+        withContext(Dispatchers.IO) {
+            appcuesRemoteSource.getExperienceContent(experienceId, storage.userSignature, query).let {
+                when (it) {
+                    is Success -> experienceMapper.map(it.value, trigger)
+                    is Failure -> {
+                        dataLogcues.error("Experience content request failed", it.reason.toString())
+                        null
+                    }
                 }
             }
         }
-    }
 
-    suspend fun getExperiencePreview(experienceId: String): ResultOf<Experience, RemoteError> = withContext(Dispatchers.IO) {
-        return@withContext appcuesRemoteSource.getExperiencePreview(experienceId, storage.userSignature).let {
-            when (it) {
-                is Success -> Success(experienceMapper.map(it.value, ExperienceTrigger.Preview))
-                is Failure -> {
-                    dataLogcues.error("Experience preview request failed", it.reason.toString())
-                    it
+    suspend fun getExperiencePreview(experienceId: String, query: Map<String, String>): ResultOf<Experience, RemoteError> =
+        withContext(Dispatchers.IO) {
+            return@withContext appcuesRemoteSource.getExperiencePreview(experienceId, storage.userSignature, query).let {
+                when (it) {
+                    is Success -> Success(experienceMapper.map(it.value, ExperienceTrigger.Preview))
+                    is Failure -> {
+                        dataLogcues.error("Experience preview request failed", it.reason.toString())
+                        it
+                    }
                 }
             }
         }
-    }
 
     suspend fun trackActivity(activity: ActivityRequest): QualificationResult? = withContext(Dispatchers.IO) {
 

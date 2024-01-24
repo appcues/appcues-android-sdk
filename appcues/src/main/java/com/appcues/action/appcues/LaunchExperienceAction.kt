@@ -45,7 +45,7 @@ internal class LaunchExperienceAction(
 
     override suspend fun execute() {
         if (experienceId != null) {
-            experienceRenderer.show(experienceId, getTrigger())
+            experienceRenderer.show(experienceId, getTrigger(), mapOf())
         }
     }
 

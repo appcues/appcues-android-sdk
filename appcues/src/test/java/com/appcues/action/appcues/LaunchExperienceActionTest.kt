@@ -90,7 +90,7 @@ internal class LaunchExperienceActionTest : AppcuesScopeTest {
         action.execute()
 
         // THEN
-        coVerify { experienceRenderer.show(experienceIdString, ExperienceTrigger.LaunchExperienceAction(currentExperience.id)) }
+        coVerify { experienceRenderer.show(experienceIdString, ExperienceTrigger.LaunchExperienceAction(currentExperience.id), mapOf()) }
     }
 
     @Test
@@ -108,7 +108,7 @@ internal class LaunchExperienceActionTest : AppcuesScopeTest {
         action.execute()
 
         // THEN
-        coVerify { experienceRenderer.show(experienceIdString, ExperienceTrigger.LaunchExperienceAction(null)) }
+        coVerify { experienceRenderer.show(experienceIdString, ExperienceTrigger.LaunchExperienceAction(null), mapOf()) }
     }
 
     @Test
@@ -132,7 +132,8 @@ internal class LaunchExperienceActionTest : AppcuesScopeTest {
         coVerify {
             experienceRenderer.show(
                 launchExperienceId.toString(),
-                ExperienceTrigger.ExperienceCompletionAction(completedExperienceId)
+                ExperienceTrigger.ExperienceCompletionAction(completedExperienceId),
+                mapOf()
             )
         }
     }

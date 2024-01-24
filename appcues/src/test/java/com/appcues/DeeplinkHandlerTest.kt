@@ -295,7 +295,7 @@ internal class DeeplinkHandlerTest {
     }
 
     @Test
-    fun `handle SHOULD call show WITH experienceId`() {
+    fun `handle SHOULD call show WITH experienceId and query`() {
         // GIVEN
         val activity = mockk<Activity>(relaxed = true)
         val intent = mockk<Intent> {
@@ -304,6 +304,9 @@ internal class DeeplinkHandlerTest {
                 every { scheme } returns "appcues-democues"
                 every { host } returns "sdk"
                 every { pathSegments } returns listOf("experience_content", "experienceId-1234")
+                every { queryParameterNames } returns setOf("param1", "param2")
+                every { getQueryParameter("param1") } returns "value1"
+                every { getQueryParameter("param2") } returns "value2"
             }
         }
 
@@ -311,11 +314,11 @@ internal class DeeplinkHandlerTest {
         deepLinkHandler.handle(activity, intent)
 
         // THEN
-        coVerify { experienceRenderer.show("experienceId-1234", DeepLink) }
+        coVerify { experienceRenderer.show("experienceId-1234", DeepLink, mapOf("param1" to "value1", "param2" to "value2")) }
     }
 
     @Test
-    fun `handle SHOULD call preview WITH experienceId`() {
+    fun `handle SHOULD call preview WITH experienceId and query`() {
         // GIVEN
         val activity = mockk<Activity>(relaxed = true)
         val intent = mockk<Intent> {
@@ -324,6 +327,9 @@ internal class DeeplinkHandlerTest {
                 every { scheme } returns "appcues-democues"
                 every { host } returns "sdk"
                 every { pathSegments } returns listOf("experience_preview", "experienceId-1234")
+                every { queryParameterNames } returns setOf("param1", "param2")
+                every { getQueryParameter("param1") } returns "value1"
+                every { getQueryParameter("param2") } returns "value2"
             }
         }
 
@@ -331,7 +337,7 @@ internal class DeeplinkHandlerTest {
         deepLinkHandler.handle(activity, intent)
 
         // THEN
-        coVerify { experienceRenderer.preview("experienceId-1234") }
+        coVerify { experienceRenderer.preview("experienceId-1234", mapOf("param1" to "value1", "param2" to "value2")) }
     }
 
     @Test
@@ -346,7 +352,7 @@ internal class DeeplinkHandlerTest {
                 every { pathSegments } returns listOf("experience_preview", "experienceId-1234")
             }
         }
-        coEvery { experienceRenderer.preview("experienceId-1234") } returns Failed
+        coEvery { experienceRenderer.preview("experienceId-1234", mapOf()) } returns Failed
 
         // WHEN
         deepLinkHandler.handle(activity, intent)
@@ -367,7 +373,7 @@ internal class DeeplinkHandlerTest {
                 every { pathSegments } returns listOf("experience_preview", "experienceId-1234")
             }
         }
-        coEvery { experienceRenderer.preview("experienceId-1234") } returns PreviewDeferred(mockk(), null)
+        coEvery { experienceRenderer.preview("experienceId-1234", mapOf()) } returns PreviewDeferred(mockk(), null)
 
         // WHEN
         deepLinkHandler.handle(activity, intent)
@@ -391,7 +397,7 @@ internal class DeeplinkHandlerTest {
                 every { pathSegments } returns listOf("experience_preview", "experienceId-1234")
             }
         }
-        coEvery { experienceRenderer.preview("experienceId-1234") } returns PreviewDeferred(experience, "frame1234")
+        coEvery { experienceRenderer.preview("experienceId-1234", mapOf()) } returns PreviewDeferred(experience, "frame1234")
 
         // WHEN
         deepLinkHandler.handle(activity, intent)
@@ -415,7 +421,7 @@ internal class DeeplinkHandlerTest {
                 every { pathSegments } returns listOf("experience_preview", "experienceId-1234")
             }
         }
-        coEvery { experienceRenderer.preview("experienceId-1234") } returns StateMachineError(experience, ExperienceAlreadyActive)
+        coEvery { experienceRenderer.preview("experienceId-1234", mapOf()) } returns StateMachineError(experience, ExperienceAlreadyActive)
 
         // WHEN
         deepLinkHandler.handle(activity, intent)
@@ -436,7 +442,7 @@ internal class DeeplinkHandlerTest {
                 every { pathSegments } returns listOf("experience_preview", "experienceId-1234")
             }
         }
-        coEvery { experienceRenderer.preview("experienceId-1234") } returns ExperienceNotFound
+        coEvery { experienceRenderer.preview("experienceId-1234", mapOf()) } returns ExperienceNotFound
 
         // WHEN
         deepLinkHandler.handle(activity, intent)
@@ -457,7 +463,7 @@ internal class DeeplinkHandlerTest {
                 every { pathSegments } returns listOf("experience_preview", "experienceId-1234")
             }
         }
-        coEvery { experienceRenderer.preview("experienceId-1234") } returns Success
+        coEvery { experienceRenderer.preview("experienceId-1234", mapOf()) } returns Success
 
         // WHEN
         deepLinkHandler.handle(activity, intent)
