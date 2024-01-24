@@ -219,7 +219,7 @@ public class Appcues internal constructor(internal val scope: AppcuesScope) {
      * @return True if experience content was able to be shown, false if not.
      */
     public suspend fun show(experienceId: String): Boolean {
-        return experienceRenderer.show(experienceId, ExperienceTrigger.ShowCall)
+        return experienceRenderer.show(experienceId, ExperienceTrigger.ShowCall, mapOf())
     }
 
     /**

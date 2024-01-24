@@ -192,10 +192,10 @@ internal class ExperienceRenderer(override val scope: AppcuesScope) : AppcuesCom
             ?: potentiallyRenderableExperiences[renderContext]?.let { attemptToShow(it) }
     }
 
-    suspend fun show(experienceId: String, trigger: ExperienceTrigger): Boolean {
+    suspend fun show(experienceId: String, trigger: ExperienceTrigger, query: Map<String, String>): Boolean {
         if (sessionMonitor.sessionId == null) return false
 
-        repository.getExperienceContent(experienceId, trigger)?.let {
+        repository.getExperienceContent(experienceId, trigger, query)?.let {
             if (it.renderContext != Modal) {
                 // No caching required for modals since they can't be lazy-loaded.
                 potentiallyRenderableExperiences[it.renderContext] = listOf(it)
@@ -226,10 +226,12 @@ internal class ExperienceRenderer(override val scope: AppcuesScope) : AppcuesCom
         data class StateMachineError(val experience: Experience, val error: Error) : PreviewResponse()
     }
 
-    suspend fun preview(experienceId: String): PreviewResponse {
-        repository.getExperiencePreview(experienceId).run {
+    suspend fun preview(experienceId: String, query: Map<String, String>): PreviewResponse {
+        repository.getExperiencePreview(experienceId, query).run {
             return when (this) {
                 is Success -> {
+                    // adding query to previewed experience to
+                    value.previewQuery = query
                     previewExperiences[value.renderContext] = value
 
                     return when (val result = show(value)) {

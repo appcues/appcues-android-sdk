@@ -269,7 +269,7 @@ internal class AppcuesTest : AppcuesScopeTest {
         appcues.show(experienceId)
 
         // THEN
-        coVerify { experienceRenderer.show(experienceId, ExperienceTrigger.ShowCall) }
+        coVerify { experienceRenderer.show(experienceId, ExperienceTrigger.ShowCall, mapOf()) }
     }
 
     @Test

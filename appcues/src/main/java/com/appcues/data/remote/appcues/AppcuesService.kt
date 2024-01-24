@@ -10,9 +10,11 @@ import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
 import retrofit2.http.Path
+import retrofit2.http.QueryMap
 import java.util.UUID
 
 internal interface AppcuesService {
+
     @POST("v1/accounts/{account}/users/{user}/activity")
     suspend fun activity(
         @Path("account") account: String,
@@ -35,6 +37,7 @@ internal interface AppcuesService {
         @Path("account") account: String,
         @Path("user") user: String,
         @Path("experienceId") experienceId: String,
+        @QueryMap(encoded = true) query: Map<String, String>,
         @Header("Authorization") authorization: String?,
     ): ExperienceResponse
 
@@ -43,6 +46,7 @@ internal interface AppcuesService {
         @Path("account") account: String,
         @Path("user") user: String,
         @Path("experienceId") experienceId: String,
+        @QueryMap(encoded = true) query: Map<String, String>,
         @Header("Authorization") authorization: String?,
     ): ExperienceResponse
 
@@ -50,6 +54,7 @@ internal interface AppcuesService {
     suspend fun experiencePreview(
         @Path("account") account: String,
         @Path("experienceId") experienceId: String,
+        @QueryMap(encoded = true) query: Map<String, String>,
     ): ExperienceResponse
 
     @GET("healthz")

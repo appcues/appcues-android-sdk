@@ -27,6 +27,7 @@ internal data class Experience(
     val requestId: UUID? = null,
     val error: String? = null,
     var renderErrorId: UUID? = null,
+    var previewQuery: Map<String, String> = mapOf(),
 ) {
 
     // a unique identifier for this instance of the Experience, for comparison purposes, in the

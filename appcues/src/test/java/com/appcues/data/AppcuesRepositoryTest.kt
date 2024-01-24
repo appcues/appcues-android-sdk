@@ -64,11 +64,11 @@ internal class AppcuesRepositoryTest {
     fun `getExperienceContent SHOULD get from appcuesRemoteSource AND map from experienceMapper`() = runTest {
         // GIVEN
         val experienceResponse = mockk<ExperienceResponse>()
-        coEvery { appcuesRemoteSource.getExperienceContent("1234", any()) } returns Success(experienceResponse)
+        coEvery { appcuesRemoteSource.getExperienceContent("1234", any(), any()) } returns Success(experienceResponse)
         val mappedExperience = mockk<Experience>()
         coEvery { experienceMapper.map(experienceResponse, ExperienceTrigger.ShowCall) } returns mappedExperience
         // WHEN
-        val result = repository.getExperienceContent("1234", ExperienceTrigger.ShowCall)
+        val result = repository.getExperienceContent("1234", ExperienceTrigger.ShowCall, mapOf())
         // THEN
         assertThat(result).isEqualTo(mappedExperience)
     }
@@ -76,9 +76,9 @@ internal class AppcuesRepositoryTest {
     @Test
     fun `getExperienceContent SHOULD return null WHEN appcuesRemoteSource fails`() = runTest {
         // GIVEN
-        coEvery { appcuesRemoteSource.getExperienceContent("1234", any()) } returns Failure(HttpError())
+        coEvery { appcuesRemoteSource.getExperienceContent("1234", any(), any()) } returns Failure(HttpError())
         // WHEN
-        val result = repository.getExperienceContent("1234", ExperienceTrigger.ShowCall)
+        val result = repository.getExperienceContent("1234", ExperienceTrigger.ShowCall, mapOf())
         // THEN
         assertThat(result).isNull()
     }
@@ -87,11 +87,11 @@ internal class AppcuesRepositoryTest {
     fun `getExperiencePreview SHOULD get from appcuesRemoteSource AND map from experienceMapper`() = runTest {
         // GIVEN
         val experienceResponse = mockk<ExperienceResponse>()
-        coEvery { appcuesRemoteSource.getExperiencePreview("1234", any()) } returns Success(experienceResponse)
+        coEvery { appcuesRemoteSource.getExperiencePreview("1234", any(), any()) } returns Success(experienceResponse)
         val mappedExperience = mockk<Experience>()
         coEvery { experienceMapper.map(experienceResponse, ExperienceTrigger.Preview) } returns mappedExperience
         // WHEN
-        val result = repository.getExperiencePreview("1234")
+        val result = repository.getExperiencePreview("1234", mapOf())
         // THEN
         assertThat(result).isInstanceOf(Success::class.java)
     }
@@ -99,9 +99,9 @@ internal class AppcuesRepositoryTest {
     @Test
     fun `getExperiencePreview SHOULD return PreviewError WHEN appcuesRemoteSource fails`() = runTest {
         // GIVEN
-        coEvery { appcuesRemoteSource.getExperiencePreview("1234", any()) } returns Failure(HttpError())
+        coEvery { appcuesRemoteSource.getExperiencePreview("1234", any(), any()) } returns Failure(HttpError())
         // WHEN
-        val result = repository.getExperiencePreview("1234")
+        val result = repository.getExperiencePreview("1234", mapOf())
         // THEN
         assertThat(result).isInstanceOf(Failure::class.java)
     }
