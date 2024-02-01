@@ -62,9 +62,6 @@ internal class GetCaptureUseCase {
     private suspend fun View.screenshot(window: Window): Screenshot? {
         return if (this.width > 0 && this.height > 0) {
             awaitCaptureBitmap(this, window)?.let {
-                val canvas = Canvas(it)
-                this.draw(canvas)
-
                 val insets = ViewCompat.getRootWindowInsets(this)?.getInsets(WindowInsetsCompat.Type.systemBars()) ?: Insets.NONE
 
                 Screenshot(
