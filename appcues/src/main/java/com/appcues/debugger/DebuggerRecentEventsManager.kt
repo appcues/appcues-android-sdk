@@ -95,9 +95,9 @@ internal class DebuggerRecentEventsManager(
             DebuggerEventItem(
                 id = lastEventId,
                 type = EventType.USER_PROFILE,
-                // it should always contain updated at property, this is just a safeguard
+                // it should always contain timestamp property, this is just a safeguard
                 // in case something changes in the future to avoid unwanted exceptions
-                timestamp = ((request.profileUpdate?.get(AutoPropertyDecorator.UPDATED_AT_PROPERTY) as Date?) ?: Date()).time,
+                timestamp = ((request.profileUpdate?.get(AutoPropertyDecorator.LAST_SEEN_AT) as Date?) ?: Date()).time,
                 name = request.userId,
                 propertySections = listOf(
                     DebuggerEventItemPropertySection(
