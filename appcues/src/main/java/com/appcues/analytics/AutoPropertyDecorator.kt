@@ -22,7 +22,7 @@ internal class AutoPropertyDecorator(
     companion object {
 
         const val IDENTITY_PROPERTY = "_identity"
-        const val UPDATED_AT_PROPERTY = "_updatedAt"
+        const val LAST_SEEN_AT = "_lastSeenAt"
     }
 
     private var currentScreen: String? = null
@@ -55,7 +55,9 @@ internal class AutoPropertyDecorator(
             "userId" to storage.userId,
             "_isAnonymous" to storage.isAnonymous,
             "_localId" to storage.deviceId,
-            UPDATED_AT_PROPERTY to Date(),
+            "_updatedAt" to Date(),
+            // Last Seen At will deprecate _updatedAt which can't be entirely removed today since it's used for targeting
+            LAST_SEEN_AT to Date(),
             "_sessionId" to sessionMonitor.sessionId?.toString(),
             "_lastContentShownAt" to storage.lastContentShownAt,
             "_lastBrowserLanguage" to contextWrapper.getLanguage(),
@@ -111,7 +113,7 @@ internal class AutoPropertyDecorator(
 
         return activity.copy(
             groupUpdate = (activity.groupUpdate ?: hashMapOf()).also {
-                it["_lastSeenAt"] = Date()
+                it[LAST_SEEN_AT] = Date()
             }
         )
     }

@@ -50,12 +50,37 @@ internal class AutoPropertyDecoratorTest {
     }
 
     @Test
-    fun `autoProperties SHOULD contain 20 amount of elements`() {
-        assertThat(autoPropertyDecorator.autoProperties).hasSize(20)
+    fun `autoProperties SHOULD contain 21 amount of elements`() {
+        assertThat(autoPropertyDecorator.autoProperties).hasSize(21)
+        with(autoPropertyDecorator.autoProperties) {
+            // App
+            assertThat(containsKey("_appId")).isTrue()
+            assertThat(containsKey("_operatingSystem")).isTrue()
+            assertThat(containsKey("_bundlePackageId")).isTrue()
+            assertThat(containsKey("_appName")).isTrue()
+            assertThat(containsKey("_appVersion")).isTrue()
+            assertThat(containsKey("_appBuild")).isTrue()
+            assertThat(containsKey("_sdkVersion")).isTrue()
+            assertThat(containsKey("_sdkName")).isTrue()
+            assertThat(containsKey("_osVersion")).isTrue()
+            assertThat(containsKey("_deviceType")).isTrue()
+            assertThat(containsKey("_deviceModel")).isTrue()
+            // session
+            assertThat(containsKey("userId")).isTrue()
+            assertThat(containsKey("_isAnonymous")).isTrue()
+            assertThat(containsKey("_localId")).isTrue()
+            assertThat(containsKey("_updatedAt")).isTrue()
+            assertThat(containsKey("_lastSeenAt")).isTrue()
+            assertThat(containsKey("_sessionId")).isTrue()
+            assertThat(containsKey("_lastContentShownAt")).isTrue()
+            assertThat(containsKey("_lastBrowserLanguage")).isTrue()
+            assertThat(containsKey("_sessionPageviews")).isTrue()
+            assertThat(containsKey("_sessionRandomizer")).isTrue()
+        }
     }
 
     @Test
-    fun `autoProperties SHOULD contain 21 amount of elements WHEN one ScreenView is decorated`() {
+    fun `autoProperties SHOULD contain 22 amount of elements WHEN one ScreenView is decorated`() {
         // given
         autoPropertyDecorator.decorateTrack(
             EventRequest(
@@ -66,11 +91,11 @@ internal class AutoPropertyDecoratorTest {
             )
         )
         // then
-        assertThat(autoPropertyDecorator.autoProperties).hasSize(21)
+        assertThat(autoPropertyDecorator.autoProperties).hasSize(22)
     }
 
     @Test
-    fun `autoProperties SHOULD contain 22 amount of elements WHEN two or more ScreenView are decorated`() {
+    fun `autoProperties SHOULD contain 23 amount of elements WHEN two or more ScreenView are decorated`() {
         // given
         autoPropertyDecorator.decorateTrack(
             EventRequest(
@@ -89,7 +114,7 @@ internal class AutoPropertyDecoratorTest {
             )
         )
         // then
-        assertThat(autoPropertyDecorator.autoProperties).hasSize(22)
+        assertThat(autoPropertyDecorator.autoProperties).hasSize(23)
     }
 
     @Test
@@ -192,7 +217,7 @@ internal class AutoPropertyDecoratorTest {
         // when
         with(autoPropertyDecorator.decorateIdentify(activityRequest)) {
             // then
-            assertThat(profileUpdate).hasSize(20)
+            assertThat(profileUpdate).hasSize(21)
         }
     }
 
@@ -208,7 +233,7 @@ internal class AutoPropertyDecoratorTest {
         // when
         with(autoPropertyDecorator.decorateIdentify(activityRequest)) {
             // then
-            assertThat(profileUpdate).hasSize(21)
+            assertThat(profileUpdate).hasSize(22)
         }
         // then when
         with(autoPropertyDecorator.decorateTrack(EventRequest(name = SessionStarted.eventName))) {
@@ -228,7 +253,7 @@ internal class AutoPropertyDecoratorTest {
         // when
         with(autoPropertyDecorator.decorateIdentify(activityRequest)) {
             // then
-            assertThat(profileUpdate).hasSize(21)
+            assertThat(profileUpdate).hasSize(22)
             assertThat(profileUpdate!!["_test"]).isEqualTo("Test")
         }
     }
