@@ -6,6 +6,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.findViewTreeOnBackPressedDispatcherOwner
 import androidx.compose.runtime.key
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.findViewTreeLifecycleOwner
@@ -95,7 +96,13 @@ internal abstract class ViewPresenter(
                 onDismiss = ::onCompositionDismiss
             ).also {
                 composeView.setContent {
-                    key(currentExperience?.instanceId) {
+                    // [currentExperience?.instanceId]: when the instanceId changes it means it could be a "newer" version
+                    // of the same experience, instanceId relates to the request/response for a particular qualification
+                    // or previewing of a flow.
+                    // [LocalLayoutDirection.current]: when this configuration is changed the composition should be discarded
+                    // and re-built. it was a problem detected from the react-native-sdk when for some reason the OS emits
+                    // multiple layout direction changes when the composition is added to the view.
+                    key(currentExperience?.instanceId, LocalLayoutDirection.current) {
                         AppcuesComposition(
                             viewModel = it,
                             logcues = get(),
