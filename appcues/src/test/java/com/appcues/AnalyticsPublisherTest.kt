@@ -64,6 +64,7 @@ internal class AnalyticsPublisherTest : AppcuesScopeTest {
         )
         val activity = ActivityRequest(
             accountId = "123",
+            appId = "appId",
             userId = "userId",
             sessionId = UUID.randomUUID(),
             events = listOf(EventRequest("event1", attributes = attributes))
@@ -90,6 +91,7 @@ internal class AnalyticsPublisherTest : AppcuesScopeTest {
         val attributes = hashMapOf<String, Any>("prop" to 42)
         val activity = ActivityRequest(
             accountId = "123",
+            appId = "appId",
             userId = "userId",
             sessionId = UUID.randomUUID(),
             events = listOf(EventRequest("event1", attributes = attributes))
@@ -110,6 +112,7 @@ internal class AnalyticsPublisherTest : AppcuesScopeTest {
         val attributes = hashMapOf<String, Any>(ActivityRequestBuilder.SCREEN_TITLE_ATTRIBUTE to "screen1")
         val activity = ActivityRequest(
             accountId = "123",
+            appId = "appId",
             userId = "userId",
             sessionId = UUID.randomUUID(),
             events = listOf(EventRequest(ScreenView.eventName, attributes = attributes))
@@ -132,6 +135,7 @@ internal class AnalyticsPublisherTest : AppcuesScopeTest {
         val attributes = hashMapOf<String, Any>("prop" to 42)
         val activity = ActivityRequest(
             accountId = "123",
+            appId = "appId",
             sessionId = UUID.randomUUID(),
             userId = storage.userId,
             profileUpdate = attributes
@@ -154,6 +158,7 @@ internal class AnalyticsPublisherTest : AppcuesScopeTest {
         val attributes = hashMapOf<String, Any>("prop" to 42)
         val activity = ActivityRequest(
             accountId = "123",
+            appId = "appId",
             userId = "userId",
             sessionId = UUID.randomUUID(),
             groupId = storage.groupId,
@@ -175,6 +180,7 @@ internal class AnalyticsPublisherTest : AppcuesScopeTest {
         val attributes = hashMapOf<String, Any>("prop" to 42)
         val activity = ActivityRequest(
             accountId = "123",
+            appId = "appId",
             userId = "userId",
             sessionId = UUID.randomUUID(),
             events = listOf(EventRequest("event1", attributes = attributes))
