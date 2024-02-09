@@ -29,7 +29,7 @@ internal class AnalyticsQueueProcessorTest {
 
     private val mockkEvent: EventRequest = mockk()
     private val mockkActivity: ActivityRequest =
-        ActivityRequest(userId = "222", accountId = "111", sessionId = UUID.randomUUID(), events = listOf(mockkEvent))
+        ActivityRequest(userId = "222", accountId = "111", appId = "appId", sessionId = UUID.randomUUID(), events = listOf(mockkEvent))
     private val mockkQualificationResult: QualificationResult =
         QualificationResult(Qualification("screen_view"), arrayListOf(mockk()))
 
@@ -93,7 +93,13 @@ internal class AnalyticsQueueProcessorTest {
         // given
         val queuedActivitySlot = slot<ActivityRequest>()
         val queuedEvent: EventRequest = mockk()
-        val queuedActivity = ActivityRequest(userId = "222", accountId = "111", sessionId = UUID.randomUUID(), events = listOf(queuedEvent))
+        val queuedActivity = ActivityRequest(
+            userId = "222",
+            appId = "appId",
+            accountId = "111",
+            sessionId = UUID.randomUUID(),
+            events = listOf(queuedEvent)
+        )
         val activitySlot = slot<ActivityRequest>()
         analyticsQueueProcessor.queueForTesting(queuedActivity)
         // when
@@ -119,7 +125,8 @@ internal class AnalyticsQueueProcessorTest {
         // given
         val queuedActivitySlot = slot<ActivityRequest>()
         val queuedEvent: EventRequest = mockk()
-        val queuedActivity = ActivityRequest(userId = "222", accountId = "111", sessionId = UUID.randomUUID(), events = listOf(queuedEvent))
+        val queuedActivity =
+            ActivityRequest(userId = "222", accountId = "111", appId = "appId", sessionId = UUID.randomUUID(), events = listOf(queuedEvent))
         analyticsQueueProcessor.queueForTesting(queuedActivity)
         // when
         analyticsQueueProcessor.flushAsync()
@@ -135,12 +142,14 @@ internal class AnalyticsQueueProcessorTest {
         // given
         val identifyActivity = ActivityRequest(
             userId = "user-1",
+            appId = "appId",
             accountId = "00000",
             sessionId = UUID.randomUUID(),
             profileUpdate = mutableMapOf("userProp" to 1)
         )
         val groupActivity = ActivityRequest(
             userId = "user-1",
+            appId = "appId",
             accountId = "00000",
             sessionId = UUID.randomUUID(),
             groupId = "group-id",
@@ -170,12 +179,14 @@ internal class AnalyticsQueueProcessorTest {
         // given
         val identifyActivity1 = ActivityRequest(
             userId = "user-1",
+            appId = "appId",
             accountId = "00000",
             sessionId = UUID.randomUUID(),
             profileUpdate = mutableMapOf("userProp" to 1)
         )
         val identifyActivity2 = ActivityRequest(
             userId = "user-2",
+            appId = "appId",
             accountId = "00000",
             sessionId = UUID.randomUUID(),
             profileUpdate = mutableMapOf("groupProp" to 2)
@@ -211,12 +222,14 @@ internal class AnalyticsQueueProcessorTest {
         // given
         val identifyActivity = ActivityRequest(
             userId = "user-1",
+            appId = "appId",
             accountId = "00000",
             sessionId = UUID.randomUUID(),
             profileUpdate = mutableMapOf("userProp" to 1)
         )
         val eventActivity = ActivityRequest(
             userId = "user-1",
+            appId = "appId",
             accountId = "00000",
             sessionId = UUID.randomUUID(),
             events = listOf(mockkEvent)
@@ -244,12 +257,14 @@ internal class AnalyticsQueueProcessorTest {
         // given
         val identifyActivity = ActivityRequest(
             userId = "user-1",
+            appId = "appId",
             accountId = "00000",
             sessionId = UUID.randomUUID(),
             profileUpdate = mutableMapOf("userProp" to 1)
         )
         val eventActivity = ActivityRequest(
             userId = "user-1",
+            appId = "appId",
             accountId = "00000",
             sessionId = UUID.randomUUID(),
             events = listOf(mockkEvent)

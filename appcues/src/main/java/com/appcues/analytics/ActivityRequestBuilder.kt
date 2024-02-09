@@ -23,6 +23,7 @@ internal class ActivityRequestBuilder(
         ActivityRequest(
             userId = storage.userId,
             accountId = config.accountId,
+            appId = config.applicationId,
             groupId = storage.groupId,
             sessionId = sessionId,
             profileUpdate = properties?.toMutableMap(),
@@ -34,6 +35,7 @@ internal class ActivityRequestBuilder(
         ActivityRequest(
             userId = storage.userId,
             accountId = config.accountId,
+            appId = config.applicationId,
             groupId = storage.groupId,
             sessionId = sessionId,
             groupUpdate = properties?.toMutableMap(),
@@ -52,6 +54,7 @@ internal class ActivityRequestBuilder(
             userId = storage.userId,
             profileUpdate = decorator.autoProperties.toMutableMap(),
             accountId = config.accountId,
+            appId = config.applicationId,
             groupId = storage.groupId,
             sessionId = sessionId,
             events = listOf(trackEvent),
@@ -75,6 +78,7 @@ internal class ActivityRequestBuilder(
             userId = storage.userId,
             profileUpdate = decorator.autoProperties.toMutableMap(),
             accountId = config.accountId,
+            appId = config.applicationId,
             groupId = storage.groupId,
             sessionId = sessionId,
             events = listOf(screenEvent),

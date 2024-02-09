@@ -213,7 +213,12 @@ internal class AutoPropertyDecoratorTest {
     @Test
     fun `decorateIdentity SHOULD add autoProperties to profileUpdate map`() {
         // given
-        val activityRequest = ActivityRequest(userId = "test userId", sessionId = UUID.randomUUID(), accountId = "test accountId")
+        val activityRequest = ActivityRequest(
+            userId = "test userId",
+            appId = "appId",
+            sessionId = UUID.randomUUID(),
+            accountId = "test accountId"
+        )
         // when
         with(autoPropertyDecorator.decorateIdentify(activityRequest)) {
             // then
@@ -226,6 +231,7 @@ internal class AutoPropertyDecoratorTest {
         // given
         val activityRequest = ActivityRequest(
             userId = "test userId",
+            appId = "appId",
             accountId = "test accountId",
             sessionId = UUID.randomUUID(),
             profileUpdate = hashMapOf("test_property" to "test_value")
@@ -246,6 +252,7 @@ internal class AutoPropertyDecoratorTest {
         // given
         val activityRequest = ActivityRequest(
             userId = "test userId",
+            appId = "appId",
             accountId = "test accountId",
             sessionId = UUID.randomUUID(),
             profileUpdate = hashMapOf("_test" to "Test")
@@ -291,6 +298,7 @@ internal class AutoPropertyDecoratorTest {
         // given
         val activityRequest = ActivityRequest(
             userId = "test userId",
+            appId = "appId",
             sessionId = UUID.randomUUID(),
             accountId = "test accountId",
             groupId = "group"
@@ -308,6 +316,7 @@ internal class AutoPropertyDecoratorTest {
         // given
         val activityRequest = ActivityRequest(
             userId = "test userId",
+            appId = "appId",
             sessionId = UUID.randomUUID(),
             accountId = "test accountId",
             groupId = null
@@ -324,6 +333,7 @@ internal class AutoPropertyDecoratorTest {
         // given
         val activityRequest = ActivityRequest(
             userId = "test userId",
+            appId = "appId",
             accountId = "test accountId",
             sessionId = UUID.randomUUID(),
             groupId = "group",
