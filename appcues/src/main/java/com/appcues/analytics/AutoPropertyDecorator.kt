@@ -22,6 +22,7 @@ internal class AutoPropertyDecorator(
     companion object {
 
         const val IDENTITY_PROPERTY = "_identity"
+        const val DEVICE_PROPERTY = "_device"
         const val LAST_SEEN_AT = "_lastSeenAt"
     }
 
@@ -48,6 +49,16 @@ internal class AutoPropertyDecorator(
         "_osVersion" to "${VERSION.SDK_INT}",
         "_deviceType" to contextWrapper.getString(R.string.appcues_device_type),
         "_deviceModel" to contextWrapper.getDeviceName(),
+    )
+
+    private var deviceProperties = hashMapOf<String, Any>(
+        "_deviceId" to storage.deviceId,
+        "_language" to contextWrapper.getLanguage()
+        // token information on comes later on future task
+        // "_pushToken" to "UUID",
+        // "_pushSubscriptionStatus" to “subscribed”, “opted-in”, “unsubscribed”
+        // "_pushEnabled" to true, false
+        // "_pushEnabledBackground" to true, false
     )
 
     private val sessionProperties: Map<String, Any>
@@ -88,6 +99,11 @@ internal class AutoPropertyDecorator(
             currentScreen = attributes[ActivityRequestBuilder.SCREEN_TITLE_ATTRIBUTE]?.toString()
             sessionPageviews += 1
         } else if (event.name == AnalyticsEvent.SessionStarted.eventName) {
+            // on session start set _device key
+            attributes[DEVICE_PROPERTY] = hashMapOf<String, Any>().apply {
+                putAll(applicationProperties)
+                putAll(deviceProperties)
+            }
             // special handling for session start events
             sessionPageviews = 0
             sessionRandomId = sessionRandomizer.get()
