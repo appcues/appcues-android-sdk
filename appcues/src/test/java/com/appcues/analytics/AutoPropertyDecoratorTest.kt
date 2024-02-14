@@ -3,6 +3,7 @@ package com.appcues.analytics
 import com.appcues.AppcuesConfig
 import com.appcues.SessionMonitor
 import com.appcues.Storage
+import com.appcues.analytics.AnalyticsEvent.ExperienceStepSeen
 import com.appcues.analytics.AnalyticsEvent.ScreenView
 import com.appcues.analytics.AnalyticsEvent.SessionStarted
 import com.appcues.data.remote.appcues.request.ActivityRequest
@@ -182,6 +183,44 @@ internal class AutoPropertyDecoratorTest {
                 assertThat(containsKey("_currentScreenTitle")).isFalse()
                 assertThat(get("_sessionPageviews")).isEqualTo(0)
             }
+        }
+    }
+
+    @Test
+    fun `decorateTrack SHOULD decorate _device properties WHEN event is SessionStarted`() {
+        // given
+        val event = EventRequest(name = SessionStarted.eventName)
+        // when
+        with(autoPropertyDecorator.decorateTrack(event)) {
+            // then
+            assertThat(attributes.containsKey("_device")).isTrue()
+
+            with(attributes["_device"] as Map<*, *>) {
+                assertThat(containsKey("_appId")).isTrue()
+                assertThat(containsKey("_operatingSystem")).isTrue()
+                assertThat(containsKey("_bundlePackageId")).isTrue()
+                assertThat(containsKey("_appName")).isTrue()
+                assertThat(containsKey("_appVersion")).isTrue()
+                assertThat(containsKey("_appBuild")).isTrue()
+                assertThat(containsKey("_sdkVersion")).isTrue()
+                assertThat(containsKey("_sdkName")).isTrue()
+                assertThat(containsKey("_osVersion")).isTrue()
+                assertThat(containsKey("_deviceType")).isTrue()
+                assertThat(containsKey("_deviceModel")).isTrue()
+                assertThat(containsKey("_deviceId")).isTrue()
+                assertThat(containsKey("_language")).isTrue()
+            }
+        }
+    }
+
+    @Test
+    fun `decorateTrack SHOULD NOT include _device properties WHEN event is not SessionStarted`() {
+        // given
+        val event = EventRequest(name = ExperienceStepSeen.eventName)
+        // when
+        with(autoPropertyDecorator.decorateTrack(event)) {
+            // then
+            assertThat(attributes.containsKey("_device")).isFalse()
         }
     }
 
