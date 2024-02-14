@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
@@ -111,7 +112,8 @@ internal fun DialogModal(
                     // default modal style modifiers
                     .modalStyle(style, isDark) { Modifier.dialogModifier(it, isDark) }
                     // apply width AFTER any margin in modalStyle in line above
-                    .styleWidth(style)
+                    .styleWidth(style),
+                color = Color.Transparent,
             ) {
                 content(
                     Modifier,
