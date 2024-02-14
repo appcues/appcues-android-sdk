@@ -235,7 +235,7 @@ internal fun ComponentStyle.getTextStyle(context: Context, isDark: Boolean): Tex
         color = foregroundColor.getColor(isDark) ?: Color.Unspecified,
         fontSize = fontSize?.sp ?: TextUnit.Unspecified,
         lineHeight = lineHeight?.sp ?: TextUnit.Unspecified,
-        textAlign = getTextAlignment(),
+        textAlign = getTextAlignment() ?: TextAlign.Unspecified,
         fontFamily = getFontFamily(context),
         letterSpacing = letterSpacing?.sp ?: TextUnit.Unspecified,
         fontWeight = getFontWeight(),

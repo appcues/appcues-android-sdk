@@ -19,6 +19,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.trait.AppcuesContentAnimatedVisibility
@@ -75,6 +76,7 @@ internal fun BottomSheetModal(
                         .fillMaxHeight(height.value)
                         // default modal style modifiers
                         .modalStyle(style, isDark) { Modifier.sheetModifier(appcuesWindowInfo, isDark, it) },
+                    color = Color.Transparent,
                     content = {
                         content(
                             Modifier.fillMaxSize(),

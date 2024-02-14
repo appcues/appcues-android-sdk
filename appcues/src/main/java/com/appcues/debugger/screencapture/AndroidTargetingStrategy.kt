@@ -208,9 +208,6 @@ private fun View.extractResourceName(): String? {
 }
 
 private fun SemanticsNode.asCaptureView(context: Context, screenBounds: Rect): ViewElement? {
-    val displayMetrics = context.resources.displayMetrics
-    val density = displayMetrics.density
-
     val bounds = unclippedGlobalBounds()
 
     // if the view is not currently in the screenshot image (scrolled away), ignore
