@@ -53,6 +53,7 @@ import com.appcues.ui.extensions.checkErrorStyle
 import com.appcues.ui.extensions.getColor
 import com.appcues.ui.extensions.getHorizontalAlignment
 import com.appcues.ui.extensions.styleBorder
+import com.appcues.ui.theme.LocalAppcuesColors
 
 @Composable
 internal fun OptionSelectPrimitive.Compose(modifier: Modifier) {
@@ -220,6 +221,7 @@ private fun ComponentSelectMode.Compose(
     errorTint: Color?,
     selectionToggled: () -> Unit,
 ) {
+    val colors = LocalAppcuesColors.current
     val selectedColor = optionSelectPrimitive.selectedColor.getColor(isSystemInDarkTheme())
     val unselectedColor = optionSelectPrimitive.unselectedColor.getColor(isSystemInDarkTheme())
     val accentColor = optionSelectPrimitive.accentColor.getColor(isSystemInDarkTheme())
@@ -231,8 +233,8 @@ private fun ComponentSelectMode.Compose(
                 onClick = selectionToggled,
                 colors = RadioButtonDefaults.colors(
                     // the builder should always send these values, but default to the theme like the standard default behavior
-                    selectedColor = selectedColor ?: MaterialTheme.colors.secondary,
-                    unselectedColor = errorTint ?: unselectedColor ?: MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
+                    selectedColor = selectedColor ?: colors.primary,
+                    unselectedColor = errorTint ?: unselectedColor ?: colors.onBackground,
                 )
             )
         }
@@ -242,9 +244,9 @@ private fun ComponentSelectMode.Compose(
                 onCheckedChange = { selectionToggled() },
                 colors = CheckboxDefaults.colors(
                     // the builder should always send these values, but default to the theme like the standard default behavior
-                    checkedColor = selectedColor ?: MaterialTheme.colors.secondary,
-                    uncheckedColor = errorTint ?: unselectedColor ?: MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
-                    checkmarkColor = accentColor ?: MaterialTheme.colors.surface,
+                    checkedColor = selectedColor ?: colors.primary,
+                    uncheckedColor = errorTint ?: unselectedColor ?: colors.onBackground.copy(alpha = 0.6f),
+                    checkmarkColor = accentColor ?: colors.primary,
                 )
             )
         }
@@ -283,7 +285,7 @@ private fun List<OptionSelectPrimitive.OptionItem>.ComposePicker(
                     .size(size = 20.dp),
                 contentDescription = null,
                 imageVector = ImageVector.vectorResource(id = R.drawable.appcues_ic_drop_down),
-                tint = accentColor ?: MaterialTheme.colors.secondary,
+                tint = accentColor ?: LocalAppcuesColors.current.secondary,
             )
         }
         // 2. the dropdown menu for selection that shows on expanded state

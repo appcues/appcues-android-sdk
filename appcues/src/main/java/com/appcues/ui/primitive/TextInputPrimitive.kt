@@ -60,6 +60,7 @@ import com.appcues.ui.extensions.styleBackground
 import com.appcues.ui.extensions.styleBorder
 import com.appcues.ui.extensions.styleCorner
 import com.appcues.ui.extensions.styleShadow
+import com.appcues.ui.theme.LocalAppcuesColors
 import com.appcues.ui.utils.margin
 import kotlin.math.max
 
@@ -149,7 +150,7 @@ private fun TextInputPrimitive.getColors(isDark: Boolean) =
     TextFieldDefaults.textFieldColors(
         backgroundColor = Color.Transparent,
         // the builder should always send this value, but default to the theme like the standard default behavior
-        cursorColor = cursorColor?.getColor(isDark) ?: MaterialTheme.colors.primary,
+        cursorColor = cursorColor?.getColor(isDark) ?: LocalAppcuesColors.current.primary,
         focusedIndicatorColor = Color.Transparent,
         unfocusedIndicatorColor = Color.Transparent,
     )

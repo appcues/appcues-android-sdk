@@ -11,7 +11,7 @@ apply from: 'copy-dependencies.gradle'
 apply from: 'dokka.gradle'
 
 ext.room_version = '2.5.2'
-ext.compose_version = '1.5.2'
+ext.compose_version = '1.6.0'
 ext.compose_compiler_version = '1.4.8'
 ext.coil_version = '2.4.0'
 ext.moshi_version = '1.15.0'
@@ -88,7 +88,7 @@ dependencies {
     implementation "androidx.compose.ui:ui-tooling-preview:$compose_version"
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_version"
     debugImplementation "androidx.compose.ui:ui-test-manifest:$compose_version"
-    implementation "com.google.android.material:material:1.9.0"
+    implementation "com.google.android.material:material:1.11.0"
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
     implementation "androidx.room:room-runtime:$room_version"
     implementation "androidx.room:room-ktx:$room_version"
