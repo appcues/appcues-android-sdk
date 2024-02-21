@@ -1,5 +1,6 @@
 package com.appcues.ui
 
+import android.app.Activity
 import android.view.MotionEvent
 import android.view.ViewTreeObserver
 import android.view.ViewTreeObserver.OnDrawListener
@@ -28,6 +29,7 @@ internal class ModalStateMachineOwner(
 ) : StateMachineOwning {
 
     companion object {
+
         private const val SCROLL_DEBOUNCE_MILLISECONDS = 1_000L
     }
 
@@ -92,24 +94,22 @@ internal class ModalStateMachineOwner(
         }
     }
 
-    private fun attemptRetry() {
-        onUiIdle {
-            // stop listening for updates, will re-attach if another error occurs
-            stopRetryHandling(false)
+    private fun attemptRetry() = onUiIdle {
+        // stop listening for updates, will re-attach if another error occurs
+        stopRetryHandling(false)
 
-            // cancel any current touch (drag) as our overlay is about to drop on top and we don't want things moving behind it
-            AppcuesActivityMonitor.activity?.getParentView()?.dispatchTouchEvent(
-                MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_CANCEL, 0f, 0f, 0)
-            )
+        // cancel any current touch (drag) as our overlay is about to drop on top and we don't want things moving behind it
+        it.getParentView().dispatchTouchEvent(
+            MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_CANCEL, 0f, 0f, 0)
+        )
 
-            // trigger the retry in the state machine
-            coroutineScope.launch {
-                stateMachine.handleAction(Retry)
-            }
+        // trigger the retry in the state machine
+        coroutineScope.launch {
+            stateMachine.handleAction(Retry)
         }
     }
 
-    private fun onUiIdle(block: () -> Unit) {
+    private fun onUiIdle(block: (Activity) -> Unit) {
         // cancel any previous
         uiIdleDebounceTimer?.cancel()
 
@@ -117,7 +117,9 @@ internal class ModalStateMachineOwner(
             // set to know to allow new Timer
             uiIdleDebounceTimer = null
             // run callback block
-            block()
+            val activity = AppcuesActivityMonitor.activity ?: return@schedule
+
+            activity.runOnUiThread { block(activity) }
         }
     }
 
