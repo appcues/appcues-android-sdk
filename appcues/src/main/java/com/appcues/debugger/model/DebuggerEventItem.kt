@@ -20,7 +20,7 @@ internal data class DebuggerEventItem(
 }
 
 internal enum class EventType {
-    EXPERIENCE, GROUP_UPDATE, USER_PROFILE, CUSTOM, SCREEN, SESSION
+    EXPERIENCE, GROUP_UPDATE, USER_PROFILE, CUSTOM, SCREEN, SESSION, DEVICE
 }
 
 internal data class DebuggerEventItemPropertySection(
