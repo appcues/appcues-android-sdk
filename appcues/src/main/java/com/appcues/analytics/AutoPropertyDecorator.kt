@@ -51,15 +51,16 @@ internal class AutoPropertyDecorator(
         "_deviceModel" to contextWrapper.getDeviceName(),
     )
 
-    private var deviceProperties = hashMapOf<String, Any>(
-        "_deviceId" to storage.deviceId,
-        "_language" to contextWrapper.getLanguage()
-        // token information on comes later on future task
-        // "_pushToken" to "UUID",
-        // "_pushSubscriptionStatus" to “subscribed”, “opted-in”, “unsubscribed”
-        // "_pushEnabled" to true, false
-        // "_pushEnabledBackground" to true, false
-    )
+    private val deviceProperties: Map<String, Any?>
+        get() = hashMapOf(
+            "_deviceId" to storage.deviceId,
+            "_language" to contextWrapper.getLanguage(),
+            "_pushToken" to storage.pushToken,
+            // token information on comes later on future task
+            // "_pushSubscriptionStatus" to “subscribed”, “opted-in”, “unsubscribed”
+            // "_pushEnabled" to true, false
+            // "_pushEnabledBackground" to true, false
+        )
 
     private val sessionProperties: Map<String, Any>
         get() = hashMapOf(
@@ -100,7 +101,7 @@ internal class AutoPropertyDecorator(
             sessionPageviews += 1
         } else if (event.name == AnalyticsEvent.SessionStarted.eventName) {
             // on session start set _device key
-            attributes[DEVICE_PROPERTY] = hashMapOf<String, Any>().apply {
+            attributes[DEVICE_PROPERTY] = hashMapOf<String, Any?>().apply {
                 putAll(applicationProperties)
                 putAll(deviceProperties)
             }
