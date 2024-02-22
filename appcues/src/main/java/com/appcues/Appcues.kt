@@ -264,6 +264,15 @@ public class Appcues internal constructor(internal val scope: AppcuesScope) {
     }
 
     /**
+     *  Provide the Firebase Cloud Messaging (FCM) device token to Appcues.
+     *
+     *  @param token A globally unique token that identifies this device to FCM.
+     */
+    public fun setPushToken(token: String?) {
+        storage.pushToken = token
+    }
+
+    /**
      * Enables automatic screen tracking for Activities.
      */
     public fun trackScreens() {
