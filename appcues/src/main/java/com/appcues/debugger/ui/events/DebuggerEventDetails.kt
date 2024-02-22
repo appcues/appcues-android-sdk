@@ -109,7 +109,7 @@ private fun LazyListScope.details(event: DebuggerEventItem) {
 
 private fun LazyListScope.properties(properties: List<Pair<String, Any?>>) {
     items(properties.toList()) { item ->
-        ListItem(key = item.first, value = item.second?.toString() ?: "")
+        ListItem(key = item.first, value = item.second?.toString() ?: "null")
     }
 
     item {
