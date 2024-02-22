@@ -4,6 +4,7 @@ import com.appcues.R
 import com.appcues.analytics.AnalyticsEvent
 import com.appcues.debugger.model.EventType
 import com.appcues.debugger.model.EventType.CUSTOM
+import com.appcues.debugger.model.EventType.DEVICE
 import com.appcues.debugger.model.EventType.EXPERIENCE
 import com.appcues.debugger.model.EventType.GROUP_UPDATE
 import com.appcues.debugger.model.EventType.SCREEN
@@ -30,6 +31,7 @@ internal fun EventType?.toResourceId(): Int {
         CUSTOM -> R.drawable.appcues_ic_custom
         SCREEN -> R.drawable.appcues_ic_screen
         SESSION -> R.drawable.appcues_ic_session
+        DEVICE -> R.drawable.appcues_ic_device
         else -> R.drawable.appcues_ic_all
     }
 }
@@ -37,6 +39,7 @@ internal fun EventType?.toResourceId(): Int {
 internal fun String.toEventType(): EventType = when (this) {
     AnalyticsEvent.ScreenView.eventName -> SCREEN
     AnalyticsEvent.SessionStarted.eventName -> SESSION
+    AnalyticsEvent.DeviceUpdated.eventName -> DEVICE
     AnalyticsEvent.ExperienceStepSeen.eventName,
     AnalyticsEvent.ExperienceStepInteraction.eventName,
     AnalyticsEvent.ExperienceStepCompleted.eventName,
@@ -51,6 +54,7 @@ internal fun String.toEventType(): EventType = when (this) {
 
 internal fun String.toEventTitle(): Int? = when (this) {
     AnalyticsEvent.SessionStarted.eventName -> R.string.appcues_debugger_event_type_session_started_title
+    AnalyticsEvent.DeviceUpdated.eventName -> R.string.appcues_debugger_event_type_device_updated_title
     AnalyticsEvent.ExperienceStepSeen.eventName -> R.string.appcues_debugger_event_type_step_seen_title
     AnalyticsEvent.ExperienceStepInteraction.eventName -> R.string.appcues_debugger_event_type_step_interaction_title
     AnalyticsEvent.ExperienceStepCompleted.eventName -> R.string.appcues_debugger_event_type_step_completed_title
