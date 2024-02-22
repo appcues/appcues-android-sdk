@@ -6,6 +6,7 @@ import android.content.Intent
 import com.appcues.action.ActionRegistry
 import com.appcues.action.ExperienceAction
 import com.appcues.analytics.ActivityScreenTracking
+import com.appcues.analytics.AnalyticsEvent
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.data.model.ExperienceTrigger
 import com.appcues.data.model.RenderContext
@@ -270,6 +271,8 @@ public class Appcues internal constructor(internal val scope: AppcuesScope) {
      */
     public fun setPushToken(token: String?) {
         storage.pushToken = token
+
+        analyticsTracker.track(AnalyticsEvent.DeviceUpdated.eventName, properties = null, interactive = false, isInternal = true)
     }
 
     /**

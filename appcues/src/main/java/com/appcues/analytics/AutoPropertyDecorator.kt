@@ -51,7 +51,7 @@ internal class AutoPropertyDecorator(
         "_deviceModel" to contextWrapper.getDeviceName(),
     )
 
-    private val deviceProperties: Map<String, Any?>
+    private val pushProperties: Map<String, Any?>
         get() = hashMapOf(
             "_deviceId" to storage.deviceId,
             "_language" to contextWrapper.getLanguage(),
@@ -93,23 +93,30 @@ internal class AutoPropertyDecorator(
             }
         }
 
+    val deviceProperties: Map<String, Any?>
+        get() = hashMapOf<String, Any?>().apply {
+            putAll(applicationProperties)
+            putAll(pushProperties)
+        }
+
     fun decorateTrack(event: EventRequest) = event.apply {
-        if (event.name == AnalyticsEvent.ScreenView.eventName) {
-            // special handling for screen_view events
-            previousScreen = currentScreen
-            currentScreen = attributes[ActivityRequestBuilder.SCREEN_TITLE_ATTRIBUTE]?.toString()
-            sessionPageviews += 1
-        } else if (event.name == AnalyticsEvent.SessionStarted.eventName) {
-            // on session start set _device key
-            attributes[DEVICE_PROPERTY] = hashMapOf<String, Any?>().apply {
-                putAll(applicationProperties)
-                putAll(deviceProperties)
+        when (event.name) {
+            AnalyticsEvent.ScreenView.eventName -> {
+                previousScreen = currentScreen
+                currentScreen = attributes[ActivityRequestBuilder.SCREEN_TITLE_ATTRIBUTE]?.toString()
+                sessionPageviews += 1
             }
-            // special handling for session start events
-            sessionPageviews = 0
-            sessionRandomId = sessionRandomizer.get()
-            currentScreen = null
-            previousScreen = null
+            AnalyticsEvent.SessionStarted.eventName -> {
+                attributes[DEVICE_PROPERTY] = deviceProperties
+
+                sessionPageviews = 0
+                sessionRandomId = sessionRandomizer.get()
+                currentScreen = null
+                previousScreen = null
+            }
+            AnalyticsEvent.DeviceUpdated.eventName -> {
+                attributes[DEVICE_PROPERTY] = deviceProperties
+            }
         }
 
         attributes[IDENTITY_PROPERTY] = autoProperties
