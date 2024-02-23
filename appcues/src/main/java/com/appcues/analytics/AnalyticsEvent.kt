@@ -15,4 +15,5 @@ internal enum class AnalyticsEvent(val eventName: String) {
     ExperienceRecovery("appcues:v2:experience_recovered"),
     ExperimentEntered("appcues:experiment_entered"),
     DeviceUpdated("appcues:device_updated"),
+    DeviceUnregistered("appcues:device_unregistered"),
 }

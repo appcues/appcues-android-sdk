@@ -61,6 +61,7 @@
 
     <string name="appcues_debugger_event_type_session_started_title">Session Started</string>
     <string name="appcues_debugger_event_type_device_updated_title">Device Updated</string>
+    <string name="appcues_debugger_event_type_device_unregistered_title">Device Unregistered</string>
     <string name="appcues_debugger_event_type_session_suspended_title">Session Suspended</string>
     <string name="appcues_debugger_event_type_session_resumed_title">Session Resumed</string>
     <string name="appcues_debugger_event_type_session_reset_title">Session Reset</string>

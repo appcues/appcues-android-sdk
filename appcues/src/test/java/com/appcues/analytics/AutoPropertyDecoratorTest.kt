@@ -3,6 +3,7 @@ package com.appcues.analytics
 import com.appcues.AppcuesConfig
 import com.appcues.SessionMonitor
 import com.appcues.Storage
+import com.appcues.analytics.AnalyticsEvent.DeviceUpdated
 import com.appcues.analytics.AnalyticsEvent.ExperienceStepSeen
 import com.appcues.analytics.AnalyticsEvent.ScreenView
 import com.appcues.analytics.AnalyticsEvent.SessionStarted
@@ -211,6 +212,17 @@ internal class AutoPropertyDecoratorTest {
                 assertThat(containsKey("_language")).isTrue()
                 assertThat(containsKey("_pushToken")).isTrue()
             }
+        }
+    }
+
+    @Test
+    fun `decorateTrack SHOULD decorate _device properties WHEN event is DeviceUpdated`() {
+        // given
+        val event = EventRequest(name = DeviceUpdated.eventName)
+        // when
+        with(autoPropertyDecorator.decorateTrack(event)) {
+            // then
+            assertThat(attributes.containsKey("_device")).isTrue()
         }
     }
 
