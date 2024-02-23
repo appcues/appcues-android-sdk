@@ -175,6 +175,7 @@ public class Appcues internal constructor(internal val scope: AppcuesScope) {
      * Can be used when the user logs out of your application.
      */
     public fun reset() {
+        analyticsTracker.track(AnalyticsEvent.DeviceUnregistered.eventName, properties = null, isInternal = true, interactive = false)
         // flush any pending analytics for the previous user, prior to reset
         analyticsTracker.flushPendingActivity()
 
