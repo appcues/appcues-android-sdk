@@ -57,8 +57,8 @@ internal class AutoPropertyDecorator(
             "_language" to contextWrapper.getLanguage(),
             "_pushToken" to storage.pushToken,
             // token information on comes later on future task
+            "_pushEnabled" to contextWrapper.isNotificationEnabled()
             // "_pushSubscriptionStatus" to “subscribed”, “opted-in”, “unsubscribed”
-            // "_pushEnabled" to true, false
             // "_pushEnabledBackground" to true, false
         )
 
