@@ -8,6 +8,7 @@ import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import android.util.DisplayMetrics
 import androidx.annotation.StringRes
+import androidx.core.app.NotificationManagerCompat
 import java.util.Locale
 
 /**
@@ -63,6 +64,10 @@ internal class ContextWrapper(private val context: Context) {
 
     fun getLanguage(): String {
         return getCurrentLocale(context).toLanguageTag()
+    }
+
+    fun isNotificationEnabled(): Boolean {
+        return NotificationManagerCompat.from(context).areNotificationsEnabled()
     }
 
     private fun getCurrentLocale(context: Context): Locale {
