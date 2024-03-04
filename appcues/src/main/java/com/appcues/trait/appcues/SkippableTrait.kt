@@ -152,6 +152,7 @@ internal class SkippableTrait(
             Spacer(
                 modifier = Modifier
                     .matchParentSize()
+                    .background(Color(color = 0xFF5C5CFF))
                     // add click listener but without any ripple effect.
                     .pointerInput(Unit) {
                         detectTapGestures {
@@ -180,6 +181,7 @@ internal class SkippableTrait(
                         .handleSkipClick()
                         .drawDefaultX(isDark)
                         .buttonBorder(isDark)
+
                 ButtonAppearance.MINIMAL ->
                     Modifier
                         .width(buttonWidth.dp)

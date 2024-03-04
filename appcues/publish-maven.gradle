@@ -103,10 +103,10 @@ afterEvaluate {
         }
     }
 
-    signing {
-        useInMemoryPgpKeys(signingKey, signingKeyPwd)
-        sign publishing.publications.release
-    }
+//    signing {
+//        useInMemoryPgpKeys(signingKey, signingKeyPwd)
+//        sign publishing.publications.release
+//    }
 }
 
 task versionTxt()  {
