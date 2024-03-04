@@ -213,7 +213,7 @@ internal class DebuggerViewModel(override val scope: AppcuesScope, debugMode: De
             // saving a capture is only valid in screen capture mode with token
             is ScreenCapture -> {
                 viewModelScope.launch {
-                    when (saveCaptureUseCase(currentMode.token, capture)) {
+                    when (val response = saveCaptureUseCase(currentMode.token, capture)) {
                         is Success -> _toastState.value = Rendering(
                             type = ScreenCaptureSuccess(capture.displayName) {
                                 // on dismiss
@@ -226,7 +226,10 @@ internal class DebuggerViewModel(override val scope: AppcuesScope, debugMode: De
                                 onRetry = {
                                     _toastState.value = ToastState.Idle
                                     onScreenCaptureConfirm(capture)
-                                }
+                                },
+                                error = if (response.reason.isTokenInvalid())
+                                    ScreenCaptureFailure.CaptureError.INVALID_TOKEN
+                                else null
                             )
                         )
                     }

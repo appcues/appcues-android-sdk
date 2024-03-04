@@ -1,10 +1,13 @@
 package com.appcues.debugger.screencapture
 
 import android.graphics.Bitmap
-import com.appcues.data.remote.RemoteError
 import com.appcues.data.remote.customerapi.CustomerApiRemoteSource
 import com.appcues.data.remote.imageupload.ImageUploadRemoteSource
 import com.appcues.data.remote.sdksettings.SdkSettingsRemoteSource
+import com.appcues.debugger.screencapture.ScreenCaptureSaveException.CaptureStep.GET_CUSTOMER_API_URL
+import com.appcues.debugger.screencapture.ScreenCaptureSaveException.CaptureStep.GET_IMAGE_PRE_UPLOAD_URL
+import com.appcues.debugger.screencapture.ScreenCaptureSaveException.CaptureStep.SAVE_SCREEN_CAPTURE
+import com.appcues.debugger.screencapture.ScreenCaptureSaveException.CaptureStep.UPLOAD_IMAGE
 import com.appcues.debugger.screencapture.model.Capture
 import com.appcues.util.ResultOf
 import com.appcues.util.ResultOf.Failure
@@ -16,7 +19,7 @@ internal class SaveCaptureUseCase(
     private val imageUpload: ImageUploadRemoteSource,
 ) {
 
-    suspend operator fun invoke(token: String, capture: Capture): ResultOf<Unit, RemoteError> {
+    suspend operator fun invoke(token: String, capture: Capture): ResultOf<Unit, ScreenCaptureSaveException> {
         return try {
             // step 1 - get customer API url
             val customerApiUrl = getCustomerApiUrl()
@@ -27,7 +30,7 @@ internal class SaveCaptureUseCase(
             // step 4 - update the screenshot link and save the screen
             saveScreen(customerApiUrl, token, capture, imageUrls.finalUrl)
         } catch (e: ScreenCaptureSaveException) {
-            Failure(e.error)
+            Failure(e)
         }
     }
 
@@ -35,7 +38,7 @@ internal class SaveCaptureUseCase(
     private suspend fun getCustomerApiUrl(): String {
         return sdkSettings.getCustomerApiUrl().let { result ->
             when (result) {
-                is Failure -> throw ScreenCaptureSaveException(result.reason)
+                is Failure -> throw ScreenCaptureSaveException(GET_CUSTOMER_API_URL, result.reason)
                 is Success -> result.value
             }
         }
@@ -52,7 +55,7 @@ internal class SaveCaptureUseCase(
 
         return customer.getUploadUrls(url, token, name).let { result ->
             when (result) {
-                is Failure -> throw ScreenCaptureSaveException(result.reason)
+                is Failure -> throw ScreenCaptureSaveException(GET_IMAGE_PRE_UPLOAD_URL, result.reason)
                 is Success -> result.value
             }
         }
@@ -62,7 +65,7 @@ internal class SaveCaptureUseCase(
     private suspend fun uploadScreenshot(uploadUrl: String, bitmap: Bitmap) {
         return imageUpload.upload(uploadUrl, bitmap).let { result ->
             when (result) {
-                is Failure -> throw ScreenCaptureSaveException(result.reason)
+                is Failure -> throw ScreenCaptureSaveException(UPLOAD_IMAGE, result.reason)
                 is Success -> Unit
             }
         }
@@ -72,11 +75,9 @@ internal class SaveCaptureUseCase(
     private suspend fun saveScreen(customerApiUrl: String, token: String, capture: Capture, imageUrl: String): Success<Unit> {
         return customer.saveCapture(customerApiUrl, token, capture, imageUrl).let { result ->
             when (result) {
-                is Failure -> throw ScreenCaptureSaveException(result.reason)
+                is Failure -> throw ScreenCaptureSaveException(SAVE_SCREEN_CAPTURE, result.reason)
                 is Success -> result
             }
         }
     }
-
-    private class ScreenCaptureSaveException(val error: RemoteError) : Exception("ScreenCaptureException: $error")
 }

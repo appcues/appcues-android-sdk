@@ -110,6 +110,8 @@
     <string name="appcues_screen_capture_cancel">Retry</string>
     <string name="appcues_screen_capture_ok">Send to builder</string>
     <string name="appcues_screen_capture_toast_upload_failed">Upload failed</string>
+    <string name="appcues_screen_capture_toast_error_400_title">Upload failed due to expired session.</string>
+    <string name="appcues_screen_capture_toast_error_400_description">Please restart the screen capture flow from the Mobile Builder.</string>
     <string name="appcues_screen_capture_toast_try_again">Try again</string>
     <string name="appcues_screen_capture_toast_success_suffix">is now available for preview and targeting.</string>
     <string name="appcues_screen_capture_not_seeing_element">Not seeing the element you want highlighted?</string>

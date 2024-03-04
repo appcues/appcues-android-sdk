@@ -7,10 +7,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
@@ -19,6 +21,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -29,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.appcues.R.string
 import com.appcues.debugger.model.DebuggerToast.ScreenCaptureFailure
+import com.appcues.debugger.model.DebuggerToast.ScreenCaptureFailure.CaptureError.INVALID_TOKEN
 import com.appcues.debugger.model.DebuggerToast.ScreenCaptureSuccess
 import com.appcues.debugger.ui.theme.LocalAppcuesTheme
 import kotlinx.coroutines.delay
@@ -98,8 +102,20 @@ internal fun BoxScope.SuccessToast(toast: ScreenCaptureSuccess, debuggerState: M
     }
 }
 
+internal data class ToastInfo(val title: String, val description: String)
+
 @Composable
 internal fun BoxScope.FailureToast(toast: ScreenCaptureFailure, debuggerState: MutableDebuggerState) {
+    val context = LocalContext.current
+    val toastInfo = remember {
+        when (toast.error) {
+            INVALID_TOKEN -> ToastInfo(
+                title = context.getString(string.appcues_screen_capture_toast_error_400_title),
+                description = context.getString(string.appcues_screen_capture_toast_error_400_description)
+            )
+            else -> null
+        }
+    }
     // any tap on this background will dismiss the toast before it auto expires
     Spacer(
         modifier = Modifier
@@ -124,38 +140,57 @@ internal fun BoxScope.FailureToast(toast: ScreenCaptureFailure, debuggerState: M
             modifier = Modifier
                 .background(color = LocalAppcuesTheme.current.error, shape = RoundedCornerShape(6.dp))
                 .fillMaxWidth()
-                .height(64.dp)
-                .padding(start = 16.dp, end = 16.dp),
+                .heightIn(min = 64.dp)
+                .padding(horizontal = 16.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = stringResource(id = string.appcues_screen_capture_toast_upload_failed),
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                color = color
-            )
-            Spacer(modifier = Modifier.weight(1.0f))
-
-            Box(
-                modifier = Modifier
-                    .height(40.dp)
-                    .border(
-                        width = 1.dp,
-                        shape = RoundedCornerShape(6.dp),
+            if (toastInfo != null) {
+                Column {
+                    Text(
+                        text = toastInfo.title,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
                         color = color
                     )
-                    .clickable(onClick = toast.onRetry)
-            ) {
+                    Text(
+                        text = toastInfo.description,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Normal,
+                        color = color
+                    )
+                }
+            } else {
                 Text(
-                    text = stringResource(id = string.appcues_screen_capture_toast_try_again),
+                    text = stringResource(id = string.appcues_screen_capture_toast_upload_failed),
                     fontSize = 14.sp,
-                    color = color,
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .padding(start = 16.dp, end = 16.dp)
+                    fontWeight = FontWeight.Bold,
+                    color = color
                 )
+
+                Spacer(modifier = Modifier.weight(1.0f))
+
+                Box(
+                    modifier = Modifier
+                        .height(40.dp)
+                        .border(
+                            width = 1.dp,
+                            shape = RoundedCornerShape(6.dp),
+                            color = color
+                        )
+                        .clickable(onClick = toast.onRetry)
+                ) {
+                    Text(
+                        text = stringResource(id = string.appcues_screen_capture_toast_try_again),
+                        fontSize = 14.sp,
+                        color = color,
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .padding(start = 16.dp, end = 16.dp)
+                    )
+                }
             }
         }
+
         LaunchedEffect(debuggerState.toast.targetState) {
             delay(timeMillis = FAILURE_TOAST_LENGTH)
             toast.onDismiss()
