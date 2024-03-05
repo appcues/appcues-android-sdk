@@ -1,7 +1,6 @@
 package com.appcues.trait
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
@@ -19,14 +18,16 @@ internal fun AppcuesContentAnimatedVisibility(
     modifier: Modifier = Modifier,
     enter: EnterTransition,
     exit: ExitTransition,
-    content: @Composable() AnimatedVisibilityScope.() -> Unit
+    content: @Composable () -> Unit
 ) {
-    val compositionState = LocalExperienceCompositionState.current
-    AnimatedVisibility(
-        modifier = modifier,
-        visibleState = compositionState.isContentVisible,
-        enter = enter,
-        exit = exit,
-        content = content
-    )
+    content()
+//    val compositionState = LocalExperienceCompositionState.current
+//    AnimatedVisibility(
+//        modifier = modifier,
+//        visibleState = compositionState.isContentVisible,
+//        enter = enter,
+//        exit = exit
+//    ) {
+//        content()
+//    }
 }
