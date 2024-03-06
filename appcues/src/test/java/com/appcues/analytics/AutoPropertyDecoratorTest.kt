@@ -52,8 +52,8 @@ internal class AutoPropertyDecoratorTest {
     }
 
     @Test
-    fun `autoProperties SHOULD contain 21 amount of elements`() {
-        assertThat(autoPropertyDecorator.autoProperties).hasSize(21)
+    fun `autoProperties SHOULD contain proper amount of elements`() {
+        assertThat(autoPropertyDecorator.autoProperties).hasSize(22)
         with(autoPropertyDecorator.autoProperties) {
             // App
             assertThat(containsKey("_appId")).isTrue()
@@ -78,11 +78,12 @@ internal class AutoPropertyDecoratorTest {
             assertThat(containsKey("_lastBrowserLanguage")).isTrue()
             assertThat(containsKey("_sessionPageviews")).isTrue()
             assertThat(containsKey("_sessionRandomizer")).isTrue()
+            assertThat(containsKey("_pushPrimerEligible")).isTrue()
         }
     }
 
     @Test
-    fun `autoProperties SHOULD contain 22 amount of elements WHEN one ScreenView is decorated`() {
+    fun `autoProperties SHOULD contain proper amount of elements WHEN one ScreenView is decorated`() {
         // given
         autoPropertyDecorator.decorateTrack(
             EventRequest(
@@ -93,11 +94,11 @@ internal class AutoPropertyDecoratorTest {
             )
         )
         // then
-        assertThat(autoPropertyDecorator.autoProperties).hasSize(22)
+        assertThat(autoPropertyDecorator.autoProperties).hasSize(23)
     }
 
     @Test
-    fun `autoProperties SHOULD contain 23 amount of elements WHEN two or more ScreenView are decorated`() {
+    fun `autoProperties SHOULD contain correct amount of elements WHEN two or more ScreenView are decorated`() {
         // given
         autoPropertyDecorator.decorateTrack(
             EventRequest(
@@ -116,7 +117,7 @@ internal class AutoPropertyDecoratorTest {
             )
         )
         // then
-        assertThat(autoPropertyDecorator.autoProperties).hasSize(23)
+        assertThat(autoPropertyDecorator.autoProperties).hasSize(24)
     }
 
     @Test
@@ -275,7 +276,7 @@ internal class AutoPropertyDecoratorTest {
         // when
         with(autoPropertyDecorator.decorateIdentify(activityRequest)) {
             // then
-            assertThat(profileUpdate).hasSize(21)
+            assertThat(profileUpdate).hasSize(22)
         }
     }
 
@@ -292,7 +293,7 @@ internal class AutoPropertyDecoratorTest {
         // when
         with(autoPropertyDecorator.decorateIdentify(activityRequest)) {
             // then
-            assertThat(profileUpdate).hasSize(22)
+            assertThat(profileUpdate).hasSize(23)
         }
         // then when
         with(autoPropertyDecorator.decorateTrack(EventRequest(name = SessionStarted.eventName))) {
@@ -313,7 +314,7 @@ internal class AutoPropertyDecoratorTest {
         // when
         with(autoPropertyDecorator.decorateIdentify(activityRequest)) {
             // then
-            assertThat(profileUpdate).hasSize(22)
+            assertThat(profileUpdate).hasSize(23)
             assertThat(profileUpdate!!["_test"]).isEqualTo("Test")
         }
     }
