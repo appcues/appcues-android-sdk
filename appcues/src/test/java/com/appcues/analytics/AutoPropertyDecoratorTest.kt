@@ -212,6 +212,7 @@ internal class AutoPropertyDecoratorTest {
                 assertThat(containsKey("_deviceId")).isTrue()
                 assertThat(containsKey("_language")).isTrue()
                 assertThat(containsKey("_pushToken")).isTrue()
+                assertThat(containsKey("_pushEnabledBackground")).isTrue()
                 assertThat(containsKey("_pushEnabled")).isTrue()
             }
         }
