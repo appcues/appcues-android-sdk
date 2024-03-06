@@ -1,6 +1,9 @@
 package com.appcues.analytics
 
+import android.Manifest
 import android.os.Build.VERSION
+import android.os.Build.VERSION_CODES
+import androidx.core.app.ActivityCompat
 import com.appcues.AppcuesConfig
 import com.appcues.BuildConfig
 import com.appcues.R
@@ -8,6 +11,7 @@ import com.appcues.SessionMonitor
 import com.appcues.Storage
 import com.appcues.data.remote.appcues.request.ActivityRequest
 import com.appcues.data.remote.appcues.request.EventRequest
+import com.appcues.monitor.AppcuesActivityMonitor
 import com.appcues.util.ContextWrapper
 import java.util.Date
 
@@ -77,7 +81,18 @@ internal class AutoPropertyDecorator(
             "_lastScreenTitle" to previousScreen,
             "_sessionPageviews" to sessionPageviews,
             "_sessionRandomizer" to sessionRandomId,
+            "_pushPrimerEligible" to getPushPrimerEligible()
         ).filterValues { it != null }.mapValues { it.value as Any }
+
+    private fun getPushPrimerEligible(): Boolean {
+        val activity = AppcuesActivityMonitor.activity ?: return false
+        // VERSION guard because of Manifest.permission.POST_NOTIFICATIONS
+        return if (VERSION.SDK_INT >= VERSION_CODES.TIRAMISU) {
+            ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            false
+        }
+    }
 
     val autoProperties: Map<String, Any>
         get() = hashMapOf<String, Any>().apply {
