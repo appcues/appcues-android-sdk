@@ -10,6 +10,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.findViewTreeLifecycleOwner
+import com.appcues.AppcuesConfig
 import com.appcues.AppcuesCoroutineScope
 import com.appcues.action.ActionProcessor
 import com.appcues.data.model.Experience
@@ -37,6 +38,7 @@ internal abstract class ViewPresenter(
     private val coroutineScope: AppcuesCoroutineScope by inject()
     private val actionProcessor: ActionProcessor by inject()
     private val appcuesViewTreeOwner: AppcuesViewTreeOwner by inject()
+    private val appcuesConfig: AppcuesConfig by inject()
 
     private var viewModel: AppcuesViewModel? = null
     private var gestureListener: ShakeGestureListener? = null
@@ -108,6 +110,7 @@ internal abstract class ViewPresenter(
                             logcues = get(),
                             imageLoader = get(),
                             chromeClient = EmbedChromeClient(this),
+                            packageNames = appcuesConfig.packageNames
                         )
                     }
                 }

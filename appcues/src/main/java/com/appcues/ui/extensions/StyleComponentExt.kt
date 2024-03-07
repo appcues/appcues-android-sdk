@@ -1,10 +1,12 @@
 package com.appcues.ui.extensions
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Resources.NotFoundException
 import android.graphics.Typeface
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
@@ -56,9 +58,9 @@ internal fun ComponentStyle.getTextAlignment(): TextAlign? {
     }
 }
 
-internal fun ComponentStyle.getFontFamily(context: Context): FontFamily? {
+internal fun ComponentStyle.getFontFamily(context: Context, packageNames: List<String>): FontFamily? {
     return FontFamily.getSystemFontFamily(fontName)
-        ?: FontFamily.getFontResource(context, fontName)
+        ?: FontFamily.getFontResource(context, packageNames, fontName)
         ?: FontFamily.getFontAsset(context, fontName)
         ?: FontFamily.getSystemFont(fontName)
 }
@@ -76,32 +78,50 @@ private fun FontFamily.Companion.getSystemFontFamily(fontName: String?): FontFam
     return null
 }
 
-// try to load a custom font from a resource in the host application
-private fun FontFamily.Companion.getFontResource(context: Context, fontName: String?): FontFamily? {
+private fun FontFamily.Companion.getFontResource(context: Context, packageNames: List<String>, fontName: String?): FontFamily? {
     // Font resources are only available on API 26+ (Android 8.0, "O"), so don't even try on lower versions
     if (VERSION.SDK_INT >= VERSION_CODES.O && fontName != null) {
-        // this is an attempt to provide convenience to convert to valid resource names, for ex. if a font
-        // name of "Lato-Black" was used, it will auto convert to "lato_black" resource name
-        val resourceName = fontName.lowercase().replace("-", "_")
-        val fontId = context.resources.getIdentifier(resourceName, "font", context.packageName)
-        if (fontId != 0) {
-            // Even if the font identifier is found, this typeface may not be available on the current
-            // OS level, if any api-specific resource folders have been used, i.e. "font-v30". We do
-            // another check here to try and catch this, since otherwise it will result in an uncaught
-            // exception during Compose render time. That exception will crash the app when
-            // trying to show the Appcues experience.
-            @Suppress("SwallowedException")
-            return try {
-                // the result of this getFont is unused, but success indicates the resource is available
-                // and we can progress with the creation of the Font and FontFamily
-                context.resources.getFont(fontId)
-                FontFamily(Font(fontId))
-            } catch (_: NotFoundException) {
-                null
-            } catch (_: NullPointerException) {
-                // this can happen in our snapshot unit tests when the font is not available
-                null
-            }
+        val mergedPackageNames = mutableSetOf<String>().apply {
+            add(context.packageName)
+            addAll(packageNames)
+        }
+
+        // iterate the packageNames list and return the first not null font
+        mergedPackageNames.forEach {
+            val font = getFontResource(context, it, fontName)
+            if (font != null) return font
+        }
+    }
+
+    // font was not found in resources
+    return null
+}
+
+// try to load a custom font from a resource in the host application
+@RequiresApi(VERSION_CODES.O)
+@SuppressLint("DiscouragedApi")
+private fun FontFamily.Companion.getFontResource(context: Context, packageName: String, fontName: String): FontFamily? {
+    // this is an attempt to provide convenience to convert to valid resource names, for ex. if a font
+    // name of "Lato-Black" was used, it will auto convert to "lato_black" resource name
+    val resourceName = fontName.lowercase().replace("-", "_")
+    val fontId = context.resources.getIdentifier(resourceName, "font", packageName)
+    if (fontId != 0) {
+        // Even if the font identifier is found, this typeface may not be available on the current
+        // OS level, if any api-specific resource folders have been used, i.e. "font-v30". We do
+        // another check here to try and catch this, since otherwise it will result in an uncaught
+        // exception during Compose render time. That exception will crash the app when
+        // trying to show the Appcues experience.
+        @Suppress("SwallowedException")
+        return try {
+            // the result of this getFont is unused, but success indicates the resource is available
+            // and we can progress with the creation of the Font and FontFamily
+            context.resources.getFont(fontId)
+            FontFamily(Font(fontId))
+        } catch (_: NotFoundException) {
+            null
+        } catch (_: NullPointerException) {
+            // this can happen in our snapshot unit tests when the font is not available
+            null
         }
     }
     return null
@@ -230,13 +250,13 @@ internal fun getBoxAlignment(
     return BiasAlignment(horizontalBias, verticalBias)
 }
 
-internal fun ComponentStyle.getTextStyle(context: Context, isDark: Boolean): TextStyle {
+internal fun ComponentStyle.getTextStyle(context: Context, packageNames: List<String>, isDark: Boolean): TextStyle {
     return TextStyle(
         color = foregroundColor.getColor(isDark) ?: Color.Unspecified,
         fontSize = fontSize?.sp ?: TextUnit.Unspecified,
         lineHeight = lineHeight?.sp ?: TextUnit.Unspecified,
         textAlign = getTextAlignment() ?: TextAlign.Unspecified,
-        fontFamily = getFontFamily(context),
+        fontFamily = getFontFamily(context, packageNames),
         letterSpacing = letterSpacing?.sp ?: TextUnit.Unspecified,
         fontWeight = getFontWeight(),
     )

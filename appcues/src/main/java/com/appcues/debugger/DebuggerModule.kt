@@ -27,7 +27,7 @@ internal object DebuggerModule : AppcuesModule {
         }
 
         scoped {
-            DebuggerFontManager(context = get(), logcues = get())
+            DebuggerFontManager(appcuesConfig = get(), context = get(), logcues = get())
         }
 
         scoped { DebuggerLogMessageManager(get()) }

@@ -48,6 +48,7 @@ import com.appcues.data.model.styling.ComponentDataType.TEXT
 import com.appcues.data.model.styling.ComponentDataType.URL
 import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.ui.composables.LocalExperienceStepFormStateDelegate
+import com.appcues.ui.composables.LocalPackageNames
 import com.appcues.ui.extensions.applyStyle
 import com.appcues.ui.extensions.checkErrorStyle
 import com.appcues.ui.extensions.getColor
@@ -87,6 +88,7 @@ internal fun TextInputPrimitive.Compose(modifier: Modifier) {
     val textStyle = LocalTextStyle.current.applyStyle(
         style = textFieldStyle,
         context = LocalContext.current,
+        packageNames = LocalPackageNames.current,
         isDark = isDark,
     )
 
