@@ -60,6 +60,8 @@ internal val LocalStackScope = compositionLocalOf { StackScope.COLUMN }
 
 internal val LocalChromeClient = compositionLocalOf { WebChromeClient() }
 
+internal val LocalPackageNames = compositionLocalOf { listOf<String>() }
+
 internal enum class StackScope {
     ROW, COLUMN
 }

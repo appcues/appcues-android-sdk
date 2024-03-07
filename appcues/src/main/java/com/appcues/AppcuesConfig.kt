@@ -90,6 +90,12 @@ public data class AppcuesConfig internal constructor(
      */
     var additionalAutoProperties: Map<String, Any> = emptyMap()
 
+    /**
+     * Optional property that allows for setting custom package list for fonts, mostly used when your fonts are stored in
+     * a different package than your main app (multi-module apps)
+     */
+    var packageNames: List<String> = arrayListOf()
+
     // internally used for ui test on debug variant
     internal var imageLoader: ImageLoader? = null
     internal var configApiBasePath: String? = null

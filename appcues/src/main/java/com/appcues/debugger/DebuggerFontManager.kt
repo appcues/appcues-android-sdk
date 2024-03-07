@@ -7,12 +7,14 @@ import android.os.Build.VERSION_CODES
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.Typeface
+import com.appcues.AppcuesConfig
 import com.appcues.debugger.model.DebuggerFontItem
 import com.appcues.logging.Logcues
 import java.io.File
 import java.io.IOException
 
 internal class DebuggerFontManager(
+    private val appcuesConfig: AppcuesConfig,
     private val context: Context,
     private val logcues: Logcues,
 ) {
@@ -33,18 +35,26 @@ internal class DebuggerFontManager(
 
     fun getAppSpecificFonts(): List<DebuggerFontItem> {
         val debugFonts = mutableListOf<DebuggerFontItem>()
-        addFontResources(debugFonts)
+
+        // merging default packageName with custom list
+        val packageNames = mutableSetOf<String>().apply {
+            add(context.packageName)
+            addAll(appcuesConfig.packageNames)
+        }
+
+        packageNames.forEach { addFontResources(it, debugFonts) }
+
         addFontAssets(debugFonts)
         debugFonts.sortWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.name })
         return debugFonts
     }
 
-    private fun addFontResources(debugFonts: MutableList<DebuggerFontItem>) {
+    private fun addFontResources(packageName: String, debugFonts: MutableList<DebuggerFontItem>) {
         // for API 26+ we can attempt to read any fonts from app Resources using
         // reflection on the app.package.name.R$font class
         if (VERSION.SDK_INT >= VERSION_CODES.O) {
             try {
-                val kClass = Class.forName(context.packageName + ".R\$font")
+                val kClass = Class.forName("$packageName.R\$font")
                 val fontFields = kClass.fields
                 for (field in fontFields) {
                     val fontResourceId = field.getInt(null)

@@ -21,6 +21,7 @@ import com.appcues.data.model.ExperiencePrimitive.SpacerPrimitive
 import com.appcues.data.model.styling.ComponentDistribution
 import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.data.model.styling.ComponentStyle.ComponentHorizontalAlignment
+import com.appcues.ui.composables.LocalPackageNames
 import com.appcues.ui.composables.LocalStackScope
 import com.appcues.ui.composables.StackScope
 import com.appcues.ui.extensions.getTextStyle
@@ -38,7 +39,7 @@ internal fun HorizontalStackPrimitive.Compose(modifier: Modifier) {
         verticalAlignment = verticalAlignment
     ) {
         CompositionLocalProvider(LocalStackScope provides StackScope.ROW) {
-            ProvideTextStyle(style.getTextStyle(LocalContext.current, isSystemInDarkTheme())) {
+            ProvideTextStyle(style.getTextStyle(LocalContext.current, LocalPackageNames.current, isSystemInDarkTheme())) {
                 items.forEach {
                     ItemBox(distribution = distribution, primitive = it, parentVerticalAlignment = verticalAlignment) {
                         it.Compose()

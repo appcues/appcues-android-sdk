@@ -33,6 +33,7 @@ internal fun AppcuesComposition(
     imageLoader: ImageLoader,
     logcues: Logcues,
     chromeClient: WebChromeClient,
+    packageNames: List<String>
 ) {
     // ensure to change some colors to match appropriate design for custom primitive blocks
     AppcuesExperienceTheme {
@@ -42,6 +43,7 @@ internal fun AppcuesComposition(
             LocalViewModel provides viewModel,
             LocalLogcues provides logcues,
             LocalChromeClient provides chromeClient,
+            LocalPackageNames provides packageNames,
             LocalAppcuesActionDelegate provides DefaultAppcuesActionsDelegate(viewModel),
             LocalAppcuesPaginationDelegate provides AppcuesPagination { viewModel.onPageChanged(it) },
             LocalExperienceCompositionState provides ExperienceCompositionState()
