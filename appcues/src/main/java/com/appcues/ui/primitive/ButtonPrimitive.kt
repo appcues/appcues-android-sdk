@@ -1,6 +1,5 @@
 package com.appcues.ui.primitive
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.ProvideTextStyle
@@ -8,10 +7,8 @@ import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import com.appcues.data.model.ExperiencePrimitive.ButtonPrimitive
 import com.appcues.data.model.styling.ComponentStyle
-import com.appcues.ui.composables.LocalPackageNames
 import com.appcues.ui.extensions.getBoxAlignment
 import com.appcues.ui.extensions.getTextStyle
 
@@ -21,7 +18,7 @@ internal fun ButtonPrimitive.Compose(modifier: Modifier) {
         modifier = modifier,
         color = Color.Transparent,
     ) {
-        ProvideTextStyle(style.getTextStyle(LocalContext.current, LocalPackageNames.current, isSystemInDarkTheme())) {
+        ProvideTextStyle(style.getTextStyle()) {
             Box(
                 contentAlignment = content.style.getBoxAlignment(),
                 modifier = Modifier.styleButtonContentWidth(style),

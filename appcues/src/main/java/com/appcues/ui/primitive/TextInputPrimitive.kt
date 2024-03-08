@@ -23,7 +23,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -48,7 +47,6 @@ import com.appcues.data.model.styling.ComponentDataType.TEXT
 import com.appcues.data.model.styling.ComponentDataType.URL
 import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.ui.composables.LocalExperienceStepFormStateDelegate
-import com.appcues.ui.composables.LocalPackageNames
 import com.appcues.ui.extensions.applyStyle
 import com.appcues.ui.extensions.checkErrorStyle
 import com.appcues.ui.extensions.getColor
@@ -75,7 +73,6 @@ private const val LINE_HEIGHT_MULTIPLIER = 1.3f
 // default top and bottom padding for a TextField
 private const val TEXT_INPUT_PADDING = 16.0
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 internal fun TextInputPrimitive.Compose(modifier: Modifier) {
 
@@ -85,12 +82,7 @@ internal fun TextInputPrimitive.Compose(modifier: Modifier) {
     val showError = formState.shouldShowError(this)
     val errorTint = if (showError) errorLabel?.style?.foregroundColor else null
     val isDark = isSystemInDarkTheme()
-    val textStyle = LocalTextStyle.current.applyStyle(
-        style = textFieldStyle,
-        context = LocalContext.current,
-        packageNames = LocalPackageNames.current,
-        isDark = isDark,
-    )
+    val textStyle = LocalTextStyle.current.applyStyle(textFieldStyle)
 
     // this avoids recalculating the label style unless the showError state changes
     val updatedLabel = remember(showError) {

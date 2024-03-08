@@ -7,10 +7,14 @@ import android.graphics.Typeface
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -23,6 +27,8 @@ import androidx.compose.ui.unit.sp
 import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.data.model.styling.ComponentStyle.ComponentHorizontalAlignment
 import com.appcues.data.model.styling.ComponentStyle.ComponentVerticalAlignment
+import com.appcues.ui.composables.LocalLogcues
+import com.appcues.ui.composables.LocalPackageNames
 import java.io.File
 
 internal fun ComponentStyle?.getMargins(defaultValue: Dp = 0.dp): PaddingValues {
@@ -58,11 +64,27 @@ internal fun ComponentStyle.getTextAlignment(): TextAlign? {
     }
 }
 
-internal fun ComponentStyle.getFontFamily(context: Context, packageNames: List<String>): FontFamily? {
-    return FontFamily.getSystemFontFamily(fontName)
+@Composable
+internal fun ComponentStyle.getFontFamily(): FontFamily? {
+    val context = LocalContext.current
+    val packageNames = LocalPackageNames.current
+    val fontFamily = FontFamily.getSystemFontFamily(fontName)
         ?: FontFamily.getFontResource(context, packageNames, fontName)
         ?: FontFamily.getFontAsset(context, fontName)
         ?: FontFamily.getSystemFont(fontName)
+
+    val logcues = LocalLogcues.current
+    LaunchedEffect(Unit) {
+        if (fontName != null && fontFamily == null) {
+            logcues.error(
+                "Font \"$fontName\" not found. Make sure to place it in your main app " +
+                    "package or in one of the provided packageNames during SDK initialization"
+            )
+        }
+    }
+
+
+    return fontFamily
 }
 
 // handle system fonts available in Compose with variable weight
@@ -250,13 +272,14 @@ internal fun getBoxAlignment(
     return BiasAlignment(horizontalBias, verticalBias)
 }
 
-internal fun ComponentStyle.getTextStyle(context: Context, packageNames: List<String>, isDark: Boolean): TextStyle {
+@Composable
+internal fun ComponentStyle.getTextStyle(): TextStyle {
     return TextStyle(
-        color = foregroundColor.getColor(isDark) ?: Color.Unspecified,
+        color = foregroundColor.getColor(isSystemInDarkTheme()) ?: Color.Unspecified,
         fontSize = fontSize?.sp ?: TextUnit.Unspecified,
         lineHeight = lineHeight?.sp ?: TextUnit.Unspecified,
         textAlign = getTextAlignment() ?: TextAlign.Unspecified,
-        fontFamily = getFontFamily(context, packageNames),
+        fontFamily = getFontFamily(),
         letterSpacing = letterSpacing?.sp ?: TextUnit.Unspecified,
         fontWeight = getFontWeight(),
     )

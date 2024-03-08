@@ -42,7 +42,6 @@ class ExampleApplication : Application() {
 
         appcues = Appcues(this, BuildConfig.APPCUES_ACCOUNT_ID, BuildConfig.APPCUES_APPLICATION_ID) {
             loggingLevel = if (BuildConfig.DEBUG) LoggingLevel.DEBUG else LoggingLevel.INFO
-            packageNames = listOf("com.appcues.samples.kotlin.module")
             navigationHandler = object : NavigationHandler {
                 // This is an example where we're processing navigation requests coming from Appcues experiences,
                 // but simply forwarding them on to start an Activity from an Intent with the given Uri. If an application
