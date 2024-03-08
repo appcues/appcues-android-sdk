@@ -35,6 +35,7 @@ import com.appcues.logging.LogMessage
 import com.appcues.logging.LogType.DEBUG
 import com.appcues.logging.LogType.ERROR
 import com.appcues.logging.LogType.INFO
+import com.appcues.logging.LogType.WARNING
 
 private val firstVisibleItemOffsetThreshold = 56.dp
 
@@ -43,15 +44,17 @@ internal fun DebuggerLogDetails(message: LogMessage, navController: NavHostContr
     val scrollState = rememberScrollState()
     val context = LocalContext.current
     val clipboard = LocalClipboardManager.current
+    val theme = LocalAppcuesTheme.current
     val color = when (message.type) {
-        INFO, DEBUG -> LocalAppcuesTheme.current.primary
-        ERROR -> LocalAppcuesTheme.current.error
+        INFO, DEBUG -> theme.primary
+        ERROR -> theme.error
+        WARNING -> theme.warning
     }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(LocalAppcuesTheme.current.background)
+            .background(theme.background)
             .verticalScroll(scrollState)
             .padding(16.dp)
     ) {
@@ -66,7 +69,7 @@ internal fun DebuggerLogDetails(message: LogMessage, navController: NavHostContr
         ) {
             Text(
                 text = text,
-                color = LocalAppcuesTheme.current.link
+                color = theme.link
             )
         }
 

@@ -3,6 +3,7 @@ package com.appcues.logging
 import com.appcues.logging.LogType.DEBUG
 import com.appcues.logging.LogType.ERROR
 import com.appcues.logging.LogType.INFO
+import com.appcues.logging.LogType.WARNING
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -22,6 +23,10 @@ internal class Logcues(private val dispatcher: CoroutineDispatcher = Dispatchers
 
     fun info(message: String) {
         launch { _messageFlow.emit(LogMessage(message, INFO, Date())) }
+    }
+
+    fun warning(message: String) {
+        launch { _messageFlow.emit(LogMessage(message, WARNING, Date())) }
     }
 
     fun debug(message: String) {

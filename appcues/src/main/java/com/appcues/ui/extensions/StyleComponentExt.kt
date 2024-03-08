@@ -76,13 +76,13 @@ internal fun ComponentStyle.getFontFamily(): FontFamily? {
     val logcues = LocalLogcues.current
     LaunchedEffect(Unit) {
         if (fontName != null && fontFamily == null) {
-            logcues.error(
+            logcues.warning(
                 "Font \"$fontName\" not found. Make sure to place it in your main app " +
                     "package or in one of the provided packageNames during SDK initialization"
             )
         }
     }
-    
+
     return fontFamily
 }
 
