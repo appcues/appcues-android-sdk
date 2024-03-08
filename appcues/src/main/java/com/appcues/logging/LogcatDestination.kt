@@ -6,6 +6,7 @@ import com.appcues.LoggingLevel.NONE
 import com.appcues.logging.LogType.DEBUG
 import com.appcues.logging.LogType.ERROR
 import com.appcues.logging.LogType.INFO
+import com.appcues.logging.LogType.WARNING
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -33,12 +34,13 @@ internal class LogcatDestination(
     }
 
     private fun LogMessage.log() {
-        if (type == INFO) {
-            Log.i(TAG, message)
-        } else if (type == ERROR) {
-            Log.e(TAG, message)
-        } else if (type == DEBUG && level == LoggingLevel.DEBUG) {
-            Log.d(TAG, message)
+        when (type) {
+            INFO -> Log.i(TAG, message)
+            WARNING -> Log.w(TAG, message)
+            ERROR -> Log.e(TAG, message)
+            DEBUG -> if (level == LoggingLevel.DEBUG) {
+                Log.d(TAG, message)
+            }
         }
     }
 }

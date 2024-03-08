@@ -23,6 +23,18 @@ internal class LogcuesTest {
     }
 
     @Test
+    fun `warning SHOULD emit warning message`() = runBlocking {
+        // WHEN
+        logcues.warning("message")
+        // THEN
+        logcues.messageFlow.test {
+            val log = awaitItem()
+            assertThat(log.type).isEqualTo(LogType.WARNING)
+            assertThat(log.message).isEqualTo("message")
+        }
+    }
+
+    @Test
     fun `debug SHOULD emit debug message`() = runBlocking {
         // WHEN
         logcues.debug("message")
