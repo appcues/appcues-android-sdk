@@ -1,6 +1,7 @@
 package com.appcues.ui.extensions
 
-import android.content.Context
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -12,33 +13,36 @@ import androidx.compose.ui.unit.sp
 import com.appcues.data.model.ExperiencePrimitive.TextSpanPrimitive
 import com.appcues.data.model.styling.ComponentStyle
 
-internal fun TextStyle.applyStyle(style: ComponentStyle, context: Context, packageNames: List<String>, isDark: Boolean): TextStyle {
+@Composable
+internal fun TextStyle.applyStyle(style: ComponentStyle): TextStyle {
     return copy(
-        color = style.foregroundColor.getColor(isDark) ?: color,
+        color = style.foregroundColor.getColor(isSystemInDarkTheme()) ?: color,
         fontSize = style.fontSize?.sp ?: fontSize,
         lineHeight = style.lineHeight?.sp ?: lineHeight,
         textAlign = style.getTextAlignment() ?: textAlign,
-        fontFamily = style.getFontFamily(context, packageNames) ?: fontFamily,
+        fontFamily = style.getFontFamily() ?: fontFamily,
         letterSpacing = style.letterSpacing?.sp ?: letterSpacing,
         fontWeight = style.getFontWeight() ?: fontWeight,
     )
 }
 
-internal fun List<TextSpanPrimitive>.toAnnotatedString(context: Context, packageNames: List<String>, isDark: Boolean): AnnotatedString {
+@Composable
+internal fun List<TextSpanPrimitive>.toAnnotatedString(): AnnotatedString {
     return buildAnnotatedString {
         forEach {
-            withStyle(style = it.style.toSpanStyle(context, packageNames, isDark)) {
+            withStyle(style = it.style.toSpanStyle()) {
                 append(it.text)
             }
         }
     }
 }
 
-private fun ComponentStyle.toSpanStyle(context: Context, packageNames: List<String>, isDark: Boolean): SpanStyle {
+@Composable
+private fun ComponentStyle.toSpanStyle(): SpanStyle {
     return SpanStyle(
-        color = foregroundColor.getColor(isDark) ?: Color.Unspecified,
+        color = foregroundColor.getColor(isSystemInDarkTheme()) ?: Color.Unspecified,
         fontSize = fontSize?.sp ?: TextUnit.Unspecified,
-        fontFamily = getFontFamily(context, packageNames),
+        fontFamily = getFontFamily(),
         letterSpacing = letterSpacing?.sp ?: TextUnit.Unspecified,
         fontWeight = getFontWeight(),
     )

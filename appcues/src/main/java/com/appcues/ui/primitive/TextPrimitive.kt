@@ -1,6 +1,5 @@
 package com.appcues.ui.primitive
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -12,10 +11,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import com.appcues.data.model.ExperiencePrimitive.TextPrimitive
-import com.appcues.ui.composables.LocalPackageNames
 import com.appcues.ui.extensions.applyStyle
 import com.appcues.ui.extensions.toAnnotatedString
 
@@ -23,10 +20,7 @@ private const val TEXT_SCALE_REDUCTION_INTERVAL = 0.9f
 
 @Composable
 internal fun TextPrimitive.Compose(modifier: Modifier) {
-    val isDark = isSystemInDarkTheme()
-    val context = LocalContext.current
-    val packageNames = LocalPackageNames.current
-    val style = LocalTextStyle.current.applyStyle(style, context, packageNames, isDark)
+    val style = LocalTextStyle.current.applyStyle(style)
 
     var resizedStyle by remember(style) { mutableStateOf(style) }
     var resizedSpans by remember(style) { mutableStateOf(spans) }
@@ -38,7 +32,7 @@ internal fun TextPrimitive.Compose(modifier: Modifier) {
             modifier = modifier
                 .clipToBounds()
                 .drawWithContent { if (readyToDraw) drawContent() },
-            text = resizedSpans.toAnnotatedString(context, packageNames, isDark),
+            text = resizedSpans.toAnnotatedString(),
             style = resizedStyle,
             overflow = TextOverflow.Ellipsis,
             onTextLayout = { textLayoutResult ->
