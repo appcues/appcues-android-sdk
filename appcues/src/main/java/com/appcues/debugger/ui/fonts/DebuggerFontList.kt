@@ -33,12 +33,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.appcues.R
-import com.appcues.R.string
 import com.appcues.debugger.DebuggerViewModel
 import com.appcues.debugger.model.DebuggerFontItem
 import com.appcues.debugger.ui.AppcuesSearchView
 import com.appcues.debugger.ui.ds.DividerItem
 import com.appcues.debugger.ui.ds.FloatingBackButton
+import com.appcues.debugger.ui.ds.InfoBox
 import com.appcues.debugger.ui.ds.TextHeader
 import com.appcues.debugger.ui.lazyColumnScrollIndicator
 import com.appcues.debugger.ui.shared.copyToClipboardAndToast
@@ -95,6 +95,8 @@ internal fun DebuggerFontList(
             fonts(appSpecificFontsFiltered.value)
         }
 
+        info(R.string.appcues_debugger_fonts_informative)
+
         if (systemFontsFiltered.value.any()) {
             sectionTitle(R.string.appcues_debugger_font_details_system_title)
             fonts(systemFontsFiltered.value)
@@ -144,7 +146,7 @@ private fun FontDetailsOverlay(
                 .padding(start = 60.dp, top = 12.dp, end = 8.dp),
             height = 40.dp,
             elevation = elevation.value,
-            hint = LocalContext.current.getString(string.appcues_debugger_font_details_hint),
+            hint = LocalContext.current.getString(R.string.appcues_debugger_font_details_hint),
             inputDelay = 300,
         ) { filter.value = it.lowercase() }
     }
@@ -156,6 +158,12 @@ private fun LazyListScope.sectionTitle(resId: Int) {
             modifier = Modifier.padding(start = 20.dp, top = 20.dp, bottom = 16.dp),
             text = LocalContext.current.getString(resId)
         )
+    }
+}
+
+private fun LazyListScope.info(resId: Int) {
+    item {
+        InfoBox(text = LocalContext.current.getString(resId))
     }
 }
 

@@ -82,8 +82,7 @@ internal fun ComponentStyle.getFontFamily(): FontFamily? {
             )
         }
     }
-
-
+    
     return fontFamily
 }
 

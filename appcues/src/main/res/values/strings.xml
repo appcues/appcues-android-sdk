@@ -98,6 +98,7 @@
     <string name="appcues_debugger_item_title">%1$s: %2$s</string>
 
     <string name="appcues_debugger_clipboard_copy_message">Copied to clipboard</string>
+    <string name="appcues_debugger_fonts_informative">Not finding your font? please check if your app needs additional package names provided at SDK initialization.</string>
 
     <!-- Screen Capture Dialog -->
     <string name="appcues_screen_capture_dismiss">dismiss</string>
