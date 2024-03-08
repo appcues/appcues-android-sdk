@@ -47,6 +47,7 @@ $dokka.location:com.appcues/AppcuesConfig/experienceListener/#/PointingToDeclara
 $dokka.location:com.appcues/AppcuesConfig/interceptor/#/PointingToDeclaration/appcues/com.appcues/-appcues-config/interceptor.html
 $dokka.location:com.appcues/AppcuesConfig/loggingLevel/#/PointingToDeclaration/appcues/com.appcues/-appcues-config/logging-level.html
 $dokka.location:com.appcues/AppcuesConfig/navigationHandler/#/PointingToDeclaration/appcues/com.appcues/-appcues-config/navigation-handler.html
+$dokka.location:com.appcues/AppcuesConfig/packageNames/#/PointingToDeclaration/appcues/com.appcues/-appcues-config/package-names.html
 $dokka.location:com.appcues/AppcuesConfig/sessionTimeout/#/PointingToDeclaration/appcues/com.appcues/-appcues-config/session-timeout.html
 $dokka.location:com.appcues/AppcuesFrameView///PointingToDeclaration/appcues/com.appcues/-appcues-frame-view/index.html
 $dokka.location:com.appcues/AppcuesFrameView/AppcuesFrameView/#android.content.Context#android.util.AttributeSet?#kotlin.Int/PointingToDeclaration/appcues/com.appcues/-appcues-frame-view/-appcues-frame-view.html
