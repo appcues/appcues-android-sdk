@@ -1,5 +1,6 @@
 package com.appcues.debugger.ui.events
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,6 +18,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
@@ -30,6 +32,7 @@ import com.appcues.debugger.ui.ds.TextPrimary
 import com.appcues.debugger.ui.ds.TextSecondary
 import com.appcues.debugger.ui.getTitleString
 import com.appcues.debugger.ui.lazyColumnScrollIndicator
+import com.appcues.debugger.ui.shared.copyToClipboardAndToast
 import java.sql.Timestamp
 
 private val firstVisibleItemOffsetThreshold = 56.dp
@@ -119,9 +122,13 @@ private fun LazyListScope.properties(properties: List<Pair<String, Any?>>) {
 
 @Composable
 private fun LazyItemScope.ListItem(key: String, value: String) {
+    val clipboard = LocalClipboardManager.current
+    val context = LocalContext.current
+
     Row(
         modifier = Modifier
             .fillParentMaxWidth()
+            .clickable { copyToClipboardAndToast(context, clipboard, value) }
             .padding(horizontal = 20.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
