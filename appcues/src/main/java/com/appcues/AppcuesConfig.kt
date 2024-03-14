@@ -29,6 +29,12 @@ public data class AppcuesConfig internal constructor(
     var apiBasePath: String? = null
 
     /**
+     * Defines custom api settings path for the SDK. This path should consist of the scheme, host, and any additional
+     * path prefix required. If Not defined it will point to the default Appcues host: https://fast.appcues.com/
+     */
+    var apiSettingsPath: String? = null
+
+    /**
      * Set the factory responsible for generating anonymous user IDs.
      */
     var anonymousIdFactory: (() -> String)? = null
@@ -98,5 +104,4 @@ public data class AppcuesConfig internal constructor(
 
     // internally used for ui test on debug variant
     internal var imageLoader: ImageLoader? = null
-    internal var configApiBasePath: String? = null
 }

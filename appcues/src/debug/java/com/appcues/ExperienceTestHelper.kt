@@ -15,13 +15,11 @@ public fun Appcues(
     accountId: String,
     applicationId: String,
     imageLoader: ImageLoader?,
-    configApiBasePath: String? = null,
     config: (AppcuesConfig.() -> Unit)? = null,
 ): Appcues = Bootstrap.createScope(
     context = context,
     config = AppcuesConfig(accountId, applicationId).apply {
         config?.invoke(this)
         this.imageLoader = imageLoader
-        this.configApiBasePath = configApiBasePath
     }
 ).get()
