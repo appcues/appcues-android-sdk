@@ -281,6 +281,17 @@ public class Appcues internal constructor(internal val scope: AppcuesScope) {
     }
 
     /**
+     * Provide the option to opt out of appcues push
+     *
+     * @param optOut boolean representing subscription status for this session
+     */
+    public fun pushOptOut(optOut: Boolean) {
+        storage.pushOptOut = optOut
+
+        analyticsTracker.track(AnalyticsEvent.DeviceUpdated.eventName, properties = null, interactive = false, isInternal = true)
+    }
+
+    /**
      * Enables automatic screen tracking for Activities.
      */
     public fun trackScreens() {

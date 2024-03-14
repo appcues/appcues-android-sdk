@@ -214,6 +214,7 @@ internal class AutoPropertyDecoratorTest {
                 assertThat(containsKey("_pushToken")).isTrue()
                 assertThat(containsKey("_pushEnabledBackground")).isTrue()
                 assertThat(containsKey("_pushEnabled")).isTrue()
+                assertThat(containsKey("_pushSubscriptionStatus")).isTrue()
             }
         }
     }

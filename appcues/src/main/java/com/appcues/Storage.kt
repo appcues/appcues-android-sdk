@@ -14,6 +14,7 @@ internal class Storage(
     private enum class Constants(val rawVal: String) {
         DeviceId("appcues.deviceId"),
         PushToken("appcues.pushToken"),
+        PushOptOut("appcues.pushOptOut"),
         UserId("appcues.userId"),
         GroupId("appcues.groupId"),
         IsAnonymous("appcues.isAnonymous"),
@@ -33,6 +34,10 @@ internal class Storage(
     var pushToken: String?
         get() = allowReads { sharedPreferences.getString(Constants.PushToken.rawVal, null) }
         set(value) = sharedPreferences.edit().putString(Constants.PushToken.rawVal, value).apply()
+
+    var pushOptOut: Boolean
+        get() = allowReads { sharedPreferences.getBoolean(Constants.PushOptOut.rawVal, false) }
+        set(value) = sharedPreferences.edit().putBoolean(Constants.PushOptOut.rawVal, value).apply()
 
     var userId: String
         get() = allowReads { sharedPreferences.getString(Constants.UserId.rawVal, null) ?: "" }
