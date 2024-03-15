@@ -44,6 +44,11 @@ internal class SessionMonitor(
     fun startNewSession(): UUID? {
         if (storage.userId.isEmpty()) return null
 
+        // during the start of a new session, check if there is a new pushToken to set.
+        if (Appcues.pushToken != null && Appcues.pushToken != storage.pushToken) {
+            storage.pushToken = Appcues.pushToken
+        }
+
         return UUID.randomUUID().also {
             _sessionId = it
             updateLastActivity()
