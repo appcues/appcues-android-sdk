@@ -24,7 +24,10 @@ import com.appcues.debugger.model.StatusType.UNKNOWN
 import com.appcues.debugger.model.TapActionType
 import com.appcues.debugger.model.TapActionType.DEEPLINK_CHECK
 import com.appcues.debugger.model.TapActionType.HEALTH_CHECK
+import com.appcues.debugger.model.TapActionType.PUSH_CHECK
 import com.appcues.util.ContextWrapper
+import com.appcues.util.ResultOf.Failure
+import com.appcues.util.ResultOf.Success
 import com.appcues.util.resolveActivityCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -52,6 +55,9 @@ internal class DebuggerStatusManager(
         get() = Dispatchers.Default
 
     private var connectedToAppcues: Boolean? = false
+
+    private var pushConfigured: Boolean? = null
+    private var pushErrorText: String? = null
 
     private var deepLinkConfigured: Boolean? = null
     private var deepLinkValidationToken: String? = null
@@ -159,6 +165,7 @@ internal class DebuggerStatusManager(
                 sdkInfoItem(),
                 connectionCheckItem(),
                 deepLinkCheckItem(),
+                pushCheckItem(),
                 trackingScreenCheckItem(),
                 identifyUserItem(),
                 identifyGroupItem()
@@ -212,6 +219,22 @@ internal class DebuggerStatusManager(
             statusType = statusType,
             showRefreshIcon = statusType == UNKNOWN,
             tapActionType = DEEPLINK_CHECK
+        )
+    }
+
+    private fun pushCheckItem() = (pushConfigured?.let { if (it) SUCCESS else ERROR } ?: UNKNOWN).let { statusType ->
+        DebuggerStatusItem(
+            title = contextWrapper.getString(R.string.appcues_debugger_status_check_push_title),
+            line1 = statusType.let {
+                when (it) {
+                    UNKNOWN -> contextWrapper.getString(R.string.appcues_debugger_status_check_push_instruction)
+                    ERROR -> pushErrorText
+                    else -> null
+                }
+            },
+            statusType = statusType,
+            showRefreshIcon = statusType == UNKNOWN,
+            tapActionType = PUSH_CHECK
         )
     }
 
@@ -271,6 +294,7 @@ internal class DebuggerStatusManager(
         when (tapActionType) {
             HEALTH_CHECK -> connectToAppcues(true)
             DEEPLINK_CHECK -> checkDeepLinkIntentFilter()
+            PUSH_CHECK -> checkPushValidation()
         }
     }
 
@@ -325,6 +349,23 @@ internal class DebuggerStatusManager(
                 deepLinkConfigured = false
                 deepLinkErrorText = contextWrapper.getString(R.string.appcues_debugger_status_check_deep_link_error_manifest)
                 updateData()
+            }
+        }
+    }
+
+    suspend fun checkPushValidation() {
+        if (pushConfigured == true) return
+
+        pushErrorText = null
+
+        when (val result = appcuesRemoteSource.checkAppcuesPush()) {
+            is Failure -> {
+                pushErrorText = "something when wrong"
+                // 500 - app_config_not_found
+                pushConfigured = false
+            }
+            is Success -> {
+                pushConfigured = true
             }
         }
     }
