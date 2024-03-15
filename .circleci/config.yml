@@ -63,6 +63,9 @@ commands:
       - aws-s3/copy:
           from: 's3://appcues-mobile-certs/appcues.keystore'
           to: './'
+      - aws-s3/copy:
+          from: 's3://appcues-mobile-certs/appcues-kotlin-example-google-services.json'
+          to: './samples/kotlin-android-app/google-services.json'
       - run:
           name: Generate Gradle cache key
           command: ./checksum.sh /tmp/checksum.txt
