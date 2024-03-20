@@ -1,20 +1,43 @@
 package com.appcues.util
 
 import android.annotation.SuppressLint
+import android.app.Application
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
+import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import com.appcues.AppcuesFirebaseMessagingService.AppcuesMessagingData
+import com.appcues.R
 import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URL
 
-internal fun NotificationCompat.Builder.setStyle(data: AppcuesMessagingData) = apply {
+internal fun Context.getNotificationBuilder(
+    channelId: String,
+    channelName: String,
+    channelDescription: String
+): NotificationCompat.Builder {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        with(getSystemService(Application.NOTIFICATION_SERVICE) as NotificationManager) {
+            createNotificationChannel(
+                NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT)
+                    .apply { description = channelDescription }
+            )
+        }
+    }
+
+    return NotificationCompat.Builder(this, channelId)
+}
+
+internal fun NotificationCompat.Builder.setStyle(context: Context, data: AppcuesMessagingData) = apply {
     downloadImageFromUrl(data.imageUrl)?.let { image ->
         setStyle(
             NotificationCompat.BigPictureStyle()
@@ -27,23 +50,20 @@ internal fun NotificationCompat.Builder.setStyle(data: AppcuesMessagingData) = a
                 .bigText(data.body)
         )
     }
+
+    // those should be custom icons and colors coming from customer side
+    setSmallIcon(R.drawable.appcues_ic_white_logo)
+    setColor(ContextCompat.getColor(context, android.R.color.background_dark))
 }
 
+@SuppressLint("QueryPermissionsNeeded")
 internal fun NotificationCompat.Builder.setContentIntent(context: Context, data: AppcuesMessagingData) = apply {
-    val intent = Intent().apply {
-        addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-
-        setAction(Intent.ACTION_VIEW)
-
-        if (data.deepLink != null) {
-            setData(Uri.parse(data.deepLink))
-        }
-    }
-
-    // Need to get valid launch activity and create intent from that.
-    setContentIntent(
-        PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE)
-    )
+    val deepLink = "appcues-${data.appId}://sdk/notification"
+    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(deepLink))
+    intent.putExtra("notification_id", data.notificationId)
+    intent.putExtra("forward_deeplink", data.deepLink)
+    intent.putExtra("show_content", data.experienceId)
+    setContentIntent(PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE))
 }
 
 @SuppressLint("MissingPermission")

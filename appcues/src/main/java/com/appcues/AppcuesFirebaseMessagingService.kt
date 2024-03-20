@@ -2,10 +2,11 @@ package com.appcues
 
 import android.Manifest.permission
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import androidx.core.app.ActivityCompat
-import androidx.core.app.NotificationCompat
-import androidx.core.content.ContextCompat
+import com.appcues.util.getNotificationBuilder
 import com.appcues.util.notify
 import com.appcues.util.setContentIntent
 import com.appcues.util.setStyle
@@ -22,6 +23,8 @@ public class AppcuesFirebaseMessagingService : FirebaseMessagingService() {
 
     public companion object {
 
+        private var notificationId = 0
+
         /**
          * handleMessage will try to parse the received message into an Appcues notification, if it does it will return true,
          * or false in case the message is not for Appcues to handle
@@ -33,27 +36,37 @@ public class AppcuesFirebaseMessagingService : FirebaseMessagingService() {
          */
         @JvmStatic
         public fun handleMessage(context: Context, message: RemoteMessage): Boolean {
-            // check for permission
-            if (ActivityCompat.checkSelfPermission(context, permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED)
-                return false
-
             val data = try {
                 AppcuesMessagingData(message)
             } catch (_: IllegalStateException) {
                 return false
             }
 
-            val pm = context.packageManager
-            val appInfo = pm.getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
+            if (data.isTesting) {
+                // during testing we just want to validate that push message came through
+                context.startActivity(
+                    Intent(Intent.ACTION_VIEW, Uri.parse("appcues-${data.appId}://sdk/debugger/push-token")).apply {
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    }
+                )
+                return true
+            }
 
-            NotificationCompat.Builder(context, "Appcues")
+            // maybe this will be provided within the message somehow?
+            val defaultChannelId = "Appcues"
+            val defaultChannelName = "Appcues"
+            val defaultChannelDescription = "Appcues default channel"
+            // check for permission
+            if (ActivityCompat.checkSelfPermission(context, permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED)
+                return false
+
+            context.getNotificationBuilder(defaultChannelId, defaultChannelName, defaultChannelDescription)
                 .setContentTitle(data.title)
                 .setContentText(data.body)
                 .setAutoCancel(true)
-                .setSmallIcon(appInfo.icon) // Not working as intended
-                .setStyle(data)
+                .setStyle(context, data)
                 .setContentIntent(context, data)
-                .notify(1, context)
+                .notify(notificationId++, context)
 
             return true
         }
@@ -70,17 +83,22 @@ public class AppcuesFirebaseMessagingService : FirebaseMessagingService() {
     }
 
     internal class AppcuesMessagingData(message: RemoteMessage) {
+
         // required
-        val title: String = message.data["title"] ?: throw IllegalStateException("title not found")
-        val body: String = message.data["body"] ?: throw IllegalStateException("body not found")
-        val userId: String = message.data["appcues_user_id"] ?: throw IllegalStateException("appcues_user_id not found")
-        val notificationId: String =
-            message.data["appcues_notification_id"] ?: throw IllegalStateException("appcues_notification_id not found")
+        val userId: String = message.data["appcues_user_id"] ?: throw PropertyNotFound("appcues_user_id")
+        val accountId: String = message.data["appcues_account_id"] ?: throw PropertyNotFound("appcues_user_id")
+        val appId: String = message.data["appcues_app_id"] ?: throw PropertyNotFound("appcues_app_id")
+        val notificationId: String = message.data["appcues_notification_id"] ?: throw PropertyNotFound("appcues_notification_id")
+        val title: String = message.data["title"] ?: throw PropertyNotFound("title")
+        val body: String = message.data["body"] ?: throw PropertyNotFound("body")
+        val isTesting: Boolean = message.data.containsKey("appcues_test")
 
         // optional values
         val imageUrl: String? = message.data["appcues_attachment_url"]
         val deepLink: String? = message.data["appcues_deep_link_url"]
         val experienceId: String? = message.data["appcues_experience_id"]
+
+        private class PropertyNotFound(property: String) : IllegalStateException("AppcuesMessagingData: $property not found.")
     }
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {

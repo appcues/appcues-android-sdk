@@ -57,6 +57,7 @@ internal class DebuggerStatusManager(
     private var connectedToAppcues: Boolean? = false
 
     private var pushConfigured: Boolean? = null
+    private var pushValidationToken: String? = null
     private var pushErrorText: String? = null
 
     private var deepLinkConfigured: Boolean? = null
@@ -148,13 +149,20 @@ internal class DebuggerStatusManager(
     }
 
     suspend fun checkDeepLinkValidation(deepLinkPath: String): Boolean {
-        return if (deepLinkPath == deepLinkValidationToken) {
-            deepLinkConfigured = true
-            deepLinkValidationToken = null
-            updateData()
-            true
-        } else {
-            false
+        return when (deepLinkPath) {
+            deepLinkValidationToken -> {
+                deepLinkConfigured = true
+                deepLinkValidationToken = null
+                updateData()
+                true
+            }
+            pushValidationToken -> {
+                pushConfigured = true
+                pushValidationToken = null
+                updateData()
+                true
+            }
+            else -> false
         }
     }
 
@@ -322,7 +330,7 @@ internal class DebuggerStatusManager(
                 updateData()
             }
 
-            val token = "verify-${UUID.randomUUID()}"
+            val token = "deeplink-${UUID.randomUUID()}"
             val intent = Intent(Intent.ACTION_VIEW).apply {
                 data = Uri.parse("appcues-${appcuesConfig.applicationId}://sdk/debugger/$token")
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK
@@ -357,15 +365,20 @@ internal class DebuggerStatusManager(
         if (pushConfigured == true) return
 
         pushErrorText = null
+        pushValidationToken = "push-token"
 
         when (val result = appcuesRemoteSource.checkAppcuesPush()) {
             is Failure -> {
                 pushErrorText = "something when wrong"
                 // 500 - app_config_not_found
                 pushConfigured = false
+                pushValidationToken = null
+                updateData()
             }
             is Success -> {
                 pushConfigured = true
+                pushValidationToken = null
+                updateData()
             }
         }
     }
