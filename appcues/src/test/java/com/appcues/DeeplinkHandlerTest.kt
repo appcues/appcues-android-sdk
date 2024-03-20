@@ -2,6 +2,7 @@ package com.appcues
 
 import android.app.Activity
 import android.content.Intent
+import com.appcues.analytics.AnalyticsTracker
 import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperienceTrigger.DeepLink
 import com.appcues.debugger.AppcuesDebuggerManager
@@ -39,10 +40,11 @@ internal class DeeplinkHandlerTest {
     private val experienceRenderer: ExperienceRenderer = mockk(relaxed = true)
     private val appcuesCoroutineScope: AppcuesCoroutineScope = AppcuesCoroutineScope(Logcues())
     private val debuggerManager: AppcuesDebuggerManager = mockk(relaxed = true)
+    private val analyticsTracker: AnalyticsTracker = mockk(relaxed = true)
 
     @Before
     fun setUp() {
-        deepLinkHandler = DeepLinkHandler(config, experienceRenderer, appcuesCoroutineScope, debuggerManager)
+        deepLinkHandler = DeepLinkHandler(config, experienceRenderer, appcuesCoroutineScope, debuggerManager, analyticsTracker)
     }
 
     @Test
