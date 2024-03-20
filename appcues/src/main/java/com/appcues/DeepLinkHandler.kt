@@ -3,7 +3,10 @@ package com.appcues
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
+import android.os.Bundle
 import android.widget.Toast
+import com.appcues.analytics.AnalyticsEvent
+import com.appcues.analytics.AnalyticsTracker
 import com.appcues.data.model.ExperienceTrigger.DeepLink
 import com.appcues.debugger.AppcuesDebuggerManager
 import com.appcues.debugger.DebugMode.Debugger
@@ -21,18 +24,21 @@ internal class DeepLinkHandler(
     private val experienceRenderer: ExperienceRenderer,
     private val appcuesCoroutineScope: AppcuesCoroutineScope,
     private val debuggerManager: AppcuesDebuggerManager,
+    private val analyticsTracker: AnalyticsTracker,
 ) {
 
     fun handle(activity: Activity, intent: Intent?): Boolean {
-        val linkAction: String? = intent?.action
-        val linkData: Uri? = intent?.data
+        if (intent == null) return false
+        val linkAction: String? = intent.action
+        val linkData: Uri? = intent.data
+        val extras = intent.extras
 
         if (linkData != null) {
             val validScheme = linkData.scheme == "appcues-${config.applicationId}" || linkData.scheme == "appcues-democues"
             val validHost = linkData.host == "sdk"
 
             if (linkAction == Intent.ACTION_VIEW && validScheme && validHost) {
-                return processLink(linkData, activity)
+                return processLink(linkData, activity, extras)
             }
         }
 
@@ -51,7 +57,7 @@ internal class DeepLinkHandler(
     }
 
     // return true if handled
-    private fun processLink(linkData: Uri, activity: Activity): Boolean {
+    private fun processLink(linkData: Uri, activity: Activity, extras: Bundle?): Boolean {
         val segments = linkData.pathSegments
         val query = linkData.getQueryMap()
 
@@ -65,6 +71,26 @@ internal class DeepLinkHandler(
             segments.count() == 2 && segments[0] == "experience_content" -> {
                 appcuesCoroutineScope.launch {
                     experienceRenderer.show(segments[1], DeepLink, query)
+                }
+                true
+            }
+            segments.any() && segments[0] == "notification" && extras != null -> {
+                analyticsTracker.track(
+                    AnalyticsEvent.PushOpened.eventName,
+                    properties = mapOf("notification_id" to extras.getString("notification_id", null)),
+                    interactive = false,
+                    isInternal = true
+                )
+
+                extras.getString("forward_deeplink")?.let {
+                    // TODO forward to deeplink
+                }
+
+                extras.getString("show_content")?.let {
+                    appcuesCoroutineScope.launch {
+                        // query map here makes sense for localization? how to get this information
+                        experienceRenderer.show(it, DeepLink, mapOf())
+                    }
                 }
                 true
             }
