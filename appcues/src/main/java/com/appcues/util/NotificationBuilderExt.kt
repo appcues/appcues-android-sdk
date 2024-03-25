@@ -16,29 +16,43 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.appcues.AppcuesFirebaseMessagingService.AppcuesMessagingData
 import com.appcues.R
+import com.google.firebase.messaging.RemoteMessage
 import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URL
 
-internal fun Context.getNotificationBuilder(
-    channelId: String,
-    channelName: String,
-    channelDescription: String
-): NotificationCompat.Builder {
+// for now channels are not configurable, which means all push messages will come through the default channel defined in XML config
+internal fun Context.getNotificationBuilder(): NotificationCompat.Builder {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         with(getSystemService(Application.NOTIFICATION_SERVICE) as NotificationManager) {
+
             createNotificationChannel(
-                NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT)
-                    .apply { description = channelDescription }
+                NotificationChannel(
+                    getString(R.string.appcues_notification_channel_id),
+                    getString(R.string.appcues_notification_channel_name),
+                    resources.getInteger(R.integer.appcues_notification_channel_importance)
+                ).apply { description = getString(R.string.appcues_notification_channel_description) }
             )
         }
     }
 
-    return NotificationCompat.Builder(this, channelId)
+    return NotificationCompat.Builder(this, getString(R.string.appcues_notification_channel_id))
+}
+
+internal fun NotificationCompat.Builder.setupNotification(message: RemoteMessage) = apply {
+    setAutoCancel(true)
+    setPriority(message.priority)
+    message.notification?.visibility?.let { setVisibility(it) }
+    message.notification?.channelId?.let { setChannelId(it) }
+}
+
+internal fun NotificationCompat.Builder.setContent(data: AppcuesMessagingData) = apply {
+    setContentTitle(data.title)
+    setContentText(data.body)
 }
 
 internal fun NotificationCompat.Builder.setStyle(context: Context, data: AppcuesMessagingData) = apply {
-    downloadImageFromUrl(data.imageUrl)?.let { image ->
+    downloadImageFromUrl(data.image)?.let { image ->
         setStyle(
             NotificationCompat.BigPictureStyle()
                 .bigPicture(image)
@@ -51,17 +65,15 @@ internal fun NotificationCompat.Builder.setStyle(context: Context, data: Appcues
         )
     }
 
-    // those should be custom icons and colors coming from customer side
-    setSmallIcon(R.drawable.appcues_ic_white_logo)
-    setColor(ContextCompat.getColor(context, android.R.color.background_dark))
+    setSmallIcon(R.drawable.appcues_notification_small_icon)
+    setColor(ContextCompat.getColor(context, R.color.appcues_notification_color))
 }
 
-@SuppressLint("QueryPermissionsNeeded")
-internal fun NotificationCompat.Builder.setContentIntent(context: Context, data: AppcuesMessagingData) = apply {
+internal fun NotificationCompat.Builder.setIntent(context: Context, data: AppcuesMessagingData) = apply {
     val deepLink = "appcues-${data.appId}://sdk/notification"
     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(deepLink))
     intent.putExtra("notification_id", data.notificationId)
-    intent.putExtra("forward_deeplink", data.deepLink)
+    intent.putExtra("forward_deeplink", data.deeplink)
     intent.putExtra("show_content", data.experienceId)
     setContentIntent(PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE))
 }
