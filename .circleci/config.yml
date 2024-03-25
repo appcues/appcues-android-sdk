@@ -27,7 +27,7 @@ orbs:
 executors:
   android_compatible:
     machine: 
-      image: android:2023.07.1 #https://circleci.com/developer/machine/image/android
+      image: android:default
     resource_class: large
     working_directory: ~/code
 
