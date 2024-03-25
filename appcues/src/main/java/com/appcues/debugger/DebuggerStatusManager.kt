@@ -369,7 +369,8 @@ internal class DebuggerStatusManager(
 
         when (val result = appcuesRemoteSource.checkAppcuesPush()) {
             is Failure -> {
-                pushErrorText = "something when wrong"
+                // improve logging around this failure reason
+                pushErrorText = "something when wrong: ${result.reason}"
                 // 500 - app_config_not_found
                 pushConfigured = false
                 pushValidationToken = null
