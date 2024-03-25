@@ -1,11 +1,8 @@
 package com.appcues.samples.kotlin
 
 import android.app.Application
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.os.StrictMode
 import android.os.StrictMode.ThreadPolicy
 import android.os.StrictMode.VmPolicy
@@ -23,8 +20,6 @@ class ExampleApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
-
-        setupNotificationChannels()
 
         if (BuildConfig.DEBUG) {
             StrictMode.setThreadPolicy(
@@ -61,18 +56,6 @@ class ExampleApplication : Application() {
                     }
                     return true // navigation successful
                 }
-            }
-        }
-    }
-
-    private fun setupNotificationChannels() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            with(getSystemService(NOTIFICATION_SERVICE) as NotificationManager) {
-                createNotificationChannel(
-                    NotificationChannel("Appcues", "Appcues", NotificationManager.IMPORTANCE_DEFAULT).apply {
-                        description = "Internal Appcues Channel"
-                    }
-                )
             }
         }
     }
