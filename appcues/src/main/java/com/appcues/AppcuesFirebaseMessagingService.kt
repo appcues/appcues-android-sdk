@@ -6,12 +6,17 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import androidx.core.app.ActivityCompat
+import com.appcues.data.MoshiConfiguration
 import com.appcues.util.getNotificationBuilder
 import com.appcues.util.notify
-import com.appcues.util.setContentIntent
+import com.appcues.util.setContent
+import com.appcues.util.setIntent
 import com.appcues.util.setStyle
+import com.appcues.util.setupNotification
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 
 /**
  * Appcues Firebase Messaging Service implementation.
@@ -37,35 +42,31 @@ public class AppcuesFirebaseMessagingService : FirebaseMessagingService() {
         @JvmStatic
         public fun handleMessage(context: Context, message: RemoteMessage): Boolean {
             val data = try {
-                AppcuesMessagingData(message)
-            } catch (_: IllegalStateException) {
+                val appcuesData = message.data["appcues"] ?: throw IllegalStateException("Appcues message data not found.")
+                MoshiConfiguration.moshi.adapter(AppcuesMessagingData::class.java).fromJson(appcuesData)!!
+            } catch (_: Exception) {
+                // unable to get data, most likely means this message is not for us.
                 return false
             }
 
-            if (data.isTesting) {
+            if (data.test) {
                 // during testing we just want to validate that push message came through
                 context.startActivity(
                     Intent(Intent.ACTION_VIEW, Uri.parse("appcues-${data.appId}://sdk/debugger/push-token")).apply {
                         flags = Intent.FLAG_ACTIVITY_NEW_TASK
                     }
                 )
-                return true
             }
 
-            // maybe this will be provided within the message somehow?
-            val defaultChannelId = "Appcues"
-            val defaultChannelName = "Appcues"
-            val defaultChannelDescription = "Appcues default channel"
             // check for permission
             if (ActivityCompat.checkSelfPermission(context, permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED)
                 return false
 
-            context.getNotificationBuilder(defaultChannelId, defaultChannelName, defaultChannelDescription)
-                .setContentTitle(data.title)
-                .setContentText(data.body)
-                .setAutoCancel(true)
+            context.getNotificationBuilder()
+                .setupNotification(message)
+                .setContent(data)
                 .setStyle(context, data)
-                .setContentIntent(context, data)
+                .setIntent(context, data)
                 .notify(notificationId++, context)
 
             return true
@@ -82,24 +83,35 @@ public class AppcuesFirebaseMessagingService : FirebaseMessagingService() {
         }
     }
 
-    internal class AppcuesMessagingData(message: RemoteMessage) {
-
-        // required
-        val userId: String = message.data["appcues_user_id"] ?: throw PropertyNotFound("appcues_user_id")
-        val accountId: String = message.data["appcues_account_id"] ?: throw PropertyNotFound("appcues_user_id")
-        val appId: String = message.data["appcues_app_id"] ?: throw PropertyNotFound("appcues_app_id")
-        val notificationId: String = message.data["appcues_notification_id"] ?: throw PropertyNotFound("appcues_notification_id")
-        val title: String = message.data["title"] ?: throw PropertyNotFound("title")
-        val body: String = message.data["body"] ?: throw PropertyNotFound("body")
-        val isTesting: Boolean = message.data.containsKey("appcues_test")
-
-        // optional values
-        val imageUrl: String? = message.data["appcues_attachment_url"]
-        val deepLink: String? = message.data["appcues_deep_link_url"]
-        val experienceId: String? = message.data["appcues_experience_id"]
-
-        private class PropertyNotFound(property: String) : IllegalStateException("AppcuesMessagingData: $property not found.")
-    }
+    @JsonClass(generateAdapter = true)
+    internal data class AppcuesMessagingData(
+        @Json(name = "notification_id")
+        val id: String,
+        val title: String,
+        val body: String,
+        @Json(name = "account_id")
+        val accountId: String,
+        @Json(name = "app_id")
+        val appId: String,
+        @Json(name = "user_id")
+        val userId: String,
+        @Json(name = "workflow_id")
+        val workflowId: String?,
+        @Json(name = "workflow_task_id")
+        val workflowTaskId: String?,
+        @Json(name = "deep_link_url")
+        val deeplink: String?,
+        @Json(name = "attachment_url")
+        val image: String?,
+        @Json(name = "experience_id")
+        val experienceId: String?,
+        @Json(name = "category")
+        val category: String?,
+        @Json(name = "android_notification_id")
+        val notificationId: String?,
+        @Json(name = "test")
+        val test: Boolean = false,
+    )
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
