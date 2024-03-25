@@ -5,7 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
-import com.appcues.analytics.AnalyticsEvent
+import com.appcues.analytics.AnalyticsEvent.PushOpened
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.data.model.ExperienceTrigger.DeepLink
 import com.appcues.debugger.AppcuesDebuggerManager
@@ -75,23 +75,7 @@ internal class DeepLinkHandler(
                 true
             }
             segments.any() && segments[0] == "notification" && extras != null -> {
-                analyticsTracker.track(
-                    AnalyticsEvent.PushOpened.eventName,
-                    properties = mapOf("notification_id" to extras.getString("notification_id", null)),
-                    interactive = false,
-                    isInternal = true
-                )
-
-                extras.getString("forward_deeplink")?.let {
-                    // TODO forward to deeplink
-                }
-
-                extras.getString("show_content")?.let {
-                    appcuesCoroutineScope.launch {
-                        // query map here makes sense for localization? how to get this information
-                        experienceRenderer.show(it, DeepLink, mapOf())
-                    }
-                }
+                processNotification(extras)
                 true
             }
             segments.any() && segments[0] == "debugger" -> {
@@ -109,6 +93,26 @@ internal class DeepLinkHandler(
                 }
             }
             else -> false
+        }
+    }
+
+    private fun processNotification(extras: Bundle) {
+        analyticsTracker.track(
+            PushOpened.eventName,
+            properties = mapOf("notification_id" to extras.getString("notification_id", null)),
+            interactive = false,
+            isInternal = true
+        )
+
+        extras.getString("forward_deeplink")?.let {
+            // TODO forward to deeplink
+        }
+
+        extras.getString("show_content")?.let {
+            appcuesCoroutineScope.launch {
+                // query map here makes sense for localization? how to get this information
+                experienceRenderer.show(it, DeepLink, mapOf())
+            }
         }
     }
 
