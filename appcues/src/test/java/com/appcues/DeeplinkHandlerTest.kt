@@ -2,6 +2,8 @@ package com.appcues
 
 import android.app.Activity
 import android.content.Intent
+import android.os.Bundle
+import com.appcues.analytics.AnalyticsTracker
 import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperienceTrigger.DeepLink
 import com.appcues.debugger.AppcuesDebuggerManager
@@ -39,10 +41,11 @@ internal class DeeplinkHandlerTest {
     private val experienceRenderer: ExperienceRenderer = mockk(relaxed = true)
     private val appcuesCoroutineScope: AppcuesCoroutineScope = AppcuesCoroutineScope(Logcues())
     private val debuggerManager: AppcuesDebuggerManager = mockk(relaxed = true)
+    private val analyticsTracker: AnalyticsTracker = mockk(relaxed = true)
 
     @Before
     fun setUp() {
-        deepLinkHandler = DeepLinkHandler(config, experienceRenderer, appcuesCoroutineScope, debuggerManager)
+        deepLinkHandler = DeepLinkHandler(config, experienceRenderer, appcuesCoroutineScope, debuggerManager, analyticsTracker)
     }
 
     @Test
@@ -50,6 +53,7 @@ internal class DeeplinkHandlerTest {
         // GIVEN
         val intent = mockk<Intent> {
             every { action } returns Intent.ACTION_VIEW
+            every { extras } returns Bundle()
             every { data } returns null
         }
 
@@ -65,6 +69,7 @@ internal class DeeplinkHandlerTest {
         // GIVEN
         val intent = mockk<Intent> {
             every { action } returns Intent.ACTION_CALL
+            every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
                 every { scheme } returns "appcues-democues"
                 every { host } returns "sdk"
@@ -84,6 +89,7 @@ internal class DeeplinkHandlerTest {
         every { config.applicationId } returns "5555-ABCD"
         val intent = mockk<Intent> {
             every { action } returns Intent.ACTION_VIEW
+            every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
                 every { scheme } returns "appcues-5555-ABCD"
                 every { host } returns "sdk"
@@ -103,6 +109,7 @@ internal class DeeplinkHandlerTest {
         // GIVEN
         val intent = mockk<Intent> {
             every { action } returns Intent.ACTION_VIEW
+            every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
                 every { scheme } returns "appcues-democues"
                 every { host } returns "sdk"
@@ -122,6 +129,7 @@ internal class DeeplinkHandlerTest {
         // GIVEN
         val intent = mockk<Intent> {
             every { action } returns Intent.ACTION_VIEW
+            every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
                 every { scheme } returns "appcues-democues"
                 every { host } returns "sdk"
@@ -141,6 +149,7 @@ internal class DeeplinkHandlerTest {
         // GIVEN
         val intent = mockk<Intent> {
             every { action } returns Intent.ACTION_VIEW
+            every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
                 every { scheme } returns "appcues-democues"
                 every { host } returns "sdk"
@@ -160,6 +169,7 @@ internal class DeeplinkHandlerTest {
         // GIVEN
         val intent = mockk<Intent> {
             every { action } returns Intent.ACTION_VIEW
+            every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
                 every { scheme } returns "appcues-democues"
                 every { host } returns "sdk"
@@ -179,6 +189,7 @@ internal class DeeplinkHandlerTest {
         // GIVEN
         val intent = mockk<Intent> {
             every { action } returns Intent.ACTION_VIEW
+            every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
                 every { scheme } returns "appcues-democues"
                 every { host } returns "sdk"
@@ -199,6 +210,7 @@ internal class DeeplinkHandlerTest {
         // GIVEN
         val intent = mockk<Intent> {
             every { action } returns Intent.ACTION_VIEW
+            every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
                 every { scheme } returns "appcues-democues"
                 every { host } returns "sdk"
@@ -219,6 +231,7 @@ internal class DeeplinkHandlerTest {
         // GIVEN
         val intent = mockk<Intent> {
             every { action } returns Intent.ACTION_VIEW
+            every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
                 every { scheme } returns "appcues-democues"
                 every { host } returns "sdk"
@@ -239,6 +252,7 @@ internal class DeeplinkHandlerTest {
         val activity = mockk<Activity>(relaxed = true)
         val intent = mockk<Intent> {
             every { action } returns Intent.ACTION_VIEW
+            every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
                 every { scheme } returns "appcues-democues"
                 every { host } returns "sdk"
@@ -260,6 +274,7 @@ internal class DeeplinkHandlerTest {
         val activity = mockk<Activity>(relaxed = true)
         val intent = mockk<Intent> {
             every { action } returns Intent.ACTION_VIEW
+            every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
                 every { scheme } returns "appcues-democues"
                 every { host } returns "sdk"
@@ -280,6 +295,7 @@ internal class DeeplinkHandlerTest {
         val activity = mockk<Activity>(relaxed = true)
         val intent = mockk<Intent> {
             every { action } returns Intent.ACTION_VIEW
+            every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
                 every { scheme } returns "appcues-democues"
                 every { host } returns "sdk"
@@ -300,6 +316,7 @@ internal class DeeplinkHandlerTest {
         val activity = mockk<Activity>(relaxed = true)
         val intent = mockk<Intent> {
             every { action } returns Intent.ACTION_VIEW
+            every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
                 every { scheme } returns "appcues-democues"
                 every { host } returns "sdk"
@@ -323,6 +340,7 @@ internal class DeeplinkHandlerTest {
         val activity = mockk<Activity>(relaxed = true)
         val intent = mockk<Intent> {
             every { action } returns Intent.ACTION_VIEW
+            every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
                 every { scheme } returns "appcues-democues"
                 every { host } returns "sdk"
@@ -346,6 +364,7 @@ internal class DeeplinkHandlerTest {
         val activity = mockk<Activity>(relaxed = true)
         val intent = mockk<Intent> {
             every { action } returns Intent.ACTION_VIEW
+            every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
                 every { scheme } returns "appcues-democues"
                 every { host } returns "sdk"
@@ -367,6 +386,7 @@ internal class DeeplinkHandlerTest {
         val activity = mockk<Activity>(relaxed = true)
         val intent = mockk<Intent> {
             every { action } returns Intent.ACTION_VIEW
+            every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
                 every { scheme } returns "appcues-democues"
                 every { host } returns "sdk"
@@ -391,6 +411,7 @@ internal class DeeplinkHandlerTest {
         }
         val intent = mockk<Intent> {
             every { action } returns Intent.ACTION_VIEW
+            every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
                 every { scheme } returns "appcues-democues"
                 every { host } returns "sdk"
@@ -415,6 +436,7 @@ internal class DeeplinkHandlerTest {
         }
         val intent = mockk<Intent> {
             every { action } returns Intent.ACTION_VIEW
+            every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
                 every { scheme } returns "appcues-democues"
                 every { host } returns "sdk"
@@ -436,6 +458,7 @@ internal class DeeplinkHandlerTest {
         val activity = mockk<Activity>(relaxed = true)
         val intent = mockk<Intent> {
             every { action } returns Intent.ACTION_VIEW
+            every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
                 every { scheme } returns "appcues-democues"
                 every { host } returns "sdk"
@@ -457,6 +480,7 @@ internal class DeeplinkHandlerTest {
         val activity = mockk<Activity>(relaxed = true)
         val intent = mockk<Intent> {
             every { action } returns Intent.ACTION_VIEW
+            every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
                 every { scheme } returns "appcues-democues"
                 every { host } returns "sdk"

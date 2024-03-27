@@ -34,6 +34,7 @@ internal object MainModule : AppcuesModule {
                 experienceRenderer = get(),
                 appcuesCoroutineScope = get(),
                 debuggerManager = get(),
+                analyticsTracker = get(),
             )
         }
         scoped { AppcuesDebuggerManager(appcuesViewTreeOwner = get(), contextWrapper = get(), scope = scope) }

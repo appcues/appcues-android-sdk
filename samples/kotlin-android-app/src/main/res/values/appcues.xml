@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--All these values are overriding ids from the SDK -->
+<resources>
+    <drawable name="appcues_notification_small_icon">@drawable/appcues_logo</drawable>
+    <color name="appcues_notification_color">@color/blurple_500</color>
+
+    <string name="appcues_notification_channel_id">com.appcues.samples.channel</string>
+    <string name="appcues_notification_channel_name">Appcues</string>
+    <string name="appcues_notification_channel_description">Appcues sample app channel</string>
+</resources>

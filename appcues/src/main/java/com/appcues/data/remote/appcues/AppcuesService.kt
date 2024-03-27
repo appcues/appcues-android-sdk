@@ -1,5 +1,6 @@
 package com.appcues.data.remote.appcues
 
+import com.appcues.data.remote.appcues.request.PushCheckRequest
 import com.appcues.data.remote.appcues.response.ActivityResponse
 import com.appcues.data.remote.appcues.response.HealthCheckResponse
 import com.appcues.data.remote.appcues.response.QualifyResponse
@@ -59,4 +60,10 @@ internal interface AppcuesService {
 
     @GET("healthz")
     suspend fun healthCheck(): HealthCheckResponse
+
+    @POST("/v1/accounts/{account}/push_notification_test")
+    suspend fun pushCheck(
+        @Path("account") account: String,
+        @Body request: PushCheckRequest
+    )
 }

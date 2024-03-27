@@ -67,6 +67,8 @@ public class Appcues internal constructor(internal val scope: AppcuesScope) {
          * provided by the SDK is based on Android View layout information.
          */
         public var elementTargeting: ElementTargetingStrategy = AndroidTargetingStrategy()
+
+        internal var pushToken: String? = null
     }
 
     private val config by scope.inject<AppcuesConfig>()
@@ -271,9 +273,11 @@ public class Appcues internal constructor(internal val scope: AppcuesScope) {
      *  @param token A globally unique token that identifies this device to FCM.
      */
     public fun setPushToken(token: String?) {
-        storage.pushToken = token
+        if (token != storage.pushToken) {
+            storage.pushToken = token
 
-        analyticsTracker.track(AnalyticsEvent.DeviceUpdated.eventName, properties = null, interactive = false, isInternal = true)
+            analyticsTracker.track(AnalyticsEvent.DeviceUpdated.eventName, properties = null, interactive = false, isInternal = true)
+        }
     }
 
     /**
