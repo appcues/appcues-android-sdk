@@ -61,10 +61,19 @@ internal class AutoPropertyDecorator(
             "_language" to contextWrapper.getLanguage(),
             "_pushToken" to storage.pushToken,
             "_pushEnabledBackground" to (storage.pushToken != null),
-            "_pushEnabled" to contextWrapper.isNotificationEnabled()
-            // token information on comes later on future task
-            // "_pushSubscriptionStatus" to “subscribed”, “opted-in”, “unsubscribed”
+            "_pushEnabled" to contextWrapper.isNotificationEnabled(),
+            "_pushSubscriptionStatus" to getSubscriptionStatus(),
         )
+
+    private fun getSubscriptionStatus(): String {
+        val optOut = storage.pushOptOut
+        val hasNotification = contextWrapper.isNotificationEnabled()
+        return when {
+            !optOut && hasNotification -> "optedIn"
+            !optOut && !hasNotification -> "subscribed"
+            else -> "unsubscribed"
+        }
+    }
 
     private val sessionProperties: Map<String, Any>
         get() = hashMapOf(
