@@ -2,9 +2,7 @@ package com.appcues
 
 import android.Manifest.permission
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import androidx.core.app.ActivityCompat
 import com.appcues.data.MoshiConfiguration
 import com.appcues.util.getNotificationBuilder
@@ -28,7 +26,7 @@ public class AppcuesFirebaseMessagingService : FirebaseMessagingService() {
 
     public companion object {
 
-        private var notificationId = 0
+        private var notificationId = 1_000_000
 
         /**
          * handleMessage will try to parse the received message into an Appcues notification, if it does it will return true,
@@ -47,15 +45,6 @@ public class AppcuesFirebaseMessagingService : FirebaseMessagingService() {
             } catch (_: Exception) {
                 // unable to get data, most likely means this message is not for us.
                 return false
-            }
-
-            if (data.test) {
-                // during testing we just want to validate that push message came through
-                context.startActivity(
-                    Intent(Intent.ACTION_VIEW, Uri.parse("appcues-${data.appId}://sdk/debugger/push-token")).apply {
-                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                    }
-                )
             }
 
             // check for permission
