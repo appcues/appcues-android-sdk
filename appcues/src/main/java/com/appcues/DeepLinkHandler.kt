@@ -110,7 +110,6 @@ internal class DeepLinkHandler(
 
         extras.getString("show_content")?.let {
             appcuesCoroutineScope.launch {
-                // query map here makes sense for localization? how to get this information
                 experienceRenderer.show(it, DeepLink, mapOf())
             }
         }
