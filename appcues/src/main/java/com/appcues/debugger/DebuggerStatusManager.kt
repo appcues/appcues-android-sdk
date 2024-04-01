@@ -15,6 +15,7 @@ import com.appcues.analytics.AnalyticsTracker
 import com.appcues.data.remote.appcues.AppcuesRemoteSource
 import com.appcues.data.remote.appcues.request.ActivityRequest
 import com.appcues.debugger.model.DebuggerStatusItem
+import com.appcues.debugger.model.StatusType
 import com.appcues.debugger.model.StatusType.ERROR
 import com.appcues.debugger.model.StatusType.EXPERIENCE
 import com.appcues.debugger.model.StatusType.LOADING
@@ -56,15 +57,15 @@ internal class DebuggerStatusManager(
 
     private var connectedToAppcues: Boolean? = false
 
-    private var pushConfigured: Boolean? = null
+    private var pushStatus: StatusType = UNKNOWN
     private var pushValidationToken: String? = null
     private var pushErrorText: String? = null
 
-    private var deepLinkConfigured: Boolean? = null
+    private var deeplinkStatus: StatusType = UNKNOWN
     private var deepLinkValidationToken: String? = null
     private var deepLinkErrorText: String? = null
 
-    private var trackingScreens: Boolean? = null
+    private var screenTrackingStatus: StatusType = LOADING
 
     private var userId: String? = storage.userId.ifEmpty { null }
     private var groupId: String? = storage.groupId
@@ -113,7 +114,7 @@ internal class DebuggerStatusManager(
         activityRequest.events?.forEach { event ->
             when (event.name) {
                 AnalyticsEvent.ScreenView.eventName -> {
-                    trackingScreens = true
+                    screenTrackingStatus = SUCCESS
                 }
                 AnalyticsEvent.ExperienceStarted.eventName -> {
                     val id = event.attributes["experienceId"] as String
@@ -151,13 +152,13 @@ internal class DebuggerStatusManager(
     suspend fun checkDeepLinkValidation(deepLinkPath: String): Boolean {
         return when (deepLinkPath) {
             deepLinkValidationToken -> {
-                deepLinkConfigured = true
+                deeplinkStatus = SUCCESS
                 deepLinkValidationToken = null
                 updateData()
                 true
             }
             pushValidationToken -> {
-                pushConfigured = true
+                pushStatus = SUCCESS
                 pushValidationToken = null
                 updateData()
                 true
@@ -214,50 +215,44 @@ internal class DebuggerStatusManager(
         )
     }
 
-    private fun deepLinkCheckItem() = (deepLinkConfigured?.let { if (it) SUCCESS else ERROR } ?: UNKNOWN).let { statusType ->
-        DebuggerStatusItem(
-            title = contextWrapper.getString(R.string.appcues_debugger_status_check_deep_link_title),
-            line1 = statusType.let {
-                when (it) {
-                    UNKNOWN -> contextWrapper.getString(R.string.appcues_debugger_status_check_deep_link_instruction)
-                    ERROR -> deepLinkErrorText
-                    else -> null
-                }
-            },
-            statusType = statusType,
-            showRefreshIcon = statusType == UNKNOWN,
-            tapActionType = DEEPLINK_CHECK
-        )
-    }
+    private fun deepLinkCheckItem() = DebuggerStatusItem(
+        title = contextWrapper.getString(R.string.appcues_debugger_status_check_deep_link_title),
+        line1 = deeplinkStatus.let {
+            when (it) {
+                UNKNOWN -> contextWrapper.getString(R.string.appcues_debugger_status_check_deep_link_instruction)
+                ERROR -> deepLinkErrorText
+                else -> null
+            }
+        },
+        statusType = deeplinkStatus,
+        showRefreshIcon = deeplinkStatus == UNKNOWN,
+        tapActionType = DEEPLINK_CHECK
+    )
 
-    private fun pushCheckItem() = (pushConfigured?.let { if (it) SUCCESS else ERROR } ?: UNKNOWN).let { statusType ->
-        DebuggerStatusItem(
-            title = contextWrapper.getString(R.string.appcues_debugger_status_check_push_title),
-            line1 = statusType.let {
-                when (it) {
-                    UNKNOWN -> contextWrapper.getString(R.string.appcues_debugger_status_check_push_instruction)
-                    ERROR -> pushErrorText
-                    else -> null
-                }
-            },
-            statusType = statusType,
-            showRefreshIcon = statusType == UNKNOWN,
-            tapActionType = PUSH_CHECK
-        )
-    }
+    private fun pushCheckItem() = DebuggerStatusItem(
+        title = contextWrapper.getString(R.string.appcues_debugger_status_check_push_title),
+        line1 = pushStatus.let {
+            when (it) {
+                UNKNOWN -> contextWrapper.getString(R.string.appcues_debugger_status_check_push_instruction)
+                ERROR -> pushErrorText
+                else -> null
+            }
+        },
+        statusType = pushStatus,
+        showRefreshIcon = pushStatus == UNKNOWN,
+        tapActionType = PUSH_CHECK
+    )
 
-    private fun trackingScreenCheckItem() = (trackingScreens?.let { if (it) SUCCESS else ERROR } ?: LOADING).let { statusType ->
-        DebuggerStatusItem(
-            title = contextWrapper.getString(R.string.appcues_debugger_status_check_screen_tracking_title),
-            line1 = statusType.let {
-                when (it) {
-                    LOADING -> R.string.appcues_debugger_status_check_screen_tracking_loading_line1
-                    else -> null
-                }
-            }?.let { contextWrapper.getString(it) },
-            statusType = statusType,
-        )
-    }
+    private fun trackingScreenCheckItem() = DebuggerStatusItem(
+        title = contextWrapper.getString(R.string.appcues_debugger_status_check_screen_tracking_title),
+        line1 = screenTrackingStatus.let {
+            when (it) {
+                LOADING -> R.string.appcues_debugger_status_check_screen_tracking_loading_line1
+                else -> null
+            }
+        }?.let { contextWrapper.getString(it) },
+        statusType = screenTrackingStatus,
+    )
 
     private fun identifyUserItem() = userId?.let {
         DebuggerStatusItem(
@@ -320,66 +315,64 @@ internal class DebuggerStatusManager(
     }
 
     private suspend fun checkDeepLinkIntentFilter() {
+        if (deeplinkStatus == SUCCESS) return
+
+        // set to null and update data so it will update to loading
+        deeplinkStatus = LOADING
         deepLinkErrorText = null
+        updateData()
 
-        if (deepLinkConfigured != true) {
+        val token = "deeplink-${UUID.randomUUID()}"
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            data = Uri.parse("appcues-${appcuesConfig.applicationId}://sdk/debugger/$token")
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        }
 
-            // set to null and update data so it will update to loading
-            if (deepLinkConfigured != null) {
-                deepLinkConfigured = null
+        val manifestConfigured = context.packageManager.resolveActivityCompat(intent, PackageManager.MATCH_DEFAULT_ONLY) != null
+
+        if (manifestConfigured) {
+            deepLinkValidationToken = token
+            context.startActivity(intent)
+
+            // a new link should have come in and updated our state in the checkDeepLinkValidation function above
+            // we give that a little time to process
+            delay(1.seconds)
+
+            // if after 1 second we still do not have that updated state - it failed
+            if (deepLinkValidationToken != null) {
+                deepLinkValidationToken = null
+                deeplinkStatus = ERROR
+                deepLinkErrorText = contextWrapper.getString(R.string.appcues_debugger_status_check_deep_link_error_handler)
                 updateData()
             }
-
-            val token = "deeplink-${UUID.randomUUID()}"
-            val intent = Intent(Intent.ACTION_VIEW).apply {
-                data = Uri.parse("appcues-${appcuesConfig.applicationId}://sdk/debugger/$token")
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            }
-
-            val manifestConfigured = context.packageManager.resolveActivityCompat(intent, PackageManager.MATCH_DEFAULT_ONLY) != null
-
-            if (manifestConfigured) {
-                deepLinkValidationToken = token
-                context.startActivity(intent)
-
-                // a new link should have come in and updated our state in the checkDeepLinkValidation function above
-                // we give that a little time to process
-                delay(1.seconds)
-
-                // if after 1 second we still do not have that updated state - it failed
-                if (deepLinkValidationToken != null) {
-                    deepLinkValidationToken = null
-                    deepLinkConfigured = false
-                    deepLinkErrorText = contextWrapper.getString(R.string.appcues_debugger_status_check_deep_link_error_handler)
-                    updateData()
-                }
-            } else {
-                deepLinkConfigured = false
-                deepLinkErrorText = contextWrapper.getString(R.string.appcues_debugger_status_check_deep_link_error_manifest)
-                updateData()
-            }
+        } else {
+            deeplinkStatus = ERROR
+            deepLinkErrorText = contextWrapper.getString(R.string.appcues_debugger_status_check_deep_link_error_manifest)
+            updateData()
         }
     }
 
     suspend fun checkPushValidation() {
-        if (pushConfigured == true) return
+        if (pushStatus == SUCCESS) return
 
+        // set to null and update data so it will update to loading
         pushErrorText = null
-        pushValidationToken = "push-token"
+        pushValidationToken = null
+        pushStatus = LOADING
+        updateData()
 
-        when (val result = appcuesRemoteSource.checkAppcuesPush()) {
+        // create new random id and send it to the server
+        val token = "push-${UUID.randomUUID()}"
+        when (val result = appcuesRemoteSource.checkAppcuesPush(token)) {
             is Failure -> {
-                // improve logging around this failure reason
+                // this defines an error when sending push to the server (Http Error)
                 pushErrorText = "something when wrong: ${result.reason}"
                 // 500 - app_config_not_found
-                pushConfigured = false
-                pushValidationToken = null
+                pushStatus = ERROR
                 updateData()
             }
             is Success -> {
-                pushConfigured = true
-                pushValidationToken = null
-                updateData()
+                pushValidationToken = token
             }
         }
     }

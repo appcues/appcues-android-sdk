@@ -7,4 +7,6 @@ import com.squareup.moshi.JsonClass
 internal data class PushCheckRequest(
     @Json(name = "device_id")
     val deviceId: String,
+    @Json(name = "test_id")
+    val token: String
 )
