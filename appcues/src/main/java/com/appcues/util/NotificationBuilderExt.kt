@@ -70,11 +70,17 @@ internal fun NotificationCompat.Builder.setStyle(context: Context, data: Appcues
 }
 
 internal fun NotificationCompat.Builder.setIntent(context: Context, data: AppcuesMessagingData) = apply {
-    val deepLink = "appcues-${data.appId}://sdk/notification"
-    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(deepLink))
-    intent.putExtra("notification_id", data.notificationId)
-    intent.putExtra("forward_deeplink", data.deeplink)
-    intent.putExtra("show_content", data.experienceId)
+    val intent = if (data.test) {
+        // during testing we just want to validate that push message came through
+        Intent(Intent.ACTION_VIEW, Uri.parse("appcues-${data.appId}://sdk/debugger/${data.id}"))
+    } else {
+        Intent(Intent.ACTION_VIEW, Uri.parse("appcues-${data.appId}://sdk/notification")).apply {
+            putExtra("notification_id", data.id)
+            putExtra("forward_deeplink", data.deeplink)
+            putExtra("show_content", data.experienceId)
+        }
+    }
+
     setContentIntent(PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE))
 }
 
