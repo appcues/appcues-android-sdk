@@ -96,9 +96,9 @@ internal class AppcuesRemoteSource(
         }
     }
 
-    suspend fun checkAppcuesPush(): ResultOf<Unit, RemoteError> {
+    suspend fun checkAppcuesPush(token: String): ResultOf<Unit, RemoteError> {
         return NetworkRequest.execute {
-            service.pushCheck(config.accountId, PushCheckRequest(storage.deviceId))
+            service.pushCheck(config.accountId, PushCheckRequest(storage.deviceId, token))
         }.let {
             when (it) {
                 is ResultOf.Failure -> ResultOf.Failure(it.reason)
