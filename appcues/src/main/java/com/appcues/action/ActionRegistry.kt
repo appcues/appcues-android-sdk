@@ -4,6 +4,7 @@ import com.appcues.action.appcues.CloseAction
 import com.appcues.action.appcues.ContinueAction
 import com.appcues.action.appcues.LaunchExperienceAction
 import com.appcues.action.appcues.LinkAction
+import com.appcues.action.appcues.RequestPushAction
 import com.appcues.action.appcues.RequestReviewAction
 import com.appcues.action.appcues.SubmitFormAction
 import com.appcues.action.appcues.TrackEventAction
@@ -34,6 +35,7 @@ internal class ActionRegistry(override val scope: AppcuesScope) : AppcuesCompone
         register(TrackEventAction.TYPE) { config, _ -> TrackEventAction(config, get()) }
         register(UpdateProfileAction.TYPE) { config, _ -> UpdateProfileAction(config, get(), get()) }
         register(RequestReviewAction.TYPE) { config, _ -> RequestReviewAction(config, get(), get()) }
+        register(RequestPushAction.TYPE) { config, _ -> RequestPushAction(config, get(), get()) }
     }
 
     operator fun get(key: String): ActionFactoryBlock? {
