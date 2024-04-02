@@ -2,7 +2,10 @@ package com.appcues.util
 
 import android.app.Application
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.res.Configuration
+import android.net.Uri
 import android.os.Build
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
@@ -68,6 +71,25 @@ internal class ContextWrapper(private val context: Context) {
 
     fun isNotificationEnabled(): Boolean {
         return NotificationManagerCompat.from(context).areNotificationsEnabled()
+    }
+
+    fun cancelAllNotifications() {
+        NotificationManagerCompat.from(context).cancelAll()
+    }
+
+    fun resolveDeeplink(deeplink: String): Boolean {
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            data = Uri.parse(deeplink)
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        }
+
+        val isDeeplinkSupported = context.packageManager.resolveActivityCompat(intent, PackageManager.MATCH_DEFAULT_ONLY) != null
+
+        if (isDeeplinkSupported) {
+            context.startActivity(intent)
+        }
+
+        return isDeeplinkSupported
     }
 
     private fun getCurrentLocale(context: Context): Locale {
