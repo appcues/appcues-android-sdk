@@ -70,7 +70,7 @@ internal fun NotificationCompat.Builder.setStyle(context: Context, data: Appcues
 }
 
 internal fun NotificationCompat.Builder.setIntent(context: Context, data: AppcuesMessagingData) = apply {
-    val intent = if (data.test) {
+    val intent = if (data.test && data.id.startsWith("test-push")) {
         // during testing we just want to validate that push message came through
         Intent(Intent.ACTION_VIEW, Uri.parse("appcues-${data.appId}://sdk/debugger/${data.id}"))
     } else {

@@ -315,14 +315,14 @@ internal class DebuggerStatusManager(
     }
 
     private suspend fun checkDeepLinkIntentFilter() {
-        if (deeplinkStatus == SUCCESS) return
+        if (deeplinkStatus == SUCCESS || deeplinkStatus == LOADING) return
 
         // set to null and update data so it will update to loading
         deeplinkStatus = LOADING
         deepLinkErrorText = null
         updateData()
 
-        val token = "deeplink-${UUID.randomUUID()}"
+        val token = "test-deeplink-${UUID.randomUUID()}"
         val intent = Intent(Intent.ACTION_VIEW).apply {
             data = Uri.parse("appcues-${appcuesConfig.applicationId}://sdk/debugger/$token")
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
@@ -353,7 +353,7 @@ internal class DebuggerStatusManager(
     }
 
     suspend fun checkPushValidation() {
-        if (pushStatus == SUCCESS) return
+        if (pushStatus == SUCCESS || pushStatus == LOADING) return
 
         // set to null and update data so it will update to loading
         pushErrorText = null
@@ -362,7 +362,7 @@ internal class DebuggerStatusManager(
         updateData()
 
         // create new random id and send it to the server
-        val token = "push-${UUID.randomUUID()}"
+        val token = "test-push-${UUID.randomUUID()}"
         when (val result = appcuesRemoteSource.checkAppcuesPush(token)) {
             is Failure -> {
                 // this defines an error when sending push to the server (Http Error)
