@@ -47,6 +47,7 @@ import com.appcues.debugger.model.DebuggerEventItem
 import com.appcues.debugger.model.DebuggerInfoItem
 import com.appcues.debugger.model.DebuggerStatusItem
 import com.appcues.debugger.model.EventType
+import com.appcues.debugger.model.StatusType
 import com.appcues.debugger.model.TapActionType
 import com.appcues.debugger.ui.ds.DividerItem
 import com.appcues.debugger.ui.ds.TextHeader
@@ -97,9 +98,8 @@ private fun LazyListScope.statusSection(list: List<DebuggerStatusItem>, onTap: (
             modifier = Modifier
                 .fillParentMaxWidth()
                 .then(
-                    if (item.tapActionType != null) {
-                        Modifier.clickable { onTap(item.tapActionType) }
-                    } else Modifier
+                    if (item.tapActionType != null && item.statusType != StatusType.LOADING)
+                        Modifier.clickable { onTap(item.tapActionType) } else Modifier
                 ),
             verticalAlignment = Alignment.CenterVertically,
         ) {
