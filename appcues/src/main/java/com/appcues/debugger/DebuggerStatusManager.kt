@@ -4,6 +4,7 @@ import android.os.Build
 import android.os.Build.VERSION
 import com.appcues.AppcuesConfig
 import com.appcues.BuildConfig
+import com.appcues.DeepLinkHandler
 import com.appcues.R
 import com.appcues.Storage
 import com.appcues.analytics.AnalyticsEvent
@@ -91,7 +92,7 @@ internal class DebuggerStatusManager(
             }
         }
 
-        launch { checkConnection(false) }
+        launch { checkConnection() }
 
         isStarted = true
     }
@@ -156,6 +157,7 @@ internal class DebuggerStatusManager(
             }
             pushValidationToken -> {
                 pushStatus = SUCCESS
+                pushTimeoutJob?.cancel()
                 pushValidationToken = null
                 updateData()
                 true
@@ -224,7 +226,7 @@ internal class DebuggerStatusManager(
         title = contextWrapper.getString(R.string.appcues_debugger_status_check_push_title),
         line1 = when (pushStatus) {
             IDLE -> contextWrapper.getString(R.string.appcues_debugger_status_check_push_instruction)
-            LOADING -> contextWrapper.getString(R.string.appcues_debugger_status_check_push_cancel)
+            LOADING -> contextWrapper.getString(R.string.appcues_debugger_status_check_push_loading_instruction)
             ERROR -> pushErrorText
             else -> null
         },
@@ -285,36 +287,36 @@ internal class DebuggerStatusManager(
 
     suspend fun onTapAction(tapActionType: TapActionType) {
         when (tapActionType) {
-            HEALTH_CHECK -> checkConnection(true)
+            HEALTH_CHECK -> checkConnection()
             DEEPLINK_CHECK -> checkDeeplink()
             PUSH_CHECK -> checkPush()
         }
     }
 
-    private suspend fun checkConnection(showLoading: Boolean) = withContext(Dispatchers.IO) {
-        if (connectionStatus == LOADING) return@withContext
-
+    private suspend fun checkConnection() {
         // set to null and update data so it will update to loading
         connectionStatus = LOADING
-        if (showLoading) {
+        updateData()
+
+        withContext(Dispatchers.IO) {
+            // set new value (true or false) and update data
+            connectionStatus = if (appcuesRemoteSource.checkAppcuesConnection()) SUCCESS else ERROR
             updateData()
         }
-
-        // set new value (true or false) and update data
-        connectionStatus = if (appcuesRemoteSource.checkAppcuesConnection()) SUCCESS else ERROR
-        updateData()
     }
 
     private suspend fun checkDeeplink() {
-        if (deeplinkStatus == SUCCESS || deeplinkStatus == LOADING) return
-
         // set to null and update data so it will update to loading
         deeplinkStatus = LOADING
         deepLinkErrorText = null
-        deepLinkValidationToken = "test-deeplink-${UUID.randomUUID()}"
+        val token = "test-deeplink-${UUID.randomUUID()}"
+        deepLinkValidationToken = token
         updateData()
 
-        if (contextWrapper.resolveDeeplink("appcues-${appcuesConfig.applicationId}://sdk/debugger/$deepLinkValidationToken")) {
+        val intent = DeepLinkHandler.getDebuggerValidationIntent(appcuesConfig.applicationId, token)
+        if (contextWrapper.isIntentSupported(intent)) {
+            contextWrapper.startIntent(intent)
+
             // a new link should have come in and updated our state in the checkDeepLinkValidation function above
             // we give that a little time to process
             delay(1.seconds)
@@ -335,19 +337,8 @@ internal class DebuggerStatusManager(
     }
 
     suspend fun checkPush() {
-        // whenever we run the push check we first clear all previous notification
-        // to ensure they are always seeing the latest one
-        contextWrapper.cancelAllNotifications()
-        pushTimeoutJob?.cancel()
-
-        // status loading we should transition to idle
-        if (pushStatus == LOADING) {
-            pushStatus = IDLE
-            updateData()
-            return
-        }
-
         // set to null and update data so it will update to loading
+        pushTimeoutJob?.cancel()
         pushErrorText = null
         pushValidationToken = null
         pushStatus = LOADING
