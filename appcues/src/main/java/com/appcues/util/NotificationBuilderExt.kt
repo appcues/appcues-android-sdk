@@ -6,15 +6,15 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.net.Uri
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import com.appcues.AppcuesFirebaseMessagingService
 import com.appcues.AppcuesFirebaseMessagingService.AppcuesMessagingData
+import com.appcues.DeepLinkHandler
 import com.appcues.R
 import com.google.firebase.messaging.RemoteMessage
 import java.io.InputStream
@@ -69,16 +69,12 @@ internal fun NotificationCompat.Builder.setStyle(context: Context, data: Appcues
     setColor(ContextCompat.getColor(context, R.color.appcues_notification_color))
 }
 
-internal fun NotificationCompat.Builder.setIntent(context: Context, data: AppcuesMessagingData) = apply {
-    val intent = if (data.test && data.id.startsWith("test-push")) {
+internal fun NotificationCompat.Builder.setIntent(context: Context, data: AppcuesMessagingData, isCheckPush: Boolean) = apply {
+    val intent = if (isCheckPush) {
         // during testing we just want to validate that push message came through
-        Intent(Intent.ACTION_VIEW, Uri.parse("appcues-${data.appId}://sdk/debugger/${data.id}"))
+        DeepLinkHandler.getDebuggerValidationIntent(data.appId, data.id)
     } else {
-        Intent(Intent.ACTION_VIEW, Uri.parse("appcues-${data.appId}://sdk/notification")).apply {
-            putExtra("notification_id", data.id)
-            putExtra("forward_deeplink", data.deeplink)
-            putExtra("show_content", data.experienceId)
-        }
+        DeepLinkHandler.getNotificationIntent(data)
     }
 
     setContentIntent(PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE))
@@ -86,8 +82,15 @@ internal fun NotificationCompat.Builder.setIntent(context: Context, data: Appcue
 
 @SuppressLint("MissingPermission")
 // Suppressing MissingPermission for POST_NOTIFICATION since this should be done on customer's end.
-internal fun NotificationCompat.Builder.notify(notificationId: Int, context: Context) {
-    NotificationManagerCompat.from(context).notify(notificationId, build())
+internal fun NotificationCompat.Builder.notify(context: Context, isCheckPush: Boolean) {
+    // keep same id for test notifications (makes it easier to cancel or replace it)
+    val id = if (isCheckPush) {
+        AppcuesFirebaseMessagingService.CHECK_PUSH_NOTIFICATION_ID
+    } else {
+        AppcuesFirebaseMessagingService.notificationId++
+    }
+
+    NotificationManagerCompat.from(context).notify(id, build())
 }
 
 @SuppressWarnings("TooGenericExceptionCaught", "SwallowedException")
