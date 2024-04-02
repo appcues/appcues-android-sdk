@@ -14,7 +14,6 @@ internal object DebuggerModule : AppcuesModule {
                 appcuesConfig = get(),
                 appcuesRemoteSource = get(),
                 contextWrapper = get(),
-                context = get(),
                 analyticsTracker = get(),
             )
         }
