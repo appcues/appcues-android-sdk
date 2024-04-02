@@ -28,15 +28,7 @@ internal object MainModule : AppcuesModule {
         scoped { Logcues() }
         scoped { LogcatDestination(get(), get<AppcuesConfig>().loggingLevel) }
         scoped { Storage(context = get(), config = get()) }
-        scoped {
-            DeepLinkHandler(
-                config = get(),
-                experienceRenderer = get(),
-                appcuesCoroutineScope = get(),
-                debuggerManager = get(),
-                analyticsTracker = get(),
-            )
-        }
+        scoped { DeepLinkHandler(scope = scope) }
         scoped { AppcuesDebuggerManager(appcuesViewTreeOwner = get(), contextWrapper = get(), scope = scope) }
         scoped { StateMachineDirectory() }
         scoped { ExperienceRenderer(scope = scope) }
