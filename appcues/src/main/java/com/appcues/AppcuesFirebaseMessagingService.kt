@@ -26,7 +26,9 @@ public class AppcuesFirebaseMessagingService : FirebaseMessagingService() {
 
     public companion object {
 
-        private var notificationId = 1_000_000
+        internal var notificationId = 1_000_000
+
+        internal const val CHECK_PUSH_NOTIFICATION_ID = 1_100_100
 
         /**
          * handleMessage will try to parse the received message into an Appcues notification, if it does it will return true,
@@ -51,12 +53,14 @@ public class AppcuesFirebaseMessagingService : FirebaseMessagingService() {
             if (ActivityCompat.checkSelfPermission(context, permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED)
                 return false
 
+            val isCheckPush = data.test && data.id.startsWith("test-push")
+
             context.getNotificationBuilder()
                 .setupNotification(message)
                 .setContent(data)
                 .setStyle(context, data)
-                .setIntent(context, data)
-                .notify(notificationId++, context)
+                .setIntent(context, data, isCheckPush)
+                .notify(context, isCheckPush)
 
             return true
         }

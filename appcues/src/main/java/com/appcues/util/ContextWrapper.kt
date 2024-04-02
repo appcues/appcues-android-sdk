@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
-import android.net.Uri
 import android.os.Build
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
@@ -73,23 +72,12 @@ internal class ContextWrapper(private val context: Context) {
         return NotificationManagerCompat.from(context).areNotificationsEnabled()
     }
 
-    fun cancelAllNotifications() {
-        NotificationManagerCompat.from(context).cancelAll()
+    fun isIntentSupported(intent: Intent): Boolean {
+        return context.packageManager.resolveActivityCompat(intent, PackageManager.MATCH_DEFAULT_ONLY) != null
     }
 
-    fun resolveDeeplink(deeplink: String): Boolean {
-        val intent = Intent(Intent.ACTION_VIEW).apply {
-            data = Uri.parse(deeplink)
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        }
-
-        val isDeeplinkSupported = context.packageManager.resolveActivityCompat(intent, PackageManager.MATCH_DEFAULT_ONLY) != null
-
-        if (isDeeplinkSupported) {
-            context.startActivity(intent)
-        }
-
-        return isDeeplinkSupported
+    fun startIntent(intent: Intent) {
+        context.startActivity(intent)
     }
 
     private fun getCurrentLocale(context: Context): Locale {
