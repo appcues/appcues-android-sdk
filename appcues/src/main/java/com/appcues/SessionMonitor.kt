@@ -47,6 +47,7 @@ internal class SessionMonitor(
         // during the start of a new session, check if there is a new pushToken to set.
         if (Appcues.pushToken != null && Appcues.pushToken != storage.pushToken) {
             storage.pushToken = Appcues.pushToken
+            Appcues.pushToken = null
         }
 
         return UUID.randomUUID().also {
