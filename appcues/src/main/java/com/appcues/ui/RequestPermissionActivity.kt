@@ -15,6 +15,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 internal class RequestPermissionActivity : AppCompatActivity() {
 
@@ -46,6 +51,8 @@ internal class RequestPermissionActivity : AppCompatActivity() {
         completion?.complete(hasPermission)
         finish()
     }
+
+    private var delayedJob: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // remove enter animation from this activity
@@ -81,6 +88,22 @@ internal class RequestPermissionActivity : AppCompatActivity() {
                 permissionLauncher.launch(permissionKey)
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        delayedJob = CoroutineScope(Dispatchers.Main).launch {
+            // if we get stuck in this activity for any reason we should exit
+            delay(timeMillis = 300)
+
+            completion?.complete(false)
+            finish()
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        delayedJob?.cancel()
     }
 
     override fun finish() {
