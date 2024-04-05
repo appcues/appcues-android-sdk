@@ -28,19 +28,23 @@ internal class DeepLinkHandler(scope: AppcuesScope) {
     companion object {
 
         private const val NOTIFICATION_ID_EXTRA = "ID"
-        private const val NOTIFICATION_WORKFLOW_ID = "WORKFLOW_ID"
-        private const val NOTIFICATION_WORKFLOW_TASK_ID = "WORKFLOW_TASK_ID"
-        private const val NOTIFICATION_FORWARD_DEEPLINK_EXTRA = "FORWARD_DEEPLINK"
+        private const val NOTIFICATION_VERSION_EXTRA = "VERSION"
         private const val NOTIFICATION_SHOW_CONTENT_EXTRA = "SHOW_CONTENT"
         private const val NOTIFICATION_TEST_EXTRA = "TEST"
+        private const val NOTIFICATION_WORKFLOW_ID_EXTRA = "WORKFLOW_ID"
+        private const val NOTIFICATION_WORKFLOW_TASK_ID_EXTRA = "WORKFLOW_TASK_ID"
+        private const val NOTIFICATION_WORKFLOW_VERSION_EXTRA = "WORKFLOW_VERSION"
+        private const val NOTIFICATION_FORWARD_DEEPLINK_EXTRA = "FORWARD_DEEPLINK"
 
         fun getNotificationIntent(appcuesData: AppcuesMessagingData) = Intent(Intent.ACTION_VIEW).apply {
             data = Uri.parse("appcues-${appcuesData.appId}://sdk/notification")
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
 
-            putExtra(NOTIFICATION_ID_EXTRA, appcuesData.id)
-            putExtra(NOTIFICATION_WORKFLOW_ID, appcuesData.workflowId)
-            putExtra(NOTIFICATION_WORKFLOW_TASK_ID, appcuesData.workflowTaskId)
+            putExtra(NOTIFICATION_ID_EXTRA, appcuesData.notificationId)
+            putExtra(NOTIFICATION_VERSION_EXTRA, appcuesData.notificationVersion)
+            putExtra(NOTIFICATION_WORKFLOW_ID_EXTRA, appcuesData.workflowId)
+            putExtra(NOTIFICATION_WORKFLOW_TASK_ID_EXTRA, appcuesData.workflowTaskId)
+            putExtra(NOTIFICATION_WORKFLOW_VERSION_EXTRA, appcuesData.workflowVersion)
             putExtra(NOTIFICATION_FORWARD_DEEPLINK_EXTRA, appcuesData.deeplink)
             putExtra(NOTIFICATION_SHOW_CONTENT_EXTRA, appcuesData.experienceId)
             putExtra(NOTIFICATION_TEST_EXTRA, appcuesData.test)
@@ -110,21 +114,25 @@ internal class DeepLinkHandler(scope: AppcuesScope) {
                 }
                 true
             }
+
             segments.count() == 2 && segments[0] == "experience_content" -> {
                 appcuesCoroutineScope.launch {
                     experienceRenderer.show(segments[1], DeepLink, query)
                 }
                 true
             }
+
             segments.any() && segments[0] == "notification" && extras != null -> {
                 processNotification(extras)
                 true
             }
+
             segments.any() && segments[0] == "debugger" -> {
                 val deepLinkPath = if (segments.count() > 1) segments[1] else null
                 debuggerManager.start(activity, Debugger, deepLinkPath)
                 true
             }
+
             segments.any() && segments[0] == "capture_screen" -> {
                 val token = linkData.getQueryParameter("token")
                 if (token != null) {
@@ -134,6 +142,7 @@ internal class DeepLinkHandler(scope: AppcuesScope) {
                     false
                 }
             }
+
             else -> false
         }
     }
@@ -142,12 +151,14 @@ internal class DeepLinkHandler(scope: AppcuesScope) {
         if (!extras.getBoolean(NOTIFICATION_TEST_EXTRA)) {
             analyticsTracker.track(
                 PushOpened.eventName,
-                properties = mapOf(
+                properties = mapOf<String, Any?>(
                     "notification_id" to extras.getString(NOTIFICATION_ID_EXTRA, null),
-                    "workflow_id" to extras.getString(NOTIFICATION_WORKFLOW_ID, null),
-                    "workflow_task_id" to extras.getString(NOTIFICATION_WORKFLOW_TASK_ID, null),
+                    "push_notification_version" to extras.getLong(NOTIFICATION_VERSION_EXTRA, -1L).let { if (it == -1L) null else it },
+                    "workflow_id" to extras.getString(NOTIFICATION_WORKFLOW_ID_EXTRA, null),
+                    "workflow_task_id" to extras.getString(NOTIFICATION_WORKFLOW_TASK_ID_EXTRA, null),
+                    "workflow_version" to extras.getLong(NOTIFICATION_WORKFLOW_VERSION_EXTRA, -1L).let { if (it == -1L) null else it },
                     "device_id" to storage.deviceId
-                ),
+                ).filterValues { it != null }.mapValues { it.value as Any },
                 interactive = false,
                 isInternal = true
             )
@@ -177,6 +188,7 @@ internal class DeepLinkHandler(scope: AppcuesScope) {
                         resources.getString(R.string.appcues_preview_flow_failed)
                     }
                 }
+
                 is StateMachineError -> resources.getString(R.string.appcues_preview_flow_failed_reason, experience.name, error.message)
                 is ExperienceNotFound -> resources.getString(R.string.appcues_preview_flow_not_found) // do nothing. previewing experience
                 is Success -> null

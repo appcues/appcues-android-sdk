@@ -72,7 +72,7 @@ internal fun NotificationCompat.Builder.setStyle(context: Context, data: Appcues
 internal fun NotificationCompat.Builder.setIntent(context: Context, data: AppcuesMessagingData, isCheckPush: Boolean) = apply {
     val intent = if (isCheckPush) {
         // during testing we just want to validate that push message came through
-        DeepLinkHandler.getDebuggerValidationIntent(data.appId, data.id)
+        DeepLinkHandler.getDebuggerValidationIntent(data.appId, data.notificationId)
     } else {
         DeepLinkHandler.getNotificationIntent(data)
     }
