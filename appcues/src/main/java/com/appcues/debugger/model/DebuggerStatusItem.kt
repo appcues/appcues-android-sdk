@@ -16,5 +16,6 @@ internal enum class StatusType {
 internal enum class TapActionType {
     HEALTH_CHECK,
     DEEPLINK_CHECK,
-    PUSH_CHECK
+    PUSH_CHECK,
+    OPEN_SETTINGS
 }

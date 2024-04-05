@@ -1,7 +1,10 @@
 package com.appcues.debugger
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Build.VERSION
+import android.provider.Settings
 import com.appcues.AppcuesConfig
 import com.appcues.BuildConfig
 import com.appcues.DeepLinkHandler
@@ -22,6 +25,7 @@ import com.appcues.debugger.model.StatusType.SUCCESS
 import com.appcues.debugger.model.TapActionType
 import com.appcues.debugger.model.TapActionType.DEEPLINK_CHECK
 import com.appcues.debugger.model.TapActionType.HEALTH_CHECK
+import com.appcues.debugger.model.TapActionType.OPEN_SETTINGS
 import com.appcues.debugger.model.TapActionType.PUSH_CHECK
 import com.appcues.util.ContextWrapper
 import com.appcues.util.ResultOf.Failure
@@ -55,6 +59,7 @@ internal class DebuggerStatusManager(
     private var connectionStatus: StatusType = IDLE
 
     private var pushStatus: StatusType = IDLE
+    private var pushTapAction: TapActionType = PUSH_CHECK
     private var pushValidationToken: String? = null
     private var pushErrorText: String? = null
     private var pushTimeoutJob: Job? = null
@@ -232,7 +237,7 @@ internal class DebuggerStatusManager(
         },
         statusType = pushStatus,
         showRefreshIcon = pushStatus != LOADING,
-        tapActionType = PUSH_CHECK
+        tapActionType = pushTapAction
     )
 
     private fun trackingScreenCheckItem() = DebuggerStatusItem(
@@ -290,7 +295,21 @@ internal class DebuggerStatusManager(
             HEALTH_CHECK -> checkConnection()
             DEEPLINK_CHECK -> checkDeeplink()
             PUSH_CHECK -> checkPush()
+            OPEN_SETTINGS -> openSettings()
         }
+    }
+
+    private suspend fun openSettings() {
+        pushStatus = IDLE
+        pushTapAction = PUSH_CHECK
+        pushErrorText = null
+        updateData()
+
+        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            data = Uri.fromParts("package", contextWrapper.getPackageName(), null)
+        }
+        contextWrapper.startIntent(intent)
     }
 
     private suspend fun checkConnection() {
@@ -336,7 +355,15 @@ internal class DebuggerStatusManager(
         }
     }
 
-    suspend fun checkPush() {
+    private suspend fun checkPush() {
+        if (!contextWrapper.isNotificationEnabled()) {
+            pushErrorText = "Tap to enable permission for push in app settings"
+            pushStatus = ERROR
+            pushTapAction = OPEN_SETTINGS
+            updateData()
+            return
+        }
+
         // set to null and update data so it will update to loading
         pushTimeoutJob?.cancel()
         pushErrorText = null
