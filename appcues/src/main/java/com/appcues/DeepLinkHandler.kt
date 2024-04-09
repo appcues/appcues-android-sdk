@@ -8,6 +8,7 @@ import android.widget.Toast
 import com.appcues.AppcuesFirebaseMessagingService.AppcuesMessagingData
 import com.appcues.analytics.AnalyticsEvent.PushOpened
 import com.appcues.analytics.AnalyticsTracker
+import com.appcues.data.PushRepository
 import com.appcues.data.model.ExperienceTrigger.DeepLink
 import com.appcues.debugger.AppcuesDebuggerManager
 import com.appcues.debugger.DebugMode.Debugger
@@ -67,6 +68,7 @@ internal class DeepLinkHandler(scope: AppcuesScope) {
 
     private val config by scope.inject<AppcuesConfig>()
     private val experienceRenderer by scope.inject<ExperienceRenderer>()
+    private val pushRepository by scope.inject<PushRepository>()
     private val appcuesCoroutineScope by scope.inject<AppcuesCoroutineScope>()
     private val debuggerManager by scope.inject<AppcuesDebuggerManager>()
     private val analyticsTracker by scope.inject<AnalyticsTracker>()
@@ -124,6 +126,20 @@ internal class DeepLinkHandler(scope: AppcuesScope) {
 
             segments.any() && segments[0] == "notification" && extras != null -> {
                 processNotification(extras)
+                true
+            }
+
+            segments.count() == 2 && segments[0] == "push_preview" -> {
+                appcuesCoroutineScope.launch {
+                    pushRepository.preview(segments[1], query)
+                }
+                true
+            }
+
+            segments.count() == 2 && segments[0] == "push_content" -> {
+                appcuesCoroutineScope.launch {
+                    pushRepository.send(segments[1])
+                }
                 true
             }
 
