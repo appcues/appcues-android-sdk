@@ -1,6 +1,6 @@
 package com.appcues.data.remote.appcues
 
-import com.appcues.data.remote.appcues.request.PushCheckRequest
+import com.appcues.data.remote.appcues.request.PushRequest
 import com.appcues.data.remote.appcues.response.ActivityResponse
 import com.appcues.data.remote.appcues.response.HealthCheckResponse
 import com.appcues.data.remote.appcues.response.QualifyResponse
@@ -64,6 +64,21 @@ internal interface AppcuesService {
     @POST("/v1/accounts/{account}/push_notification_test")
     suspend fun pushCheck(
         @Path("account") account: String,
-        @Body request: PushCheckRequest
+        @Body request: PushRequest
+    )
+
+    @POST("v1/accounts/{account}/push_notification/{id}/send")
+    suspend fun pushSend(
+        @Path("account") account: String,
+        @Path("id") pushId: String,
+        @Body request: PushRequest,
+    )
+
+    @POST("v1/accounts/{account}/push_notification/{id}/preview")
+    suspend fun pushPreview(
+        @Path("account") account: String,
+        @Path("id") pushId: String,
+        @Body request: PushRequest,
+        @QueryMap(encoded = true) query: Map<String, String>,
     )
 }
