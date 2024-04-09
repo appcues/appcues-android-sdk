@@ -3,6 +3,7 @@ package com.appcues
 import com.appcues.action.ActionProcessor
 import com.appcues.action.ActionRegistry
 import com.appcues.data.AppcuesRepository
+import com.appcues.data.PushRepository
 import com.appcues.debugger.AppcuesDebuggerManager
 import com.appcues.di.AppcuesModule
 import com.appcues.di.scope.AppcuesScopeDSL
@@ -42,6 +43,7 @@ internal object MainModule : AppcuesModule {
                 storage = get(),
             )
         }
+        scoped { PushRepository(get(), get()) }
         scoped { LinkOpener(get()) }
         scoped { AnalyticsPublisher(storage = get()) }
 
