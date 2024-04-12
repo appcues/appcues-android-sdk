@@ -80,7 +80,7 @@ internal class AnalyticsTracker(
 
     // returns valid session id (existing or creating new) or null if unable to start one.
     private fun getSession(): UUID? {
-        if (sessionMonitor.sessionId == null || sessionMonitor.isExpired) {
+        if (!sessionMonitor.hasSession()) {
             // if no existing session, or expired, start a new one
             val sessionId = sessionMonitor.startNewSession() ?: return null
             // immediately track the session_started analytic, before any
@@ -90,9 +90,6 @@ internal class AnalyticsTracker(
             // use true for waitForBatch, as a session_started event created due to a new user identify() should
             // merge and send together in a single activity payload
             analyticsQueueProcessor.flushThenSend(activityRequest, true)
-        } else {
-            // we have a valid session, update its last activity timestamp to push out the timeout
-            sessionMonitor.updateLastActivity()
         }
 
         return sessionMonitor.sessionId
