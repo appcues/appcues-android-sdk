@@ -5,51 +5,24 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
-import com.appcues.AppcuesFirebaseMessagingService.AppcuesMessagingData
-import com.appcues.analytics.AnalyticsEvent.PushOpened
-import com.appcues.analytics.AnalyticsTracker
-import com.appcues.data.PushRepository
 import com.appcues.data.model.ExperienceTrigger.DeepLink
 import com.appcues.debugger.AppcuesDebuggerManager
 import com.appcues.debugger.DebugMode.Debugger
 import com.appcues.debugger.DebugMode.ScreenCapture
 import com.appcues.di.scope.AppcuesScope
 import com.appcues.di.scope.inject
+import com.appcues.push.PushDeeplinkHandler
 import com.appcues.ui.ExperienceRenderer
 import com.appcues.ui.ExperienceRenderer.PreviewResponse.ExperienceNotFound
 import com.appcues.ui.ExperienceRenderer.PreviewResponse.Failed
 import com.appcues.ui.ExperienceRenderer.PreviewResponse.PreviewDeferred
 import com.appcues.ui.ExperienceRenderer.PreviewResponse.StateMachineError
 import com.appcues.ui.ExperienceRenderer.PreviewResponse.Success
-import com.appcues.util.ContextWrapper
 import kotlinx.coroutines.launch
 
 internal class DeepLinkHandler(scope: AppcuesScope) {
 
     companion object {
-
-        private const val NOTIFICATION_ID_EXTRA = "ID"
-        private const val NOTIFICATION_VERSION_EXTRA = "VERSION"
-        private const val NOTIFICATION_SHOW_CONTENT_EXTRA = "SHOW_CONTENT"
-        private const val NOTIFICATION_TEST_EXTRA = "TEST"
-        private const val NOTIFICATION_WORKFLOW_ID_EXTRA = "WORKFLOW_ID"
-        private const val NOTIFICATION_WORKFLOW_TASK_ID_EXTRA = "WORKFLOW_TASK_ID"
-        private const val NOTIFICATION_WORKFLOW_VERSION_EXTRA = "WORKFLOW_VERSION"
-        private const val NOTIFICATION_FORWARD_DEEPLINK_EXTRA = "FORWARD_DEEPLINK"
-
-        fun getNotificationIntent(appcuesData: AppcuesMessagingData) = Intent(Intent.ACTION_VIEW).apply {
-            data = Uri.parse("appcues-${appcuesData.appId}://sdk/notification")
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK
-
-            putExtra(NOTIFICATION_ID_EXTRA, appcuesData.notificationId)
-            putExtra(NOTIFICATION_VERSION_EXTRA, appcuesData.notificationVersion)
-            putExtra(NOTIFICATION_WORKFLOW_ID_EXTRA, appcuesData.workflowId)
-            putExtra(NOTIFICATION_WORKFLOW_TASK_ID_EXTRA, appcuesData.workflowTaskId)
-            putExtra(NOTIFICATION_WORKFLOW_VERSION_EXTRA, appcuesData.workflowVersion)
-            putExtra(NOTIFICATION_FORWARD_DEEPLINK_EXTRA, appcuesData.deeplink)
-            putExtra(NOTIFICATION_SHOW_CONTENT_EXTRA, appcuesData.experienceId)
-            putExtra(NOTIFICATION_TEST_EXTRA, appcuesData.test)
-        }
 
         fun getDebuggerValidationIntent(appId: String, token: String): Intent {
             return Intent(Intent.ACTION_VIEW).apply {
@@ -57,23 +30,13 @@ internal class DeepLinkHandler(scope: AppcuesScope) {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK
             }
         }
-
-        fun getGenericIntent(uriString: String): Intent {
-            return Intent(Intent.ACTION_VIEW).apply {
-                data = Uri.parse(uriString)
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            }
-        }
     }
 
     private val config by scope.inject<AppcuesConfig>()
     private val experienceRenderer by scope.inject<ExperienceRenderer>()
-    private val pushRepository by scope.inject<PushRepository>()
     private val appcuesCoroutineScope by scope.inject<AppcuesCoroutineScope>()
     private val debuggerManager by scope.inject<AppcuesDebuggerManager>()
-    private val analyticsTracker by scope.inject<AnalyticsTracker>()
-    private val contextWrapper by scope.inject<ContextWrapper>()
-    private val storage by scope.inject<Storage>()
+    private val pushDeeplinkHandler by scope.inject<PushDeeplinkHandler>()
 
     fun handle(activity: Activity, intent: Intent?): Boolean {
         if (intent == null) return false
@@ -123,26 +86,6 @@ internal class DeepLinkHandler(scope: AppcuesScope) {
                 }
                 true
             }
-
-            segments.any() && segments[0] == "notification" && extras != null -> {
-                processNotification(extras)
-                true
-            }
-
-            segments.count() == 2 && segments[0] == "push_preview" -> {
-                appcuesCoroutineScope.launch {
-                    pushRepository.preview(segments[1], query)
-                }
-                true
-            }
-
-            segments.count() == 2 && segments[0] == "push_content" -> {
-                appcuesCoroutineScope.launch {
-                    pushRepository.send(segments[1])
-                }
-                true
-            }
-
             segments.any() && segments[0] == "debugger" -> {
                 val deepLinkPath = if (segments.count() > 1) segments[1] else null
                 debuggerManager.start(activity, Debugger, deepLinkPath)
@@ -159,35 +102,9 @@ internal class DeepLinkHandler(scope: AppcuesScope) {
                 }
             }
 
+            pushDeeplinkHandler.processLink(segments, extras, query) -> true
+
             else -> false
-        }
-    }
-
-    private fun processNotification(extras: Bundle) {
-        if (!extras.getBoolean(NOTIFICATION_TEST_EXTRA)) {
-            analyticsTracker.track(
-                PushOpened.eventName,
-                properties = mapOf<String, Any?>(
-                    "notification_id" to extras.getString(NOTIFICATION_ID_EXTRA, null),
-                    "push_notification_version" to extras.getLong(NOTIFICATION_VERSION_EXTRA, -1L).let { if (it == -1L) null else it },
-                    "workflow_id" to extras.getString(NOTIFICATION_WORKFLOW_ID_EXTRA, null),
-                    "workflow_task_id" to extras.getString(NOTIFICATION_WORKFLOW_TASK_ID_EXTRA, null),
-                    "workflow_version" to extras.getLong(NOTIFICATION_WORKFLOW_VERSION_EXTRA, -1L).let { if (it == -1L) null else it },
-                    "device_id" to storage.deviceId
-                ).filterValues { it != null }.mapValues { it.value as Any },
-                interactive = false,
-                isInternal = true
-            )
-        }
-
-        extras.getString("forward_deeplink")?.let {
-            contextWrapper.startIntent(getGenericIntent(it))
-        }
-
-        extras.getString("show_content")?.let {
-            appcuesCoroutineScope.launch {
-                experienceRenderer.show(it, DeepLink, mapOf())
-            }
         }
     }
 
