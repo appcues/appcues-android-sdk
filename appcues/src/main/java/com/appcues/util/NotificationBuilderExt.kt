@@ -16,6 +16,7 @@ import com.appcues.AppcuesFirebaseMessagingService
 import com.appcues.AppcuesFirebaseMessagingService.AppcuesMessagingData
 import com.appcues.DeepLinkHandler
 import com.appcues.R
+import com.appcues.push.PushDeeplinkHandler
 import com.google.firebase.messaging.RemoteMessage
 import java.io.InputStream
 import java.net.HttpURLConnection
@@ -74,7 +75,7 @@ internal fun NotificationCompat.Builder.setIntent(context: Context, data: Appcue
         // during testing we just want to validate that push message came through
         DeepLinkHandler.getDebuggerValidationIntent(data.appId, data.notificationId)
     } else {
-        DeepLinkHandler.getNotificationIntent(data)
+        PushDeeplinkHandler.getNotificationIntent(data)
     }
 
     setContentIntent(PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE))

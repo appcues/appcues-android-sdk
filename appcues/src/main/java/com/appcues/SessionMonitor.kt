@@ -41,6 +41,14 @@ internal class SessionMonitor(
         }
     }
 
+    fun hasSession(): Boolean {
+        val isValid = sessionId != null || isExpired.not()
+
+        if (isValid) updateLastActivity()
+
+        return isValid
+    }
+
     fun startNewSession(): UUID? {
         if (storage.userId.isEmpty()) return null
 
@@ -56,7 +64,7 @@ internal class SessionMonitor(
         }
     }
 
-    fun updateLastActivity() {
+    private fun updateLastActivity() {
         lastActivityAt = Date()
     }
 
