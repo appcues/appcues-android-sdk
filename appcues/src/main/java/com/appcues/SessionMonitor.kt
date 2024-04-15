@@ -27,7 +27,7 @@ internal class SessionMonitor(
     val sessionId: UUID?
         get() = _sessionId
 
-    val isExpired: Boolean
+    private val isExpired: Boolean
         get() = lastActivityAt?.let {
             TimeUnit.MILLISECONDS.toSeconds(Date().time - it.time) >= sessionTimeout
         } ?: false
@@ -42,7 +42,7 @@ internal class SessionMonitor(
     }
 
     fun hasSession(): Boolean {
-        val isValid = sessionId != null || isExpired.not()
+        val isValid = sessionId != null && isExpired.not()
 
         if (isValid) updateLastActivity()
 
