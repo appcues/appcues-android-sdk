@@ -19,6 +19,7 @@ import com.appcues.di.scope.get
 import com.appcues.di.scope.inject
 import com.appcues.logging.LogcatDestination
 import com.appcues.logging.Logcues
+import com.appcues.push.PushOpenedProcessor
 import com.appcues.trait.ExperienceTrait
 import com.appcues.trait.ExperienceTraitLevel
 import com.appcues.trait.TraitRegistry
@@ -84,6 +85,7 @@ public class Appcues internal constructor(internal val scope: AppcuesScope) {
     private val debuggerManager by scope.inject<AppcuesDebuggerManager>()
     private val appcuesCoroutineScope by scope.inject<AppcuesCoroutineScope>()
     private val analyticsPublisher by scope.inject<AnalyticsPublisher>()
+    private val pushOpenedProcessor by scope.inject<PushOpenedProcessor>()
 
     /**
      * Set the listener to be notified about the display of Experience content.
@@ -339,5 +341,11 @@ public class Appcues internal constructor(internal val scope: AppcuesScope) {
         storage.isAnonymous = isAnonymous
         storage.userSignature = mutableProperties?.remove("appcues:user_id_signature") as? String
         analyticsTracker.identify(mutableProperties)
+
+        // whenever user identifies we check to see if there is a pending push open action matching the userId,
+        // in case there is we run it.
+        appcuesCoroutineScope.launch {
+            pushOpenedProcessor.processDeferred(userId)
+        }
     }
 }

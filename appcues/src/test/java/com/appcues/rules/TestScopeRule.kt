@@ -18,6 +18,8 @@ import com.appcues.di.scope.AppcuesScopeDSL
 import com.appcues.logging.LogcatDestination
 import com.appcues.logging.Logcues
 import com.appcues.mocks.storageMockk
+import com.appcues.push.PushDeeplinkHandler
+import com.appcues.push.PushOpenedProcessor
 import com.appcues.statemachine.StateMachine
 import com.appcues.trait.TraitRegistry
 import com.appcues.ui.ExperienceRenderer
@@ -47,6 +49,8 @@ internal class TestScopeRule : TestWatcher() {
                         scoped { mockk<TraitRegistry>(relaxed = true) }
                         scoped { mockk<ActionRegistry>(relaxed = true) }
                         scoped { mockk<DeepLinkHandler>(relaxed = true) }
+                        scoped { mockk<PushDeeplinkHandler>(relaxed = true) }
+                        scoped { mockk<PushOpenedProcessor>(relaxed = true) }
                         scoped { mockk<StateMachine>(relaxed = true) }
                         scoped { mockk<LinkOpener>(relaxed = true) }
                         scoped { storageMockk() }
