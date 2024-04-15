@@ -63,13 +63,13 @@ internal class AnalyticsTrackerTest {
         // given
         val sessionId = UUID.randomUUID()
         every { sessionMonitor.sessionId } returns sessionId
-        every { sessionMonitor.startNewSession() } returns sessionId
+        every { sessionMonitor.hasSession() } returns true
         val activity: ActivityRequest = mockk(relaxed = true)
         every { activityBuilder.identify(any()) } returns activity
         // when
         analyticsTracker.identify()
         // then
-        verify { sessionMonitor.updateLastActivity() }
+        verify { sessionMonitor.hasSession() }
         assertThat(analyticsFlowUpdates).hasSize(1)
         verify { analyticsQueueProcessor.flushThenSend(activity, true) }
         assertThat(analyticsFlowUpdates.first().type).isEqualTo(AnalyticType.IDENTIFY)
@@ -93,13 +93,13 @@ internal class AnalyticsTrackerTest {
         // given
         val sessionId = UUID.randomUUID()
         every { sessionMonitor.sessionId } returns sessionId
-        every { sessionMonitor.isExpired } returns false
+        every { sessionMonitor.hasSession() } returns true
         val activity: ActivityRequest = mockk(relaxed = true)
         every { activityBuilder.track(sessionId, any()) } returns activity
         // when
         analyticsTracker.track("event1", interactive = true)
         // then
-        verify { sessionMonitor.updateLastActivity() }
+        verify { sessionMonitor.hasSession() }
         assertThat(analyticsFlowUpdates).hasSize(1)
         verify { analyticsQueueProcessor.queueThenFlush(activity) }
         assertThat(analyticsFlowUpdates.first().type).isEqualTo(AnalyticType.EVENT)
@@ -112,13 +112,13 @@ internal class AnalyticsTrackerTest {
         // given
         val sessionId = UUID.randomUUID()
         every { sessionMonitor.sessionId } returns sessionId
-        every { sessionMonitor.isExpired } returns false
+        every { sessionMonitor.hasSession() } returns true
         val activity: ActivityRequest = mockk(relaxed = true)
         every { activityBuilder.track(sessionId, any()) } returns activity
         // when
         analyticsTracker.track("event1", interactive = false)
         // then
-        verify { sessionMonitor.updateLastActivity() }
+        verify { sessionMonitor.hasSession() }
         assertThat(analyticsFlowUpdates).hasSize(1)
         verify { analyticsQueueProcessor.queue(activity) }
         assertThat(analyticsFlowUpdates.first().type).isEqualTo(AnalyticType.EVENT)
@@ -142,13 +142,13 @@ internal class AnalyticsTrackerTest {
         // given
         val sessionId = UUID.randomUUID()
         every { sessionMonitor.sessionId } returns sessionId
-        every { sessionMonitor.isExpired } returns false
+        every { sessionMonitor.hasSession() } returns true
         val activity: ActivityRequest = mockk(relaxed = true)
         every { activityBuilder.screen(sessionId, any()) } returns activity
         // when
         analyticsTracker.screen("title")
         // then
-        verify { sessionMonitor.updateLastActivity() }
+        verify { sessionMonitor.hasSession() }
         assertThat(analyticsFlowUpdates).hasSize(1)
         verify { analyticsQueueProcessor.queueThenFlush(activity) }
         assertThat(analyticsFlowUpdates.first().type).isEqualTo(AnalyticType.SCREEN)
@@ -172,13 +172,13 @@ internal class AnalyticsTrackerTest {
         // given
         val sessionId = UUID.randomUUID()
         every { sessionMonitor.sessionId } returns sessionId
-        every { sessionMonitor.isExpired } returns false
+        every { sessionMonitor.hasSession() } returns true
         val activity: ActivityRequest = mockk(relaxed = true)
         every { activityBuilder.group(sessionId) } returns activity
         // when
         analyticsTracker.group()
         // then
-        verify { sessionMonitor.updateLastActivity() }
+        verify { sessionMonitor.hasSession() }
         assertThat(analyticsFlowUpdates).hasSize(1)
         verify { analyticsQueueProcessor.flushThenSend(activity) }
         assertThat(analyticsFlowUpdates.first().type).isEqualTo(AnalyticType.GROUP)
