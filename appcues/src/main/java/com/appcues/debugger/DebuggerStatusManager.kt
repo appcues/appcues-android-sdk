@@ -12,6 +12,7 @@ import com.appcues.R
 import com.appcues.Storage
 import com.appcues.analytics.AnalyticsEvent
 import com.appcues.analytics.AnalyticsTracker
+import com.appcues.data.remote.RemoteError.HttpErrorV2
 import com.appcues.data.remote.appcues.AppcuesRemoteSource
 import com.appcues.data.remote.appcues.request.ActivityRequest
 import com.appcues.debugger.model.DebuggerStatusItem
@@ -46,7 +47,7 @@ import kotlin.time.Duration.Companion.seconds
 
 @Suppress("TooManyFunctions")
 internal class DebuggerStatusManager(
-    storage: Storage,
+    private val storage: Storage,
     private val appcuesConfig: AppcuesConfig,
     private val appcuesRemoteSource: AppcuesRemoteSource,
     private val contextWrapper: ContextWrapper,
@@ -356,10 +357,7 @@ internal class DebuggerStatusManager(
     }
 
     private suspend fun checkPush() {
-        if (!contextWrapper.isNotificationEnabled()) {
-            pushErrorText = "Tap to enable permission for push in app settings"
-            pushStatus = ERROR
-            pushTapAction = OPEN_SETTINGS
+        if (!isLocalPushSetup()) {
             updateData()
             return
         }
@@ -375,9 +373,12 @@ internal class DebuggerStatusManager(
         val token = "test-push-${UUID.randomUUID()}"
         when (val result = appcuesRemoteSource.checkAppcuesPush(token)) {
             is Failure -> {
-                // this defines an error when sending push to the server (Http Error)
-                pushErrorText = "something when wrong: ${result.reason}"
-                // 500 - app_config_not_found
+                val reason = result.reason
+                pushErrorText = if (reason is HttpErrorV2 && reason.error != null) {
+                    contextWrapper.getString(R.string.appcues_debugger_status_check_push_server_error, reason.error.error)
+                } else {
+                    contextWrapper.getString(R.string.appcues_debugger_status_check_push_unknown_server_error)
+                }
                 pushStatus = ERROR
                 updateData()
             }
@@ -390,12 +391,30 @@ internal class DebuggerStatusManager(
                         delay(timeMillis = 30_000)
                         if (pushStatus == LOADING) {
                             pushStatus = ERROR
-                            pushErrorText = "Notification dismissed or not interacted after 30 seconds."
+                            pushErrorText = contextWrapper.getString(R.string.appcues_debugger_status_check_push_error_ignored)
                             updateData()
                         }
                     }
                 }
             }
         }
+    }
+
+    // run possible local checks regarding to push setup
+    private fun isLocalPushSetup(): Boolean {
+        if (!contextWrapper.isNotificationEnabled()) {
+            pushErrorText = contextWrapper.getString(R.string.appcues_debugger_status_check_push_error_no_permission)
+            pushStatus = ERROR
+            pushTapAction = OPEN_SETTINGS
+            return false
+        }
+
+        if (storage.pushToken == null) {
+            pushErrorText = contextWrapper.getString(R.string.appcues_debugger_status_check_push_error_no_token)
+            pushStatus = ERROR
+            return false
+        }
+
+        return true
     }
 }
