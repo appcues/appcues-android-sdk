@@ -34,7 +34,12 @@
     <string name="appcues_debugger_status_check_push_title">Appcues Push</string>
     <string name="appcues_debugger_status_check_push_instruction">Tap to check configuration</string>
     <string name="appcues_debugger_status_check_push_loading_instruction">Tap on the test notification in system tray</string>
-    <string name="appcues_debugger_status_check_push_error_1">Error 1: x</string>
+    <string name="appcues_debugger_status_check_push_error_no_token">Error 1: No Push token registered with Appcues</string>
+    <string name="appcues_debugger_status_check_push_error_no_permission">Error 2: Notification permission required. Tap to enable through settings</string>
+    <string name="appcues_debugger_status_check_push_error_ignored">Error 3: Notification dismissed or ignored after 30 seconds</string>
+    <string name="appcues_debugger_status_check_push_unknown_server_error">Error 4: Unknown Server error</string>
+    <string name="appcues_debugger_status_check_push_server_error">Server Error: %1$s</string>
+    <string name="appcues_debugger_status_check_push_error_sever_error">Error 500: Server Error</string>
     <string name="appcues_debugger_status_check_screen_tracking_title">Tracking Screens</string>
     <string name="appcues_debugger_status_check_screen_tracking_loading_line1">waiting for screen event…</string>
     <string name="appcues_debugger_status_user_identity_title">User Identified</string>
