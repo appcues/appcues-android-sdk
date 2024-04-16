@@ -97,20 +97,15 @@ internal class AppcuesRemoteSource(
     }
 
     suspend fun checkAppcuesPush(token: String): ResultOf<Unit, RemoteError> {
-        return NetworkRequest.execute {
+        return NetworkRequest.executePushRequest {
             service.pushCheck(config.accountId, PushRequest(storage.deviceId, token))
-        }.let {
-            when (it) {
-                is ResultOf.Failure -> ResultOf.Failure(it.reason)
-                is ResultOf.Success -> ResultOf.Success(Unit)
-            }
         }
     }
 
     suspend fun sendPush(
         pushId: String,
     ): ResultOf<Unit, RemoteError> {
-        return NetworkRequest.execute {
+        return NetworkRequest.executePushRequest {
             service.pushSend(config.accountId, pushId, PushRequest(storage.deviceId))
         }
     }
@@ -119,7 +114,7 @@ internal class AppcuesRemoteSource(
         pushId: String,
         query: Map<String, String>
     ): ResultOf<Unit, RemoteError> {
-        return NetworkRequest.execute {
+        return NetworkRequest.executePushRequest {
             service.pushPreview(config.accountId, pushId, PushRequest(storage.deviceId), query)
         }
     }
