@@ -29,8 +29,8 @@ internal class PushDeeplinkHandler(
         private const val NOTIFICATION_WORKFLOW_VERSION_EXTRA = "WORKFLOW_VERSION"
         private const val NOTIFICATION_FORWARD_DEEPLINK_EXTRA = "FORWARD_DEEPLINK"
 
-        fun getNotificationIntent(appcuesData: AppcuesMessagingData) = Intent(Intent.ACTION_VIEW).apply {
-            data = Uri.parse("appcues-${appcuesData.appId}://sdk/notification")
+        fun getNotificationIntent(scheme: String, appcuesData: AppcuesMessagingData) = Intent(Intent.ACTION_VIEW).apply {
+            data = Uri.parse("$scheme://sdk/notification")
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
 
             putExtra(NOTIFICATION_ID_EXTRA, appcuesData.notificationId)
