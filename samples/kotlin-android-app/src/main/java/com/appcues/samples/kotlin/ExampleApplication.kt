@@ -9,6 +9,7 @@ import android.os.StrictMode.VmPolicy
 import com.appcues.Appcues
 import com.appcues.LoggingLevel
 import com.appcues.NavigationHandler
+import com.google.firebase.messaging.FirebaseMessaging
 
 class ExampleApplication : Application() {
 
@@ -56,6 +57,15 @@ class ExampleApplication : Application() {
                     }
                     return true // navigation successful
                 }
+            }
+        }
+
+        // this is necessary to ensure that not only when we get a new token but whenever we initialize the application appcues should know
+        // whats the latest available token
+        FirebaseMessaging.getInstance().token.addOnCompleteListener {
+            // ensures we have token set
+            if (it.isSuccessful) {
+                appcues.setPushToken(it.result)
             }
         }
     }

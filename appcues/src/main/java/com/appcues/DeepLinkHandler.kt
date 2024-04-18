@@ -18,15 +18,16 @@ import com.appcues.ui.ExperienceRenderer.PreviewResponse.Failed
 import com.appcues.ui.ExperienceRenderer.PreviewResponse.PreviewDeferred
 import com.appcues.ui.ExperienceRenderer.PreviewResponse.StateMachineError
 import com.appcues.ui.ExperienceRenderer.PreviewResponse.Success
+import com.appcues.util.ContextWrapper
 import kotlinx.coroutines.launch
 
 internal class DeepLinkHandler(scope: AppcuesScope) {
 
     companion object {
 
-        fun getDebuggerValidationIntent(appId: String, token: String): Intent {
+        fun getDebuggerValidationIntent(scheme: String, token: String): Intent {
             return Intent(Intent.ACTION_VIEW).apply {
-                data = Uri.parse("appcues-$appId://sdk/debugger/$token")
+                data = Uri.parse("$scheme://sdk/debugger/$token")
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK
             }
         }
@@ -37,6 +38,7 @@ internal class DeepLinkHandler(scope: AppcuesScope) {
     private val appcuesCoroutineScope by scope.inject<AppcuesCoroutineScope>()
     private val debuggerManager by scope.inject<AppcuesDebuggerManager>()
     private val pushDeeplinkHandler by scope.inject<PushDeeplinkHandler>()
+    private val contextWrapper by scope.inject<ContextWrapper>()
 
     fun handle(activity: Activity, intent: Intent?): Boolean {
         if (intent == null) return false
@@ -45,7 +47,8 @@ internal class DeepLinkHandler(scope: AppcuesScope) {
         val extras = intent.extras
 
         if (linkData != null) {
-            val validScheme = linkData.scheme == "appcues-${config.applicationId}" || linkData.scheme == "appcues-democues"
+            val scheme = contextWrapper.getString(R.string.appcues_custom_scheme).ifEmpty { "appcues-${config.applicationId}" }
+            val validScheme = linkData.scheme == scheme
             val validHost = linkData.host == "sdk"
 
             if (linkAction == Intent.ACTION_VIEW && validScheme && validHost) {
