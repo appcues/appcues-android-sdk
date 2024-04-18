@@ -333,7 +333,8 @@ internal class DebuggerStatusManager(
         deepLinkValidationToken = token
         updateData()
 
-        val intent = DeepLinkHandler.getDebuggerValidationIntent(appcuesConfig.applicationId, token)
+        val scheme = contextWrapper.getString(R.string.appcues_custom_scheme).ifEmpty { "appcues-${appcuesConfig.applicationId}" }
+        val intent = DeepLinkHandler.getDebuggerValidationIntent(scheme, token)
         if (contextWrapper.isIntentSupported(intent)) {
             contextWrapper.startIntent(intent)
 
