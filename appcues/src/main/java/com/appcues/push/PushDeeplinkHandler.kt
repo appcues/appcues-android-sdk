@@ -69,7 +69,7 @@ internal class PushDeeplinkHandler(
     }
 
     private fun processNotification(extras: Bundle) {
-        if (extras.getBoolean(NOTIFICATION_TEST_EXTRA, false)) return
+        val isTest = extras.getBoolean(NOTIFICATION_TEST_EXTRA, false)
 
         val properties = mapOf<String, Any?>(
             "notification_id" to extras.getString(NOTIFICATION_ID_EXTRA, null),
@@ -83,7 +83,7 @@ internal class PushDeeplinkHandler(
         val deeplink = extras.getString(NOTIFICATION_FORWARD_DEEPLINK_EXTRA, null)
         val experienceId = extras.getString(NOTIFICATION_SHOW_CONTENT_EXTRA, null)
 
-        val action = PushOpenedAction(storage.userId, properties, deeplink, experienceId)
+        val action = PushOpenedAction(storage.userId, properties, deeplink, experienceId, isTest)
 
         if (sessionMonitor.hasSession()) {
             coroutineScope.launch { pushOpenedProcessor.process(action) }

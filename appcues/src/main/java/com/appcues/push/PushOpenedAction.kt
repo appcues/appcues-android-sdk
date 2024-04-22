@@ -7,6 +7,7 @@ internal data class PushOpenedAction(
     val eventProperties: Map<String, Any>?,
     val deeplink: String?,
     val experienceId: String?,
+    val isTest: Boolean,
 ) {
 
     val eventName = PushOpened.eventName
