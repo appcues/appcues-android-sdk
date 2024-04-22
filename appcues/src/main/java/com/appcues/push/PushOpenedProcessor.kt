@@ -38,7 +38,9 @@ internal class PushOpenedProcessor(
     }
 
     suspend fun process(pushAction: PushOpenedAction) {
-        analyticsTracker.track(pushAction.eventName, pushAction.eventProperties, interactive = false, isInternal = true)
+        if (pushAction.isTest.not()) {
+            analyticsTracker.track(pushAction.eventName, pushAction.eventProperties, interactive = false, isInternal = true)
+        }
 
         pushAction.deeplink?.let {
             val uri = Uri.parse(it)
