@@ -41,11 +41,11 @@ then
 	exit 1
 fi
 
-# check that we're on the `main` or `release` branch
+# check that we're on the `sdk4` or `release` branch
 branch=$(git rev-parse --abbrev-ref HEAD)
-if [[ $branch != 'main' ]] && [[ $branch != release/* ]]
+if [[ $branch != 'sdk4' ]] && [[ $branch != release/* ]]
 then
-	echo "The 'main' or 'release/*' must be the current branch to make a release."
+	echo "Alpha release from 'sdk4'"
 	echo "You are currently on: $branch"
 	exit 1
 fi
