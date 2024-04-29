@@ -24,6 +24,7 @@ import com.appcues.trait.ExperienceTrait
 import com.appcues.trait.ExperienceTraitLevel
 import com.appcues.trait.TraitRegistry
 import com.appcues.ui.ExperienceRenderer
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.launch
 import kotlin.DeprecationLevel.ERROR
 
@@ -46,7 +47,21 @@ public fun Appcues(
     .createScope(
         context = context,
         config = AppcuesConfig(accountId, applicationId).apply { config?.invoke(this) }
-    ).get()
+    ).get<Appcues>().also {
+        try {
+            // this is necessary to ensure that not only when we get a new token but whenever we initialize the application appcues should know
+            // whats the latest available token
+            FirebaseMessaging.getInstance().token.addOnCompleteListener {
+                // ensures we have token set
+                if (it.isSuccessful) {
+                    // store token on static pushToken that will be used on the next session start
+                    Appcues.pushToken = it.result
+                }
+            }
+        } catch (_: Exception) {
+            // do nothing on any exception we may hit here as customer might not even have google messaging services setup
+        }
+    }
 
 /**
  * The main entry point for using Appcues functionality in your application - tracking
