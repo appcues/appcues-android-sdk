@@ -68,7 +68,7 @@ internal class DeeplinkHandlerTest : AppcuesScopeTest {
             every { action } returns Intent.ACTION_CALL
             every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
-                every { scheme } returns "appcues-democues"
+                every { scheme } returns "appcues-123"
                 every { host } returns "sdk"
             }
         }
@@ -107,7 +107,7 @@ internal class DeeplinkHandlerTest : AppcuesScopeTest {
             every { action } returns Intent.ACTION_VIEW
             every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
-                every { scheme } returns "appcues-democues"
+                every { scheme } returns "appcues-123"
                 every { host } returns "sdk"
                 every { pathSegments } returns listOf("experience_preview", "1234")
             }
@@ -127,7 +127,7 @@ internal class DeeplinkHandlerTest : AppcuesScopeTest {
             every { action } returns Intent.ACTION_VIEW
             every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
-                every { scheme } returns "appcues-democues"
+                every { scheme } returns "appcues-123"
                 every { host } returns "sdk"
                 every { pathSegments } returns listOf("experience_content", "1234")
             }
@@ -147,7 +147,7 @@ internal class DeeplinkHandlerTest : AppcuesScopeTest {
             every { action } returns Intent.ACTION_VIEW
             every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
-                every { scheme } returns "appcues-democues"
+                every { scheme } returns "appcues-123"
                 every { host } returns "sdk"
                 every { pathSegments } returns listOf("debugger")
             }
@@ -167,7 +167,7 @@ internal class DeeplinkHandlerTest : AppcuesScopeTest {
             every { action } returns Intent.ACTION_VIEW
             every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
-                every { scheme } returns "appcues-democues"
+                every { scheme } returns "appcues-123"
                 every { host } returns "sdk"
                 every { pathSegments } returns listOf("debugger", "debugger-path")
             }
@@ -187,7 +187,7 @@ internal class DeeplinkHandlerTest : AppcuesScopeTest {
             every { action } returns Intent.ACTION_VIEW
             every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
-                every { scheme } returns "appcues-democues"
+                every { scheme } returns "appcues-123"
                 every { host } returns "sdk"
                 every { pathSegments } returns listOf("capture_screen")
                 every { getQueryParameter("token") } returns "1234"
@@ -208,7 +208,7 @@ internal class DeeplinkHandlerTest : AppcuesScopeTest {
             every { action } returns Intent.ACTION_VIEW
             every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
-                every { scheme } returns "appcues-democues"
+                every { scheme } returns "appcues-123"
                 every { host } returns "sdk"
                 every { pathSegments } returns listOf("capture_screen")
                 every { getQueryParameter("token") } returns null
@@ -229,7 +229,7 @@ internal class DeeplinkHandlerTest : AppcuesScopeTest {
             every { action } returns Intent.ACTION_VIEW
             every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
-                every { scheme } returns "appcues-democues"
+                every { scheme } returns "appcues-123"
                 every { host } returns "sdk"
                 every { pathSegments } returns listOf("invalid")
             }
@@ -250,7 +250,7 @@ internal class DeeplinkHandlerTest : AppcuesScopeTest {
             every { action } returns Intent.ACTION_VIEW
             every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
-                every { scheme } returns "appcues-democues"
+                every { scheme } returns "appcues-123"
                 every { host } returns "sdk"
                 every { pathSegments } returns listOf("capture_screen")
                 every { getQueryParameter("token") } returns "token-1234"
@@ -272,7 +272,7 @@ internal class DeeplinkHandlerTest : AppcuesScopeTest {
             every { action } returns Intent.ACTION_VIEW
             every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
-                every { scheme } returns "appcues-democues"
+                every { scheme } returns "appcues-123"
                 every { host } returns "sdk"
                 every { pathSegments } returns listOf("debugger")
             }
@@ -293,7 +293,7 @@ internal class DeeplinkHandlerTest : AppcuesScopeTest {
             every { action } returns Intent.ACTION_VIEW
             every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
-                every { scheme } returns "appcues-democues"
+                every { scheme } returns "appcues-123"
                 every { host } returns "sdk"
                 every { pathSegments } returns listOf("debugger", "deeplink-path")
             }
@@ -314,7 +314,7 @@ internal class DeeplinkHandlerTest : AppcuesScopeTest {
             every { action } returns Intent.ACTION_VIEW
             every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
-                every { scheme } returns "appcues-democues"
+                every { scheme } returns "appcues-123"
                 every { host } returns "sdk"
                 every { pathSegments } returns listOf("experience_content", "experienceId-1234")
                 every { queryParameterNames } returns setOf("param1", "param2")
@@ -338,7 +338,7 @@ internal class DeeplinkHandlerTest : AppcuesScopeTest {
             every { action } returns Intent.ACTION_VIEW
             every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
-                every { scheme } returns "appcues-democues"
+                every { scheme } returns "appcues-123"
                 every { host } returns "sdk"
                 every { pathSegments } returns listOf("experience_preview", "experienceId-1234")
                 every { queryParameterNames } returns setOf("param1", "param2")
@@ -362,7 +362,7 @@ internal class DeeplinkHandlerTest : AppcuesScopeTest {
             every { action } returns Intent.ACTION_VIEW
             every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
-                every { scheme } returns "appcues-democues"
+                every { scheme } returns "appcues-123"
                 every { host } returns "sdk"
                 every { pathSegments } returns listOf("experience_preview", "experienceId-1234")
             }
@@ -384,7 +384,7 @@ internal class DeeplinkHandlerTest : AppcuesScopeTest {
             every { action } returns Intent.ACTION_VIEW
             every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
-                every { scheme } returns "appcues-democues"
+                every { scheme } returns "appcues-123"
                 every { host } returns "sdk"
                 every { pathSegments } returns listOf("experience_preview", "experienceId-1234")
             }
@@ -409,7 +409,7 @@ internal class DeeplinkHandlerTest : AppcuesScopeTest {
             every { action } returns Intent.ACTION_VIEW
             every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
-                every { scheme } returns "appcues-democues"
+                every { scheme } returns "appcues-123"
                 every { host } returns "sdk"
                 every { pathSegments } returns listOf("experience_preview", "experienceId-1234")
             }
@@ -434,7 +434,7 @@ internal class DeeplinkHandlerTest : AppcuesScopeTest {
             every { action } returns Intent.ACTION_VIEW
             every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
-                every { scheme } returns "appcues-democues"
+                every { scheme } returns "appcues-123"
                 every { host } returns "sdk"
                 every { pathSegments } returns listOf("experience_preview", "experienceId-1234")
             }
@@ -459,7 +459,7 @@ internal class DeeplinkHandlerTest : AppcuesScopeTest {
             every { action } returns Intent.ACTION_VIEW
             every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
-                every { scheme } returns "appcues-democues"
+                every { scheme } returns "appcues-123"
                 every { host } returns "sdk"
                 every { pathSegments } returns listOf("experience_preview", "experienceId-1234")
             }
@@ -481,7 +481,7 @@ internal class DeeplinkHandlerTest : AppcuesScopeTest {
             every { action } returns Intent.ACTION_VIEW
             every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
-                every { scheme } returns "appcues-democues"
+                every { scheme } returns "appcues-123"
                 every { host } returns "sdk"
                 every { pathSegments } returns listOf("experience_preview", "experienceId-1234")
             }
