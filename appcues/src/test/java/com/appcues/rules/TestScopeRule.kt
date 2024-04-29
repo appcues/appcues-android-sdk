@@ -23,6 +23,7 @@ import com.appcues.push.PushOpenedProcessor
 import com.appcues.statemachine.StateMachine
 import com.appcues.trait.TraitRegistry
 import com.appcues.ui.ExperienceRenderer
+import com.appcues.util.ContextWrapper
 import com.appcues.util.LinkOpener
 import io.mockk.mockk
 import org.junit.rules.TestWatcher
@@ -53,6 +54,7 @@ internal class TestScopeRule : TestWatcher() {
                         scoped { mockk<PushOpenedProcessor>(relaxed = true) }
                         scoped { mockk<StateMachine>(relaxed = true) }
                         scoped { mockk<LinkOpener>(relaxed = true) }
+                        scoped { mockk<ContextWrapper>(relaxed = true) }
                         scoped { storageMockk() }
                         scoped { mockk<Appcues>(relaxed = true) }
                         scoped { mockk<ActionProcessor>(relaxed = true) }
