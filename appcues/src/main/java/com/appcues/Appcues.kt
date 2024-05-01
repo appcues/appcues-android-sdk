@@ -374,6 +374,13 @@ public class Appcues internal constructor(internal val scope: AppcuesScope) {
         storage.isAnonymous = isAnonymous
         storage.userSignature = mutableProperties?.remove("appcues:user_id_signature") as? String
         analyticsTracker.identify(mutableProperties)
+        if (!userChanged) {
+            // track a device update on any re-identify of the same user as well, since it will not trigger a new
+            // session but this is a way to force an update of any device props that may have changed outside of the SDK
+            // i.e. push permission.
+            // this is interactive=true so it gets batched together with the identify in a single request
+            analyticsTracker.track(AnalyticsEvent.DeviceUpdated.eventName, isInternal = true)
+        }
 
         // whenever user identifies we check to see if there is a pending push open action matching the userId,
         // in case there is we run it.
