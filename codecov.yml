@@ -1,1 +1,9 @@
 comment: false
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+        # https://docs.codecov.com/docs/commit-status#threshold
+        # Allow the coverage to drop by 0.5%, and keep a success status
+        threshold: 0.5%
