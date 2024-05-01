@@ -132,6 +132,36 @@ internal class AppcuesTest : AppcuesScopeTest {
     }
 
     @Test
+    fun `identify SHOULD track device update WHEN same as existing user`() {
+        // GIVEN
+        val tracker: AnalyticsTracker = get()
+        val storage: Storage = get()
+        storage.userId = "test-user"
+
+        // WHEN
+        appcues.identify("test-user")
+
+        // THEN
+        verify { tracker.track(name = "appcues:device_updated", properties = null, interactive = true, isInternal = true) }
+    }
+
+    @Test
+    fun `identify SHOULD NOT track device update WHEN new existing user`() {
+        // no device update here since the new user will trigger a new session_started
+        // event with device props
+        // GIVEN
+        val tracker: AnalyticsTracker = get()
+        val storage: Storage = get()
+        storage.userId = "test-user"
+
+        // WHEN
+        appcues.identify("different-user")
+
+        // THEN
+        verify(exactly = 0) { tracker.track(name = "appcues:device_updated", properties = null, interactive = true, isInternal = true) }
+    }
+
+    @Test
     fun `track event SHOULD call AnalyticsTracker track function`() {
         // GIVEN
         val eventName = "test_event"
