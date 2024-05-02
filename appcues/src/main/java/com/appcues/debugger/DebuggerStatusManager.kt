@@ -1,6 +1,7 @@
 package com.appcues.debugger
 
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Build.VERSION
@@ -308,7 +309,7 @@ internal class DebuggerStatusManager(
 
         val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            data = Uri.fromParts("package", contextWrapper.getPackageName(), null)
+            data = Uri.fromParts("package", contextWrapper.packageName, null)
         }
         contextWrapper.startIntent(intent)
     }
@@ -403,19 +404,41 @@ internal class DebuggerStatusManager(
 
     // run possible local checks regarding to push setup
     private fun isLocalPushSetup(): Boolean {
-        if (!contextWrapper.isNotificationEnabled()) {
+        return if (!isPushManifestConfigured()) {
+            pushErrorText = contextWrapper.getString(R.string.appcues_debugger_status_check_push_manifest_not_set)
+            pushStatus = ERROR
+            pushTapAction = OPEN_SETTINGS
+            false
+        } else if (!contextWrapper.isNotificationEnabled()) {
             pushErrorText = contextWrapper.getString(R.string.appcues_debugger_status_check_push_error_no_permission)
             pushStatus = ERROR
             pushTapAction = OPEN_SETTINGS
-            return false
-        }
-
-        if (storage.pushToken == null) {
+            false
+        } else if (storage.pushToken == null) {
             pushErrorText = contextWrapper.getString(R.string.appcues_debugger_status_check_push_error_no_token)
             pushStatus = ERROR
-            return false
+            false
+        } else true
+    }
+
+    private fun isPushManifestConfigured(): Boolean {
+        val packageManager = contextWrapper.packageManager
+
+        val services = packageManager.queryIntentServices(
+            Intent().apply { action = "com.google.firebase.MESSAGING_EVENT" },
+            PackageManager.GET_SERVICES
+        )
+
+        for (service in services) {
+            // if service matches default Firebase it means its not appcues or any other custom
+            // in this case its not properly configured so we can receive Appcues specific push messages
+            if (service.serviceInfo.name != "com.google.firebase.messaging.FirebaseMessagingService") {
+                // if service name is not FirebaseMessagingService it means its a custom made or
+                // AppcuesFirebaseMessagingService, which is what we want
+                return true
+            }
         }
 
-        return true
+        return false
     }
 }
