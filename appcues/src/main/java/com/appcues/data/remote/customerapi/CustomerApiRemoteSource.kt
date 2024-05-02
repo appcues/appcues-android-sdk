@@ -81,7 +81,7 @@ internal class CustomerApiRemoteSource(
             deviceHeight = size.height,
             deviceOrientation = contextWrapper.orientation,
             deviceType = contextWrapper.getString(R.string.appcues_device_type),
-            bundlePackageId = contextWrapper.getPackageName(),
+            bundlePackageId = contextWrapper.packageName,
             sdkVersion = BuildConfig.SDK_VERSION,
             sdkName = "appcues-android",
             osName = "android",
