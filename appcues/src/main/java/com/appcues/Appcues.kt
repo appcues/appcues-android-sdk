@@ -41,27 +41,40 @@ public fun Appcues(
     accountId: String,
     applicationId: String,
     config: (AppcuesConfig.() -> Unit)? = null,
-): Appcues = Bootstrap
+): Appcues {
     // This creates the Scope and initializes the Appcues instance within, then returns the Appcues instance
     // ready to go with the necessary dependency configuration in its scope.
-    .createScope(
-        context = context,
-        config = AppcuesConfig(accountId, applicationId).apply { config?.invoke(this) }
-    ).get<Appcues>().also {
-        try {
-            // this is necessary to ensure that not only when we get a new token but whenever we initialize the application appcues should know
-            // whats the latest available token
-            FirebaseMessaging.getInstance().token.addOnCompleteListener {
-                // ensures we have token set
-                if (it.isSuccessful) {
-                    // store token on static pushToken that will be used on the next session start
-                    Appcues.pushToken = it.result
+    val scope = Bootstrap
+        .createScope(
+            context = context,
+            config = AppcuesConfig(accountId, applicationId).apply { config?.invoke(this) }
+        )
+
+    val appcues = scope.get<Appcues>()
+
+    try {
+        // this is necessary to ensure that not only when we get a new token but whenever we initialize the application appcues should know
+        // whats the latest available token
+        FirebaseMessaging.getInstance().token.addOnCompleteListener {
+            // ensures we have token set
+            if (it.isSuccessful) {
+                val sessionMonitor = scope.get<SessionMonitor>()
+                if (sessionMonitor.hasSession()) {
+                    // can call setPushToken directly if we are already in a session, so the device_updated event is tracked
+                    appcues.setPushToken(it.result)
+                } else {
+                    // store token on static pushToken that will be used on the next session start to track device props
+                    val storage = scope.get<Storage>()
+                    storage.pushToken = it.result
                 }
             }
-        } catch (_: Exception) {
-            // do nothing on any exception we may hit here as customer might not even have google messaging services setup
         }
+    } catch (_: Exception) {
+        // do nothing on any exception we may hit here as customer might not even have google messaging services setup
     }
+
+    return appcues
+}
 
 /**
  * The main entry point for using Appcues functionality in your application - tracking
