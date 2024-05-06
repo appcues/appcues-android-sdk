@@ -1,17 +1,24 @@
 package com.appcues.push
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.widget.Toast
 import com.appcues.AppcuesCoroutineScope
 import com.appcues.AppcuesFirebaseMessagingService.AppcuesMessagingData
+import com.appcues.R
 import com.appcues.SessionMonitor
 import com.appcues.Storage
 import com.appcues.data.PushRepository
+import com.appcues.data.remote.RemoteError.HttpErrorV2
+import com.appcues.data.remote.RemoteError.NetworkError
 import com.appcues.di.component.AppcuesComponent
 import com.appcues.di.component.inject
 import com.appcues.di.scope.AppcuesScope
 import com.appcues.di.scope.inject
+import com.appcues.util.ResultOf.Failure
+import com.appcues.util.ResultOf.Success
 import kotlinx.coroutines.launch
 
 internal class PushDeeplinkHandler(
@@ -28,6 +35,8 @@ internal class PushDeeplinkHandler(
         private const val NOTIFICATION_WORKFLOW_TASK_ID_EXTRA = "WORKFLOW_TASK_ID"
         private const val NOTIFICATION_WORKFLOW_VERSION_EXTRA = "WORKFLOW_VERSION"
         private const val NOTIFICATION_FORWARD_DEEPLINK_EXTRA = "FORWARD_DEEPLINK"
+
+        private const val NETWORK_ERROR_NOT_FOUND = 404
 
         fun getNotificationIntent(scheme: String, appcuesData: AppcuesMessagingData) = Intent(Intent.ACTION_VIEW).apply {
             data = Uri.parse("$scheme://sdk/notification")
@@ -50,14 +59,14 @@ internal class PushDeeplinkHandler(
     private val storage by inject<Storage>()
     private val pushRepository by scope.inject<PushRepository>()
 
-    fun processLink(segments: List<String>, extras: Bundle?, query: Map<String, String>): Boolean {
+    fun processLink(context: Context, segments: List<String>, extras: Bundle?, query: Map<String, String>): Boolean {
         return when {
             segments.any() && segments[0] == "notification" && extras != null -> {
                 processNotification(extras)
                 true
             }
             segments.count() == 2 && segments[0] == "push_preview" -> {
-                processPreviewPush(segments[1], query)
+                processPreviewPush(context, segments[1], query)
                 true
             }
             segments.count() == 2 && segments[0] == "push_content" -> {
@@ -92,8 +101,21 @@ internal class PushDeeplinkHandler(
         }
     }
 
-    private fun processPreviewPush(id: String, query: Map<String, String>) {
-        coroutineScope.launch { pushRepository.preview(id, query) }
+    private fun processPreviewPush(context: Context, id: String, query: Map<String, String>) {
+        coroutineScope.launch {
+            val result = pushRepository.preview(id, query)
+
+            when (result) {
+                is Failure -> when {
+                    result.reason is HttpErrorV2 && result.reason.code == NETWORK_ERROR_NOT_FOUND ->
+                        context.resources.getString(R.string.appcues_preview_push_not_found)
+                    result.reason is NetworkError ->
+                        context.resources.getString(R.string.appcues_preview_push_failed)
+                    else -> context.resources.getString(R.string.appcues_preview_push_failed_generic)
+                }
+                is Success -> null
+            }?.let { errorMessage -> Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show() }
+        }
     }
 
     private fun processShowPush(id: String) {
