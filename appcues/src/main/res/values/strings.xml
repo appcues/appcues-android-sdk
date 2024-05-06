@@ -7,6 +7,10 @@
     <string name="appcues_preview_flow_failed">Mobile flow preview failed.</string>
     <string name="appcues_preview_flow_failed_reason">Preview of %1$s failed: %2$s</string>
 
+    <string name="appcues_preview_push_not_found">Push notification not found.</string>
+    <string name="appcues_preview_push_failed">Error loading push notification preview.</string>
+    <string name="appcues_preview_push_failed_generic">Push notification preview failed.</string>
+
     <!-- Debugger Fab -->
     <string name="appcues_debugger_fab_on_debugger_click_label">Appcues debugger details</string>
     <string name="appcues_debugger_fab_on_screen_capture_click_label">Appcues screen capture</string>
