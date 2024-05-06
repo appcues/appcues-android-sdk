@@ -105,7 +105,7 @@ internal class DeepLinkHandler(scope: AppcuesScope) {
                 }
             }
 
-            pushDeeplinkHandler.processLink(segments, extras, query) -> true
+            pushDeeplinkHandler.processLink(activity, segments, extras, query) -> true
 
             else -> false
         }
