@@ -18,10 +18,9 @@ import com.appcues.statemachine.states.IdlingState
 import com.appcues.statemachine.states.RenderingStepState
 import com.appcues.ui.utils.getParentView
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.util.Timer
-import java.util.TimerTask
-import kotlin.concurrent.schedule
 
 internal class ModalStateMachineOwner(
     override val stateMachine: StateMachine,
@@ -37,7 +36,7 @@ internal class ModalStateMachineOwner(
 
     // used to attempt retry when items in view change
     private var viewTreeUpdateHandler: ViewTreeUpdateHandler = ViewTreeUpdateHandler { attemptRetry() }
-    private var uiIdleDebounceTimer: TimerTask? = null
+    private var uiIdleDebounceTimer: Job? = null
     private var viewTreeObserver: ViewTreeObserver? = null
 
     init {
@@ -113,11 +112,10 @@ internal class ModalStateMachineOwner(
         // cancel any previous
         uiIdleDebounceTimer?.cancel()
 
-        uiIdleDebounceTimer = Timer().schedule(delay = SCROLL_DEBOUNCE_MILLISECONDS) {
-            // set to know to allow new Timer
-            uiIdleDebounceTimer = null
-            // run callback block
-            val activity = AppcuesActivityMonitor.activity ?: return@schedule
+        uiIdleDebounceTimer = coroutineScope.launch(Dispatchers.Main) {
+            delay(SCROLL_DEBOUNCE_MILLISECONDS)
+
+            val activity = AppcuesActivityMonitor.activity ?: return@launch
 
             activity.runOnUiThread { block(activity) }
         }
