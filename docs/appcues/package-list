@@ -43,6 +43,7 @@ $dokka.location:com.appcues/AppcuesConfig/additionalAutoProperties/#/PointingToD
 $dokka.location:com.appcues/AppcuesConfig/analyticsListener/#/PointingToDeclaration/appcues/com.appcues/-appcues-config/analytics-listener.html
 $dokka.location:com.appcues/AppcuesConfig/anonymousIdFactory/#/PointingToDeclaration/appcues/com.appcues/-appcues-config/anonymous-id-factory.html
 $dokka.location:com.appcues/AppcuesConfig/apiBasePath/#/PointingToDeclaration/appcues/com.appcues/-appcues-config/api-base-path.html
+$dokka.location:com.appcues/AppcuesConfig/apiSettingsPath/#/PointingToDeclaration/appcues/com.appcues/-appcues-config/api-settings-path.html
 $dokka.location:com.appcues/AppcuesConfig/experienceListener/#/PointingToDeclaration/appcues/com.appcues/-appcues-config/experience-listener.html
 $dokka.location:com.appcues/AppcuesConfig/interceptor/#/PointingToDeclaration/appcues/com.appcues/-appcues-config/interceptor.html
 $dokka.location:com.appcues/AppcuesConfig/loggingLevel/#/PointingToDeclaration/appcues/com.appcues/-appcues-config/logging-level.html
