@@ -26,8 +26,8 @@ orbs:
 # -------------------------
 executors:
   android_compatible:
-    machine: 
-      image: android:default
+    machine:
+      image: android:2024.01.1
     resource_class: large
     working_directory: ~/code
 
@@ -68,12 +68,12 @@ commands:
           command: ./checksum.sh /tmp/checksum.txt
       - restore_cache:
           name: Restore Gradle cache
-          key: gradle-{{ checksum "/tmp/checksum.txt" }}
+          key: 1-gradle-{{ checksum "/tmp/checksum.txt" }}
   save_gradle_cache:
     description: 'Save Gradle cache'
     steps:
       - save_cache:
-          key: gradle-{{ checksum "/tmp/checksum.txt" }}
+          key: 1-gradle-{{ checksum "/tmp/checksum.txt" }}
           paths:
             - ~/.gradle/caches
             - ~/.gradle/wrapper
