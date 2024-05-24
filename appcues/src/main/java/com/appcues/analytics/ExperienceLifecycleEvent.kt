@@ -7,6 +7,7 @@ import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.Interactio
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType.TARGET_TAPPED
 import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperienceStepFormState
+import com.appcues.data.model.ExperienceTrigger.Notification
 import com.appcues.data.model.getFrameId
 import com.appcues.statemachine.Error
 import com.appcues.util.appcuesFormatted
@@ -106,6 +107,12 @@ internal sealed class ExperienceLifecycleEvent(
             error?.let {
                 this["message"] = it.message
                 this["errorId"] = it.id.appcuesFormatted()
+            }
+
+            // in case trigger is push we want to include the notification id
+            val trigger = experience.trigger
+            if (trigger is Notification) {
+                this["notificationId"] = trigger.notificationId
             }
         }.filterValues { it != null }.mapValues { it.value as Any }
 

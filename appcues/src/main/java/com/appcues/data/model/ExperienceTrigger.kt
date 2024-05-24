@@ -8,5 +8,6 @@ internal sealed class ExperienceTrigger {
     data class LaunchExperienceAction(val fromExperienceId: UUID?) : ExperienceTrigger()
     object ShowCall : ExperienceTrigger()
     object DeepLink : ExperienceTrigger()
+    data class Notification(val notificationId: String): ExperienceTrigger()
     object Preview : ExperienceTrigger()
 }

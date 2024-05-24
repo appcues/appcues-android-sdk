@@ -4,7 +4,7 @@ import android.content.ActivityNotFoundException
 import android.net.Uri
 import com.appcues.Appcues
 import com.appcues.analytics.AnalyticsTracker
-import com.appcues.data.model.ExperienceTrigger.DeepLink
+import com.appcues.data.model.ExperienceTrigger.Notification
 import com.appcues.di.component.AppcuesComponent
 import com.appcues.di.component.inject
 import com.appcues.di.scope.AppcuesScope
@@ -54,7 +54,7 @@ internal class PushOpenedProcessor(
         }
 
         pushAction.experienceId?.let {
-            experienceRenderer.show(it, DeepLink, mapOf())
+            experienceRenderer.show(it, Notification(pushAction.notificationId), mapOf())
         }
     }
 }
