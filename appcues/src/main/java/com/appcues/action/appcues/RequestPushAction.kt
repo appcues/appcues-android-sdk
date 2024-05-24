@@ -29,6 +29,6 @@ internal class RequestPushAction(
 
         completion.await()
 
-        analyticsTracker.track(AnalyticsEvent.DeviceUpdated.eventName, properties = null, interactive = false, isInternal = true)
+        analyticsTracker.track(AnalyticsEvent.DeviceUpdated.eventName, properties = null, interactive = true, isInternal = true)
     }
 }
