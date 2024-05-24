@@ -311,7 +311,7 @@ public class Appcues internal constructor(internal val scope: AppcuesScope) {
         if (token != storage.pushToken) {
             storage.pushToken = token
 
-            analyticsTracker.track(AnalyticsEvent.DeviceUpdated.eventName, properties = null, interactive = false, isInternal = true)
+            analyticsTracker.track(AnalyticsEvent.DeviceUpdated.eventName, properties = null, interactive = true, isInternal = true)
         }
     }
 
@@ -379,7 +379,7 @@ public class Appcues internal constructor(internal val scope: AppcuesScope) {
             // session but this is a way to force an update of any device props that may have changed outside of the SDK
             // i.e. push permission.
             // this is interactive=true so it gets batched together with the identify in a single request
-            analyticsTracker.track(AnalyticsEvent.DeviceUpdated.eventName, isInternal = true)
+            analyticsTracker.track(AnalyticsEvent.DeviceUpdated.eventName, properties = null, interactive = true, isInternal = true)
         }
 
         // whenever user identifies we check to see if there is a pending push open action matching the userId,
