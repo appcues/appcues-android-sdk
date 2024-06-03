@@ -10,6 +10,7 @@ The SDK is a Kotlin library for sending user properties and events to the Appcue
 
 - [Appcues Android SDK](#appcues-android-sdk)
   - [🚀 Getting Started](#-getting-started)
+    - [Prerequisites](#prerequisites)
     - [Installation](#installation)
       - [Standard](#standard-installation)
       - [Segment](#segment)
@@ -26,6 +27,33 @@ The SDK is a Kotlin library for sending user properties and events to the Appcue
   - [📄 License](#-license)
 
 ## 🚀 Getting Started
+
+### Prerequisites
+
+Your application's `build.gradle` must have a `compileSdkVersion` of 34+ and `minSdkVersion` of 21+
+
+```
+android {
+    compileSdkVersion 34
+
+    defaultConfig {
+        minSdkVersion 21
+    }
+}
+```
+
+Due to the SDK usage of Jetpack Compose, it is required to either:
+
+1. apply `kotlin-android` plugin in app's build.gradle file.
+   ```
+   plugins {  
+     id 'com.android.application' 
+     id 'kotlin-android' 
+   }
+   ```
+2. **OR** Update Android Gradle Plugin 8.4.0+
+
+> [Related Google issue](https://issuetracker.google.com/issues/328687152) regarding usage of the Jetpack Compose dependency versions 1.6+
 
 ### Installation
 
