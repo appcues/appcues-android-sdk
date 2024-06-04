@@ -7,9 +7,11 @@ import com.appcues.action.ExperienceAction
 import com.appcues.action.MetadataSettingsAction
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.getConfig
+import com.appcues.data.model.getConfigInt
 import com.appcues.data.model.getConfigOrDefault
 import com.appcues.logging.Logcues
 import com.appcues.util.LinkOpener
+import kotlinx.coroutines.delay
 
 internal class LinkAction(
     override val config: AppcuesConfigMap,
@@ -31,6 +33,7 @@ internal class LinkAction(
     )
 
     private val url: String? = config.getConfig("url")
+    private val completionDelay: Int = config.getConfigInt("completionDelay") ?: 0
     private val openExternally = config.getConfigOrDefault("openExternally", false)
 
     override val category = "link"
@@ -50,6 +53,8 @@ internal class LinkAction(
             // this will handle any in-app deep link scheme URLs OR any web urls that were
             // requested to open into the external browser application
             appcues.navigationHandler?.navigateTo(uri) ?: linkOpener.startNewIntent(uri)
+            // wait if there is any delay before proceeding
+            delay(completionDelay.toLong())
         } catch (exception: ActivityNotFoundException) {
             logcues.error("Unable to process deep link $destination\n\n Reason: ${exception.message}")
         }
