@@ -1,12 +1,22 @@
 package com.appcues.samples.kotlin
 
+import android.annotation.SuppressLint
 import android.app.Application
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Handler
+import android.os.Looper
 import android.os.StrictMode
 import android.os.StrictMode.ThreadPolicy
 import android.os.StrictMode.VmPolicy
+import android.view.ViewGroup
+import android.widget.Button
+import android.widget.LinearLayout
+import androidx.appcompat.app.AppCompatDelegate
 import com.appcues.Appcues
+import com.appcues.AppcuesCustomComponentView
+import com.appcues.AppcuesExperienceActions
 import com.appcues.LoggingLevel
 import com.appcues.NavigationHandler
 
@@ -56,6 +66,52 @@ class ExampleApplication : Application() {
                     }
                     return true // navigation successful
                 }
+            }
+        }
+
+        Appcues.registerCustomComponent("setTheme", SetThemeView(this@ExampleApplication))
+    }
+
+    private class SetThemeView(private val context: Context) : AppcuesCustomComponentView {
+        companion object {
+
+            const val SET_NEW_VALUE_DELAY = 300L
+        }
+        
+        @SuppressLint("SetTextI18n")
+        override fun getView(actionsController: AppcuesExperienceActions, config: Map<String, Any>?): ViewGroup {
+            return LinearLayout(context).apply {
+                addView(
+                    Button(context).apply {
+                        text = "Dark Mode"
+
+                        setOnClickListener {
+                            actionsController.close()
+
+                            val mainHandler = Handler(Looper.getMainLooper())
+
+                            mainHandler.postDelayed({
+                                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+                            }, SET_NEW_VALUE_DELAY)
+                        }
+                    }
+                )
+
+                addView(
+                    Button(context).apply {
+                        text = "Light Mode"
+
+                        setOnClickListener {
+                            actionsController.close()
+
+                            val mainHandler = Handler(Looper.getMainLooper())
+
+                            mainHandler.postDelayed({
+                                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+                            }, SET_NEW_VALUE_DELAY)
+                        }
+                    }
+                )
             }
         }
     }

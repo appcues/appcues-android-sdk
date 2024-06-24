@@ -1,8 +1,10 @@
 package com.appcues.data.remote.appcues.response.step.primitive
 
+import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.Type.BLOCK
 import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.Type.BOX
 import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.Type.BUTTON
+import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.Type.CUSTOM_COMPONENT
 import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.Type.EMBED
 import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.Type.IMAGE
 import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.Type.OPTION_SELECT
@@ -22,6 +24,7 @@ internal sealed class PrimitiveResponse(
     enum class Type(val jsonName: String) {
         STACK("stack"),
         BOX("box"),
+        CUSTOM_COMPONENT("customComponent"),
         BUTTON("button"),
         TEXT("text"),
         IMAGE("image"),
@@ -42,6 +45,13 @@ internal sealed class PrimitiveResponse(
         val style: StyleResponse? = null,
         val items: List<PrimitiveResponse>,
     ) : PrimitiveResponse(BOX)
+
+    internal data class CustomComponentPrimitiveResponse(
+        val id: UUID,
+        val style: StyleResponse? = null,
+        val identifier: String,
+        val config: AppcuesConfigMap,
+    ) : PrimitiveResponse(CUSTOM_COMPONENT)
 
     internal data class StackPrimitiveResponse(
         val id: UUID,

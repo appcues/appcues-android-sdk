@@ -11,6 +11,7 @@ import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse
 import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.BlockPrimitiveResponse
 import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.BoxPrimitiveResponse
 import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.ButtonPrimitiveResponse
+import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.CustomComponentPrimitiveResponse
 import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.EmbedPrimitiveResponse
 import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.ImagePrimitiveResponse
 import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.OptionSelectPrimitiveResponse
@@ -77,9 +78,10 @@ internal object MoshiConfiguration {
         }
     }
 
-    private fun getPrimitiveFactory(): JsonAdapter.Factory {
+    private fun getPrimitiveFactory(): Factory {
         return PolymorphicJsonAdapterFactory.of(PrimitiveResponse::class.java, "type")
             .withSubtype(BoxPrimitiveResponse::class.java, PrimitiveResponse.Type.BOX.jsonName)
+            .withSubtype(CustomComponentPrimitiveResponse::class.java, PrimitiveResponse.Type.CUSTOM_COMPONENT.jsonName)
             .withSubtype(ButtonPrimitiveResponse::class.java, PrimitiveResponse.Type.BUTTON.jsonName)
             .withSubtype(EmbedPrimitiveResponse::class.java, PrimitiveResponse.Type.EMBED.jsonName)
             .withSubtype(ImagePrimitiveResponse::class.java, PrimitiveResponse.Type.IMAGE.jsonName)

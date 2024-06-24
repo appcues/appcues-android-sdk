@@ -93,6 +93,16 @@ internal sealed class ExperiencePrimitive(
         override val textDescription: String = items.joinTextDescriptions()
     }
 
+    data class CustomComponentPrimitive(
+        override val id: UUID,
+        override val style: ComponentStyle,
+        val identifier: String,
+        val config: AppcuesConfigMap,
+    ) : ExperiencePrimitive(id, style) {
+
+        override val textDescription: String? = null
+    }
+
     data class SpacerPrimitive(
         override val id: UUID,
         val spacing: Double = 0.0,
