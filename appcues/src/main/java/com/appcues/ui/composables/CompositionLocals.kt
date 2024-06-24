@@ -10,6 +10,7 @@ import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.Interactio
 import com.appcues.data.model.Action
 import com.appcues.data.model.ExperienceStepFormState
 import com.appcues.logging.Logcues
+import com.appcues.ui.CustomFrameDirectory
 import com.appcues.ui.presentation.AppcuesViewModel
 import java.util.UUID
 
@@ -52,6 +53,10 @@ internal val LocalLogcues = staticCompositionLocalOf<Logcues> { noLocalProvidedF
 
 internal val LocalExperienceCompositionState = staticCompositionLocalOf<ExperienceCompositionState> {
     noLocalProvidedFor("LocalExperienceCompositionState")
+}
+
+internal val LocalCustomFrameDirectory = staticCompositionLocalOf<CustomFrameDirectory> {
+    noLocalProvidedFor("LocalCustomViewDirectory")
 }
 
 internal val LocalExperienceStepFormStateDelegate = compositionLocalOf { ExperienceStepFormState() }

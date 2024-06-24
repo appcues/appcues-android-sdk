@@ -3,8 +3,10 @@ package com.appcues.ui.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.appcues.AppcuesCoroutineScope
+import com.appcues.ExperienceRemoteController
 import com.appcues.action.ActionProcessor
 import com.appcues.action.ExperienceAction
+import com.appcues.analytics.AnalyticsTracker
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType
 import com.appcues.analytics.SdkMetrics
 import com.appcues.data.model.Experience
@@ -28,6 +30,7 @@ internal class AppcuesViewModel(
     private val renderContext: RenderContext,
     private val coroutineScope: AppcuesCoroutineScope,
     private val experienceRenderer: ExperienceRenderer,
+    private val analyticsTracker: AnalyticsTracker,
     private val actionProcessor: ActionProcessor,
     private val onDismiss: () -> Unit,
 ) : ViewModel() {
@@ -139,5 +142,14 @@ internal class AppcuesViewModel(
         coroutineScope.launch {
             experienceRenderer.onViewConfigurationChanged(renderContext)
         }
+    }
+
+    fun getRemoteController(): ExperienceRemoteController {
+        return ExperienceRemoteController(
+            renderContext = renderContext,
+            coroutineScope = coroutineScope,
+            analyticsTracker = analyticsTracker,
+            experienceRenderer = experienceRenderer,
+        )
     }
 }

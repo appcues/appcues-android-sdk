@@ -21,6 +21,7 @@ import com.appcues.logging.Logcues
 import com.appcues.trait.ExperienceTrait
 import com.appcues.trait.ExperienceTraitLevel
 import com.appcues.trait.TraitRegistry
+import com.appcues.ui.CustomFrameDirectory
 import com.appcues.ui.ExperienceRenderer
 import kotlinx.coroutines.launch
 import kotlin.DeprecationLevel.ERROR
@@ -81,6 +82,7 @@ public class Appcues internal constructor(internal val scope: AppcuesScope) {
     private val debuggerManager by scope.inject<AppcuesDebuggerManager>()
     private val appcuesCoroutineScope by scope.inject<AppcuesCoroutineScope>()
     private val analyticsPublisher by scope.inject<AnalyticsPublisher>()
+    private val customFrameDirectory by scope.inject<CustomFrameDirectory>()
 
     /**
      * Set the listener to be notified about the display of Experience content.
@@ -261,6 +263,13 @@ public class Appcues internal constructor(internal val scope: AppcuesScope) {
         appcuesCoroutineScope.launch {
             experienceRenderer.start(frame, RenderContext.Embed(frameId))
         }
+    }
+
+    /**
+     * Register custom view to be rendered if key matches incoming custom view in any flow
+     */
+    public fun registerCustomFrame(identifier: String, view: AppcuesComposeView) {
+        customFrameDirectory.set(identifier, view)
     }
 
     /**

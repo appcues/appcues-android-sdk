@@ -22,6 +22,7 @@ import com.appcues.trait.BackdropDecoratingTrait
 import com.appcues.trait.ContainerDecoratingTrait
 import com.appcues.trait.ContainerDecoratingTrait.ContainerDecoratingType
 import com.appcues.trait.ContentHolderTrait.ContainerPages
+import com.appcues.ui.CustomFrameDirectory
 import com.appcues.ui.presentation.AppcuesViewModel
 import com.appcues.ui.presentation.AppcuesViewModel.UIState.Dismissing
 import com.appcues.ui.presentation.AppcuesViewModel.UIState.Rendering
@@ -32,6 +33,7 @@ internal fun AppcuesComposition(
     viewModel: AppcuesViewModel,
     imageLoader: ImageLoader,
     logcues: Logcues,
+    customFrameDirectory: CustomFrameDirectory,
     chromeClient: WebChromeClient,
     packageNames: List<String>
 ) {
@@ -42,6 +44,7 @@ internal fun AppcuesComposition(
             LocalImageLoader provides imageLoader,
             LocalViewModel provides viewModel,
             LocalLogcues provides logcues,
+            LocalCustomFrameDirectory provides customFrameDirectory,
             LocalChromeClient provides chromeClient,
             LocalPackageNames provides packageNames,
             LocalAppcuesActionDelegate provides DefaultAppcuesActionsDelegate(viewModel),

@@ -12,7 +12,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import com.appcues.AppcuesConfig
 import com.appcues.AppcuesCoroutineScope
-import com.appcues.action.ActionProcessor
 import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperienceTrigger.Preview
 import com.appcues.data.model.RenderContext
@@ -36,7 +35,6 @@ internal abstract class ViewPresenter(
 
     private val experienceRenderer: ExperienceRenderer by inject()
     private val coroutineScope: AppcuesCoroutineScope by inject()
-    private val actionProcessor: ActionProcessor by inject()
     private val appcuesViewTreeOwner: AppcuesViewTreeOwner by inject()
     private val appcuesConfig: AppcuesConfig by inject()
 
@@ -94,7 +92,8 @@ internal abstract class ViewPresenter(
                 renderContext = renderContext,
                 coroutineScope = coroutineScope,
                 experienceRenderer = experienceRenderer,
-                actionProcessor = actionProcessor,
+                actionProcessor = get(),
+                analyticsTracker = get(),
                 onDismiss = ::onCompositionDismiss
             ).also {
                 composeView.setContent {
@@ -109,6 +108,7 @@ internal abstract class ViewPresenter(
                             viewModel = it,
                             logcues = get(),
                             imageLoader = get(),
+                            customFrameDirectory = get(),
                             chromeClient = EmbedChromeClient(this),
                             packageNames = appcuesConfig.packageNames
                         )

@@ -10,6 +10,7 @@ import com.appcues.logging.LogcatDestination
 import com.appcues.logging.Logcues
 import com.appcues.statemachine.StateMachine
 import com.appcues.trait.TraitRegistry
+import com.appcues.ui.CustomFrameDirectory
 import com.appcues.ui.ExperienceRenderer
 import com.appcues.ui.StateMachineDirectory
 import com.appcues.ui.utils.ImageLoaderWrapper
@@ -38,6 +39,7 @@ internal object MainModule : AppcuesModule {
         }
         scoped { AppcuesDebuggerManager(appcuesViewTreeOwner = get(), contextWrapper = get(), scope = scope) }
         scoped { StateMachineDirectory() }
+        scoped { CustomFrameDirectory() }
         scoped { ExperienceRenderer(scope = scope) }
         scoped {
             AppcuesRepository(

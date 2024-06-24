@@ -3,6 +3,9 @@ plugins {
     id 'kotlin-android'
 }
 
+ext.compose_version = '1.6.2'
+ext.compose_compiler_version = '1.4.8'
+
 android {
     compileSdk 34
 
@@ -26,8 +29,8 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField "String", "APPCUES_ACCOUNT_ID", "\"PLACEHOLDER_ACCOUNT_ID\""
-        buildConfigField "String", "APPCUES_APPLICATION_ID", "\"PLACEHOLDER_APPLICATION_ID\""
+        buildConfigField "String", "APPCUES_ACCOUNT_ID", "\"103523\""
+        buildConfigField "String", "APPCUES_APPLICATION_ID", "\"4b6b796f-1313-440a-b356-ee4b7abe931c\""
     }
 
     buildTypes {
@@ -50,6 +53,17 @@ android {
     buildFeatures {
         buildConfig true
         viewBinding true
+        compose true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "$compose_compiler_version"
+    }
+
+    packagingOptions {
+        resources {
+            excludes += '/META-INF/{AL2.0,LGPL2.1}'
+        }
     }
 }
 
@@ -61,6 +75,11 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.navigation:navigation-fragment-ktx:2.7.3'
     implementation 'androidx.navigation:navigation-ui-ktx:2.7.3'
+    implementation "androidx.compose.ui:ui:$compose_version"
+    implementation "androidx.compose.material:material:$compose_version"
+    implementation "androidx.compose.ui:ui-tooling-preview:$compose_version"
+
+    implementation "com.pierfrancescosoffritti.androidyoutubeplayer:core:11.1.0"
 }
 
 tasks.register('versionTxt') {

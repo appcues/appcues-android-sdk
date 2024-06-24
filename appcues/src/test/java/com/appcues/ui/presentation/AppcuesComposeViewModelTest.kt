@@ -49,7 +49,7 @@ import org.junit.Test
 import org.junit.rules.TestRule
 
 @OptIn(ExperimentalCoroutinesApi::class)
-internal class AppcuesViewModelTest {
+internal class AppcuesComposeViewModelTest {
 
     @get:Rule
     val rule: TestRule = InstantTaskExecutorRule()
