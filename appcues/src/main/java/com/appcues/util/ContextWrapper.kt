@@ -2,12 +2,14 @@ package com.appcues.util
 
 import android.app.Application
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
-import android.util.DisplayMetrics
 import androidx.annotation.StringRes
+import androidx.core.app.NotificationManagerCompat
 import java.util.Locale
 
 /**
@@ -18,10 +20,14 @@ import java.util.Locale
  */
 internal class ContextWrapper(private val context: Context) {
 
-    val displayMetrics: DisplayMetrics
-        get() = context.resources.displayMetrics
     val orientation: String
         get() = if (context.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) "landscape" else "portrait"
+
+    val packageManager: PackageManager
+        get() = context.packageManager
+
+    val packageName: String
+        get() = context.packageName
 
     fun getApplication(): Application = context.applicationContext as Application
 
@@ -57,12 +63,20 @@ internal class ContextWrapper(private val context: Context) {
         return Build.MANUFACTURER.capitalize() + " " + Build.MODEL
     }
 
-    fun getPackageName(): String = with(context) {
-        packageName
-    }
-
     fun getLanguage(): String {
         return getCurrentLocale(context).toLanguageTag()
+    }
+
+    fun isNotificationEnabled(): Boolean {
+        return NotificationManagerCompat.from(context).areNotificationsEnabled()
+    }
+
+    fun isIntentSupported(intent: Intent): Boolean {
+        return context.packageManager.resolveActivityCompat(intent, PackageManager.MATCH_DEFAULT_ONLY) != null
+    }
+
+    fun startIntent(intent: Intent) {
+        context.startActivity(intent)
     }
 
     private fun getCurrentLocale(context: Context): Locale {

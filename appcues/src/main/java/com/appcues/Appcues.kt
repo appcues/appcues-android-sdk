@@ -6,6 +6,7 @@ import android.content.Intent
 import com.appcues.action.ActionRegistry
 import com.appcues.action.ExperienceAction
 import com.appcues.analytics.ActivityScreenTracking
+import com.appcues.analytics.AnalyticsEvent
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.data.model.ExperienceTrigger
 import com.appcues.data.model.RenderContext
@@ -18,10 +19,12 @@ import com.appcues.di.scope.get
 import com.appcues.di.scope.inject
 import com.appcues.logging.LogcatDestination
 import com.appcues.logging.Logcues
+import com.appcues.push.PushOpenedProcessor
 import com.appcues.trait.ExperienceTrait
 import com.appcues.trait.ExperienceTraitLevel
 import com.appcues.trait.TraitRegistry
 import com.appcues.ui.ExperienceRenderer
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.launch
 import kotlin.DeprecationLevel.ERROR
 
@@ -38,13 +41,40 @@ public fun Appcues(
     accountId: String,
     applicationId: String,
     config: (AppcuesConfig.() -> Unit)? = null,
-): Appcues = Bootstrap
+): Appcues {
     // This creates the Scope and initializes the Appcues instance within, then returns the Appcues instance
     // ready to go with the necessary dependency configuration in its scope.
-    .createScope(
-        context = context,
-        config = AppcuesConfig(accountId, applicationId).apply { config?.invoke(this) }
-    ).get()
+    val scope = Bootstrap
+        .createScope(
+            context = context,
+            config = AppcuesConfig(accountId, applicationId).apply { config?.invoke(this) }
+        )
+
+    val appcues = scope.get<Appcues>()
+
+    try {
+        // this is necessary to ensure that not only when we get a new token but whenever we initialize the application appcues should know
+        // whats the latest available token
+        FirebaseMessaging.getInstance().token.addOnCompleteListener {
+            // ensures we have token set
+            if (it.isSuccessful) {
+                val sessionMonitor = scope.get<SessionMonitor>()
+                if (sessionMonitor.hasSession()) {
+                    // can call setPushToken directly if we are already in a session, so the device_updated event is tracked
+                    appcues.setPushToken(it.result)
+                } else {
+                    // store token on static pushToken that will be used on the next session start to track device props
+                    val storage = scope.get<Storage>()
+                    storage.pushToken = it.result
+                }
+            }
+        }
+    } catch (_: Exception) {
+        // do nothing on any exception we may hit here as customer might not even have google messaging services setup
+    }
+
+    return appcues
+}
 
 /**
  * The main entry point for using Appcues functionality in your application - tracking
@@ -66,6 +96,8 @@ public class Appcues internal constructor(internal val scope: AppcuesScope) {
          * provided by the SDK is based on Android View layout information.
          */
         public var elementTargeting: ElementTargetingStrategy = AndroidTargetingStrategy()
+
+        internal var pushToken: String? = null
     }
 
     private val config by scope.inject<AppcuesConfig>()
@@ -81,6 +113,7 @@ public class Appcues internal constructor(internal val scope: AppcuesScope) {
     private val debuggerManager by scope.inject<AppcuesDebuggerManager>()
     private val appcuesCoroutineScope by scope.inject<AppcuesCoroutineScope>()
     private val analyticsPublisher by scope.inject<AnalyticsPublisher>()
+    private val pushOpenedProcessor by scope.inject<PushOpenedProcessor>()
 
     /**
      * Set the listener to be notified about the display of Experience content.
@@ -174,6 +207,12 @@ public class Appcues internal constructor(internal val scope: AppcuesScope) {
      * Can be used when the user logs out of your application.
      */
     public fun reset() {
+        analyticsTracker.track(
+            name = AnalyticsEvent.DeviceUnregistered.eventName,
+            properties = mapOf("reason" to "sdk_reset"),
+            isInternal = true,
+            interactive = false
+        )
         // flush any pending analytics for the previous user, prior to reset
         analyticsTracker.flushPendingActivity()
 
@@ -264,6 +303,19 @@ public class Appcues internal constructor(internal val scope: AppcuesScope) {
     }
 
     /**
+     *  Provide the Firebase Cloud Messaging (FCM) device token to Appcues.
+     *
+     *  @param token A globally unique token that identifies this device to FCM.
+     */
+    public fun setPushToken(token: String?) {
+        if (token != storage.pushToken) {
+            storage.pushToken = token
+
+            analyticsTracker.track(AnalyticsEvent.DeviceUpdated.eventName, properties = null, interactive = true, isInternal = true)
+        }
+    }
+
+    /**
      * Enables automatic screen tracking for Activities.
      */
     public fun trackScreens() {
@@ -322,5 +374,18 @@ public class Appcues internal constructor(internal val scope: AppcuesScope) {
         storage.isAnonymous = isAnonymous
         storage.userSignature = mutableProperties?.remove("appcues:user_id_signature") as? String
         analyticsTracker.identify(mutableProperties)
+        if (!userChanged) {
+            // track a device update on any re-identify of the same user as well, since it will not trigger a new
+            // session but this is a way to force an update of any device props that may have changed outside of the SDK
+            // i.e. push permission.
+            // this is interactive=true so it gets batched together with the identify in a single request
+            analyticsTracker.track(AnalyticsEvent.DeviceUpdated.eventName, properties = null, interactive = true, isInternal = true)
+        }
+
+        // whenever user identifies we check to see if there is a pending push open action matching the userId,
+        // in case there is we run it.
+        appcuesCoroutineScope.launch {
+            pushOpenedProcessor.processDeferred(userId)
+        }
     }
 }

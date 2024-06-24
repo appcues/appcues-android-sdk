@@ -3,11 +3,14 @@ package com.appcues
 import com.appcues.action.ActionProcessor
 import com.appcues.action.ActionRegistry
 import com.appcues.data.AppcuesRepository
+import com.appcues.data.PushRepository
 import com.appcues.debugger.AppcuesDebuggerManager
 import com.appcues.di.AppcuesModule
 import com.appcues.di.scope.AppcuesScopeDSL
 import com.appcues.logging.LogcatDestination
 import com.appcues.logging.Logcues
+import com.appcues.push.PushDeeplinkHandler
+import com.appcues.push.PushOpenedProcessor
 import com.appcues.statemachine.StateMachine
 import com.appcues.trait.TraitRegistry
 import com.appcues.ui.ExperienceRenderer
@@ -28,14 +31,9 @@ internal object MainModule : AppcuesModule {
         scoped { Logcues() }
         scoped { LogcatDestination(get(), get<AppcuesConfig>().loggingLevel) }
         scoped { Storage(context = get(), config = get()) }
-        scoped {
-            DeepLinkHandler(
-                config = get(),
-                experienceRenderer = get(),
-                appcuesCoroutineScope = get(),
-                debuggerManager = get(),
-            )
-        }
+        scoped { DeepLinkHandler(scope = scope) }
+        scoped { PushDeeplinkHandler(scope) }
+        scoped { PushOpenedProcessor(scope) }
         scoped { AppcuesDebuggerManager(appcuesViewTreeOwner = get(), contextWrapper = get(), scope = scope) }
         scoped { StateMachineDirectory() }
         scoped { ExperienceRenderer(scope = scope) }
@@ -49,6 +47,7 @@ internal object MainModule : AppcuesModule {
                 storage = get(),
             )
         }
+        scoped { PushRepository(get(), get()) }
         scoped { LinkOpener(get()) }
         scoped { AnalyticsPublisher(storage = get()) }
 

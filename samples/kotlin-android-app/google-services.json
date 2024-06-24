@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "791142292595",
+    "project_id": "appcues-kotlin-example",
+    "storage_bucket": "appcues-kotlin-example.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:791142292595:android:ee7abd84a9c936382b1e06",
+        "android_client_info": {
+          "package_name": "com.appcues.samples.kotlin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "GOOGLE_SERVICES_KEY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

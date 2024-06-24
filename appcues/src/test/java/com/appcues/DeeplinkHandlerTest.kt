@@ -2,13 +2,15 @@ package com.appcues
 
 import android.app.Activity
 import android.content.Intent
+import android.os.Bundle
 import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperienceTrigger.DeepLink
 import com.appcues.debugger.AppcuesDebuggerManager
 import com.appcues.debugger.DebugMode.Debugger
 import com.appcues.debugger.DebugMode.ScreenCapture
-import com.appcues.logging.Logcues
+import com.appcues.di.component.get
 import com.appcues.rules.MainDispatcherRule
+import com.appcues.rules.TestScopeRule
 import com.appcues.statemachine.Error.ExperienceAlreadyActive
 import com.appcues.ui.ExperienceRenderer
 import com.appcues.ui.ExperienceRenderer.PreviewResponse.ExperienceNotFound
@@ -28,21 +30,19 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
-internal class DeeplinkHandlerTest {
+internal class DeeplinkHandlerTest : AppcuesScopeTest {
+
+    @get:Rule
+    override val scopeRule = TestScopeRule()
 
     @get:Rule
     val dispatcherRule = MainDispatcherRule()
 
     private lateinit var deepLinkHandler: DeepLinkHandler
 
-    private val config: AppcuesConfig = mockk(relaxed = true)
-    private val experienceRenderer: ExperienceRenderer = mockk(relaxed = true)
-    private val appcuesCoroutineScope: AppcuesCoroutineScope = AppcuesCoroutineScope(Logcues())
-    private val debuggerManager: AppcuesDebuggerManager = mockk(relaxed = true)
-
     @Before
     fun setUp() {
-        deepLinkHandler = DeepLinkHandler(config, experienceRenderer, appcuesCoroutineScope, debuggerManager)
+        deepLinkHandler = DeepLinkHandler(get())
     }
 
     @Test
@@ -50,6 +50,7 @@ internal class DeeplinkHandlerTest {
         // GIVEN
         val intent = mockk<Intent> {
             every { action } returns Intent.ACTION_VIEW
+            every { extras } returns Bundle()
             every { data } returns null
         }
 
@@ -65,8 +66,9 @@ internal class DeeplinkHandlerTest {
         // GIVEN
         val intent = mockk<Intent> {
             every { action } returns Intent.ACTION_CALL
+            every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
-                every { scheme } returns "appcues-democues"
+                every { scheme } returns "appcues-123"
                 every { host } returns "sdk"
             }
         }
@@ -81,11 +83,11 @@ internal class DeeplinkHandlerTest {
     @Test
     fun `handle SHOULD return true WHEN scheme is appcues-appId`() {
         // GIVEN
-        every { config.applicationId } returns "5555-ABCD"
         val intent = mockk<Intent> {
             every { action } returns Intent.ACTION_VIEW
+            every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
-                every { scheme } returns "appcues-5555-ABCD"
+                every { scheme } returns "appcues-123"
                 every { host } returns "sdk"
                 every { pathSegments } returns listOf("experience_preview", "1234")
             }
@@ -103,8 +105,9 @@ internal class DeeplinkHandlerTest {
         // GIVEN
         val intent = mockk<Intent> {
             every { action } returns Intent.ACTION_VIEW
+            every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
-                every { scheme } returns "appcues-democues"
+                every { scheme } returns "appcues-123"
                 every { host } returns "sdk"
                 every { pathSegments } returns listOf("experience_preview", "1234")
             }
@@ -122,8 +125,9 @@ internal class DeeplinkHandlerTest {
         // GIVEN
         val intent = mockk<Intent> {
             every { action } returns Intent.ACTION_VIEW
+            every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
-                every { scheme } returns "appcues-democues"
+                every { scheme } returns "appcues-123"
                 every { host } returns "sdk"
                 every { pathSegments } returns listOf("experience_content", "1234")
             }
@@ -141,8 +145,9 @@ internal class DeeplinkHandlerTest {
         // GIVEN
         val intent = mockk<Intent> {
             every { action } returns Intent.ACTION_VIEW
+            every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
-                every { scheme } returns "appcues-democues"
+                every { scheme } returns "appcues-123"
                 every { host } returns "sdk"
                 every { pathSegments } returns listOf("debugger")
             }
@@ -160,8 +165,9 @@ internal class DeeplinkHandlerTest {
         // GIVEN
         val intent = mockk<Intent> {
             every { action } returns Intent.ACTION_VIEW
+            every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
-                every { scheme } returns "appcues-democues"
+                every { scheme } returns "appcues-123"
                 every { host } returns "sdk"
                 every { pathSegments } returns listOf("debugger", "debugger-path")
             }
@@ -179,8 +185,9 @@ internal class DeeplinkHandlerTest {
         // GIVEN
         val intent = mockk<Intent> {
             every { action } returns Intent.ACTION_VIEW
+            every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
-                every { scheme } returns "appcues-democues"
+                every { scheme } returns "appcues-123"
                 every { host } returns "sdk"
                 every { pathSegments } returns listOf("capture_screen")
                 every { getQueryParameter("token") } returns "1234"
@@ -199,8 +206,9 @@ internal class DeeplinkHandlerTest {
         // GIVEN
         val intent = mockk<Intent> {
             every { action } returns Intent.ACTION_VIEW
+            every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
-                every { scheme } returns "appcues-democues"
+                every { scheme } returns "appcues-123"
                 every { host } returns "sdk"
                 every { pathSegments } returns listOf("capture_screen")
                 every { getQueryParameter("token") } returns null
@@ -219,8 +227,9 @@ internal class DeeplinkHandlerTest {
         // GIVEN
         val intent = mockk<Intent> {
             every { action } returns Intent.ACTION_VIEW
+            every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
-                every { scheme } returns "appcues-democues"
+                every { scheme } returns "appcues-123"
                 every { host } returns "sdk"
                 every { pathSegments } returns listOf("invalid")
             }
@@ -239,8 +248,9 @@ internal class DeeplinkHandlerTest {
         val activity = mockk<Activity>(relaxed = true)
         val intent = mockk<Intent> {
             every { action } returns Intent.ACTION_VIEW
+            every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
-                every { scheme } returns "appcues-democues"
+                every { scheme } returns "appcues-123"
                 every { host } returns "sdk"
                 every { pathSegments } returns listOf("capture_screen")
                 every { getQueryParameter("token") } returns "token-1234"
@@ -251,7 +261,7 @@ internal class DeeplinkHandlerTest {
         deepLinkHandler.handle(activity, intent)
 
         // THEN
-        coVerify { debuggerManager.start(activity, ScreenCapture("token-1234")) }
+        coVerify { get<AppcuesDebuggerManager>().start(activity, ScreenCapture("token-1234")) }
     }
 
     @Test
@@ -260,8 +270,9 @@ internal class DeeplinkHandlerTest {
         val activity = mockk<Activity>(relaxed = true)
         val intent = mockk<Intent> {
             every { action } returns Intent.ACTION_VIEW
+            every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
-                every { scheme } returns "appcues-democues"
+                every { scheme } returns "appcues-123"
                 every { host } returns "sdk"
                 every { pathSegments } returns listOf("debugger")
             }
@@ -271,7 +282,7 @@ internal class DeeplinkHandlerTest {
         deepLinkHandler.handle(activity, intent)
 
         // THEN
-        coVerify { debuggerManager.start(activity, Debugger) }
+        coVerify { get<AppcuesDebuggerManager>().start(activity, Debugger) }
     }
 
     @Test
@@ -280,8 +291,9 @@ internal class DeeplinkHandlerTest {
         val activity = mockk<Activity>(relaxed = true)
         val intent = mockk<Intent> {
             every { action } returns Intent.ACTION_VIEW
+            every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
-                every { scheme } returns "appcues-democues"
+                every { scheme } returns "appcues-123"
                 every { host } returns "sdk"
                 every { pathSegments } returns listOf("debugger", "deeplink-path")
             }
@@ -291,7 +303,7 @@ internal class DeeplinkHandlerTest {
         deepLinkHandler.handle(activity, intent)
 
         // THEN
-        coVerify { debuggerManager.start(activity, Debugger, "deeplink-path") }
+        coVerify { get<AppcuesDebuggerManager>().start(activity, Debugger, "deeplink-path") }
     }
 
     @Test
@@ -300,8 +312,9 @@ internal class DeeplinkHandlerTest {
         val activity = mockk<Activity>(relaxed = true)
         val intent = mockk<Intent> {
             every { action } returns Intent.ACTION_VIEW
+            every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
-                every { scheme } returns "appcues-democues"
+                every { scheme } returns "appcues-123"
                 every { host } returns "sdk"
                 every { pathSegments } returns listOf("experience_content", "experienceId-1234")
                 every { queryParameterNames } returns setOf("param1", "param2")
@@ -314,7 +327,7 @@ internal class DeeplinkHandlerTest {
         deepLinkHandler.handle(activity, intent)
 
         // THEN
-        coVerify { experienceRenderer.show("experienceId-1234", DeepLink, mapOf("param1" to "value1", "param2" to "value2")) }
+        coVerify { get<ExperienceRenderer>().show("experienceId-1234", DeepLink, mapOf("param1" to "value1", "param2" to "value2")) }
     }
 
     @Test
@@ -323,8 +336,9 @@ internal class DeeplinkHandlerTest {
         val activity = mockk<Activity>(relaxed = true)
         val intent = mockk<Intent> {
             every { action } returns Intent.ACTION_VIEW
+            every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
-                every { scheme } returns "appcues-democues"
+                every { scheme } returns "appcues-123"
                 every { host } returns "sdk"
                 every { pathSegments } returns listOf("experience_preview", "experienceId-1234")
                 every { queryParameterNames } returns setOf("param1", "param2")
@@ -337,7 +351,7 @@ internal class DeeplinkHandlerTest {
         deepLinkHandler.handle(activity, intent)
 
         // THEN
-        coVerify { experienceRenderer.preview("experienceId-1234", mapOf("param1" to "value1", "param2" to "value2")) }
+        coVerify { get<ExperienceRenderer>().preview("experienceId-1234", mapOf("param1" to "value1", "param2" to "value2")) }
     }
 
     @Test
@@ -346,13 +360,14 @@ internal class DeeplinkHandlerTest {
         val activity = mockk<Activity>(relaxed = true)
         val intent = mockk<Intent> {
             every { action } returns Intent.ACTION_VIEW
+            every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
-                every { scheme } returns "appcues-democues"
+                every { scheme } returns "appcues-123"
                 every { host } returns "sdk"
                 every { pathSegments } returns listOf("experience_preview", "experienceId-1234")
             }
         }
-        coEvery { experienceRenderer.preview("experienceId-1234", mapOf()) } returns Failed
+        coEvery { get<ExperienceRenderer>().preview("experienceId-1234", mapOf()) } returns Failed
 
         // WHEN
         deepLinkHandler.handle(activity, intent)
@@ -367,13 +382,14 @@ internal class DeeplinkHandlerTest {
         val activity = mockk<Activity>(relaxed = true)
         val intent = mockk<Intent> {
             every { action } returns Intent.ACTION_VIEW
+            every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
-                every { scheme } returns "appcues-democues"
+                every { scheme } returns "appcues-123"
                 every { host } returns "sdk"
                 every { pathSegments } returns listOf("experience_preview", "experienceId-1234")
             }
         }
-        coEvery { experienceRenderer.preview("experienceId-1234", mapOf()) } returns PreviewDeferred(mockk(), null)
+        coEvery { get<ExperienceRenderer>().preview("experienceId-1234", mapOf()) } returns PreviewDeferred(mockk(), null)
 
         // WHEN
         deepLinkHandler.handle(activity, intent)
@@ -391,13 +407,14 @@ internal class DeeplinkHandlerTest {
         }
         val intent = mockk<Intent> {
             every { action } returns Intent.ACTION_VIEW
+            every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
-                every { scheme } returns "appcues-democues"
+                every { scheme } returns "appcues-123"
                 every { host } returns "sdk"
                 every { pathSegments } returns listOf("experience_preview", "experienceId-1234")
             }
         }
-        coEvery { experienceRenderer.preview("experienceId-1234", mapOf()) } returns PreviewDeferred(experience, "frame1234")
+        coEvery { get<ExperienceRenderer>().preview("experienceId-1234", mapOf()) } returns PreviewDeferred(experience, "frame1234")
 
         // WHEN
         deepLinkHandler.handle(activity, intent)
@@ -415,13 +432,17 @@ internal class DeeplinkHandlerTest {
         }
         val intent = mockk<Intent> {
             every { action } returns Intent.ACTION_VIEW
+            every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
-                every { scheme } returns "appcues-democues"
+                every { scheme } returns "appcues-123"
                 every { host } returns "sdk"
                 every { pathSegments } returns listOf("experience_preview", "experienceId-1234")
             }
         }
-        coEvery { experienceRenderer.preview("experienceId-1234", mapOf()) } returns StateMachineError(experience, ExperienceAlreadyActive)
+        coEvery { get<ExperienceRenderer>().preview("experienceId-1234", mapOf()) } returns StateMachineError(
+            experience,
+            ExperienceAlreadyActive
+        )
 
         // WHEN
         deepLinkHandler.handle(activity, intent)
@@ -436,13 +457,14 @@ internal class DeeplinkHandlerTest {
         val activity = mockk<Activity>(relaxed = true)
         val intent = mockk<Intent> {
             every { action } returns Intent.ACTION_VIEW
+            every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
-                every { scheme } returns "appcues-democues"
+                every { scheme } returns "appcues-123"
                 every { host } returns "sdk"
                 every { pathSegments } returns listOf("experience_preview", "experienceId-1234")
             }
         }
-        coEvery { experienceRenderer.preview("experienceId-1234", mapOf()) } returns ExperienceNotFound
+        coEvery { get<ExperienceRenderer>().preview("experienceId-1234", mapOf()) } returns ExperienceNotFound
 
         // WHEN
         deepLinkHandler.handle(activity, intent)
@@ -457,13 +479,14 @@ internal class DeeplinkHandlerTest {
         val activity = mockk<Activity>(relaxed = true)
         val intent = mockk<Intent> {
             every { action } returns Intent.ACTION_VIEW
+            every { extras } returns Bundle()
             every { data } returns mockk(relaxed = true) {
-                every { scheme } returns "appcues-democues"
+                every { scheme } returns "appcues-123"
                 every { host } returns "sdk"
                 every { pathSegments } returns listOf("experience_preview", "experienceId-1234")
             }
         }
-        coEvery { experienceRenderer.preview("experienceId-1234", mapOf()) } returns Success
+        coEvery { get<ExperienceRenderer>().preview("experienceId-1234", mapOf()) } returns Success
 
         // WHEN
         deepLinkHandler.handle(activity, intent)

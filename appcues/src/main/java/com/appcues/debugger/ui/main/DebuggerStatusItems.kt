@@ -50,7 +50,7 @@ private fun StatusType.toResourceId(): Int {
         StatusType.SUCCESS -> R.drawable.appcues_ic_success
         StatusType.ERROR -> R.drawable.appcues_ic_error
         StatusType.EXPERIENCE -> R.drawable.appcues_ic_experience
-        StatusType.UNKNOWN -> R.drawable.appcues_ic_unknown
+        StatusType.IDLE -> R.drawable.appcues_ic_unknown
         // we never need loading icon
         StatusType.LOADING -> 0
     }
@@ -58,7 +58,7 @@ private fun StatusType.toResourceId(): Int {
 
 private fun StatusType.getColorFilter(theme: AppcuesThemeColors): ColorFilter? {
     return when (this) {
-        StatusType.PHONE, StatusType.EXPERIENCE, StatusType.UNKNOWN -> ColorFilter.tint(theme.primary)
+        StatusType.PHONE, StatusType.EXPERIENCE, StatusType.IDLE -> ColorFilter.tint(theme.primary)
         StatusType.SUCCESS -> ColorFilter.tint(theme.success)
         StatusType.ERROR -> ColorFilter.tint(theme.error)
         else -> null
