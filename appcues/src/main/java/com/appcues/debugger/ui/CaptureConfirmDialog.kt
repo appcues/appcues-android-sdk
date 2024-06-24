@@ -26,7 +26,7 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
-import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
@@ -104,7 +104,7 @@ private fun Header(debuggerViewModel: DebuggerViewModel) {
                     onClick = { debuggerViewModel.closeExpandedView() },
                     role = Role.Button,
                     interactionSource = remember { MutableInteractionSource() },
-                    indication = rememberRipple(bounded = false, 24.dp),
+                    indication = ripple(bounded = false, 24.dp),
                     onClickLabel = stringResource(id = string.appcues_screen_capture_dismiss)
                 )
                 .drawBehind {
