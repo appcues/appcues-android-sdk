@@ -64,7 +64,7 @@ internal interface AppcuesTapForwardingDelegate {
 }
 
 internal class DefaultAppcuesTapForwardingDelegate(private val viewModel: AppcuesViewModel) : AppcuesTapForwardingDelegate {
-    override fun onTap(offset: Offset) = viewModel.tapPassThroughHandler(offset)
+    override fun onTap(offset: Offset) = viewModel.onTap(offset)
 }
 
 /**

@@ -3,8 +3,10 @@ package com.appcues.ui.presentation
 import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.appcues.AppcuesExperienceActions
 import com.appcues.action.ActionProcessor
 import com.appcues.action.ExperienceAction
+import com.appcues.analytics.AnalyticsTracker
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType
 import com.appcues.analytics.SdkMetrics
 import com.appcues.data.model.Experience
@@ -25,14 +27,21 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
+// TODO refactor dependency injection to reduce dependency count
 internal class AppcuesViewModel(
-    private val renderContext: RenderContext,
+    private val binding: PresentationBinding,
     private val coroutineScope: CoroutineScope,
     private val experienceRenderer: ExperienceRenderer,
+    private val analyticsTracker: AnalyticsTracker,
     private val actionProcessor: ActionProcessor,
-    private val onDismiss: () -> Unit,
-    val tapPassThroughHandler: (Offset) -> Unit,
 ) : ViewModel() {
+
+    interface PresentationBinding {
+
+        val renderContext: RenderContext
+        fun onDismiss()
+        fun onTap(offset: Offset)
+    }
 
     sealed class UIState {
         object Idle : UIState()
@@ -58,11 +67,11 @@ internal class AppcuesViewModel(
     init {
         statesJob = collectStates()
 
-        if (statesJob == null) onDismiss()
+        if (statesJob == null) binding.onDismiss()
     }
 
     private fun collectStates(): Job? {
-        val stateFlow = experienceRenderer.getStateFlow(renderContext) ?: return null
+        val stateFlow = experienceRenderer.getStateFlow(binding.renderContext) ?: return null
         return viewModelScope.launch {
             stateFlow.collectLatest { state ->
                 if (state is RenderingStepState) {
@@ -86,7 +95,7 @@ internal class AppcuesViewModel(
             // from an external source (ex deep link) and we should end the experience
             if (state is Rendering) {
                 coroutineScope.launch {
-                    experienceRenderer.dismiss(renderContext, markComplete = false, destroyed = true)
+                    experienceRenderer.dismiss(binding.renderContext, markComplete = false, destroyed = true)
                 }
             }
         }
@@ -108,7 +117,7 @@ internal class AppcuesViewModel(
     }
 
     fun onActions(actions: List<ExperienceAction>, interactionType: InteractionType, viewDescription: String?) {
-        actionProcessor.process(renderContext, actions, interactionType, viewDescription)
+        actionProcessor.process(binding.renderContext, actions, interactionType, viewDescription)
     }
 
     fun onPageChanged(index: Int) {
@@ -117,15 +126,19 @@ internal class AppcuesViewModel(
             // then we report new position to state machine
             if (state is Rendering && state.position != index) {
                 coroutineScope.launch {
-                    experienceRenderer.show(renderContext, StepGroupPageIndex(index, state.flatStepIndex))
+                    experienceRenderer.show(binding.renderContext, StepGroupPageIndex(index, state.flatStepIndex))
                 }
             }
         }
     }
 
     fun onDismissed(awaitDismissEffect: AwaitDismissEffect) {
-        onDismiss()
+        binding.onDismiss()
         awaitDismissEffect.dismissed()
+    }
+
+    fun onTap(offset: Offset) {
+        binding.onTap(offset)
     }
 
     fun canDismiss(): Boolean {
@@ -137,14 +150,23 @@ internal class AppcuesViewModel(
         val state = uiState.value
         if (state is Rendering && state.experience.allowDismissal(state.flatStepIndex)) {
             coroutineScope.launch {
-                experienceRenderer.dismiss(renderContext, markComplete = false, destroyed = false)
+                experienceRenderer.dismiss(binding.renderContext, markComplete = false, destroyed = false)
             }
         }
     }
 
     fun onConfigurationChanged() {
         coroutineScope.launch {
-            experienceRenderer.onViewConfigurationChanged(renderContext)
+            experienceRenderer.onViewConfigurationChanged(binding.renderContext)
         }
+    }
+
+    fun getRemoteController(): AppcuesExperienceActions {
+        return AppcuesExperienceActions(
+            renderContext = binding.renderContext,
+            coroutineScope = coroutineScope,
+            analyticsTracker = analyticsTracker,
+            experienceRenderer = experienceRenderer,
+        )
     }
 }

@@ -23,6 +23,7 @@ import com.appcues.push.PushOpenedProcessor
 import com.appcues.trait.ExperienceTrait
 import com.appcues.trait.ExperienceTraitLevel
 import com.appcues.trait.TraitRegistry
+import com.appcues.ui.AppcuesCustomComponentDirectory
 import com.appcues.ui.ExperienceRenderer
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.CoroutineScope
@@ -96,6 +97,13 @@ public class Appcues internal constructor(internal val scope: AppcuesScope) {
          * provided by the SDK is based on Android View layout information.
          */
         public var elementTargeting: ElementTargetingStrategy = AndroidTargetingStrategy()
+
+        /**
+         * Register custom view to be rendered if key matches incoming custom view in any flow
+         */
+        public fun registerCustomComponent(identifier: String, view: AppcuesCustomComponentView) {
+            AppcuesCustomComponentDirectory.set(identifier, view)
+        }
 
         internal var pushToken: String? = null
     }
