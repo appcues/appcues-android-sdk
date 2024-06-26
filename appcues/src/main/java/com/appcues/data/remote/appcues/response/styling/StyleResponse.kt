@@ -16,6 +16,7 @@ internal data class StyleResponse(
     val paddingTrailing: Double? = null,
     val cornerRadius: Double? = null,
     val shadow: StyleShadowResponse? = null,
+    val colors: List<String>? = null,
     val foregroundColor: StyleColorResponse? = null,
     val backgroundColor: StyleColorResponse? = null,
     val backgroundGradient: StyleGradientColorResponse? = null,

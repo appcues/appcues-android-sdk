@@ -10,6 +10,7 @@ import com.appcues.trait.appcues.BackdropKeyholeTrait
 import com.appcues.trait.appcues.BackdropTrait
 import com.appcues.trait.appcues.BackgroundContentTrait
 import com.appcues.trait.appcues.CarouselTrait
+import com.appcues.trait.appcues.EffectsTrait
 import com.appcues.trait.appcues.EmbedTrait
 import com.appcues.trait.appcues.ModalTrait
 import com.appcues.trait.appcues.PagingDotsTrait
@@ -47,6 +48,7 @@ internal class TraitRegistry(
         register(TargetElementTrait.TYPE) { config, _ -> TargetElementTrait(config) }
         register(TargetRectangleTrait.TYPE) { config, _ -> TargetRectangleTrait(config) }
         register(BackdropTrait.TYPE) { config, _ -> BackdropTrait(config) }
+        register(EffectsTrait.TYPE) { config, _ -> EffectsTrait(config) }
         register(BackdropKeyholeTrait.TYPE) { config, _ -> BackdropKeyholeTrait(config) }
         register(CarouselTrait.TYPE) { config, _ -> CarouselTrait(config) }
         register(PagingDotsTrait.TYPE) { config, _ -> PagingDotsTrait(config) }
