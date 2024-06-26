@@ -42,6 +42,19 @@ internal fun AppcuesConfigMap.getConfigInt(key: String): Int? {
     }
 }
 
+internal fun AppcuesConfigMap.getConfigDouble(key: String): Double? {
+    // if hash config is null, return default
+    if (this == null) return null
+    // get value by key as Double?
+    return get(key)?.let {
+        when (it) {
+            is Double -> it
+            is Int -> it.toDouble()
+            else -> null
+        }
+    }
+}
+
 internal fun AppcuesConfigMap.getConfigStyle(key: String): ComponentStyle? {
     return getConfig<Any>(key)?.let {
         MoshiConfiguration.fromAny<StyleResponse>(it).mapComponentStyle()
