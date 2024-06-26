@@ -8,14 +8,6 @@ import com.appcues.data.remote.appcues.response.styling.StyleResponse
 internal fun StyleResponse?.mapComponentStyle(): ComponentStyle {
     if (this == null) return ComponentStyle()
 
-    fun StyleGradientColorResponse?.toComponentColorList(): List<ComponentColor>? {
-        if (this == null) return null
-        return arrayListOf<ComponentColor>().apply {
-            colors.forEach { fromColor ->
-                add(fromColor.mapComponentColor())
-            }
-        }
-    }
     return ComponentStyle(
         width = width,
         height = height,
@@ -32,6 +24,7 @@ internal fun StyleResponse?.mapComponentStyle(): ComponentStyle {
         backgroundColor = backgroundColor?.mapComponentColor(),
         backgroundImage = backgroundImage?.mapComponentBackgroundImage(),
         shadow = shadow?.mapComponentShadow(),
+        colors = colors.mapToColors(),
         // Not dealing with direction, every gradient is horizontal from start to end
         backgroundGradient = backgroundGradient.toComponentColorList(),
         borderColor = borderColor?.mapComponentColor(),
@@ -44,4 +37,13 @@ internal fun StyleResponse?.mapComponentStyle(): ComponentStyle {
         verticalAlignment = mapComponentVerticalAlignment(verticalAlignment),
         horizontalAlignment = mapComponentHorizontalAlignment(horizontalAlignment),
     )
+}
+
+private fun StyleGradientColorResponse?.toComponentColorList(): List<ComponentColor>? {
+    if (this == null) return null
+    return arrayListOf<ComponentColor>().apply {
+        colors.forEach { fromColor ->
+            add(fromColor.mapComponentColor())
+        }
+    }
 }

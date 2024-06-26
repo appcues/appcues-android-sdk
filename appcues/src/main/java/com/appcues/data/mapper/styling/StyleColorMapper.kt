@@ -12,3 +12,7 @@ internal fun StyleColorResponse.mapComponentColor(): ComponentColor {
         dark = dark,
     )
 }
+
+internal fun List<String>?.mapToColors(): List<Long> {
+    return this?.map { normalizeToArgbLong(it) } ?: listOf()
+}

@@ -20,6 +20,7 @@ internal data class ComponentStyle(
     val borderColor: ComponentColor? = null,
     val borderWidth: Double? = null,
     val shadow: ComponentShadow? = null,
+    val colors: List<Long>? = null,
 
     // Text related properties
     val fontName: String? = null,
