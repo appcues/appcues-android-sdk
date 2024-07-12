@@ -20,6 +20,7 @@ import com.appcues.di.scope.inject
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 internal class PushDeeplinkHandler(
     override val scope: AppcuesScope,
@@ -79,9 +80,10 @@ internal class PushDeeplinkHandler(
 
     private fun processNotification(extras: Bundle) {
         val isTest = extras.getBoolean(NOTIFICATION_TEST_EXTRA, false)
+        val pushNotificationId = extras.getString(NOTIFICATION_ID_EXTRA, null)
 
         val properties = mapOf<String, Any?>(
-            "notification_id" to extras.getString(NOTIFICATION_ID_EXTRA, null),
+            "notification_id" to pushNotificationId,
             "push_notification_version" to extras.getLong(NOTIFICATION_VERSION_EXTRA, -1L).let { if (it == -1L) null else it },
             "workflow_id" to extras.getString(NOTIFICATION_WORKFLOW_ID_EXTRA, null),
             "workflow_task_id" to extras.getString(NOTIFICATION_WORKFLOW_TASK_ID_EXTRA, null),
@@ -92,7 +94,7 @@ internal class PushDeeplinkHandler(
         val deeplink = extras.getString(NOTIFICATION_FORWARD_DEEPLINK_EXTRA, null)
         val experienceId = extras.getString(NOTIFICATION_SHOW_CONTENT_EXTRA, null)
 
-        val action = PushOpenedAction(storage.userId, properties, deeplink, experienceId, isTest)
+        val action = PushOpenedAction(UUID.fromString(pushNotificationId), storage.userId, properties, deeplink, experienceId, isTest)
 
         if (sessionMonitor.hasSession()) {
             coroutineScope.launch { pushOpenedProcessor.process(action) }

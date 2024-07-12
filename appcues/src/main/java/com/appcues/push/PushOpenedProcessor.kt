@@ -4,7 +4,7 @@ import android.content.ActivityNotFoundException
 import android.net.Uri
 import com.appcues.Appcues
 import com.appcues.analytics.AnalyticsTracker
-import com.appcues.data.model.ExperienceTrigger.DeepLink
+import com.appcues.data.model.ExperienceTrigger.PushNotification
 import com.appcues.di.component.AppcuesComponent
 import com.appcues.di.component.inject
 import com.appcues.di.scope.AppcuesScope
@@ -37,12 +37,12 @@ internal class PushOpenedProcessor(
         deferredAction = null
     }
 
-    suspend fun process(pushAction: PushOpenedAction) {
-        if (pushAction.isTest.not()) {
-            analyticsTracker.track(pushAction.eventName, pushAction.eventProperties, interactive = false, isInternal = true)
+    suspend fun process(action: PushOpenedAction) = with(action) {
+        if (isTest.not()) {
+            analyticsTracker.track(eventName, eventProperties, interactive = false, isInternal = true)
         }
 
-        pushAction.deeplink?.let {
+        deeplink?.let {
             val uri = Uri.parse(it)
             try {
                 // this will handle any in-app deep link scheme URLs OR any web urls that were
@@ -53,8 +53,8 @@ internal class PushOpenedProcessor(
             }
         }
 
-        pushAction.experienceId?.let {
-            experienceRenderer.show(it, DeepLink, mapOf())
+        experienceId?.let {
+            experienceRenderer.show(it, PushNotification(pushNotificationId), mapOf())
         }
     }
 }
