@@ -6,7 +6,6 @@ import com.appcues.action.ExperienceActionQueueTransforming
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType.FORM_SUBMITTED
-import com.appcues.analytics.formattedAsProfileUpdate
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.RenderContext
 import com.appcues.data.model.getConfigOrDefault

@@ -10,11 +10,16 @@ import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType.BUTTON_TAPPED
 import com.appcues.analytics.ExperienceLifecycleEvent.StepRecovered
 import com.appcues.analytics.ExperienceLifecycleEvent.StepSeen
+import com.appcues.data.model.ExperienceTrigger.ExperienceCompletionAction
+import com.appcues.data.model.ExperienceTrigger.LaunchExperienceAction
+import com.appcues.data.model.ExperienceTrigger.PushNotification
+import com.appcues.data.model.RenderContext
 import com.appcues.mocks.mockExperience
 import com.appcues.statemachine.Error
 import com.appcues.util.appcuesFormatted
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
+import java.util.UUID
 
 internal class ExperienceLifecycleEventTest {
 
@@ -119,8 +124,61 @@ internal class ExperienceLifecycleEventTest {
         assertThat(event.properties).containsEntry("errorId", error.id.appcuesFormatted())
     }
 
-//    @Test
-//    fun `ExperienceLifecycleEvent general testing`() {
-//        // given
-//    }
+    @Test
+    fun `ExperienceLifecycleEvent general testing`() {
+        // given
+        val frameExperience = experience.copy(
+            renderContext = RenderContext.Embed("testFrame"),
+            localeName = "LocaleName",
+            localeId = "LocaleId"
+        )
+        val event = StepSeen(frameExperience, 1)
+        // then
+        assertThat(event.properties).containsEntry("experienceId", frameExperience.id.appcuesFormatted())
+        assertThat(event.properties).containsEntry("experienceInstanceId", frameExperience.instanceId.appcuesFormatted())
+        assertThat(event.properties).containsEntry("experienceName", frameExperience.name)
+        assertThat(event.properties).containsEntry("experienceType", frameExperience.type)
+        assertThat(event.properties).containsEntry("version", frameExperience.publishedAt)
+        assertThat(event.properties).containsEntry("localeName", "LocaleName")
+        assertThat(event.properties).containsEntry("localeId", "LocaleId")
+        assertThat(event.properties).containsEntry("frameId", "testFrame")
+        assertThat(event.properties).doesNotContainKey("fromExperienceId")
+        assertThat(event.properties).doesNotContainKey("pushNotificationId")
+    }
+
+    @Test
+    fun `ExperienceLifecycleEvent with Trigger ExperienceCompletionAction`() {
+        // given
+        val fromExperienceId = UUID.randomUUID()
+        val frameExperience = experience.copy(
+            trigger = ExperienceCompletionAction(fromExperienceId)
+        )
+        val event = StepSeen(frameExperience, 1)
+        // then
+        assertThat(event.properties).containsEntry("fromExperienceId", fromExperienceId)
+    }
+
+    @Test
+    fun `ExperienceLifecycleEvent with Trigger LaunchExperienceAction`() {
+        // given
+        val fromExperienceId = UUID.randomUUID()
+        val frameExperience = experience.copy(
+            trigger = LaunchExperienceAction(fromExperienceId)
+        )
+        val event = StepSeen(frameExperience, 1)
+        // then
+        assertThat(event.properties).containsEntry("fromExperienceId", fromExperienceId)
+    }
+
+    @Test
+    fun `ExperienceLifecycleEvent with Trigger PushNotification`() {
+        // given
+        val fromExperienceId = UUID.randomUUID()
+        val frameExperience = experience.copy(
+            trigger = PushNotification(fromExperienceId)
+        )
+        val event = StepSeen(frameExperience, 1)
+        // then
+        assertThat(event.properties).containsEntry("pushNotificationId", fromExperienceId)
+    }
 }
