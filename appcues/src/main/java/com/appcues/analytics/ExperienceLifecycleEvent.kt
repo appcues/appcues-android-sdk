@@ -6,7 +6,6 @@ import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.Interactio
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType.TARGET_LONG_PRESSED
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType.TARGET_TAPPED
 import com.appcues.data.model.Experience
-import com.appcues.data.model.ExperienceStepFormState
 import com.appcues.data.model.ExperienceTrigger.DeepLink
 import com.appcues.data.model.ExperienceTrigger.ExperienceCompletionAction
 import com.appcues.data.model.ExperienceTrigger.LaunchExperienceAction
@@ -17,7 +16,6 @@ import com.appcues.data.model.ExperienceTrigger.ShowCall
 import com.appcues.data.model.getFrameId
 import com.appcues.statemachine.Error
 import com.appcues.util.appcuesFormatted
-import com.appcues.util.toSlug
 
 internal sealed class ExperienceLifecycleEvent(
     open val experience: Experience,
@@ -89,17 +87,8 @@ internal sealed class ExperienceLifecycleEvent(
         get() = event.eventName
 
     val properties: Map<String, Any>
-        get() = hashMapOf<String, Any?>(
-            "experienceId" to experience.id.appcuesFormatted(),
-            "experienceInstanceId" to experience.instanceId.appcuesFormatted(),
-            "experienceName" to experience.name,
-            "experienceType" to experience.type,
-            "frameId" to experience.renderContext.getFrameId(),
-            "version" to experience.publishedAt,
-            "localeName" to experience.localeName,
-            "localeId" to experience.localeId,
-        )
-            .experienceTriggerProperties()
+        get() = hashMapOf<String, Any?>()
+            .experienceProperties()
             .stepProperties()
             .eventProperties()
             // filter null props and map from Map<String, Any?> to Map<String, Any>
@@ -116,8 +105,17 @@ internal sealed class ExperienceLifecycleEvent(
             ShowCall -> "show_call"
         }
 
-    private fun HashMap<String, Any?>.experienceTriggerProperties() = apply {
+    private fun HashMap<String, Any?>.experienceProperties() = apply {
+        this["experienceId"] = experience.id.appcuesFormatted()
+        this["experienceInstanceId"] = experience.instanceId.appcuesFormatted()
+        this["experienceName"] = experience.name
+        this["experienceType"] = experience.type
+        this["frameId"] = experience.renderContext.getFrameId()
+        this["version"] = experience.publishedAt
+        this["localeName"] = experience.localeName
+        this["localeId"] = experience.localeId
         this["trigger"] = triggerValue
+
         when (val trigger = experience.trigger) {
             is ExperienceCompletionAction -> {
                 this["fromExperienceId"] = trigger.fromExperienceId
@@ -188,18 +186,4 @@ internal sealed class ExperienceLifecycleEvent(
             TARGET_TAPPED -> TARGET_TAPPED_INTERACTION_TYPE
             TARGET_LONG_PRESSED -> TARGET_LONG_PRESSED_INTERACTION_TYPE
         }
-}
-
-internal fun ExperienceStepFormState.formattedAsProfileUpdate(): Map<String, Any> {
-    val profileUpdate = hashMapOf<String, Any>()
-
-    formItems.forEach {
-        profileUpdate["_appcuesForm_${it.label.toSlug()}"] = it.value
-
-        if (it.attributeName != null) {
-            profileUpdate[it.attributeName] = it.value
-        }
-    }
-
-    return profileUpdate
 }
