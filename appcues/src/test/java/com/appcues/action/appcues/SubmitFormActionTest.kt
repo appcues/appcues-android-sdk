@@ -4,7 +4,6 @@ import com.appcues.Appcues
 import com.appcues.analytics.AnalyticsTracker
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType.FORM_SUBMITTED
-import com.appcues.analytics.formattedAsProfileUpdate
 import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperiencePrimitive
 import com.appcues.data.model.ExperiencePrimitive.OptionSelectPrimitive
