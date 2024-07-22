@@ -57,7 +57,7 @@ internal interface ContextDensity {
 }
 
 internal fun <R> View.withDensity(densityBlock: ContextDensity.() -> R): R {
-    return with(ContextDensityImpl(context)) { densityBlock() }
+    return context.withDensity { densityBlock() }
 }
 
 internal fun <R> Context.withDensity(densityBlock: ContextDensity.() -> R): R {
