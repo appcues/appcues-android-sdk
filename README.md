@@ -17,6 +17,7 @@ The SDK is a Kotlin library for sending user properties and events to the Appcue
     - [One Time Setup](#one-time-setup)
       - [Initializing the SDK](#initializing-the-sdk)
       - [Supporting Builder Preview and Screen Capture](#supporting-builder-preview-and-screen-capture)
+      - [Enabling Push Notifications](#enabling-push-notifications)
     - [Identifying Users](#identifying-users)
     - [Tracking Screens and Events](#tracking-screens-and-events)
     - [Anchored Tooltips](#anchored-tooltips)
@@ -98,6 +99,10 @@ Initializing the SDK requires you to provide two values: `APPCUES_ACCOUNT_ID` an
 #### Supporting Builder Preview and Screen Capture
 
 During installation, follow the steps outlined in [Configuring the Appcues URL Scheme](https://github.com/appcues/appcues-android-sdk/blob/main/docs/URLSchemeConfiguring.md). This is necessary for the complete Appcues builder experience, supporting experience preview, screen capture and debugging. Refer to the [Debug Guide](https://github.com/appcues/appcues-android-sdk/blob/main/docs/Debugging.md) for details about using the Appcues debugger.
+
+#### Enabling Push Notifications
+
+During installation, follow the steps outlined in [Push Notification](https://github.com/appcues/appcues-android-sdk/blob/main/docs/PushNotification.md).
 
 ### Identifying Users
 
