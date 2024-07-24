@@ -52,7 +52,7 @@ internal class AnalyticsTrackerExtTest {
     fun `track internal event SHOULD update analyticsFlow with internal event`() {
         // given
         every { sessionMonitor.sessionId } returns UUID.randomUUID()
-        every { sessionMonitor.isExpired } returns false
+        every { sessionMonitor.hasSession() } returns true
         val activity: ActivityRequest = mockk(relaxed = true)
         every { activityBuilder.track(any(), any()) } returns activity
         // when
@@ -70,7 +70,7 @@ internal class AnalyticsTrackerExtTest {
         val sessionId = UUID.randomUUID()
         every { activityBuilder.track(sessionId, any(), any()) } returns activity
         every { sessionMonitor.sessionId } returns sessionId
-        every { sessionMonitor.isExpired } returns false
+        every { sessionMonitor.hasSession() } returns true
         val experiment = Experiment(
             id = UUID.fromString("06f9bf87-1921-4919-be55-429b278bf578"),
             group = "control",

@@ -7,6 +7,10 @@
     <string name="appcues_preview_flow_failed">Mobile flow preview failed.</string>
     <string name="appcues_preview_flow_failed_reason">Preview of %1$s failed: %2$s</string>
 
+    <string name="appcues_preview_push_not_found">Push notification not found.</string>
+    <string name="appcues_preview_push_failed">Error loading push notification preview.</string>
+    <string name="appcues_preview_push_failed_generic">Push notification preview failed.</string>
+
     <!-- Debugger Fab -->
     <string name="appcues_debugger_fab_on_debugger_click_label">Appcues debugger details</string>
     <string name="appcues_debugger_fab_on_screen_capture_click_label">Appcues screen capture</string>
@@ -31,6 +35,16 @@
     <string name="appcues_debugger_status_check_deep_link_instruction">Tap to check configuration</string>
     <string name="appcues_debugger_status_check_deep_link_error_manifest">Error 1: AndroidManifest intent-filter scheme missing</string>
     <string name="appcues_debugger_status_check_deep_link_error_handler">Error 2: Appcues SDK not receiving links</string>
+    <string name="appcues_debugger_status_check_push_title">Appcues Push</string>
+    <string name="appcues_debugger_status_check_push_instruction">Tap to check configuration</string>
+    <string name="appcues_debugger_status_check_push_loading_instruction">Tap on the test notification in system tray</string>
+    <string name="appcues_debugger_status_check_push_manifest_not_set">Error 1: Service not set in AndroidManifest.xml</string>
+    <string name="appcues_debugger_status_check_push_error_no_permission">Error 2: Notification permission required. Tap to enable through settings</string>
+    <string name="appcues_debugger_status_check_push_error_no_token">Error 3: No Push token registered with Appcues</string>
+    <string name="appcues_debugger_status_check_push_unknown_server_error">Error 4: Unknown Server error</string>
+    <string name="appcues_debugger_status_check_push_error_ignored">Error 5: Notification dismissed or ignored after 30 seconds</string>
+    <string name="appcues_debugger_status_check_push_server_error">Server Error: %1$s</string>
+    <string name="appcues_debugger_status_check_push_error_sever_error">Error 500: Server Error</string>
     <string name="appcues_debugger_status_check_screen_tracking_title">Tracking Screens</string>
     <string name="appcues_debugger_status_check_screen_tracking_loading_line1">waiting for screen event…</string>
     <string name="appcues_debugger_status_user_identity_title">User Identified</string>
@@ -60,6 +74,8 @@
     <string name="appcues_debugger_event_type_profile_update_title">Profile Update</string>
 
     <string name="appcues_debugger_event_type_session_started_title">Session Started</string>
+    <string name="appcues_debugger_event_type_device_updated_title">Device Updated</string>
+    <string name="appcues_debugger_event_type_device_unregistered_title">Device Unregistered</string>
     <string name="appcues_debugger_event_type_session_suspended_title">Session Suspended</string>
     <string name="appcues_debugger_event_type_session_resumed_title">Session Resumed</string>
     <string name="appcues_debugger_event_type_session_reset_title">Session Reset</string>
@@ -80,6 +96,7 @@
     <string name="appcues_debugger_event_details_form_response_title">Interaction data: form response</string>
     <string name="appcues_debugger_event_details_interaction_data">Interaction data</string>
     <string name="appcues_debugger_event_details_identity_auto_properties_title">Identity auto-properties</string>
+    <string name="appcues_debugger_event_details_device_properties_title">Device properties</string>
     <string name="appcues_debugger_event_details_sdk_metrics_properties_title">SDK metrics</string>
     <string name="appcues_debugger_event_details_type_title">Type</string>
     <string name="appcues_debugger_event_details_name_title">Name</string>

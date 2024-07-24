@@ -6,11 +6,16 @@ import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.Interactio
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType.TARGET_LONG_PRESSED
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType.TARGET_TAPPED
 import com.appcues.data.model.Experience
-import com.appcues.data.model.ExperienceStepFormState
+import com.appcues.data.model.ExperienceTrigger.DeepLink
+import com.appcues.data.model.ExperienceTrigger.ExperienceCompletionAction
+import com.appcues.data.model.ExperienceTrigger.LaunchExperienceAction
+import com.appcues.data.model.ExperienceTrigger.Preview
+import com.appcues.data.model.ExperienceTrigger.PushNotification
+import com.appcues.data.model.ExperienceTrigger.Qualification
+import com.appcues.data.model.ExperienceTrigger.ShowCall
 import com.appcues.data.model.getFrameId
 import com.appcues.statemachine.Error
 import com.appcues.util.appcuesFormatted
-import com.appcues.util.toSlug
 
 internal sealed class ExperienceLifecycleEvent(
     open val experience: Experience,
@@ -82,32 +87,48 @@ internal sealed class ExperienceLifecycleEvent(
         get() = event.eventName
 
     val properties: Map<String, Any>
-        get() = hashMapOf<String, Any?>(
-            "experienceId" to experience.id.appcuesFormatted(),
-            "experienceInstanceId" to experience.instanceId.appcuesFormatted(),
-            "experienceName" to experience.name,
-            "experienceType" to experience.type,
-            "frameId" to experience.renderContext.getFrameId(),
-            "version" to experience.publishedAt,
-            "localeName" to experience.localeName,
-            "localeId" to experience.localeId,
-        ).apply {
-            flatStepIndex?.let {
-                experience.flatSteps.getOrNull(it)?.let { step ->
-                    this["stepId"] = step.id.appcuesFormatted()
-                    // this is required by SDK debugger to know which step and group is currently showing
-                    this["stepIndex"] = "${experience.groupLookup[it] ?: 0},${experience.stepIndexLookup[it] ?: 0}"
-                    this["stepType"] = step.type
-                }
+        get() = hashMapOf<String, Any?>()
+            .experienceProperties()
+            .stepProperties()
+            .eventProperties()
+            // filter null props and map from Map<String, Any?> to Map<String, Any>
+            .filterValues { it != null }.mapValues { it.value as Any }
+
+    private val triggerValue: String?
+        get() = when (val trigger = experience.trigger) {
+            DeepLink -> "deep_link"
+            is ExperienceCompletionAction -> "experience_completion_action"
+            is LaunchExperienceAction -> "launch_action"
+            Preview -> "preview"
+            is PushNotification -> "push_notification"
+            is Qualification -> trigger.reason
+            ShowCall -> "show_call"
+        }
+
+    private fun HashMap<String, Any?>.experienceProperties() = apply {
+        this["experienceId"] = experience.id.appcuesFormatted()
+        this["experienceInstanceId"] = experience.instanceId.appcuesFormatted()
+        this["experienceName"] = experience.name
+        this["experienceType"] = experience.type
+        this["frameId"] = experience.renderContext.getFrameId()
+        this["version"] = experience.publishedAt
+        this["localeName"] = experience.localeName
+        this["localeId"] = experience.localeId
+        this["trigger"] = triggerValue
+
+        when (val trigger = experience.trigger) {
+            is ExperienceCompletionAction -> {
+                this["fromExperienceId"] = trigger.fromExperienceId
             }
-            customProperties?.let {
-                putAll(it)
+            is LaunchExperienceAction -> {
+                this["fromExperienceId"] = trigger.fromExperienceId
             }
-            error?.let {
-                this["message"] = it.message
-                this["errorId"] = it.id.appcuesFormatted()
+            is PushNotification -> {
+                this["pushNotificationId"] = trigger.fromPushId
             }
-        }.filterValues { it != null }.mapValues { it.value as Any }
+            else -> Unit
+        }
+    }
 
     private val flatStepIndex: Int?
         get() = when (this) {
@@ -120,32 +141,42 @@ internal sealed class ExperienceLifecycleEvent(
             else -> null
         }
 
-    private val error: Error?
-        get() = when (this) {
-            is StepError -> stepError
-            is ExperienceError -> experienceError
-            else -> null
+    private fun HashMap<String, Any?>.stepProperties() = apply {
+        flatStepIndex?.let {
+            experience.flatSteps.getOrNull(it)?.let { step ->
+                this["stepId"] = step.id.appcuesFormatted()
+                // this is required by SDK debugger to know which step and group is currently showing
+                this["stepIndex"] = "${experience.groupLookup[it] ?: 0},${experience.stepIndexLookup[it] ?: 0}"
+                this["stepType"] = step.type
+            }
         }
+    }
 
-    private val customProperties: HashMap<String, Any>?
-        get() = when (this) {
+    private fun HashMap<String, Any?>.eventProperties() = apply {
+        when (this@ExperienceLifecycleEvent) {
             is StepInteraction -> {
-                flatStepIndex?.let {
-                    val step = experience.flatSteps[it]
-                    hashMapOf(
-                        INTERACTION_TYPE_KEY to interactionType.analyticsName(),
-                        INTERACTION_DATA_KEY to when (interactionType) {
-                            FORM_SUBMITTED -> step.formState
-                            BUTTON_TAPPED -> interactionProperties
-                            BUTTON_LONG_PRESSED -> interactionProperties
-                            TARGET_TAPPED -> interactionProperties
-                            TARGET_LONG_PRESSED -> interactionProperties
-                        },
-                    )
+                val step = experience.flatSteps[stepIndex]
+
+                this[INTERACTION_TYPE_KEY] = interactionType.analyticsName()
+                this[INTERACTION_DATA_KEY] = when (interactionType) {
+                    FORM_SUBMITTED -> step.formState
+                    BUTTON_TAPPED -> interactionProperties
+                    BUTTON_LONG_PRESSED -> interactionProperties
+                    TARGET_TAPPED -> interactionProperties
+                    TARGET_LONG_PRESSED -> interactionProperties
                 }
             }
-            else -> null
+            is StepError -> {
+                this["message"] = stepError.message
+                this["errorId"] = stepError.id.appcuesFormatted()
+            }
+            is ExperienceError -> {
+                this["message"] = experienceError.message
+                this["errorId"] = experienceError.id.appcuesFormatted()
+            }
+            else -> Unit
         }
+    }
 
     private fun StepInteraction.InteractionType.analyticsName() =
         when (this) {
@@ -155,18 +186,4 @@ internal sealed class ExperienceLifecycleEvent(
             TARGET_TAPPED -> TARGET_TAPPED_INTERACTION_TYPE
             TARGET_LONG_PRESSED -> TARGET_LONG_PRESSED_INTERACTION_TYPE
         }
-}
-
-internal fun ExperienceStepFormState.formattedAsProfileUpdate(): Map<String, Any> {
-    val profileUpdate = hashMapOf<String, Any>()
-
-    formItems.forEach {
-        profileUpdate["_appcuesForm_${it.label.toSlug()}"] = it.value
-
-        if (it.attributeName != null) {
-            profileUpdate[it.attributeName] = it.value
-        }
-    }
-
-    return profileUpdate
 }

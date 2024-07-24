@@ -146,9 +146,7 @@ internal class DebuggerRecentEventsManager(
                             title = contextWrapper.getString(R.string.appcues_debugger_event_details_properties_title),
                             properties = event.attributes
                                 .filterOutScreenProperties(type)
-                                .filterOutAutoProperties()
-                                .filterOutMetricsProperties()
-                                .filterOutInteractionData()
+                                .filterOutInternalProperties()
                                 .toSortedList(),
                         ),
                         DebuggerEventItemPropertySection(
@@ -162,6 +160,12 @@ internal class DebuggerRecentEventsManager(
                             properties = event.attributes
                                 .getInteractionData()
                                 .toSortedList(),
+                        ),
+                        DebuggerEventItemPropertySection(
+                            title = contextWrapper.getString(R.string.appcues_debugger_event_details_device_properties_title),
+                            properties = event.attributes
+                                .getDeviceProperties()
+                                .toSortedList()
                         ),
                         DebuggerEventItemPropertySection(
                             title = contextWrapper.getString(R.string.appcues_debugger_event_details_identity_auto_properties_title),
@@ -229,12 +233,14 @@ private fun Map<String, Any>.filterOutScreenProperties(eventType: EventType): Ma
     } else this
 }
 
-private fun Map<String, Any>.filterOutAutoProperties(): Map<String, Any> {
-    return filterNot { it.key == AutoPropertyDecorator.IDENTITY_PROPERTY }
-}
-
-private fun Map<String, Any>.filterOutMetricsProperties(): Map<String, Any> {
-    return filterNot { it.key == SdkMetrics.METRICS_PROPERTY }
+// filter out all internal properties so it doesnt show in "properties" section
+private fun Map<String, Any>.filterOutInternalProperties(): Map<String, Any> {
+    return filter {
+        it.key != AutoPropertyDecorator.IDENTITY_PROPERTY &&
+            it.key != AutoPropertyDecorator.DEVICE_PROPERTY &&
+            it.key != ExperienceLifecycleEvent.INTERACTION_DATA_KEY &&
+            it.key != SdkMetrics.METRICS_PROPERTY
+    }
 }
 
 private fun Map<String, Any>.getAutoProperties(): Map<String, Any> {
@@ -242,13 +248,14 @@ private fun Map<String, Any>.getAutoProperties(): Map<String, Any> {
     return (this[AutoPropertyDecorator.IDENTITY_PROPERTY] as Map<String, Any>?) ?: mapOf()
 }
 
+private fun Map<String, Any?>.getDeviceProperties(): Map<String, Any> {
+    @Suppress("UNCHECKED_CAST")
+    return (this[AutoPropertyDecorator.DEVICE_PROPERTY] as Map<String, Any>?) ?: mapOf()
+}
+
 private fun Map<String, Any>.getMetricsProperties(): Map<String, Any> {
     @Suppress("UNCHECKED_CAST")
     return (this[SdkMetrics.METRICS_PROPERTY] as Map<String, Any>?) ?: mapOf()
-}
-
-private fun Map<String, Any>.filterOutInteractionData(): Map<String, Any> {
-    return filterNot { it.key == ExperienceLifecycleEvent.INTERACTION_DATA_KEY }
 }
 
 private fun Map<String, Any>.getFormResponse(): Map<String, Any?> {

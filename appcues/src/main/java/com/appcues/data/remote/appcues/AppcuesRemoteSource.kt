@@ -4,6 +4,7 @@ import com.appcues.AppcuesConfig
 import com.appcues.Storage
 import com.appcues.data.remote.NetworkRequest
 import com.appcues.data.remote.RemoteError
+import com.appcues.data.remote.appcues.request.PushRequest
 import com.appcues.data.remote.appcues.response.ActivityResponse
 import com.appcues.data.remote.appcues.response.QualifyResponse
 import com.appcues.data.remote.appcues.response.experience.ExperienceResponse
@@ -92,6 +93,29 @@ internal class AppcuesRemoteSource(
                 is ResultOf.Failure -> false
                 is ResultOf.Success -> it.value.ok
             }
+        }
+    }
+
+    suspend fun checkAppcuesPush(token: String): ResultOf<Unit, RemoteError> {
+        return NetworkRequest.executePushRequest {
+            service.pushCheck(config.accountId, PushRequest(storage.deviceId, token))
+        }
+    }
+
+    suspend fun sendPush(
+        pushId: String,
+    ): ResultOf<Unit, RemoteError> {
+        return NetworkRequest.executePushRequest {
+            service.pushSend(config.accountId, pushId, PushRequest(storage.deviceId))
+        }
+    }
+
+    suspend fun previewPush(
+        pushId: String,
+        query: Map<String, String>
+    ): ResultOf<Unit, RemoteError> {
+        return NetworkRequest.executePushRequest {
+            service.pushPreview(config.accountId, pushId, PushRequest(storage.deviceId), query)
         }
     }
 }

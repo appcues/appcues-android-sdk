@@ -12,6 +12,11 @@ internal data class ErrorResponse(
 )
 
 @JsonClass(generateAdapter = true)
+internal data class PushErrorResponse(
+    val error: String,
+)
+
+@JsonClass(generateAdapter = true)
 internal data class ErrorMessageResponse(
     val description: String,
     val title: String,

@@ -1,6 +1,9 @@
 package com.appcues.analytics
 
+import android.Manifest
 import android.os.Build.VERSION
+import android.os.Build.VERSION_CODES
+import androidx.core.app.ActivityCompat
 import com.appcues.AppcuesConfig
 import com.appcues.BuildConfig
 import com.appcues.R
@@ -8,6 +11,7 @@ import com.appcues.SessionMonitor
 import com.appcues.Storage
 import com.appcues.data.remote.appcues.request.ActivityRequest
 import com.appcues.data.remote.appcues.request.EventRequest
+import com.appcues.monitor.AppcuesActivityMonitor
 import com.appcues.util.ContextWrapper
 import java.util.Date
 
@@ -22,6 +26,7 @@ internal class AutoPropertyDecorator(
     companion object {
 
         const val IDENTITY_PROPERTY = "_identity"
+        const val DEVICE_PROPERTY = "_device"
         const val LAST_SEEN_AT = "_lastSeenAt"
     }
 
@@ -39,7 +44,7 @@ internal class AutoPropertyDecorator(
     private var applicationProperties = hashMapOf<String, Any>(
         "_appId" to config.applicationId,
         "_operatingSystem" to "Android",
-        "_bundlePackageId" to contextWrapper.getPackageName(),
+        "_bundlePackageId" to contextWrapper.packageName,
         "_appName" to contextWrapper.getAppName(),
         "_appVersion" to contextWrapper.getAppVersion(),
         "_appBuild" to contextWrapper.getAppBuild().toString(),
@@ -49,6 +54,17 @@ internal class AutoPropertyDecorator(
         "_deviceType" to contextWrapper.getString(R.string.appcues_device_type),
         "_deviceModel" to contextWrapper.getDeviceName(),
     )
+
+    private val pushProperties: Map<String, Any?>
+        get() = hashMapOf(
+            "_deviceId" to storage.deviceId,
+            "_language" to contextWrapper.getLanguage(),
+            "_pushToken" to storage.pushToken,
+            "_pushEnabledBackground" to (storage.pushToken != null),
+            "_pushEnabled" to (contextWrapper.isNotificationEnabled() && !storage.pushToken.isNullOrEmpty())
+            // token information on comes later on future task
+            // "_pushSubscriptionStatus" to “subscribed”, “opted-in”, “unsubscribed”
+        )
 
     private val sessionProperties: Map<String, Any>
         get() = hashMapOf(
@@ -65,7 +81,18 @@ internal class AutoPropertyDecorator(
             "_lastScreenTitle" to previousScreen,
             "_sessionPageviews" to sessionPageviews,
             "_sessionRandomizer" to sessionRandomId,
+            "_pushPrimerEligible" to getPushPrimerEligible()
         ).filterValues { it != null }.mapValues { it.value as Any }
+
+    private fun getPushPrimerEligible(): Boolean {
+        val activity = AppcuesActivityMonitor.activity ?: return false
+        // VERSION guard because of Manifest.permission.POST_NOTIFICATIONS
+        return if (VERSION.SDK_INT >= VERSION_CODES.TIRAMISU) {
+            ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            false
+        }
+    }
 
     val autoProperties: Map<String, Any>
         get() = hashMapOf<String, Any>().apply {
@@ -81,18 +108,30 @@ internal class AutoPropertyDecorator(
             }
         }
 
+    val deviceProperties: Map<String, Any?>
+        get() = hashMapOf<String, Any?>().apply {
+            putAll(applicationProperties)
+            putAll(pushProperties)
+        }
+
     fun decorateTrack(event: EventRequest) = event.apply {
-        if (event.name == AnalyticsEvent.ScreenView.eventName) {
-            // special handling for screen_view events
-            previousScreen = currentScreen
-            currentScreen = attributes[ActivityRequestBuilder.SCREEN_TITLE_ATTRIBUTE]?.toString()
-            sessionPageviews += 1
-        } else if (event.name == AnalyticsEvent.SessionStarted.eventName) {
-            // special handling for session start events
-            sessionPageviews = 0
-            sessionRandomId = sessionRandomizer.get()
-            currentScreen = null
-            previousScreen = null
+        when (event.name) {
+            AnalyticsEvent.ScreenView.eventName -> {
+                previousScreen = currentScreen
+                currentScreen = attributes[ActivityRequestBuilder.SCREEN_TITLE_ATTRIBUTE]?.toString()
+                sessionPageviews += 1
+            }
+            AnalyticsEvent.SessionStarted.eventName -> {
+                attributes[DEVICE_PROPERTY] = deviceProperties
+
+                sessionPageviews = 0
+                sessionRandomId = sessionRandomizer.get()
+                currentScreen = null
+                previousScreen = null
+            }
+            AnalyticsEvent.DeviceUpdated.eventName -> {
+                attributes[DEVICE_PROPERTY] = deviceProperties
+            }
         }
 
         attributes[IDENTITY_PROPERTY] = autoProperties

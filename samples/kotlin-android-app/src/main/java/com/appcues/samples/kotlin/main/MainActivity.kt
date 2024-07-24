@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.MenuItemCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
@@ -15,6 +16,7 @@ import com.appcues.samples.kotlin.R
 import com.appcues.samples.kotlin.R.id
 import com.appcues.samples.kotlin.databinding.ActivityMainBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
@@ -82,6 +84,12 @@ class MainActivity : AppCompatActivity() {
                     "profile" -> binding.navView.selectedItemId = id.navigation_profile
                     "group" -> binding.navView.selectedItemId = id.navigation_group
                     "embed" -> binding.navView.selectedItemId = id.navigation_embed
+                }
+
+                data?.getQueryParameter("experience")?.let {
+                    lifecycleScope.launch {
+                        ExampleApplication.appcues.show(it)
+                    }
                 }
             }
         }

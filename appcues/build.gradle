@@ -110,6 +110,8 @@ dependencies {
     // Play In-App Review
     implementation 'com.google.android.play:review:2.0.1'
     implementation 'com.google.android.play:review-ktx:2.0.1'
+    // Messaging
+    implementation "com.google.firebase:firebase-messaging-ktx:23.4.1"
     // Animation
     implementation 'nl.dionsegijn:konfetti-compose:2.0.4'
 

@@ -3,6 +3,8 @@ package com.appcues.analytics
 import com.appcues.AppcuesConfig
 import com.appcues.SessionMonitor
 import com.appcues.Storage
+import com.appcues.analytics.AnalyticsEvent.DeviceUpdated
+import com.appcues.analytics.AnalyticsEvent.ExperienceStepSeen
 import com.appcues.analytics.AnalyticsEvent.ScreenView
 import com.appcues.analytics.AnalyticsEvent.SessionStarted
 import com.appcues.data.remote.appcues.request.ActivityRequest
@@ -50,8 +52,8 @@ internal class AutoPropertyDecoratorTest {
     }
 
     @Test
-    fun `autoProperties SHOULD contain 21 amount of elements`() {
-        assertThat(autoPropertyDecorator.autoProperties).hasSize(21)
+    fun `autoProperties SHOULD contain proper amount of elements`() {
+        assertThat(autoPropertyDecorator.autoProperties).hasSize(22)
         with(autoPropertyDecorator.autoProperties) {
             // App
             assertThat(containsKey("_appId")).isTrue()
@@ -76,11 +78,12 @@ internal class AutoPropertyDecoratorTest {
             assertThat(containsKey("_lastBrowserLanguage")).isTrue()
             assertThat(containsKey("_sessionPageviews")).isTrue()
             assertThat(containsKey("_sessionRandomizer")).isTrue()
+            assertThat(containsKey("_pushPrimerEligible")).isTrue()
         }
     }
 
     @Test
-    fun `autoProperties SHOULD contain 22 amount of elements WHEN one ScreenView is decorated`() {
+    fun `autoProperties SHOULD contain proper amount of elements WHEN one ScreenView is decorated`() {
         // given
         autoPropertyDecorator.decorateTrack(
             EventRequest(
@@ -91,11 +94,11 @@ internal class AutoPropertyDecoratorTest {
             )
         )
         // then
-        assertThat(autoPropertyDecorator.autoProperties).hasSize(22)
+        assertThat(autoPropertyDecorator.autoProperties).hasSize(23)
     }
 
     @Test
-    fun `autoProperties SHOULD contain 23 amount of elements WHEN two or more ScreenView are decorated`() {
+    fun `autoProperties SHOULD contain correct amount of elements WHEN two or more ScreenView are decorated`() {
         // given
         autoPropertyDecorator.decorateTrack(
             EventRequest(
@@ -114,7 +117,7 @@ internal class AutoPropertyDecoratorTest {
             )
         )
         // then
-        assertThat(autoPropertyDecorator.autoProperties).hasSize(23)
+        assertThat(autoPropertyDecorator.autoProperties).hasSize(24)
     }
 
     @Test
@@ -186,6 +189,58 @@ internal class AutoPropertyDecoratorTest {
     }
 
     @Test
+    fun `decorateTrack SHOULD decorate _device properties WHEN event is SessionStarted`() {
+        // given
+        val event = EventRequest(name = SessionStarted.eventName)
+        // when
+        with(autoPropertyDecorator.decorateTrack(event)) {
+            // then
+            assertThat(attributes.containsKey("_device")).isTrue()
+
+            with(attributes["_device"] as Map<*, *>) {
+                assertThat(containsKey("_appId")).isTrue()
+                assertThat(containsKey("_operatingSystem")).isTrue()
+                assertThat(containsKey("_bundlePackageId")).isTrue()
+                assertThat(containsKey("_appName")).isTrue()
+                assertThat(containsKey("_appVersion")).isTrue()
+                assertThat(containsKey("_appBuild")).isTrue()
+                assertThat(containsKey("_sdkVersion")).isTrue()
+                assertThat(containsKey("_sdkName")).isTrue()
+                assertThat(containsKey("_osVersion")).isTrue()
+                assertThat(containsKey("_deviceType")).isTrue()
+                assertThat(containsKey("_deviceModel")).isTrue()
+                assertThat(containsKey("_deviceId")).isTrue()
+                assertThat(containsKey("_language")).isTrue()
+                assertThat(containsKey("_pushToken")).isTrue()
+                assertThat(containsKey("_pushEnabledBackground")).isTrue()
+                assertThat(containsKey("_pushEnabled")).isTrue()
+            }
+        }
+    }
+
+    @Test
+    fun `decorateTrack SHOULD decorate _device properties WHEN event is DeviceUpdated`() {
+        // given
+        val event = EventRequest(name = DeviceUpdated.eventName)
+        // when
+        with(autoPropertyDecorator.decorateTrack(event)) {
+            // then
+            assertThat(attributes.containsKey("_device")).isTrue()
+        }
+    }
+
+    @Test
+    fun `decorateTrack SHOULD NOT include _device properties WHEN event is not SessionStarted`() {
+        // given
+        val event = EventRequest(name = ExperienceStepSeen.eventName)
+        // when
+        with(autoPropertyDecorator.decorateTrack(event)) {
+            // then
+            assertThat(attributes.containsKey("_device")).isFalse()
+        }
+    }
+
+    @Test
     fun `decorateTrack SHOULD decorate identity WITH new sessionRandomizer WHEN event is SessionStarted`() {
         // given
         val event = EventRequest(
@@ -222,7 +277,7 @@ internal class AutoPropertyDecoratorTest {
         // when
         with(autoPropertyDecorator.decorateIdentify(activityRequest)) {
             // then
-            assertThat(profileUpdate).hasSize(21)
+            assertThat(profileUpdate).hasSize(22)
         }
     }
 
@@ -239,7 +294,7 @@ internal class AutoPropertyDecoratorTest {
         // when
         with(autoPropertyDecorator.decorateIdentify(activityRequest)) {
             // then
-            assertThat(profileUpdate).hasSize(22)
+            assertThat(profileUpdate).hasSize(23)
         }
         // then when
         with(autoPropertyDecorator.decorateTrack(EventRequest(name = SessionStarted.eventName))) {
@@ -260,7 +315,7 @@ internal class AutoPropertyDecoratorTest {
         // when
         with(autoPropertyDecorator.decorateIdentify(activityRequest)) {
             // then
-            assertThat(profileUpdate).hasSize(22)
+            assertThat(profileUpdate).hasSize(23)
             assertThat(profileUpdate!!["_test"]).isEqualTo("Test")
         }
     }

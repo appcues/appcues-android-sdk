@@ -7,6 +7,7 @@ import com.appcues.data.model.ExperienceStepFormItemState.OptionSelectFormItemSt
 import com.appcues.data.model.ExperienceStepFormItemState.TextInputFormItemState
 import com.appcues.data.model.styling.ComponentSelectMode.MULTIPLE
 import com.appcues.data.model.styling.ComponentSelectMode.SINGLE
+import com.appcues.util.toSlug
 import java.util.UUID
 
 internal class ExperienceStepFormState {
@@ -73,6 +74,20 @@ internal class ExperienceStepFormState {
 
     fun toHashMap(): HashMap<String, Any> {
         return hashMapOf("formResponse" to formItems.map { it.toHashMap() })
+    }
+
+    internal fun formattedAsProfileUpdate(): Map<String, Any> {
+        val profileUpdate = hashMapOf<String, Any>()
+
+        formItems.forEach {
+            profileUpdate["_appcuesForm_${it.label.toSlug()}"] = it.value
+
+            if (it.attributeName != null) {
+                profileUpdate[it.attributeName] = it.value
+            }
+        }
+
+        return profileUpdate
     }
 }
 
