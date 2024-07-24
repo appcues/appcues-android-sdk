@@ -26,7 +26,6 @@ import com.appcues.trait.TraitRegistry
 import com.appcues.ui.ExperienceRenderer
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.launch
-import kotlin.DeprecationLevel.ERROR
 
 /**
  * Construct and return an instance of the Appcues SDK.
@@ -190,16 +189,6 @@ public class Appcues internal constructor(internal val scope: AppcuesScope) {
         // anonymous user IDs is supplied in the config builder
         val anonymousId = config.anonymousIdFactory?.invoke() ?: storage.deviceId
         identify(true, "anon:$anonymousId", null)
-    }
-
-    /**
-     * This function has been removed. Calling the anonymous function with a properties parameter
-     * is no longer supported. A call to `anonymous()` with no parameters should be used instead.
-     */
-    @Deprecated("properties are no longer supported for anonymous users.", level = ERROR)
-    @Suppress("UnusedPrivateMember", "UNUSED_PARAMETER")
-    public fun anonymous(properties: Map<String, Any>?) {
-        // removed
     }
 
     /**
