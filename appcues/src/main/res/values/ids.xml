@@ -2,4 +2,5 @@
 <resources>
     <item name="appcues_debugger_view" type="id"/>
     <item name="appcues_overlay_view" type="id" />
+    <item name="appcues_fab_view" type="id" />
 </resources>

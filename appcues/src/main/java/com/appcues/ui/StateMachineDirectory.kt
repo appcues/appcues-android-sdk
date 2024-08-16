@@ -3,6 +3,7 @@ package com.appcues.ui
 import com.appcues.AppcuesFrameView
 import com.appcues.data.model.RenderContext
 import com.appcues.data.model.RenderContext.Embed
+import com.appcues.data.model.RenderContext.Launcher
 import com.appcues.statemachine.StateMachine
 import org.jetbrains.annotations.VisibleForTesting
 import java.lang.ref.WeakReference
@@ -17,6 +18,16 @@ internal interface StateMachineOwning {
     suspend fun onConfigurationChanged() = Unit
 
     fun isInvalid(): Boolean = false
+}
+
+internal class LauncherStateMachineOwner(override val stateMachine: StateMachine) : StateMachineOwning {
+
+    override val renderContext: RenderContext
+        get() = Launcher
+
+    override suspend fun reset() {
+        stateMachine.stop(true)
+    }
 }
 
 internal class AppcuesFrameStateMachineOwner(

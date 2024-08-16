@@ -13,6 +13,7 @@ import com.appcues.data.model.ExperiencePriority.NORMAL
 import com.appcues.data.model.ExperienceTrigger
 import com.appcues.data.model.QualificationResult
 import com.appcues.data.model.RenderContext
+import com.appcues.data.model.RenderContext.Launcher
 import com.appcues.data.model.RenderContext.Modal
 import com.appcues.data.model.StepReference
 import com.appcues.data.model.getFrameId
@@ -66,6 +67,7 @@ internal class ExperienceRenderer(override val scope: AppcuesScope) : AppcuesCom
         // sets up the single state machine used for modal experiences (mobile flows, not embeds)
         // that lives indefinitely and handles one experience at a time
         stateMachines.setOwner(ModalStateMachineOwner(get(::onExperienceEnded), get()))
+        stateMachines.setOwner(LauncherStateMachineOwner(get(::onExperienceEnded)))
     }
 
     fun getStateFlow(renderContext: RenderContext): Flow<State>? {
@@ -144,12 +146,11 @@ internal class ExperienceRenderer(override val scope: AppcuesScope) : AppcuesCom
         // make a copy while we try to show them, so anything else editing the
         // main mapping won't hit a concurrent modification exception
         val experiencesToTry = potentiallyRenderableExperiences.toMap()
-        experiencesToTry.forEach {
-            attemptToShow(it.value)
-        }
+        experiencesToTry.forEach { attemptToShow(it.value) }
 
-        // No caching required for modals since they can't be lazy-loaded.
+        // No caching required for modals and launcher since they can't be lazy-loaded.
         potentiallyRenderableExperiences.remove(Modal)
+        potentiallyRenderableExperiences.remove(Launcher)
     }
 
     private suspend fun attemptToShow(experiences: List<Experience>) {

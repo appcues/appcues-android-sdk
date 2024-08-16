@@ -11,9 +11,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.testTag
 import coil.ImageLoader
 import com.appcues.data.model.StepContainer
@@ -53,11 +50,9 @@ internal fun AppcuesComposition(
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun MainSurface() {
     Box(
-        modifier = Modifier.pointerInteropFilter { false },
         contentAlignment = Alignment.Center
     ) {
         val viewModel = LocalViewModel.current

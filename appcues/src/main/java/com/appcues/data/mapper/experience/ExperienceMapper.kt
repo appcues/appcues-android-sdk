@@ -173,15 +173,21 @@ internal class ExperienceMapper(
         }
 
     private fun LossyExperienceResponse.getRenderContext(): RenderContext {
-        return when (this) {
-            is ExperienceResponse -> {
-                // check for experience-level or first group-level embed trait
-                val eligibleTraits = traits + ((steps.firstOrNull()?.traits) ?: listOf())
-                eligibleTraits.firstOrNull { it.type == "@appcues/embedded" }?.let {
-                    (it.config?.get("frameID") as? String)?.let { frameId -> RenderContext.Embed(frameId) }
-                } ?: RenderContext.Modal
-            }
-            is FailedExperienceResponse -> RenderContext.Modal
+        // initialize as Modal context (default fallback)
+        var renderContext: RenderContext = RenderContext.Modal
+
+        if (this is ExperienceResponse) {
+            // check for experience-level or first group-level traits
+            val eligibleTraits = traits + ((steps.firstOrNull()?.traits) ?: listOf())
+            // check for Embed context
+            eligibleTraits.firstOrNull { it.type == "@appcues/embedded" }
+                ?.let { (it.config?.get("frameID") as? String) }
+                ?.also { renderContext = RenderContext.Embed(it) }
+            // check for Launcher context
+            eligibleTraits.firstOrNull { it.type == "@appcues/launcher" }
+                ?.also { renderContext = RenderContext.Launcher }
         }
+
+        return renderContext
     }
 }

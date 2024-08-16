@@ -12,6 +12,7 @@ import com.appcues.trait.appcues.BackgroundContentTrait
 import com.appcues.trait.appcues.CarouselTrait
 import com.appcues.trait.appcues.EffectsTrait
 import com.appcues.trait.appcues.EmbedTrait
+import com.appcues.trait.appcues.LauncherTrait
 import com.appcues.trait.appcues.ModalTrait
 import com.appcues.trait.appcues.PagingDotsTrait
 import com.appcues.trait.appcues.SkippableTrait
@@ -39,6 +40,7 @@ internal class TraitRegistry(
         register(ModalTrait.TYPE) { config, _, context -> ModalTrait(config, context, get()) }
         register(TooltipTrait.TYPE) { config, _, context -> TooltipTrait(config, context, get()) }
         register(EmbedTrait.TYPE) { config, _, context -> EmbedTrait(config, context, get()) }
+        register(LauncherTrait.TYPE) { config, _, context -> LauncherTrait(config, context, get()) }
         register(TargetInteractionTrait.TYPE) { config, _, context -> TargetInteractionTrait(config, context, get(), get()) }
         register(SkippableTrait.TYPE) { config, _, context -> SkippableTrait(config, context, get(), get()) }
 
