@@ -1,6 +1,8 @@
 package com.appcues.ui.presentation
 
 import android.app.Activity
+import android.os.Handler
+import android.os.Looper
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.findViewTreeOnBackPressedDispatcherOwner
@@ -28,6 +30,7 @@ import com.appcues.ui.primitive.EmbedChromeClient
 import com.appcues.ui.utils.getParentView
 import com.appcues.util.AppcuesViewTreeOwner
 import kotlinx.coroutines.launch
+import java.lang.ref.WeakReference
 
 internal abstract class ViewPresenter(
     override val scope: AppcuesScope,
@@ -40,6 +43,7 @@ internal abstract class ViewPresenter(
     private val appcuesViewTreeOwner: AppcuesViewTreeOwner by inject()
     private val appcuesConfig: AppcuesConfig by inject()
 
+    private var parentView: WeakReference<ViewGroup> = WeakReference(null)
     private var viewModel: AppcuesViewModel? = null
     private var gestureListener: ShakeGestureListener? = null
 
@@ -90,12 +94,16 @@ internal abstract class ViewPresenter(
             setLifecycleObserver(this)
             setOnBackPressDispatcher(this)
 
+            // storing current viewGroup to be re-used during dismiss/remove since getParentView
+            // can return another viewGroup depending the situation (eg. One activity calling another on top)
+            parentView = WeakReference(this)
+
             viewModel = AppcuesViewModel(
                 renderContext = renderContext,
                 coroutineScope = coroutineScope,
                 experienceRenderer = experienceRenderer,
                 actionProcessor = actionProcessor,
-                onDismiss = ::onCompositionDismiss
+                onDismiss = ::remove
             ).also {
                 composeView.setContent {
                     // [currentExperience?.instanceId]: when the instanceId changes it means it could be a "newer" version
@@ -120,21 +128,19 @@ internal abstract class ViewPresenter(
     }
 
     fun remove() {
-        onCompositionDismiss()
-    }
+        // ensure all this is running on the main thread
+        Handler(Looper.getMainLooper()).post {
+            parentView.get()?.let { view ->
+                view.findViewTreeLifecycleOwner()?.lifecycle?.removeObserver(lifecycleObserver)
+                view.removeView()
+            }
 
-    private fun onCompositionDismiss() {
-        AppcuesActivityMonitor.unsubscribe(activityMonitorListener)
-
-        gestureListener?.clearListener()
-        gestureListener = null
-        viewModel = null
-
-        AppcuesActivityMonitor.activity?.getParentView()?.run {
-            findViewTreeLifecycleOwner()?.lifecycle?.removeObserver(lifecycleObserver)
+            AppcuesActivityMonitor.unsubscribe(activityMonitorListener)
             onBackPressCallback.remove()
-
-            post { removeView() }
+            gestureListener?.clearListener()
+            gestureListener = null
+            viewModel = null
+            parentView = WeakReference(null)
         }
     }
 

@@ -15,7 +15,7 @@ import com.appcues.statemachine.effects.PresentationEffect
 // send to the state machine once it's done dismissing the current container
 // the presence of a non-null value is what tells the UI to dismiss the current container,
 // and it should be set to null if a dismiss is not requested (i.e. moving to next step in same container)
-// also when awaitDismissEffect is not null it means that when we take StartStep we want to present a new container
+// also when awaitDismissEffect is not null it means that ui/view presenter will remove the container from parentView
 internal data class EndingStepState(
     val experience: Experience,
     val flatStepIndex: Int,
