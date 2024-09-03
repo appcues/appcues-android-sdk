@@ -58,7 +58,8 @@ internal class RenderingStepStateTest {
         // WHEN
         val transition = state.take(action)
         // THEN
-        transition.assertState(EndingStepState(experience, flatStepIndex, markComplete, null))
+        val awaitDismissEffect = AwaitDismissEffect(action)
+        transition.assertState(EndingStepState(experience, flatStepIndex, markComplete, awaitDismissEffect))
         transition.assertEffect(ContinuationEffect(action))
     }
 

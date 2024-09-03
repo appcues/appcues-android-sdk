@@ -90,18 +90,20 @@ internal data class RenderingStepState(
     }
 
     private fun toEndingExperience(action: EndExperience): Transition {
+        // passing in the effect on EndingStepState to ensure the UI will dismiss
+        // even though we might not be waiting for the completion before moving to
+        // the next step.
+        val awaitDismissEffect = AwaitDismissEffect(action)
         return if (action.destroyed) {
             // this means the activity hosting the experience was destroyed externally (i.e. deep link) and we should
             // immediately transition to EndingExperience - not rely on the UI to do it for us (it's gone)
-            next(EndingStepState(experience, flatStepIndex, action.markComplete, null), ContinuationEffect(action))
+            next(EndingStepState(experience, flatStepIndex, action.markComplete, awaitDismissEffect), ContinuationEffect(action))
         } else {
             // otherwise, its a natural end of experience from an in-experience action / dismiss
             // and should be communicated to the UI layer to dismiss itself.
             //
             // instead of using sideEffect we pass EndExperience on EndingStep
             // then AppcuesViewModel will continue to EndExperience when appropriate
-            val awaitDismissEffect = AwaitDismissEffect(action)
-
             next(EndingStepState(experience, flatStepIndex, action.markComplete, awaitDismissEffect), awaitDismissEffect)
         }
     }
