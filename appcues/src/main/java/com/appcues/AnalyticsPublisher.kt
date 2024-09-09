@@ -9,6 +9,7 @@ import com.appcues.analytics.TrackingData
 import com.appcues.data.model.ExperienceStepFormState
 import com.appcues.data.remote.appcues.request.EventRequest
 import java.util.Date
+import java.util.UUID
 
 internal class AnalyticsPublisher(
     private val storage: Storage
@@ -21,8 +22,8 @@ internal class AnalyticsPublisher(
             EVENT -> data.request.events?.forEach {
                 listener.trackedAnalytic(EVENT, it.name, it.attributes.sanitize(), data.isInternal)
             }
-            IDENTIFY -> listener.trackedAnalytic(IDENTIFY, storage.userId, data.request.profileUpdate, data.isInternal)
-            GROUP -> listener.trackedAnalytic(GROUP, storage.groupId, data.request.groupUpdate, data.isInternal)
+            IDENTIFY -> listener.trackedAnalytic(IDENTIFY, storage.userId, data.request.profileUpdate?.sanitize(), data.isInternal)
+            GROUP -> listener.trackedAnalytic(GROUP, storage.groupId, data.request.groupUpdate?.sanitize(), data.isInternal)
             SCREEN -> data.request.events?.forEach {
                 listener.trackedAnalytic(SCREEN, it.screenTitle(), it.attributes.sanitize(), data.isInternal)
             }
@@ -43,6 +44,8 @@ internal class AnalyticsPublisher(
                     is ExperienceStepFormState -> value.toHashMap().sanitize()
                     // convert Date types to Double value
                     is Date -> value.time.toDouble()
+                    // convert UUID to string value
+                    is UUID -> value.toString()
                     is Map<*, *> -> value.sanitize()
                     is List<*> -> value.sanitize()
                     else -> value
@@ -61,6 +64,8 @@ internal class AnalyticsPublisher(
                     is ExperienceStepFormState -> it.toHashMap().sanitize()
                     // convert Date types to Double value
                     is Date -> it.time.toDouble()
+                    // convert UUID to string value
+                    is UUID -> it.toString()
                     is Map<*, *> -> it.sanitize()
                     is List<*> -> it.sanitize()
                     else -> it
