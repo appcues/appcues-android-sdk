@@ -83,7 +83,7 @@ internal class PushDeeplinkHandler(
         val pushNotificationId = extras.getString(NOTIFICATION_ID_EXTRA, null)
 
         val properties = mapOf<String, Any?>(
-            "notification_id" to pushNotificationId,
+            "push_notification_id" to pushNotificationId,
             "push_notification_version" to extras.getLong(NOTIFICATION_VERSION_EXTRA, -1L).let { if (it == -1L) null else it },
             "workflow_id" to extras.getString(NOTIFICATION_WORKFLOW_ID_EXTRA, null),
             "workflow_task_id" to extras.getString(NOTIFICATION_WORKFLOW_TASK_ID_EXTRA, null),
