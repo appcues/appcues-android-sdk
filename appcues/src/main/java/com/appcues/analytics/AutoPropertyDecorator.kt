@@ -62,8 +62,6 @@ internal class AutoPropertyDecorator(
             "_pushToken" to storage.pushToken,
             "_pushEnabledBackground" to (storage.pushToken != null),
             "_pushEnabled" to (contextWrapper.isNotificationEnabled() && !storage.pushToken.isNullOrEmpty())
-            // token information on comes later on future task
-            // "_pushSubscriptionStatus" to “subscribed”, “opted-in”, “unsubscribed”
         )
 
     private val sessionProperties: Map<String, Any>
