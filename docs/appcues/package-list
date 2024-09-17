@@ -20,7 +20,6 @@ $dokka.location:com.appcues/Appcues.Companion/version/#/PointingToDeclaration/a
 $dokka.location:com.appcues/Appcues///PointingToDeclaration/appcues/com.appcues/-appcues/index.html
 $dokka.location:com.appcues/Appcues/analyticsListener/#/PointingToDeclaration/appcues/com.appcues/-appcues/analytics-listener.html
 $dokka.location:com.appcues/Appcues/anonymous/#/PointingToDeclaration/appcues/com.appcues/-appcues/anonymous.html
-$dokka.location:com.appcues/Appcues/anonymous/#kotlin.collections.Map[kotlin.String,kotlin.Any]?/PointingToDeclaration/appcues/com.appcues/-appcues/anonymous.html
 $dokka.location:com.appcues/Appcues/debug/#android.app.Activity/PointingToDeclaration/appcues/com.appcues/-appcues/debug.html
 $dokka.location:com.appcues/Appcues/experienceListener/#/PointingToDeclaration/appcues/com.appcues/-appcues/experience-listener.html
 $dokka.location:com.appcues/Appcues/group/#kotlin.String?#kotlin.collections.Map[kotlin.String,kotlin.Any]?/PointingToDeclaration/appcues/com.appcues/-appcues/group.html
@@ -31,6 +30,7 @@ $dokka.location:com.appcues/Appcues/onNewIntent/#android.app.Activity#android.co
 $dokka.location:com.appcues/Appcues/registerEmbed/#kotlin.String#com.appcues.AppcuesFrameView/PointingToDeclaration/appcues/com.appcues/-appcues/register-embed.html
 $dokka.location:com.appcues/Appcues/reset/#/PointingToDeclaration/appcues/com.appcues/-appcues/reset.html
 $dokka.location:com.appcues/Appcues/screen/#kotlin.String#kotlin.collections.Map[kotlin.String,kotlin.Any]?/PointingToDeclaration/appcues/com.appcues/-appcues/screen.html
+$dokka.location:com.appcues/Appcues/setPushToken/#kotlin.String?/PointingToDeclaration/appcues/com.appcues/-appcues/set-push-token.html
 $dokka.location:com.appcues/Appcues/show/#kotlin.String/PointingToDeclaration/appcues/com.appcues/-appcues/show.html
 $dokka.location:com.appcues/Appcues/stop/#/PointingToDeclaration/appcues/com.appcues/-appcues/stop.html
 $dokka.location:com.appcues/Appcues/track/#kotlin.String#kotlin.collections.Map[kotlin.String,kotlin.Any]?/PointingToDeclaration/appcues/com.appcues/-appcues/track.html
@@ -50,6 +50,13 @@ $dokka.location:com.appcues/AppcuesConfig/loggingLevel/#/PointingToDeclaration/
 $dokka.location:com.appcues/AppcuesConfig/navigationHandler/#/PointingToDeclaration/appcues/com.appcues/-appcues-config/navigation-handler.html
 $dokka.location:com.appcues/AppcuesConfig/packageNames/#/PointingToDeclaration/appcues/com.appcues/-appcues-config/package-names.html
 $dokka.location:com.appcues/AppcuesConfig/sessionTimeout/#/PointingToDeclaration/appcues/com.appcues/-appcues-config/session-timeout.html
+$dokka.location:com.appcues/AppcuesFirebaseMessagingService.Companion///PointingToDeclaration/appcues/com.appcues/-appcues-firebase-messaging-service/-companion/index.html
+$dokka.location:com.appcues/AppcuesFirebaseMessagingService.Companion/handleMessage/#android.content.Context#com.google.firebase.messaging.RemoteMessage/PointingToDeclaration/appcues/com.appcues/-appcues-firebase-messaging-service/-companion/handle-message.html
+$dokka.location:com.appcues/AppcuesFirebaseMessagingService.Companion/setToken/#kotlin.String/PointingToDeclaration/appcues/com.appcues/-appcues-firebase-messaging-service/-companion/set-token.html
+$dokka.location:com.appcues/AppcuesFirebaseMessagingService///PointingToDeclaration/appcues/com.appcues/-appcues-firebase-messaging-service/index.html
+$dokka.location:com.appcues/AppcuesFirebaseMessagingService/AppcuesFirebaseMessagingService/#/PointingToDeclaration/appcues/com.appcues/-appcues-firebase-messaging-service/-appcues-firebase-messaging-service.html
+$dokka.location:com.appcues/AppcuesFirebaseMessagingService/onMessageReceived/#com.google.firebase.messaging.RemoteMessage/PointingToDeclaration/appcues/com.appcues/-appcues-firebase-messaging-service/on-message-received.html
+$dokka.location:com.appcues/AppcuesFirebaseMessagingService/onNewToken/#kotlin.String/PointingToDeclaration/appcues/com.appcues/-appcues-firebase-messaging-service/on-new-token.html
 $dokka.location:com.appcues/AppcuesFrameView///PointingToDeclaration/appcues/com.appcues/-appcues-frame-view/index.html
 $dokka.location:com.appcues/AppcuesFrameView/AppcuesFrameView/#android.content.Context#android.util.AttributeSet?#kotlin.Int/PointingToDeclaration/appcues/com.appcues/-appcues-frame-view/-appcues-frame-view.html
 $dokka.location:com.appcues/AppcuesInterceptor///PointingToDeclaration/appcues/com.appcues/-appcues-interceptor/index.html
