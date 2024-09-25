@@ -15,12 +15,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.testTag
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Lifecycle.Event
 import androidx.lifecycle.Lifecycle.Event.ON_ANY
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.appcues.debugger.DebugMode.Debugger
 import com.appcues.debugger.DebugMode.ScreenCapture
 import com.appcues.debugger.DebuggerViewModel

@@ -4,7 +4,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -49,7 +49,7 @@ internal fun ExperiencePrimitive.Compose(matchParentBox: BoxScope? = null, modif
                     actionsDelegate = LocalAppcuesActionDelegate.current,
                     actions = LocalAppcuesActions.current,
                     interactionSource = remember { MutableInteractionSource() },
-                    indication = rememberRipple(),
+                    indication = ripple(),
                     enabled = remember { true },
                     role = getRole()
                 ),

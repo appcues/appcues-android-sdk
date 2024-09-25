@@ -122,7 +122,7 @@ private fun LazyItemScope.Item(event: DebuggerEventItem, isAnchoredStart: Boolea
                 .clip(RoundedCornerShape(6.dp))
                 .background(theme.background)
                 .padding(2.dp)
-                .animateItemPlacement(),
+                .animateItem(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
