@@ -19,14 +19,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
-import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
@@ -45,14 +44,15 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -104,7 +104,7 @@ private fun Header(debuggerViewModel: DebuggerViewModel) {
                     onClick = { debuggerViewModel.closeExpandedView() },
                     role = Role.Button,
                     interactionSource = remember { MutableInteractionSource() },
-                    indication = rememberRipple(bounded = false, 24.dp),
+                    indication = ripple(bounded = false, 24.dp),
                     onClickLabel = stringResource(id = string.appcues_screen_capture_dismiss)
                 )
                 .drawBehind {
@@ -225,22 +225,22 @@ private fun CaptureContents(debuggerViewModel: DebuggerViewModel, capture: Captu
 
 @Composable
 private fun TextWebLink(text: String, @Suppress("SameParameterValue") url: String) {
-    val uriHandler = LocalUriHandler.current
-    ClickableText(
+    Text(
         modifier = Modifier.fillMaxWidth(),
         text = buildAnnotatedString {
-            append(text)
-            addStyle(
-                style = SpanStyle(
-                    color = LocalAppcuesTheme.current.link,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Medium,
-                ),
-                start = 0,
-                end = text.length
-            )
-        },
-        onClick = { uriHandler.openUri(url) }
+            withLink(LinkAnnotation.Url(url = url)) {
+                append(text)
+                addStyle(
+                    style = SpanStyle(
+                        color = LocalAppcuesTheme.current.link,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium,
+                    ),
+                    start = 0,
+                    end = text.length
+                )
+            }
+        }
     )
 }
 

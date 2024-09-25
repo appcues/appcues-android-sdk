@@ -1,6 +1,5 @@
 package com.appcues.trait.appcues
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.pager.HorizontalPager
@@ -31,7 +30,6 @@ internal class CarouselTrait(
         const val TYPE = "@appcues/carousel"
     }
 
-    @OptIn(ExperimentalFoundationApi::class)
     @Composable
     override fun BoxScope.CreateContentHolder(containerPages: ContainerPages) {
         val pagerState = rememberPagerState(
@@ -117,8 +115,7 @@ internal class CarouselTrait(
         }
     }
 
-    @ExperimentalFoundationApi
-    private class HorizontalPagerSize constructor(private val pagerState: PagerState) {
+    private class HorizontalPagerSize(private val pagerState: PagerState) {
 
         val heightMap = mutableStateMapOf<Int, Int>()
 
