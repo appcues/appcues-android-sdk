@@ -29,11 +29,12 @@ import com.appcues.data.model.styling.ComponentStyle.ComponentHorizontalAlignmen
 import com.appcues.data.model.styling.ComponentStyle.ComponentVerticalAlignment
 import com.appcues.ui.composables.LocalLogcues
 import com.appcues.ui.composables.LocalPackageNames
+import com.appcues.ui.utils.MarginValues
 import java.io.File
 
 internal fun ComponentStyle?.getMargins(defaultValue: Dp = 0.dp): PaddingValues {
-    return if (this == null) PaddingValues(defaultValue) else
-        PaddingValues(
+    return if (this == null) MarginValues(defaultValue) else
+        MarginValues(
             start = marginLeading?.dp ?: defaultValue,
             top = marginTop?.dp ?: defaultValue,
             bottom = marginBottom?.dp ?: defaultValue,
