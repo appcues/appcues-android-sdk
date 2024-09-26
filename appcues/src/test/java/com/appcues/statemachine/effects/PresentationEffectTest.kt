@@ -19,6 +19,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import io.mockk.verifySequence
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -181,6 +182,7 @@ internal class PresentationEffectTest {
         }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun `launch SHOULD retry produceMetadata 3 times after 4 seconds WHEN shouldPresent AND produceMetadata throws`() = runTest {
         // GIVEN
