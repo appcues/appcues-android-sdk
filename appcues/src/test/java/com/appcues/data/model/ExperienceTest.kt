@@ -82,7 +82,6 @@ internal class ExperienceTest {
     @Test
     fun `areStepsFromDifferentGroup SHOULD return true WHEN step 0 and step 1 are from different group`() {
         // GIVEN
-        val id = UUID.randomUUID()
         val stepContainer1 = getStepContainer(steps = arrayListOf(getStep()))
         val stepContainer2 = getStepContainer(steps = arrayListOf(getStep()))
         val experience = getExperience(listOf(stepContainer1, stepContainer2))
@@ -95,7 +94,6 @@ internal class ExperienceTest {
     @Test
     fun `areStepsFromDifferentGroup SHOULD return false WHEN step 0 and step 1 are from the same group`() {
         // GIVEN
-        val id = UUID.randomUUID()
         val stepContainer1 = getStepContainer(steps = arrayListOf(getStep(), getStep()))
         val stepContainer2 = getStepContainer(steps = arrayListOf())
         val experience = getExperience(listOf(stepContainer1, stepContainer2))
