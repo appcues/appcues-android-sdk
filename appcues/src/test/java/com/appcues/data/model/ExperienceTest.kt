@@ -11,6 +11,7 @@ import com.appcues.trait.PresentingTrait
 import com.appcues.trait.appcues.BackdropTrait
 import com.appcues.trait.appcues.SkippableTrait
 import com.google.common.truth.Truth.assertThat
+import io.mockk.every
 import io.mockk.mockk
 import org.junit.Test
 import java.util.Date
@@ -197,15 +198,31 @@ internal class ExperienceTest {
     }
 
     @Test
-    fun `isSkippable SHOULD return true WHEN step contains skippableTrait`() {
+    fun `isSkippable SHOULD return true WHEN step contains skippableTrait AND skipOnBackPressed is true`() {
         // GIVEN
-        val skippableTrait = mockk<SkippableTrait>()
+        val skippableTrait = mockk<SkippableTrait>() {
+            every { skipOnBackPressed } returns true
+        }
         val stepContainer = getStepContainer(steps = listOf(getStep(backdropDecoratingTrait = listOf(skippableTrait))))
         val experience = getExperience(listOf(stepContainer))
         // WHEN
         val result = experience.isSkippable(0)
         // THEN
         assertThat(result).isTrue()
+    }
+
+    @Test
+    fun `isSkippable SHOULD return false WHEN step contains skippableTrait AND skipOnBackPressed is false`() {
+        // GIVEN
+        val skippableTrait = mockk<SkippableTrait>() {
+            every { skipOnBackPressed } returns false
+        }
+        val stepContainer = getStepContainer(steps = listOf(getStep(backdropDecoratingTrait = listOf(skippableTrait))))
+        val experience = getExperience(listOf(stepContainer))
+        // WHEN
+        val result = experience.isSkippable(0)
+        // THEN
+        assertThat(result).isFalse()
     }
 
     @Test
