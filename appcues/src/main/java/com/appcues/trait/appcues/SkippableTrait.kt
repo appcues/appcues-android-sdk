@@ -108,6 +108,9 @@ internal class SkippableTrait(
         else -> ButtonAppearance.DEFAULT
     }
 
+    val skipOnBackPressed: Boolean
+        get() = !ignoreBackdropTap
+
     // computed style props
 
     private val buttonWidth by lazy { buttonStyle?.width ?: buttonStyle?.height ?: BUTTON_DEFAULT_SIZE }
