@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.RenderContext
 import com.appcues.data.model.getConfigOrDefault
@@ -84,6 +85,7 @@ internal class EmbedTrait(
                         .fillMaxWidth()
                         // Embeds works well using the modifier set for modal (presentationStyle = dialog) for now.
                         .modalStyle(style, isDark) { Modifier.dialogModifier(it, isDark) },
+                    color = Color.Transparent,
                     content = {
                         content(
                             Modifier,
