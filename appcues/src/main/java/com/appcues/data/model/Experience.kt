@@ -86,7 +86,7 @@ internal data class Experience(
     }
 
     fun isSkippable(flatStepIndex: Int): Boolean {
-        return getStepOrThrow(flatStepIndex).backdropDecoratingTraits.any { it is SkippableTrait }
+        return getStepOrThrow(flatStepIndex).backdropDecoratingTraits.any { it is SkippableTrait && it.skipOnBackPressed }
     }
 
     private fun getStepOrThrow(flatStepIndex: Int): Step {
