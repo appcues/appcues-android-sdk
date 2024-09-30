@@ -31,7 +31,7 @@ The SDK is a Kotlin library for sending user properties and events to the Appcue
 
 ### Prerequisites
 
-Your application's `build.gradle` must have a `compileSdkVersion` of 34+ and `minSdkVersion` of 21+
+Your application's `build.gradle` must have a `compileSdkVersion` of 34+ and `minSdkVersion` of 21+, and use Android Gradle Plugin (AGP) 8+.
 
 ```
 android {
