@@ -98,7 +98,7 @@ internal sealed class DebuggerPages(val path: String, val parent: DebuggerPages?
     object ExpandedLogDetailsPage : DebuggerPages("log_details", LogListPage, listOf())
 }
 
-internal fun NavHostController.navigate(page: DebuggerPages) {
+internal fun NavHostController.navigateDebugger(page: DebuggerPages) {
     navigate(page.path)
 }
 
@@ -125,10 +125,10 @@ private fun DebuggerPanelPages(viewModel: DebuggerViewModel) {
                 debuggerViewModel = viewModel,
                 onEventClick = {
                     selectedEvent.value = it
-                    navController.navigate(EventDetailsPage)
+                    navController.navigateDebugger(EventDetailsPage)
                 },
-                onFontsClick = { navController.navigate(FontListPage) },
-                onDetailedLogClick = { navController.navigate(LogListPage) }
+                onFontsClick = { navController.navigateDebugger(FontListPage) },
+                onDetailedLogClick = { navController.navigateDebugger(LogListPage) }
             )
         }
 
@@ -145,7 +145,7 @@ private fun DebuggerPanelPages(viewModel: DebuggerViewModel) {
         registerPage(LogListPage) {
             DebuggerLogList(viewModel, navController) {
                 selectedLogMessage.value = it
-                navController.navigate(ExpandedLogDetailsPage)
+                navController.navigateDebugger(ExpandedLogDetailsPage)
             }
         }
 
@@ -159,7 +159,7 @@ private fun DebuggerPanelPages(viewModel: DebuggerViewModel) {
     val deeplink = viewModel.deeplink.collectAsState()
     LaunchedEffect(deeplink.value) {
         deeplink.value.toPage()?.let {
-            navController.navigate(it)
+            navController.navigateDebugger(it)
             viewModel.consumeDeeplink()
         }
     }
