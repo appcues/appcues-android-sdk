@@ -85,16 +85,27 @@ private fun Step.ComposeStepContent(
     stickyContentPadding: StickyContentPadding,
     hasVerticalScroll: Boolean,
 ) {
-    BoxWithConstraints() {
+    BoxWithConstraints {
+        // the max height that the main content has available for layout, which is used
+        // to determine if content may need to scroll
+        val maxContentHeight = maxHeight -
+            containerPadding.verticalPadding() -
+            safeAreaInsets.verticalPadding() -
+            stickyContentPadding.paddingValues.value.verticalPadding()
+
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = modifier
+                .stepVerticalScroll(hasVerticalScroll, maxContentHeight)
                 .padding(containerPadding)
                 .padding(safeAreaInsets)
                 .padding(stickyContentPadding.paddingValues.value)
-                .stepVerticalScroll(hasVerticalScroll, maxHeight)
         ) { content.Compose() }
     }
+}
+
+private fun PaddingValues.verticalPadding(): Dp {
+    return calculateTopPadding() + calculateBottomPadding()
 }
 
 @Composable

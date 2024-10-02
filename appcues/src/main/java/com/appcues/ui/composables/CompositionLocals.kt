@@ -48,7 +48,8 @@ internal interface AppcuesDismissalDelegate {
 }
 
 internal class DefaultAppcuesDismissalDelegate(private val viewModel: AppcuesViewModel) : AppcuesDismissalDelegate {
-    override val canDismiss = viewModel.canDismiss()
+    override val canDismiss: Boolean
+        get() = viewModel.canDismiss()
     override fun requestDismissal() = viewModel.requestDismissal()
 }
 
