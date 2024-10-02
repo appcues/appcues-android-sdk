@@ -37,6 +37,21 @@ internal val LocalAppcuesActions = staticCompositionLocalOf<Map<UUID, List<Actio
 // used to support UI testing and mocking of image loading
 internal val LocalImageLoader = staticCompositionLocalOf<ImageLoader> { noLocalProvidedFor("ImageLoader") }
 
+// Dismissal delegate used to support swipe to dismiss, abstraction layer for testing
+internal val LocalAppcuesDismissalDelegate = staticCompositionLocalOf<AppcuesDismissalDelegate> {
+    noLocalProvidedFor("LocalAppcuesDismissalDelegate")
+}
+
+internal interface AppcuesDismissalDelegate {
+    val canDismiss: Boolean
+    fun requestDismissal()
+}
+
+internal class DefaultAppcuesDismissalDelegate(private val viewModel: AppcuesViewModel) : AppcuesDismissalDelegate {
+    override val canDismiss = viewModel.canDismiss()
+    override fun requestDismissal() = viewModel.requestDismissal()
+}
+
 /**
  * LocalAppcuesPagination is used to report back any page change that
  * happened that is coming from outside of our internal SDK logic.

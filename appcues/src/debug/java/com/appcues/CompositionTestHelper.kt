@@ -26,9 +26,11 @@ import com.appcues.di.Bootstrap
 import com.appcues.di.scope.get
 import com.appcues.logging.Logcues
 import com.appcues.ui.composables.AppcuesActionsDelegate
+import com.appcues.ui.composables.AppcuesDismissalDelegate
 import com.appcues.ui.composables.ComposeContainer
 import com.appcues.ui.composables.ExperienceCompositionState
 import com.appcues.ui.composables.LocalAppcuesActionDelegate
+import com.appcues.ui.composables.LocalAppcuesDismissalDelegate
 import com.appcues.ui.composables.LocalExperienceCompositionState
 import com.appcues.ui.composables.LocalExperienceStepFormStateDelegate
 import com.appcues.ui.composables.LocalImageLoader
@@ -115,7 +117,8 @@ public fun ComposeContainer(context: Context, stepContentJson: List<String>?, tr
                 // disables animations
                 isContentVisible = MutableTransitionState(true),
                 isBackdropVisible = MutableTransitionState(true)
-            )
+            ),
+            LocalAppcuesDismissalDelegate provides FakeAppcuesDismissalDelegate(),
         ) {
             // render the step container on the desired step
             Box(
@@ -177,7 +180,8 @@ public fun ComposeContainer(
                 // disables animations
                 isContentVisible = MutableTransitionState(!animated),
                 isBackdropVisible = MutableTransitionState(!animated)
-            )
+            ),
+            LocalAppcuesDismissalDelegate provides FakeAppcuesDismissalDelegate(),
         ) {
             // render the step container on the desired step
             Box(
@@ -230,4 +234,9 @@ private class FakeAppcuesActionDelegate : AppcuesActionsDelegate {
     override fun onActions(actions: List<ExperienceAction>, interactionType: InteractionType, viewDescription: String?) {
         // do nothing
     }
+}
+
+private class FakeAppcuesDismissalDelegate : AppcuesDismissalDelegate {
+    override val canDismiss = false
+    override fun requestDismissal() { }
 }
