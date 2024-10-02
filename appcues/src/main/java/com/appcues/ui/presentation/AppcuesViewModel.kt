@@ -126,9 +126,14 @@ internal class AppcuesViewModel(
         awaitDismissEffect.dismissed()
     }
 
-    fun onBackPressed() {
+    fun canDismiss(): Boolean {
         val state = uiState.value
-        if (state is Rendering && state.experience.isSkippable(state.flatStepIndex)) {
+        return state is Rendering && state.experience.allowDismissal(state.flatStepIndex)
+    }
+
+    fun requestDismissal() {
+        val state = uiState.value
+        if (state is Rendering && state.experience.allowDismissal(state.flatStepIndex)) {
             coroutineScope.launch {
                 experienceRenderer.dismiss(renderContext, markComplete = false, destroyed = false)
             }

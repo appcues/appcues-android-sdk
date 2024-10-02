@@ -2,6 +2,7 @@ package com.appcues.ui.composables
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
@@ -10,11 +11,14 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
 import com.appcues.data.model.Step
 import com.appcues.trait.StepDecoratingTrait.StepDecoratingType
 import com.appcues.trait.StickyContentPadding
@@ -32,7 +36,7 @@ internal fun Step.ComposeStep(
     key(id) {
         CompositionLocalProvider(
             LocalAppcuesActions provides actions,
-            LocalExperienceStepFormStateDelegate provides formState
+            LocalExperienceStepFormStateDelegate provides formState,
         ) {
             // used to get the padding values from step decorating trait and apply to the Column
             val density = LocalDensity.current
@@ -81,14 +85,16 @@ private fun Step.ComposeStepContent(
     stickyContentPadding: StickyContentPadding,
     hasVerticalScroll: Boolean,
 ) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier
-            .stepVerticalScroll(hasVerticalScroll)
-            .padding(containerPadding)
-            .padding(safeAreaInsets)
-            .padding(stickyContentPadding.paddingValues.value)
-    ) { content.Compose() }
+    BoxWithConstraints() {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = modifier
+                .padding(containerPadding)
+                .padding(safeAreaInsets)
+                .padding(stickyContentPadding.paddingValues.value)
+                .stepVerticalScroll(hasVerticalScroll, maxHeight)
+        ) { content.Compose() }
+    }
 }
 
 @Composable
@@ -119,11 +125,31 @@ private fun Step.ComposeStickyContent(
     }
 }
 
-// conditionally add vertical scrolling to the step, only if the given ScrollState is not null.
-// this is used to allow the parent trait to control whether or not step content is scrollable
-private fun Modifier.stepVerticalScroll(enabled: Boolean) = composed {
+// The `enabled` parameter allows the parent trait to control whether or not step content is
+// scrollable. Embeds, for instance, would not allow vertical scrolling, as they just size the
+// content to the required height.
+//
+// If enabled, the maxHeight param is used to check if the sized content will actually need
+// scrolling. If the content height is less than the maxHeight, then no scrolling is enabled. This
+// is so that other gestures like swipe dismiss can be applied.
+//
+// If enabled and the content is taller than the available space, then scrolling is enabled.
+private fun Modifier.stepVerticalScroll(enabled: Boolean, maxHeightDp: Dp) = composed {
     if (enabled) {
-        Modifier.verticalScroll(rememberScrollState())
+        val contentHeight = remember { mutableIntStateOf(0) }
+        val maxHeight = with(LocalDensity.current) { maxHeightDp.toPx() }
+        Modifier
+            // Measures the height of the content to determine if scroll needed
+            .onGloballyPositioned { coordinates ->
+                contentHeight.intValue = coordinates.size.height
+            }
+            .let {
+                if (contentHeight.intValue < maxHeight) {
+                    it
+                } else {
+                    it.verticalScroll(rememberScrollState())
+                }
+            }
     } else {
         Modifier
     }

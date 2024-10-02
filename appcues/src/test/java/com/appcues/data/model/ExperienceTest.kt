@@ -201,12 +201,12 @@ internal class ExperienceTest {
     fun `isSkippable SHOULD return true WHEN step contains skippableTrait AND skipOnBackPressed is true`() {
         // GIVEN
         val skippableTrait = mockk<SkippableTrait>() {
-            every { skipOnBackPressed } returns true
+            every { allowDismissal } returns true
         }
         val stepContainer = getStepContainer(steps = listOf(getStep(backdropDecoratingTrait = listOf(skippableTrait))))
         val experience = getExperience(listOf(stepContainer))
         // WHEN
-        val result = experience.isSkippable(0)
+        val result = experience.allowDismissal(0)
         // THEN
         assertThat(result).isTrue()
     }
@@ -215,24 +215,24 @@ internal class ExperienceTest {
     fun `isSkippable SHOULD return false WHEN step contains skippableTrait AND skipOnBackPressed is false`() {
         // GIVEN
         val skippableTrait = mockk<SkippableTrait>() {
-            every { skipOnBackPressed } returns false
+            every { allowDismissal } returns false
         }
         val stepContainer = getStepContainer(steps = listOf(getStep(backdropDecoratingTrait = listOf(skippableTrait))))
         val experience = getExperience(listOf(stepContainer))
         // WHEN
-        val result = experience.isSkippable(0)
+        val result = experience.allowDismissal(0)
         // THEN
         assertThat(result).isFalse()
     }
 
     @Test
-    fun `isSkippable SHOULD return false WHEN step contains no skippableTrait`() {
+    fun `allowDismissal SHOULD return false WHEN step contains no skippableTrait`() {
         // GIVEN
         val skippableTrait = mockk<BackdropTrait>()
         val stepContainer = getStepContainer(steps = listOf(getStep(backdropDecoratingTrait = listOf(skippableTrait))))
         val experience = getExperience(listOf(stepContainer))
         // WHEN
-        val result = experience.isSkippable(0)
+        val result = experience.allowDismissal(0)
         // THEN
         assertThat(result).isFalse()
     }
