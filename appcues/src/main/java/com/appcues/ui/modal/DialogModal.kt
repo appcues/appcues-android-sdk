@@ -38,7 +38,8 @@ import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.data.model.styling.ComponentStyle.ComponentHorizontalAlignment
 import com.appcues.data.model.styling.ComponentStyle.ComponentVerticalAlignment
 import com.appcues.trait.AppcuesContentAnimatedVisibility
-import com.appcues.ui.composables.LocalViewModel
+import com.appcues.ui.composables.AppcuesDismissalDelegate
+import com.appcues.ui.composables.LocalAppcuesDismissalDelegate
 import com.appcues.ui.extensions.getBoxAlignment
 import com.appcues.ui.extensions.getPaddings
 import com.appcues.ui.extensions.modalStyle
@@ -49,7 +50,6 @@ import com.appcues.ui.modal.SlideTransitionEdge.CENTER
 import com.appcues.ui.modal.SlideTransitionEdge.LEADING
 import com.appcues.ui.modal.SlideTransitionEdge.TOP
 import com.appcues.ui.modal.SlideTransitionEdge.TRAILING
-import com.appcues.ui.presentation.AppcuesViewModel
 import com.appcues.ui.utils.AppcuesWindowInfo
 import com.appcues.ui.utils.AppcuesWindowInfo.ScreenType.COMPACT
 import com.appcues.ui.utils.AppcuesWindowInfo.ScreenType.EXPANDED
@@ -95,8 +95,8 @@ internal fun DialogModal(
 ) {
     val isDark = isSystemInDarkTheme()
     val density = LocalDensity.current
-    val viewModel = LocalViewModel.current
-    val contentCanDismiss = viewModel.canDismiss()
+    val dismissalDelegate = LocalAppcuesDismissalDelegate.current
+    val contentCanDismiss = dismissalDelegate.canDismiss
 
     val maxWidth = maxWidthDerivedOf(windowInfo)
     val maxHeight = maxHeightDerivedOf(windowInfo)
@@ -130,7 +130,7 @@ internal fun DialogModal(
             .padding(horizontal = dialogHorizontalPadding, vertical = dialogVerticalPadding)
     ) {
         val slideTransitionEdge = style.getSlideEdge()
-        val draggableState = remember { transition.anchoredDraggableState(viewModel, density, slideTransitionEdge) }
+        val draggableState = remember { transition.anchoredDraggableState(dismissalDelegate, density, slideTransitionEdge) }
 
         AppcuesContentAnimatedVisibility(
             modifier = Modifier
@@ -306,7 +306,7 @@ private fun AnchoredDraggableState<DragAnchors>.onSizeChanged(
 
 @OptIn(ExperimentalFoundationApi::class)
 private fun DialogTransition.anchoredDraggableState(
-    viewModel: AppcuesViewModel,
+    dismissalDelegate: AppcuesDismissalDelegate,
     density: Density,
     slideTransitionEdge: SlideTransitionEdge
 ): AnchoredDraggableState<DragAnchors>? {
@@ -325,9 +325,9 @@ private fun DialogTransition.anchoredDraggableState(
                     when {
                         // only allow change to dismissed anchor if the view model
                         // allows this step content to be dismissed
-                        anchor == DragAnchors.Dismissed && viewModel.canDismiss() -> {
+                        anchor == DragAnchors.Dismissed && dismissalDelegate.canDismiss -> {
                             // it is allowed, request the content to be dismissed
-                            viewModel.requestDismissal()
+                            dismissalDelegate.requestDismissal()
                             true
                         }
                         anchor == DragAnchors.Dismissed -> false
