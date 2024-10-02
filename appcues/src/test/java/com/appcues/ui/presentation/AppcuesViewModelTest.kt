@@ -306,11 +306,11 @@ internal class AppcuesViewModelTest {
     }
 
     @Test
-    fun `onBackPressed SHOULD call dismiss WHEN state is Rendering AND experience is skippable`() = runTest {
+    fun `requestDismissal SHOULD call dismiss WHEN state is Rendering AND experience is dismissible`() = runTest {
         // GIVEN
         val mockStepContainer: StepContainer = mockk()
         val mockExperience: Experience = mockk(relaxed = true) {
-            every { isSkippable(any()) } returns true
+            every { allowDismissal(any()) } returns true
             every { groupLookup } returns hashMapOf(0 to 0)
             every { stepIndexLookup } returns hashMapOf(0 to 0)
             every { stepContainers } returns listOf(mockStepContainer)
@@ -318,17 +318,17 @@ internal class AppcuesViewModelTest {
         val mockMetadata: Map<String, Any?> = hashMapOf()
         experienceStates.emit(RenderingStepState(mockExperience, 0, mockMetadata))
         // WHEN
-        viewModel.onBackPressed()
+        viewModel.requestDismissal()
         // THEN
         coVerify { experienceRenderer.dismiss(renderContext, markComplete = false, destroyed = false) }
     }
 
     @Test
-    fun `onBackPressed SHOULD not call experienceRenderer WHEN state is Rendering AND experience is not skippable`() = runTest {
+    fun `requestDismissal SHOULD not call experienceRenderer WHEN state is Rendering AND experience is not dismissible`() = runTest {
         // GIVEN
         val mockStepContainer: StepContainer = mockk()
         val mockExperience: Experience = mockk(relaxed = true) {
-            every { isSkippable(any()) } returns false
+            every { allowDismissal(any()) } returns false
             every { groupLookup } returns hashMapOf(0 to 0)
             every { stepIndexLookup } returns hashMapOf(0 to 0)
             every { stepContainers } returns listOf(mockStepContainer)
@@ -336,24 +336,24 @@ internal class AppcuesViewModelTest {
         val mockMetadata: Map<String, Any?> = hashMapOf()
         experienceStates.emit(RenderingStepState(mockExperience, 0, mockMetadata))
         // WHEN
-        viewModel.onBackPressed()
+        viewModel.requestDismissal()
         // THEN
         coVerify { experienceRenderer wasNot Called }
     }
 
     @Test
-    fun `onBackPressed SHOULD not call experienceRenderer WHEN state is not Rendering`() = runTest {
+    fun `requestDismissal SHOULD not call experienceRenderer WHEN state is not Rendering`() = runTest {
         // GIVEN
         val mockStepContainer: StepContainer = mockk()
         val mockExperience: Experience = mockk(relaxed = true) {
-            every { isSkippable(any()) } returns true
+            every { allowDismissal(any()) } returns true
             every { groupLookup } returns hashMapOf(0 to 0)
             every { stepIndexLookup } returns hashMapOf(0 to 0)
             every { stepContainers } returns listOf(mockStepContainer)
         }
         experienceStates.emit(BeginningStepState(mockExperience, 0, true))
         // WHEN
-        viewModel.onBackPressed()
+        viewModel.requestDismissal()
         // THEN
         coVerify { experienceRenderer wasNot Called }
     }

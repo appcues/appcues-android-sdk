@@ -32,6 +32,7 @@ output.json
 /.idea/kotlinc.xml
 /.idea/deploymentTargetSelector.xml
 /.idea/other.xml
+/.idea/caches/
 vendor/
 
 # Keystore files

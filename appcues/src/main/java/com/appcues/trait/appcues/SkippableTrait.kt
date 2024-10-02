@@ -108,7 +108,7 @@ internal class SkippableTrait(
         else -> ButtonAppearance.DEFAULT
     }
 
-    val skipOnBackPressed: Boolean
+    val allowDismissal: Boolean
         get() = !ignoreBackdropTap
 
     // computed style props

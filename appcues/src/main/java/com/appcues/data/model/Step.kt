@@ -5,6 +5,7 @@ import com.appcues.trait.ContainerDecoratingTrait
 import com.appcues.trait.MetadataSettingTrait
 import com.appcues.trait.PresentingTrait
 import com.appcues.trait.StepDecoratingTrait
+import com.appcues.trait.appcues.SkippableTrait
 import java.util.UUID
 
 internal data class Step(
@@ -20,4 +21,8 @@ internal data class Step(
     val formState: ExperienceStepFormState = ExperienceStepFormState(),
     val topStickyContent: ExperiencePrimitive? = null,
     val bottomStickyContent: ExperiencePrimitive? = null,
-)
+) {
+    fun allowDismissal(): Boolean {
+        return backdropDecoratingTraits.any { it is SkippableTrait && it.allowDismissal }
+    }
+}

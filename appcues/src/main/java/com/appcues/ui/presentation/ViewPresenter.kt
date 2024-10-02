@@ -176,7 +176,7 @@ internal abstract class ViewPresenter(
 
     private val onBackPressCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
-            viewModel?.onBackPressed()
+            viewModel?.requestDismissal()
         }
     }
 }
