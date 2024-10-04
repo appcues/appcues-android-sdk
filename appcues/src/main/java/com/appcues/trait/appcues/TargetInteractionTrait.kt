@@ -54,6 +54,8 @@ internal class TargetInteractionTrait(
         private const val VIEW_DESCRIPTION = "Target Rectangle"
     }
 
+    override val isBlocking = false
+
     private val actions = config.getConfigActions("actions", renderContext, actionRegistry)
 
     private val actionDelegate = object : AppcuesActionsDelegate {
@@ -64,10 +66,15 @@ internal class TargetInteractionTrait(
 
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
-    override fun BoxScope.BackdropDecorate(content: @Composable BoxScope.() -> Unit) {
+    override fun BoxScope.BackdropDecorate(isBlocking: Boolean, content: @Composable BoxScope.() -> Unit) {
         // calling content before our composable makes so we are on top of all other backdrop traits
         // wrapping content call
         content()
+
+        // if there is no blocking backdrop (no backdrop trait) - then interactions on the backdrop simply
+        // flow through to the underlying application. We do not apply a target interaction since it would result
+        // in an invisible section of the app capturing and taking action on touch in an unexpected way.
+        if (!isBlocking) return
 
         val targetRectInfo = rememberTargetRectangleInfo(LocalAppcuesStepMetadata.current)
         val keyholeSettings = rememberKeyholeSettings(LocalAppcuesStepMetadata.current)

@@ -18,8 +18,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInteropFilter
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.getConfigColor
 import com.appcues.data.model.styling.ComponentColor
@@ -42,12 +44,15 @@ internal class BackdropTrait(
         const val METADATA_BACKGROUND_COLOR = "backgroundColor"
     }
 
+    override val isBlocking = true
+
     override fun produceMetadata(): Map<String, Any?> {
         return hashMapOf(METADATA_BACKGROUND_COLOR to config.getConfigColor("backgroundColor"))
     }
 
+    @OptIn(ExperimentalComposeUiApi::class)
     @Composable
-    override fun BoxScope.BackdropDecorate(content: @Composable BoxScope.() -> Unit) {
+    override fun BoxScope.BackdropDecorate(isBlocking: Boolean, content: @Composable BoxScope.() -> Unit) {
         val metadata = LocalAppcuesStepMetadata.current
         val animation = rememberColorStepAnimation(metadata)
         val color = rememberBackgroundColor(metadata = metadata, animationSpec = animation)
@@ -64,6 +69,8 @@ internal class BackdropTrait(
                     .fillMaxSize()
                     // set background color
                     .backdrop(color.value)
+                    // this makes the content behind the experience non-interactive, capture all touches inside of our overlay
+                    .pointerInteropFilter { false }
             )
         }
 

@@ -27,6 +27,8 @@ internal class EffectsTrait(
         CONFETTI
     }
 
+    override val isBlocking = false
+
     private val presentationStyle = config.getConfig<String?>("presentationStyle").toPresentationStyle()
 
     private val duration = config.getConfigInt("duration") ?: DEFAULT_DURATION
@@ -36,7 +38,7 @@ internal class EffectsTrait(
     private val style = config.getConfigStyle("style")
 
     @Composable
-    override fun BoxScope.BackdropDecorate(content: @Composable BoxScope.() -> Unit) {
+    override fun BoxScope.BackdropDecorate(isBlocking: Boolean, content: @Composable BoxScope.() -> Unit) {
         // other backdrop decorate traits renders first (putting this one on top)
         content()
 

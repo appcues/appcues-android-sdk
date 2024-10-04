@@ -44,6 +44,8 @@ internal class BackdropKeyholeTrait(
         const val METADATA_KEYHOLE_SETTINGS = "keyholeSettings"
     }
 
+    override val isBlocking = false
+
     enum class ConfigShape {
         RECTANGLE, CIRCLE
     }
@@ -75,7 +77,13 @@ internal class BackdropKeyholeTrait(
     }
 
     @Composable
-    override fun BoxScope.BackdropDecorate(content: @Composable BoxScope.() -> Unit) {
+    override fun BoxScope.BackdropDecorate(isBlocking: Boolean, content: @Composable BoxScope.() -> Unit) {
+        // if there is no blocking backdrop (backdrop trait) then we do not decorate any keyhole sections
+        if (!isBlocking) {
+            content()
+            return
+        }
+
         val density = LocalDensity.current
         val metadata = LocalAppcuesStepMetadata.current
 
