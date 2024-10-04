@@ -53,7 +53,7 @@ internal class AutoPropertyDecoratorTest {
 
     @Test
     fun `autoProperties SHOULD contain proper amount of elements`() {
-        assertThat(autoPropertyDecorator.autoProperties).hasSize(22)
+        assertThat(autoPropertyDecorator.autoProperties).hasSize(23)
         with(autoPropertyDecorator.autoProperties) {
             // App
             assertThat(containsKey("_appId")).isTrue()
@@ -94,7 +94,7 @@ internal class AutoPropertyDecoratorTest {
             )
         )
         // then
-        assertThat(autoPropertyDecorator.autoProperties).hasSize(23)
+        assertThat(autoPropertyDecorator.autoProperties).hasSize(24)
     }
 
     @Test
@@ -117,7 +117,7 @@ internal class AutoPropertyDecoratorTest {
             )
         )
         // then
-        assertThat(autoPropertyDecorator.autoProperties).hasSize(24)
+        assertThat(autoPropertyDecorator.autoProperties).hasSize(25)
     }
 
     @Test
@@ -277,7 +277,7 @@ internal class AutoPropertyDecoratorTest {
         // when
         with(autoPropertyDecorator.decorateIdentify(activityRequest)) {
             // then
-            assertThat(profileUpdate).hasSize(22)
+            assertThat(profileUpdate).hasSize(23)
         }
     }
 
@@ -294,7 +294,7 @@ internal class AutoPropertyDecoratorTest {
         // when
         with(autoPropertyDecorator.decorateIdentify(activityRequest)) {
             // then
-            assertThat(profileUpdate).hasSize(23)
+            assertThat(profileUpdate).hasSize(24)
         }
         // then when
         with(autoPropertyDecorator.decorateTrack(EventRequest(name = SessionStarted.eventName))) {
@@ -315,7 +315,7 @@ internal class AutoPropertyDecoratorTest {
         // when
         with(autoPropertyDecorator.decorateIdentify(activityRequest)) {
             // then
-            assertThat(profileUpdate).hasSize(23)
+            assertThat(profileUpdate).hasSize(24)
             assertThat(profileUpdate!!["_test"]).isEqualTo("Test")
         }
     }
