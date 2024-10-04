@@ -44,7 +44,7 @@ internal class StepMapper(
             id = from.id,
             content = responseContent.mapPrimitive(),
             presentingTrait = presentingTrait,
-            stepDecoratingTraits = mappedTraits.filterIsInstance(StepDecoratingTrait::class.java),
+            stepDecoratingTraits = mappedTraits.filterIsInstance<StepDecoratingTrait>(),
             backdropDecoratingTraits = mappedTraits.filterIsInstance<BackdropDecoratingTrait>(),
             containerDecoratingTraits = mappedTraits.filterIsInstance<ContainerDecoratingTrait>(),
             metadataSettingTraits = mappedTraits.filterIsInstance<MetadataSettingTrait>(),

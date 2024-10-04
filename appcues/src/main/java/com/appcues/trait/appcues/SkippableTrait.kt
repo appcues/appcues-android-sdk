@@ -95,6 +95,8 @@ internal class SkippableTrait(
         DEFAULT, MINIMAL, HIDDEN
     }
 
+    override val isBlocking = false
+
     override val containerComposeOrder = ContainerDecoratingType.OVERLAY
 
     // config properties
@@ -150,8 +152,8 @@ internal class SkippableTrait(
     }
 
     @Composable
-    override fun BoxScope.BackdropDecorate(content: @Composable BoxScope.() -> Unit) {
-        if (ignoreBackdropTap.not()) {
+    override fun BoxScope.BackdropDecorate(isBlocking: Boolean, content: @Composable BoxScope.() -> Unit) {
+        if (ignoreBackdropTap.not() && isBlocking) {
             Spacer(
                 modifier = Modifier
                     .matchParentSize()

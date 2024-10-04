@@ -11,9 +11,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.testTag
 import coil.ImageLoader
 import com.appcues.data.model.StepContainer
@@ -54,13 +51,9 @@ internal fun AppcuesComposition(
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun MainSurface() {
-    Box(
-        modifier = Modifier.pointerInteropFilter { false },
-        contentAlignment = Alignment.Center
-    ) {
+    Box(contentAlignment = Alignment.Center) {
         val viewModel = LocalViewModel.current
         // collect all UIState
         viewModel.uiState.collectAsState().let { state ->
@@ -109,7 +102,8 @@ internal fun BoxScope.ComposeContainer(stepContainer: StepContainer, stepIndex: 
         stepMetadata.value?.let { metadata ->
             CompositionLocalProvider(LocalAppcuesStepMetadata provides metadata) {
                 // apply backdrop traits
-                ApplyBackgroundDecoratingTraits(backdropDecoratingTraits.value)
+                val isBlockingBackdrop = backdropDecoratingTraits.value.any { it.isBlocking }
+                ApplyBackgroundDecoratingTraits(isBlockingBackdrop, backdropDecoratingTraits.value)
 
                 // create wrapper
                 contentWrappingTrait.WrapContent { modifier, containerPadding, safeAreaInsets, hasVerticalScroll ->
@@ -160,11 +154,11 @@ internal fun BoxScope.ApplyUnderlayContainerTraits(
 }
 
 @Composable
-private fun BoxScope.ApplyBackgroundDecoratingTraits(list: List<BackdropDecoratingTrait>) {
+private fun BoxScope.ApplyBackgroundDecoratingTraits(isBlocking: Boolean, list: List<BackdropDecoratingTrait>) {
     // get last trait if its not null compose it and drop last calling it again recursively
     val item = list.lastOrNull()
     if (item != null) {
-        with(item) { BackdropDecorate { ApplyBackgroundDecoratingTraits(list.dropLast(1)) } }
+        with(item) { BackdropDecorate(isBlocking) { ApplyBackgroundDecoratingTraits(isBlocking, list.dropLast(1)) } }
     }
 }
 
