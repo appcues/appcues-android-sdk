@@ -14,6 +14,7 @@ import com.appcues.data.remote.appcues.request.EventRequest
 import com.appcues.monitor.AppcuesActivityMonitor
 import com.appcues.util.ContextWrapper
 import java.util.Date
+import java.util.TimeZone
 
 internal class AutoPropertyDecorator(
     private val config: AppcuesConfig,
@@ -53,6 +54,7 @@ internal class AutoPropertyDecorator(
         "_osVersion" to "${VERSION.SDK_INT}",
         "_deviceType" to contextWrapper.getString(R.string.appcues_device_type),
         "_deviceModel" to contextWrapper.getDeviceName(),
+        "_timezoneOffset" to TimeZone.getDefault().offsetMinutes()
     )
 
     private val pushProperties: Map<String, Any?>
@@ -155,3 +157,7 @@ internal class AutoPropertyDecorator(
         )
     }
 }
+
+private const val MILLISECONDS_PER_MINUTE = 60_000
+
+private fun TimeZone.offsetMinutes() = getOffset(System.currentTimeMillis()) / MILLISECONDS_PER_MINUTE
