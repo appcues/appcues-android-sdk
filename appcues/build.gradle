@@ -11,7 +11,7 @@ apply from: 'copy-dependencies.gradle'
 apply from: 'dokka.gradle'
 
 ext.room_version = '2.6.1'
-ext.compose_version = '1.7.2'
+ext.compose_version = '1.7.3'
 ext.compose_compiler_version = '1.4.8'
 ext.coil_version = '2.4.0'
 ext.moshi_version = '1.15.0'
@@ -113,7 +113,7 @@ dependencies {
     implementation 'com.google.android.play:review:2.0.1'
     implementation 'com.google.android.play:review-ktx:2.0.1'
     // Messaging
-    implementation "com.google.firebase:firebase-messaging-ktx:24.0.1"
+    implementation "com.google.firebase:firebase-messaging-ktx:24.0.2"
     // Animation
     implementation 'nl.dionsegijn:konfetti-compose:2.0.4'
 
@@ -121,7 +121,7 @@ dependencies {
     testImplementation "io.mockk:mockk:1.13.5"
     testImplementation "com.google.truth:truth:1.1.5"
     testImplementation "com.squareup.okhttp3:mockwebserver:4.11.0"
-    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1"
     testImplementation 'androidx.arch.core:core-testing:2.2.0'
     testImplementation 'app.cash.turbine:turbine:1.0.0'
 }
