@@ -32,6 +32,14 @@ internal class CarouselTrait(
 
     @Composable
     override fun BoxScope.CreateContentHolder(containerPages: ContainerPages) {
+        if (containerPages.pageCount < 2) {
+            // If we do not have multiple pages, skip all carousel logic
+            // to avoid the creation of a pager or horizontal scroll gesture handling.
+            // This ends up working exactly the same as the DefaultContentHolderTrait
+            containerPages.composePage(containerPages.currentPage)
+            return
+        }
+
         val pagerState = rememberPagerState(
             initialPage = containerPages.currentPage,
             pageCount = { containerPages.pageCount }
