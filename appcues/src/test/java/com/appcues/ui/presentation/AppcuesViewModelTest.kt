@@ -1,6 +1,7 @@
 package com.appcues.ui.presentation
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.viewModelScope
 import com.appcues.AppcuesCoroutineScope
 import com.appcues.action.ActionProcessor
@@ -67,6 +68,8 @@ internal class AppcuesViewModelTest {
 
     private val onDismiss: () -> Unit = mockk(relaxed = true)
 
+    private val tapPassThroughHandler: (Offset) -> Unit = mockk(relaxed = true)
+
     private lateinit var viewModel: AppcuesViewModel
 
     private val uiStates = arrayListOf<UIState>()
@@ -77,7 +80,14 @@ internal class AppcuesViewModelTest {
     fun setup() {
         Dispatchers.setMain(UnconfinedTestDispatcher())
 
-        viewModel = AppcuesViewModel(renderContext, coroutineScope, experienceRenderer, actionProcessor, onDismiss).apply {
+        viewModel = AppcuesViewModel(
+            renderContext = renderContext,
+            coroutineScope = coroutineScope,
+            experienceRenderer = experienceRenderer,
+            actionProcessor = actionProcessor,
+            onDismiss = onDismiss,
+            tapPassThroughHandler = tapPassThroughHandler
+        ).apply {
             stateJob = viewModelScope.launch { uiState.collect { uiStates.add(it) } }
         }
 
@@ -105,7 +115,7 @@ internal class AppcuesViewModelTest {
             coEvery { getStateFlow(renderContext) } returns null
         }
         // WHEN
-        viewModel = AppcuesViewModel(renderContext, coroutineScope, experienceRenderer, actionProcessor, onDismiss)
+        viewModel = AppcuesViewModel(renderContext, coroutineScope, experienceRenderer, actionProcessor, onDismiss, tapPassThroughHandler)
         // WHEN
         verifySequence { onDismiss.invoke() }
     }

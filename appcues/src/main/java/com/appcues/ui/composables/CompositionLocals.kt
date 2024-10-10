@@ -4,6 +4,7 @@ import android.webkit.WebChromeClient
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.geometry.Offset
 import coil.ImageLoader
 import com.appcues.action.ExperienceAction
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType
@@ -51,6 +52,19 @@ internal class DefaultAppcuesDismissalDelegate(private val viewModel: AppcuesVie
     override val canDismiss: Boolean
         get() = viewModel.canDismiss()
     override fun requestDismissal() = viewModel.requestDismissal()
+}
+
+// Tap forwarding delegate used to support tooltip tap pass through, abstraction layer for testing
+internal val LocalAppcuesTapForwardingDelegate = staticCompositionLocalOf<AppcuesTapForwardingDelegate> {
+    noLocalProvidedFor("LocalAppcuesTapForwardingDelegate")
+}
+
+internal interface AppcuesTapForwardingDelegate {
+    fun onTap(offset: Offset)
+}
+
+internal class DefaultAppcuesTapForwardingDelegate(private val viewModel: AppcuesViewModel) : AppcuesTapForwardingDelegate {
+    override fun onTap(offset: Offset) = viewModel.tapPassThroughHandler(offset)
 }
 
 /**
