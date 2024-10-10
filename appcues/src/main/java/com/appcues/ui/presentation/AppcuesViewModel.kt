@@ -1,5 +1,6 @@
 package com.appcues.ui.presentation
 
+import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.appcues.action.ActionProcessor
@@ -30,6 +31,7 @@ internal class AppcuesViewModel(
     private val experienceRenderer: ExperienceRenderer,
     private val actionProcessor: ActionProcessor,
     private val onDismiss: () -> Unit,
+    val tapPassThroughHandler: (Offset) -> Unit,
 ) : ViewModel() {
 
     sealed class UIState {

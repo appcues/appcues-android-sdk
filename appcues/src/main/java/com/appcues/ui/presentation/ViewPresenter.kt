@@ -3,10 +3,12 @@ package com.appcues.ui.presentation
 import android.app.Activity
 import android.os.Handler
 import android.os.Looper
+import android.view.MotionEvent
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.findViewTreeOnBackPressedDispatcherOwner
 import androidx.compose.runtime.key
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -103,7 +105,8 @@ internal abstract class ViewPresenter(
                 coroutineScope = coroutineScope,
                 experienceRenderer = experienceRenderer,
                 actionProcessor = actionProcessor,
-                onDismiss = ::remove
+                onDismiss = ::remove,
+                tapPassThroughHandler = ::tapPassThrough,
             ).also {
                 composeView.setContent {
                     // [currentExperience?.instanceId]: when the instanceId changes it means it could be a "newer" version
@@ -141,6 +144,21 @@ internal abstract class ViewPresenter(
             gestureListener = null
             viewModel = null
             parentView = WeakReference(null)
+        }
+    }
+
+    private fun tapPassThrough(offset: Offset) {
+        parentView.get()?.let { view ->
+            val now = System.currentTimeMillis()
+            val downEvent = MotionEvent.obtain(now, now, MotionEvent.ACTION_DOWN, offset.x, offset.y, 0)
+            val upEvent = MotionEvent.obtain(now, now, MotionEvent.ACTION_UP, offset.x, offset.y, 0)
+
+            // Dispatch both ACTION_DOWN and ACTION_UP events to simulate a click
+            view.dispatchTouchEvent(downEvent)
+            view.dispatchTouchEvent(upEvent)
+
+            downEvent.recycle()
+            upEvent.recycle()
         }
     }
 
