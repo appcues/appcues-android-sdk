@@ -45,6 +45,7 @@ internal fun AppcuesComposition(
             LocalAppcuesPaginationDelegate provides AppcuesPagination { viewModel.onPageChanged(it) },
             LocalExperienceCompositionState provides ExperienceCompositionState(),
             LocalAppcuesDismissalDelegate provides DefaultAppcuesDismissalDelegate(viewModel),
+            LocalAppcuesTapForwardingDelegate provides DefaultAppcuesTapForwardingDelegate(viewModel),
         ) {
             MainSurface()
         }

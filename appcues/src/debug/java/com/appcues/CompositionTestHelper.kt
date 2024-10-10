@@ -9,6 +9,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import coil.ImageLoader
 import com.appcues.action.ExperienceAction
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType
@@ -27,10 +28,12 @@ import com.appcues.di.scope.get
 import com.appcues.logging.Logcues
 import com.appcues.ui.composables.AppcuesActionsDelegate
 import com.appcues.ui.composables.AppcuesDismissalDelegate
+import com.appcues.ui.composables.AppcuesTapForwardingDelegate
 import com.appcues.ui.composables.ComposeContainer
 import com.appcues.ui.composables.ExperienceCompositionState
 import com.appcues.ui.composables.LocalAppcuesActionDelegate
 import com.appcues.ui.composables.LocalAppcuesDismissalDelegate
+import com.appcues.ui.composables.LocalAppcuesTapForwardingDelegate
 import com.appcues.ui.composables.LocalExperienceCompositionState
 import com.appcues.ui.composables.LocalExperienceStepFormStateDelegate
 import com.appcues.ui.composables.LocalImageLoader
@@ -119,6 +122,7 @@ public fun ComposeContainer(context: Context, stepContentJson: List<String>?, tr
                 isBackdropVisible = MutableTransitionState(true)
             ),
             LocalAppcuesDismissalDelegate provides FakeAppcuesDismissalDelegate(),
+            LocalAppcuesTapForwardingDelegate provides FakeAppcuesTapForwardingDelegate(),
         ) {
             // render the step container on the desired step
             Box(
@@ -182,6 +186,7 @@ public fun ComposeContainer(
                 isBackdropVisible = MutableTransitionState(!animated)
             ),
             LocalAppcuesDismissalDelegate provides FakeAppcuesDismissalDelegate(),
+            LocalAppcuesTapForwardingDelegate provides FakeAppcuesTapForwardingDelegate(),
         ) {
             // render the step container on the desired step
             Box(
@@ -239,4 +244,8 @@ private class FakeAppcuesActionDelegate : AppcuesActionsDelegate {
 private class FakeAppcuesDismissalDelegate : AppcuesDismissalDelegate {
     override val canDismiss = false
     override fun requestDismissal() { }
+}
+
+private class FakeAppcuesTapForwardingDelegate: AppcuesTapForwardingDelegate {
+    override fun onTap(offset: Offset) { }
 }
