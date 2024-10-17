@@ -140,7 +140,12 @@ public class Appcues internal constructor(internal val scope: AppcuesScope) {
 
         appcuesCoroutineScope.launch {
             analyticsTracker.analyticsFlow.collect {
-                analyticsPublisher.publish(analyticsListener, it)
+                try {
+                    analyticsPublisher.publish(analyticsListener, it)
+                } catch (_: Exception) {
+                    // ignore any exception that occurs in client app code that is observing analytics,
+                    // so we always continue collecting on the analyticsFlow
+                }
             }
         }
 
