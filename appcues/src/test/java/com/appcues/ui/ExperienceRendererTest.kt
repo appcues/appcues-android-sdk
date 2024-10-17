@@ -25,6 +25,7 @@ import com.appcues.logging.Logcues
 import com.appcues.mocks.mockEmbedExperience
 import com.appcues.mocks.mockExperience
 import com.appcues.mocks.mockExperienceExperiment
+import com.appcues.rules.MainDispatcherRule
 import com.appcues.statemachine.Action.EndExperience
 import com.appcues.statemachine.Action.StartExperience
 import com.appcues.statemachine.State
@@ -41,11 +42,16 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
 import java.util.UUID
 
 internal class ExperienceRendererTest {
+
+    @get:Rule
+    val dispatcherRule = MainDispatcherRule()
 
     @Test
     fun `dismissCurrentExperience SHOULD NOT mark complete WHEN current state is on last step`() = runTest {
@@ -516,7 +522,7 @@ internal class ExperienceRendererTest {
                     scoped { mockk<AnalyticsTracker>(relaxed = true) }
                     scoped { mockk<ExperienceLifecycleTracker>(relaxed = true) }
                     scoped { StateMachineDirectory() }
-                    scoped { AppcuesCoroutineScope(get()) }
+                    scoped<CoroutineScope> { AppcuesCoroutineScope(get()) }
                     scoped { mockk<Logcues>(relaxed = true) }
                 }
             })

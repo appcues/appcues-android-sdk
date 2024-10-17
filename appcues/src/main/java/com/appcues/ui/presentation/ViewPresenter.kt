@@ -13,7 +13,6 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import com.appcues.AppcuesConfig
-import com.appcues.AppcuesCoroutineScope
 import com.appcues.action.ActionProcessor
 import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperienceTrigger.Preview
@@ -29,6 +28,7 @@ import com.appcues.ui.composables.AppcuesComposition
 import com.appcues.ui.primitive.EmbedChromeClient
 import com.appcues.ui.utils.getParentView
 import com.appcues.util.AppcuesViewTreeOwner
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.lang.ref.WeakReference
 
@@ -38,7 +38,7 @@ internal abstract class ViewPresenter(
 ) : AppcuesComponent {
 
     private val experienceRenderer: ExperienceRenderer by inject()
-    private val coroutineScope: AppcuesCoroutineScope by inject()
+    private val coroutineScope: CoroutineScope by inject()
     private val actionProcessor: ActionProcessor by inject()
     private val appcuesViewTreeOwner: AppcuesViewTreeOwner by inject()
     private val appcuesConfig: AppcuesConfig by inject()
@@ -129,7 +129,7 @@ internal abstract class ViewPresenter(
 
     fun remove() {
         // ensure all this is running on the main thread
-        Handler(Looper.getMainLooper()).post {
+        postIfNeeded {
             parentView.get()?.let { view ->
                 view.findViewTreeLifecycleOwner()?.lifecycle?.removeObserver(lifecycleObserver)
                 view.removeView()
@@ -149,6 +149,17 @@ internal abstract class ViewPresenter(
     abstract fun ViewGroup.setupView(activity: Activity): ComposeView?
 
     abstract fun ViewGroup.removeView()
+
+    private fun postIfNeeded(block: () -> Unit) {
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            // already on main
+            block()
+        } else {
+            Handler(Looper.getMainLooper()).post {
+                block()
+            }
+        }
+    }
 
     private fun refreshPreview() {
         currentExperience?.let {

@@ -2,7 +2,6 @@ package com.appcues.ui.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.appcues.AppcuesCoroutineScope
 import com.appcues.action.ActionProcessor
 import com.appcues.action.ExperienceAction
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType
@@ -18,6 +17,7 @@ import com.appcues.ui.ExperienceRenderer
 import com.appcues.ui.presentation.AppcuesViewModel.UIState.Dismissing
 import com.appcues.ui.presentation.AppcuesViewModel.UIState.Idle
 import com.appcues.ui.presentation.AppcuesViewModel.UIState.Rendering
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,7 +26,7 @@ import kotlinx.coroutines.launch
 
 internal class AppcuesViewModel(
     private val renderContext: RenderContext,
-    private val coroutineScope: AppcuesCoroutineScope,
+    private val coroutineScope: CoroutineScope,
     private val experienceRenderer: ExperienceRenderer,
     private val actionProcessor: ActionProcessor,
     private val onDismiss: () -> Unit,

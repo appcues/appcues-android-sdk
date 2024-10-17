@@ -27,6 +27,7 @@ import io.mockk.Called
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -130,7 +131,7 @@ internal class ActionProcessorTest {
                     scoped { mockk<Logcues>(relaxed = true) }
                     scoped { mockk<Appcues>(relaxed = true) }
                     scoped { AppcuesConfig("00000", "123") }
-                    scoped { AppcuesCoroutineScope(get()) }
+                    scoped<CoroutineScope> { AppcuesCoroutineScope(get()) }
                     scoped { mockk<AnalyticsTracker>(relaxed = true) }
                     scoped { ActionProcessor(get()) }
                     scoped { params ->

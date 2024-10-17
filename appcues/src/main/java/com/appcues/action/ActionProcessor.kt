@@ -1,7 +1,6 @@
 package com.appcues.action
 
 import com.appcues.Appcues
-import com.appcues.AppcuesCoroutineScope
 import com.appcues.action.appcues.StepInteractionAction
 import com.appcues.action.appcues.StepInteractionAction.StepInteractionData
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType
@@ -10,6 +9,7 @@ import com.appcues.di.component.AppcuesComponent
 import com.appcues.di.component.get
 import com.appcues.di.component.inject
 import com.appcues.di.scope.AppcuesScope
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 
@@ -19,7 +19,7 @@ internal class ActionProcessor(override val scope: AppcuesScope) : AppcuesCompon
 
     // lazy initialization injection to avoid circular dependency
     private val appcues: Appcues by inject()
-    private val appcuesCoroutineScope: AppcuesCoroutineScope by inject()
+    private val appcuesCoroutineScope: CoroutineScope by inject()
 
     private val actionQueue = Channel<ExperienceAction>(Channel.UNLIMITED)
 

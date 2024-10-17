@@ -5,7 +5,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
-import com.appcues.AppcuesCoroutineScope
 import com.appcues.AppcuesFirebaseMessagingService.AppcuesMessagingData
 import com.appcues.R
 import com.appcues.SessionMonitor
@@ -19,6 +18,7 @@ import com.appcues.di.scope.AppcuesScope
 import com.appcues.di.scope.inject
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.util.UUID
 
@@ -56,7 +56,7 @@ internal class PushDeeplinkHandler(
 
     private val sessionMonitor by inject<SessionMonitor>()
     private val pushOpenedProcessor by inject<PushOpenedProcessor>()
-    private val coroutineScope by scope.inject<AppcuesCoroutineScope>()
+    private val coroutineScope by scope.inject<CoroutineScope>()
     private val storage by inject<Storage>()
     private val pushRepository by scope.inject<PushRepository>()
 

@@ -5,6 +5,7 @@ import com.appcues.data.remote.appcues.response.ErrorResponse
 import com.appcues.data.remote.appcues.response.PushErrorResponse
 import com.appcues.util.ResultOf
 import com.squareup.moshi.JsonDataException
+import okio.IOException
 import retrofit2.HttpException
 
 internal object NetworkRequest {
@@ -22,6 +23,8 @@ internal object NetworkRequest {
             exception.response()?.errorBody()?.source()?.let {
                 MoshiConfiguration.moshi.adapter(ErrorResponse::class.java).fromJson(it)
             }
+        } catch (exception: IOException) {
+            null
         } catch (exception: JsonDataException) {
             null
         }
@@ -40,6 +43,8 @@ internal object NetworkRequest {
             exception.response()?.errorBody()?.source()?.let {
                 MoshiConfiguration.moshi.adapter(PushErrorResponse::class.java).fromJson(it)
             }
+        } catch (exception: IOException) {
+            null
         } catch (exception: JsonDataException) {
             null
         }

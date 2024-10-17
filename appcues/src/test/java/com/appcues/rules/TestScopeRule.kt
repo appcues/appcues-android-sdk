@@ -26,6 +26,7 @@ import com.appcues.ui.ExperienceRenderer
 import com.appcues.util.ContextWrapper
 import com.appcues.util.LinkOpener
 import io.mockk.mockk
+import kotlinx.coroutines.CoroutineScope
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 
@@ -40,7 +41,7 @@ internal class TestScopeRule : TestWatcher() {
                     override fun AppcuesScopeDSL.install() {
                         scoped { mockk<LogcatDestination>(relaxed = true) }
                         scoped { AppcuesConfig("00000", "123") }
-                        scoped { AppcuesCoroutineScope(get()) }
+                        scoped<CoroutineScope> { AppcuesCoroutineScope(get()) }
                         scoped { mockk<AnalyticsTracker>(relaxed = true) }
                         scoped { mockk<SessionMonitor>(relaxed = true) }
                         scoped { mockk<Logcues>(relaxed = true) }

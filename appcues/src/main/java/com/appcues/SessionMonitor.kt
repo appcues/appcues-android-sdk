@@ -10,6 +10,7 @@ import com.appcues.di.component.AppcuesComponent
 import com.appcues.di.component.inject
 import com.appcues.di.scope.AppcuesScope
 import com.appcues.util.ContextWrapper
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.util.Date
 import java.util.UUID
@@ -23,7 +24,7 @@ internal class SessionMonitor(
     private val analyticsTracker by inject<AnalyticsTracker>()
     private val storage by inject<Storage>()
     private val config by inject<AppcuesConfig>()
-    private val appcuesCoroutineScope by inject<AppcuesCoroutineScope>()
+    private val appcuesCoroutineScope by inject<CoroutineScope>()
     private val contextWrapper by inject<ContextWrapper>()
 
     private var _sessionId: UUID? = null
