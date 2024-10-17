@@ -25,6 +25,7 @@ import com.appcues.trait.ExperienceTraitLevel
 import com.appcues.trait.TraitRegistry
 import com.appcues.ui.ExperienceRenderer
 import com.google.firebase.messaging.FirebaseMessaging
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 /**
@@ -110,7 +111,7 @@ public class Appcues internal constructor(internal val scope: AppcuesScope) {
     private val activityScreenTracking by scope.inject<ActivityScreenTracking>()
     private val deepLinkHandler by scope.inject<DeepLinkHandler>()
     private val debuggerManager by scope.inject<AppcuesDebuggerManager>()
-    private val appcuesCoroutineScope by scope.inject<AppcuesCoroutineScope>()
+    private val appcuesCoroutineScope by scope.inject<CoroutineScope>()
     private val analyticsPublisher by scope.inject<AnalyticsPublisher>()
     private val pushOpenedProcessor by scope.inject<PushOpenedProcessor>()
 

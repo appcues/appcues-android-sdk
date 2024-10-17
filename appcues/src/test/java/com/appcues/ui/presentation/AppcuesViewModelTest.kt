@@ -33,6 +33,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import io.mockk.verifySequence
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -56,7 +57,7 @@ internal class AppcuesViewModelTest {
 
     private val renderContext: RenderContext = RenderContext.Modal
 
-    private val coroutineScope: AppcuesCoroutineScope = AppcuesCoroutineScope(Logcues())
+    private val coroutineScope: CoroutineScope = AppcuesCoroutineScope(Logcues())
 
     private val experienceStates = MutableSharedFlow<State>(1)
     private val experienceRenderer: ExperienceRenderer = mockk(relaxed = true) {

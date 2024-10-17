@@ -1,11 +1,11 @@
 package com.appcues.analytics
 
 import androidx.annotation.VisibleForTesting
-import com.appcues.AppcuesCoroutineScope
 import com.appcues.data.AppcuesRepository
 import com.appcues.data.remote.appcues.request.ActivityRequest
 import com.appcues.data.remote.appcues.request.EventRequest
 import com.appcues.ui.ExperienceRenderer
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.util.Date
 import java.util.Timer
@@ -13,7 +13,7 @@ import java.util.TimerTask
 import kotlin.concurrent.schedule
 
 internal class AnalyticsQueueProcessor(
-    private val appcuesCoroutineScope: AppcuesCoroutineScope,
+    private val appcuesCoroutineScope: CoroutineScope,
     private val repository: AppcuesRepository,
     private val experienceRenderer: ExperienceRenderer,
     // this is the background analytics processing queue - 10 sec batch

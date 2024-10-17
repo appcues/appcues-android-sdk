@@ -19,6 +19,7 @@ import com.appcues.ui.ExperienceRenderer.PreviewResponse.PreviewDeferred
 import com.appcues.ui.ExperienceRenderer.PreviewResponse.StateMachineError
 import com.appcues.ui.ExperienceRenderer.PreviewResponse.Success
 import com.appcues.util.ContextWrapper
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 internal class DeepLinkHandler(scope: AppcuesScope) {
@@ -35,7 +36,7 @@ internal class DeepLinkHandler(scope: AppcuesScope) {
 
     private val config by scope.inject<AppcuesConfig>()
     private val experienceRenderer by scope.inject<ExperienceRenderer>()
-    private val appcuesCoroutineScope by scope.inject<AppcuesCoroutineScope>()
+    private val appcuesCoroutineScope by scope.inject<CoroutineScope>()
     private val debuggerManager by scope.inject<AppcuesDebuggerManager>()
     private val pushDeeplinkHandler by scope.inject<PushDeeplinkHandler>()
     private val contextWrapper by scope.inject<ContextWrapper>()

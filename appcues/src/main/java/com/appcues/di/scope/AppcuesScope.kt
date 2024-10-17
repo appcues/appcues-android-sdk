@@ -12,8 +12,8 @@ internal data class AppcuesScope(
 
     private val definitions = hashMapOf<KClass<*>, Definition<*>>()
 
-    fun <T : Any> define(clazz: KClass<T>, definition: Definition<T>) {
-        if (definitions.contains(clazz)) throw DefinitionException("definition already registered for class $clazz")
+    fun <T : Any> define(clazz: KClass<T>, definition: Definition<T>, override: Boolean = false) {
+        if (!override && definitions.contains(clazz)) throw DefinitionException("definition already registered for class $clazz")
 
         definitions[clazz] = definition
     }

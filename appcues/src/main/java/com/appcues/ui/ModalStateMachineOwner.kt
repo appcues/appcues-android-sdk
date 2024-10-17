@@ -6,7 +6,6 @@ import android.view.ViewTreeObserver
 import android.view.ViewTreeObserver.OnDrawListener
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.view.ViewTreeObserver.OnScrollChangedListener
-import com.appcues.AppcuesCoroutineScope
 import com.appcues.data.model.RenderContext
 import com.appcues.data.model.RenderContext.Modal
 import com.appcues.monitor.AppcuesActivityMonitor
@@ -17,6 +16,7 @@ import com.appcues.statemachine.StateMachine
 import com.appcues.statemachine.states.IdlingState
 import com.appcues.statemachine.states.RenderingStepState
 import com.appcues.ui.utils.getParentView
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -24,7 +24,7 @@ import kotlinx.coroutines.launch
 
 internal class ModalStateMachineOwner(
     override val stateMachine: StateMachine,
-    private val coroutineScope: AppcuesCoroutineScope,
+    private val coroutineScope: CoroutineScope,
 ) : StateMachineOwning {
 
     companion object {

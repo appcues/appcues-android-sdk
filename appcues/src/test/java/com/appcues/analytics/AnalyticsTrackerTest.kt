@@ -34,7 +34,6 @@ internal class AnalyticsTrackerTest {
     @Before
     fun setup() {
         analyticsTracker = AnalyticsTracker(
-            appcuesCoroutineScope = coroutineScope,
             activityBuilder = activityBuilder,
             sessionMonitor = sessionMonitor,
             analyticsQueueProcessor = analyticsQueueProcessor,
