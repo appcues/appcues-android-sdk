@@ -1,6 +1,5 @@
 package com.appcues
 
-import coil.ImageLoader
 import com.appcues.LoggingLevel.NONE
 
 /**
@@ -101,7 +100,4 @@ public data class AppcuesConfig internal constructor(
      * a different package than your main app (multi-module apps)
      */
     var packageNames: List<String> = arrayListOf()
-
-    // internally used for ui test on debug variant
-    internal var imageLoader: ImageLoader? = null
 }

@@ -36,7 +36,6 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import com.appcues.AppcuesCoroutineScope
 import com.appcues.R
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.RenderContext
@@ -55,6 +54,7 @@ import com.appcues.ui.extensions.getMargins
 import com.appcues.ui.extensions.xShapePath
 import com.appcues.ui.utils.margin
 import com.appcues.util.ne
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlin.math.min
 
@@ -62,7 +62,7 @@ internal class SkippableTrait(
     override val config: AppcuesConfigMap,
     private val renderContext: RenderContext,
     private val experienceRenderer: ExperienceRenderer,
-    private val appcuesCoroutineScope: AppcuesCoroutineScope,
+    private val appcuesCoroutineScope: CoroutineScope,
 ) : ContainerDecoratingTrait, BackdropDecoratingTrait {
 
     companion object {

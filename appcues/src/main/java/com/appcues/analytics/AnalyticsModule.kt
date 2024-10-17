@@ -34,12 +34,7 @@ internal object AnalyticsModule : AppcuesModule {
             )
         }
         scoped {
-            AnalyticsTracker(
-                appcuesCoroutineScope = get(),
-                activityBuilder = get(),
-                sessionMonitor = get(),
-                analyticsQueueProcessor = get(),
-            )
+            AnalyticsTracker(activityBuilder = get(), sessionMonitor = get(), analyticsQueueProcessor = get())
         }
     }
 }

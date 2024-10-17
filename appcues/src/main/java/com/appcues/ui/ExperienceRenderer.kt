@@ -35,7 +35,9 @@ import com.appcues.ui.ExperienceRenderer.RenderingResult.StateMachineError
 import com.appcues.ui.ExperienceRenderer.RenderingResult.WontDisplay
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.withContext
 
 @Suppress("TooManyFunctions")
 internal class ExperienceRenderer(override val scope: AppcuesScope) : AppcuesComponent {
@@ -131,7 +133,7 @@ internal class ExperienceRenderer(override val scope: AppcuesScope) : AppcuesCom
         return newExperience.priority == NORMAL && state !is IdlingState
     }
 
-    suspend fun show(qualificationResult: QualificationResult) {
+    suspend fun show(qualificationResult: QualificationResult) = withContext(Dispatchers.Main) {
         if (qualificationResult.trigger.reason == "screen_view") {
             // clear list in case this was a screen_view qualification
             potentiallyRenderableExperiences.clear()

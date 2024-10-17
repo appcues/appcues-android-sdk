@@ -3,7 +3,6 @@ package com.appcues.debugger
 import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.appcues.AppcuesCoroutineScope
 import com.appcues.data.model.RenderContext
 import com.appcues.debugger.DebugMode.Debugger
 import com.appcues.debugger.DebugMode.ScreenCapture
@@ -32,6 +31,7 @@ import com.appcues.logging.LogMessage
 import com.appcues.ui.ExperienceRenderer
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -49,7 +49,7 @@ internal class DebuggerViewModel(override val scope: AppcuesScope, debugMode: De
 
     private val getCaptureUseCase by inject<GetCaptureUseCase>()
 
-    private val appcuesCoroutineScope by inject<AppcuesCoroutineScope>()
+    private val appcuesCoroutineScope by inject<CoroutineScope>()
 
     private val experienceRenderer by inject<ExperienceRenderer>()
 

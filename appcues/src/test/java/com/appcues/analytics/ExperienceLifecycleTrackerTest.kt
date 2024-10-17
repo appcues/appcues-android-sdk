@@ -40,9 +40,9 @@ import com.google.common.truth.Truth.assertThat
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -262,7 +262,7 @@ internal class ExperienceLifecycleTrackerTest {
     private suspend fun initScope(state: State): AppcuesScope {
         val scope = createScope(state)
         val machine: StateMachine = scope.get()
-        val coroutineScope: AppcuesCoroutineScope = scope.get()
+        val coroutineScope: CoroutineScope = scope.get()
 
         coroutineScope.launch {
             // this collect on the stateFlow simulates the function of the UI
@@ -278,9 +278,7 @@ internal class ExperienceLifecycleTrackerTest {
             }
         }
 
-        coroutineScope.launch {
-            scope.get<ExperienceLifecycleTracker>().start(machine, {}, UnconfinedTestDispatcher())
-        }
+        scope.get<ExperienceLifecycleTracker>().start(machine) {}
 
         return scope
     }
@@ -290,7 +288,7 @@ internal class ExperienceLifecycleTrackerTest {
             modules = arrayListOf(object : AppcuesModule {
                 override fun AppcuesScopeDSL.install() {
                     scoped { AppcuesConfig("00000", "123") }
-                    scoped { AppcuesCoroutineScope(get()) }
+                    scoped<CoroutineScope> { AppcuesCoroutineScope(get()) }
                     scoped { mockk<AnalyticsTracker>(relaxed = true) }
                     scoped { mockk<SessionMonitor>(relaxed = true) }
                     scoped { mockk<Logcues>(relaxed = true) }

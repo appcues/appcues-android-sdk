@@ -1,7 +1,6 @@
 package com.appcues.analytics
 
 import com.appcues.AppcuesConfig
-import com.appcues.AppcuesCoroutineScope
 import com.appcues.Storage
 import com.appcues.analytics.ExperienceLifecycleEvent.ExperienceCompleted
 import com.appcues.analytics.ExperienceLifecycleEvent.ExperienceDismissed
@@ -24,8 +23,7 @@ import com.appcues.statemachine.states.BeginningStepState
 import com.appcues.statemachine.states.EndingExperienceState
 import com.appcues.statemachine.states.EndingStepState
 import com.appcues.statemachine.states.RenderingStepState
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.util.Date
@@ -39,18 +37,18 @@ internal class ExperienceLifecycleTracker(
     // AnalyticsTracker -> this <- Analytics Tracker
     private val analyticsTracker: AnalyticsTracker by inject()
     private val storage: Storage by inject()
-    private val appcuesCoroutineScope: AppcuesCoroutineScope by inject()
+    private val appcuesCoroutineScope: CoroutineScope by inject()
     private val config: AppcuesConfig by inject()
 
     private var stateJob: Job? = null
     private var errorJob: Job? = null
 
-    fun start(stateMachine: StateMachine, onEndedExperience: (Experience) -> Unit, dispatcher: CoroutineDispatcher = Dispatchers.IO) {
+    fun start(stateMachine: StateMachine, onEndedExperience: (Experience) -> Unit) {
         // ensure any existing observers are stopped before starting new ones
         stop()
 
-        stateJob = appcuesCoroutineScope.launch(dispatcher) { stateMachine.observeState(onEndedExperience) }
-        errorJob = appcuesCoroutineScope.launch(dispatcher) { stateMachine.observeErrors() }
+        stateJob = appcuesCoroutineScope.launch { stateMachine.observeState(onEndedExperience) }
+        errorJob = appcuesCoroutineScope.launch { stateMachine.observeErrors() }
     }
 
     fun stop() {

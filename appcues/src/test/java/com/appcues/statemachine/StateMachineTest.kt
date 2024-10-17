@@ -1,6 +1,5 @@
 package com.appcues.statemachine
 
-import com.appcues.AppcuesCoroutineScope
 import com.appcues.AppcuesScopeTest
 import com.appcues.action.ActionProcessor
 import com.appcues.action.ExperienceAction
@@ -47,6 +46,7 @@ import io.mockk.coVerifyOrder
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
@@ -787,7 +787,7 @@ internal class StateMachineTest : AppcuesScopeTest {
     ): StateMachine {
         val stateFlowCompletion: CompletableDeferred<Boolean> = CompletableDeferred()
         val errorFlowCompletion: CompletableDeferred<Boolean> = CompletableDeferred()
-        val scope: AppcuesCoroutineScope = get()
+        val scope: CoroutineScope = get()
         val machine = StateMachine(get(), get(), state)
         // this collect on the stateFlow simulates the function of the UI
         // that is required to progress the state machine forward on UI present/dismiss

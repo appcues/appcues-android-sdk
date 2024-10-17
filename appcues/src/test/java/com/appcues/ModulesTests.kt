@@ -56,6 +56,7 @@ import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
+import kotlinx.coroutines.CoroutineScope
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -71,7 +72,6 @@ internal class ModulesTests {
         every { applicationContext } returns mockk<Application>(relaxed = true)
     }
 
-    private val customImageLoader = mockk<ImageLoader>()
     private val imageLoader = mockk<ImageLoader>()
     private val imageLoaderWrapper = mockk<ImageLoaderWrapper> {
         every { build() } returns imageLoader
@@ -112,7 +112,7 @@ internal class ModulesTests {
         get<TraitRegistry>()
         get<ActionRegistry>()
         get<ActionProcessor>()
-        get<AppcuesCoroutineScope>()
+        get<CoroutineScope>()
         get<Logcues>()
         get<Storage>()
         get<DeepLinkHandler>()
@@ -125,17 +125,6 @@ internal class ModulesTests {
         get<AnalyticsPublisher>()
         get<StateMachine>(DefinitionParams(listOf(onExperienceEnded)))
         assertThat(get<ImageLoader>()).isEqualTo(imageLoader)
-    }
-
-    @Test
-    fun `check MainModule gets custom ImageLoader`() {
-        val config = AppcuesConfig("account", "app").apply {
-            imageLoader = customImageLoader
-        }
-
-        withScope(config) {
-            assertThat(get<ImageLoader>()).isEqualTo(customImageLoader)
-        }
     }
 
     @Test

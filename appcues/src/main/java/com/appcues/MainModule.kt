@@ -1,5 +1,6 @@
 package com.appcues
 
+import coil.ImageLoader
 import com.appcues.action.ActionProcessor
 import com.appcues.action.ActionRegistry
 import com.appcues.data.AppcuesRepository
@@ -18,6 +19,7 @@ import com.appcues.ui.StateMachineDirectory
 import com.appcues.ui.utils.ImageLoaderWrapper
 import com.appcues.util.AppcuesViewTreeOwner
 import com.appcues.util.LinkOpener
+import kotlinx.coroutines.CoroutineScope
 
 internal object MainModule : AppcuesModule {
 
@@ -27,7 +29,7 @@ internal object MainModule : AppcuesModule {
         scoped { TraitRegistry(get(), get()) }
         scoped { ActionRegistry(get()) }
         scoped { ActionProcessor(get()) }
-        scoped { AppcuesCoroutineScope(logcues = get()) }
+        scoped<CoroutineScope> { AppcuesCoroutineScope(logcues = get()) }
         scoped { Logcues() }
         scoped { LogcatDestination(get(), get<AppcuesConfig>().loggingLevel) }
         scoped { Storage(context = get(), config = get()) }
@@ -53,6 +55,6 @@ internal object MainModule : AppcuesModule {
 
         factory { StateMachine(actionProcessor = get(), lifecycleTracker = get(), onEndedExperience = it.next()) }
 
-        scoped { get<AppcuesConfig>().imageLoader ?: get<ImageLoaderWrapper>().build() }
+        scoped<ImageLoader> { get<ImageLoaderWrapper>().build() }
     }
 }

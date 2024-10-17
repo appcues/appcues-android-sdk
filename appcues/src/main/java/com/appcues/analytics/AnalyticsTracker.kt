@@ -5,22 +5,22 @@ import com.appcues.AnalyticType.EVENT
 import com.appcues.AnalyticType.GROUP
 import com.appcues.AnalyticType.IDENTIFY
 import com.appcues.AnalyticType.SCREEN
-import com.appcues.AppcuesCoroutineScope
 import com.appcues.SessionMonitor
 import com.appcues.data.remote.appcues.request.ActivityRequest
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.launch
 import java.util.UUID
 
 internal class AnalyticsTracker(
-    private val appcuesCoroutineScope: AppcuesCoroutineScope,
     private val activityBuilder: ActivityRequestBuilder,
     private val sessionMonitor: SessionMonitor,
     private val analyticsQueueProcessor: AnalyticsQueueProcessor,
 ) {
 
-    private val _analyticsFlow = MutableSharedFlow<TrackingData>(1)
+    private val _analyticsFlow = MutableSharedFlow<TrackingData>(
+        replay = 1,
+        extraBufferCapacity = Int.MAX_VALUE
+    )
     val analyticsFlow: SharedFlow<TrackingData>
         get() = _analyticsFlow
 
@@ -96,8 +96,6 @@ internal class AnalyticsTracker(
     }
 
     private fun updateAnalyticsFlow(type: AnalyticType, isInternal: Boolean, activity: ActivityRequest) {
-        appcuesCoroutineScope.launch {
-            _analyticsFlow.emit(TrackingData(type, isInternal, activity))
-        }
+        _analyticsFlow.tryEmit(TrackingData(type, isInternal, activity))
     }
 }
