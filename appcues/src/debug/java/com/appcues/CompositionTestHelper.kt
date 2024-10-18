@@ -105,7 +105,7 @@ public fun ComposeContainer(context: Context, stepContentJson: List<String>?, tr
     val experience = experienceMapper.map(updatedExperienceResponse, ExperienceTrigger.Preview)
     val container = experience.stepContainers[0]
     val metadataSettingTraits = container.steps[0].metadataSettingTraits
-    val metadata = hashMapOf<String, Any?>().apply { metadataSettingTraits.forEach { putAll(it.produceMetadata()) } }
+    val metadata = hashMapOf<String, Any?>()//.apply { metadataSettingTraits.forEach { putAll(it.produceMetadata()) } }
 
     AppcuesExperienceTheme {
         CompositionLocalProvider(
@@ -168,7 +168,7 @@ public fun ComposeContainer(
     val experience = experienceMapper.map(updatedExperienceResponse, ExperienceTrigger.Preview)
     val container = experience.stepContainers[groupIndex]
     val metadataSettingTraits = container.steps[stepIndex].metadataSettingTraits
-    val metadata = hashMapOf<String, Any?>().apply { metadataSettingTraits.forEach { putAll(it.produceMetadata()) } }
+    val metadata = hashMapOf<String, Any?>()//.apply { metadataSettingTraits.forEach { putAll(it.produceMetadata()) } }
 
     AppcuesExperienceTheme {
         CompositionLocalProvider(

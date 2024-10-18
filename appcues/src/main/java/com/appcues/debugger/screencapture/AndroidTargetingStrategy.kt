@@ -6,6 +6,7 @@ import android.graphics.Rect
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.WebView
 import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.semantics.SemanticsOwner
 import androidx.compose.ui.semantics.SemanticsProperties
@@ -16,6 +17,7 @@ import androidx.core.view.children
 import com.appcues.ElementSelector
 import com.appcues.ElementTargetingStrategy
 import com.appcues.ViewElement
+import com.appcues.data.MoshiConfiguration
 import com.appcues.debugger.screencapture.AndroidViewSelector.Companion.SELECTOR_APPCUES_ID
 import com.appcues.debugger.screencapture.AndroidViewSelector.Companion.SELECTOR_CONTENT_DESCRIPTION
 import com.appcues.debugger.screencapture.AndroidViewSelector.Companion.SELECTOR_RESOURCE_NAME
@@ -24,6 +26,12 @@ import com.appcues.isAppcuesView
 import com.appcues.monitor.AppcuesActivityMonitor
 import com.appcues.ui.utils.getParentView
 import com.appcues.util.withDensity
+import com.squareup.moshi.Types
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import java.lang.reflect.Type
 
 internal class AndroidViewSelector(
     private val properties: Map<String, String?>,
@@ -87,7 +95,7 @@ internal class AndroidViewSelector(
 
 internal class AndroidTargetingStrategy : ElementTargetingStrategy {
 
-    override fun captureLayout(): ViewElement? {
+    override suspend fun captureLayout(): ViewElement? {
         return AppcuesActivityMonitor.activity?.getParentView()?.let {
             val screenBounds = Rect()
             it.getGlobalVisibleRect(screenBounds)
@@ -102,7 +110,7 @@ internal class AndroidTargetingStrategy : ElementTargetingStrategy {
 
 private const val ANDROID_COMPOSE_VIEW_CLASS_NAME = "androidx.compose.ui.platform.AndroidComposeView"
 
-private fun View.asCaptureView(screenBounds: Rect): ViewElement? {
+private suspend fun View.asCaptureView(screenBounds: Rect): ViewElement? {
     // the coordinates of the non-clipped area of this view in the coordinate space of the view's root view
     val globalVisibleRect = Rect()
 
@@ -121,20 +129,28 @@ private fun View.asCaptureView(screenBounds: Rect): ViewElement? {
 
     val children: MutableList<ViewElement> = mutableListOf()
 
+    val rectDp = withDensity { globalVisibleRect.toDp() }
+
     // gather up child views for any ViewGroup
     // note: AndroidComposeView (handled below) is also a ViewGroup, and can have
     // additional View items within, when using Compose <--> View interop. Those
     // will also be collected here
     if (this is ViewGroup) {
-        val viewChildren = this.children.mapNotNull {
-            if (!it.isShown) {
-                // discard hidden views and subviews within
-                null
-            } else {
-                it.asCaptureView(screenBounds)
-            }
-        }.toList()
-        children.addAll(viewChildren)
+        coroutineScope {
+            val deferred = this@asCaptureView.children.map {
+                async {
+                    if (!it.isShown) {
+                        // discard hidden views and subviews within
+                        null
+                    } else {
+                        it.asCaptureView(screenBounds)
+                    }
+                }
+            }.toList()
+
+            val viewChildren = deferred.awaitAll().filterNotNull()
+            children.addAll(viewChildren)
+        }
     }
 
     // For an AndroidComposeView, we need to gather up the layout info for the Composables
@@ -160,9 +176,44 @@ private fun View.asCaptureView(screenBounds: Rect): ViewElement? {
         }
     }
 
-    return selector(globalVisibleRect).let {
-        val rectDp = withDensity { globalVisibleRect.toDp() }
+    if (this is WebView) {
+        val js = """
+        [...document.querySelectorAll('button')].map (el => {
+            const { x, y, width, height } = el.getBoundingClientRect();
+            return {
+                x,
+                y,
+                width,
+                height,
+                selector: `html-${'$'}{el.id}`,
+            }
+        });
+        """
 
+        val result = evaluateJavascript(js)
+        val viewChildren = result.map { el ->
+            val x = (el["x"] as Double).toInt()
+            val y = (el["y"] as Double).toInt()
+            val width = (el["width"] as Double).toInt()
+            val height = (el["height"] as Double).toInt()
+            ViewElement(
+                x = rectDp.left + x,
+                y = rectDp.top + y,
+                width = width,
+                height = height,
+                displayName = null,
+                selector = AndroidViewSelector(
+                    properties = mapOf(SELECTOR_APPCUES_ID to (el["selector"] as String)),
+                ),
+                type = "htmlNode",
+                children = null,
+            )
+        }
+
+        children.addAll(viewChildren)
+    }
+
+    return selector(globalVisibleRect).let {
         ViewElement(
             x = rectDp.left,
             y = rectDp.top,
@@ -174,6 +225,17 @@ private fun View.asCaptureView(screenBounds: Rect): ViewElement? {
             children = children.ifEmpty { null },
         )
     }
+}
+
+private suspend fun WebView.evaluateJavascript(script: String) : List<Map<String, Any>> {
+    val completion = CompletableDeferred<List<Map<String, Any>>>()
+    evaluateJavascript(script) { result ->
+        val listType: Type = Types.newParameterizedType(List::class.java, Types.newParameterizedType(Map::class.java, String::class.java, Any::class.java))
+        val adapter = MoshiConfiguration.moshi.adapter<List<Map<String, Any>>>(listType)
+        val parsed: List<Map<String, Any>> = adapter.fromJson(result)!!
+        completion.complete(parsed)
+    }
+    return completion.await()
 }
 
 private fun View.isVisibleForTargeting(globalVisibleRect: Rect): Boolean {
@@ -201,7 +263,7 @@ private fun View.selector(globalVisibleRect: Rect): AndroidViewSelector? {
 @Suppress("SwallowedException")
 private fun View.extractResourceName(): String? {
     return try {
-        if (this.isClickable) resources.getResourceEntryName(id) else null
+        if (this.isClickable && this !is WebView) resources.getResourceEntryName(id) else null
     } catch (_: NotFoundException) {
         null
     }
