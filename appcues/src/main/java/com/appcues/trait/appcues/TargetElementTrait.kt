@@ -34,7 +34,7 @@ internal class TargetElementTrait(
     private val retryMilliseconds: Int?
         get() = if (retryIntervals.isNotEmpty()) retryIntervals.removeFirst() else null
 
-    override fun produceMetadata(): Map<String, Any?> {
+    override suspend fun produceMetadata(): Map<String, Any?> {
         val viewElement = viewMatchingSelector()
 
         val view = AppcuesActivityMonitor.activity?.getParentView()
@@ -62,7 +62,7 @@ internal class TargetElementTrait(
         }
     }
 
-    private fun viewMatchingSelector(): ViewElement {
+    private suspend fun viewMatchingSelector(): ViewElement {
         val strategy = Appcues.elementTargeting
 
         // a null value here means that there were no valid selector properties for

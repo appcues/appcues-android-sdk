@@ -84,7 +84,7 @@ internal data class PresentationEffect(
      * creates a map that contains a combined result of all
      * metadata setting traits for this step
      */
-    private fun produceMetadata(): Map<String, Any?> {
+    private suspend fun produceMetadata(): Map<String, Any?> {
         return hashMapOf<String, Any?>().apply {
             experience.getMetadataSettingTraits(flatStepIndex).forEach {
                 putAll(it.produceMetadata())

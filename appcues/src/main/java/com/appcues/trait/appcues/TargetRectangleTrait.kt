@@ -15,7 +15,7 @@ internal class TargetRectangleTrait(
         const val TYPE = "@appcues/target-rectangle"
     }
 
-    override fun produceMetadata(): Map<String, Any?> {
+    override suspend fun produceMetadata(): Map<String, Any?> {
         val targetRectangle = TargetRectangleInfo(
             x = config.getConfigInt("x")?.toFloat() ?: 0f,
             y = config.getConfigInt("y")?.toFloat() ?: 0f,

@@ -72,7 +72,7 @@ internal class BackdropKeyholeTrait(
         }
     }
 
-    override fun produceMetadata(): Map<String, Any?> {
+    override suspend fun produceMetadata(): Map<String, Any?> {
         return hashMapOf(METADATA_KEYHOLE_SETTINGS to keyholeSettings)
     }
 

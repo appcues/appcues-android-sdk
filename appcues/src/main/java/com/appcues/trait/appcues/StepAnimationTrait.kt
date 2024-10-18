@@ -33,7 +33,7 @@ internal class StepAnimationTrait(
     private val duration = config.getConfigInt("duration") ?: DEFAULT_ANIMATION_DURATION
     private val easing = config.getConfig<String>("easing").toEasing()
 
-    override fun produceMetadata(): Map<String, Any?> {
+    override suspend fun produceMetadata(): Map<String, Any?> {
         return StepTransitionAnimationInfo(
             duration = duration,
             easing = easing,
