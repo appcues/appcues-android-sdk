@@ -59,11 +59,13 @@ public fun ComposeContent(json: String, imageLoader: ImageLoader) {
     }
 }
 
-// This helper supports testing any arbitrary combination of traits with optional given content.
-// It constructs a synthetic 1-step experience. The traits are applied at the experience level. The
-// optional content is injected into the single step, if present.
-@Composable
-public fun ComposeContainer(context: Context, stepContentJson: List<String>?, traitJson: List<String>, imageLoader: ImageLoader) {
+public suspend fun composeTraits(
+    context: Context,
+    stepContentJson: List<String>?,
+    traitJson: List<String>,
+    imageLoader: ImageLoader,
+    execute: (composable: @Composable () -> Unit) -> Unit,
+) {
     // set up a scope for testing - for experience/trait mapping, trait registry, etc
     val scope = Bootstrap.createScope(context, AppcuesConfig("", ""))
 
@@ -105,41 +107,43 @@ public fun ComposeContainer(context: Context, stepContentJson: List<String>?, tr
     val experience = experienceMapper.map(updatedExperienceResponse, ExperienceTrigger.Preview)
     val container = experience.stepContainers[0]
     val metadataSettingTraits = container.steps[0].metadataSettingTraits
-    val metadata = hashMapOf<String, Any?>()//.apply { metadataSettingTraits.forEach { putAll(it.produceMetadata()) } }
+    val metadata = hashMapOf<String, Any?>().apply { metadataSettingTraits.forEach { putAll(it.produceMetadata()) } }
 
-    AppcuesExperienceTheme {
-        CompositionLocalProvider(
-            LocalImageLoader provides imageLoader,
-            LocalLogcues provides Logcues(),
-            LocalExperienceStepFormStateDelegate provides ExperienceStepFormState(),
-            LocalAppcuesActionDelegate provides FakeAppcuesActionDelegate(),
-            LocalExperienceCompositionState provides ExperienceCompositionState(
-                // disables animations
-                isContentVisible = MutableTransitionState(true),
-                isBackdropVisible = MutableTransitionState(true)
-            ),
-            LocalAppcuesDismissalDelegate provides FakeAppcuesDismissalDelegate(),
-        ) {
-            // render the step container on the desired step
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
+    execute {
+        AppcuesExperienceTheme {
+            CompositionLocalProvider(
+                LocalImageLoader provides imageLoader,
+                LocalLogcues provides Logcues(),
+                LocalExperienceStepFormStateDelegate provides ExperienceStepFormState(),
+                LocalAppcuesActionDelegate provides FakeAppcuesActionDelegate(),
+                LocalExperienceCompositionState provides ExperienceCompositionState(
+                    // disables animations
+                    isContentVisible = MutableTransitionState(true),
+                    isBackdropVisible = MutableTransitionState(true)
+                ),
+                LocalAppcuesDismissalDelegate provides FakeAppcuesDismissalDelegate(),
             ) {
-                ComposeContainer(container, 0, metadata)
+                // render the step container on the desired step
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    ComposeContainer(container, 0, metadata)
+                }
             }
         }
     }
 }
 
 // This helper supports testing any experience JSON content, rendering the given group and step index.
-@Composable
-public fun ComposeContainer(
+public suspend fun composeExperience(
     context: Context,
     experienceJson: String,
     groupIndex: Int,
     stepIndex: Int,
     animated: Boolean,
     imageLoader: ImageLoader,
+    execute: (composable: @Composable () -> Unit) -> Unit,
 ) {
     // set up a Koin scope for testing - for experience/trait mapping, trait registry, etc
     val scope = Bootstrap.createScope(context, AppcuesConfig("", ""))
@@ -168,34 +172,36 @@ public fun ComposeContainer(
     val experience = experienceMapper.map(updatedExperienceResponse, ExperienceTrigger.Preview)
     val container = experience.stepContainers[groupIndex]
     val metadataSettingTraits = container.steps[stepIndex].metadataSettingTraits
-    val metadata = hashMapOf<String, Any?>()//.apply { metadataSettingTraits.forEach { putAll(it.produceMetadata()) } }
+    val metadata = hashMapOf<String, Any?>().apply { metadataSettingTraits.forEach { putAll(it.produceMetadata()) } }
 
-    AppcuesExperienceTheme {
-        CompositionLocalProvider(
-            LocalImageLoader provides imageLoader,
-            LocalLogcues provides Logcues(),
-            LocalExperienceStepFormStateDelegate provides ExperienceStepFormState(),
-            LocalAppcuesActionDelegate provides FakeAppcuesActionDelegate(),
-            LocalExperienceCompositionState provides ExperienceCompositionState(
-                // disables animations
-                isContentVisible = MutableTransitionState(!animated),
-                isBackdropVisible = MutableTransitionState(!animated)
-            ),
-            LocalAppcuesDismissalDelegate provides FakeAppcuesDismissalDelegate(),
-        ) {
-            // render the step container on the desired step
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
+    execute {
+        AppcuesExperienceTheme {
+            CompositionLocalProvider(
+                LocalImageLoader provides imageLoader,
+                LocalLogcues provides Logcues(),
+                LocalExperienceStepFormStateDelegate provides ExperienceStepFormState(),
+                LocalAppcuesActionDelegate provides FakeAppcuesActionDelegate(),
+                LocalExperienceCompositionState provides ExperienceCompositionState(
+                    // disables animations
+                    isContentVisible = MutableTransitionState(!animated),
+                    isBackdropVisible = MutableTransitionState(!animated)
+                ),
+                LocalAppcuesDismissalDelegate provides FakeAppcuesDismissalDelegate(),
             ) {
-                ComposeContainer(container, stepIndex, metadata)
-            }
+                // render the step container on the desired step
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    ComposeContainer(container, stepIndex, metadata)
+                }
 
-            if (animated) {
-                val compositionState = LocalExperienceCompositionState.current
-                LaunchedEffect(Unit) {
-                    compositionState.isContentVisible.targetState = true
-                    compositionState.isBackdropVisible.targetState = true
+                if (animated) {
+                    val compositionState = LocalExperienceCompositionState.current
+                    LaunchedEffect(Unit) {
+                        compositionState.isContentVisible.targetState = true
+                        compositionState.isBackdropVisible.targetState = true
+                    }
                 }
             }
         }
