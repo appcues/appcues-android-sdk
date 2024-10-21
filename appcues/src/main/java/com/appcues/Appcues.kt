@@ -142,9 +142,10 @@ public class Appcues internal constructor(internal val scope: AppcuesScope) {
             analyticsTracker.analyticsFlow.collect {
                 try {
                     analyticsPublisher.publish(analyticsListener, it)
-                } catch (_: Exception) {
+                } catch (ex: Exception) {
                     // ignore any exception that occurs in client app code that is observing analytics,
                     // so we always continue collecting on the analyticsFlow
+                    logcues.error(ex)
                 }
             }
         }
