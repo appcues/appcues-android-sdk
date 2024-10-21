@@ -140,6 +140,7 @@ public class Appcues internal constructor(internal val scope: AppcuesScope) {
 
         appcuesCoroutineScope.launch {
             analyticsTracker.analyticsFlow.collect {
+                @Suppress("TooGenericExceptionCaught")
                 try {
                     analyticsPublisher.publish(analyticsListener, it)
                 } catch (ex: Exception) {
