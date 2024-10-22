@@ -161,12 +161,15 @@ internal class AppcuesViewModel(
         }
     }
 
-    fun getRemoteController(): AppcuesExperienceActions {
+    fun getRemoteController(identifier: String, actions: List<ExperienceAction>): AppcuesExperienceActions {
         return AppcuesExperienceActions(
+            identifier = identifier,
             renderContext = binding.renderContext,
             coroutineScope = coroutineScope,
             analyticsTracker = analyticsTracker,
             experienceRenderer = experienceRenderer,
+            actionsProcessor = actionProcessor,
+            actions = actions,
         )
     }
 }
