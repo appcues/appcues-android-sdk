@@ -15,7 +15,6 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import com.appcues.AppcuesConfig
-import com.appcues.action.ActionProcessor
 import com.appcues.data.model.Experience
 import com.appcues.data.model.ExperienceTrigger.Preview
 import com.appcues.data.model.RenderContext
@@ -27,6 +26,7 @@ import com.appcues.monitor.AppcuesActivityMonitor
 import com.appcues.monitor.AppcuesActivityMonitor.ActivityMonitorListener
 import com.appcues.ui.ExperienceRenderer
 import com.appcues.ui.composables.AppcuesComposition
+import com.appcues.ui.presentation.AppcuesViewModel.PresentationBinding
 import com.appcues.ui.primitive.EmbedChromeClient
 import com.appcues.ui.utils.getParentView
 import com.appcues.util.AppcuesViewTreeOwner
@@ -41,7 +41,6 @@ internal abstract class ViewPresenter(
 
     private val experienceRenderer: ExperienceRenderer by inject()
     private val coroutineScope: CoroutineScope by inject()
-    private val actionProcessor: ActionProcessor by inject()
     private val appcuesViewTreeOwner: AppcuesViewTreeOwner by inject()
     private val appcuesConfig: AppcuesConfig by inject()
 
@@ -74,6 +73,14 @@ internal abstract class ViewPresenter(
         }
     }
 
+    private val binding = object : PresentationBinding {
+        override val renderContext = this@ViewPresenter.renderContext
+
+        override fun onDismiss() = remove()
+
+        override fun onTap(offset: Offset) = tapPassThrough(offset)
+    }
+
     fun present(): Boolean {
         val activity = AppcuesActivityMonitor.activity
 
@@ -101,12 +108,11 @@ internal abstract class ViewPresenter(
             parentView = WeakReference(this)
 
             viewModel = AppcuesViewModel(
-                renderContext = renderContext,
+                binding = binding,
                 coroutineScope = coroutineScope,
                 experienceRenderer = experienceRenderer,
-                actionProcessor = actionProcessor,
-                onDismiss = ::remove,
-                tapPassThroughHandler = ::tapPassThrough,
+                actionProcessor = get(),
+                analyticsTracker = get(),
             ).also {
                 composeView.setContent {
                     // [currentExperience?.instanceId]: when the instanceId changes it means it could be a "newer" version

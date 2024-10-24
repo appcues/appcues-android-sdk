@@ -4,8 +4,10 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.viewModelScope
 import com.appcues.AppcuesCoroutineScope
+import com.appcues.AppcuesExperienceActions
 import com.appcues.action.ActionProcessor
 import com.appcues.action.ExperienceAction
+import com.appcues.analytics.AnalyticsTracker
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType
 import com.appcues.data.model.Experience
 import com.appcues.data.model.RenderContext
@@ -19,6 +21,7 @@ import com.appcues.statemachine.states.BeginningStepState
 import com.appcues.statemachine.states.EndingStepState
 import com.appcues.statemachine.states.RenderingStepState
 import com.appcues.ui.ExperienceRenderer
+import com.appcues.ui.presentation.AppcuesViewModel.PresentationBinding
 import com.appcues.ui.presentation.AppcuesViewModel.UIState
 import com.appcues.ui.presentation.AppcuesViewModel.UIState.Dismissing
 import com.appcues.ui.presentation.AppcuesViewModel.UIState.Idle
@@ -58,6 +61,8 @@ internal class AppcuesViewModelTest {
 
     private val renderContext: RenderContext = RenderContext.Modal
 
+    private val analyticsTracker: AnalyticsTracker = mockk(relaxed = true)
+
     private val coroutineScope: CoroutineScope = AppcuesCoroutineScope(Logcues())
 
     private val experienceStates = MutableSharedFlow<State>(1)
@@ -77,17 +82,24 @@ internal class AppcuesViewModelTest {
 
     private lateinit var stateJob: Job
 
+    private val binding = object : PresentationBinding {
+        override val renderContext: RenderContext = this@AppcuesViewModelTest.renderContext
+
+        override fun onDismiss() = onDismiss.invoke()
+
+        override fun onTap(offset: Offset) = tapPassThroughHandler.invoke(offset)
+    }
+
     @Before
     fun setup() {
         Dispatchers.setMain(UnconfinedTestDispatcher())
 
         viewModel = AppcuesViewModel(
-            renderContext = renderContext,
+            binding = binding,
             coroutineScope = coroutineScope,
             experienceRenderer = experienceRenderer,
+            analyticsTracker = analyticsTracker,
             actionProcessor = actionProcessor,
-            onDismiss = onDismiss,
-            tapPassThroughHandler = tapPassThroughHandler
         ).apply {
             stateJob = viewModelScope.launch { uiState.collect { uiStates.add(it) } }
         }
@@ -116,7 +128,7 @@ internal class AppcuesViewModelTest {
             coEvery { getStateFlow(renderContext) } returns null
         }
         // WHEN
-        viewModel = AppcuesViewModel(renderContext, coroutineScope, experienceRenderer, actionProcessor, onDismiss, tapPassThroughHandler)
+        viewModel = AppcuesViewModel(binding, coroutineScope, experienceRenderer, analyticsTracker, actionProcessor)
         // WHEN
         verifySequence { onDismiss.invoke() }
     }
@@ -377,5 +389,25 @@ internal class AppcuesViewModelTest {
         coVerify {
             experienceRenderer.onViewConfigurationChanged(renderContext)
         }
+    }
+
+    @Test
+    fun `onTap SHOULD call onTap callback from presentation binding`() {
+        // Given
+        val offset = Offset(10f, 10f)
+        // When
+        viewModel.onTap(offset)
+        // Then
+        verify { binding.onTap(offset) }
+    }
+
+    @Test
+    fun `getExperienceActions SHOULD return AppcuesExperienceAction `() {
+        // Given
+        val actions = listOf<ExperienceAction>()
+        // When
+        val actionsController = viewModel.getExperienceActions("identifier", actions)
+        // Then
+        assertThat(actionsController).isInstanceOf(AppcuesExperienceActions::class.java)
     }
 }

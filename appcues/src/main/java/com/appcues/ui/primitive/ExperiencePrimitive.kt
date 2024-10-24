@@ -15,6 +15,7 @@ import coil.compose.AsyncImage
 import com.appcues.data.model.ExperiencePrimitive
 import com.appcues.data.model.ExperiencePrimitive.BoxPrimitive
 import com.appcues.data.model.ExperiencePrimitive.ButtonPrimitive
+import com.appcues.data.model.ExperiencePrimitive.CustomComponentPrimitive
 import com.appcues.data.model.ExperiencePrimitive.EmbedHtmlPrimitive
 import com.appcues.data.model.ExperiencePrimitive.HorizontalStackPrimitive
 import com.appcues.data.model.ExperiencePrimitive.ImagePrimitive
@@ -74,6 +75,7 @@ internal fun ExperiencePrimitive.Compose(matchParentBox: BoxScope? = null, modif
                 is TextInputPrimitive -> Compose(innerModifier)
                 is OptionSelectPrimitive -> Compose(innerModifier)
                 is SpacerPrimitive -> Compose(innerModifier)
+                is CustomComponentPrimitive -> Compose(innerModifier)
             }
         }
     }
@@ -95,6 +97,7 @@ private fun ExperiencePrimitive.getRole(): Role {
         is TextInputPrimitive -> Role.Button
         is OptionSelectPrimitive -> Role.Button
         is SpacerPrimitive -> Role.Image
+        is CustomComponentPrimitive -> Role.Button
     }
 }
 

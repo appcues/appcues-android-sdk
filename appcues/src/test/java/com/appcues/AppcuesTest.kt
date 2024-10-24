@@ -19,6 +19,7 @@ import com.appcues.rules.TestScopeRule
 import com.appcues.trait.ExperienceTrait
 import com.appcues.trait.ExperienceTraitLevel
 import com.appcues.trait.TraitRegistry
+import com.appcues.ui.AppcuesCustomComponentDirectory
 import com.appcues.ui.ExperienceRenderer
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coVerify
@@ -436,5 +437,15 @@ internal class AppcuesTest : AppcuesScopeTest {
 
         // THEN
         verify { tracker.track(name, null) }
+    }
+
+    @Test
+    fun `registerCustomComponent SHOULD add component to static dictionary`() {
+        // Given
+        val customComponent = mockk<AppcuesCustomComponentView>()
+        // When
+        Appcues.registerCustomComponent("1", customComponent)
+        // Then
+        assertThat(AppcuesCustomComponentDirectory.get("1")).isEqualTo(customComponent)
     }
 }

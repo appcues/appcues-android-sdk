@@ -32,6 +32,7 @@ import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.Interactio
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType.BUTTON_TAPPED
 import com.appcues.data.model.Action
 import com.appcues.data.model.ExperiencePrimitive
+import com.appcues.data.model.ExperiencePrimitive.CustomComponentPrimitive
 import com.appcues.data.model.ExperiencePrimitive.ImagePrimitive
 import com.appcues.data.model.styling.ComponentContentMode
 import com.appcues.data.model.styling.ComponentSize
@@ -58,12 +59,19 @@ internal fun Modifier.outerPrimitiveStyle(
             .margin(style.getMargins())
             .styleShadow(style, isDark)
             .styleSize(style, matchParentBox)
-            .actions(id, gestureProperties, component.textDescription)
+            // Exclude actions for CustomComponent since those if needed should be triggered manually
+            .conditional(component !is CustomComponentPrimitive) { actions(id, gestureProperties, component.textDescription) }
             .styleCorner(style)
             .styleBackground(style, isDark)
             .styleBorder(style, isDark)
     }
 )
+
+/**
+ * allows for easy chaining of modifiers when true/false conditions are involved
+ */
+internal fun Modifier.conditional(condition: Boolean, modifier: Modifier.() -> Modifier): Modifier =
+    if (condition) then(modifier(Modifier)) else this
 
 /**
  * Should be used by any children of ExperiencePrimitive Compose
@@ -166,12 +174,14 @@ private fun Modifier.styleDefaultWidth(contentMode: ComponentContentMode) = this
 )
 
 internal fun Modifier.styleCorner(style: ComponentStyle) = this.then(
-    style.getCornerRadius().let { cornerRadius ->
-        when {
-            cornerRadius != 0.dp -> Modifier.clip(RoundedCornerShape(cornerRadius))
-            else -> Modifier
+    style
+        .getCornerRadius()
+        .let { cornerRadius ->
+            when {
+                cornerRadius != 0.dp -> Modifier.clip(RoundedCornerShape(cornerRadius))
+                else -> Modifier
+            }
         }
-    }
 )
 
 internal fun Modifier.styleShadow(style: ComponentStyle?, isDark: Boolean): Modifier {

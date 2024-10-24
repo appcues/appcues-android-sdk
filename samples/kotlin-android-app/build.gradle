@@ -63,6 +63,9 @@ dependencies {
     implementation 'androidx.navigation:navigation-fragment-ktx:2.8.1'
     implementation 'androidx.navigation:navigation-ui-ktx:2.8.1'
     implementation 'com.google.firebase:firebase-messaging-ktx:24.0.1'
+
+    // Youtube player
+    implementation "com.pierfrancescosoffritti.androidyoutubeplayer:core:11.1.0"
 }
 
 tasks.register('versionTxt') {
