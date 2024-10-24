@@ -15,7 +15,9 @@ internal fun CustomComponentPrimitive.Compose(modifier: Modifier) {
 
     val viewModel = LocalViewModel.current
     val appcuesActions = LocalAppcuesActions.current
-    val controller = remember { viewModel.getRemoteController(identifier, appcuesActions[id]?.map { it.experienceAction } ?: listOf()) }
+    val actionsController = remember {
+        viewModel.getExperienceActions(identifier, appcuesActions[id]?.map { it.experienceAction } ?: listOf())
+    }
 
-    AndroidView(modifier = modifier, factory = { customComponent.getView(controller, config) })
+    AndroidView(modifier = modifier, factory = { customComponent.getView(actionsController, config) })
 }

@@ -4,6 +4,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.viewModelScope
 import com.appcues.AppcuesCoroutineScope
+import com.appcues.AppcuesExperienceActions
 import com.appcues.action.ActionProcessor
 import com.appcues.action.ExperienceAction
 import com.appcues.analytics.AnalyticsTracker
@@ -388,5 +389,25 @@ internal class AppcuesViewModelTest {
         coVerify {
             experienceRenderer.onViewConfigurationChanged(renderContext)
         }
+    }
+
+    @Test
+    fun `onTap SHOULD call onTap callback from presentation binding`() {
+        // Given
+        val offset = Offset(10f, 10f)
+        // When
+        viewModel.onTap(offset)
+        // Then
+        verify { binding.onTap(offset) }
+    }
+
+    @Test
+    fun `getExperienceActions SHOULD return AppcuesExperienceAction `() {
+        // Given
+        val actions = listOf<ExperienceAction>()
+        // When
+        val actionsController = viewModel.getExperienceActions("identifier", actions)
+        // Then
+        assertThat(actionsController).isInstanceOf(AppcuesExperienceActions::class.java)
     }
 }
