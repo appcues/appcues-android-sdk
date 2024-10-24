@@ -161,7 +161,7 @@ internal class AppcuesViewModel(
         }
     }
 
-    fun getRemoteController(identifier: String, actions: List<ExperienceAction>): AppcuesExperienceActions {
+    fun getExperienceActions(identifier: String, actions: List<ExperienceAction>): AppcuesExperienceActions {
         return AppcuesExperienceActions(
             identifier = identifier,
             renderContext = binding.renderContext,
