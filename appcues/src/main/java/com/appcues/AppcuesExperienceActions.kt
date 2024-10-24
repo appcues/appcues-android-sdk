@@ -11,7 +11,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 /**
- * TODO document this
+ * AppcuesExperienceActions is the controller that allows custom component access useful appcues and experience calls.
  */
 // Suppressing until figure out a way to make this class more concise
 @Suppress("LongParameterList")
@@ -26,15 +26,14 @@ public class AppcuesExperienceActions internal constructor(
 ) {
 
     /**
-     * TODO document this
-     * TODO implement it
+     * Manually trigger all actions defined in studio for this custom block
      */
     public fun triggerBlockActions() {
         actionsProcessor.process(renderContext, actions, BUTTON_TAPPED, "Custom component $identifier")
     }
 
     /**
-     * TODO document this
+     * Move to the next step or completes the experience if called from the last step
      */
     public fun nextStep() {
         coroutineScope.launch {
@@ -43,7 +42,7 @@ public class AppcuesExperienceActions internal constructor(
     }
 
     /**
-     * TODO document this
+     * Move to a previous step if any
      */
     public fun previousStep() {
         coroutineScope.launch {
@@ -52,7 +51,11 @@ public class AppcuesExperienceActions internal constructor(
     }
 
     /**
-     * TODO document this
+     * Closes the experience
+     *
+     * @param markComplete if set to true signals that the experience completed successfully.
+     *                     leaving it as false (default) means that this experience is not completed
+     *                     analytics wise, like when it was dismissed by tapping on a "X" close
      */
     public fun close(markComplete: Boolean = false) {
         coroutineScope.launch {
@@ -61,16 +64,21 @@ public class AppcuesExperienceActions internal constructor(
     }
 
     /**
-     * TODO document this
+     * Track an action taken by a user.
+     *
+     * @param name Name of the event.
+     * @param properties Optional properties that provide additional context about the event.
      */
     public fun track(name: String, properties: Map<String, Any>? = null) {
         analyticsTracker.track(name, properties)
     }
 
     /**
-     * TODO document this
+     * Updates user profile.
+     *
+     * @param properties properties that provide additional context about the user.
      */
-    public fun updateProfile(map: Map<String, String>) {
-        analyticsTracker.identify(map, interactive = false)
+    public fun updateProfile(properties: Map<String, String>) {
+        analyticsTracker.identify(properties, interactive = false)
     }
 }
