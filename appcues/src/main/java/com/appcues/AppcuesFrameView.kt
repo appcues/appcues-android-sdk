@@ -7,7 +7,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.core.view.isVisible
 
 /**
- * AppcuesFrameView should is used when customers want to define a specific place for inflating Embed content
+ * AppcuesFrameView should be used when customers want to define a specific place for inflating Embed content
  * in their app. By placing an AppcuesFrameView in their layout, then can later register this view with a frameId.
  *
  * appcues.registerEmbed("frame1", appcuesFrameView)
