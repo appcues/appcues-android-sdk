@@ -30,6 +30,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.appcues.R
 import com.appcues.debugger.DebuggerViewModel
+import com.appcues.debugger.navigation.DebuggerRoutes.LogDetailsPage
+import com.appcues.debugger.navigation.navigateDebugger
 import com.appcues.debugger.ui.ds.DividerItem
 import com.appcues.debugger.ui.ds.FloatingBackButton
 import com.appcues.debugger.ui.lazyColumnScrollIndicator
@@ -46,10 +48,10 @@ private val firstVisibleItemOffsetThreshold = 56.dp
 internal fun DebuggerLogList(
     viewModel: DebuggerViewModel,
     navController: NavHostController,
-    onLogMessageSelected: (LogMessage) -> Unit
 ) {
     val lazyListState = rememberLazyListState()
     val messages = viewModel.logMessages.collectAsState()
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -62,7 +64,7 @@ internal fun DebuggerLogList(
         }
 
         itemsIndexed(messages.value) { index, item ->
-            ListItem(index, item, onLogMessageSelected)
+            ListItem(index, item, navController)
         }
 
         item {
@@ -71,8 +73,9 @@ internal fun DebuggerLogList(
     }
 
     val firstVisible = remember { derivedStateOf { lazyListState.firstVisibleItemIndex } }
-    val docked = firstVisible.value == 0 &&
-        with(LocalDensity.current) { lazyListState.firstVisibleItemScrollOffset.toDp() < firstVisibleItemOffsetThreshold }
+    val docked = firstVisible.value == 0 && with(LocalDensity.current) {
+        lazyListState.firstVisibleItemScrollOffset.toDp() < firstVisibleItemOffsetThreshold
+    }
 
     FloatingBackButton(
         modifier = Modifier.padding(top = 12.dp, start = 8.dp),
@@ -83,10 +86,10 @@ internal fun DebuggerLogList(
 }
 
 @Composable
-private fun LazyItemScope.ListItem(index: Int, logMessage: LogMessage, onItemClicked: (LogMessage) -> Unit) {
+private fun LazyItemScope.ListItem(index: Int, logMessage: LogMessage, navController: NavHostController) {
     Row(
         modifier = Modifier
-            .clickable { onItemClicked(logMessage) }
+            .clickable { navController.navigateDebugger(LogDetailsPage.applyExtras(logMessage)) }
             .fillParentMaxWidth()
             .padding(horizontal = 20.dp)
             .testTag("log-message-$index"),

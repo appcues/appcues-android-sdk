@@ -41,6 +41,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import com.appcues.R
 import com.appcues.debugger.DebuggerViewModel
 import com.appcues.debugger.model.DebuggerEventItem
@@ -49,6 +50,11 @@ import com.appcues.debugger.model.DebuggerStatusItem
 import com.appcues.debugger.model.EventType
 import com.appcues.debugger.model.StatusType
 import com.appcues.debugger.model.TapActionType
+import com.appcues.debugger.navigation.DebuggerRoutes.EventDetailsPage
+import com.appcues.debugger.navigation.DebuggerRoutes.FontsPage
+import com.appcues.debugger.navigation.DebuggerRoutes.LogsPage
+import com.appcues.debugger.navigation.DebuggerRoutes.PluginsPage
+import com.appcues.debugger.navigation.navigateDebugger
 import com.appcues.debugger.ui.ds.DividerItem
 import com.appcues.debugger.ui.ds.TextHeader
 import com.appcues.debugger.ui.getTitleString
@@ -60,9 +66,7 @@ import kotlinx.coroutines.delay
 @Composable
 internal fun DebuggerMain(
     debuggerViewModel: DebuggerViewModel,
-    onEventClick: (DebuggerEventItem) -> Unit,
-    onFontsClick: () -> Unit,
-    onDetailedLogClick: () -> Unit,
+    navController: NavHostController,
 ) {
     val statusInfo = debuggerViewModel.statusInfo.collectAsState()
     val recentEvents = debuggerViewModel.events.collectAsState()
@@ -79,9 +83,9 @@ internal fun DebuggerMain(
 
         statusSection(statusInfo.value) { debuggerViewModel.onStatusTapAction(it) }
 
-        infoSection(onFontsClick, onDetailedLogClick)
+        infoSection(navController)
 
-        eventsSection(isFilterOn.value, recentEvents.value, { debuggerViewModel.onApplyEventFilter(it) }, { onEventClick(it) })
+        eventsSection(navController, isFilterOn.value, recentEvents.value) { debuggerViewModel.onApplyEventFilter(it) }
     }
 }
 
@@ -116,10 +120,7 @@ private fun LazyListScope.statusSection(list: List<DebuggerStatusItem>, onTap: (
     }
 }
 
-private fun LazyListScope.infoSection(
-    onFontsClick: () -> Unit,
-    onDetailedLogClick: () -> Unit,
-) {
+private fun LazyListScope.infoSection(navController: NavHostController) {
     item {
         Box(
             modifier = Modifier
@@ -138,7 +139,7 @@ private fun LazyListScope.infoSection(
         Row(
             modifier = Modifier
                 .fillParentMaxWidth()
-                .clickable { onFontsClick() }
+                .clickable { navController.navigateDebugger(FontsPage) }
                 .padding(horizontal = 20.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -154,7 +155,23 @@ private fun LazyListScope.infoSection(
         Row(
             modifier = Modifier
                 .fillParentMaxWidth()
-                .clickable { onDetailedLogClick() }
+                .clickable { navController.navigateDebugger(PluginsPage) }
+                .padding(horizontal = 20.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            with(DebuggerInfoItem(LocalContext.current.getString(R.string.appcues_debugger_plugins_title))) {
+                InfoItemContent(rowScope = this@Row)
+            }
+        }
+
+        DividerItem()
+    }
+
+    item {
+        Row(
+            modifier = Modifier
+                .fillParentMaxWidth()
+                .clickable { navController.navigateDebugger(LogsPage) }
                 .padding(horizontal = 20.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -168,10 +185,10 @@ private fun LazyListScope.infoSection(
 }
 
 private fun LazyListScope.eventsSection(
+    navController: NavHostController,
     currentFilter: EventType?,
     list: List<DebuggerEventItem>,
     onApplyFilter: (EventType?) -> Unit,
-    onTap: (DebuggerEventItem) -> Unit
 ) {
     item {
         Box(
@@ -221,7 +238,7 @@ private fun LazyListScope.eventsSection(
         Row(
             modifier = Modifier
                 .fillParentMaxWidth()
-                .clickable { onTap(item) }
+                .clickable { navController.navigateDebugger(EventDetailsPage.applyExtras(item)) }
                 .padding(horizontal = 20.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
