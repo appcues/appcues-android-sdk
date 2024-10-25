@@ -56,6 +56,7 @@
 
     <string name="appcues_debugger_info_title">Info</string>
     <string name="appcues_debugger_info_fonts">Available Fonts</string>
+    <string name="appcues_debugger_plugins_title">Plugins</string>
     <string name="appcues_debugger_info_detailed_log">Detailed Log</string>
     <string name="appcues_debugger_recent_events_title">Recent events</string>
     <string name="appcues_debugger_recent_events_item_icon_description">Event icon</string>
@@ -108,6 +109,9 @@
     <string name="appcues_debugger_font_details_copy_icon_description">Copy icon</string>
     <string name="appcues_debugger_font_details_clean_filter">Clear</string>
     <string name="appcues_debugger_font_details_hint">"Search…"</string>
+
+    <string name="appcues_debugger_plugins_custom_components_title">Custom components</string>
+    <string name="appcues_debugger_plugins_custom_components_info">Register custom components with Appcues.registerCustomComponent()</string>
 
     <string name="appcues_debugger_log_copy_log">Copy Log</string>
     <string name="appcues_debugger_log_level">Level: %1$s</string>

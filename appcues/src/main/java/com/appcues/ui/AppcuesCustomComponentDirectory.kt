@@ -5,13 +5,14 @@ import kotlin.collections.set
 
 internal object AppcuesCustomComponentDirectory {
 
-    private var views = mutableMapOf<String, AppcuesCustomComponentView>()
+    private val _customComponents = mutableMapOf<String, AppcuesCustomComponentView>()
+    val customComponents: Map<String, AppcuesCustomComponentView> = _customComponents
 
     fun set(identifier: String, view: AppcuesCustomComponentView) {
-        views[identifier] = view
+        _customComponents[identifier] = view
     }
 
     fun get(identifier: String): AppcuesCustomComponentView? {
-        return views[identifier]
+        return _customComponents[identifier]
     }
 }

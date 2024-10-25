@@ -3,6 +3,7 @@ package com.appcues.debugger
 import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.appcues.AppcuesCustomComponentView
 import com.appcues.data.model.RenderContext
 import com.appcues.debugger.DebugMode.Debugger
 import com.appcues.debugger.DebugMode.ScreenCapture
@@ -28,6 +29,7 @@ import com.appcues.di.component.AppcuesComponent
 import com.appcues.di.component.inject
 import com.appcues.di.scope.AppcuesScope
 import com.appcues.logging.LogMessage
+import com.appcues.ui.AppcuesCustomComponentDirectory
 import com.appcues.ui.ExperienceRenderer
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
@@ -109,6 +111,8 @@ internal class DebuggerViewModel(override val scope: AppcuesScope, debugMode: De
 
     val systemFonts: List<DebuggerFontItem>
         get() = debuggerFontManager.getSystemFonts()
+
+    val customComponents: Map<String, AppcuesCustomComponentView> = AppcuesCustomComponentDirectory.customComponents
 
     val allFonts: List<DebuggerFontItem>
         get() = debuggerFontManager.getAllFonts()
