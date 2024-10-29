@@ -1,6 +1,7 @@
 package com.appcues.data.remote
 
 import com.appcues.logging.Logcues
+import com.appcues.util.beautify
 import okhttp3.Headers
 import okhttp3.MediaType
 import okhttp3.Request
@@ -14,13 +15,8 @@ import okio.Buffer
  */
 internal class DataLogcues(private val logcues: Logcues) {
 
-    companion object {
-
-        private const val indent = "  "
-    }
-
     fun error(description: String, reason: String) {
-        logcues.error("$description.\nReason: ${reason.beautify()}")
+        logcues.error("$description.\nReason: ${reason.beautify(2)}")
     }
 
     fun debug(request: Request) {
@@ -81,92 +77,12 @@ internal class DataLogcues(private val logcues: Logcues) {
     private fun StringBuffer.appendHeader(headers: Headers) {
         if (headers.size > 0) {
             appendLine("Headers: {")
-            headers.forEach { appendLine("$indent[${it.first}] = ${it.second}") }
+            headers.forEach { appendLine("  [${it.first}] = ${it.second}") }
             appendLine("}")
         }
     }
 
     private fun StringBuffer.appendBody(decodedBody: String, contentLength: Long) {
-        appendLine("Body($contentLength bytes): ${decodedBody.beautify()}")
-    }
-
-    @Suppress("TooGenericExceptionCaught", "SwallowedException")
-    fun String.beautify(): String {
-        try {
-            val builder = StringBuilder()
-            var indentation = 0
-            var quoting = false
-
-            forEachIndexed { index, char ->
-                if (char == '"') quoting = !quoting
-
-                if (quoting) {
-                    builder.append(char)
-                } else if (!builder.handle(char, indentation)) {
-                    indentation = beautifyAtIndex(builder, char, index, indentation)
-                }
-            }
-
-            return builder.toString()
-        } catch (e: Exception) {
-            // in case any parsing goes wrong just return existing text
-            return this
-        }
-    }
-
-    private fun StringBuilder.handle(char: Char, sourceIndentation: Int): Boolean {
-        return when {
-            // break line and keep indentation
-            char == ',' -> {
-                appendLine(char)
-                append(indent.repeat(sourceIndentation))
-                true
-            }
-            // skip empty spaces when we are indenting
-            char == ' ' && sourceIndentation > 0 -> true
-            else -> false
-        }
-    }
-
-    private fun String.beautifyAtIndex(prettyJson: StringBuilder, char: Char, index: Int, sourceIndentation: Int): Int {
-        var indentation = sourceIndentation
-        when {
-            char == '(' && get(index + 1) != ')' -> {
-                prettyJson.appendLine(char)
-                indentation++
-                prettyJson.append(indent.repeat(indentation))
-            }
-            char == '{' && get(index + 1) != '}' -> {
-                prettyJson.appendLine(char)
-                indentation++
-                prettyJson.append(indent.repeat(indentation))
-            }
-            char == '[' && get(index + 1) != ']' -> {
-                prettyJson.appendLine(char)
-                indentation++
-                prettyJson.append(indent.repeat(indentation))
-            }
-            char == ']' && get(index - 1) != '[' -> {
-                prettyJson.appendLine()
-                indentation--
-                prettyJson.append(indent.repeat(indentation))
-                prettyJson.append(char)
-            }
-            char == '}' && get(index - 1) != '{' -> {
-                prettyJson.appendLine()
-                indentation--
-                prettyJson.append(indent.repeat(indentation))
-                prettyJson.append(char)
-            }
-            char == ')' && get(index - 1) != '(' -> {
-                prettyJson.appendLine()
-                indentation--
-                prettyJson.append(indent.repeat(indentation))
-                prettyJson.append(char)
-            }
-            else -> prettyJson.append(char)
-        }
-
-        return indentation
+        appendLine("Body($contentLength bytes): ${decodedBody.beautify(2)}")
     }
 }

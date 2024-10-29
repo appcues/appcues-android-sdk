@@ -10,6 +10,12 @@ import android.view.ViewGroup
 public interface AppcuesCustomComponentView {
 
     /**
+     * Define your properties here as a map with example values so it can be
+     * previewed in debugger
+     */
+    public val debugConfig: Map<String, Any>
+
+    /**
      * Returns a ViewGroup that will be inflated in the experience block for custom component matching the registered identifier.
      *
      * Its possible to use Compose by inflating a ComposeAndroidView and working with compose from there.

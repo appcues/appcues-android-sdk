@@ -2,6 +2,8 @@ package com.appcues.debugger.ui.plugins
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,16 +15,12 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.appcues.AppcuesCustomComponentView
 import com.appcues.R
@@ -33,6 +31,7 @@ import com.appcues.debugger.navigation.navigateDebugger
 import com.appcues.debugger.ui.ds.DividerItem
 import com.appcues.debugger.ui.ds.FloatingBackButton
 import com.appcues.debugger.ui.ds.TextHeader
+import com.appcues.debugger.ui.ds.TextPrimary
 import com.appcues.debugger.ui.ds.TextSecondary
 import com.appcues.debugger.ui.lazyColumnScrollIndicator
 import com.appcues.debugger.ui.theme.LocalAppcuesTheme
@@ -114,19 +113,21 @@ private fun LazyItemScope.ListItem(
 ) {
     Row(
         modifier = Modifier
+            .fillParentMaxWidth()
             .clickable {
                 navController.navigateDebugger(CustomComponentPage.applyExtras(DebuggerCustomComponentItem(identify, component)))
             }
-            .fillParentMaxWidth()
             .padding(horizontal = 20.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(
-            text = identify,
-            fontSize = 12.sp,
-            fontWeight = FontWeight.SemiBold,
-            fontFamily = FontFamily.Monospace,
-        )
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 20.dp, vertical = 20.dp),
+            verticalArrangement = Arrangement.Center
+        ) {
+            TextPrimary(text = identify)
+        }
     }
 
     DividerItem()

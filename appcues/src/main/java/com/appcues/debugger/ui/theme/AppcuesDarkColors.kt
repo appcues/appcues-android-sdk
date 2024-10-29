@@ -16,6 +16,7 @@ private val Blue300 = Color(color = 0xFF81B2EF)
 private val Pink400 = Color(color = 0xFFE86891)
 private val Blurple300 = Color(color = 0xFFA7A7F1)
 private val Blurple400 = Color(color = 0xFF8787E8)
+private val Blurple800 = Color(color = 0xFF292960)
 private val Yellow300 = Color(color = 0xFFD5A84D)
 private val Green300 = Color(color = 0xFF5EBEBE)
 
@@ -23,6 +24,7 @@ private val Green300 = Color(color = 0xFF5EBEBE)
 // Visit: https://www.figma.com/file/8Sozh9JnseLTF5oWjvGfIp/Foundations?type=design&node-id=5619-2635&mode=design&t=56CipGcX1bXwpUOW-0
 internal fun appcuesDarkColors() = AppcuesThemeColors(
     background = Neutral600,
+    backgroundBranded = Blurple800,
     backgroundSelected = Neutral700,
     error = Pink400,
     warning = Yellow300,
