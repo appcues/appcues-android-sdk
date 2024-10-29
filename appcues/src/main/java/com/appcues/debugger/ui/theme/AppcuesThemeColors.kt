@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 @SuppressWarnings("LongParameterList")
 internal class AppcuesThemeColors(
     background: Color,
+    backgroundBranded: Color,
     backgroundSelected: Color,
     error: Color,
     warning: Color,
@@ -32,6 +33,8 @@ internal class AppcuesThemeColors(
 ) {
 
     var background by mutableStateOf(background, structuralEqualityPolicy())
+        internal set
+    var backgroundBranded by mutableStateOf(backgroundBranded, structuralEqualityPolicy())
         internal set
     var backgroundSelected by mutableStateOf(backgroundSelected, structuralEqualityPolicy())
         internal set

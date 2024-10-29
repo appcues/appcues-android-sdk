@@ -19,6 +19,17 @@ internal fun TextHeader(modifier: Modifier = Modifier, text: String) {
 }
 
 @Composable
+internal fun TextPrimaryHighLighted(modifier: Modifier = Modifier, text: String) {
+    Text(
+        text = text,
+        modifier = modifier,
+        fontSize = 18.sp,
+        fontWeight = FontWeight.Bold,
+        color = LocalAppcuesTheme.current.primary
+    )
+}
+
+@Composable
 internal fun TextPrimary(modifier: Modifier = Modifier, text: String) {
     Text(
         text = text,

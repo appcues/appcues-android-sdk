@@ -4,6 +4,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.appcues.AppcuesExperienceActions
+import com.appcues.AppcuesExperienceActionsImpl
 import com.appcues.action.ActionProcessor
 import com.appcues.action.ExperienceAction
 import com.appcues.analytics.AnalyticsTracker
@@ -162,7 +163,7 @@ internal class AppcuesViewModel(
     }
 
     fun getExperienceActions(identifier: String, actions: List<ExperienceAction>): AppcuesExperienceActions {
-        return AppcuesExperienceActions(
+        return AppcuesExperienceActionsImpl(
             identifier = identifier,
             renderContext = binding.renderContext,
             coroutineScope = coroutineScope,

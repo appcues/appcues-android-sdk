@@ -14,6 +14,7 @@ private val Neutral700 = Color(color = 0xFF425678)
 private val Neutral800 = Color(color = 0xFF141923)
 private val Blue600 = Color(color = 0xFF0072D6)
 private val Pink600 = Color(color = 0xFFDD2270)
+private val Blurple100 = Color(color = 0xFFEEEEFF)
 private val Blurple600 = Color(color = 0xFF5C5CFF)
 private val Blurple700 = Color(color = 0xFF4343C5)
 private val Yellow600 = Color(color = 0xFFA66300)
@@ -23,6 +24,7 @@ private val Green600 = Color(color = 0xFF108484)
 // Visit: https://www.figma.com/file/8Sozh9JnseLTF5oWjvGfIp/Foundations?type=design&node-id=5619-2635&mode=design&t=56CipGcX1bXwpUOW-0
 internal fun appcuesLightColors() = AppcuesThemeColors(
     background = Neutral0,
+    backgroundBranded = Blurple100,
     backgroundSelected = Neutral50,
     error = Pink600,
     warning = Yellow600,
