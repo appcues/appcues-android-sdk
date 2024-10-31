@@ -28,7 +28,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-// TODO refactor dependency injection to reduce dependency count
 internal class AppcuesViewModel(
     private val binding: PresentationBinding,
     private val coroutineScope: CoroutineScope,
