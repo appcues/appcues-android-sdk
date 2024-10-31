@@ -3,8 +3,6 @@ package com.appcues
 /**
  * AppcuesExperienceActions is the controller that allows custom component access useful appcues and experience calls.
  */
-// Suppressing until figure out a way to make this class more concise
-@Suppress("LongParameterList")
 public interface AppcuesExperienceActions {
 
     /**
