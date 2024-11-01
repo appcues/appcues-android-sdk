@@ -47,7 +47,7 @@ internal class AppcuesExperienceActionsTest {
     fun setUp() {
         Dispatchers.setMain(UnconfinedTestDispatcher())
 
-        experienceActions = AppcuesExperienceActions(
+        experienceActions = AppcuesExperienceActionsImpl(
             identifier = "identifier",
             renderContext = renderContext,
             coroutineScope = coroutineScope,
