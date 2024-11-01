@@ -9,7 +9,7 @@ import android.os.StrictMode.VmPolicy
 import com.appcues.Appcues
 import com.appcues.LoggingLevel
 import com.appcues.NavigationHandler
-import com.appcues.samples.kotlin.custom.SetThemeView
+import com.appcues.samples.kotlin.custom.LiveStreamView
 import com.appcues.samples.kotlin.custom.SimpleButtonView
 
 class ExampleApplication : Application() {
@@ -61,7 +61,7 @@ class ExampleApplication : Application() {
             }
         }
 
-        Appcues.registerCustomComponent("setTheme", SetThemeView(this))
         Appcues.registerCustomComponent("SimpleButtonView", SimpleButtonView(this))
+        Appcues.registerCustomComponent("LiveStream", LiveStreamView(this))
     }
 }
