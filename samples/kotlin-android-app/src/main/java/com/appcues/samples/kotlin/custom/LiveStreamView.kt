@@ -17,8 +17,8 @@ import com.appcues.samples.kotlin.R
 
 internal class LiveStreamView(private val context: Context) : AppcuesCustomComponentView {
 
-    override val debugConfig: Map<String, Any>
-        get() = mapOf("url" to "https://zssd-koala.hls.camzonecdn.com/CamzoneStreams/zssd-koala/Playlist.m3u8")
+    override fun getDebugConfig(): Map<String, Any> =
+        mapOf("url" to "https://zssd-koala.hls.camzonecdn.com/CamzoneStreams/zssd-koala/Playlist.m3u8")
 
     @SuppressLint("SetTextI18n")
     override fun getView(actionsController: AppcuesExperienceActions, config: Map<String, Any>?): ViewGroup {

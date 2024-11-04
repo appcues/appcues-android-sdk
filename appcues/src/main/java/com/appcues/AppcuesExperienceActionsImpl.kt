@@ -14,11 +14,11 @@ import kotlinx.coroutines.launch
 @Suppress("LongParameterList")
 internal class AppcuesExperienceActionsImpl internal constructor(
     private val identifier: String,
+    private val actions: List<ExperienceAction>,
     private val renderContext: RenderContext,
     private val coroutineScope: CoroutineScope,
     private val analyticsTracker: AnalyticsTracker,
     private val experienceRenderer: ExperienceRenderer,
-    private val actions: List<ExperienceAction>,
     private val actionsProcessor: ActionProcessor,
 ) : AppcuesExperienceActions {
 

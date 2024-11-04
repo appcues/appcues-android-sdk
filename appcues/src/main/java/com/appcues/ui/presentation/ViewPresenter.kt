@@ -108,7 +108,7 @@ internal abstract class ViewPresenter(
             parentView = WeakReference(this)
 
             viewModel = AppcuesViewModel(
-                binding = binding,
+                presentationBinding = binding,
                 coroutineScope = coroutineScope,
                 experienceRenderer = experienceRenderer,
                 actionProcessor = get(),

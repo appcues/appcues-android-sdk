@@ -95,7 +95,7 @@ internal class AppcuesViewModelTest {
         Dispatchers.setMain(UnconfinedTestDispatcher())
 
         viewModel = AppcuesViewModel(
-            binding = binding,
+            presentationBinding = binding,
             coroutineScope = coroutineScope,
             experienceRenderer = experienceRenderer,
             analyticsTracker = analyticsTracker,
