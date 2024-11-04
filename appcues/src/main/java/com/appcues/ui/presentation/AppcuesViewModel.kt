@@ -29,7 +29,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 internal class AppcuesViewModel(
-    private val binding: PresentationBinding,
+    private val presentationBinding: PresentationBinding,
     private val coroutineScope: CoroutineScope,
     private val experienceRenderer: ExperienceRenderer,
     private val analyticsTracker: AnalyticsTracker,
@@ -67,11 +67,11 @@ internal class AppcuesViewModel(
     init {
         statesJob = collectStates()
 
-        if (statesJob == null) binding.onDismiss()
+        if (statesJob == null) presentationBinding.onDismiss()
     }
 
     private fun collectStates(): Job? {
-        val stateFlow = experienceRenderer.getStateFlow(binding.renderContext) ?: return null
+        val stateFlow = experienceRenderer.getStateFlow(presentationBinding.renderContext) ?: return null
         return viewModelScope.launch {
             stateFlow.collectLatest { state ->
                 if (state is RenderingStepState) {
@@ -95,7 +95,7 @@ internal class AppcuesViewModel(
             // from an external source (ex deep link) and we should end the experience
             if (state is Rendering) {
                 coroutineScope.launch {
-                    experienceRenderer.dismiss(binding.renderContext, markComplete = false, destroyed = true)
+                    experienceRenderer.dismiss(presentationBinding.renderContext, markComplete = false, destroyed = true)
                 }
             }
         }
@@ -117,7 +117,7 @@ internal class AppcuesViewModel(
     }
 
     fun onActions(actions: List<ExperienceAction>, interactionType: InteractionType, viewDescription: String?) {
-        actionProcessor.process(binding.renderContext, actions, interactionType, viewDescription)
+        actionProcessor.process(presentationBinding.renderContext, actions, interactionType, viewDescription)
     }
 
     fun onPageChanged(index: Int) {
@@ -126,19 +126,19 @@ internal class AppcuesViewModel(
             // then we report new position to state machine
             if (state is Rendering && state.position != index) {
                 coroutineScope.launch {
-                    experienceRenderer.show(binding.renderContext, StepGroupPageIndex(index, state.flatStepIndex))
+                    experienceRenderer.show(presentationBinding.renderContext, StepGroupPageIndex(index, state.flatStepIndex))
                 }
             }
         }
     }
 
     fun onDismissed(awaitDismissEffect: AwaitDismissEffect) {
-        binding.onDismiss()
+        presentationBinding.onDismiss()
         awaitDismissEffect.dismissed()
     }
 
     fun onTap(offset: Offset) {
-        binding.onTap(offset)
+        presentationBinding.onTap(offset)
     }
 
     fun canDismiss(): Boolean {
@@ -150,26 +150,26 @@ internal class AppcuesViewModel(
         val state = uiState.value
         if (state is Rendering && state.experience.allowDismissal(state.flatStepIndex)) {
             coroutineScope.launch {
-                experienceRenderer.dismiss(binding.renderContext, markComplete = false, destroyed = false)
+                experienceRenderer.dismiss(presentationBinding.renderContext, markComplete = false, destroyed = false)
             }
         }
     }
 
     fun onConfigurationChanged() {
         coroutineScope.launch {
-            experienceRenderer.onViewConfigurationChanged(binding.renderContext)
+            experienceRenderer.onViewConfigurationChanged(presentationBinding.renderContext)
         }
     }
 
     fun getExperienceActions(identifier: String, actions: List<ExperienceAction>): AppcuesExperienceActions {
         return AppcuesExperienceActionsImpl(
             identifier = identifier,
-            renderContext = binding.renderContext,
+            actions = actions,
+            renderContext = presentationBinding.renderContext,
             coroutineScope = coroutineScope,
             analyticsTracker = analyticsTracker,
             experienceRenderer = experienceRenderer,
             actionsProcessor = actionProcessor,
-            actions = actions,
         )
     }
 }

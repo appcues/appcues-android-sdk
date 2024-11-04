@@ -12,8 +12,7 @@ import com.appcues.AppcuesExperienceActions
 
 internal class SimpleButtonView(private val context: Context) : AppcuesCustomComponentView {
 
-    override val debugConfig: Map<String, Any>
-        get() = mapOf("event_name" to "customEvent1")
+    override fun getDebugConfig(): Map<String, Any> = mapOf("event_name" to "customEvent1")
 
     companion object {
 

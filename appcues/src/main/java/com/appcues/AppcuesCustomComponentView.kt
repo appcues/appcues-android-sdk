@@ -13,7 +13,7 @@ public interface AppcuesCustomComponentView {
      * Define your properties here as a map with example values so it can be
      * previewed in debugger
      */
-    public val debugConfig: Map<String, Any>
+    public fun getDebugConfig(): Map<String, Any>? = null
 
     /**
      * Returns a ViewGroup that will be inflated in the experience block for custom component matching the registered identifier.

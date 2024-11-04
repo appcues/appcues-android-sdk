@@ -112,7 +112,8 @@ internal class DebuggerViewModel(override val scope: AppcuesScope, debugMode: De
     val systemFonts: List<DebuggerFontItem>
         get() = debuggerFontManager.getSystemFonts()
 
-    val customComponents: Map<String, AppcuesCustomComponentView> = AppcuesCustomComponentDirectory.customComponents
+    val customComponents: Map<String, AppcuesCustomComponentView>
+        get() = AppcuesCustomComponentDirectory.customComponents
 
     val allFonts: List<DebuggerFontItem>
         get() = debuggerFontManager.getAllFonts()

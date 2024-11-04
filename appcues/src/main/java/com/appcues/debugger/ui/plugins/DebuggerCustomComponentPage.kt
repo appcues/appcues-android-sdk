@@ -108,10 +108,10 @@ internal fun DebuggerCustomComponentPage(item: DebuggerCustomComponentItem, navC
                     .padding(12.dp)
             ) {
                 val configMap = remember {
-                    if (item.component.debugConfig.isEmpty()) {
+                    if (item.component.getDebugConfig().isNullOrEmpty()) {
                         "empty"
                     } else {
-                        item.component.debugConfig.toString().beautify(indentationMultiplier = 4)
+                        item.component.getDebugConfig().toString().beautify(indentationMultiplier = 4)
                     }
                 }
 
@@ -133,7 +133,7 @@ internal fun DebuggerCustomComponentPage(item: DebuggerCustomComponentItem, navC
                             brush = SolidColor(theme.brand),
                             shape = RoundedCornerShape(0.dp)
                         ),
-                    factory = { item.component.getView(controller, item.component.debugConfig) }
+                    factory = { item.component.getView(controller, item.component.getDebugConfig()) }
                 )
             }
         }
