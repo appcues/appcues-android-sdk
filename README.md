@@ -132,7 +132,7 @@ Add `AppcuesFrameView` instances in your application layouts to support embedded
 
 ### Custom Components
 
-Implement `AppcuesCustomComponentView` instances and register to Appcues take advantage of building your own component and have it in experiences. For more information refer to the guide on [Configuring an AppcuesCustomComponentView](https://github.com/appcues/appcues-android-sdk/blob/main/docs/AppcuesCustomComponentConfiguring.md)
+Implement `AppcuesCustomComponentView` instances and register them with Appcues to take advantage of building your own components and using them in experiences. For more information refer to the guide on [Configuring an AppcuesCustomComponentView](https://github.com/appcues/appcues-android-sdk/blob/main/docs/AppcuesCustomComponentConfiguring.md)
 
 Refer to the full [Getting Started Guide](https://github.com/appcues/appcues-android-sdk/blob/main/docs/GettingStarted.md) for more details.
 
