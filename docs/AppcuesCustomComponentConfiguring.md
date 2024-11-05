@@ -2,7 +2,7 @@
 
 An `AppcuesCustomComponentView` allows your app to define a custom component that can be rendered in an experience containing a custom component block using the registered `identifier` for the component.
 
-## Implementing AppcuesCustomViewComponentView
+## Implementing AppcuesCustomComponentView
 
 ```kotlin
 internal class ExampleCustomComponentView(private val context: Context) : AppcuesCustomComponentView {
@@ -23,7 +23,7 @@ internal class ExampleCustomComponentView(private val context: Context) : Appcue
 
 > When working with compose its possible to inflate an AndroidComposeView and compose your view from there.
 
-### Registering an AppcuesCustomViewComponentView with the Appcues SDK
+### Registering an AppcuesCustomComponentView with the Appcues SDK
 
 Registering a custom view is made statically through the call of `Appcues.registerCustomComponent(identifier, customView)`, make sure the identifier is an unique string when registering multiple custom components
 
@@ -37,3 +37,4 @@ Appcues.registerCustomComponent("customView1", customView)
 
 * All registered custom view are listed in the `Debugger` under the `Plugins` section.
 * When config options are used to the custom view, filling the `debugConfig` helps non-developers in the team to validate how the custom component works.
+* `AppcuesCustomComponentView` call getView will include reference to `AppcuesExperienceActions` that can be used to trigger actions defined in builder, navigate through the experience or perform some analytics calls like `track` and `updateProfile`
