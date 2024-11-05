@@ -1,6 +1,6 @@
 # Configuring an AppcuesCustomComponent
 
-Using `AppcuesCustomComponentView` instances in your project allows to define a custom component to be rendered in an experience that contains matching custom component block based on the registered `identifier`.
+An `AppcuesCustomComponentView` allows your app to define a custom component that can be rendered in an experience containing a custom component block using the registered `identifier` for the component.
 
 ## Implementing AppcuesCustomViewComponentView
 
