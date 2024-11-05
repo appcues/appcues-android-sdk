@@ -7,8 +7,10 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import androidx.annotation.OptIn
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import com.appcues.AppcuesCustomComponentView
@@ -18,13 +20,24 @@ import com.appcues.samples.kotlin.R
 internal class LiveStreamView(private val context: Context) : AppcuesCustomComponentView {
 
     override fun getDebugConfig(): Map<String, Any> =
-        mapOf("url" to "https://zssd-koala.hls.camzonecdn.com/CamzoneStreams/zssd-koala/Playlist.m3u8")
+        mapOf(
+            "url" to "https://zssd-koala.hls.camzonecdn.com/CamzoneStreams/zssd-koala/Playlist.m3u8",
+            "showControls" to false,
+            "isMuted" to false,
+        )
 
     @SuppressLint("SetTextI18n")
     override fun getView(actionsController: AppcuesExperienceActions, config: Map<String, Any>?): ViewGroup {
         val url = config?.get("url") as String?
+        val showControls = config?.get("showControls") as Boolean? ?: false
+        val isMuted = config?.get("isMuted") as Boolean? ?: false
+
 
         return LiveStreamView(context).apply {
+
+            showControls(showControls)
+            mute(isMuted)
+
             url?.let { setStreamUrl(it) }
         }
     }
@@ -38,6 +51,21 @@ internal class LiveStreamView(private val context: Context) : AppcuesCustomCompo
         private val playerView: PlayerView
         private val player: ExoPlayer
         private var streamUrl: String? = null
+
+        fun mute(mute: Boolean) {
+            player.volume = if (mute) 0f else 1f
+        }
+
+        @OptIn(UnstableApi::class)
+        fun showControls(show: Boolean) {
+            if (show) {
+                playerView.showController()
+                playerView.useController = true
+            } else {
+                playerView.hideController()
+                playerView.useController = false
+            }
+        }
 
         init {
             LayoutInflater.from(context).inflate(R.layout.live_stream_view, this)
