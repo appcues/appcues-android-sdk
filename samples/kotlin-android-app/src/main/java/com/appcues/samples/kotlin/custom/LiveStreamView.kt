@@ -31,7 +31,7 @@ internal class LiveStreamView(private val context: Context) : AppcuesCustomCompo
         val url = config?.get("url") as String?
         val showControls = config?.get("showControls") as Boolean? ?: false
         val isMuted = config?.get("isMuted") as Boolean? ?: false
-        
+
         return LiveStreamView(context).apply {
 
             showControls(showControls)

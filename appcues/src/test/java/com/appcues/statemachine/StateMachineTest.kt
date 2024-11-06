@@ -651,7 +651,7 @@ internal class StateMachineTest : AppcuesScopeTest {
         // THEN
         assertThat(result.successValue()).isEqualTo(IdlingState)
         assertThat(stateMachine.state).isEqualTo(IdlingState)
-        coVerify { get<ActionProcessor>().processPostFlowActions(experience.completionActions) }
+        coVerify { get<ActionProcessor>().enqueue(experience.completionActions) }
     }
 
     @Test

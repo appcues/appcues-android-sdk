@@ -287,7 +287,7 @@ internal class AppcuesViewModelTest {
         // WHEN
         viewModel.onActions(actions, type, description)
         // THEN
-        verify { actionProcessor.process(renderContext, actions, type, description) }
+        verify { actionProcessor.enqueue(renderContext, actions, type, description) }
     }
 
     @Test
