@@ -10,7 +10,6 @@ import com.appcues.Appcues
 import com.appcues.LoggingLevel
 import com.appcues.NavigationHandler
 import com.appcues.samples.kotlin.custom.LiveStreamView
-import com.appcues.samples.kotlin.custom.SimpleButtonView
 
 class ExampleApplication : Application() {
 
@@ -61,7 +60,6 @@ class ExampleApplication : Application() {
             }
         }
 
-        Appcues.registerCustomComponent("simpleButtonView", SimpleButtonView(this))
         Appcues.registerCustomComponent("liveStream", LiveStreamView(this))
     }
 }
