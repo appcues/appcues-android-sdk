@@ -61,7 +61,7 @@ class ExampleApplication : Application() {
             }
         }
 
-        Appcues.registerCustomComponent("SimpleButtonView", SimpleButtonView(this))
+        Appcues.registerCustomComponent("simpleButtonView", SimpleButtonView(this))
         Appcues.registerCustomComponent("liveStream", LiveStreamView(this))
     }
 }

@@ -5,6 +5,10 @@ import com.appcues.action.MetadataSettingsAction
 import com.appcues.data.model.AppcuesConfigMap
 import com.appcues.data.model.RenderContext
 import com.appcues.data.model.StepReference
+import com.appcues.data.model.StepReference.StepGroupPageIndex
+import com.appcues.data.model.StepReference.StepId
+import com.appcues.data.model.StepReference.StepIndex
+import com.appcues.data.model.StepReference.StepOffset
 import com.appcues.data.model.getConfig
 import com.appcues.data.model.getConfigInt
 import com.appcues.ui.ExperienceRenderer
@@ -19,7 +23,25 @@ internal class ContinueAction(
     companion object {
 
         const val TYPE = "@appcues/continue"
+
+        private fun buildConfigMap(stepReference: StepReference): AppcuesConfigMap {
+            return mutableMapOf<String, Any>().apply {
+                when (stepReference) {
+                    is StepId -> put("stepID", stepReference.id)
+                    is StepIndex -> put("index", stepReference.index)
+                    is StepOffset -> put("offset", stepReference.offset)
+                    // StepGroupPageIndex is unsupported by ContinueAction
+                    is StepGroupPageIndex -> Unit
+                }
+            }
+        }
     }
+
+    constructor(
+        renderContext: RenderContext,
+        experienceRenderer: ExperienceRenderer,
+        stepReference: StepReference,
+    ) : this(buildConfigMap(stepReference), renderContext, experienceRenderer)
 
     private val index = config.getConfigInt("index")
 
@@ -29,10 +51,11 @@ internal class ContinueAction(
 
     private val stepReference: StepReference
         get() = when {
-            index != null -> StepReference.StepIndex(index)
-            id != null -> StepReference.StepId(UUID.fromString(id))
-            else -> StepReference.StepOffset(offset)
+            index != null -> StepIndex(index)
+            id != null -> StepId(UUID.fromString(id))
+            else -> StepOffset(offset)
         }
+
     override val category: String = "internal"
 
     override val destination: String = stepReference.destination

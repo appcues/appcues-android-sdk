@@ -16,7 +16,19 @@ internal class CloseAction(
     companion object {
 
         const val TYPE = "@appcues/close"
+
+        private fun buildConfigMap(markComplete: Boolean): AppcuesConfigMap {
+            return mutableMapOf<String, Any>().apply {
+                put("markComplete", markComplete)
+            }
+        }
     }
+
+    constructor(
+        renderContext: RenderContext,
+        experienceRenderer: ExperienceRenderer,
+        markComplete: Boolean
+    ) : this(buildConfigMap(markComplete), renderContext, experienceRenderer)
 
     private val markComplete = config.getConfigOrDefault("markComplete", false)
 

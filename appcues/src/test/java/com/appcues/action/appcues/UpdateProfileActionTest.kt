@@ -1,8 +1,7 @@
 package com.appcues.action.appcues
 
-import com.appcues.Appcues
 import com.appcues.AppcuesScopeTest
-import com.appcues.Storage
+import com.appcues.analytics.AnalyticsTracker
 import com.appcues.di.component.get
 import com.appcues.rules.TestScopeRule
 import com.google.common.truth.Truth.assertThat
@@ -25,30 +24,27 @@ internal class UpdateProfileActionTest : AppcuesScopeTest {
     @Test
     fun `update profile SHOULD trigger Appcues identify with properties`() = runTest {
         // GIVEN
-        val appcues: Appcues = get()
-        val storage: Storage = get()
-        val userId = "test-user"
-        storage.userId = userId
+        val analyticsTracker: AnalyticsTracker = get()
         val properties = mapOf("prop1" to 2, "prop2" to "ok")
-        val action = UpdateProfileAction(properties, storage, appcues)
+        val action = UpdateProfileAction(properties, analyticsTracker)
 
         // WHEN
         action.execute()
 
         // THEN
-        coVerify { appcues.identify(userId, properties) }
+        coVerify { analyticsTracker.identify(properties) }
     }
 
     @Test
     fun `update profile SHOULD NOT trigger Appcues identify WHEN no props are in config`() = runTest {
         // GIVEN
-        val appcues: Appcues = get()
-        val action = UpdateProfileAction(null, get(), appcues)
+        val analyticsTracker: AnalyticsTracker = get()
+        val action = UpdateProfileAction(null, analyticsTracker)
 
         // WHEN
         action.execute()
 
         // THEN
-        coVerify { appcues wasNot Called }
+        coVerify { analyticsTracker wasNot Called }
     }
 }
