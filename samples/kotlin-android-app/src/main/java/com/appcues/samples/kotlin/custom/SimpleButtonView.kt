@@ -41,6 +41,7 @@ internal class SimpleButtonView(private val context: Context) : AppcuesCustomCom
                     setOnClickListener {
                         val eventName = config?.get("event_name") as String?
                         eventName?.let { actionsController.track(eventName, mapOf("count" to count++)) }
+                        actionsController.updateProfile(mapOf("custom_component" to "Button Closed Clicked"))
 
                         actionsController.close(markComplete = true)
                     }

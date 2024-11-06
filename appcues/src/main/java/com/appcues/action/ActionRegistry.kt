@@ -34,7 +34,7 @@ internal class ActionRegistry(override val scope: AppcuesScope) : AppcuesCompone
         register(SubmitFormAction.TYPE) { config, context -> SubmitFormAction(config, context, get(), get()) }
         register(LinkAction.TYPE) { config, _ -> LinkAction(config, get(), get(), get()) }
         register(TrackEventAction.TYPE) { config, _ -> TrackEventAction(config, get()) }
-        register(UpdateProfileAction.TYPE) { config, _ -> UpdateProfileAction(config, get(), get()) }
+        register(UpdateProfileAction.TYPE) { config, _ -> UpdateProfileAction(config, get()) }
         register(RequestReviewAction.TYPE) { config, _ -> RequestReviewAction(config, get(), get()) }
         register(DelayAction.TYPE) { config, _ -> DelayAction(config) }
         register(RequestPushAction.TYPE) { config, _ -> RequestPushAction(config, get(), get()) }

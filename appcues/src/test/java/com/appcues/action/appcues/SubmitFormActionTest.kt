@@ -144,10 +144,10 @@ internal class SubmitFormActionTest {
         }
         val analyticsTracker: AnalyticsTracker = mockk(relaxed = true)
         val appcues: Appcues = mockk(relaxed = true)
-        val action0 = TrackEventAction(mapOf("eventName" to "My Custom Event"), appcues)
+        val action0 = TrackEventAction(mapOf("eventName" to "My Custom Event"), analyticsTracker)
         val action = SubmitFormAction(emptyMap(), RenderContext.Modal, experienceRenderer, analyticsTracker)
-        val action1 = TrackEventAction(mapOf("eventName" to "My Custom Event"), appcues)
-        val action2 = TrackEventAction(mapOf("eventName" to "My Custom Event"), appcues)
+        val action1 = TrackEventAction(mapOf("eventName" to "My Custom Event"), analyticsTracker)
+        val action2 = TrackEventAction(mapOf("eventName" to "My Custom Event"), analyticsTracker)
         val initialQueue = listOf(action0, action, action1, action2)
 
         // WHEN
@@ -174,10 +174,10 @@ internal class SubmitFormActionTest {
         }
         val analyticsTracker: AnalyticsTracker = mockk(relaxed = true)
         val appcues: Appcues = mockk(relaxed = true)
-        val action0 = TrackEventAction(mapOf("eventName" to "My Custom Event"), appcues)
+        val action0 = TrackEventAction(mapOf("eventName" to "My Custom Event"), analyticsTracker)
         val action = SubmitFormAction(emptyMap(), RenderContext.Modal, experienceRenderer, analyticsTracker)
-        val action1 = TrackEventAction(mapOf("eventName" to "My Custom Event"), appcues)
-        val action2 = TrackEventAction(mapOf("eventName" to "My Custom Event"), appcues)
+        val action1 = TrackEventAction(mapOf("eventName" to "My Custom Event"), analyticsTracker)
+        val action2 = TrackEventAction(mapOf("eventName" to "My Custom Event"), analyticsTracker)
         val initialQueue = listOf(action0, action, action1, action2)
 
         // WHEN
@@ -210,12 +210,12 @@ internal class SubmitFormActionTest {
         }
         val analyticsTracker: AnalyticsTracker = mockk(relaxed = true)
         val appcues: Appcues = mockk(relaxed = true)
-        val action0 = TrackEventAction(mapOf("eventName" to "My Custom Event"), appcues)
+        val action0 = TrackEventAction(mapOf("eventName" to "My Custom Event"), analyticsTracker)
         val action = SubmitFormAction(
             mapOf("skipValidation" to true), RenderContext.Modal, experienceRenderer, analyticsTracker
         )
-        val action1 = TrackEventAction(mapOf("eventName" to "My Custom Event"), appcues)
-        val action2 = TrackEventAction(mapOf("eventName" to "My Custom Event"), appcues)
+        val action1 = TrackEventAction(mapOf("eventName" to "My Custom Event"), analyticsTracker)
+        val action2 = TrackEventAction(mapOf("eventName" to "My Custom Event"), analyticsTracker)
         val initialQueue = listOf(action0, action, action1, action2)
 
         // WHEN

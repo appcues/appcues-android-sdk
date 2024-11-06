@@ -165,11 +165,11 @@ internal class AppcuesViewModel(
         return AppcuesExperienceActionsImpl(
             identifier = identifier,
             actions = actions,
+            actionsProcessor = actionProcessor,
             renderContext = presentationBinding.renderContext,
             coroutineScope = coroutineScope,
             analyticsTracker = analyticsTracker,
             experienceRenderer = experienceRenderer,
-            actionsProcessor = actionProcessor,
         )
     }
 }
