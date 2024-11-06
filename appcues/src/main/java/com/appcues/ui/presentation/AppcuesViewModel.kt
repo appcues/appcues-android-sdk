@@ -117,7 +117,7 @@ internal class AppcuesViewModel(
     }
 
     fun onActions(actions: List<ExperienceAction>, interactionType: InteractionType, viewDescription: String?) {
-        actionProcessor.process(presentationBinding.renderContext, actions, interactionType, viewDescription)
+        actionProcessor.enqueue(presentationBinding.renderContext, actions, interactionType, viewDescription)
     }
 
     fun onPageChanged(index: Int) {
@@ -167,7 +167,6 @@ internal class AppcuesViewModel(
             actions = actions,
             actionsProcessor = actionProcessor,
             renderContext = presentationBinding.renderContext,
-            coroutineScope = coroutineScope,
             analyticsTracker = analyticsTracker,
             experienceRenderer = experienceRenderer,
         )

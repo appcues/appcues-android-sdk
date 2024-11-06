@@ -11,7 +11,7 @@ internal data class ExperienceActionEffect(private val actions: List<ExperienceA
         // invoking processPostFlowActions ensures the current transition will complete
         // regardless of the actions being processed here.
         // This is necessary to avoid a possible deadlock between the actions and the state machine.
-        processor.processPostFlowActions(actions)
+        processor.enqueue(actions)
 
         return null
     }

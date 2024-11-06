@@ -40,20 +40,25 @@ internal class ActionProcessor(override val scope: AppcuesScope) : AppcuesCompon
         // typically the Continue action moving to the next step. Since we need to be able to
         // make this a suspend function and wait on them, we cannot place them in the queue or
         // suspend the currently executing action at all, or the queue would become deadlocked.
-        transformQueue(actions).toMutableList().forEach { it.execute() }
+        transformQueue(actions).forEach { it.execute() }
     }
 
-    // This is used for post flow actions, ensures we never get to a deadlock state with the current transition
-    // being processed by the state machine. Mainly because of LaunchExperienceAction when we have another
+    // This is used for post flow actions, ensures we never get to a deadlock state with the
+    // current transition being processed by the state machine. Mainly because of LaunchExperienceAction when we have another
     // experience we would want to trigger when current flow completes
-    suspend fun processPostFlowActions(actions: List<ExperienceAction>) {
-        transformQueue(actions).forEach { actionQueue.send(it) }
+    fun enqueue(actions: List<ExperienceAction>) {
+        transformQueue(actions).forEach { actionQueue.trySend(it) }
     }
 
-    // This version is used by the viewModel to process interactive actions from user input - button taps.
+    // Enqueue single action (no transformQueue necessary)
+    fun enqueue(action: ExperienceAction) {
+        actionQueue.trySend(action)
+    }
+
+    // This version is used by the viewModel to enqueue interactive actions from user input - button taps.
     // It includes relevant information about the user interaction that can be used in the auto generated
     // step_interaction event.
-    fun process(
+    fun enqueue(
         renderContext: RenderContext,
         actions: List<ExperienceAction>,
         interactionType: InteractionType,
@@ -61,16 +66,11 @@ internal class ActionProcessor(override val scope: AppcuesScope) : AppcuesCompon
     ) {
         if (actions.isEmpty()) return
 
-        // find step interaction action if there is any
-        val stepInteraction = getStepInteractionAction(renderContext, actions, interactionType, viewDescription)
-
-        appcuesCoroutineScope.launch {
-            // the stepInteraction is not included in the transform, and is inserted at the front of queue
-            transformQueue(actions).toMutableList()
-                .apply { add(0, stepInteraction) }
-                // user interactions are processed through the shared queue, to ensure consistency in order of operations
-                .forEach { actionQueue.send(it) }
-        }
+        // the stepInteraction is not included in the transform, and is inserted at the front of queue
+        transformQueue(actions).toMutableList()
+            .apply { add(0, getStepInteractionAction(renderContext, actions, interactionType, viewDescription)) }
+            // user interactions are processed through the shared queue, to ensure consistency in order of operations
+            .forEach { actionQueue.trySend(it) }
     }
 
     private fun transformQueue(actions: List<ExperienceAction>) = actions.fold(actions) { currentQueue, action ->

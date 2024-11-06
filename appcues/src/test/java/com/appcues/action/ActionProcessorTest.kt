@@ -40,6 +40,7 @@ internal class ActionProcessorTest {
     @Test
     fun `process SHOULD transform queue WHEN it contains a transformation action`() = runTest {
         // GIVEN
+        TestAction.executeCount = 0
         val experience = mockExperience()
         val initialState = RenderingStepState(experience, 0, mutableMapOf(), true)
         val scope = createScope(initialState)
@@ -54,23 +55,20 @@ internal class ActionProcessorTest {
         actionProcessor.process(listOf(action1, action2, action3, action4, action5))
 
         // THEN
-
         // the last two actions should be removed
         assertThat(TestAction.executeCount).isEqualTo(3)
     }
 
     @Test
-    fun `process(1,2,3) SHOULD send stepInteraction analytics based on last of type MetadataSettingsAction`() = runTest {
+    fun `enqueue(1,2,3) SHOULD send stepInteraction analytics based on last of type MetadataSettingsAction`() {
 
         // GIVEN
+        TestAction.executeCount = 0
         val experience = mockExperience()
         val initialState = RenderingStepState(experience, 0, mutableMapOf(), true)
         val scope = createScope(initialState)
-        val experienceRenderer = scope.get<ExperienceRenderer>()
         val actionProcessor = scope.get<ActionProcessor>()
         val analyticsTracker: AnalyticsTracker = scope.get()
-
-        experienceRenderer.show(experience)
 
         val action1 = TestAction(false)
         val stepAction1 = TestStepInteractionAction("test", "a")
@@ -82,7 +80,7 @@ internal class ActionProcessorTest {
         val action5 = TestAction(false)
 
         // WHEN
-        actionProcessor.process(
+        actionProcessor.enqueue(
             RenderContext.Modal,
             listOf(action1, stepAction1, action2, stepAction2, action3, action4, stepAction3, action5),
             BUTTON_TAPPED,
@@ -113,7 +111,7 @@ internal class ActionProcessorTest {
         val stepAction1 = TestStepInteractionAction("test", "a")
 
         // WHEN
-        actionProcessor.process(
+        actionProcessor.enqueue(
             RenderContext.Modal,
             listOf(stepAction1),
             BUTTON_TAPPED,

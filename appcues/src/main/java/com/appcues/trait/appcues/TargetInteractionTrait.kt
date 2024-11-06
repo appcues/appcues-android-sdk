@@ -67,7 +67,7 @@ internal class TargetInteractionTrait(
 
     private val actionDelegate = object : AppcuesActionsDelegate {
         override fun onActions(actions: List<ExperienceAction>, interactionType: InteractionType, viewDescription: String?) {
-            actionProcessor.process(renderContext, actions, interactionType, viewDescription)
+            actionProcessor.enqueue(renderContext, actions, interactionType, viewDescription)
         }
     }
 
