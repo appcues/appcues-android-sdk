@@ -16,6 +16,7 @@ $dokka.location:com.appcues/AnalyticsListener///PointingToDeclaration/appcues/c
 $dokka.location:com.appcues/AnalyticsListener/trackedAnalytic/#com.appcues.AnalyticType#kotlin.String?#kotlin.collections.Map[kotlin.String,kotlin.Any]?#kotlin.Boolean/PointingToDeclaration/appcues/com.appcues/-analytics-listener/tracked-analytic.html
 $dokka.location:com.appcues/Appcues.Companion///PointingToDeclaration/appcues/com.appcues/-appcues/-companion/index.html
 $dokka.location:com.appcues/Appcues.Companion/elementTargeting/#/PointingToDeclaration/appcues/com.appcues/-appcues/-companion/element-targeting.html
+$dokka.location:com.appcues/Appcues.Companion/registerCustomComponent/#kotlin.String#com.appcues.AppcuesCustomComponentView/PointingToDeclaration/appcues/com.appcues/-appcues/-companion/register-custom-component.html
 $dokka.location:com.appcues/Appcues.Companion/version/#/PointingToDeclaration/appcues/com.appcues/-appcues/-companion/version.html
 $dokka.location:com.appcues/Appcues///PointingToDeclaration/appcues/com.appcues/-appcues/index.html
 $dokka.location:com.appcues/Appcues/analyticsListener/#/PointingToDeclaration/appcues/com.appcues/-appcues/analytics-listener.html
@@ -50,6 +51,16 @@ $dokka.location:com.appcues/AppcuesConfig/loggingLevel/#/PointingToDeclaration/
 $dokka.location:com.appcues/AppcuesConfig/navigationHandler/#/PointingToDeclaration/appcues/com.appcues/-appcues-config/navigation-handler.html
 $dokka.location:com.appcues/AppcuesConfig/packageNames/#/PointingToDeclaration/appcues/com.appcues/-appcues-config/package-names.html
 $dokka.location:com.appcues/AppcuesConfig/sessionTimeout/#/PointingToDeclaration/appcues/com.appcues/-appcues-config/session-timeout.html
+$dokka.location:com.appcues/AppcuesCustomComponentView///PointingToDeclaration/appcues/com.appcues/-appcues-custom-component-view/index.html
+$dokka.location:com.appcues/AppcuesCustomComponentView/getDebugConfig/#/PointingToDeclaration/appcues/com.appcues/-appcues-custom-component-view/get-debug-config.html
+$dokka.location:com.appcues/AppcuesCustomComponentView/getView/#com.appcues.AppcuesExperienceActions#kotlin.collections.Map[kotlin.String,kotlin.Any]?/PointingToDeclaration/appcues/com.appcues/-appcues-custom-component-view/get-view.html
+$dokka.location:com.appcues/AppcuesExperienceActions///PointingToDeclaration/appcues/com.appcues/-appcues-experience-actions/index.html
+$dokka.location:com.appcues/AppcuesExperienceActions/close/#kotlin.Boolean/PointingToDeclaration/appcues/com.appcues/-appcues-experience-actions/close.html
+$dokka.location:com.appcues/AppcuesExperienceActions/nextStep/#/PointingToDeclaration/appcues/com.appcues/-appcues-experience-actions/next-step.html
+$dokka.location:com.appcues/AppcuesExperienceActions/previousStep/#/PointingToDeclaration/appcues/com.appcues/-appcues-experience-actions/previous-step.html
+$dokka.location:com.appcues/AppcuesExperienceActions/track/#kotlin.String#kotlin.collections.Map[kotlin.String,kotlin.Any]?/PointingToDeclaration/appcues/com.appcues/-appcues-experience-actions/track.html
+$dokka.location:com.appcues/AppcuesExperienceActions/triggerBlockActions/#/PointingToDeclaration/appcues/com.appcues/-appcues-experience-actions/trigger-block-actions.html
+$dokka.location:com.appcues/AppcuesExperienceActions/updateProfile/#kotlin.collections.Map[kotlin.String,kotlin.String]/PointingToDeclaration/appcues/com.appcues/-appcues-experience-actions/update-profile.html
 $dokka.location:com.appcues/AppcuesFirebaseMessagingService.Companion///PointingToDeclaration/appcues/com.appcues/-appcues-firebase-messaging-service/-companion/index.html
 $dokka.location:com.appcues/AppcuesFirebaseMessagingService.Companion/handleMessage/#android.content.Context#com.google.firebase.messaging.RemoteMessage/PointingToDeclaration/appcues/com.appcues/-appcues-firebase-messaging-service/-companion/handle-message.html
 $dokka.location:com.appcues/AppcuesFirebaseMessagingService.Companion/setToken/#kotlin.String/PointingToDeclaration/appcues/com.appcues/-appcues-firebase-messaging-service/-companion/set-token.html
