@@ -2,7 +2,6 @@ package com.appcues.ui.primitive
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -21,6 +20,7 @@ import com.appcues.data.model.styling.ComponentStyle
 import com.appcues.data.model.styling.ComponentStyle.ComponentHorizontalAlignment
 import com.appcues.ui.composables.LocalStackScope
 import com.appcues.ui.composables.StackScope
+import com.appcues.ui.extensions.conditional
 import com.appcues.ui.extensions.getTextStyle
 import com.appcues.ui.extensions.getVerticalAlignment
 import com.appcues.ui.utils.AppcuesArrangement
@@ -37,9 +37,11 @@ internal fun HorizontalStackPrimitive.Compose(modifier: Modifier) {
         CompositionLocalProvider(LocalStackScope provides StackScope.ROW) {
             ProvideTextStyle(style.getTextStyle()) {
                 items.forEach {
-                    ItemBox(distribution = distribution, primitive = it, parentVerticalAlignment = verticalAlignment) {
-                        it.Compose()
-                    }
+                    ItemBox(
+                        primitive = it,
+                        distribution = distribution,
+                        parentVerticalAlignment = verticalAlignment
+                    )
                 }
             }
         }
@@ -48,24 +50,22 @@ internal fun HorizontalStackPrimitive.Compose(modifier: Modifier) {
 
 @Composable
 private fun RowScope.ItemBox(
-    distribution: ComponentDistribution,
     primitive: ExperiencePrimitive,
+    distribution: ComponentDistribution,
     parentVerticalAlignment: Alignment.Vertical,
-    content: @Composable BoxScope.() -> Unit
 ) {
     Box(
         modifier = Modifier
             .align(primitive.style.getVerticalAlignment(parentVerticalAlignment))
-            .then(
-                if (distribution == ComponentDistribution.EQUAL ||
+            .conditional(
+                distribution == ComponentDistribution.EQUAL ||
                     // for when its a spacer with no set spacing, it will fill available space
                     (primitive is SpacerPrimitive && primitive.spacing eq 0.0)
-                ) Modifier.weight(1f)
-                else Modifier
-            ),
-        contentAlignment = primitive.style.getBoxAlignment(),
-        content = content
-    )
+            ) { weight(1f) },
+        contentAlignment = primitive.style.getBoxAlignment()
+    ) {
+        primitive.Compose()
+    }
 }
 
 private fun ComponentDistribution.toHorizontalArrangement(spacing: Double = 0.0): Arrangement.Horizontal {
