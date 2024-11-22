@@ -12,6 +12,7 @@ import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.Interactio
 import com.appcues.analytics.SdkMetrics
 import com.appcues.data.model.Experience
 import com.appcues.data.model.RenderContext
+import com.appcues.data.model.RenderContext.Embed
 import com.appcues.data.model.StepContainer
 import com.appcues.data.model.StepReference.StepGroupPageIndex
 import com.appcues.statemachine.effects.AwaitDismissEffect
@@ -90,6 +91,13 @@ internal class AppcuesViewModel(
     }
 
     fun onActivityChanged() {
+        if (presentationBinding.renderContext is Embed) {
+            // we do nothing (no dismiss) if this is an embed, as it is safe to navigate away
+            // and return back to an Activity with an embed, and the embed will not block
+            // any other experiences from showing.
+            return
+        }
+
         uiState.value.let { state ->
             // if current state IS Rendering this means that the Activity was removed
             // from an external source (ex deep link) and we should end the experience
