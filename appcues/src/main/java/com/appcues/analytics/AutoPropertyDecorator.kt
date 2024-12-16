@@ -54,7 +54,8 @@ internal class AutoPropertyDecorator(
         "_osVersion" to "${VERSION.SDK_INT}",
         "_deviceType" to contextWrapper.getString(R.string.appcues_device_type),
         "_deviceModel" to contextWrapper.getDeviceName(),
-        "_timezoneOffset" to TimeZone.getDefault().offsetMinutes()
+        "_timezoneOffset" to TimeZone.getDefault().offsetMinutes(),
+        "_timezoneCode" to TimeZone.getDefault().id,
     )
 
     private val pushProperties: Map<String, Any?>
