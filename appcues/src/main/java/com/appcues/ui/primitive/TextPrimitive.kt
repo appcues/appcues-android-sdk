@@ -20,11 +20,12 @@ private const val TEXT_SCALE_REDUCTION_INTERVAL = 0.9f
 
 @Composable
 internal fun TextPrimitive.Compose(modifier: Modifier) {
-    val style = LocalTextStyle.current.applyStyle(style)
+    val textStyle = LocalTextStyle.current.applyStyle(style)
+    val spansText = spans.joinToString(separator = String()) { it.text }
 
-    var resizedStyle by remember(style) { mutableStateOf(style) }
-    var resizedSpans by remember(style) { mutableStateOf(spans) }
-    var readyToDraw by remember(style) { mutableStateOf(false) }
+    var resizedStyle by remember(id, spansText, textStyle) { mutableStateOf(textStyle) }
+    var resizedSpans by remember(id, spansText, textStyle) { mutableStateOf(spans) }
+    var readyToDraw by remember(id, spansText, textStyle) { mutableStateOf(false) }
 
     key(resizedStyle) {
 
