@@ -6,17 +6,16 @@ import com.appcues.AnalyticType.IDENTIFY
 import com.appcues.AnalyticType.SCREEN
 import com.appcues.analytics.ActivityRequestBuilder
 import com.appcues.analytics.TrackingData
-import com.appcues.data.model.ExperienceStepFormState
 import com.appcues.data.remote.appcues.request.EventRequest
-import java.util.Date
-import java.util.UUID
+import com.appcues.util.DataSanitizer
 
 internal class AnalyticsPublisher(
-    private val storage: Storage
+    private val storage: Storage,
+    private val dataSanitizer: DataSanitizer,
 ) {
 
-    fun publish(listener: AnalyticsListener?, data: TrackingData) {
-        if (listener == null) return
+    fun publish(listener: AnalyticsListener?, data: TrackingData) = with(dataSanitizer) {
+        if (listener == null) return@with
 
         when (data.type) {
             EVENT -> data.request.events?.forEach {
@@ -32,46 +31,4 @@ internal class AnalyticsPublisher(
 
     private fun EventRequest.screenTitle(): String? =
         attributes[ActivityRequestBuilder.SCREEN_TITLE_ATTRIBUTE] as? String
-
-    private fun Map<*, *>.sanitize(): MutableMap<String, Any> {
-        val sanitizedMap = mutableMapOf<String, Any>()
-
-        forEach {
-            val key = it.key
-            val value = it.value
-            if (key is String && value != null) {
-                sanitizedMap[key] = when (value) {
-                    is ExperienceStepFormState -> value.toHashMap().sanitize()
-                    // convert Date types to Double value
-                    is Date -> value.time.toDouble()
-                    // convert UUID to string value
-                    is UUID -> value.toString()
-                    is Map<*, *> -> value.sanitize()
-                    is List<*> -> value.sanitize()
-                    else -> value
-                }
-            }
-        }
-        return sanitizedMap
-    }
-
-    private fun List<*>.sanitize(): List<*> {
-        val sanitizedList = mutableListOf<Any>()
-
-        filterNotNull().forEach {
-            sanitizedList.add(
-                when (it) {
-                    is ExperienceStepFormState -> it.toHashMap().sanitize()
-                    // convert Date types to Double value
-                    is Date -> it.time.toDouble()
-                    // convert UUID to string value
-                    is UUID -> it.toString()
-                    is Map<*, *> -> it.sanitize()
-                    is List<*> -> it.sanitize()
-                    else -> it
-                }
-            )
-        }
-        return sanitizedList
-    }
 }
