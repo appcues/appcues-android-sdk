@@ -25,6 +25,7 @@
     <string name="appcues_debugger_status_experience_name">Showing %1$s</string>
     <string name="appcues_debugger_status_experience_step">Group %1$s step %2$s</string>
     <string name="appcues_debugger_status_sdk_title">Installed SDK %1$s</string>
+    <string name="appcues_debugger_status_sdk_title_fake">Installed SDK 1.0.0</string>
     <string name="appcues_debugger_status_sdk_line1">Account ID: %1$s</string>
     <string name="appcues_debugger_status_sdk_line2">Application ID: %1$s</string>
     <string name="appcues_debugger_status_check_connection_connecting_title">Connecting to Appcues</string>

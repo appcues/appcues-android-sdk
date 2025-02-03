@@ -18,9 +18,12 @@ import androidx.compose.ui.unit.LayoutDirection.Ltr
  * ONLY USE THIS FOR APPCUES SPECIFIC COMPOSITIONS LIKE OUR FAB(Floating Action Button)
  */
 @Composable
-internal fun AppcuesTheme(content: @Composable () -> Unit) {
+internal fun AppcuesTheme(
+    isTesting: Boolean,
+    content: @Composable () -> Unit,
+) {
     val isDark = isSystemInDarkTheme()
-    val appcuesTheme = if (isDark) appcuesDarkColors() else appcuesLightColors()
+    val appcuesTheme = if (isDark) appcuesDarkColors(isTesting) else appcuesLightColors(isTesting)
 
     MaterialTheme(colors = appcuesTheme.toMaterialTheme(isDark)) {
         CompositionLocalProvider(
@@ -33,7 +36,7 @@ internal fun AppcuesTheme(content: @Composable () -> Unit) {
     }
 }
 
-internal val LocalAppcuesTheme = staticCompositionLocalOf { appcuesLightColors() }
+internal val LocalAppcuesTheme = staticCompositionLocalOf { appcuesLightColors(false) }
 
 /**
  * Based on our current theme, override some properties for the material theme

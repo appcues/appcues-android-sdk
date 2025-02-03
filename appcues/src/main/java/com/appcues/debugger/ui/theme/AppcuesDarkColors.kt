@@ -22,12 +22,13 @@ private val Green300 = Color(color = 0xFF5EBEBE)
 
 // Composing a color palette for dark mode are based on foundation figma doc.
 // Visit: https://www.figma.com/file/8Sozh9JnseLTF5oWjvGfIp/Foundations?type=design&node-id=5619-2635&mode=design&t=56CipGcX1bXwpUOW-0
-internal fun appcuesDarkColors() = AppcuesThemeColors(
+internal fun appcuesDarkColors(isTesting: Boolean) = AppcuesThemeColors(
     background = Neutral600,
     backgroundBranded = Blurple800,
     backgroundSelected = Neutral700,
     error = Pink400,
     warning = Yellow300,
+    loading = if (isTesting) Color.Transparent else Blue300,
     info = Blue300,
     success = Green300,
     link = Blurple300,

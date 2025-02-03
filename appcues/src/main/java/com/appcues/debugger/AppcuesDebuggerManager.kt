@@ -13,6 +13,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.viewModelScope
+import com.appcues.AppcuesConfig
 import com.appcues.R
 import com.appcues.debugger.DebuggerViewModel.UIState.Expanded
 import com.appcues.debugger.ui.DebuggerComposition
@@ -33,7 +34,8 @@ import kotlin.coroutines.CoroutineContext
 internal class AppcuesDebuggerManager(
     private val appcuesViewTreeOwner: AppcuesViewTreeOwner,
     private val contextWrapper: ContextWrapper,
-    private val scope: AppcuesScope
+    private val scope: AppcuesScope,
+    private val appcuesConfig: AppcuesConfig,
 ) : Application.ActivityLifecycleCallbacks {
 
     private val coroutineScope: CoroutineScope = object : CoroutineScope {
@@ -122,7 +124,7 @@ internal class AppcuesDebuggerManager(
                     }
 
                     setContent {
-                        AppcuesTheme {
+                        AppcuesTheme(isTesting = appcuesConfig.isSnapshotTesting) {
                             DebuggerComposition(debuggerViewModel) {
                                 stop()
                                 parentView.removeView(this)

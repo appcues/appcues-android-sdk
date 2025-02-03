@@ -19,6 +19,7 @@ internal class AppcuesThemeColors(
     backgroundSelected: Color,
     error: Color,
     warning: Color,
+    loading: Color,
     info: Color,
     success: Color,
     link: Color,
@@ -43,6 +44,8 @@ internal class AppcuesThemeColors(
     var warning by mutableStateOf(warning, structuralEqualityPolicy())
         internal set
     var info by mutableStateOf(info, structuralEqualityPolicy())
+        internal set
+    var loading by mutableStateOf(loading, structuralEqualityPolicy())
         internal set
     var success by mutableStateOf(success, structuralEqualityPolicy())
         internal set
