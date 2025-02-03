@@ -4,6 +4,7 @@ import com.appcues.AnalyticType.EVENT
 import com.appcues.AnalyticType.GROUP
 import com.appcues.AnalyticType.IDENTIFY
 import com.appcues.AnalyticType.SCREEN
+import com.appcues.AppcuesConfig
 import com.appcues.R
 import com.appcues.analytics.ActivityRequestBuilder
 import com.appcues.analytics.AnalyticsTracker
@@ -14,6 +15,7 @@ import com.appcues.analytics.TrackingData
 import com.appcues.data.model.ExperienceStepFormState
 import com.appcues.data.remote.appcues.request.ActivityRequest
 import com.appcues.data.remote.appcues.request.EventRequest
+import com.appcues.debugger.model.DebuggerConstants
 import com.appcues.debugger.model.DebuggerEventItem
 import com.appcues.debugger.model.DebuggerEventItemPropertySection
 import com.appcues.debugger.model.EventType
@@ -28,12 +30,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import java.util.Date
 import kotlin.coroutines.CoroutineContext
 
 internal class DebuggerRecentEventsManager(
     private val contextWrapper: ContextWrapper,
     private val analyticsTracker: AnalyticsTracker,
+    private val appcuesConfig: AppcuesConfig,
 ) : CoroutineScope {
 
     companion object {
@@ -97,7 +99,7 @@ internal class DebuggerRecentEventsManager(
                 type = EventType.USER_PROFILE,
                 // it should always contain timestamp property, this is just a safeguard
                 // in case something changes in the future to avoid unwanted exceptions
-                timestamp = ((request.profileUpdate?.get(AutoPropertyDecorator.LAST_SEEN_AT) as Date?) ?: Date()).time,
+                timestamp = request.getTimestampMillis(),
                 name = request.userId,
                 propertySections = listOf(
                     DebuggerEventItemPropertySection(
@@ -116,7 +118,7 @@ internal class DebuggerRecentEventsManager(
             DebuggerEventItem(
                 id = lastEventId,
                 type = EventType.GROUP_UPDATE,
-                timestamp = Date().time,
+                timestamp = request.getTimestampMillis(),
                 name = request.groupId ?: contextWrapper.getString(R.string.appcues_debugger_event_type_group_update_title),
                 propertySections = listOf(
                     DebuggerEventItemPropertySection(
@@ -129,18 +131,25 @@ internal class DebuggerRecentEventsManager(
         lastEventId++
     }
 
+    private fun ActivityRequest.getTimestampMillis(): Long {
+        return if (!appcuesConfig.isSnapshotTesting) {
+            timestamp.time
+        } else {
+            DebuggerConstants.testDate.time
+        }
+    }
+
     private fun onActivityRequest(request: ActivityRequest) {
         request.events?.forEach { event ->
             val type = event.name.toEventType()
             val title = event.name.toEventTitle()?.let { contextWrapper.getString(it) }
-            val displayName = getEventDisplayName(event, type, title)
 
             events.addFirst(
                 DebuggerEventItem(
                     id = lastEventId,
                     type = type,
-                    timestamp = event.timestamp.time,
-                    name = displayName,
+                    timestamp = event.getTimestampMillis(),
+                    name = event.getDisplayName(type, title),
                     propertySections = listOf(
                         DebuggerEventItemPropertySection(
                             title = contextWrapper.getString(R.string.appcues_debugger_event_details_properties_title),
@@ -187,16 +196,23 @@ internal class DebuggerRecentEventsManager(
         }
     }
 
-    private fun getEventDisplayName(
-        event: EventRequest,
+    private fun EventRequest.getDisplayName(
         type: EventType,
         title: String?
-    ) = if (type == EventType.SCREEN && event.attributes.contains(ActivityRequestBuilder.SCREEN_TITLE_ATTRIBUTE)) {
+    ) = if (type == EventType.SCREEN && attributes.contains(ActivityRequestBuilder.SCREEN_TITLE_ATTRIBUTE)) {
         // screen views are a special case where the title is the screen title
-        event.attributes[ActivityRequestBuilder.SCREEN_TITLE_ATTRIBUTE] as String
+        attributes[ActivityRequestBuilder.SCREEN_TITLE_ATTRIBUTE] as String
     } else {
         // otherwise - use the given title for system events or the event name for custom events
-        title ?: event.name
+        title ?: name
+    }
+
+    private fun EventRequest.getTimestampMillis(): Long {
+        return if (!appcuesConfig.isSnapshotTesting) {
+            timestamp.time
+        } else {
+            DebuggerConstants.testDate.time
+        }
     }
 
     private fun Map<String, Any?>.toSortedList(): List<Pair<String, Any?>> = toList().let { list ->

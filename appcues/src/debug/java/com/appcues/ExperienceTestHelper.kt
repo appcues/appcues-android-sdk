@@ -21,9 +21,12 @@ public fun Appcues(
     config: (AppcuesConfig.() -> Unit)? = null,
 ): Appcues = Bootstrap.createScope(
     context = context,
-    config = AppcuesConfig(accountId, applicationId).apply { config?.invoke(this) }
-).also { scope ->
+    config = AppcuesConfig(accountId, applicationId)
+        .apply {
+            isSnapshotTesting = true
+            config?.invoke(this)
+        }).also { scope ->
     // optional test overrides
     imageLoader?.let { scope.define(ImageLoader::class, ScopedDefinition { imageLoader }, true) }
-    coroutineScope?.let { scope.define(CoroutineScope::class, ScopedDefinition { coroutineScope}, true) }
+    coroutineScope?.let { scope.define(CoroutineScope::class, ScopedDefinition { coroutineScope }, true) }
 }.get()

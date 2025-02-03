@@ -18,19 +18,9 @@ internal object DebuggerModule : AppcuesModule {
             )
         }
 
-        scoped {
-            DebuggerRecentEventsManager(
-                contextWrapper = get(),
-                analyticsTracker = get(),
-            )
-        }
-
-        scoped {
-            DebuggerFontManager(appcuesConfig = get(), context = get(), logcues = get())
-        }
-
-        scoped { DebuggerLogMessageManager(get()) }
-
+        scoped { DebuggerRecentEventsManager(contextWrapper = get(), analyticsTracker = get(), appcuesConfig = get()) }
+        scoped { DebuggerFontManager(appcuesConfig = get(), context = get(), logcues = get()) }
+        scoped { DebuggerLogMessageManager(appcuesConfig = get(), logcues = get()) }
         scoped { SaveCaptureUseCase(sdkSettings = get(), customer = get(), imageUpload = get()) }
         scoped { GetCaptureUseCase() }
     }

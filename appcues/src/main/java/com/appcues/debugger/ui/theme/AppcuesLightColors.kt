@@ -22,12 +22,13 @@ private val Green600 = Color(color = 0xFF108484)
 
 // Composing a color palette for light mode are based on foundation figma doc.
 // Visit: https://www.figma.com/file/8Sozh9JnseLTF5oWjvGfIp/Foundations?type=design&node-id=5619-2635&mode=design&t=56CipGcX1bXwpUOW-0
-internal fun appcuesLightColors() = AppcuesThemeColors(
+internal fun appcuesLightColors(isTesting: Boolean) = AppcuesThemeColors(
     background = Neutral0,
     backgroundBranded = Blurple100,
     backgroundSelected = Neutral50,
     error = Pink600,
     warning = Yellow600,
+    loading = if (isTesting) Color.Transparent else Blue600,
     info = Blue600,
     success = Green600,
     link = Blurple700,

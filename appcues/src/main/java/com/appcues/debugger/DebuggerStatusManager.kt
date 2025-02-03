@@ -121,6 +121,7 @@ internal class DebuggerStatusManager(
                 AnalyticsEvent.ScreenView.eventName -> {
                     screenTrackingStatus = SUCCESS
                 }
+
                 AnalyticsEvent.ExperienceStarted.eventName -> {
                     val id = event.attributes["experienceId"] as String
                     displayingExperiences[id] = DisplayingExperience(
@@ -131,6 +132,7 @@ internal class DebuggerStatusManager(
                         frameId = event.attributes["frameId"] as String?,
                     )
                 }
+
                 AnalyticsEvent.ExperienceStepSeen.eventName -> {
                     val id = event.attributes["experienceId"] as String
                     val step = (event.attributes["stepIndex"] as String).split(",").let {
@@ -142,11 +144,13 @@ internal class DebuggerStatusManager(
 
                     displayingExperiences[id]?.step = step
                 }
+
                 AnalyticsEvent.ExperienceCompleted.eventName, AnalyticsEvent.ExperienceDismissed.eventName -> {
                     val id = event.attributes["experienceId"] as String
 
                     displayingExperiences.remove(id)
                 }
+
                 else -> Unit
             }
         }
@@ -162,6 +166,7 @@ internal class DebuggerStatusManager(
                 updateData()
                 true
             }
+
             pushValidationToken -> {
                 pushStatus = SUCCESS
                 pushTimeoutJob?.cancel()
@@ -169,6 +174,7 @@ internal class DebuggerStatusManager(
                 updateData()
                 true
             }
+
             else -> false
         }
     }
@@ -193,12 +199,19 @@ internal class DebuggerStatusManager(
         statusType = PHONE,
     )
 
-    private fun sdkInfoItem() = DebuggerStatusItem(
-        title = contextWrapper.getString(R.string.appcues_debugger_status_sdk_title, BuildConfig.SDK_VERSION),
-        statusType = SUCCESS,
-        line1 = contextWrapper.getString(R.string.appcues_debugger_status_sdk_line1, appcuesConfig.accountId),
-        line2 = contextWrapper.getString(R.string.appcues_debugger_status_sdk_line2, appcuesConfig.applicationId)
-    )
+    private fun sdkInfoItem(): DebuggerStatusItem {
+        val title = if (!appcuesConfig.isSnapshotTesting) {
+            contextWrapper.getString(R.string.appcues_debugger_status_sdk_title, BuildConfig.SDK_VERSION)
+        } else {
+            contextWrapper.getString(R.string.appcues_debugger_status_sdk_title_fake)
+        }
+        return DebuggerStatusItem(
+            title = title,
+            statusType = SUCCESS,
+            line1 = contextWrapper.getString(R.string.appcues_debugger_status_sdk_line1, appcuesConfig.accountId),
+            line2 = contextWrapper.getString(R.string.appcues_debugger_status_sdk_line2, appcuesConfig.applicationId)
+        )
+    }
 
     private fun connectionCheckItem() = DebuggerStatusItem(
         title = when (connectionStatus) {
@@ -384,6 +397,7 @@ internal class DebuggerStatusManager(
                 pushStatus = ERROR
                 updateData()
             }
+
             is Success -> {
                 pushValidationToken = token
 

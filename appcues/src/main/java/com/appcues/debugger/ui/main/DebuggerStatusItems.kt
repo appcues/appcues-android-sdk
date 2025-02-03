@@ -32,7 +32,7 @@ internal fun DebuggerStatusItem.StatusItemIcon() {
     val theme = LocalAppcuesTheme.current
 
     if (statusType == StatusType.LOADING) {
-        CircularProgressIndicator(modifier = iconModifier, color = theme.info)
+        CircularProgressIndicator(modifier = iconModifier, color = theme.loading)
     } else {
         Image(
             painter = painterResource(id = statusType.toResourceId()),

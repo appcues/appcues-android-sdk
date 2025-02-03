@@ -1,5 +1,7 @@
 package com.appcues.debugger
 
+import com.appcues.AppcuesConfig
+import com.appcues.debugger.model.DebuggerConstants
 import com.appcues.logging.LogMessage
 import com.appcues.logging.Logcues
 import kotlinx.coroutines.CoroutineScope
@@ -10,7 +12,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
-internal class DebuggerLogMessageManager(private val logcues: Logcues) : CoroutineScope {
+internal class DebuggerLogMessageManager(
+    private val appcuesConfig: AppcuesConfig,
+    private val logcues: Logcues
+) : CoroutineScope {
 
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Default
@@ -41,12 +46,16 @@ internal class DebuggerLogMessageManager(private val logcues: Logcues) : Corouti
     }
 
     private suspend fun onMessage(logMessage: LogMessage) {
-        messages.add(0, logMessage)
+        if (!appcuesConfig.isSnapshotTesting) {
+            messages.add(0, logMessage)
+        } else {
+            messages.add(0, logMessage.copy(timestamp = DebuggerConstants.testDate))
+        }
 
         updateData()
     }
 
-    suspend fun updateData() {
+    private suspend fun updateData() {
         _data.emit(messages)
     }
 }

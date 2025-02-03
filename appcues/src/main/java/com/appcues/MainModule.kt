@@ -36,7 +36,7 @@ internal object MainModule : AppcuesModule {
         scoped { DeepLinkHandler(scope = scope) }
         scoped { PushDeeplinkHandler(scope) }
         scoped { PushOpenedProcessor(scope) }
-        scoped { AppcuesDebuggerManager(appcuesViewTreeOwner = get(), contextWrapper = get(), scope = scope) }
+        scoped { AppcuesDebuggerManager(appcuesViewTreeOwner = get(), contextWrapper = get(), scope = scope, appcuesConfig = get()) }
         scoped { StateMachineDirectory() }
         scoped { ExperienceRenderer(scope = scope) }
         scoped {

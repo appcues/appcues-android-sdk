@@ -100,4 +100,6 @@ public data class AppcuesConfig internal constructor(
      * a different package than your main app (multi-module apps)
      */
     var packageNames: List<String> = arrayListOf()
+
+    internal var isSnapshotTesting: Boolean = false
 }
