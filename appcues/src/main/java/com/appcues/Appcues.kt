@@ -238,10 +238,15 @@ public class Appcues internal constructor(internal val scope: AppcuesScope) {
     /**
      * Track an action taken by a user.
      *
-     * @param name Name of the event.
+     * @param name Name of the event, cannot be empty.
      * @param properties Optional properties that provide additional context about the event.
      */
     public fun track(name: String, properties: Map<String, Any>? = null) {
+        if (name.isEmpty()) {
+            logcues.error("Invalid event name - empty string")
+            return
+        }
+
         analyticsTracker.track(name, properties)
     }
 
