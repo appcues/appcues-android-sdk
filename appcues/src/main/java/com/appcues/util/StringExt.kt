@@ -6,9 +6,11 @@ internal fun String.toSlug() = lowercase(Locale.getDefault())
     .replace("\n", " ")
     .replace("[^a-z\\d\\s]".toRegex(), " ")
     .split(" ")
+    .filter { it.isNotEmpty() }
     .joinToString("-")
     .replace("-+".toRegex(), "-")
     .trimEnd('-')
+    .trimStart('-')
 
 @Suppress("TooGenericExceptionCaught", "SwallowedException")
 internal fun String.beautify(indentationMultiplier: Int): String {

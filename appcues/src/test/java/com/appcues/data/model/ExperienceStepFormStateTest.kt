@@ -363,6 +363,35 @@ internal class ExperienceStepFormStateTest {
         assertThat(formState.isFormComplete).isFalse()
     }
 
+    @Test
+    fun `form state SHOULD NOT include leading or trailing hyphens WHEN formatted to profile update`() {
+        // GIVEN
+        val formState = ExperienceStepFormState()
+        val options = optionItems(5)
+        val label = TextPrimitive(
+            id = UUID.randomUUID(),
+            spans = listOf(TextSpanPrimitive("*Personalized Onboarding Multi-Select Response-"))
+        )
+        val optionSelect = OptionSelectPrimitive(
+            id = UUID.randomUUID(),
+            label = label,
+            minSelections = 1u,
+            selectMode = MULTIPLE,
+            options = options,
+        )
+        val textInput = TextInputPrimitive(id = UUID.randomUUID(), label = label, required = true)
+        formState.register(textInput)
+        formState.register(optionSelect)
+        formState.setValue(optionSelect, options[0].value)
+
+        // WHEN
+        val profileUpdate = formState.formattedAsProfileUpdate()
+
+        // THEN
+        assertThat(profileUpdate.size).isEqualTo(1)
+        assertThat(profileUpdate.keys.first()).isEqualTo("_appcuesForm_personalized-onboarding-multi-select-response")
+    }
+
     private fun optionItems(count: Int) = (0..count).map {
         OptionItem("$it", TextPrimitive(UUID.randomUUID(), spans = listOf(TextSpanPrimitive("$it"))))
     }
