@@ -177,6 +177,18 @@ internal class AppcuesTest : AppcuesScopeTest {
     }
 
     @Test
+    fun `track event SHOULD NOT track WHEN event name is empty`() {
+        // GIVEN
+        val tracker: AnalyticsTracker = get()
+
+        // WHEN
+        appcues.track("")
+
+        // THEN
+        verify(exactly = 0) { tracker.track(any(), any()) }
+    }
+
+    @Test
     fun `track screen SHOULD call AnalyticsTracker screen function`() {
         // GIVEN
         val screenTitle = "test_screen"
