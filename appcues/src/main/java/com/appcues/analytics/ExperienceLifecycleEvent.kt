@@ -114,17 +114,19 @@ internal sealed class ExperienceLifecycleEvent(
         this["version"] = experience.publishedAt
         this["localeName"] = experience.localeName
         this["localeId"] = experience.localeId
+        this["workflowId"] = experience.workflowId?.appcuesFormatted()
+        this["workflowTaskId"] = experience.workflowTaskId?.appcuesFormatted()
         this["trigger"] = triggerValue
 
         when (val trigger = experience.trigger) {
             is ExperienceCompletionAction -> {
-                this["fromExperienceId"] = trigger.fromExperienceId
+                this["fromExperienceId"] = trigger.fromExperienceId.appcuesFormatted()
             }
             is LaunchExperienceAction -> {
-                this["fromExperienceId"] = trigger.fromExperienceId
+                this["fromExperienceId"] = trigger.fromExperienceId?.appcuesFormatted()
             }
             is PushNotification -> {
-                this["pushNotificationId"] = trigger.fromPushId
+                this["pushNotificationId"] = trigger.fromPushId.appcuesFormatted()
             }
             else -> Unit
         }

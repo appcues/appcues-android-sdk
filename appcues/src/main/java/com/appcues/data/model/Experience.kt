@@ -20,6 +20,8 @@ internal data class Experience(
     val publishedAt: Long?,
     val localeId: String?,
     val localeName: String?,
+    val workflowId: UUID?,
+    val workflowTaskId: UUID?,
     val experiment: Experiment?,
     val completionActions: List<ExperienceAction>,
     val trigger: ExperienceTrigger,
