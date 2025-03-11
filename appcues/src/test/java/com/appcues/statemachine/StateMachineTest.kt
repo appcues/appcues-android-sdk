@@ -342,6 +342,8 @@ internal class StateMachineTest : AppcuesScopeTest {
             localeId = null,
             localeName = null,
             trigger = ExperienceTrigger.ShowCall,
+            workflowId = null,
+            workflowTaskId = null,
         )
         val initialState = IdlingState
         val stateMachine = initMachine(initialState)
@@ -373,6 +375,8 @@ internal class StateMachineTest : AppcuesScopeTest {
             localeId = null,
             localeName = null,
             trigger = ExperienceTrigger.ShowCall,
+            workflowId = null,
+            workflowTaskId = null,
         )
         val initialState = IdlingState
         val stateMachine = initMachine(initialState)

@@ -66,6 +66,8 @@ internal fun mockExperience(onPresent: (() -> Unit)? = null) =
         trigger = ShowCall,
         localeId = null,
         localeName = null,
+        workflowId = null,
+        workflowTaskId = null,
     )
 
 internal fun mockStep(id: UUID, presentingTrait: PresentingTrait) =
@@ -109,6 +111,8 @@ internal fun mockExperienceExperiment(experiment: Experiment) =
         trigger = ShowCall,
         localeId = null,
         localeName = null,
+        workflowId = null,
+        workflowTaskId = null,
     )
 
 internal fun mockEmbedExperience(frameId: String, onPresent: (() -> Unit)? = null) =
@@ -136,6 +140,8 @@ internal fun mockEmbedExperience(frameId: String, onPresent: (() -> Unit)? = nul
         trigger = ExperienceTrigger.Qualification("screen_view"),
         localeId = null,
         localeName = null,
+        workflowId = null,
+        workflowTaskId = null,
     )
 
 // An experience with two step containers, each with one step. The given list of actions are applied to both
@@ -175,6 +181,8 @@ internal fun mockExperienceNavigateActions(actions: List<Action>, presentingTrai
         trigger = trigger,
         localeId = null,
         localeName = null,
+        workflowId = null,
+        workflowTaskId = null,
     )
 
 internal fun mockLocalizedExperience(localeName: String, localeId: String) =
@@ -202,4 +210,35 @@ internal fun mockLocalizedExperience(localeName: String, localeId: String) =
         trigger = ShowCall,
         localeId = localeId,
         localeName = localeName,
+        workflowId = null,
+        workflowTaskId = null,
+    )
+
+internal fun mockWorkflowExperience(workflowId: UUID, workflowTaskId: UUID) =
+    Experience(
+        id = UUID.fromString("d84c9d01-aa27-4cbb-b832-ee03720e04fc"),
+        name = "Mock Localized Experience",
+        type = "mobile",
+        renderContext = RenderContext.Modal,
+        stepContainers = listOf(
+            StepContainer(
+                id = UUID.fromString("e062bd81-b736-44c4-abba-633dfff966aa"),
+                steps = listOf(
+                    mockStep(UUID.fromString("01d8a05a-3a55-4ecc-872d-d140cd628902"), mockPresentingTrait()),
+                ),
+                contentHolderTrait = mockk(relaxed = true),
+                contentWrappingTrait = mockk(relaxed = true),
+                actions = emptyMap(),
+            )
+        ),
+        published = true,
+        priority = LOW,
+        publishedAt = 1652895835000,
+        experiment = null,
+        completionActions = arrayListOf(TrackEventAction(hashMapOf(), analyticsTracker = mockk(relaxed = true))),
+        trigger = ShowCall,
+        localeId = null,
+        localeName = null,
+        workflowId = workflowId,
+        workflowTaskId = workflowTaskId,
     )
