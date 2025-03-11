@@ -17,6 +17,7 @@ import com.appcues.di.scope.get
 import com.appcues.logging.Logcues
 import com.appcues.mocks.mockExperience
 import com.appcues.mocks.mockLocalizedExperience
+import com.appcues.mocks.mockWorkflowExperience
 import com.appcues.mocks.storageMockk
 import com.appcues.rules.MainDispatcherRule
 import com.appcues.statemachine.Action.EndExperience
@@ -160,6 +161,35 @@ internal class ExperienceLifecycleTrackerTest {
             // and all should have the specified locale information
             assertThat("France").isEqualTo(it["localeName"])
             assertThat("b636348b-648f-4e0d-a06a-6ebb2fe2b7f8").isEqualTo(it["localeId"])
+        }
+    }
+
+    @Test
+    fun `Idling SHOULD track events WITH workflow properties WHEN action is StartExperience`() = runTest {
+        // verify locale properties from context are coming through
+        // GIVEN
+        val experience = mockWorkflowExperience(
+            workflowId = UUID.randomUUID(),
+            workflowTaskId = UUID.randomUUID()
+        )
+        val initialState = IdlingState
+        val action = StartExperience(experience)
+        val scope = initScope(initialState)
+        val stateMachine: StateMachine = scope.get()
+        val analyticsTracker: AnalyticsTracker = scope.get()
+
+        // WHEN
+        stateMachine.handleAction(action)
+
+        // THEN
+        val properties = mutableListOf<Map<String, Any>>()
+        verify { analyticsTracker.track(any(), capture(properties), any(), any()) }
+        assertThat(properties).isNotEmpty()
+        properties.forEach {
+            // there are multiple flow events during the experience start (experience start and step start)
+            // and all should have the specified locale information
+            assertThat(experience.workflowId?.appcuesFormatted()).isEqualTo(it["workflowId"])
+            assertThat(experience.workflowTaskId?.appcuesFormatted()).isEqualTo(it["workflowTaskId"])
         }
     }
 

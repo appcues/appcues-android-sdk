@@ -292,6 +292,8 @@ internal class ExperienceTest {
             requestId = null,
             error = null,
             renderErrorId = null,
+            workflowId = null,
+            workflowTaskId = null
         )
     }
 

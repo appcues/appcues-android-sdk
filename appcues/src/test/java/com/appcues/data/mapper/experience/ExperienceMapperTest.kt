@@ -12,7 +12,7 @@ import java.util.UUID
 internal class ExperienceMapperTest {
 
     @Test
-    fun `mapDecoded SHOULD set locale properties from ExperienceResponse context`() {
+    fun `mapDecoded SHOULD set context properties from ExperienceResponse context`() {
         // GIVEN
         val mapper = ExperienceMapper(
             stepMapper = mockk(relaxed = true),
@@ -31,7 +31,12 @@ internal class ExperienceMapperTest {
             publishedAt = null,
             nextContentId = null,
             redirectUrl = null,
-            context = ContextResponse("locale-id", "locale-name")
+            context = ContextResponse(
+                localeId ="locale-id",
+                localeName = "locale-name",
+                workflowId = UUID.randomUUID(),
+                workflowTaskId = UUID.randomUUID()
+            )
         )
 
         // WHEN
@@ -40,6 +45,8 @@ internal class ExperienceMapperTest {
         // THEN
         assertThat(experience.localeId).isEqualTo("locale-id")
         assertThat(experience.localeName).isEqualTo("locale-name")
+        assertThat(experience.workflowId).isEqualTo(response.context?.workflowId)
+        assertThat(experience.workflowTaskId).isEqualTo(response.context?.workflowTaskId)
     }
 
     @Test
@@ -71,10 +78,12 @@ internal class ExperienceMapperTest {
         // THEN
         assertThat(experience.localeId).isNull()
         assertThat(experience.localeName).isNull()
+        assertThat(experience.workflowId).isNull()
+        assertThat(experience.workflowTaskId).isNull()
     }
 
     @Test
-    fun `mapDecoded SHOULD set locale properties from FailedExperienceResponse context`() {
+    fun `mapDecoded SHOULD set context properties from FailedExperienceResponse context`() {
         // GIVEN
         val mapper = ExperienceMapper(
             stepMapper = mockk(relaxed = true),
@@ -87,7 +96,12 @@ internal class ExperienceMapperTest {
             name = "name",
             type = null,
             publishedAt = null,
-            context = ContextResponse("locale-id", "locale-name")
+            context = ContextResponse(
+                localeId ="locale-id",
+                localeName = "locale-name",
+                workflowId = UUID.randomUUID(),
+                workflowTaskId = UUID.randomUUID()
+            )
         )
 
         // WHEN
@@ -96,5 +110,7 @@ internal class ExperienceMapperTest {
         // THEN
         assertThat(experience.localeId).isEqualTo("locale-id")
         assertThat(experience.localeName).isEqualTo("locale-name")
+        assertThat(experience.workflowId).isEqualTo(response.context?.workflowId)
+        assertThat(experience.workflowTaskId).isEqualTo(response.context?.workflowTaskId)
     }
 }

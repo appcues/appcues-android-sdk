@@ -150,35 +150,35 @@ internal class ExperienceLifecycleEventTest {
     fun `ExperienceLifecycleEvent with Trigger ExperienceCompletionAction`() {
         // given
         val fromExperienceId = UUID.randomUUID()
-        val frameExperience = experience.copy(
+        val experience = experience.copy(
             trigger = ExperienceCompletionAction(fromExperienceId)
         )
-        val event = StepSeen(frameExperience, 1)
+        val event = StepSeen(experience, 1)
         // then
-        assertThat(event.properties).containsEntry("fromExperienceId", fromExperienceId)
+        assertThat(event.properties).containsEntry("fromExperienceId", fromExperienceId.appcuesFormatted())
     }
 
     @Test
     fun `ExperienceLifecycleEvent with Trigger LaunchExperienceAction`() {
         // given
         val fromExperienceId = UUID.randomUUID()
-        val frameExperience = experience.copy(
+        val experience = experience.copy(
             trigger = LaunchExperienceAction(fromExperienceId)
         )
-        val event = StepSeen(frameExperience, 1)
+        val event = StepSeen(experience, 1)
         // then
-        assertThat(event.properties).containsEntry("fromExperienceId", fromExperienceId)
+        assertThat(event.properties).containsEntry("fromExperienceId", fromExperienceId.appcuesFormatted())
     }
 
     @Test
     fun `ExperienceLifecycleEvent with Trigger PushNotification`() {
         // given
-        val fromExperienceId = UUID.randomUUID()
-        val frameExperience = experience.copy(
-            trigger = PushNotification(fromExperienceId)
+        val pushNotificationId = UUID.randomUUID()
+        val experience = experience.copy(
+            trigger = PushNotification(pushNotificationId)
         )
-        val event = StepSeen(frameExperience, 1)
+        val event = StepSeen(experience, 1)
         // then
-        assertThat(event.properties).containsEntry("pushNotificationId", fromExperienceId)
+        assertThat(event.properties).containsEntry("pushNotificationId", pushNotificationId.appcuesFormatted())
     }
 }
