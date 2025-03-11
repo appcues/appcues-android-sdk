@@ -32,7 +32,7 @@ internal class ExperienceMapperTest {
             nextContentId = null,
             redirectUrl = null,
             context = ContextResponse(
-                localeId ="locale-id",
+                localeId = "locale-id",
                 localeName = "locale-name",
                 workflowId = UUID.randomUUID(),
                 workflowTaskId = UUID.randomUUID()
@@ -97,7 +97,7 @@ internal class ExperienceMapperTest {
             type = null,
             publishedAt = null,
             context = ContextResponse(
-                localeId ="locale-id",
+                localeId = "locale-id",
                 localeName = "locale-name",
                 workflowId = UUID.randomUUID(),
                 workflowTaskId = UUID.randomUUID()
