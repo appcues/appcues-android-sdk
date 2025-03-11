@@ -75,6 +75,8 @@ internal class ExperienceMapper(
             publishedAt = from.publishedAt,
             localeId = from.context?.localeId,
             localeName = from.context?.localeName,
+            workflowId = from.context?.workflowId,
+            workflowTaskId = from.context?.workflowTaskId,
             experiment = experiments?.getExperiment(from.id),
             completionActions = emptyList(),
             trigger = trigger,
@@ -104,6 +106,8 @@ internal class ExperienceMapper(
             publishedAt = from.publishedAt,
             localeId = from.context?.localeId,
             localeName = from.context?.localeName,
+            workflowId = from.context?.workflowId,
+            workflowTaskId = from.context?.workflowTaskId,
             experiment = experiments?.getExperiment(from.id),
             completionActions = arrayListOf<ExperienceAction>().apply {
                 from.redirectUrl?.let {

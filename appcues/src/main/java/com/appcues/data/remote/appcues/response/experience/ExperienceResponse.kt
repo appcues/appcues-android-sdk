@@ -41,4 +41,8 @@ internal data class ContextResponse(
     val localeId: String?,
     @Json(name = "locale_name")
     val localeName: String?,
+    @Json(name = "workflow_id")
+    val workflowId: UUID?,
+    @Json(name = "worfklow_task_id")
+    val workflowTaskId: UUID?
 )
