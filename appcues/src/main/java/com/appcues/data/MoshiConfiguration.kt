@@ -80,16 +80,16 @@ internal object MoshiConfiguration {
 
     private fun getPrimitiveFactory(): Factory {
         return PolymorphicJsonAdapterFactory.of(PrimitiveResponse::class.java, "type")
-            .withSubtype(BoxPrimitiveResponse::class.java, PrimitiveResponse.Type.BOX.jsonName)
-            .withSubtype(CustomComponentPrimitiveResponse::class.java, PrimitiveResponse.Type.CUSTOM_COMPONENT.jsonName)
-            .withSubtype(ButtonPrimitiveResponse::class.java, PrimitiveResponse.Type.BUTTON.jsonName)
-            .withSubtype(EmbedPrimitiveResponse::class.java, PrimitiveResponse.Type.EMBED.jsonName)
-            .withSubtype(ImagePrimitiveResponse::class.java, PrimitiveResponse.Type.IMAGE.jsonName)
-            .withSubtype(OptionSelectPrimitiveResponse::class.java, PrimitiveResponse.Type.OPTION_SELECT.jsonName)
-            .withSubtype(StackPrimitiveResponse::class.java, PrimitiveResponse.Type.STACK.jsonName)
-            .withSubtype(TextInputPrimitiveResponse::class.java, PrimitiveResponse.Type.TEXT_INPUT.jsonName)
-            .withSubtype(TextPrimitiveResponse::class.java, PrimitiveResponse.Type.TEXT.jsonName)
-            .withSubtype(BlockPrimitiveResponse::class.java, PrimitiveResponse.Type.BLOCK.jsonName)
-            .withSubtype(SpacerPrimitiveResponse::class.java, PrimitiveResponse.Type.SPACER.jsonName)
+            .withSubtype(BoxPrimitiveResponse::class.java, "box")
+            .withSubtype(CustomComponentPrimitiveResponse::class.java, "customComponent")
+            .withSubtype(ButtonPrimitiveResponse::class.java, "button")
+            .withSubtype(EmbedPrimitiveResponse::class.java, "embed")
+            .withSubtype(ImagePrimitiveResponse::class.java, "image")
+            .withSubtype(OptionSelectPrimitiveResponse::class.java, "optionSelect")
+            .withSubtype(StackPrimitiveResponse::class.java, "stack")
+            .withSubtype(TextInputPrimitiveResponse::class.java, "textInput")
+            .withSubtype(TextPrimitiveResponse::class.java, "text")
+            .withSubtype(BlockPrimitiveResponse::class.java, "block")
+            .withSubtype(SpacerPrimitiveResponse::class.java, "spacer")
     }
 }
