@@ -1,57 +1,29 @@
 package com.appcues.data.remote.appcues.response.step.primitive
 
 import com.appcues.data.model.AppcuesConfigMap
-import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.Type.BLOCK
-import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.Type.BOX
-import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.Type.BUTTON
-import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.Type.CUSTOM_COMPONENT
-import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.Type.EMBED
-import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.Type.IMAGE
-import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.Type.OPTION_SELECT
-import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.Type.SPACER
-import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.Type.STACK
-import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.Type.TEXT
-import com.appcues.data.remote.appcues.response.step.primitive.PrimitiveResponse.Type.TEXT_INPUT
 import com.appcues.data.remote.appcues.response.styling.StyleColorResponse
 import com.appcues.data.remote.appcues.response.styling.StyleResponse
 import com.appcues.data.remote.appcues.response.styling.StyleSizeResponse
 import java.util.UUID
 
-internal sealed class PrimitiveResponse(
-    val type: Type,
-) {
-
-    enum class Type(val jsonName: String) {
-        STACK("stack"),
-        BOX("box"),
-        CUSTOM_COMPONENT("customComponent"),
-        BUTTON("button"),
-        TEXT("text"),
-        IMAGE("image"),
-        EMBED("embed"),
-        SPACER("spacer"),
-        TEXT_INPUT("textInput"),
-        OPTION_SELECT("optionSelect"),
-        BLOCK("block"),
-    }
-
+internal sealed class PrimitiveResponse {
     internal data class BlockPrimitiveResponse(
         val id: UUID,
         val content: PrimitiveResponse,
-    ) : PrimitiveResponse(BLOCK)
+    ) : PrimitiveResponse()
 
     internal data class BoxPrimitiveResponse(
         val id: UUID,
         val style: StyleResponse? = null,
         val items: List<PrimitiveResponse>,
-    ) : PrimitiveResponse(BOX)
+    ) : PrimitiveResponse()
 
     internal data class CustomComponentPrimitiveResponse(
         val id: UUID,
         val style: StyleResponse? = null,
         val identifier: String,
         val config: AppcuesConfigMap,
-    ) : PrimitiveResponse(CUSTOM_COMPONENT)
+    ) : PrimitiveResponse()
 
     internal data class StackPrimitiveResponse(
         val id: UUID,
@@ -61,14 +33,14 @@ internal sealed class PrimitiveResponse(
         val distribution: String? = null,
         val spacing: Double = 0.0,
         val sticky: String? = null,
-    ) : PrimitiveResponse(STACK)
+    ) : PrimitiveResponse()
 
     internal data class TextPrimitiveResponse(
         val id: UUID,
         val style: StyleResponse? = null,
         val text: String? = null,
         val spans: List<TextSpanResponse>? = null,
-    ) : PrimitiveResponse(TEXT)
+    ) : PrimitiveResponse()
 
     internal data class TextSpanResponse(
         val text: String,
@@ -79,7 +51,7 @@ internal sealed class PrimitiveResponse(
         val id: UUID,
         val style: StyleResponse? = null,
         val content: PrimitiveResponse,
-    ) : PrimitiveResponse(BUTTON)
+    ) : PrimitiveResponse()
 
     internal data class ImagePrimitiveResponse(
         val id: UUID,
@@ -89,19 +61,19 @@ internal sealed class PrimitiveResponse(
         val blurHash: String? = null,
         val intrinsicSize: StyleSizeResponse? = null,
         val accessibilityLabel: String? = null,
-    ) : PrimitiveResponse(IMAGE)
+    ) : PrimitiveResponse()
 
     internal data class EmbedPrimitiveResponse(
         val id: UUID,
         val style: StyleResponse? = null,
         val embed: String,
         val intrinsicSize: StyleSizeResponse? = null,
-    ) : PrimitiveResponse(EMBED)
+    ) : PrimitiveResponse()
 
     internal data class SpacerPrimitiveResponse(
         val id: UUID,
         val spacing: Double = 0.0,
-    ) : PrimitiveResponse(SPACER)
+    ) : PrimitiveResponse()
 
     internal data class OptionSelectPrimitiveResponse(
         val id: UUID,
@@ -122,7 +94,7 @@ internal sealed class PrimitiveResponse(
         val accentColor: StyleColorResponse?,
         val attributeName: String?,
         val leadingFill: Boolean?
-    ) : PrimitiveResponse(OPTION_SELECT) {
+    ) : PrimitiveResponse() {
 
         data class OptionItem(
             val value: String,
@@ -145,5 +117,5 @@ internal sealed class PrimitiveResponse(
         val textFieldStyle: StyleResponse?,
         val cursorColor: StyleColorResponse?,
         val attributeName: String?,
-    ) : PrimitiveResponse(TEXT_INPUT)
+    ) : PrimitiveResponse()
 }
