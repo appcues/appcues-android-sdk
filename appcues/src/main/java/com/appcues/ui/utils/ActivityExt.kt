@@ -22,7 +22,7 @@ internal fun Activity.getParentView(): ViewGroup {
         // in case of multiple views, get the one that is hosting android.R.id.content
         // we get the last one because sometimes stacking activities might be listed in this method,
         // and we always want the one that is on top
-        WindowInspector.getGlobalWindowViews().findTopMost() ?: window.decorView
+        WindowInspector.getGlobalWindowViews().findTopMost(this) ?: window.decorView
     } else {
         @Suppress("SwallowedException", "TooGenericExceptionCaught")
         try {
@@ -33,15 +33,17 @@ internal fun Activity.getParentView(): ViewGroup {
             val getRootView: Method = windowManagerClass.getMethod("getRootView", String::class.java)
             val rootViewNames = getViewRootNames.invoke(windowManager) as Array<Any?>
             val rootViews = rootViewNames.map { getRootView(windowManager, it) as View }
-            rootViews.findTopMost() ?: window.decorView
+            rootViews.findTopMost(this) ?: window.decorView
         } catch (ex: Exception) {
             Log.e("Appcues", "error getting decorView, ${ex.message}")
             // if all else fails, use the decorView on the window, which is typically the only one
             window.decorView
         }
     }
-
+    
     return decorView.rootView as ViewGroup
 }
 
-private fun List<View>.findTopMost() = lastOrNull { it.findViewById<View?>(android.R.id.content) != null }
+private fun List<View>.findTopMost(activity: Activity) = lastOrNull {
+    it.context == activity && it.findViewById<View?>(android.R.id.content) != null
+}
