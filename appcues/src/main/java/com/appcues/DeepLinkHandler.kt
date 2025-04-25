@@ -3,7 +3,6 @@ package com.appcues
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
-import android.os.Bundle
 import android.widget.Toast
 import com.appcues.data.model.ExperienceTrigger.DeepLink
 import com.appcues.debugger.AppcuesDebuggerManager
@@ -45,7 +44,6 @@ internal class DeepLinkHandler(scope: AppcuesScope) {
         if (intent == null) return false
         val linkAction: String? = intent.action
         val linkData: Uri? = intent.data
-        val extras = intent.extras
 
         if (linkData != null) {
             val scheme = contextWrapper.getString(R.string.appcues_custom_scheme).ifEmpty { "appcues-${config.applicationId}" }
@@ -53,7 +51,7 @@ internal class DeepLinkHandler(scope: AppcuesScope) {
             val validHost = linkData.host == "sdk"
 
             if (linkAction == Intent.ACTION_VIEW && validScheme && validHost) {
-                return processLink(linkData, activity, extras)
+                return processLink(linkData, activity)
             }
         }
 
@@ -72,7 +70,7 @@ internal class DeepLinkHandler(scope: AppcuesScope) {
     }
 
     // return true if handled
-    private fun processLink(linkData: Uri, activity: Activity, extras: Bundle?): Boolean {
+    private fun processLink(linkData: Uri, activity: Activity): Boolean {
         val segments = linkData.pathSegments
         val query = linkData.getQueryMap()
 
@@ -106,7 +104,7 @@ internal class DeepLinkHandler(scope: AppcuesScope) {
                 }
             }
 
-            pushDeeplinkHandler.processLink(activity, segments, extras, query) -> true
+            pushDeeplinkHandler.processLink(activity, segments, query) -> true
 
             else -> false
         }
