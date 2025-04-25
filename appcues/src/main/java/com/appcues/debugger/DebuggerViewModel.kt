@@ -124,7 +124,15 @@ internal class DebuggerViewModel(override val scope: AppcuesScope, debugMode: De
         logMessageManager.start()
 
         with(viewModelScope) {
-            launch { debuggerRecentEventsManager.data.collect { _events.value = it } }
+            launch {
+                debuggerRecentEventsManager.data.collect { newList ->
+                    val oldById = _events.value.associateBy { it.id }
+                    _events.value = newList.map { new ->
+                        val old = oldById[new.id]
+                        new.copy(showOnFab = old?.showOnFab ?: new.showOnFab)
+                    }
+                }
+            }
             launch { debuggerStatusManager.data.collect { _statusInfo.value = it } }
             launch { logMessageManager.data.collect { _logMessages.value = it } }
         }
@@ -257,9 +265,15 @@ internal class DebuggerViewModel(override val scope: AppcuesScope, debugMode: De
         }
     }
 
-    fun onDisplayedEventTimeout() {
+    fun onDisplayedEventTimeout(id: Int) {
         viewModelScope.launch {
-            _events.value = _events.value.hideEventsForFab()
+            _events.value = _events.value.toMutableList().onEach { if (it.id == id) it.showOnFab = false }
+        }
+    }
+
+    fun hideAllEvents() {
+        viewModelScope.launch {
+            _events.value = _events.value.map { it.copy(showOnFab = false) }
         }
     }
 
@@ -267,10 +281,6 @@ internal class DebuggerViewModel(override val scope: AppcuesScope, debugMode: De
         debuggerStatusManager.reset()
         debuggerRecentEventsManager.reset()
         logMessageManager.reset()
-    }
-
-    private fun List<DebuggerEventItem>.hideEventsForFab(): List<DebuggerEventItem> {
-        return toMutableList().onEach { it.showOnFab = false }
     }
 
     fun consumeDeeplink() {
