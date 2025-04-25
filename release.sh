@@ -142,7 +142,7 @@ gh release create $newVersion -F $tempFile -t $newVersion --target $branch
 rm $tempFile
 
 # publish to Maven Central
-gradle appcues:publishReleasePublicationToOSSRHRepository
+gradle appcues:publishToMavenCentral
 
 # if the new version has a '-' in it, then it's a pre-release version (eg 1.0.0-rc01, 1.0.0-beta01, 1.0.0-alpha01)
 if [[ "$newVersion" == *-* ]]

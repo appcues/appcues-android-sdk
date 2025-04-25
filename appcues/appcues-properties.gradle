@@ -1,0 +1,29 @@
+def props = new Properties()
+file("appcues.properties").withInputStream {
+    props.load(it)
+}
+
+def major = props.getProperty("VERSION_MAJOR")
+def minor = props.getProperty("VERSION_MINOR")
+def patch = props.getProperty("VERSION_PATCH")
+def classifier = props.getProperty("VERSION_CLASSIFIER")
+
+ext.VERSION_NAME = "${major}.${minor}.${patch}" + (classifier?.trim() ? "-${classifier}" : "")
+ext.GROUP_ID = props.getProperty("GROUP_ID")
+ext.ARTIFACT_ID = props.getProperty("ARTIFACT_ID")
+ext.NAME = props.getProperty("NAME")
+ext.DESCRIPTION = props.getProperty("DESCRIPTION")
+ext.ORG_URL = props.getProperty("ORG_URL")
+ext.LICENSE = props.getProperty("LICENSE")
+ext.LICENSE_URL = props.getProperty("LICENSE_URL")
+ext.ORG_ID = props.getProperty("ORG_ID")
+ext.ORG_NAME = props.getProperty("ORG_NAME")
+ext.ORG_URL = props.getProperty("ORG_URL")
+ext.ORG_EMAIL = props.getProperty("ORG_EMAIL")
+ext.GITHUB_PATH = props.getProperty("GITHUB_PATH")
+
+tasks.register('versionTxt') {
+    doLast {
+        new File(projectDir.parentFile, "version.txt").text = "$VERSION_NAME"
+    }
+}
