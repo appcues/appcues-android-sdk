@@ -3,7 +3,6 @@ package com.appcues.push
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Bundle
 import android.widget.Toast
 import com.appcues.AppcuesFirebaseMessagingService.AppcuesMessagingData
 import com.appcues.R
@@ -18,6 +17,7 @@ import com.appcues.di.scope.AppcuesScope
 import com.appcues.di.scope.inject
 import com.appcues.util.ResultOf.Failure
 import com.appcues.util.ResultOf.Success
+import com.appcues.util.appcuesFormatted
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -28,29 +28,35 @@ internal class PushDeeplinkHandler(
 
     companion object {
 
-        private const val NOTIFICATION_ID_EXTRA = "ID"
-        private const val NOTIFICATION_VERSION_EXTRA = "VERSION"
-        private const val NOTIFICATION_SHOW_CONTENT_EXTRA = "SHOW_CONTENT"
-        private const val NOTIFICATION_TEST_EXTRA = "TEST"
-        private const val NOTIFICATION_WORKFLOW_ID_EXTRA = "WORKFLOW_ID"
-        private const val NOTIFICATION_WORKFLOW_TASK_ID_EXTRA = "WORKFLOW_TASK_ID"
-        private const val NOTIFICATION_WORKFLOW_VERSION_EXTRA = "WORKFLOW_VERSION"
-        private const val NOTIFICATION_FORWARD_DEEPLINK_EXTRA = "FORWARD_DEEPLINK"
+        private const val NOTIFICATION_VERSION_PARAM = "version"
+        private const val NOTIFICATION_SHOW_CONTENT_PARAM = "show_content"
+        private const val NOTIFICATION_TEST_PARAM = "test"
+        private const val NOTIFICATION_WORKFLOW_ID_PARAM = "workflow_id"
+        private const val NOTIFICATION_WORKFLOW_TASK_ID_PARAM = "workflow_task_id"
+        private const val NOTIFICATION_WORKFLOW_VERSION_PARAM = "workflow_version"
+        private const val NOTIFICATION_FORWARD_DEEPLINK_PARAM = "forward_deeplink"
 
         private const val NETWORK_ERROR_NOT_FOUND = 404
 
         fun getNotificationIntent(scheme: String, appcuesData: AppcuesMessagingData) = Intent(Intent.ACTION_VIEW).apply {
-            data = Uri.parse("$scheme://sdk/notification")
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
-
-            putExtra(NOTIFICATION_ID_EXTRA, appcuesData.notificationId)
-            putExtra(NOTIFICATION_VERSION_EXTRA, appcuesData.notificationVersion)
-            putExtra(NOTIFICATION_WORKFLOW_ID_EXTRA, appcuesData.workflowId)
-            putExtra(NOTIFICATION_WORKFLOW_TASK_ID_EXTRA, appcuesData.workflowTaskId)
-            putExtra(NOTIFICATION_WORKFLOW_VERSION_EXTRA, appcuesData.workflowVersion)
-            putExtra(NOTIFICATION_FORWARD_DEEPLINK_EXTRA, appcuesData.deeplink)
-            putExtra(NOTIFICATION_SHOW_CONTENT_EXTRA, appcuesData.experienceId)
-            putExtra(NOTIFICATION_TEST_EXTRA, appcuesData.test)
+            // note: encoding all the params into the URI rather than using extras on the intent here, so that the linking
+            // tools used in all cross-platform frameworks will continue to work and preserve the push payload details
+            data = Uri.Builder()
+                .scheme(scheme)
+                .authority("sdk")
+                .appendPath("notification")
+                .appendPath(appcuesData.notificationId)
+                .apply {
+                    if (appcuesData.test) { appendQueryParameter(NOTIFICATION_TEST_PARAM, "true") }
+                    appcuesData.notificationVersion?.let { appendQueryParameter(NOTIFICATION_VERSION_PARAM, it.toString()) }
+                    appcuesData.workflowId?.let { appendQueryParameter(NOTIFICATION_WORKFLOW_ID_PARAM, it) }
+                    appcuesData.workflowTaskId?.let { appendQueryParameter(NOTIFICATION_WORKFLOW_TASK_ID_PARAM, it) }
+                    appcuesData.workflowVersion?.let { appendQueryParameter(NOTIFICATION_WORKFLOW_VERSION_PARAM, it.toString()) }
+                    appcuesData.experienceId?.let { appendQueryParameter(NOTIFICATION_SHOW_CONTENT_PARAM, it) }
+                    appcuesData.deeplink?.let { appendQueryParameter(NOTIFICATION_FORWARD_DEEPLINK_PARAM, it) }
+                }
+                .build()
         }
     }
 
@@ -60,10 +66,11 @@ internal class PushDeeplinkHandler(
     private val storage by inject<Storage>()
     private val pushRepository by scope.inject<PushRepository>()
 
-    fun processLink(context: Context, segments: List<String>, extras: Bundle?, query: Map<String, String>): Boolean {
+    fun processLink(context: Context, segments: List<String>, query: Map<String, String>): Boolean {
         return when {
-            segments.any() && segments[0] == "notification" && extras != null -> {
-                processNotification(extras)
+            segments.count() == 2 && segments[0] == "notification" -> {
+                val pushNotificationId = UUID.fromString(segments[1])
+                processNotification(pushNotificationId, query)
                 true
             }
             segments.count() == 2 && segments[0] == "push_preview" -> {
@@ -78,23 +85,22 @@ internal class PushDeeplinkHandler(
         }
     }
 
-    private fun processNotification(extras: Bundle) {
-        val isTest = extras.getBoolean(NOTIFICATION_TEST_EXTRA, false)
-        val pushNotificationId = extras.getString(NOTIFICATION_ID_EXTRA, null)
+    private fun processNotification(pushNotificationId: UUID, query: Map<String, String>) {
+        val isTest = query[NOTIFICATION_TEST_PARAM]?.toBoolean() ?: false
 
         val properties = mapOf<String, Any?>(
-            "push_notification_id" to pushNotificationId,
-            "push_notification_version" to extras.getLong(NOTIFICATION_VERSION_EXTRA, -1L).let { if (it == -1L) null else it },
-            "workflow_id" to extras.getString(NOTIFICATION_WORKFLOW_ID_EXTRA, null),
-            "workflow_task_id" to extras.getString(NOTIFICATION_WORKFLOW_TASK_ID_EXTRA, null),
-            "workflow_version" to extras.getLong(NOTIFICATION_WORKFLOW_VERSION_EXTRA, -1L).let { if (it == -1L) null else it },
+            "push_notification_id" to pushNotificationId.appcuesFormatted(),
+            "push_notification_version" to query[NOTIFICATION_VERSION_PARAM]?.toLongOrNull(),
+            "workflow_id" to query[NOTIFICATION_WORKFLOW_ID_PARAM],
+            "workflow_task_id" to query[NOTIFICATION_WORKFLOW_TASK_ID_PARAM],
+            "workflow_version" to query[NOTIFICATION_WORKFLOW_VERSION_PARAM]?.toLongOrNull(),
             "device_id" to storage.deviceId
         ).filterValues { it != null }.mapValues { it.value as Any }
 
-        val deeplink = extras.getString(NOTIFICATION_FORWARD_DEEPLINK_EXTRA, null)
-        val experienceId = extras.getString(NOTIFICATION_SHOW_CONTENT_EXTRA, null)
+        val deeplink = query[NOTIFICATION_FORWARD_DEEPLINK_PARAM]
+        val experienceId = query[NOTIFICATION_SHOW_CONTENT_PARAM]
 
-        val action = PushOpenedAction(UUID.fromString(pushNotificationId), storage.userId, properties, deeplink, experienceId, isTest)
+        val action = PushOpenedAction(pushNotificationId, storage.userId, properties, deeplink, experienceId, isTest)
 
         if (sessionMonitor.hasSession()) {
             coroutineScope.launch { pushOpenedProcessor.process(action) }

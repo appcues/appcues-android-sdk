@@ -67,5 +67,6 @@ internal fun String.toEventTitle(): Int? = when (this) {
     AnalyticsEvent.ExperienceDismissed.eventName -> R.string.appcues_debugger_event_type_experience_dismissed_title
     AnalyticsEvent.ExperienceError.eventName -> R.string.appcues_debugger_event_type_experience_error_title
     AnalyticsEvent.ExperienceRecovery.eventName -> R.string.appcues_debugger_event_type_experience_recover_title
+    AnalyticsEvent.PushOpened.eventName -> R.string.appcues_debugger_event_type_push_opened_title
     else -> null
 }
