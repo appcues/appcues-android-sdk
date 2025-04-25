@@ -1,14 +1,17 @@
+import com.vanniktech.maven.publish.SonatypeHost
+
 plugins {
     id 'com.android.library'
     id 'kotlin-android'
     id 'org.jetbrains.dokka'
     id 'kotlin-kapt'
+    id "com.vanniktech.maven.publish" version "0.31.0"
 }
 
 apply from: 'artifacts-android.gradle'
-apply from: 'publish-maven.gradle'
 apply from: 'copy-dependencies.gradle'
 apply from: 'dokka.gradle'
+apply from: 'appcues-properties.gradle'
 
 ext.room_version = '2.6.1'
 ext.compose_version = '1.7.3'
@@ -35,6 +38,8 @@ android {
                 arguments += ["room.schemaLocation": "$projectDir/schemas".toString()]
             }
         }
+
+        buildConfigField "String", "SDK_VERSION", "\"${VERSION_NAME}\""
     }
 
     resourcePrefix 'appcues_'
@@ -123,4 +128,36 @@ dependencies {
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1"
     testImplementation 'androidx.arch.core:core-testing:2.2.0'
     testImplementation 'app.cash.turbine:turbine:1.0.0'
+}
+
+mavenPublishing {
+    coordinates(GROUP_ID, ARTIFACT_ID, VERSION_NAME)
+    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL, false)
+    signAllPublications()
+
+    pom {
+        name = NAME
+        description = DESCRIPTION
+        url = ORG_URL
+        licenses {
+            license {
+                name = LICENSE
+                url = LICENSE_URL
+            }
+        }
+        developers {
+            developer {
+                id = ORG_ID
+                name = ORG_NAME
+                organization = ORG_NAME
+                organizationUrl = ORG_URL
+                email = ORG_EMAIL
+            }
+        }
+        scm {
+            connection = 'scm:git:git://github.com/' + GITHUB_PATH + '.git'
+            developerConnection = 'scm:git:ssh://github.com:' + GITHUB_PATH + '.git'
+            url = 'https://github.com/' + GITHUB_PATH
+        }
+    }
 }
