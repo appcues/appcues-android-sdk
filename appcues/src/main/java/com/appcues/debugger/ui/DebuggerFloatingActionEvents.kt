@@ -1,12 +1,12 @@
 package com.appcues.debugger.ui
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -46,9 +46,8 @@ import com.appcues.debugger.ui.theme.LocalAppcuesTheme
 import kotlinx.coroutines.delay
 
 private const val MAX_FAB_EVENTS = 10
-private const val FAB_EVENT_DISPLAYED_ALPHA = 0.75f
-private const val MARK_AS_DISPLAYED_DELAY = 1000L
-private const val TIMEOUT_DISPLAYED_EVENTS = 2000L
+private const val FAB_EVENT_DISPLAYED_ALPHA = 0.50f
+private const val EVENT_VISIBILITY_DELAY = 1000L
 
 @Composable
 internal fun BoxScope.DebuggerFloatingActionEvents(
@@ -82,30 +81,32 @@ internal fun BoxScope.DebuggerFloatingActionEvents(
             val events = if (shouldDisplayEvents)
                 debuggerViewModel.events.collectAsState().value.take(MAX_FAB_EVENTS)
             else
-                arrayListOf<DebuggerEventItem>().also { debuggerViewModel.onDisplayedEventTimeout() }
+                arrayListOf<DebuggerEventItem>().also { debuggerViewModel.hideAllEvents() }
 
             LazyColumn(
-                modifier = Modifier.animateContentSize(),
                 verticalArrangement = Arrangement.spacedBy(4.dp),
                 reverseLayout = eventsProperties.drawTop,
                 userScrollEnabled = false,
             ) {
                 items(events, key = { it.id }) { event ->
-                    Item(event, eventsProperties.anchorToStart) { debuggerViewModel.onDisplayedEventTimeout() }
+                    Item(event, eventsProperties.anchorToStart) { debuggerViewModel.onDisplayedEventTimeout(it) }
                 }
             }
         }
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun LazyItemScope.Item(event: DebuggerEventItem, isAnchoredStart: Boolean, eventTimedOut: () -> Unit) {
+private fun LazyItemScope.Item(event: DebuggerEventItem, isAnchoredStart: Boolean, eventTimedOut: (Int) -> Unit) {
     val theme = LocalAppcuesTheme.current
     val visibility = remember { MutableTransitionState(false) }.apply { targetState = event.showOnFab }
     val displayed = remember { mutableStateOf(false) }
     val alpha = animateFloatAsState(
         targetValue = if (displayed.value) FAB_EVENT_DISPLAYED_ALPHA else 1f,
+        animationSpec = tween(
+            durationMillis = EVENT_VISIBILITY_DELAY.toInt(),
+            easing = FastOutLinearInEasing
+        ),
         label = "Floating actions Alpha"
     )
 
@@ -117,11 +118,11 @@ private fun LazyItemScope.Item(event: DebuggerEventItem, isAnchoredStart: Boolea
         Row(
             modifier = Modifier
                 .padding(2.dp)
-                .alpha(alpha.value)
                 .shadow(2.dp, RoundedCornerShape(6.dp), clip = true)
                 .clip(RoundedCornerShape(6.dp))
                 .background(theme.background)
-                .padding(2.dp)
+                .alpha(alpha.value)
+                .padding(start = 8.dp, end = 8.dp, top = 2.dp, bottom = 2.dp)
                 .animateItem(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -138,12 +139,10 @@ private fun LazyItemScope.Item(event: DebuggerEventItem, isAnchoredStart: Boolea
     }
 
     LaunchedEffect(event.id) {
-        delay(MARK_AS_DISPLAYED_DELAY)
+        delay(EVENT_VISIBILITY_DELAY)
         displayed.value = true
-    }
-
-    LaunchedEffect(event) {
-        delay(TIMEOUT_DISPLAYED_EVENTS)
-        eventTimedOut()
+        delay(EVENT_VISIBILITY_DELAY)
+        visibility.targetState = false
+        eventTimedOut(event.id)
     }
 }
