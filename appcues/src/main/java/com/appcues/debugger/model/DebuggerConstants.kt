@@ -8,6 +8,6 @@ internal object DebuggerConstants {
     @SuppressWarnings("MagicNumber")
     // used in multiple places for ui testing purposes
     val testDate: Date = Calendar.getInstance().apply {
-        set(2024, Calendar.SEPTEMBER, 19, 0, 23, 0)
+        timeInMillis = 1726719780000L
     }.time
 }
