@@ -41,8 +41,9 @@ Column {
 
 ## Other Considerations
 
-* The `frameId` registered with Appcues for each frame should ideally be globally unique in the application, but at least must be unique on the screen where experience content may be targeted. 
-* Some `AppcuesFrameView` instances may not be visible on the screen when it first loads, if they are lower down on a scrolling page, for instance. However, when they scroll into view, any qualified content on that screen will then render into that position.
-* Using `AppcuesFrameView` in views with element re-use (ex. `RecyclerView`) is supported, but may require re-registering with a new `frameId` when elements are re-used, depending on your use case.
-* When configuring settings for triggering embedded experience content, make sure that the experience is triggered on the same screen where the target `frameId` exists.
-* To preview embedded content from the mobile builder inside your application, you may need to initiate the preview and then navigate to the screen where the target `frameId` exists.
+- The `frameId` registered with Appcues for each frame should ideally be globally unique in the application, but at least must be unique on the screen where experience content may be targeted.
+- Some `AppcuesFrameView` instances may not be visible on the screen when it first loads, if they are lower down on a scrolling page, for instance. However, when they scroll into view, any qualified content on that screen will then render into that position.
+- Using `AppcuesFrameView` in views with element re-use (ex. `RecyclerView`) is supported, but may require re-registering with a new `frameId` when elements are re-used, depending on your use case.
+- If you are re-registering a frame in a non cell re-use situation where you don't need the content to re-render, setting the `retainContent` property to `false` on the `AppcuesFrameView` instance prevents having the same content re-render.
+- When configuring settings for triggering embedded experience content, make sure that the experience is triggered on the same screen where the target `frameId` exists.
+- To preview embedded content from the mobile builder inside your application, you may need to initiate the preview and then navigate to the screen where the target `frameId` exists.
