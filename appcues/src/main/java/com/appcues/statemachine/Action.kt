@@ -11,7 +11,6 @@ internal sealed class Action {
     data class EndExperience(
         val markComplete: Boolean,
         val destroyed: Boolean,
-        val trackAnalytics: Boolean = true,
     ) : Action()
 
     object Reset : Action()

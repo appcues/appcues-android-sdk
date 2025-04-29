@@ -108,15 +108,13 @@ internal class ExperienceLifecycleTracker(
                 }
             }
             is EndingExperienceState -> {
-                if (trackAnalytics) {
-                    if (markComplete) {
-                        // if ending on the last step OR an action requested it be considered complete explicitly,
-                        // track the experience_completed event
-                        trackLifecycleEvent(ExperienceCompleted(experience))
-                    } else {
-                        // otherwise its considered experience_dismissed (not completed)
-                        trackLifecycleEvent(ExperienceDismissed(experience, flatStepIndex))
-                    }
+                if (markComplete) {
+                    // if ending on the last step OR an action requested it be considered complete explicitly,
+                    // track the experience_completed event
+                    trackLifecycleEvent(ExperienceCompleted(experience))
+                } else {
+                    // otherwise its considered experience_dismissed (not completed)
+                    trackLifecycleEvent(ExperienceDismissed(experience, flatStepIndex))
                 }
             }
             else -> Unit

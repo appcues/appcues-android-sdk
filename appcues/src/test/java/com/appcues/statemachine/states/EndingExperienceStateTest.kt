@@ -16,7 +16,7 @@ internal class EndingExperienceStateTest {
     fun `EndingExperienceState SHOULD be instance of STATE`() {
         // GIVEN
         val experience = mockk<Experience>()
-        val state = EndingExperienceState(experience, 0, markComplete = true, trackAnalytics = true)
+        val state = EndingExperienceState(experience, 0, markComplete = true)
         // THEN
         assertThat(state).isInstanceOf(State::class.java)
         assertThat(state.currentExperience).isEqualTo(experience)
@@ -27,7 +27,7 @@ internal class EndingExperienceStateTest {
     fun `take SHOULD ignore listed actions`() {
         // GIVEN
         val experience = mockk<Experience>()
-        val state = EndingExperienceState(experience, 0, markComplete = true, trackAnalytics = true)
+        val state = EndingExperienceState(experience, 0, markComplete = true)
         // THEN
         state.assertIgnoredActions(
             listOf(
@@ -46,7 +46,7 @@ internal class EndingExperienceStateTest {
     fun `take Reset SHOULD transition to IdlingState AND no sideEffects WHEN markedComplete is false`() {
         // GIVEN
         val experience = mockk<Experience>()
-        val state = EndingExperienceState(experience, 0, markComplete = false, trackAnalytics = true)
+        val state = EndingExperienceState(experience, 0, markComplete = false)
         // WHEN
         val transition = state.take(Reset)
         // THEN
@@ -61,7 +61,7 @@ internal class EndingExperienceStateTest {
         val experience = mockk<Experience> {
             every { completionActions } returns actions
         }
-        val state = EndingExperienceState(experience, 0, markComplete = true, trackAnalytics = true)
+        val state = EndingExperienceState(experience, 0, markComplete = true)
         // WHEN
         val transition = state.take(Reset)
         // THEN

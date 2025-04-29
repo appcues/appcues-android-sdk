@@ -93,7 +93,9 @@ internal class ExperienceRenderer(override val scope: AppcuesScope) : AppcuesCom
             return WontDisplay
         }
 
-        val stateMachine = stateMachines.getOwner(renderContext)?.stateMachine ?: return NoRenderContext(experience, renderContext)
+        val stateMachineOwner = stateMachines.getOwner(renderContext)
+
+        val stateMachine = stateMachineOwner?.stateMachine ?: return NoRenderContext(experience, renderContext)
             .also { analyticsTracker.trackRecoverableExperienceError(experience, "no render context $renderContext") }
 
         if (experience.instanceId == stateMachine.state.currentExperience?.instanceId) {
@@ -120,7 +122,16 @@ internal class ExperienceRenderer(override val scope: AppcuesScope) : AppcuesCom
         experiment?.let { analyticsTracker.track(it) }
 
         return when (val result = stateMachine.handleAction(StartExperience(this))) {
-            is Success -> RenderingResult.Success.also { previewExperiences.remove(renderContext) }
+            is Success -> RenderingResult.Success.also {
+                // if this is an embed frame and it was configured to not retain content (no cell re-use)
+                // then remove it from the cache immediately upon initial render
+                (stateMachineOwner as? AppcuesFrameStateMachineOwner)?.frame?.let {
+                    if (!it.retainContent) {
+                        potentiallyRenderableExperiences.remove(renderContext)
+                    }
+                }
+                previewExperiences.remove(renderContext)
+            }
             is Failure -> StateMachineError(experience, result.reason)
         }
     }
@@ -176,13 +187,13 @@ internal class ExperienceRenderer(override val scope: AppcuesScope) : AppcuesCom
         stateMachines.getOwner(frame)?.let {
             if (it.renderContext != context) {
                 it.reset()
+                // remove the reference to the owner from the prior context
+                stateMachines.remove(it.renderContext)
             }
         }
 
         val stateMachine: StateMachine = get(::onExperienceEnded)
-
         val owner = AppcuesFrameStateMachineOwner(frame, context, stateMachine)
-
         stateMachines.setOwner(owner)
 
         show(context)

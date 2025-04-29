@@ -12,7 +12,6 @@ internal data class EndingExperienceState(
     val experience: Experience,
     val flatStepIndex: Int,
     val markComplete: Boolean,
-    val trackAnalytics: Boolean,
 ) : State {
 
     override val currentExperience: Experience

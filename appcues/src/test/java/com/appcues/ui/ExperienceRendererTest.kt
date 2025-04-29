@@ -307,7 +307,7 @@ internal class ExperienceRendererTest {
 
     // tests a recycler view like case, where the same frame gets re-registered
     @Test
-    fun `frame re-register SHOULD restart the experience again`() = runTest {
+    fun `frame re-register SHOULD restart the experience again WHEN frame retainContent is true`() = runTest {
         // GIVEN
         val experience = mockEmbedExperience("frame1")
         val stateMachine = mockk<StateMachine>(relaxed = true) {
@@ -319,16 +319,47 @@ internal class ExperienceRendererTest {
         val directory: StateMachineDirectory = scope.get()
         val context = RenderContext.Embed("frame1")
         experienceRenderer.show(QualificationResult(Qualification("screen_view"), listOf(experience)))
+        val frameMock = mockk<AppcuesFrameView>(relaxed = true) {
+            every { this@mockk.retainContent } answers { true }
+        }
 
         // WHEN
-        experienceRenderer.start(mockk(relaxed = true), context)
-        experienceRenderer.start(mockk(relaxed = true), context)
+        experienceRenderer.start(frameMock, context)
+        experienceRenderer.start(frameMock, context)
 
         // THEN
         val owner = directory.getOwner(context)
         val ownerMachine = owner!!.stateMachine
         coVerify(exactly = 1) { ownerMachine.stop(false) }
         coVerify(exactly = 2) { stateMachine.handleAction(StartExperience(experience)) }
+    }
+
+    @Test
+    fun `frame re-register SHOULD NOT restart the experience again WHEN frame retainContent is false`() = runTest {
+        // GIVEN
+        val experience = mockEmbedExperience("frame1")
+        val stateMachine = mockk<StateMachine>(relaxed = true) {
+            every { this@mockk.state } answers { IdlingState }
+            coEvery { this@mockk.handleAction(any()) } returns Success(IdlingState)
+        }
+        val scope = createScope { stateMachine }
+        val experienceRenderer = ExperienceRenderer(scope)
+        val directory: StateMachineDirectory = scope.get()
+        val context = RenderContext.Embed("frame1")
+        experienceRenderer.show(QualificationResult(Qualification("screen_view"), listOf(experience)))
+        val frameMock = mockk<AppcuesFrameView>(relaxed = true) {
+            every { this@mockk.retainContent } answers { false }
+        }
+
+        // WHEN
+        experienceRenderer.start(frameMock, context)
+        experienceRenderer.start(frameMock, context)
+
+        // THEN
+        val owner = directory.getOwner(context)
+        val ownerMachine = owner!!.stateMachine
+        coVerify(exactly = 1) { ownerMachine.stop(false) }
+        coVerify(exactly = 1) { stateMachine.handleAction(StartExperience(experience)) }
     }
 
     @Test

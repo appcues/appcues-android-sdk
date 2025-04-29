@@ -3,6 +3,7 @@ package com.appcues.statemachine
 import com.appcues.AppcuesScopeTest
 import com.appcues.action.ActionProcessor
 import com.appcues.action.ExperienceAction
+import com.appcues.analytics.ExperienceLifecycleTracker
 import com.appcues.data.model.Action
 import com.appcues.data.model.Action.Trigger.NAVIGATE
 import com.appcues.data.model.Experience
@@ -83,7 +84,8 @@ internal class StateMachineTest : AppcuesScopeTest {
         var presented = false
         val experience = mockExperience { presented = true }
         val initialState = IdlingState
-        val stateMachine = initMachine(initialState)
+        val lifecycleTracker = mockk<ExperienceLifecycleTracker>(relaxed = true)
+        val stateMachine = initMachine(initialState, lifecycleTracker = lifecycleTracker)
         val action = StartExperience(experience)
         val targetState = RenderingStepState(experience, 0, mutableMapOf(), true)
 
@@ -94,6 +96,7 @@ internal class StateMachineTest : AppcuesScopeTest {
         assertThat(result.successValue()).isEqualTo(targetState)
         assertThat(presented).isTrue()
         assertThat(stateMachine.state).isEqualTo(targetState)
+        verify { lifecycleTracker.start(stateMachine, any()) }
     }
 
     @Test
@@ -629,7 +632,7 @@ internal class StateMachineTest : AppcuesScopeTest {
     fun `EndingExperience SHOULD NOT transition WHEN action is something other than Reset or Pause`() = runTest {
         // GIVEN
         val experience = mockExperience()
-        val initialState = EndingExperienceState(experience, 1, false, true)
+        val initialState = EndingExperienceState(experience, 1, false)
         val stateMachine = initMachine(initialState)
         val action = RenderStep(mutableMapOf())
 
@@ -645,7 +648,7 @@ internal class StateMachineTest : AppcuesScopeTest {
     fun `EndingExperience SHOULD call action processor WHEN experience is completed`() = runTest {
         // GIVEN
         val experience = mockExperience()
-        val initialState = EndingExperienceState(experience, 1, true, true)
+        val initialState = EndingExperienceState(experience, 1, true)
         val stateMachine = initMachine(initialState)
         val action = Reset
 
@@ -662,7 +665,7 @@ internal class StateMachineTest : AppcuesScopeTest {
     fun `EndingExperience SHOULD NOT call action processor WHEN experience is NOT completed`() = runTest {
         // GIVEN
         val experience = mockExperience()
-        val initialState = EndingExperienceState(experience, 1, false, true)
+        val initialState = EndingExperienceState(experience, 1, false)
         val stateMachine = initMachine(initialState)
         val action = Reset
 
@@ -679,13 +682,15 @@ internal class StateMachineTest : AppcuesScopeTest {
     fun `stop SHOULD call handleAction with EndExperience`() = runTest {
         // GIVEN
         val experience = mockExperience()
-        val stateMachine = initMachine(RenderingStepState(experience, 2, mutableMapOf()))
+        val lifecycleTracker = mockk<ExperienceLifecycleTracker>(relaxed = true)
+        val stateMachine = initMachine(RenderingStepState(experience, 2, mutableMapOf()), lifecycleTracker = lifecycleTracker)
 
         // WHEN
         stateMachine.stop(true)
 
         // THEN
         assertThat(stateMachine.state).isEqualTo(IdlingState)
+        verify { lifecycleTracker.stop() }
     }
 
     @Test
@@ -787,12 +792,13 @@ internal class StateMachineTest : AppcuesScopeTest {
     private suspend fun initMachine(
         state: State,
         onStateChange: ((State) -> Unit)? = null,
-        onError: ((Error) -> Unit)? = null
+        onError: ((Error) -> Unit)? = null,
+        lifecycleTracker: ExperienceLifecycleTracker? = null,
     ): StateMachine {
         val stateFlowCompletion: CompletableDeferred<Boolean> = CompletableDeferred()
         val errorFlowCompletion: CompletableDeferred<Boolean> = CompletableDeferred()
         val scope: CoroutineScope = get()
-        val machine = StateMachine(get(), get(), state)
+        val machine = StateMachine(get(), lifecycleTracker ?: get(), state)
         // this collect on the stateFlow simulates the function of the UI
         // that is required to progress the state machine forward on UI present/dismiss
         scope.launch {
