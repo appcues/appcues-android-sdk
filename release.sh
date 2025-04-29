@@ -57,10 +57,10 @@ then
 fi
 
 # check that the required maven central signing and auth vars are set
-if [ -z ${GPG_SIGNING_KEY+x} ]; then echo "GPG_SIGNING_KEY must be set for Maven Central publishing"; exit 1; fi
-if [ -z ${GPG_SIGNING_KEY_PWD+x} ]; then echo "GPG_SIGNING_KEY_PWD must be set for Maven Central publishing"; exit 1; fi
-if [ -z ${OSSRH_USERNAME+x} ]; then echo "OSSRH_USERNAME must be set for Maven Central publishing"; exit 1; fi
-if [ -z ${OSSRH_PASSWORD+x} ]; then echo "OSSRH_PASSWORD must be set for Maven Central publishing"; exit 1; fi
+if [ -z ${ORG_GRADLE_PROJECT_signingInMemoryKey+x} ]; then echo "ORG_GRADLE_PROJECT_signingInMemoryKey must be set for Maven Central publishing"; exit 1; fi
+if [ -z ${ORG_GRADLE_PROJECT_signingInMemoryKeyPassword+x} ]; then echo "ORG_GRADLE_PROJECT_signingInMemoryKeyPassword must be set for Maven Central publishing"; exit 1; fi
+if [ -z ${ORG_GRADLE_PROJECT_mavenCentralUsername+x} ]; then echo "ORG_GRADLE_PROJECT_mavenCentralUsername must be set for Maven Central publishing"; exit 1; fi
+if [ -z ${ORG_GRADLE_PROJECT_mavenCentralPassword+x} ]; then echo "ORG_GRADLE_PROJECT_mavenCentralPassword must be set for Maven Central publishing"; exit 1; fi
 
 # read the properties file
 while IFS= read -r line; do
@@ -142,7 +142,7 @@ gh release create $newVersion -F $tempFile -t $newVersion --target $branch
 rm $tempFile
 
 # publish to Maven Central
-gradle appcues:publishToMavenCentral
+./gradlew appcues:publishToMavenCentral
 
 # if the new version has a '-' in it, then it's a pre-release version (eg 1.0.0-rc01, 1.0.0-beta01, 1.0.0-alpha01)
 if [[ "$newVersion" == *-* ]]
