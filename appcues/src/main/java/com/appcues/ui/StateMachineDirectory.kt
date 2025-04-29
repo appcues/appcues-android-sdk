@@ -36,6 +36,9 @@ internal class AppcuesFrameStateMachineOwner(
         _frame.clear()
     }
 
+    // this is called on scenarios like cell re-use in a recycler, when a frame view
+    // gets recycled into a different frame ID, or in any scenario where a frame ID is
+    // set to a different frame - this frame is no longer valid
     override suspend fun reset() {
         frame?.reset()
         // do not need to dismiss here, as the frame UI is already removed for embed
@@ -62,6 +65,10 @@ internal class StateMachineDirectory {
 
     fun setOwner(owner: StateMachineOwning) {
         stateMachines[owner.renderContext] = owner
+    }
+
+    fun remove(context: RenderContext) {
+        stateMachines.remove(context)
     }
 
     suspend fun resetAll() {

@@ -50,11 +50,11 @@ internal class EndingStepStateTest {
         val experience = mockk<Experience>()
         val currentStep = 2
         val state = EndingStepState(experience, currentStep, true, null)
-        val action = EndExperience(markComplete = true, destroyed = false, trackAnalytics = false)
+        val action = EndExperience(markComplete = true, destroyed = false)
         // WHEN
         val transition = state.take(action)
         // THEN
-        transition.assertState(EndingExperienceState(experience, currentStep, action.markComplete, action.trackAnalytics))
+        transition.assertState(EndingExperienceState(experience, currentStep, action.markComplete))
         transition.assertEffect(ContinuationEffect(Reset))
     }
 

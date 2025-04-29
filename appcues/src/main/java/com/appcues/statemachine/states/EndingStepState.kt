@@ -38,7 +38,7 @@ internal data class EndingStepState(
 
     private fun toEndingExperience(action: EndExperience): Transition {
         return next(
-            state = EndingExperienceState(experience, flatStepIndex, action.markComplete, action.trackAnalytics),
+            state = EndingExperienceState(experience, flatStepIndex, action.markComplete),
             sideEffect = ContinuationEffect(Reset)
         )
     }

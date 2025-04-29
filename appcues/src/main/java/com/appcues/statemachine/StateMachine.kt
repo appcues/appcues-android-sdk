@@ -84,6 +84,8 @@ internal class StateMachine(
     }
 
     suspend fun stop(dismiss: Boolean) {
+        // on a forced stop (reset) - we stop any lifecycle tracking (analytics callbacks)
+        stopLifecycleTracking()
         handleAction(
             EndExperience(
                 markComplete = false,
@@ -91,8 +93,6 @@ internal class StateMachine(
                 // for this use case - when !destroyed, the state machine will wait on the UI to dismiss and
                 // signal to move to next step
                 destroyed = !dismiss,
-                // special case - no complete/dismiss analytics tracked on a force stop
-                trackAnalytics = false
             )
         )
     }
