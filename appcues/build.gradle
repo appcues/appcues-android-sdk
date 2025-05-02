@@ -17,7 +17,7 @@ ext.room_version = '2.6.1'
 ext.compose_version = '1.7.3'
 ext.compose_compiler_version = '1.4.8'
 ext.coil_version = '2.4.0'
-ext.moshi_version = '1.15.0'
+ext.moshi_version = '1.15.1'
 
 android {
     compileSdk 34
