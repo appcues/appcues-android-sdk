@@ -754,6 +754,36 @@ internal class StateMachineTest : AppcuesScopeTest {
     }
 
     @Test
+    fun `Failing SHOULD NOT run navigation actions WHEN action is Retry`() = runTest {
+        // this makes sure that step error/retry will not keep running the same navigation actions (deeplink)
+        // over and over on each retry. That will only happen on the first attempt to present a step.
+
+        // GIVEN
+        val experienceAction1 = mockk<ExperienceAction>(relaxed = true)
+        val experienceAction2 = mockk<ExperienceAction>(relaxed = true)
+        val presentingTrait = mockk<PresentingTrait>(relaxed = true)
+        val navigationActions = listOf(Action(NAVIGATE, experienceAction1), Action(NAVIGATE, experienceAction2))
+        val experience = mockExperienceNavigateActions(navigationActions, presentingTrait, Qualification("screen_view"))
+
+        val stateAtFailure = BeginningStepState(experience, 1)
+        val retryEffect = PresentationEffect(experience, 1, 1, true, isRecovering = true)
+        val initialState = FailingState(stateAtFailure, retryEffect)
+        val stateMachine = initMachine(initialState)
+        val action = Retry
+        val targetState = RenderingStepState(experience, 1, mutableMapOf())
+        val actionProcessor: ActionProcessor = get()
+
+        // WHEN
+        val result = stateMachine.handleAction(action)
+
+        // THEN
+        assertThat(result.successValue()).isEqualTo(targetState)
+        assertThat(stateMachine.state).isEqualTo(targetState)
+        coVerify(exactly = 0) { actionProcessor.process(listOf(experienceAction1, experienceAction2)) }
+        coVerify { presentingTrait.present() }
+    }
+
+    @Test
     fun `Failing SHOULD transition to Rendering new Experience WHEN action StartExperience`() = runTest {
         // GIVEN
         var presented = false

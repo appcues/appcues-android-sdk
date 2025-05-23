@@ -20,7 +20,7 @@ internal data class PresentationEffect(
 ) : SideEffect {
 
     override suspend fun launch(processor: ActionProcessor): Action {
-        if (stepContainerIndex != 0 || experience.trigger !is Qualification) {
+        if (!isRecovering && (stepContainerIndex != 0 || experience.trigger !is Qualification)) {
             // for pre-step navigation actions - only allow these to execute if this experience is being launched for some
             // other reason than qualification (i.e. deep links, preview, manual show). For any qualified experience, the initial
             // starting state of the experience is determined solely by flow settings determining the trigger
