@@ -5,7 +5,7 @@ plugins {
     id 'kotlin-android'
     id 'org.jetbrains.dokka'
     id 'kotlin-kapt'
-    id "com.vanniktech.maven.publish" version "0.31.0"
+    id "com.vanniktech.maven.publish" version "0.32.0"
 }
 
 apply from: 'artifacts-android.gradle'
