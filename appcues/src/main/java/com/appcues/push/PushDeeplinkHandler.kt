@@ -35,6 +35,7 @@ internal class PushDeeplinkHandler(
         private const val NOTIFICATION_WORKFLOW_TASK_ID_PARAM = "workflow_task_id"
         private const val NOTIFICATION_WORKFLOW_VERSION_PARAM = "workflow_version"
         private const val NOTIFICATION_FORWARD_DEEPLINK_PARAM = "forward_deeplink"
+        private const val NOTIFICATION_USER_ID_PARAM = "user_id"
 
         private const val NETWORK_ERROR_NOT_FOUND = 404
 
@@ -48,6 +49,7 @@ internal class PushDeeplinkHandler(
                 .appendPath("notification")
                 .appendPath(appcuesData.notificationId)
                 .apply {
+                    appendQueryParameter(NOTIFICATION_USER_ID_PARAM, appcuesData.userId)
                     if (appcuesData.test) { appendQueryParameter(NOTIFICATION_TEST_PARAM, "true") }
                     appcuesData.notificationVersion?.let { appendQueryParameter(NOTIFICATION_VERSION_PARAM, it.toString()) }
                     appcuesData.workflowId?.let { appendQueryParameter(NOTIFICATION_WORKFLOW_ID_PARAM, it) }
@@ -99,8 +101,9 @@ internal class PushDeeplinkHandler(
 
         val deeplink = query[NOTIFICATION_FORWARD_DEEPLINK_PARAM]
         val experienceId = query[NOTIFICATION_SHOW_CONTENT_PARAM]
+        val userId = query[NOTIFICATION_USER_ID_PARAM]
 
-        val action = PushOpenedAction(pushNotificationId, storage.userId, properties, deeplink, experienceId, isTest)
+        val action = PushOpenedAction(pushNotificationId, userId, properties, deeplink, experienceId, isTest)
 
         if (sessionMonitor.hasSession()) {
             coroutineScope.launch { pushOpenedProcessor.process(action) }
