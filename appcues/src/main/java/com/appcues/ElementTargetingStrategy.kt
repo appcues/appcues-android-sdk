@@ -44,7 +44,7 @@ public interface ElementTargetingStrategy {
      * @return: Root view element for the current screen, or null if not available. The view element
      *          contains sub-views recursively in the `children` property.
      */
-    public fun captureLayout(): ViewElement?
+    public suspend fun captureLayout(): ViewElement?
 
     /**
      * Create and return a selector implementation from configuration properties.
@@ -159,7 +159,7 @@ public fun View.isAppcuesView(): Boolean {
     return this.id == R.id.appcues_debugger_view
 }
 
-internal fun ElementTargetingStrategy.findMatches(selector: ElementSelector): List<Pair<ViewElement, Int>>? {
+internal suspend fun ElementTargetingStrategy.findMatches(selector: ElementSelector): List<Pair<ViewElement, Int>>? {
     return captureLayout()?.viewsMatching(selector)
 }
 
