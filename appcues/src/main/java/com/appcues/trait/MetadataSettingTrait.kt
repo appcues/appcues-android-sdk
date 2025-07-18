@@ -13,5 +13,5 @@ internal interface MetadataSettingTrait : ExperienceTrait {
      *
      * @return map of shared values
      */
-    fun produceMetadata(): Map<String, Any?>
+    suspend fun produceMetadata(): Map<String, Any?>
 }

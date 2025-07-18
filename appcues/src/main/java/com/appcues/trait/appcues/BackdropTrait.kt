@@ -46,7 +46,7 @@ internal class BackdropTrait(
 
     override val isBlocking = true
 
-    override fun produceMetadata(): Map<String, Any?> {
+    override suspend fun produceMetadata(): Map<String, Any?> {
         return hashMapOf(METADATA_BACKGROUND_COLOR to config.getConfigColor("backgroundColor"))
     }
 
