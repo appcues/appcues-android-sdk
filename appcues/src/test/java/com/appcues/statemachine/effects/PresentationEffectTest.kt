@@ -13,12 +13,12 @@ import com.appcues.trait.MetadataSettingTrait
 import com.appcues.trait.PresentingTrait
 import com.google.common.truth.Truth.assertThat
 import io.mockk.Called
+import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.coVerifySequence
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import io.mockk.verifySequence
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
@@ -115,7 +115,7 @@ internal class PresentationEffectTest {
         // WHEN
         effect.launch(actionProcessor)
         // THEN
-        verifySequence {
+        coVerifySequence {
             metadataSettingTrait1.produceMetadata()
             metadataSettingTrait2.produceMetadata()
             metadataSettingTrait3.produceMetadata()
@@ -127,10 +127,10 @@ internal class PresentationEffectTest {
         // GIVEN
         val presentingTrait = mockk<PresentingTrait>(relaxed = true)
         val metadataSettingTrait1 = mockk<MetadataSettingTrait>(relaxed = true) {
-            every { produceMetadata() } returns mapOf("a" to "valueOf-a")
+            coEvery { produceMetadata() } returns mapOf("a" to "valueOf-a")
         }
         val metadataSettingTrait2 = mockk<MetadataSettingTrait>(relaxed = true) {
-            every { produceMetadata() } returns mapOf("b" to "valueOf-b")
+            coEvery { produceMetadata() } returns mapOf("b" to "valueOf-b")
         }
         val flatStepIndex = 0
         every { experience.getPresentingTrait(flatStepIndex) } returns presentingTrait
@@ -155,10 +155,10 @@ internal class PresentationEffectTest {
         // GIVEN
         val presentingTrait = mockk<PresentingTrait>(relaxed = true)
         val metadataSettingTrait1 = mockk<MetadataSettingTrait>(relaxed = true) {
-            every { produceMetadata() } throws AppcuesTraitException("produceMetadata error")
+            coEvery { produceMetadata() } throws AppcuesTraitException("produceMetadata error")
         }
         val metadataSettingTrait2 = mockk<MetadataSettingTrait>(relaxed = true) {
-            every { produceMetadata() } returns mapOf("b" to "valueOf-b")
+            coEvery { produceMetadata() } returns mapOf("b" to "valueOf-b")
         }
         val flatStepIndex = 0
         every { experience.getPresentingTrait(flatStepIndex) } returns presentingTrait
@@ -189,7 +189,7 @@ internal class PresentationEffectTest {
         var remainingThrows = 3
         val presentingTrait = mockk<PresentingTrait>(relaxed = true)
         val metadataSettingTrait = mockk<MetadataSettingTrait>(relaxed = true) {
-            every { produceMetadata() } answers {
+            coEvery { produceMetadata() } answers {
                 remainingThrows--
                 // will throw with retry of 4 seconds 3 times
                 throw AppcuesTraitException("produceMetadata error", retryMilliseconds = if (remainingThrows > 0) 4000 else null)
