@@ -6,6 +6,7 @@ import android.graphics.Rect
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.WebView
 import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.semantics.SemanticsOwner
 import androidx.compose.ui.semantics.SemanticsProperties
@@ -16,6 +17,7 @@ import androidx.core.view.children
 import com.appcues.ElementSelector
 import com.appcues.ElementTargetingStrategy
 import com.appcues.ViewElement
+import com.appcues.data.MoshiConfiguration
 import com.appcues.debugger.screencapture.AndroidViewSelector.Companion.SELECTOR_APPCUES_ID
 import com.appcues.debugger.screencapture.AndroidViewSelector.Companion.SELECTOR_CONTENT_DESCRIPTION
 import com.appcues.debugger.screencapture.AndroidViewSelector.Companion.SELECTOR_RESOURCE_NAME
@@ -24,9 +26,12 @@ import com.appcues.isAppcuesView
 import com.appcues.monitor.AppcuesActivityMonitor
 import com.appcues.ui.utils.getParentView
 import com.appcues.util.withDensity
+import com.squareup.moshi.Types
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import java.lang.reflect.Type
 
 internal class AndroidViewSelector(
     private val properties: Map<String, String?>,
@@ -123,6 +128,7 @@ private suspend fun View.asCaptureView(screenBounds: Rect): ViewElement? {
     }
 
     val children: MutableList<ViewElement> = mutableListOf()
+    val rectDp = withDensity { globalVisibleRect.toDp() }
 
     // gather up child views for any ViewGroup
     // note: AndroidComposeView (handled below) is also a ViewGroup, and can have
@@ -169,9 +175,11 @@ private suspend fun View.asCaptureView(screenBounds: Rect): ViewElement? {
         }
     }
 
-    return selector(globalVisibleRect).let {
-        val rectDp = withDensity { globalVisibleRect.toDp() }
+    if (this is WebView) {
+        children.addAll(this.children(rectDp))
+    }
 
+    return selector(globalVisibleRect).let {
         ViewElement(
             x = rectDp.left,
             y = rectDp.top,
@@ -183,6 +191,64 @@ private suspend fun View.asCaptureView(screenBounds: Rect): ViewElement? {
             children = children.ifEmpty { null },
         )
     }
+}
+
+private suspend fun WebView.children(positionAdjustment: Rect): List<ViewElement> {
+    val js = """
+        [...document.querySelectorAll('[id], [appcues-id]')].reduce((result, el) => {
+            const { x, y, width, height } = el.getBoundingClientRect();
+            const tag = el.id ? `#${'$'}{el.id}` : null;
+            const appcuesID = el.getAttribute('appcues-id')
+            if (height !== 0 && width !== 0) {
+                result.push({
+                    x,
+                    y,
+                    width,
+                    height,
+                    tag,
+                    appcuesID
+                });
+            }
+            return result;
+        }, []);
+        """
+
+    val result = evaluateJavascript(js)
+    return result.map { el ->
+        val x = (el["x"] as Double).toInt()
+        val y = (el["y"] as Double).toInt()
+        val width = (el["width"] as Double).toInt()
+        val height = (el["height"] as Double).toInt()
+        ViewElement(
+            x = positionAdjustment.left + x,
+            y = positionAdjustment.top + y,
+            width = width,
+            height = height,
+            displayName = null,
+            selector = AndroidViewSelector(
+                properties = mapOf(
+                    SELECTOR_APPCUES_ID to (el["appcuesID"] as String?),
+                    SELECTOR_TAG to (el["tag"] as String?)
+                ).filterValues { it != null },
+            ),
+            type = "HTMLNode",
+            children = null,
+        )
+    }
+}
+
+private suspend fun WebView.evaluateJavascript(script: String): List<Map<String, Any>> {
+    val completion = CompletableDeferred<List<Map<String, Any>>>()
+    evaluateJavascript(script) { result ->
+        val listType: Type = Types.newParameterizedType(
+            List::class.java,
+            Types.newParameterizedType(Map::class.java, String::class.java, Any::class.java)
+        )
+        val adapter = MoshiConfiguration.moshi.adapter<List<Map<String, Any>>>(listType)
+        val parsed: List<Map<String, Any>> = adapter.fromJson(result) ?: emptyList()
+        completion.complete(parsed)
+    }
+    return completion.await()
 }
 
 private fun View.isVisibleForTargeting(globalVisibleRect: Rect): Boolean {
@@ -210,7 +276,7 @@ private fun View.selector(globalVisibleRect: Rect): AndroidViewSelector? {
 @Suppress("SwallowedException")
 private fun View.extractResourceName(): String? {
     return try {
-        if (this.isClickable) resources.getResourceEntryName(id) else null
+        if (this.isClickable && this !is WebView) resources.getResourceEntryName(id) else null
     } catch (_: NotFoundException) {
         null
     }
