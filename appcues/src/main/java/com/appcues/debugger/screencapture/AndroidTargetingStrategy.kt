@@ -24,6 +24,9 @@ import com.appcues.isAppcuesView
 import com.appcues.monitor.AppcuesActivityMonitor
 import com.appcues.ui.utils.getParentView
 import com.appcues.util.withDensity
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 
 internal class AndroidViewSelector(
     private val properties: Map<String, String?>,
@@ -87,7 +90,7 @@ internal class AndroidViewSelector(
 
 internal class AndroidTargetingStrategy : ElementTargetingStrategy {
 
-    override fun captureLayout(): ViewElement? {
+    override suspend fun captureLayout(): ViewElement? {
         return AppcuesActivityMonitor.activity?.getParentView()?.let {
             val screenBounds = Rect()
             it.getGlobalVisibleRect(screenBounds)
@@ -102,7 +105,7 @@ internal class AndroidTargetingStrategy : ElementTargetingStrategy {
 
 private const val ANDROID_COMPOSE_VIEW_CLASS_NAME = "androidx.compose.ui.platform.AndroidComposeView"
 
-private fun View.asCaptureView(screenBounds: Rect): ViewElement? {
+private suspend fun View.asCaptureView(screenBounds: Rect): ViewElement? {
     // the coordinates of the non-clipped area of this view in the coordinate space of the view's root view
     val globalVisibleRect = Rect()
 
@@ -126,15 +129,21 @@ private fun View.asCaptureView(screenBounds: Rect): ViewElement? {
     // additional View items within, when using Compose <--> View interop. Those
     // will also be collected here
     if (this is ViewGroup) {
-        val viewChildren = this.children.mapNotNull {
-            if (!it.isShown) {
-                // discard hidden views and subviews within
-                null
-            } else {
-                it.asCaptureView(screenBounds)
-            }
-        }.toList()
-        children.addAll(viewChildren)
+        coroutineScope {
+            val deferred = this@asCaptureView.children.map {
+                async {
+                    if (!it.isShown) {
+                        // discard hidden views and subviews within
+                        null
+                    } else {
+                        it.asCaptureView(screenBounds)
+                    }
+                }
+            }.toList()
+
+            val viewChildren = deferred.awaitAll().filterNotNull()
+            children.addAll(viewChildren)
+        }
     }
 
     // For an AndroidComposeView, we need to gather up the layout info for the Composables
