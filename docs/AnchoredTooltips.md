@@ -49,6 +49,14 @@ Button(
 
 Note that Applications using Compose can also embed additional `android.view.View` content inside of Composables, using the provided [interop features](https://developer.android.com/jetpack/compose/migrate/interoperability-apis/views-in-compose). Those Views should be identified just like any other `android.view.View` as described in the section above, and they will also be available for targeting anchored tooltips.
 
+## Instrumenting Web Views
+
+HTML content loaded in a `WebView` is eligible for use with anchored tooltips. Any visible element with an `id` attribute or a `data-appcues-id` attribute will be selectable.
+
+```html
+<button id="my-button" type="button">My Button</button>
+<div data-appcues-id="some-id">...</div>
+```
 
 
 ## Other Considerations
