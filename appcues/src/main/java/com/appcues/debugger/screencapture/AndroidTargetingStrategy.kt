@@ -195,10 +195,10 @@ private suspend fun View.asCaptureView(screenBounds: Rect): ViewElement? {
 
 private suspend fun WebView.children(positionAdjustment: Rect): List<ViewElement> {
     val js = """
-        [...document.querySelectorAll('[id], [appcues-id]')].reduce((result, el) => {
+        [...document.querySelectorAll('[id], [data-appcues-id]')].reduce((result, el) => {
             const { x, y, width, height } = el.getBoundingClientRect();
             const tag = el.id ? `#${'$'}{el.id}` : null;
-            const appcuesID = el.getAttribute('appcues-id')
+            const appcuesID = el.getAttribute('data-appcues-id')
             if (height !== 0 && width !== 0) {
                 result.push({
                     x,
