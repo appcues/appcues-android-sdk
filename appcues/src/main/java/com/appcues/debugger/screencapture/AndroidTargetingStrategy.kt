@@ -193,7 +193,7 @@ private suspend fun View.asCaptureView(screenBounds: Rect): ViewElement? {
     }
 }
 
-private suspend fun WebView.children(positionAdjustment: Rect): List<ViewElement> {
+private suspend fun WebView.children(rectDp: Rect): List<ViewElement> {
     val js = """
         [...document.querySelectorAll('[id], [data-appcues-id]')].reduce((result, el) => {
             const { x, y, width, height } = el.getBoundingClientRect();
@@ -214,26 +214,36 @@ private suspend fun WebView.children(positionAdjustment: Rect): List<ViewElement
         """
 
     val result = evaluateJavascript(js)
-    return result.map { el ->
+    return result.mapNotNull { el ->
         val x = (el["x"] as Double).toInt()
         val y = (el["y"] as Double).toInt()
         val width = (el["width"] as Double).toInt()
         val height = (el["height"] as Double).toInt()
-        ViewElement(
-            x = positionAdjustment.left + x,
-            y = positionAdjustment.top + y,
-            width = width,
-            height = height,
-            displayName = null,
-            selector = AndroidViewSelector(
-                properties = mapOf(
-                    SELECTOR_APPCUES_ID to (el["appcuesID"] as String?),
-                    SELECTOR_TAG to (el["tag"] as String?)
-                ).filterValues { it != null },
-            ),
-            type = "HTMLNode",
-            children = null,
-        )
+
+        val appcuesId = el["appcuesID"] as? String
+        val tag = el["tag"] as? String
+
+        // considering it eligible for targeting if the center point is visible
+        val centerX = (x + (width / 2.0)).toInt()
+        val centerY = (y + (height / 2.0)).toInt()
+
+        if (centerX in 0..rectDp.width() && centerY in 0..rectDp.height())
+            ViewElement(
+                x = rectDp.left + x,
+                y = rectDp.top + y,
+                width = width,
+                height = height,
+                displayName = appcuesId ?: tag,
+                selector = AndroidViewSelector(
+                    properties = mapOf(
+                        SELECTOR_APPCUES_ID to appcuesId,
+                        SELECTOR_TAG to tag
+                    ).filterValues { it != null },
+                ),
+                type = "HTMLNode",
+                children = null,
+            )
+        else null
     }
 }
 
