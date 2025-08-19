@@ -86,10 +86,11 @@ internal class InAppReviewActivity : AppCompatActivity() {
                     requestCompletion.await()
                 }
             } catch (e: TimeoutCancellationException) {
-                val scope = Bootstrap.get(intent.getStringExtra(EXTRA_SCOPE_ID)!!)
-
-                scope?.get<Logcues>()?.run {
-                    info("In-App Review not available for this application")
+                val scopeId = intent.getStringExtra(EXTRA_SCOPE_ID)
+                if (scopeId != null) {
+                    Bootstrap.get(scopeId)?.get<Logcues>()?.run {
+                        info("In-App Review not available for this application")
+                    }
                 }
 
                 finish()
