@@ -38,7 +38,15 @@ internal class RequestPermissionActivity : AppCompatActivity() {
             }
     }
 
-    private val permissionKey by lazy { intent.getStringExtra(EXTRA_PERMISSION_KEY)!! }
+    private val permissionKey by lazy {
+        intent.getStringExtra(EXTRA_PERMISSION_KEY) ?: run {
+            // If we don't have a permission key, complete with false and finish
+            // This could happen if the Activity was terminated and recreated for some reason
+            completion?.complete(false)
+            finish()
+            ""
+        }
+    }
 
     private val permissionLauncher = registerForActivityResult(RequestPermission()) {
         completion?.complete(it)
