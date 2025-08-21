@@ -1,6 +1,7 @@
 package com.appcues.data.model
 
 import com.appcues.action.ActionRegistry
+import com.appcues.action.appcues.Check
 import com.appcues.data.MoshiConfiguration
 import com.appcues.data.mapper.action.toAction
 import com.appcues.data.mapper.step.primitives.mapPrimitive
@@ -76,6 +77,10 @@ internal fun AppcuesConfigMap.getConfigColor(key: String): ComponentColor? {
     return getConfig<Any>(key)?.let {
         MoshiConfiguration.fromAny<StyleColorResponse>(it)?.mapComponentColor()
     }
+}
+
+internal fun AppcuesConfigMap.getConfigConditionalChecks(key: String): List<Check>? {
+    return getConfig<List<Any>>(key)?.map { MoshiConfiguration.fromAny<Check>(it) }?.mapNotNull { it }
 }
 
 // general helper to get any object of type T from the config map and have it deserialized from JSON
