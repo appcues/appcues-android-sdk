@@ -1,6 +1,7 @@
 package com.appcues.action
 
 import com.appcues.action.appcues.CloseAction
+import com.appcues.action.appcues.ConditionalAction
 import com.appcues.action.appcues.ContinueAction
 import com.appcues.action.appcues.DelayAction
 import com.appcues.action.appcues.LaunchExperienceAction
@@ -38,6 +39,7 @@ internal class ActionRegistry(override val scope: AppcuesScope) : AppcuesCompone
         register(RequestReviewAction.TYPE) { config, _ -> RequestReviewAction(config, get(), get()) }
         register(DelayAction.TYPE) { config, _ -> DelayAction(config) }
         register(RequestPushAction.TYPE) { config, _ -> RequestPushAction(config, get(), get()) }
+        register(ConditionalAction.TYPE) { config, context -> ConditionalAction(config, context, get(), get(), get()) }
     }
 
     operator fun get(key: String): ActionFactoryBlock? {

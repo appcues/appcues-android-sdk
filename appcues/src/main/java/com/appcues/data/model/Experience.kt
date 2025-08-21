@@ -90,6 +90,15 @@ internal data class Experience(
         return getStepOrThrow(flatStepIndex).allowDismissal()
     }
 
+    fun surveyState(): Map<UUID, String> {
+        return this.flatSteps.fold(mutableMapOf<UUID, String>()) { results, step ->
+            step.formState.formItems.forEach { formItem ->
+                results[formItem.id] = formItem.value
+            }
+            results
+        }
+    }
+
     private fun getStepOrThrow(flatStepIndex: Int): Step {
         return flatSteps.getOrNull(flatStepIndex) ?: throw AppcuesTraitException("Invalid step index $flatStepIndex")
     }

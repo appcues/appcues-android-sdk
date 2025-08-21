@@ -1,5 +1,6 @@
 package com.appcues.data
 
+import com.appcues.data.model.ClauseAdapter
 import com.appcues.data.remote.adapters.DateAdapter
 import com.appcues.data.remote.adapters.UUIDAdapter
 import com.appcues.data.remote.appcues.adapters.ElementSelectorAdapter
@@ -63,6 +64,7 @@ internal object MoshiConfiguration {
         .add(ElementSelectorAdapter())
         .add(LossyExperienceResponseAdapterFactory())
         .add(TraitResponseAdapterFactory())
+        .add(ClauseAdapter())
         .addLast(KotlinJsonAdapterFactory())
         .build()
 
