@@ -142,6 +142,8 @@ internal sealed class Clause {
 internal class ClauseAdapter {
     @FromJson
     fun fromJson(json: Map<String, Any>): Clause? {
+        if (json.keys.size > 1) return null
+
         return when {
             json.containsKey("survey") -> parseSurveyClause(json["survey"] as? Map<String, Any>)
             json.containsKey("token") -> parseTokenClause(json["token"] as? Map<String, Any>)
@@ -162,17 +164,22 @@ internal class ClauseAdapter {
             val value = surveyData["value"] as String
             Clause.Survey(Clause.SurveyClause(block, operator, value))
         } catch (e: IllegalArgumentException) {
-            null
+            Clause.Unknown()
         }
     }
 
+    @Suppress("SwallowedException")
     private fun parseTokenClause(tokenData: Map<String, Any>?): Clause? {
         if (tokenData == null) return null
         
-        val token = tokenData["token"] as String
-        val operator = parseOperator(tokenData["operator"])
-        val value = tokenData["value"] as String
-        return Clause.Token(Clause.TokenClause(token, operator, value))
+        return try {
+            val token = tokenData["token"] as String
+            val operator = parseOperator(tokenData["operator"])
+            val value = tokenData["value"] as String
+            Clause.Token(Clause.TokenClause(token, operator, value))
+        } catch (e: IllegalArgumentException) {
+            Clause.Unknown()
+        }
     }
 
     private fun parseLogicalClause(
