@@ -7,6 +7,7 @@ import org.junit.Assert
 import org.junit.Test
 import java.util.UUID
 
+@Suppress("LargeClass")
 internal class ClauseTest {
 
     private val moshi = Moshi.Builder()
@@ -659,6 +660,19 @@ internal class ClauseTest {
     }
 
     @Test
+    fun testDecodeMultipleKeysError() {
+        val json = """
+        {
+            "and": [],
+            "or": []
+        }
+        """.trimIndent()
+
+        val clause = moshi.adapter(Clause::class.java).fromJson(json)
+        assertThat(clause).isNull()
+    }
+
+    @Test
     fun testDecodeInvalidUUID() {
         val json = """
         {
@@ -671,11 +685,12 @@ internal class ClauseTest {
         """.trimIndent()
 
         val clause = moshi.adapter(Clause::class.java).fromJson(json)
-        assertThat(clause).isNull()
+        assertThat(clause).isNotNull()
+        assertThat(clause).isInstanceOf(Clause.Unknown::class.java)
     }
 
     @Test
-    fun testDecodeInvalidOperator() {
+    fun testDecodeInvalidSurveyOperator() {
         val json = """
         {
             "survey": {
@@ -687,7 +702,25 @@ internal class ClauseTest {
         """.trimIndent()
 
         val clause = moshi.adapter(Clause::class.java).fromJson(json)
-        assertThat(clause).isNull()
+        assertThat(clause).isNotNull()
+        assertThat(clause).isInstanceOf(Clause.Unknown::class.java)
+    }
+
+    @Test
+    fun testDecodeInvalidTokenOperator() {
+        val json = """
+        {
+            "token": {
+                "token": "test",
+                "operator": "unknown",
+                "value": "test"
+            }
+        }
+        """.trimIndent()
+
+        val clause = moshi.adapter(Clause::class.java).fromJson(json)
+        assertThat(clause).isNotNull()
+        assertThat(clause).isInstanceOf(Clause.Unknown::class.java)
     }
 
     // MARK: - Integration Tests
