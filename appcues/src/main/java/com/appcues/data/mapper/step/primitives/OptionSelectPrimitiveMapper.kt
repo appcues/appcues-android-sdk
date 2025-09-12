@@ -40,7 +40,8 @@ internal fun OptionSelectPrimitiveResponse.mapOptionSelectPrimitive(): OptionSel
         unselectedColor = unselectedColor?.mapComponentColor(),
         accentColor = accentColor?.mapComponentColor(),
         attributeName = attributeName,
-        leadingFill = leadingFill ?: false
+        leadingFill = leadingFill ?: false,
+        randomizeOptionOrder = randomizeOptionOrder ?: false
     )
 }
 
