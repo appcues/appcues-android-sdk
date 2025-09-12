@@ -160,6 +160,7 @@ internal sealed class ExperiencePrimitive(
         val accentColor: ComponentColor? = null,
         val attributeName: String? = null,
         val leadingFill: Boolean = false,
+        val randomizeOptionOrder: Boolean = false,
     ) : ExperiencePrimitive(id, style) {
 
         data class OptionItem(

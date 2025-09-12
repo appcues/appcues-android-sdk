@@ -94,10 +94,11 @@ private fun OptionSelectPrimitive.ComposeOptions(
     showError: Boolean,
 ) {
     val errorTint = if (showError) errorLabel?.style?.foregroundColor?.getColor(isSystemInDarkTheme()) else null
+    val displayOptions = formState.getOptions(this@ComposeOptions)
 
     when {
         selectMode == SINGLE && displayFormat == PICKER -> {
-            options.ComposePicker(
+            displayOptions.ComposePicker(
                 selectedValues = formState.getValue(this@ComposeOptions),
                 modifier = Modifier.styleBorder(pickerStyle ?: ComponentStyle(), isSystemInDarkTheme()),
                 placeholder = placeholder,
@@ -107,7 +108,7 @@ private fun OptionSelectPrimitive.ComposeOptions(
             }
         }
         selectMode == SINGLE && displayFormat == NPS -> {
-            options.ComposeNPS(
+            displayOptions.ComposeNPS(
                 selectedValues = formState.getValue(this@ComposeOptions)
             ) {
                 formState.setValue(this@ComposeOptions, it)
@@ -115,7 +116,7 @@ private fun OptionSelectPrimitive.ComposeOptions(
         }
         displayFormat == HORIZONTAL_LIST -> {
             Row(verticalAlignment = controlPosition.getVerticalAlignment() ?: Alignment.CenterVertically) {
-                options.ComposeSelections(
+                displayOptions.ComposeSelections(
                     selectedValues = formState.getValue(this@ComposeOptions),
                     selectMode = selectMode,
                     controlPosition = controlPosition,
@@ -129,7 +130,7 @@ private fun OptionSelectPrimitive.ComposeOptions(
         }
         else -> { // VERTICAL_LIST case or a fallback (i.e. a PICKER but with multi-select, invalid)
             Column(horizontalAlignment = controlPosition.getHorizontalAlignment() ?: Alignment.CenterHorizontally) {
-                options.ComposeSelections(
+                displayOptions.ComposeSelections(
                     selectedValues = formState.getValue(this@ComposeOptions),
                     selectMode = selectMode,
                     controlPosition = controlPosition,

@@ -35,6 +35,7 @@ internal class OptionSelectPrimitiveMapperTest {
             accentColor = null,
             attributeName = null,
             leadingFill = null,
+            randomizeOptionOrder = null,
         )
 
         // WHEN
@@ -71,6 +72,7 @@ internal class OptionSelectPrimitiveMapperTest {
             accentColor = null,
             attributeName = null,
             leadingFill = null,
+            randomizeOptionOrder = null,
         )
 
         // WHEN

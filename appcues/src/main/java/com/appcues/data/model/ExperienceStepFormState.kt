@@ -72,6 +72,11 @@ internal class ExperienceStepFormState {
         item?.setValue(value)
     }
 
+    fun getOptions(primitive: OptionSelectPrimitive): List<OptionSelectPrimitive.OptionItem> {
+        val item = _formItems[primitive.id] as? OptionSelectFormItemState
+        return item?.options ?: primitive.options
+    }
+
     fun toHashMap(): HashMap<String, Any> {
         return hashMapOf("formResponse" to formItems.map { it.toHashMap() })
     }
@@ -126,13 +131,19 @@ internal sealed class ExperienceStepFormItemState(
             }
 
     fun toHashMap(): HashMap<String, Any> {
-        return hashMapOf(
+        val result: HashMap<String, Any> = hashMapOf(
             "fieldId" to id,
             "fieldType" to type,
             "fieldRequired" to isRequired,
             "label" to label,
-            "value" to value,
+            "value" to value
         )
+        
+        if (this is OptionSelectFormItemState) {
+            result["position"] = getValuePosition()
+        }
+        
+        return result
     }
 
     class TextInputFormItemState(
@@ -168,6 +179,19 @@ internal sealed class ExperienceStepFormItemState(
     ) {
 
         var values = mutableStateOf(setOf<String>())
+        
+        val options: List<OptionSelectPrimitive.OptionItem> =
+            if (primitive.randomizeOptionOrder) {
+                primitive.options.shuffled()
+            } else {
+                primitive.options
+            }
+
+        fun getValuePosition(): String {
+            return values.value.map { selectedValue ->
+                options.indexOfFirst { it.value == selectedValue }
+            }.joinToString("\n")
+        }
 
         fun setValue(newValue: String) {
             when (primitive.selectMode) {
