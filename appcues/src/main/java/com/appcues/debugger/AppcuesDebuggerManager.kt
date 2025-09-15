@@ -10,8 +10,6 @@ import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.findViewTreeOnBackPressedDispatcherOwner
 import androidx.compose.ui.platform.ComposeView
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.viewModelScope
 import com.appcues.AppcuesConfig
 import com.appcues.R
@@ -116,12 +114,7 @@ internal class AppcuesDebuggerManager(
 
                     id = R.id.appcues_debugger_view
 
-                    layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT).apply {
-                        // adds margin top and bottom according to visible status and navigation bar
-                        ViewCompat.getRootWindowInsets(parentView)?.getInsets(WindowInsetsCompat.Type.systemBars())?.let { insets ->
-                            setMargins(insets.left, insets.top, insets.right, insets.bottom)
-                        }
-                    }
+                    layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
 
                     setContent {
                         AppcuesTheme(isTesting = appcuesConfig.isSnapshotTesting) {
