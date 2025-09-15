@@ -5,8 +5,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout.LayoutParams
 import androidx.compose.ui.platform.ComposeView
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.children
 import androidx.core.view.isVisible
 import com.appcues.AppcuesFrameView
@@ -26,11 +24,7 @@ internal class OverlayViewPresenter(scope: AppcuesScope, renderContext: RenderCo
             // create and add the view
             AppcuesFrameView(activity).apply {
                 id = R.id.appcues_overlay_view
-                layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT).also {
-                    // adds margin top and bottom according to visible status and navigation bar
-                    ViewCompat.getRootWindowInsets(this@setupView)?.getInsets(WindowInsetsCompat.Type.systemBars())
-                        ?.let { insets -> it.setMargins(insets.left, insets.top, insets.right, insets.bottom) }
-                }
+                layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
             }.also { overlayView ->
                 // if debugger view exists, ensure we are positioned behind it.
                 findViewById<View>(R.id.appcues_debugger_view)
