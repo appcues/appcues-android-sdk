@@ -1,6 +1,7 @@
 package com.appcues.debugger.ui
 
 import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Offset
@@ -21,6 +22,7 @@ import kotlin.math.roundToInt
 internal class MutableDebuggerState(
     val debugMode: DebugMode,
     private val density: Density,
+    private val safeAreaInsets: PaddingValues,
     private val isCreating: Boolean,
     val fabSize: Dp = 56.dp
 ) {
@@ -175,13 +177,16 @@ internal class MutableDebuggerState(
 
     fun getExpandedContainerHeight(): Dp {
         return with(density) {
-            boxSize.height.toDp() - (fabSize / 2) - EXPANDED_CONTAINER_TOP_PADDING
+            boxSize.height.toDp() - (fabSize / 2) - safeAreaInsets.calculateTopPadding() - EXPANDED_CONTAINER_TOP_PADDING
         }
     }
 
     fun getExpandedFabAnchor(): Offset {
         return with(density) {
-            Offset((boxSize.width - fabSize.toPx()) / 2, EXPANDED_CONTAINER_TOP_PADDING.toPx())
+            Offset(
+                (boxSize.width - fabSize.toPx()) / 2,
+                safeAreaInsets.calculateTopPadding().toPx() + EXPANDED_CONTAINER_TOP_PADDING.toPx()
+            )
         }
     }
 

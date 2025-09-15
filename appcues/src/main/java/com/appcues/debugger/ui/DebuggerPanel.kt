@@ -12,9 +12,15 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -90,9 +96,14 @@ internal fun BoxScope.DebuggerPanel(debuggerState: MutableDebuggerState, debugge
 private fun DebuggerPanelPages(viewModel: DebuggerViewModel) {
     val navController = rememberNavController()
     val deeplink = viewModel.deeplink.collectAsState()
+    val safeAreaInsets = WindowInsets.systemBars.only(WindowInsetsSides.Bottom).asPaddingValues()
     navController.ProcessDeeplinkEffect(deeplink) { viewModel.consumeDeeplink() }
 
-    NavHost(navController = navController, startDestination = MainPage.path) {
+    NavHost(
+        navController = navController,
+        startDestination = MainPage.path,
+        Modifier.padding(safeAreaInsets)
+    ) {
         registerPage(MainPage) {
             DebuggerMain(viewModel, navController)
         }

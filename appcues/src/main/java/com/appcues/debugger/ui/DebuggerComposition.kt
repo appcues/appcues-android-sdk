@@ -3,7 +3,10 @@ package com.appcues.debugger.ui
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -40,8 +43,9 @@ import kotlinx.coroutines.launch
 internal fun DebuggerComposition(viewModel: DebuggerViewModel, onDismiss: () -> Unit) {
     val uiState = viewModel.uiState.collectAsState()
     val density = LocalDensity.current
-    val debuggerState by remember(uiState.value.mode) {
-        mutableStateOf(MutableDebuggerState(uiState.value.mode, density, uiState.value is Creating))
+    val safeAreaInsets = WindowInsets.systemBars.asPaddingValues()
+    val debuggerState by remember(uiState.value.mode, safeAreaInsets) {
+        mutableStateOf(MutableDebuggerState(uiState.value.mode, density, safeAreaInsets, uiState.value is Creating))
     }
 
     // listening for lifecycle changes to update isPaused properly
