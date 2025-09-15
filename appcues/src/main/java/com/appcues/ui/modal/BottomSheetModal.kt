@@ -9,10 +9,15 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -58,6 +63,7 @@ internal fun BottomSheetModal(
         val enterAnimation = enterTransitionDerivedOf(appcuesWindowInfo)
         val exitAnimation = exitTransitionDerivedOf(appcuesWindowInfo)
         val isDark = isSystemInDarkTheme()
+        val safeAreaInsets = WindowInsets.systemBars.only(WindowInsetsSides.Horizontal.plus(WindowInsetsSides.Bottom)).asPaddingValues()
 
         Box(
             modifier = Modifier
@@ -81,7 +87,7 @@ internal fun BottomSheetModal(
                         content(
                             Modifier.fillMaxSize(),
                             style.getPaddings(),
-                            PaddingValues(),
+                            safeAreaInsets,
                             true, // support vertical scroll
                         )
                     },
