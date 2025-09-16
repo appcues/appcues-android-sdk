@@ -76,6 +76,10 @@
                     android:scheme="appcues-example" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".compose.ComposeActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Appcues" />
 
         <service
             android:name="com.appcues.AppcuesFirebaseMessagingService"

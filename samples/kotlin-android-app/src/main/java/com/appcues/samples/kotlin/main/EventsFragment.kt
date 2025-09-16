@@ -1,5 +1,6 @@
 package com.appcues.samples.kotlin.main
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
@@ -16,6 +17,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import com.appcues.samples.kotlin.ExampleApplication
 import com.appcues.samples.kotlin.R
+import com.appcues.samples.kotlin.compose.ComposeActivity
 import com.appcues.samples.kotlin.databinding.FragmentEventsBinding
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -53,6 +55,11 @@ class EventsFragment : Fragment() {
             requireActivity()
                 .findNavController(R.id.nav_host_fragment_activity_example)
                 .navigate(R.id.action_from_events_to_recycler_view)
+        }
+
+        binding.composeButton.setOnClickListener {
+            val intent = Intent(requireContext(), ComposeActivity::class.java)
+            startActivity(intent)
         }
 
         return binding.root
