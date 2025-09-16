@@ -21,6 +21,7 @@
     <string name="trigger_event_2_button">Trigger Event 2</string>
     <string name="trigger_event_3_button">Trigger Event 3</string>
     <string name="show_recycler_view_button">Show RecyclerView</string>
+    <string name="show_compose_button">Show Compose</string>
     <string name="launch_modal_button">Launch Modal</string>
     <string name="given_name_label">Given Name</string>
     <string name="family_name_label">Family Name</string>
@@ -31,6 +32,7 @@
     <string name="content_description_event_2">Trigger Event 2</string>
     <string name="content_description_event_3">Trigger Event 3</string>
     <string name="content_description_show_recycler_view">Show RecyclerView</string>
+    <string name="content_description_show_compose">Show Compose</string>
     <string name="content_description_save_profile">Save Profile</string>
     <string name="content_description_save_group">Save Group</string>
     <string name="content_description_tab_events">Events Tab</string>
