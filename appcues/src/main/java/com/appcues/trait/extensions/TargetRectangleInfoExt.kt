@@ -33,17 +33,18 @@ internal fun rememberTargetRectangleInfo(metadata: AppcuesStepMetadata): TargetR
 internal fun TargetRectangleInfo?.getRect(windowInfo: AppcuesWindowInfo): Rect? {
     if (this == null) return null
 
-    val screenWidth = windowInfo.widthDp.value
-    val screenHeight = windowInfo.heightDp.value
+    val safeRect = windowInfo.safeRect
+    val availableScreenWidth = safeRect.width
+    val availableScreenHeight = safeRect.height
 
     return Rect(
         offset = Offset(
-            x = (screenWidth * relativeX).toFloat() + x,
-            y = (screenHeight * relativeY).toFloat() + y,
+            x = (availableScreenWidth * relativeX).toFloat() + x + safeRect.left,
+            y = (availableScreenHeight * relativeY).toFloat() + y + safeRect.top,
         ),
         size = Size(
-            width = (screenWidth * relativeWidth).toFloat() + width,
-            height = (screenHeight * relativeHeight).toFloat() + height,
+            width = (availableScreenWidth * relativeWidth).toFloat() + width,
+            height = (availableScreenHeight * relativeHeight).toFloat() + height,
         )
     )
 }
@@ -61,14 +62,18 @@ internal fun TargetRectangleInfo?.getTooltipPointerPosition(
 ): TooltipPointerPosition {
     if (this == null || targetRect == null || contentDimens == null) return None
 
+    val safeRect = windowInfo.safeRect
+    val availableScreenHeight = safeRect.height.dp
+    val availableScreenWidth = safeRect.width.dp
+
     val availableSpaceTop = targetRect.top.dp - TooltipTrait.SCREEN_VERTICAL_PADDING
-    val availableSpaceBottom = windowInfo.heightDp - TooltipTrait.SCREEN_VERTICAL_PADDING - targetRect.bottom.dp
+    val availableSpaceBottom = availableScreenHeight - TooltipTrait.SCREEN_VERTICAL_PADDING - targetRect.bottom.dp
 
     val excessSpaceTop = availableSpaceTop - contentDimens.heightDp - distance - pointerLength
     val excessSpaceBottom = availableSpaceBottom - contentDimens.heightDp - distance - pointerLength
 
     val availableSpaceLeft = targetRect.left.dp - TooltipTrait.SCREEN_HORIZONTAL_PADDING
-    val availableSpaceRight = windowInfo.widthDp - TooltipTrait.SCREEN_HORIZONTAL_PADDING
+    val availableSpaceRight = availableScreenWidth - TooltipTrait.SCREEN_HORIZONTAL_PADDING
 
     val excessSpaceLeft = availableSpaceLeft - contentDimens.widthDp - distance - pointerLength
     val excessSpaceRight = availableSpaceRight - targetRect.right.dp - contentDimens.widthDp - distance - pointerLength
@@ -79,7 +84,7 @@ internal fun TargetRectangleInfo?.getTooltipPointerPosition(
     // figures out the constraints of the screen, and calculate availableHeight for top and bottom, in case we need to pass it
     // as part of the TooltipPointerPosition
     val minHeight = 48.dp + pointerLength
-    val maxHeight = windowInfo.heightDp - (TooltipTrait.SCREEN_VERTICAL_PADDING * 2)
+    val maxHeight = availableScreenHeight - (TooltipTrait.SCREEN_VERTICAL_PADDING * 2)
     val availableHeightTop = (availableSpaceTop - distance - pointerLength).coerceIn(minHeight, maxHeight)
     val availableHeightBottom = (availableSpaceBottom - distance - pointerLength).coerceIn(minHeight, maxHeight)
 

@@ -283,7 +283,10 @@ internal class TooltipTrait(
         val minPaddingStart = 0.dp
         val pointerLengthDp = with(LocalDensity.current) { pointerSettings.pointerLengthPx.toDp() }
         val pointerWidthDp = if (pointerSettings.tooltipPointerPosition.isVertical) 0.dp else pointerLengthDp
-        val maxPaddingStart = (windowInfo.widthDp - contentDimens.widthDp - pointerWidthDp - (SCREEN_HORIZONTAL_PADDING * 2))
+        
+        val safeRect = windowInfo.safeRect
+        val availableScreenWidth = safeRect.width.dp
+        val maxPaddingStart = (availableScreenWidth - contentDimens.widthDp - pointerWidthDp - (SCREEN_HORIZONTAL_PADDING * 2))
             .coerceAtLeast(minPaddingStart)
 
         return animateDpAsState(
@@ -303,9 +306,9 @@ internal class TooltipTrait(
                 }
                 None -> {
                     // in None case, the width is a fixed full width, 400 max
-                    val containerMaxSize = windowInfo.widthDp - (SCREEN_HORIZONTAL_PADDING * 2)
+                    val containerMaxSize = availableScreenWidth - (SCREEN_HORIZONTAL_PADDING * 2)
                     val containerWidth = min(MAX_TOOLTIP_WIDTH, containerMaxSize)
-                    val paddingStart = windowInfo.widthDp - containerWidth - (SCREEN_HORIZONTAL_PADDING * 2)
+                    val paddingStart = availableScreenWidth - containerWidth - (SCREEN_HORIZONTAL_PADDING * 2)
                     paddingStart.coerceAtLeast(minPaddingStart)
                 }
                 else -> {
@@ -335,7 +338,10 @@ internal class TooltipTrait(
         val minPaddingTop = 0.dp
         val pointerLengthDp = with(LocalDensity.current) { pointerSettings.pointerLengthPx.toDp() }
         val pointerHeightDp = if (pointerSettings.tooltipPointerPosition.isVertical) pointerLengthDp else 0.dp
-        val maxPaddingTop = (windowInfo.heightDp - contentDimens.heightDp - pointerHeightDp - (SCREEN_VERTICAL_PADDING * 2))
+        
+        val safeRect = windowInfo.safeRect
+        val availableScreenHeight = safeRect.height.dp
+        val maxPaddingTop = (availableScreenHeight - contentDimens.heightDp - pointerHeightDp - (SCREEN_VERTICAL_PADDING * 2))
             .coerceAtLeast(minPaddingTop)
 
         return animateDpAsState(
@@ -398,10 +404,14 @@ internal class TooltipTrait(
         maxHeight: Dp?,
     ): Modifier =
         composed {
+            val safeRect = windowInfo.safeRect
+            val availableScreenWidth = safeRect.width.dp
+            val availableScreenHeight = safeRect.height.dp
+            
             // keep containerMaxSize here as a rememberable so it force recomposition when value change
             val containerMaxSize = DpSize(
-                width = windowInfo.widthDp - (SCREEN_HORIZONTAL_PADDING * 2),
-                height = maxHeight ?: (windowInfo.heightDp - (SCREEN_VERTICAL_PADDING * 2))
+                width = availableScreenWidth - (SCREEN_HORIZONTAL_PADDING * 2),
+                height = maxHeight ?: (availableScreenHeight - (SCREEN_VERTICAL_PADDING * 2))
             )
 
             // Note: when pointer position is None (un-targeted), we use "bottom toast style". We fall back
