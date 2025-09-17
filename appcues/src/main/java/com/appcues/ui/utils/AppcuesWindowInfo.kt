@@ -1,11 +1,14 @@
 package com.appcues.ui.utils
 
 import android.content.res.Configuration
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.LayoutDirection.Ltr
 import com.appcues.ui.utils.AppcuesWindowInfo.DeviceType.MOBILE
 import com.appcues.ui.utils.AppcuesWindowInfo.DeviceType.TABLET
 import com.appcues.ui.utils.AppcuesWindowInfo.Orientation.LANDSCAPE
@@ -22,6 +25,7 @@ private const val HEIGHT_MEDIUM = 900
 @Composable
 internal fun rememberAppcuesWindowInfo(): AppcuesWindowInfo {
     val configuration = LocalConfiguration.current
+    val safeAreaInsets = WindowInsets.safeDrawing.asPaddingValues()
 
     val screenWidthType = when {
         configuration.screenWidthDp < WIDTH_COMPACT -> COMPACT
@@ -52,12 +56,19 @@ internal fun rememberAppcuesWindowInfo(): AppcuesWindowInfo {
             EXPANDED -> TABLET
         }
     }
-    return remember(configuration) {
+
+    val safeRect = Rect(
+        left = safeAreaInsets.calculateLeftPadding(Ltr).value,
+        top = safeAreaInsets.calculateTopPadding().value,
+        right = configuration.screenWidthDp - safeAreaInsets.calculateRightPadding(Ltr).value,
+        bottom = configuration.screenHeightDp - safeAreaInsets.calculateBottomPadding().value
+    )
+
+    return remember(configuration, safeRect) {
         AppcuesWindowInfo(
             screenWidthType = screenWidthType,
             screenHeightType = screenHeightType,
-            widthDp = configuration.screenWidthDp.dp,
-            heightDp = configuration.screenHeightDp.dp,
+            safeRect = safeRect,
             orientation = orientation,
             deviceType = deviceType,
         )
@@ -67,8 +78,7 @@ internal fun rememberAppcuesWindowInfo(): AppcuesWindowInfo {
 internal data class AppcuesWindowInfo(
     val screenWidthType: ScreenType,
     val screenHeightType: ScreenType,
-    val widthDp: Dp,
-    val heightDp: Dp,
+    val safeRect: Rect,
     val orientation: Orientation,
     val deviceType: DeviceType,
 ) {
