@@ -93,7 +93,7 @@ internal class DebuggerRecentEventsManager(
     }
 
     private fun onIdentifyActivityRequest(request: ActivityRequest) {
-        events.addFirst(
+        events.addAsFirst(
             DebuggerEventItem(
                 id = lastEventId,
                 type = EventType.USER_PROFILE,
@@ -114,7 +114,7 @@ internal class DebuggerRecentEventsManager(
     }
 
     private fun onGroupUpdateActivityRequest(request: ActivityRequest) {
-        events.addFirst(
+        events.addAsFirst(
             DebuggerEventItem(
                 id = lastEventId,
                 type = EventType.GROUP_UPDATE,
@@ -144,7 +144,7 @@ internal class DebuggerRecentEventsManager(
             val type = event.name.toEventType()
             val title = event.name.toEventTitle()?.let { contextWrapper.getString(it) }
 
-            events.addFirst(
+            events.addAsFirst(
                 DebuggerEventItem(
                     id = lastEventId,
                     type = type,
@@ -222,7 +222,7 @@ internal class DebuggerRecentEventsManager(
         }
     }
 
-    private fun ArrayList<DebuggerEventItem>.addFirst(element: DebuggerEventItem) {
+    private fun ArrayList<DebuggerEventItem>.addAsFirst(element: DebuggerEventItem) {
         add(0, element)
     }
 

@@ -40,7 +40,7 @@ internal class ContextWrapper(private val context: Context) {
     }
 
     fun getAppVersion(): String = with(context) {
-        packageManager.getPackageInfoCompat(packageName, 0).versionName
+        packageManager.getPackageInfoCompat(packageName, 0).versionName ?: ""
     }
 
     fun getAppBuild(): Long = with(context) {

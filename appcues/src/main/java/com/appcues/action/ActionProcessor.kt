@@ -90,7 +90,7 @@ internal class ActionProcessor(override val scope: AppcuesScope) : AppcuesCompon
         viewDescription: String?
     ): StepInteractionAction {
         // reverse the action list to get the first from back to front
-        val primaryAction = actions.reversed().firstOrNull { it is MetadataSettingsAction } as? MetadataSettingsAction
+        val primaryAction = actions.lastOrNull { it is MetadataSettingsAction } as? MetadataSettingsAction
 
         // get an instance of StepInteractionAction so it can access
         // StateMachine and AnalyticsTracker

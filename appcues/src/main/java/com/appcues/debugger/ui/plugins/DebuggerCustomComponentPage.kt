@@ -138,7 +138,7 @@ internal fun DebuggerCustomComponentPage(item: DebuggerCustomComponentItem, navC
             }
         }
 
-        itemsIndexed(logs.reversed()) { index, log ->
+        itemsIndexed(logs.asReversed()) { index, log ->
             Row(
                 modifier = Modifier
                     .animateItem()
