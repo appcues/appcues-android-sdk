@@ -20,13 +20,13 @@ ext.coil_version = '2.4.0'
 ext.moshi_version = '1.15.0'
 
 android {
-    compileSdk 34
+    compileSdk 35
 
     namespace "com.appcues"
 
     defaultConfig {
         minSdk 21
-        targetSdk 34
+        targetSdk 35
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         testApplicationId = "com.appcues.test"

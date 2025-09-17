@@ -32,7 +32,7 @@ internal class TargetElementTrait(
     private val retryIntervals = (config.getConfig<List<Int>>("retryIntervals") ?: listOf(300, 600, 900, 1_200)).toMutableList()
 
     private val retryMilliseconds: Int?
-        get() = if (retryIntervals.isNotEmpty()) retryIntervals.removeFirst() else null
+        get() = if (retryIntervals.isNotEmpty()) retryIntervals.removeAt(0) else null
 
     override suspend fun produceMetadata(): Map<String, Any?> {
         val viewElement = viewMatchingSelector()
