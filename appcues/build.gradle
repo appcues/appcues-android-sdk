@@ -14,7 +14,7 @@ apply from: 'dokka.gradle'
 apply from: 'appcues-properties.gradle'
 
 ext.room_version = '2.6.1'
-ext.compose_version = '1.8.2'
+ext.compose_version = '1.9.1'
 ext.compose_compiler_version = '1.4.8'
 ext.coil_version = '2.4.0'
 ext.moshi_version = '1.15.0'
