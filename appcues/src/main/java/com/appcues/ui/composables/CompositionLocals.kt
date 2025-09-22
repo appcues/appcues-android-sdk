@@ -12,6 +12,7 @@ import com.appcues.data.model.Action
 import com.appcues.data.model.ExperienceStepFormState
 import com.appcues.logging.Logcues
 import com.appcues.ui.presentation.AppcuesViewModel
+import com.appcues.ui.utils.AppcuesWindowInfo
 import java.util.UUID
 
 // used to register callback for all Actions triggered from primitives
@@ -37,6 +38,8 @@ internal val LocalAppcuesActions = staticCompositionLocalOf<Map<UUID, List<Actio
 
 // used to support UI testing and mocking of image loading
 internal val LocalImageLoader = staticCompositionLocalOf<ImageLoader> { noLocalProvidedFor("ImageLoader") }
+
+internal val LocalAppcuesWindowInfo = staticCompositionLocalOf<AppcuesWindowInfo> { noLocalProvidedFor("AppcuesWindowInfo") }
 
 // Dismissal delegate used to support swipe to dismiss, abstraction layer for testing
 internal val LocalAppcuesDismissalDelegate = staticCompositionLocalOf<AppcuesDismissalDelegate> {

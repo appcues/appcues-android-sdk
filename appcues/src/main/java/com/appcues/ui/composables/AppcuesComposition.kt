@@ -1,5 +1,6 @@
 package com.appcues.ui.composables
 
+import android.content.res.Configuration
 import android.webkit.WebChromeClient
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -11,10 +12,18 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
+import androidx.core.graphics.Insets
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import coil.ImageLoader
 import com.appcues.data.model.StepContainer
 import com.appcues.logging.Logcues
+import com.appcues.monitor.AppcuesActivityMonitor
+import com.appcues.trait.AppcuesTraitException
 import com.appcues.trait.BackdropDecoratingTrait
 import com.appcues.trait.ContainerDecoratingTrait
 import com.appcues.trait.ContainerDecoratingTrait.ContainerDecoratingType
@@ -23,6 +32,16 @@ import com.appcues.ui.presentation.AppcuesViewModel
 import com.appcues.ui.presentation.AppcuesViewModel.UIState.Dismissing
 import com.appcues.ui.presentation.AppcuesViewModel.UIState.Rendering
 import com.appcues.ui.theme.AppcuesExperienceTheme
+import com.appcues.ui.utils.AppcuesWindowInfo
+import com.appcues.ui.utils.AppcuesWindowInfo.DeviceType.MOBILE
+import com.appcues.ui.utils.AppcuesWindowInfo.DeviceType.TABLET
+import com.appcues.ui.utils.AppcuesWindowInfo.Orientation.LANDSCAPE
+import com.appcues.ui.utils.AppcuesWindowInfo.Orientation.PORTRAIT
+import com.appcues.ui.utils.AppcuesWindowInfo.ScreenType.COMPACT
+import com.appcues.ui.utils.AppcuesWindowInfo.ScreenType.EXPANDED
+import com.appcues.ui.utils.AppcuesWindowInfo.ScreenType.MEDIUM
+import com.appcues.ui.utils.getParentView
+import com.appcues.util.withDensity
 
 @Composable
 internal fun AppcuesComposition(
@@ -46,6 +65,7 @@ internal fun AppcuesComposition(
             LocalExperienceCompositionState provides ExperienceCompositionState(),
             LocalAppcuesDismissalDelegate provides DefaultAppcuesDismissalDelegate(viewModel),
             LocalAppcuesTapForwardingDelegate provides DefaultAppcuesTapForwardingDelegate(viewModel),
+            LocalAppcuesWindowInfo provides getWindowInfo()
         ) {
             MainSurface()
         }
@@ -172,4 +192,67 @@ internal fun BoxScope.ApplyOverlayContainerTraits(
     list
         .filter { it.containerComposeOrder == ContainerDecoratingType.OVERLAY }
         .forEach { it.run { DecorateContainer(containerPadding, safeAreaInsets) } }
+}
+
+@Composable
+internal fun getWindowInfo(): AppcuesWindowInfo {
+    val configuration = LocalConfiguration.current
+
+    val view = AppcuesActivityMonitor.activity?.getParentView()
+        ?: throw AppcuesTraitException("could not find root view")
+
+    return view.withDensity {
+        val insets = ViewCompat.getRootWindowInsets(view)?.getInsets(WindowInsetsCompat.Type.systemBars())
+            ?: Insets.NONE
+        val insetsDp = insets.toDp()
+
+        val size = Size(
+            width = view.width.toDp().toFloat(),
+            height = view.height.toDp().toFloat()
+        )
+        val safeRect = Rect(
+            left = insetsDp.left.toFloat(),
+            top = insetsDp.top.toFloat(),
+            right = size.width - insetsDp.right.toFloat(),
+            bottom = size.height - insetsDp.bottom.toFloat()
+        )
+
+        val screenWidthType = when {
+            size.width < AppcuesWindowInfo.WIDTH_COMPACT -> COMPACT
+            size.width < AppcuesWindowInfo.WIDTH_MEDIUM -> MEDIUM
+            else -> EXPANDED
+        }
+
+        val screenHeightType = when {
+            size.height < AppcuesWindowInfo.HEIGHT_COMPACT -> COMPACT
+            size.height < AppcuesWindowInfo.HEIGHT_MEDIUM -> MEDIUM
+            else -> EXPANDED
+        }
+
+        val orientation = when (configuration.orientation) {
+            Configuration.ORIENTATION_PORTRAIT -> PORTRAIT
+            else -> LANDSCAPE
+        }
+
+        val deviceType = when (orientation) {
+            PORTRAIT -> when (screenWidthType) {
+                COMPACT -> MOBILE
+                MEDIUM -> TABLET
+                EXPANDED -> TABLET
+            }
+            LANDSCAPE -> when (screenHeightType) {
+                COMPACT -> MOBILE
+                MEDIUM -> TABLET
+                EXPANDED -> TABLET
+            }
+        }
+
+        AppcuesWindowInfo(
+            screenWidthType = screenWidthType,
+            screenHeightType = screenHeightType,
+            safeRect = safeRect,
+            orientation = orientation,
+            deviceType = deviceType,
+        )
+    }
 }

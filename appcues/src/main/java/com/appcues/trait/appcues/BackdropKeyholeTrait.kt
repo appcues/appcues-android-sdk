@@ -31,7 +31,7 @@ import com.appcues.trait.extensions.inflateOrEmpty
 import com.appcues.trait.extensions.rememberFloatStepAnimation
 import com.appcues.trait.extensions.rememberTargetRectangleInfo
 import com.appcues.ui.composables.LocalAppcuesStepMetadata
-import com.appcues.ui.utils.rememberAppcuesWindowInfo
+import com.appcues.ui.composables.LocalAppcuesWindowInfo
 
 internal class BackdropKeyholeTrait(
     override val config: AppcuesConfigMap,
@@ -86,11 +86,12 @@ internal class BackdropKeyholeTrait(
 
         val density = LocalDensity.current
         val metadata = LocalAppcuesStepMetadata.current
+        val windowInfo = LocalAppcuesWindowInfo.current
 
         val targetRectInfo = rememberTargetRectangleInfo(metadata)
 
         val shapeBlurRadius = if (keyholeSettings.shape == CIRCLE) keyholeSettings.blurRadius.toFloat() else 0.0f
-        val targetRect = targetRectInfo.getRect(rememberAppcuesWindowInfo()).inflateOrEmpty(keyholeSettings.spreadRadius)
+        val targetRect = targetRectInfo.getRect(windowInfo).inflateOrEmpty(keyholeSettings.spreadRadius)
         val floatAnimation = rememberFloatStepAnimation(metadata)
         val encompassesDiameter = targetRect.getRectEncompassesRadius(shapeBlurRadius) * 2
 

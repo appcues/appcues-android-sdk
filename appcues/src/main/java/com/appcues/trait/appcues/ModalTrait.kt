@@ -16,6 +16,7 @@ import com.appcues.trait.appcues.ModalTrait.PresentationStyle.DIALOG
 import com.appcues.trait.appcues.ModalTrait.PresentationStyle.FULL
 import com.appcues.trait.appcues.ModalTrait.PresentationStyle.HALF_SHEET
 import com.appcues.trait.appcues.ModalTrait.PresentationStyle.SHEET
+import com.appcues.ui.composables.LocalAppcuesWindowInfo
 import com.appcues.ui.modal.BottomSheetModal
 import com.appcues.ui.modal.DialogModal
 import com.appcues.ui.modal.DialogTransition
@@ -24,7 +25,6 @@ import com.appcues.ui.modal.DialogTransition.SLIDE
 import com.appcues.ui.modal.ExpandedBottomSheetModal
 import com.appcues.ui.modal.FullScreenModal
 import com.appcues.ui.presentation.OverlayViewPresenter
-import com.appcues.ui.utils.rememberAppcuesWindowInfo
 
 internal class ModalTrait(
     override val config: AppcuesConfigMap,
@@ -57,7 +57,7 @@ internal class ModalTrait(
             hasVerticalScroll: Boolean,
         ) -> Unit
     ) {
-        val windowInfo = rememberAppcuesWindowInfo()
+        val windowInfo = LocalAppcuesWindowInfo.current
 
         when (presentationStyle) {
             DIALOG -> DialogModal(style, content, windowInfo, getDialogTransition())
