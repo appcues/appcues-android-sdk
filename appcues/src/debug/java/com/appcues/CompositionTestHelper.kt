@@ -1,15 +1,23 @@
 package com.appcues
 
 import android.content.Context
+import android.content.res.Configuration
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.unit.LayoutDirection.Ltr
 import coil.ImageLoader
 import com.appcues.action.ExperienceAction
 import com.appcues.analytics.ExperienceLifecycleEvent.StepInteraction.InteractionType
@@ -34,12 +42,21 @@ import com.appcues.ui.composables.ExperienceCompositionState
 import com.appcues.ui.composables.LocalAppcuesActionDelegate
 import com.appcues.ui.composables.LocalAppcuesDismissalDelegate
 import com.appcues.ui.composables.LocalAppcuesTapForwardingDelegate
+import com.appcues.ui.composables.LocalAppcuesWindowInfo
 import com.appcues.ui.composables.LocalExperienceCompositionState
 import com.appcues.ui.composables.LocalExperienceStepFormStateDelegate
 import com.appcues.ui.composables.LocalImageLoader
 import com.appcues.ui.composables.LocalLogcues
 import com.appcues.ui.primitive.Compose
 import com.appcues.ui.theme.AppcuesExperienceTheme
+import com.appcues.ui.utils.AppcuesWindowInfo
+import com.appcues.ui.utils.AppcuesWindowInfo.DeviceType.MOBILE
+import com.appcues.ui.utils.AppcuesWindowInfo.DeviceType.TABLET
+import com.appcues.ui.utils.AppcuesWindowInfo.Orientation.LANDSCAPE
+import com.appcues.ui.utils.AppcuesWindowInfo.Orientation.PORTRAIT
+import com.appcues.ui.utils.AppcuesWindowInfo.ScreenType.COMPACT
+import com.appcues.ui.utils.AppcuesWindowInfo.ScreenType.EXPANDED
+import com.appcues.ui.utils.AppcuesWindowInfo.ScreenType.MEDIUM
 import java.util.UUID
 
 // This helper supports testing a single experience primitive (can have nested children),
@@ -56,6 +73,7 @@ public fun ComposeContent(json: String, imageLoader: ImageLoader) {
             LocalExperienceStepFormStateDelegate provides ExperienceStepFormState(),
             LocalAppcuesActionDelegate provides FakeAppcuesActionDelegate(),
             LocalExperienceCompositionState provides ExperienceCompositionState(),
+            LocalAppcuesWindowInfo provides testWindowInfo()
         ) {
             primitive.Compose()
         }
@@ -126,6 +144,7 @@ public suspend fun composeTraits(
                 ),
                 LocalAppcuesDismissalDelegate provides FakeAppcuesDismissalDelegate(),
                 LocalAppcuesTapForwardingDelegate provides FakeAppcuesTapForwardingDelegate(),
+                LocalAppcuesWindowInfo provides testWindowInfo()
             ) {
                 // render the step container on the desired step
                 Box(
@@ -192,6 +211,7 @@ public suspend fun composeExperience(
                 ),
                 LocalAppcuesDismissalDelegate provides FakeAppcuesDismissalDelegate(),
                 LocalAppcuesTapForwardingDelegate provides FakeAppcuesTapForwardingDelegate(),
+                LocalAppcuesWindowInfo provides testWindowInfo()
             ) {
                 // render the step container on the desired step
                 Box(
@@ -254,4 +274,63 @@ private class FakeAppcuesDismissalDelegate : AppcuesDismissalDelegate {
 
 private class FakeAppcuesTapForwardingDelegate: AppcuesTapForwardingDelegate {
     override fun onTap(offset: Offset) { }
+}
+
+@Composable
+internal fun testWindowInfo(): AppcuesWindowInfo {
+    val configuration = LocalConfiguration.current
+
+    // For tests, use the LocalConfiguration.current to derive the available content size and insets.
+    // This supports a snapshot testing environment where there is not a container/overlay view in use.
+    val insetsDp = WindowInsets.safeDrawing.asPaddingValues()
+
+    val size = Size(
+        width = configuration.screenWidthDp.toFloat(),
+        height = configuration.screenHeightDp.toFloat()
+    )
+
+    val safeRect = Rect(
+        left = insetsDp.calculateLeftPadding(Ltr).value,
+        top = insetsDp.calculateTopPadding().value,
+        right = size.width - insetsDp.calculateRightPadding(Ltr).value,
+        bottom = size.height - insetsDp.calculateBottomPadding().value
+    )
+
+    val screenWidthType = when {
+        size.width < AppcuesWindowInfo.WIDTH_COMPACT -> COMPACT
+        size.width < AppcuesWindowInfo.WIDTH_MEDIUM -> MEDIUM
+        else -> EXPANDED
+    }
+
+    val screenHeightType = when {
+        size.height < AppcuesWindowInfo.HEIGHT_COMPACT -> COMPACT
+        size.height < AppcuesWindowInfo.HEIGHT_MEDIUM -> MEDIUM
+        else -> EXPANDED
+    }
+
+    val orientation = when (configuration.orientation) {
+        Configuration.ORIENTATION_PORTRAIT -> PORTRAIT
+        else -> LANDSCAPE
+    }
+
+    val deviceType = when (orientation) {
+        PORTRAIT -> when (screenWidthType) {
+            COMPACT -> MOBILE
+            MEDIUM -> TABLET
+            EXPANDED -> TABLET
+        }
+        LANDSCAPE -> when (screenHeightType) {
+            COMPACT -> MOBILE
+            MEDIUM -> TABLET
+            EXPANDED -> TABLET
+        }
+    }
+
+    return AppcuesWindowInfo(
+        screenWidthType = screenWidthType,
+        screenHeightType = screenHeightType,
+        safeRect = safeRect,
+        orientation = orientation,
+        deviceType = deviceType,
+    )
 }

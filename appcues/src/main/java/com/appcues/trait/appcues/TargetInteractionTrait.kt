@@ -42,9 +42,9 @@ import com.appcues.ui.composables.AppcuesActionsDelegate
 import com.appcues.ui.composables.AppcuesStepMetadata
 import com.appcues.ui.composables.LocalAppcuesStepMetadata
 import com.appcues.ui.composables.LocalAppcuesTapForwardingDelegate
+import com.appcues.ui.composables.LocalAppcuesWindowInfo
 import com.appcues.ui.extensions.toLongPressMotionOrNull
 import com.appcues.ui.extensions.toTapMotionOrEmpty
-import com.appcues.ui.utils.rememberAppcuesWindowInfo
 
 internal class TargetInteractionTrait(
     override val config: AppcuesConfigMap,
@@ -88,7 +88,7 @@ internal class TargetInteractionTrait(
         val targetRectInfo = rememberTargetRectangleInfo(LocalAppcuesStepMetadata.current)
         val keyholeSettings = rememberKeyholeSettings(LocalAppcuesStepMetadata.current)
         // only draws when target rectangle info exists
-        targetRectInfo.getRect(rememberAppcuesWindowInfo())?.let {
+        targetRectInfo.getRect(LocalAppcuesWindowInfo.current)?.let {
             val rect = it.inflateOrEmpty(keyholeSettings.spreadRadius)
             val shapeBlurRadius = if (keyholeSettings.shape == CIRCLE) keyholeSettings.blurRadius.toFloat() else 0.0f
             val encompassesDiameter = rect.getRectEncompassesRadius(shapeBlurRadius) * 2
