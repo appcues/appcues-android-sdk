@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.requiredWidth
-import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.shape.GenericShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -28,6 +27,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.coerceAtLeast
+import androidx.compose.ui.unit.coerceAtMost
 import androidx.compose.ui.unit.coerceIn
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
@@ -167,12 +167,7 @@ internal class TooltipTrait(
 
         val tooltipPath = drawTooltipPointerPath(tooltipSettings, containerDimens.value, floatAnimation, dpAnimation)
 
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .safeDrawingPadding()
-                .padding(SCREEN_HORIZONTAL_PADDING, SCREEN_VERTICAL_PADDING)
-        ) {
+        Box(modifier = Modifier.fillMaxSize()) {
             AppcuesContentAnimatedVisibility(
                 enter = dialogEnterTransition(),
                 exit = dialogExitTransition(),
@@ -283,27 +278,24 @@ internal class TooltipTrait(
         animationSpec: FiniteAnimationSpec<Dp>
     ): State<Dp> {
         val safeRect = windowInfo.safeRect
-        val minPaddingStart = 0.dp
+        val minPaddingStart = safeRect.left.dp + SCREEN_HORIZONTAL_PADDING
         val pointerLengthDp = with(LocalDensity.current) { pointerSettings.pointerLengthPx.toDp() }
         val pointerWidthDp = if (pointerSettings.tooltipPointerPosition.isVertical) 0.dp else pointerLengthDp
-        // the renderable area is the safe rect, offset by our horizontal padding
-        val renderAreaWidth = safeRect.width.dp - (SCREEN_HORIZONTAL_PADDING * 2)
+
         // the max start padding is the right edge of the renderable area, offset by the content and pointer width
-        val maxPaddingStart = (renderAreaWidth - contentDimens.widthDp - pointerWidthDp).coerceAtLeast(minPaddingStart)
-        // target references below are in global coordinates, so we need to offset the y position by our
-        // container's top padding
-        val containerStartPadding = safeRect.left.dp + SCREEN_HORIZONTAL_PADDING
+        val maxPaddingStart = (safeRect.right.dp - SCREEN_HORIZONTAL_PADDING - contentDimens.widthDp - pointerWidthDp)
+            .coerceAtLeast(minPaddingStart)
 
         return animateDpAsState(
             targetValue = when (pointerSettings.tooltipPointerPosition) {
                 Left -> {
-                    val targetReference = (targetRect?.right?.dp ?: 0.dp) - containerStartPadding
+                    val targetReference = (targetRect?.right?.dp ?: 0.dp)
                     val padding = targetReference + pointerSettings.distance
                     // note: on horizontal, the max needs to account for the pointerLength as well
                     padding.coerceIn(minPaddingStart, maxPaddingStart)
                 }
                 Right -> {
-                    val targetReference = (targetRect?.left?.dp ?: 0.dp) - containerStartPadding
+                    val targetReference = (targetRect?.left?.dp ?: 0.dp)
                     // when pointing to the right - offset by the container width AND the pointer length to find the start
                     val padding = targetReference - pointerSettings.distance - contentDimens.widthDp - pointerLengthDp
                     // note: on horizontal, the max needs to account for the pointerLength as well
@@ -311,15 +303,15 @@ internal class TooltipTrait(
                 }
                 None -> {
                     // in None case, the width is a fixed full width, 400 max
-                    val containerWidth = min(MAX_TOOLTIP_WIDTH, renderAreaWidth)
-                    val paddingStart = renderAreaWidth - containerWidth
-                    paddingStart.coerceAtLeast(minPaddingStart)
+                    val safeWidth = safeRect.width.dp
+                    val containerWidth = (safeWidth - (SCREEN_HORIZONTAL_PADDING * 2)).coerceAtMost(MAX_TOOLTIP_WIDTH)
+                    ((safeWidth - containerWidth) / 2).coerceAtLeast(minPaddingStart)
                 }
                 else -> {
-                    val targetReference = (targetRect?.center?.x?.dp ?: 0.dp) - containerStartPadding - (contentDimens.widthDp / 2)
+                    val targetReference = (targetRect?.center?.x?.dp ?: 0.dp) - (contentDimens.widthDp / 2)
 
                     pointerSettings.pointerOffsetX.value = when {
-                        targetReference < 0.dp -> targetReference
+                        targetReference < minPaddingStart -> targetReference - minPaddingStart
                         targetReference > maxPaddingStart -> targetReference - maxPaddingStart
                         else -> pointerSettings.pointerOffsetX.value
                     }
@@ -340,35 +332,31 @@ internal class TooltipTrait(
         animationSpec: FiniteAnimationSpec<Dp>
     ): State<Dp> {
         val safeRect = windowInfo.safeRect
-        val minPaddingTop = 0.dp
+        val minPaddingTop = safeRect.top.dp + SCREEN_VERTICAL_PADDING
         val pointerLengthDp = with(LocalDensity.current) { pointerSettings.pointerLengthPx.toDp() }
         val pointerHeightDp = if (pointerSettings.tooltipPointerPosition.isVertical) pointerLengthDp else 0.dp
-        // the renderable area is the safe area, offset by our vertical padding
-        val renderAreaHeight = safeRect.height.dp - (SCREEN_VERTICAL_PADDING * 2)
         // the max top padding is the height of the renderable area, offset by the content and pointer height
-        val maxPaddingTop = (renderAreaHeight - contentDimens.heightDp - pointerHeightDp).coerceAtLeast(minPaddingTop)
-        // target references below are in global coordinates, so we need to offset the y position by our
-        // container's top padding
-        val containerTopPadding = safeRect.top.dp + SCREEN_VERTICAL_PADDING
+        val maxPaddingTop = (safeRect.bottom.dp - SCREEN_VERTICAL_PADDING - contentDimens.heightDp - pointerHeightDp)
+            .coerceAtLeast(minPaddingTop)
 
         return animateDpAsState(
             targetValue = when (pointerSettings.tooltipPointerPosition) {
                 is Top -> {
-                    val targetReference = (targetRect?.bottom?.dp ?: 0.dp) - containerTopPadding
+                    val targetReference = (targetRect?.bottom?.dp ?: 0.dp)
                     val padding = targetReference + pointerSettings.distance
                     padding.coerceIn(minPaddingTop, maxPaddingTop)
                 }
                 is Bottom -> {
-                    val targetReference = (targetRect?.top?.dp ?: 0.dp) - containerTopPadding
+                    val targetReference = (targetRect?.top?.dp ?: 0.dp)
                     val padding = targetReference - pointerSettings.distance - contentDimens.heightDp - pointerLengthDp
                     padding.coerceIn(minPaddingTop, maxPaddingTop)
                 }
                 is None -> maxPaddingTop
                 else -> {
-                    val targetReference = (targetRect?.center?.y?.dp ?: 0.dp) - containerTopPadding - (contentDimens.heightDp / 2)
+                    val targetReference = (targetRect?.center?.y?.dp ?: 0.dp) - (contentDimens.heightDp / 2)
 
                     pointerSettings.pointerOffsetY.value = when {
-                        targetReference < 0.dp -> targetReference
+                        targetReference < minPaddingTop -> targetReference - minPaddingTop
                         targetReference > maxPaddingTop -> targetReference - maxPaddingTop
                         else -> pointerSettings.pointerOffsetY.value
                     }
