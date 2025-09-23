@@ -305,7 +305,8 @@ internal class TooltipTrait(
                     // in None case, the width is a fixed full width, 400 max
                     val safeWidth = safeRect.width.dp
                     val containerWidth = (safeWidth - (SCREEN_HORIZONTAL_PADDING * 2)).coerceAtMost(MAX_TOOLTIP_WIDTH)
-                    ((safeWidth - containerWidth) / 2).coerceAtLeast(minPaddingStart)
+                    val contentOffset = ((safeWidth - containerWidth) / 2)
+                    (safeRect.left.dp + contentOffset).coerceAtLeast(minPaddingStart)
                 }
                 else -> {
                     val targetReference = (targetRect?.center?.x?.dp ?: 0.dp) - (contentDimens.widthDp / 2)
