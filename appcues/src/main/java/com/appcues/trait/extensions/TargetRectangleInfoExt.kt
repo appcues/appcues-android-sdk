@@ -66,17 +66,17 @@ internal fun TargetRectangleInfo?.getTooltipPointerPosition(
     val availableScreenHeight = safeRect.height.dp
     val availableScreenWidth = safeRect.width.dp
 
-    val availableSpaceTop = targetRect.top.dp - TooltipTrait.SCREEN_VERTICAL_PADDING
-    val availableSpaceBottom = availableScreenHeight - TooltipTrait.SCREEN_VERTICAL_PADDING - targetRect.bottom.dp
+    val availableSpaceTop = targetRect.top.dp - TooltipTrait.SCREEN_VERTICAL_PADDING - safeRect.top.dp
+    val availableSpaceBottom = availableScreenHeight - targetRect.bottom.dp - TooltipTrait.SCREEN_VERTICAL_PADDING
 
     val excessSpaceTop = availableSpaceTop - contentDimens.heightDp - distance - pointerLength
     val excessSpaceBottom = availableSpaceBottom - contentDimens.heightDp - distance - pointerLength
 
-    val availableSpaceLeft = targetRect.left.dp - TooltipTrait.SCREEN_HORIZONTAL_PADDING
-    val availableSpaceRight = availableScreenWidth - TooltipTrait.SCREEN_HORIZONTAL_PADDING
+    val availableSpaceLeft = targetRect.left.dp - TooltipTrait.SCREEN_HORIZONTAL_PADDING - safeRect.left.dp
+    val availableSpaceRight = availableScreenWidth - targetRect.right.dp - TooltipTrait.SCREEN_HORIZONTAL_PADDING
 
     val excessSpaceLeft = availableSpaceLeft - contentDimens.widthDp - distance - pointerLength
-    val excessSpaceRight = availableSpaceRight - targetRect.right.dp - contentDimens.widthDp - distance - pointerLength
+    val excessSpaceRight = availableSpaceRight - contentDimens.widthDp - distance - pointerLength
 
     val canPositionVertically = excessSpaceTop > 0.dp || excessSpaceBottom > 0.dp
     val canPositionHorizontally = excessSpaceLeft > 0.dp || excessSpaceRight > 0.dp
