@@ -13,12 +13,10 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -62,7 +60,7 @@ internal fun FullScreenModal(
         val enterAnimation = enterTransitionDerivedOf(windowInfo)
         val exitAnimation = exitTransitionDerivedOf(windowInfo)
         val isDark = isSystemInDarkTheme()
-        val safeAreaInsets = WindowInsets.systemBars.asPaddingValues()
+        val safeAreaInsets = windowInfo.safeInsets.asPaddingValues()
 
         Box(
             modifier = Modifier.fillMaxSize(),

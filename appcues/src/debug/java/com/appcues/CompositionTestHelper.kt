@@ -282,7 +282,8 @@ internal fun testWindowInfo(): AppcuesWindowInfo {
 
     // For tests, use the LocalConfiguration.current to derive the available content size and insets.
     // This supports a snapshot testing environment where there is not a container/overlay view in use.
-    val insetsDp = WindowInsets.safeDrawing.asPaddingValues()
+    val safeInsets = WindowInsets.safeDrawing
+    val insetsDp = safeInsets.asPaddingValues()
 
     val size = Size(
         width = configuration.screenWidthDp.toFloat(),
@@ -330,6 +331,7 @@ internal fun testWindowInfo(): AppcuesWindowInfo {
         screenWidthType = screenWidthType,
         screenHeightType = screenHeightType,
         safeRect = safeRect,
+        safeInsets = safeInsets,
         orientation = orientation,
         deviceType = deviceType,
     )

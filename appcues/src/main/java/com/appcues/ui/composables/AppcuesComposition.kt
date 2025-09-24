@@ -5,6 +5,7 @@ import android.webkit.WebChromeClient
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -16,6 +17,7 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.dp
 import androidx.core.graphics.Insets
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -210,6 +212,14 @@ internal fun getWindowInfo(): AppcuesWindowInfo {
             width = view.width.toDp().toFloat(),
             height = view.height.toDp().toFloat()
         )
+
+        val safeInsets = WindowInsets(
+            left = insetsDp.left.dp,
+            top = insetsDp.top.dp,
+            right = insetsDp.right.dp,
+            bottom = insetsDp.bottom.dp
+        )
+
         val safeRect = Rect(
             left = insetsDp.left.toFloat(),
             top = insetsDp.top.toFloat(),
@@ -251,6 +261,7 @@ internal fun getWindowInfo(): AppcuesWindowInfo {
             screenWidthType = screenWidthType,
             screenHeightType = screenHeightType,
             safeRect = safeRect,
+            safeInsets = safeInsets,
             orientation = orientation,
             deviceType = deviceType,
         )
