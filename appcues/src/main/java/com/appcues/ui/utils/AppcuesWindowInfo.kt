@@ -1,11 +1,13 @@
 package com.appcues.ui.utils
 
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.ui.geometry.Rect
 
 internal data class AppcuesWindowInfo(
     val screenWidthType: ScreenType,
     val screenHeightType: ScreenType,
     val safeRect: Rect,
+    val safeInsets: WindowInsets,
     val orientation: Orientation,
     val deviceType: DeviceType,
 ) {
