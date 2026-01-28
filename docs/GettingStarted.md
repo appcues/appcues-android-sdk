@@ -49,7 +49,8 @@ appcues.track(name, properties)
 appcues.screen(title, properties)
 ```
 
-A screen should be tracked each time the screen appears to the user, for example in an Activity or Fragment: 
+A screen should be tracked each time the screen appears to the user, for example in an Activity or Fragment:
+
 ```kotlin
 override fun onResume() {
     super.onResume()
@@ -57,7 +58,7 @@ override fun onResume() {
 }
 ```
 
-The Appcues Android SDK supports basic automatic screen tracking for Activities.  This will report a screen view using the Activity `label` value as the screen title, each time a new Activity starts.  To enable this automatic screen tracking, call `trackScreens()`.
+The Appcues Android SDK supports basic automatic screen tracking for Activities. This will report a screen view using the Activity `label` value as the screen title, each time a new Activity starts. To enable this automatic screen tracking, call `trackScreens()`.
 
 ## Anchored Tooltips
 
@@ -83,5 +84,20 @@ The Appcues Android SDK includes a dependency on the [Google Play In-App Review]
 implementation('com.appcues:appcues:<latest_version>') {
     exclude group: 'com.google.android.play', module: 'review'
     exclude group: 'com.google.android.play', module: 'review-ktx'
+}
+```
+
+## Configuring Hosting Environment
+
+By default, the Appcues SDK will send data to the United States (US) hosting environment, and no additional configuration is required. To specify a different hosting environment, apply `AppcuesConfig` settings for `apiBasePath` and `apiSettingsPath` during initialization.
+
+### EU Hosting Environment Configuration
+
+To send data to the European Union (EU) hosting environment, use the following configuration when initializing the SDK:
+
+```kotlin
+appcues = Appcues(context, APPCUES_ACCOUNT_ID, APPCUES_APPLICATION_ID) {
+    apiBasePath = "https://api.eu.appcues.net"
+    apiSettingsPath = "https://fast.eu.appcues.com"
 }
 ```
