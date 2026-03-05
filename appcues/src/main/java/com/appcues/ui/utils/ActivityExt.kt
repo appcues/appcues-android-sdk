@@ -44,6 +44,13 @@ internal fun Activity.getParentView(): ViewGroup {
     return decorView.rootView as ViewGroup
 }
 
+// Finds the topmost window root that is a real DecorView belonging to this activity.
+// WindowInspector.getGlobalWindowViews() can return non-DecorView roots such as Compose
+// PopupLayout windows, which don't support addView and would crash if selected.
 private fun List<View>.findTopMost(activity: Activity) = lastOrNull {
-    it.context == activity && it.findViewById<View?>(android.R.id.content) != null
+    it.context == activity && it.isDecorView()
+}
+
+private fun View.isDecorView(): Boolean {
+    return this::class.java.name == "com.android.internal.policy.DecorView"
 }
