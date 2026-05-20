@@ -22,10 +22,13 @@ import com.appcues.util.AppcuesViewTreeOwner
 import com.appcues.util.ContextWrapper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.lang.ref.WeakReference
 import kotlin.coroutines.CoroutineContext
 
 @Suppress("TooManyFunctions")
@@ -41,6 +44,8 @@ internal class AppcuesDebuggerManager(
     }
 
     private var debuggerViewModel: DebuggerViewModel? = null
+    private var debuggerParent: WeakReference<ViewGroup> = WeakReference(null)
+    private var windowMonitorJob: Job? = null
 
     private lateinit var currentActivity: Activity
 
@@ -66,10 +71,13 @@ internal class AppcuesDebuggerManager(
             viewModel.uiState.collect { state -> onBackPressCallback.isEnabled = state is Expanded }
         }
         addDebuggerView(viewModel)
+        startWindowMonitor()
         contextWrapper.getApplication().registerActivityLifecycleCallbacks(this)
     }
 
     fun stop() {
+        windowMonitorJob?.cancel()
+        windowMonitorJob = null
         coroutineScope.coroutineContext.cancelChildren()
         removeDebuggerView()
         debuggerViewModel?.viewModelScope?.cancel() // stop the VM from listening to app activity
@@ -100,22 +108,24 @@ internal class AppcuesDebuggerManager(
     override fun onActivityDestroyed(activity: Activity) = Unit
 
     private fun addDebuggerView(debuggerViewModel: DebuggerViewModel) {
-        // does nothing if currentActivity is not initialized
         if (this::currentActivity.isInitialized.not()) return
 
         val parentView = currentActivity.getParentView()
         if (parentView.findViewById<ComposeView?>(R.id.appcues_debugger_view) == null) {
-            appcuesViewTreeOwner.init(parentView, currentActivity)
+            // Remove from previous parent if window changed (e.g. dialog opened/closed)
+            debuggerParent.get()?.let { oldParent ->
+                oldParent.findViewById<ComposeView?>(R.id.appcues_debugger_view)?.let {
+                    oldParent.removeView(it)
+                }
+            }
 
+            appcuesViewTreeOwner.init(parentView, currentActivity)
             setOnBackPressDispatcher(parentView)
 
             parentView.addView(
                 ComposeView(currentActivity).apply {
-
                     id = R.id.appcues_debugger_view
-
                     layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
-
                     setContent {
                         AppcuesTheme(isTesting = appcuesConfig.isSnapshotTesting) {
                             DebuggerComposition(debuggerViewModel) {
@@ -126,17 +136,35 @@ internal class AppcuesDebuggerManager(
                     }
                 }
             )
+            debuggerParent = WeakReference(parentView)
         }
     }
 
     private fun removeDebuggerView() {
-        // does nothing if currentActivity is not initialized
         if (this::currentActivity.isInitialized.not()) return
 
-        val parentView = currentActivity.getParentView()
-        val debuggerView = parentView.findViewById<ComposeView?>(R.id.appcues_debugger_view)
-        if (debuggerView != null) {
-            parentView.removeView(debuggerView)
+        // Try tracked parent first (handles cross-window case), fall back to getParentView
+        val parent = debuggerParent.get() ?: currentActivity.getParentView()
+        parent.findViewById<ComposeView?>(R.id.appcues_debugger_view)?.let {
+            parent.removeView(it)
+        }
+        debuggerParent = WeakReference(null)
+    }
+
+    private fun startWindowMonitor() {
+        windowMonitorJob?.cancel()
+        windowMonitorJob = coroutineScope.launch(Dispatchers.Main) {
+            while (true) {
+                delay(WINDOW_MONITOR_INTERVAL_MS)
+                val vm = debuggerViewModel ?: continue
+                if (this@AppcuesDebuggerManager::currentActivity.isInitialized.not()) continue
+
+                val currentParent = currentActivity.getParentView()
+                val trackedParent = debuggerParent.get()
+                if (trackedParent != null && trackedParent != currentParent) {
+                    addDebuggerView(vm)
+                }
+            }
         }
     }
 
@@ -151,5 +179,9 @@ internal class AppcuesDebuggerManager(
         override fun handleOnBackPressed() {
             debuggerViewModel?.closeExpandedView()
         }
+    }
+
+    companion object {
+        private const val WINDOW_MONITOR_INTERVAL_MS = 3000L
     }
 }

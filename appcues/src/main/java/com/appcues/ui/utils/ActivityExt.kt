@@ -2,6 +2,7 @@ package com.appcues.ui.utils
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.ContextWrapper
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import android.util.Log
@@ -45,10 +46,20 @@ internal fun Activity.getParentView(): ViewGroup {
 }
 
 // Finds the topmost window root that is a real DecorView belonging to this activity.
-// WindowInspector.getGlobalWindowViews() can return non-DecorView roots such as Compose
-// PopupLayout windows, which don't support addView and would crash if selected.
+// Dialog windows wrap the activity context in ContextThemeWrapper, so we unwrap to match.
+// WindowInspector can also return non-DecorView roots (e.g. Compose PopupLayout) that
+// don't support addView — filtering by isDecorView() avoids those.
 private fun List<View>.findTopMost(activity: Activity) = lastOrNull {
-    it.context == activity && it.isDecorView()
+    it.isOwnedBy(activity) && it.isDecorView()
+}
+
+private fun View.isOwnedBy(activity: Activity): Boolean {
+    var ctx: android.content.Context? = context
+    while (ctx != null) {
+        if (ctx == activity) return true
+        ctx = (ctx as? ContextWrapper)?.baseContext
+    }
+    return false
 }
 
 private fun View.isDecorView(): Boolean {
