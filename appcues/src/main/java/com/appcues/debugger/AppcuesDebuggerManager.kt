@@ -156,15 +156,19 @@ internal class AppcuesDebuggerManager(
         windowMonitorJob = coroutineScope.launch(Dispatchers.Main) {
             while (true) {
                 delay(WINDOW_MONITOR_INTERVAL_MS)
-                val vm = debuggerViewModel ?: continue
-                if (this@AppcuesDebuggerManager::currentActivity.isInitialized.not()) continue
-
-                val currentParent = currentActivity.getParentView()
-                val trackedParent = debuggerParent.get()
-                if (trackedParent != null && trackedParent != currentParent) {
-                    addDebuggerView(vm)
-                }
+                checkWindowChanged()
             }
+        }
+    }
+
+    private fun checkWindowChanged() {
+        val vm = debuggerViewModel ?: return
+        if (this::currentActivity.isInitialized.not()) return
+
+        val currentParent = currentActivity.getParentView()
+        val trackedParent = debuggerParent.get()
+        if (trackedParent != null && trackedParent != currentParent) {
+            addDebuggerView(vm)
         }
     }
 
