@@ -164,6 +164,9 @@ internal class AppcuesDebuggerManager(
     private fun checkWindowChanged() {
         val vm = debuggerViewModel ?: return
         if (this::currentActivity.isInitialized.not()) return
+        // Only re-parent when idle — if expanded, the topmost window change is likely
+        // from our own UI (e.g. screen capture confirmation dialog)
+        if (vm.uiState.value !is DebuggerViewModel.UIState.Idle) return
 
         val currentParent = currentActivity.getParentView()
         val trackedParent = debuggerParent.get()
