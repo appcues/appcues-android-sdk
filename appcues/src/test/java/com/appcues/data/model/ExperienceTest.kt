@@ -293,7 +293,9 @@ internal class ExperienceTest {
             error = null,
             renderErrorId = null,
             workflowId = null,
-            workflowTaskId = null
+            workflowTaskId = null,
+            campaignId = null,
+            tacticId = null,
         )
     }
 

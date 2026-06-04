@@ -55,6 +55,18 @@ internal class ExperienceMapper(
         }
     }
 
+    private fun ExperienceTrigger.effectiveCampaignId(fallback: String?): String? = when (this) {
+        is ExperienceTrigger.ExperienceCompletionAction -> campaignId
+        is ExperienceTrigger.LaunchExperienceAction -> campaignId
+        else -> fallback
+    }
+
+    private fun ExperienceTrigger.effectiveTacticId(fallback: String?): String? = when (this) {
+        is ExperienceTrigger.ExperienceCompletionAction -> tacticId
+        is ExperienceTrigger.LaunchExperienceAction -> tacticId
+        else -> fallback
+    }
+
     // this version makes a synthetic Experience from the failure data, with just enough info
     // to report the flow issue about deserialization in the `error` field, for troubleshooting
     private fun mapFailed(
@@ -64,6 +76,8 @@ internal class ExperienceMapper(
         experiments: List<ExperimentResponse>? = null,
         requestId: UUID? = null,
     ): Experience {
+        val effectiveCampaignId = trigger.effectiveCampaignId(from.campaignId)
+        val effectiveTacticId = trigger.effectiveTacticId(from.tacticId)
         return Experience(
             id = from.id,
             name = from.name ?: "",
@@ -77,6 +91,8 @@ internal class ExperienceMapper(
             localeName = from.context?.localeName,
             workflowId = from.context?.workflowId,
             workflowTaskId = from.context?.workflowTaskId,
+            campaignId = effectiveCampaignId,
+            tacticId = effectiveTacticId,
             experiment = experiments?.getExperiment(from.id),
             completionActions = emptyList(),
             trigger = trigger,
@@ -95,6 +111,8 @@ internal class ExperienceMapper(
     ): Experience {
         val experienceTraits = from.traits.map { it to EXPERIENCE }
         val renderContext = from.getRenderContext()
+        val effectiveCampaignId = trigger.effectiveCampaignId(from.campaignId)
+        val effectiveTacticId = trigger.effectiveTacticId(from.tacticId)
         return Experience(
             id = from.id,
             name = from.name,
@@ -108,6 +126,8 @@ internal class ExperienceMapper(
             localeName = from.context?.localeName,
             workflowId = from.context?.workflowId,
             workflowTaskId = from.context?.workflowTaskId,
+            campaignId = effectiveCampaignId,
+            tacticId = effectiveTacticId,
             experiment = experiments?.getExperiment(from.id),
             completionActions = arrayListOf<ExperienceAction>().apply {
                 from.redirectUrl?.let {
@@ -127,6 +147,8 @@ internal class ExperienceMapper(
                             completedExperienceId = from.id.toString(),
                             launchExperienceId = it,
                             experienceRenderer = get(),
+                            campaignId = effectiveCampaignId,
+                            tacticId = effectiveTacticId,
                         )
                     )
                 }

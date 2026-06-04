@@ -284,6 +284,8 @@ internal class SubmitFormActionTest {
         localeName = null,
         workflowId = null,
         workflowTaskId = null,
+        campaignId = null,
+        tacticId = null,
         completionActions = listOf(),
         trigger = ExperienceTrigger.ShowCall,
         experiment = null,

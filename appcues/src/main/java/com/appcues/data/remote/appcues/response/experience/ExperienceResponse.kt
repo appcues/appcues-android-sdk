@@ -19,6 +19,8 @@ internal data class ExperienceResponse(
     val nextContentId: String?,
     val redirectUrl: String?,
     val context: ContextResponse?,
+    val campaignId: String? = null,
+    val tacticId: String? = null,
 ) : LossyExperienceResponse()
 
 @JsonClass(generateAdapter = true)
@@ -28,6 +30,8 @@ internal data class FailedExperienceResponse(
     val type: String?,
     val publishedAt: Long?,
     val context: ContextResponse?,
+    val campaignId: String? = null,
+    val tacticId: String? = null,
     var error: String? = null
 ) : LossyExperienceResponse()
 

@@ -22,6 +22,8 @@ internal data class Experience(
     val localeName: String?,
     val workflowId: UUID?,
     val workflowTaskId: UUID?,
+    val campaignId: String?,
+    val tacticId: String?,
     val experiment: Experiment?,
     val completionActions: List<ExperienceAction>,
     val trigger: ExperienceTrigger,

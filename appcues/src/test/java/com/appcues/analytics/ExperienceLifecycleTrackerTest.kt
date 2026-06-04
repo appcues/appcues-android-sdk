@@ -15,6 +15,7 @@ import com.appcues.di.scope.AppcuesScope
 import com.appcues.di.scope.AppcuesScopeDSL
 import com.appcues.di.scope.get
 import com.appcues.logging.Logcues
+import com.appcues.mocks.mockCampaignExperience
 import com.appcues.mocks.mockExperience
 import com.appcues.mocks.mockLocalizedExperience
 import com.appcues.mocks.mockWorkflowExperience
@@ -190,6 +191,32 @@ internal class ExperienceLifecycleTrackerTest {
             // and all should have the specified locale information
             assertThat(experience.workflowId?.appcuesFormatted()).isEqualTo(it["workflowId"])
             assertThat(experience.workflowTaskId?.appcuesFormatted()).isEqualTo(it["workflowTaskId"])
+        }
+    }
+
+    @Test
+    fun `Idling SHOULD track events WITH campaign properties WHEN action is StartExperience`() = runTest {
+        // GIVEN
+        val experience = mockCampaignExperience(
+            campaignId = "campaign-123",
+            tacticId = "tactic-456"
+        )
+        val initialState = IdlingState
+        val action = StartExperience(experience)
+        val scope = initScope(initialState)
+        val stateMachine: StateMachine = scope.get()
+        val analyticsTracker: AnalyticsTracker = scope.get()
+
+        // WHEN
+        stateMachine.handleAction(action)
+
+        // THEN
+        val properties = mutableListOf<Map<String, Any>>()
+        verify { analyticsTracker.track(any(), capture(properties), any(), any()) }
+        assertThat(properties).isNotEmpty()
+        properties.forEach {
+            assertThat(it["campaignId"]).isEqualTo("campaign-123")
+            assertThat(it["tacticId"]).isEqualTo("tactic-456")
         }
     }
 
