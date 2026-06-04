@@ -116,6 +116,8 @@ internal sealed class ExperienceLifecycleEvent(
         this["localeId"] = experience.localeId
         this["workflowId"] = experience.workflowId?.appcuesFormatted()
         this["workflowTaskId"] = experience.workflowTaskId?.appcuesFormatted()
+        this["campaignId"] = experience.campaignId
+        this["tacticId"] = experience.tacticId
         this["trigger"] = triggerValue
 
         when (val trigger = experience.trigger) {

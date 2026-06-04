@@ -22,11 +22,16 @@ internal class LaunchExperienceAction(
         completedExperienceId: String,
         launchExperienceId: String,
         experienceRenderer: ExperienceRenderer,
+        campaignId: String? = null,
+        tacticId: String? = null,
     ) : this(
         config = hashMapOf<String, Any>(
             "completedExperienceID" to completedExperienceId,
             "experienceID" to launchExperienceId,
-        ),
+        ).apply {
+            campaignId?.let { put("campaignId", it) }
+            tacticId?.let { put("tacticId", it) }
+        },
         renderContext = renderContext,
         experienceRenderer = experienceRenderer
     )
@@ -49,17 +54,26 @@ internal class LaunchExperienceAction(
         }
     }
 
-    private fun getTrigger() =
-        if (completedExperienceId != null) {
+    private fun getTrigger(): ExperienceTrigger {
+        return if (completedExperienceId != null) {
             // if a completed experience ID was provided - this means the action originated as a post-flow
             // completion action, so this should be supplied as the trigger type
-            ExperienceTrigger.ExperienceCompletionAction(UUID.fromString(completedExperienceId))
+            ExperienceTrigger.ExperienceCompletionAction(
+                fromExperienceId = UUID.fromString(completedExperienceId),
+                campaignId = config.getConfig("campaignId"),
+                tacticId = config.getConfig("tacticId"),
+            )
         } else {
             // more typical case - the action was a button action within a flow that is launching another
             // flow - capture the current experience from the state machine as the experience that is launching the new flow.
             // note: it's possible that the current experience was closed out before this triggered, in which case this
             // fromExperience ID value would be null.
             val fromExperience = experienceRenderer.getState(renderContext)?.currentExperience
-            ExperienceTrigger.LaunchExperienceAction(fromExperience?.id)
+            ExperienceTrigger.LaunchExperienceAction(
+                fromExperienceId = fromExperience?.id,
+                campaignId = fromExperience?.campaignId,
+                tacticId = fromExperience?.tacticId,
+            )
         }
+    }
 }

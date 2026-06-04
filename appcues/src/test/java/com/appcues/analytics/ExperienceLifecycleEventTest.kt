@@ -147,6 +147,28 @@ internal class ExperienceLifecycleEventTest {
     }
 
     @Test
+    fun `ExperienceLifecycleEvent SHOULD include campaign properties WHEN set`() {
+        // given
+        val campaignExperience = experience.copy(
+            campaignId = "campaign-123",
+            tacticId = "tactic-456"
+        )
+        val event = StepSeen(campaignExperience, 1)
+        // then
+        assertThat(event.properties).containsEntry("campaignId", "campaign-123")
+        assertThat(event.properties).containsEntry("tacticId", "tactic-456")
+    }
+
+    @Test
+    fun `ExperienceLifecycleEvent SHOULD NOT include campaign properties WHEN null`() {
+        // given
+        val event = StepSeen(experience, 1)
+        // then
+        assertThat(event.properties).doesNotContainKey("campaignId")
+        assertThat(event.properties).doesNotContainKey("tacticId")
+    }
+
+    @Test
     fun `ExperienceLifecycleEvent with Trigger ExperienceCompletionAction`() {
         // given
         val fromExperienceId = UUID.randomUUID()
