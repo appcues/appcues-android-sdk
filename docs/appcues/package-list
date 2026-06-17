@@ -70,7 +70,6 @@ $dokka.location:com.appcues/AppcuesFirebaseMessagingService/onMessageReceived/#c
 $dokka.location:com.appcues/AppcuesFirebaseMessagingService/onNewToken/#kotlin.String/PointingToDeclaration/appcues/com.appcues/-appcues-firebase-messaging-service/on-new-token.html
 $dokka.location:com.appcues/AppcuesFrameView///PointingToDeclaration/appcues/com.appcues/-appcues-frame-view/index.html
 $dokka.location:com.appcues/AppcuesFrameView/AppcuesFrameView/#android.content.Context#android.util.AttributeSet?#kotlin.Int/PointingToDeclaration/appcues/com.appcues/-appcues-frame-view/-appcues-frame-view.html
-$dokka.location:com.appcues/AppcuesFrameView/retainContent/#/PointingToDeclaration/appcues/com.appcues/-appcues-frame-view/retain-content.html
 $dokka.location:com.appcues/AppcuesInterceptor///PointingToDeclaration/appcues/com.appcues/-appcues-interceptor/index.html
 $dokka.location:com.appcues/AppcuesInterceptor/canDisplayExperience/#java.util.UUID/PointingToDeclaration/appcues/com.appcues/-appcues-interceptor/can-display-experience.html
 $dokka.location:com.appcues/AppcuesProviderService///PointingToDeclaration/appcues/com.appcues/-appcues-provider-service/index.html
