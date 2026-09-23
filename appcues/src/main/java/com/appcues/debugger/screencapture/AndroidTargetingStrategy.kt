@@ -152,11 +152,11 @@ private suspend fun View.asCaptureView(screenBounds: Rect): ViewElement? {
         }
     }
 
-    // For an AndroidComposeView, we need to gather up the layout info for the Composables
-    // within. This is done by accessing the semanticsOwner through reflection. At this time
-    // there is no other way to access or create it (internal constructor). Using the
-    // SemanticsNodes within allows us to traverse the view info to find selectable elements
-    // very similar to how compose UI testing works.
+    // For an AndroidComposeView, gather Composable layout info from the semantics tree.
+    // semanticsOwner is private, so it is read through reflection. The unmerged tree keeps
+    // child nodes that a merging parent would collapse, so nested appcuesView tags stay
+    // distinct. Only tagged nodes are emitted. Untagged nodes are walked so those nested
+    // tags are found, then omitted from the layout.
     if (this::class.java.name == ANDROID_COMPOSE_VIEW_CLASS_NAME) {
         @Suppress("TooGenericExceptionCaught")
         try {
@@ -165,7 +165,9 @@ private suspend fun View.asCaptureView(screenBounds: Rect): ViewElement? {
             val semanticsOwnerField = androidComposeViewClass.getDeclaredField("semanticsOwner")
                 .apply { isAccessible = true } // make private filed accessible
             val semanticsOwner = semanticsOwnerField.get(this) as SemanticsOwner
-            semanticsOwner.rootSemanticsNode.asCaptureView(context, screenBounds)?.let { children.add(it) }
+            children.addAll(
+                semanticsOwner.unmergedRootSemanticsNode.captureTaggedViews(context, screenBounds)
+            )
         } catch (ex: Exception) {
             // Catching and swallowing exceptions here with the Compose view handling in case
             // something changes in the future that breaks the expected structure being accessed
@@ -292,31 +294,32 @@ private fun View.extractResourceName(): String? {
     }
 }
 
-private fun SemanticsNode.asCaptureView(context: Context, screenBounds: Rect): ViewElement? {
+private fun SemanticsNode.captureTaggedViews(context: Context, screenBounds: Rect): List<ViewElement> {
     val bounds = unclippedGlobalBounds()
 
     // if the view is not currently in the screenshot image (scrolled away), ignore
     if (Rect.intersects(bounds, screenBounds).not()) {
-        return null
+        return emptyList()
     }
 
-    val childElements: List<ViewElement> = children.mapNotNull {
-        it.asCaptureView(context, screenBounds)
-    }
+    val taggedDescendants = children.flatMap { it.captureTaggedViews(context, screenBounds) }
 
-    return selector(bounds, screenBounds).let {
-        val boundsDp = context.withDensity { bounds.toDp() }
+    // Untagged nodes are omitted. Tagged descendants are passed up to the nearest tagged ancestor.
+    val elementSelector = selector(bounds, screenBounds) ?: return taggedDescendants
+
+    val boundsDp = context.withDensity { bounds.toDp() }
+    return listOf(
         ViewElement(
             x = boundsDp.left,
             y = boundsDp.top,
             width = boundsDp.width(),
             height = boundsDp.height(),
-            displayName = it?.displayName,
-            selector = it,
-            type = it?.type ?: "Composable #$id",
-            children = childElements.ifEmpty { null },
+            displayName = elementSelector.displayName,
+            selector = elementSelector,
+            type = elementSelector.type ?: "Composable #$id",
+            children = taggedDescendants.ifEmpty { null },
         )
-    }
+    )
 }
 
 private fun SemanticsNode.unclippedGlobalBounds(): Rect =
