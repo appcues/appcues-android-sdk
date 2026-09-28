@@ -155,8 +155,9 @@ private suspend fun View.asCaptureView(screenBounds: Rect): ViewElement? {
     // For an AndroidComposeView, gather Composable layout info from the semantics tree.
     // semanticsOwner is private, so it is read through reflection. The unmerged tree keeps
     // child nodes that a merging parent would collapse, so nested appcuesView tags stay
-    // distinct. Only tagged nodes are emitted. Untagged nodes are walked so those nested
-    // tags are found, then omitted from the layout.
+    // distinct. Only tagged nodes are emitted. A tag inside an untagged merging parent uses
+    // that parent's bounds, matching capture from older SDKs. Untagged nodes are walked so
+    // nested tags are found, then omitted from the layout.
     if (this::class.java.name == ANDROID_COMPOSE_VIEW_CLASS_NAME) {
         @Suppress("TooGenericExceptionCaught")
         try {
@@ -305,9 +306,14 @@ private fun SemanticsNode.captureTaggedViews(context: Context, screenBounds: Rec
     val taggedDescendants = children.flatMap { it.captureTaggedViews(context, screenBounds) }
 
     // Untagged nodes are omitted. Tagged descendants are passed up to the nearest tagged ancestor.
-    val elementSelector = selector(bounds, screenBounds) ?: return taggedDescendants
+    if (!config.contains(AppcuesViewTagKey)) {
+        return taggedDescendants
+    }
 
-    val boundsDp = context.withDensity { bounds.toDp() }
+    val target = boundsForTarget()
+    val elementSelector = selector(target.bounds, screenBounds, target.roleNode) ?: return taggedDescendants
+
+    val boundsDp = context.withDensity { target.bounds.toDp() }
     return listOf(
         ViewElement(
             x = boundsDp.left,
@@ -320,6 +326,33 @@ private fun SemanticsNode.captureTaggedViews(context: Context, screenBounds: Rec
             children = taggedDescendants.ifEmpty { null },
         )
     )
+}
+
+private data class TargetBounds(
+    val bounds: Rect,
+    val roleNode: SemanticsNode,
+)
+
+// A tag on a non-merging child of an untagged merging parent used to be captured on the
+// parent's rectangle. Keep that rectangle. A merging parent that has its own tag stays a
+// separate target, and the child keeps its own bounds.
+private fun SemanticsNode.boundsForTarget(): TargetBounds {
+    if (config.isMergingSemanticsOfDescendants) {
+        return TargetBounds(unclippedGlobalBounds(), this)
+    }
+
+    var ancestor = parent
+    while (ancestor != null) {
+        if (ancestor.config.isMergingSemanticsOfDescendants) {
+            return if (ancestor.config.contains(AppcuesViewTagKey)) {
+                TargetBounds(unclippedGlobalBounds(), this)
+            } else {
+                TargetBounds(ancestor.unclippedGlobalBounds(), ancestor)
+            }
+        }
+        ancestor = ancestor.parent
+    }
+    return TargetBounds(unclippedGlobalBounds(), this)
 }
 
 private fun SemanticsNode.unclippedGlobalBounds(): Rect =
@@ -335,7 +368,11 @@ private val AppcuesViewTagKey = SemanticsPropertyKey<String>("AppcuesViewTagKey"
 // used by the public appcuesViewTag Modifier in ElementTargetingStrategy.kt provided by SDK
 internal var SemanticsPropertyReceiver.appcuesViewTagProperty by AppcuesViewTagKey
 
-private fun SemanticsNode.selector(bounds: Rect, screenBounds: Rect): AndroidViewSelector? {
+private fun SemanticsNode.selector(
+    bounds: Rect,
+    screenBounds: Rect,
+    roleNode: SemanticsNode = this,
+): AndroidViewSelector? {
     // the view center point must be within the screen bounds to be eligible for targeting
     // this is the Compose version of View.isVisibleForTargeting() that is done with the visible
     // rect of an Android.view.View.
@@ -349,7 +386,7 @@ private fun SemanticsNode.selector(bounds: Rect, screenBounds: Rect): AndroidVie
     if (config.contains(AppcuesViewTagKey)) {
         return AndroidViewSelector(
             properties = mapOf(SELECTOR_APPCUES_ID to config[AppcuesViewTagKey]),
-            type = config.getOrNull(SemanticsProperties.Role)?.toString()
+            type = roleNode.config.getOrNull(SemanticsProperties.Role)?.toString()
         )
     }
     return null
