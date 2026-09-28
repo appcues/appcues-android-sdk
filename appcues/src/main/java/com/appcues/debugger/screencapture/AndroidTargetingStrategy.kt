@@ -306,26 +306,25 @@ private fun SemanticsNode.captureTaggedViews(context: Context, screenBounds: Rec
     val taggedDescendants = children.flatMap { it.captureTaggedViews(context, screenBounds) }
 
     // Untagged nodes are omitted. Tagged descendants are passed up to the nearest tagged ancestor.
-    if (!config.contains(AppcuesViewTagKey)) {
-        return taggedDescendants
+    val element = if (config.contains(AppcuesViewTagKey)) {
+        val target = boundsForTarget()
+        selector(target.bounds, screenBounds, target.roleNode)?.let { elementSelector ->
+            val boundsDp = context.withDensity { target.bounds.toDp() }
+            ViewElement(
+                x = boundsDp.left,
+                y = boundsDp.top,
+                width = boundsDp.width(),
+                height = boundsDp.height(),
+                displayName = elementSelector.displayName,
+                selector = elementSelector,
+                type = elementSelector.type ?: "Composable #$id",
+                children = taggedDescendants.ifEmpty { null },
+            )
+        }
+    } else {
+        null
     }
-
-    val target = boundsForTarget()
-    val elementSelector = selector(target.bounds, screenBounds, target.roleNode) ?: return taggedDescendants
-
-    val boundsDp = context.withDensity { target.bounds.toDp() }
-    return listOf(
-        ViewElement(
-            x = boundsDp.left,
-            y = boundsDp.top,
-            width = boundsDp.width(),
-            height = boundsDp.height(),
-            displayName = elementSelector.displayName,
-            selector = elementSelector,
-            type = elementSelector.type ?: "Composable #$id",
-            children = taggedDescendants.ifEmpty { null },
-        )
-    )
+    return element?.let { listOf(it) } ?: taggedDescendants
 }
 
 private data class TargetBounds(
