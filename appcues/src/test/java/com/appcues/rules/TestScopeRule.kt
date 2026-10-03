@@ -24,6 +24,7 @@ import com.appcues.statemachine.StateMachine
 import com.appcues.trait.TraitRegistry
 import com.appcues.ui.ExperienceRenderer
 import com.appcues.util.ContextWrapper
+import com.appcues.util.DataSanitizer
 import com.appcues.util.LinkOpener
 import io.mockk.mockk
 import kotlinx.coroutines.CoroutineScope
@@ -59,6 +60,7 @@ internal class TestScopeRule : TestWatcher() {
                         scoped { storageMockk() }
                         scoped { mockk<Appcues>(relaxed = true) }
                         scoped { mockk<ActionProcessor>(relaxed = true) }
+                        scoped { mockk<DataSanitizer>(relaxed = true) }
                         factory { mockk<ExperienceLifecycleTracker>(relaxed = true) }
                     }
                 }

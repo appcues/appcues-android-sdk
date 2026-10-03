@@ -18,6 +18,7 @@ import com.appcues.ui.ExperienceRenderer
 import com.appcues.ui.StateMachineDirectory
 import com.appcues.ui.utils.ImageLoaderWrapper
 import com.appcues.util.AppcuesViewTreeOwner
+import com.appcues.util.DataSanitizer
 import com.appcues.util.LinkOpener
 import kotlinx.coroutines.CoroutineScope
 
@@ -51,7 +52,8 @@ internal object MainModule : AppcuesModule {
         }
         scoped { PushRepository(get(), get()) }
         scoped { LinkOpener(get()) }
-        scoped { AnalyticsPublisher(storage = get()) }
+        scoped { DataSanitizer() }
+        scoped { AnalyticsPublisher(get(), get()) }
 
         factory { StateMachine(actionProcessor = get(), lifecycleTracker = get(), onEndedExperience = it.next()) }
 
