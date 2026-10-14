@@ -28,7 +28,9 @@ internal fun EmbedHtmlPrimitive.Compose(modifier: Modifier) {
 
     webViewState.value?.let { webView ->
         LaunchedEffect(webView) {
-            webView.loadData(
+            val referrer = "https://${webView.context.packageName.lowercase()}"
+            webView.loadDataWithBaseURL(
+                referrer,
                 """
                     <head>
                         <meta
@@ -39,8 +41,9 @@ internal fun EmbedHtmlPrimitive.Compose(modifier: Modifier) {
                     <body style='margin: 0; padding: 0'>
                         $embed
                     </body>""",
-                null,
+                "text/html",
                 "utf-8",
+                null,
             )
         }
     }
