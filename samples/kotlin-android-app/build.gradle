@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    compileSdk 35
+    compileSdk 36
 
     namespace "com.appcues.samples.kotlin"
 
@@ -21,7 +21,7 @@ android {
     defaultConfig {
         applicationId "com.appcues.samples.kotlin"
         minSdk 21
-        targetSdk 35
+        targetSdk 36
         versionCode Integer.valueOf(System.getenv("CIRCLE_BUILD_NUM") ?: 1)
         versionName "1.0"
 
